@@ -25,7 +25,7 @@ import VueStripeCheckout from 'vue-stripe-checkout';
 // by the options in the .open(options) 
 // function.
 const options = {
-  key: 'you_publishable_key',
+  key: 'your-publishable-key',
   image: 'https://cdn.meme.am/images/100x100/15882140.jpg',
   locale: 'auto',
   currency: 'PHP',
@@ -44,9 +44,9 @@ Checkout will be available in the `vm` or `this` if you are using single file te
 
 ```
 <template>
-<div>
-<button @click="checkout">Checkout</button>
-</div>
+  <div>
+    <button @click="checkout">Checkout</button>
+  </div>
 </template>
 
 export default {
