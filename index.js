@@ -5,7 +5,8 @@ document.getElementsByTagName('head')[0].appendChild(script);
 const vStripeCheckout = {
   install(Vue, options) {
     if(!options) {
-      console.warn('Stripe options are required dummy!');
+      console.warn('Shut up and provide the options! (config options is required in Vue.use(VueStripeCheckout, options))');
+      return;
     }
     window.addEventListener('load', () => {
       Vue.prototype.$checkout = StripeCheckout.configure(options);

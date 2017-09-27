@@ -6,7 +6,7 @@ A vue plugin for Stripe checkout.
 
 [Show me!](https://jofftiquez.github.io/vue-stripe-checkout/)
 
-![Screen Shot](https://i.imgur.com/5vnylLq.png)
+![Screen Shot](https://i.imgur.com/O1O0kI4.png)
 
 **Install**
 
@@ -17,6 +17,7 @@ A vue plugin for Stripe checkout.
 **Usage**
 
 ```javascript
+import Vue from 'vue';
 import VueStripeCheckout from 'vue-stripe-checkout';
 
 // base/global options
@@ -39,7 +40,7 @@ Just see the [stripe docu](https://stripe.com/docs/checkout#integration-simple-o
 
 **Sample**
 
-Checkout will be available in the `vm` or `this` if you are using `.vue`.
+Checkout will be available in the `vm` or `this` if you are using single file template (`.vue` files).
 
 ```
 <template>
