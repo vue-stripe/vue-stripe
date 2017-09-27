@@ -2,6 +2,12 @@
 
 A vue plugin for Stripe checkout.
 
+**Demo**
+
+[Show me!](https://jofftiquez.github.io/vue-stripe-checkout/)
+
+![Screen Shot](https://i.imgur.com/5vnylLq.png)
+
 **Install**
 
 `npm install vue-stripe-checkout --save`
@@ -10,7 +16,7 @@ A vue plugin for Stripe checkout.
 
 **Usage**
 
-```
+```javascript
 import VueStripeCheckout from 'vue-stripe-checkout';
 
 // base/global options
@@ -18,12 +24,12 @@ import VueStripeCheckout from 'vue-stripe-checkout';
 // by the options in the .open(options) 
 // function.
 const options = {
-  key: 'you_publishable_key',
-  image: 'https://cdn.meme.am/images/100x100/15882140.jpg',
-  locale: 'auto',
-  currency: 'PHP',
-  billingAddress: true,
-  panelLabel: 'Subscribe {{amount}}'
+    key: 'you_publishable_key',
+    image: 'https://cdn.meme.am/images/100x100/15882140.jpg',
+    locale: 'auto',
+    currency: 'PHP',
+    billingAddress: true,
+    panelLabel: 'Subscribe {{amount}}'
 }
 
 Vue.use(VueStripeCheckout, options);
@@ -36,23 +42,25 @@ Just see the [stripe docu](https://stripe.com/docs/checkout#integration-simple-o
 Checkout will be available in the `vm` or `this` if you are using `.vue`.
 
 ```
-<template lang="pug">
-	div
-		button(@click="checkout")
+<template>
+    <div>
+        <button @click="checkout">Checkout</button>
+    </div>
 </template>
 
 export default {
 	methods: {
 		checkout() {
+            // this.$checkout.close() is also available.
 			this.$checkout.open({
-        name: 'Shut up and take my money!',
-        currency: 'USD',
-        amount: 99999,
-        token(token) {
-          console.log(token)
-        } 
-      });
-		}
-	}
+                name: 'Shut up and take my money!',
+                currency: 'USD',
+                amount: 99999,
+                token(token) {
+                    console.log(token)
+                } 
+            });
+        }
+    }
 }
 ```
