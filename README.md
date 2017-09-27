@@ -1,4 +1,4 @@
-# Vue Stipe Checkout
+# Vue Stripe Checkout
 
 A vue plugin for Stripe checkout.
 
@@ -65,3 +65,5 @@ export default {
   }
 }
 ```
+
+Made with :heart: by Jofferson Ramirez Tiquez
