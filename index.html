@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Shup up and install this.</title>
+	<script src="https://checkout.stripe.com/checkout.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.js"></script>
+</head>
+<body>
+	<div id="app">
+		<button @click="checkout">Shutup and take my money!</button>
+    <br><br>
+    <span>Sample card:</span><pre>4242 4242 4242 4242</pre>
+    <pre>{{ token }}</pre>
+	</div>
+	<script>
+		var options = {
+      key: 'pk_test_INH6o8QUdJyZM1TuGKs5PIsT',
+      image: 'https://cdn.meme.am/images/100x100/15882140.jpg',
+      locale: 'auto',
+      panelLabel: 'Subscribe {{amount}}'
+    }
+
+    var handler = StripeCheckout.configure(options)
+
+    var vm = new Vue({
+      el: '#app',
+      data() {
+        return {
+          token: null
+        }
+      },
+      methods: {
+        checkout() {
+          handler.open({
+            name: 'Shut up and take my money!',
+            currency: 'PHP',
+            amount: 10000,
+            token(token) {
+              console.log(token);
+              vm.token = JSON.stringify(token, null, 2);
+            }
+          });
+        }
+      }
+    })
+  </script>
+</body>
+</html>

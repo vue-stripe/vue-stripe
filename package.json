@@ -1,0 +1,25 @@
+{
+  "name": "vue-stripe-checkout",
+  "version": "0.0.1",
+  "description": "Vue plugin for Stripe checkout.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jofftiquez/vue-stripe-checkout.git"
+  },
+  "keywords": [
+    "vue",
+    "vuejs",
+    "stripe",
+    "checkout"
+  ],
+  "author": "jofftiquez@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jofftiquez/vue-stripe-checkout/issues"
+  },
+  "homepage": "https://github.com/jofftiquez/vue-stripe-checkout#readme"
+}
