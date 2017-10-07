@@ -1,5 +1,5 @@
 var script = document.createElement(`script`);
-script.src = `https://checkout.stripe.com/checkout.js`;
+script.src = 'https://checkout.stripe.com/checkout.js';
 document.getElementsByTagName('head')[0].appendChild(script);
 
 const vStripeCheckout = {
