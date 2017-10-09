@@ -1,3 +1,3 @@
-import VueStripeCheckout from './src';
+import VueStripeCheckout from './dist';
 
 export default VueStripeCheckout;
