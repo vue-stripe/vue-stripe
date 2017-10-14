@@ -1,6 +1,6 @@
 # Vue Stripe Checkout
 
-A vue plugin for Stripe checkout.
+A vue plugin for Stripe checkout. I sh\*t you not, this plugin is the easiest to use. 
 
 **Demo**
 
