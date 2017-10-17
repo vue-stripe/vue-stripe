@@ -54,13 +54,14 @@ Checkout will be available in the `vm` or `this` if you are using single file te
 export default {
   methods: {
     checkout() {
-      // this.$checkout.close() is also available.
+      // this.$checkout.close() 
+      // is also available.
       this.$checkout.open({
         name: 'Shut up and take my money!',
         currency: 'USD',
         amount: 99999,
-        token(token) {
-          console.log(token)
+        token: (token) => {
+          // handle the token
         } 
       });
     }

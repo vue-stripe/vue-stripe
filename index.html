@@ -31,13 +31,16 @@
         }
       },
       methods: {
+        submit(token) {
+          console.log('token', token)
+        },
         checkout() {
           handler.open({
             name: 'Shut up and take my money!',
             currency: 'PHP',
             amount: 10000,
-            token(token) {
-              console.log(token);
+            token: (token) => {
+              this.submit(token);
               vm.token = JSON.stringify(token, null, 2);
             }
           });
