@@ -6,7 +6,9 @@ A vue plugin for Stripe checkout. I sh\*t you not, this plugin is the easiest to
 
 **Demo**
 
-[Show me!](https://jofftiquez.github.io/vue-stripe-checkout/)
+[SHOW ME!](https://jofftiquez.github.io/vue-stripe-checkout/)
+
+If you liked this repo then leave a :star:, if not, I don't care. *(Seriously leave a :star: please)*
 
 ![Screen Shot](https://i.imgur.com/O1O0kI4.png)
 
