@@ -46,13 +46,14 @@ Just see the [stripe docu](https://stripe.com/docs/checkout#integration-simple-o
 
 Checkout will be available in the `vm` or `this` if you are using single file template (`.vue` files).
 
-```
+```vue
 <template>
   <div>
     <button @click="checkout">Checkout</button>
   </div>
 </template>
 
+<script>
 export default {
   methods: {
     checkout() {
@@ -69,6 +70,7 @@ export default {
     }
   }
 }
+</script>
 ```
 
 Made with :heart: by Jofferson Ramirez Tiquez
