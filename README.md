@@ -10,7 +10,7 @@ A vue plugin for Stripe checkout. I sh\*t you not, this plugin is the easiest to
 
 If you liked this repo then leave a :star:, if not, I don't care. *(Seriously leave a :star: please)*
 
-![Screen Shot](https://i.imgur.com/O1O0kI4.png)
+![Screen Shot](https://i.imgur.com/XZgLVwT.png)
 
 **Install**
 
