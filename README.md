@@ -2,7 +2,7 @@
 
 **Shut up and clone my repo!** *(I hope y'all recognize the meme 😂)*
 
-A vue plugin for Stripe checkout. I sh\*t you not, this plugin is the easiest to use. 
+A Vue plugin for Stripe checkout. I sh\*t you not, this plugin is the easiest to use. 
 
 **Demo**
 
