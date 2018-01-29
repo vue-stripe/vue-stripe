@@ -75,7 +75,7 @@ export default {
 
 **SPECIAL THANKS TO THE FOLLOWING**
 
-![Sceen Shot]([Imgur](https://i.imgur.com/WlPwOH6t.png)
+![Sceen Shot](https://i.imgur.com/WlPwOH6t.png)
 
 [MYCURE INC.](https://www.mycure.md)
 
