@@ -73,10 +73,10 @@ export default {
 </script>
 ```
 
-**SPECIAL THANKS TO THE FOLLOWING**
-
-![Sceen Shot](https://i.imgur.com/WlPwOH6t.png)
+**SPECIAL THANKS TO THE FOLLOWING SPONSOR(S):**
 
 [MYCURE INC.](https://www.mycure.md)
+
+[TEAM O.P.S. INC.](http://myteamops.com/)
 
 Made with :heart: by Jofferson Ramirez Tiquez
