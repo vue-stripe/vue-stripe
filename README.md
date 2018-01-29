@@ -75,7 +75,8 @@ export default {
 
 **SPECIAL THANKS TO THE FOLLOWING**
 
-![Sceen Shot](https://i.imgur.com/WlPwOH6m.png)
+![Sceen Shot]([Imgur](https://i.imgur.com/WlPwOH6t.png)
+
 [MYCURE INC.](https://www.mycure.md)
 
 Made with :heart: by Jofferson Ramirez Tiquez
