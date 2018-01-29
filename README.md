@@ -73,4 +73,8 @@ export default {
 </script>
 ```
 
+**SPECIAL THANKS TO THE FOLLOWING**
+
+![Sceen Shot](https://firebasestorage.googleapis.com/v0/b/mycure-ab311.appspot.com/o/assets%2Fmycure-favicon.png?alt=media&token=f19cf1eb-d9d0-49e1-ba75-d96829f282a6)
+
 Made with :heart: by Jofferson Ramirez Tiquez
