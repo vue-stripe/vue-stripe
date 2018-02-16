@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './index.js',
+  entry: './src',
   output: {
     library: 'VueStripeCheckout',
     libraryTarget: 'commonjs2',
