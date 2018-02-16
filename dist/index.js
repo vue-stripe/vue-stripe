@@ -74,25 +74,6 @@ module.exports =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _src = __webpack_require__(1);
-
-var _src2 = _interopRequireDefault(_src);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = _src2.default;
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 var script = document.createElement('script');
 script.src = 'https://checkout.stripe.com/checkout.js';
 document.getElementsByTagName('head')[0].appendChild(script);
