@@ -7,6 +7,12 @@
   <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
   <style type="text/css">
 
+    code, pre {
+      border-radius: 4px;
+      border: 1px solid white;
+      padding: 10px;
+    }
+
     #body {
       color: white;
       background-color: #42b883;
@@ -42,6 +48,11 @@
       box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
       cursor: pointer;
     }
+
+    #preHolder {
+      width: 400px;
+      margin: 0 auto;
+    }
   </style>
 </head>
 <body id="body">
@@ -54,12 +65,16 @@
       <br>
       <button id="btn" @click="checkout">SHUT UP AND TAKE MY MONEY!</button>
       <br><br>
-      <span>Sample card:</span>
+      <span>Copy sample card number:</span>
       <br>
       <br>
       <code>4242 4242 4242 4242</code>
-      <pre>{{ token }}</pre>
     </center>
+    <br><br>
+    <div id="preHolder" v-if="!!token">
+      <span>Output token:</span>
+      <pre>{{ token }}</pre>
+    </div>
 	</div>
   <script>
     (function() {
@@ -87,7 +102,7 @@
       panelLabel: 'Subscribe {{amount}}'
     }
 
-    var handler = StripeCheckout.configure(options)
+    var handler = StripeCheckout.configure(options);
 
     var vm = new Vue({
       el: '#app',
@@ -98,7 +113,8 @@
       },
       methods: {
         submit(token) {
-          console.log('token', token)
+          console.log('token', token);
+          console.log('Submit this token to your server to perform a stripe charge, or subscription.');
         },
         checkout() {
           handler.open({
@@ -107,7 +123,7 @@
             amount: 10000,
             token: (token) => {
               this.submit(token);
-              vm.token = JSON.stringify(token, null, 2);
+              vm.token = token;
             }
           });
         }
