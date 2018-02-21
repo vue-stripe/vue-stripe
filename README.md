@@ -1,12 +1,12 @@
 # Vue Stripe Checkout
 
-**Shut up and clone my repo!** *(I hope y'all recognize the meme 😂)*
+**Shut up and clone my repo!**
 
 A Vue plugin for Stripe checkout. I sh\*t you not, this plugin is the easiest to use. 
 
 **Demo**
 
-[SHOW ME!](https://jofftiquez.github.io/vue-stripe-checkout/)
+[Shut up and see the demo!](https://jofftiquez.github.io/vue-stripe-checkout/)
 
 If you liked this repo then leave a :star:, if not, I don't care. *(Seriously leave a :star: please)*
 
@@ -64,7 +64,10 @@ export default {
         currency: 'USD',
         amount: 99999,
         token: (token) => {
-          // handle the token
+          // Send the token to your server
+          // for payment or subscription handling,
+          // or do whatever you want with it
+          // I really don't care. 
         } 
       });
     }
