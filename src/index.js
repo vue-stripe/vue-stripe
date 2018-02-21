@@ -1,4 +1,4 @@
-let script = document.createElement('script');
+const script = document.createElement('script');
 script.src = 'https://checkout.stripe.com/checkout.js';
 document.getElementsByTagName('head')[0].appendChild(script);
 
