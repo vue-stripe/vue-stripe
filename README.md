@@ -67,7 +67,7 @@ export default {
           // Send the token to your server
           // for payment or subscription handling,
           // or do whatever you want with it
-          // I really don't care. 
+          // I don't really care. 
         } 
       });
     }
