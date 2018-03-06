@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Shup up and install this.</title>
-	<script src="https://checkout.stripe.com/checkout.js"></script>
+	<title>Vue Stripe Checkout</title>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.js"></script>
   <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+  <script src="./build/vue-stripe-checkout.js"></script>
   <style type="text/css">
 
     code, pre {
@@ -95,14 +95,12 @@
     })();
   </script>
 	<script>
-		var options = {
+    Vue.use(VueStripeCheckout, {
       key: 'pk_test_INH6o8QUdJyZM1TuGKs5PIsT',
       image: 'https://cdn.meme.am/images/100x100/15882140.jpg',
       locale: 'auto',
       panelLabel: 'Subscribe {{amount}}'
-    }
-
-    var handler = StripeCheckout.configure(options);
+    });
 
     var vm = new Vue({
       el: '#app',
@@ -117,18 +115,18 @@
           console.log('Submit this token to your server to perform a stripe charge, or subscription.');
         },
         checkout() {
-          handler.open({
+          this.$checkout.open({
             name: 'Shut up and take my money!',
-            currency: 'PHP',
-            amount: 10000,
+            currency: 'USD',
+            amount: 99999,
             token: (token) => {
-              this.submit(token);
-              vm.token = token;
-            }
+              console.log(token);
+              this.token = token;
+            } 
           });
         }
       }
-    })
+    });
   </script>
 </body>
 </html>
