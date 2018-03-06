@@ -12,13 +12,19 @@ If you liked this repo then leave a :star:, if not, I don't care. *(Seriously le
 
 ![Screen Shot](https://i.imgur.com/XZgLVwT.png)
 
-**Install**
+## Install
+
+*NPM* or *Yarn*
 
 `npm install vue-stripe-checkout --save`
 
 `yarn add vue-stripe-checkout`
 
-**Usage**
+*CDN*
+
+`https://unpkg.com/vue-stripe-checkout/build/vue-stripe-checkout.js`
+
+*Usage*
 
 ```javascript
 import Vue from 'vue';
