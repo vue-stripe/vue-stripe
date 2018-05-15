@@ -74,9 +74,18 @@ module.exports =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var script = document.createElement('script');
-script.src = 'https://checkout.stripe.com/checkout.js';
-document.getElementsByTagName('head')[0].appendChild(script);
+function addScript() {
+  var script = document.createElement('script');
+  script.src = 'https://checkout.stripe.com/checkout.js';
+  script.id = 'stripe_checkout';
+  document.getElementsByTagName('head')[0].appendChild(script);
+}
+
+function removeScript() {
+  var head = document.getElementsByTagName('head')[0];
+  head.removeChild(document.getElementById('stripe_checkout'));
+  delete window.StripeCheckout;
+}
 
 var VueStripeCheckout = {
   install: function install(Vue, options) {
@@ -85,7 +94,19 @@ var VueStripeCheckout = {
       return;
     }
     window.addEventListener('load', function () {
-      Vue.prototype.$checkout = StripeCheckout.configure(options);
+      Vue.prototype.$checkout = {
+        open: function open(opts) {
+          addScript();
+
+          opts.closed = function () {
+            removeScript();
+          };
+
+          setTimeout(function () {
+            StripeCheckout.configure(options).open(opts);
+          }, 200);
+        }
+      };
     });
   }
 };
