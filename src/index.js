@@ -1,6 +1,15 @@
-const script = document.createElement('script');
-script.src = 'https://checkout.stripe.com/checkout.js';
-document.getElementsByTagName('head')[0].appendChild(script);
+function addScript() {
+  const script = document.createElement('script');
+  script.src = 'https://checkout.stripe.com/checkout.js';
+  script.id = 'stripe_checkout';
+  document.getElementsByTagName('head')[0].appendChild(script);
+}
+
+function removeScript() {
+  const head = document.getElementsByTagName('head')[0];
+  head.removeChild(document.getElementById('stripe_checkout'));
+  delete window.StripeCheckout;
+}
 
 const VueStripeCheckout = {
   install(Vue, options) {
@@ -9,7 +18,19 @@ const VueStripeCheckout = {
       return;
     }
     window.addEventListener('load', () => {
-      Vue.prototype.$checkout = StripeCheckout.configure(options);
+      Vue.prototype.$checkout = {
+        open: (opts) => {
+          addScript();
+
+          opts.closed = () => {
+            removeScript();
+          }
+
+          setTimeout(() => {
+            StripeCheckout.configure(options).open(opts);
+          }, 200);
+        }
+      }
     });
   }
 }
