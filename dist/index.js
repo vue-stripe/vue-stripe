@@ -102,9 +102,20 @@ var VueStripeCheckout = {
             removeScript();
           };
 
-          setTimeout(function () {
-            StripeCheckout.configure(options).open(opts);
-          }, 200);
+          console.warn('Downloading StripeCheckout...');
+
+          var configStripe = function configStripe(handler) {
+            if (!window.StripeCheckout) return;
+            window.StripeCheckout.configure(options).open(opts);
+            console.warn('StripeCheckout configured!');
+            if (handler) clearTimeout(handler);
+          };
+
+          if (window.StripeCheckout) return configStripe();
+
+          var handler = setInterval(function () {
+            return configStripe(handler);
+          }, 50);
         }
       };
     });
