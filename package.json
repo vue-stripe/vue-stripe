@@ -3,6 +3,8 @@
   "version": "1.0.4",
   "description": "Vue plugin for Stripe checkout.",
   "main": "index.js",
+  "module": "index.js",
+  "typings": "typings/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild:webpack": "rm -rf dist",
