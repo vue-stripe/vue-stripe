@@ -121,7 +121,10 @@
             token: (token) => {
               console.log(token);
               this.token = token;
-            } 
+            },
+            closed: () => {
+              console.log('Closed...')
+            }
           });
         }
       }
