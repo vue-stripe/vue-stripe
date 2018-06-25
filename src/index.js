@@ -21,10 +21,10 @@ const VueStripeCheckout = {
       Vue.prototype.$checkout = {
         open: (opts) => {
           addScript();
-
-          opts.closed = () => {
-            removeScript();
-          }
+          
+          // opts.closed = () => {
+          //   removeScript();
+          // }
 
           console.warn('Downloading StripeCheckout...');
 
