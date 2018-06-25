@@ -11,12 +11,6 @@ function addScript() {
   document.getElementsByTagName('head')[0].appendChild(script);
 }
 
-function removeScript() {
-  const head = document.getElementsByTagName('head')[0];
-  head.removeChild(document.getElementById('stripe_checkout'));
-  delete window.StripeCheckout;
-}
-
 const VueStripeCheckout = {
   install(Vue, options) {
     if(!options) {
@@ -27,10 +21,10 @@ const VueStripeCheckout = {
       Vue.prototype.$checkout = {
         open: (opts) => {
           addScript();
-
-          opts.closed = () => {
-            removeScript();
-          };
+          
+          // opts.closed = () => {
+          //   removeScript();
+          // }
 
           console.warn('Downloading StripeCheckout...');
 

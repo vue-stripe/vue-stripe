@@ -98,9 +98,9 @@ var VueStripeCheckout = {
         open: function open(opts) {
           addScript();
 
-          opts.closed = function () {
-            removeScript();
-          };
+          // opts.closed = () => {
+          //   removeScript();
+          // }
 
           console.warn('Downloading StripeCheckout...');
 
