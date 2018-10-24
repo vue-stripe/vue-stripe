@@ -1,12 +1,12 @@
 {
   "name": "vue-stripe-checkout",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Vue plugin for Stripe checkout.",
   "main": "index.js",
   "module": "index.js",
   "typings": "typings/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "prebuild:webpack": "rm -rf dist",
     "prebuild:rollup": "rm -rf build",
     "build:webpack": "webpack --progress --hide-modules",
@@ -36,5 +36,8 @@
   "bugs": {
     "url": "https://github.com/jofftiquez/vue-stripe-checkout/issues"
   },
-  "homepage": "https://github.com/jofftiquez/vue-stripe-checkout#readme"
+  "homepage": "https://github.com/jofftiquez/vue-stripe-checkout#readme",
+  "dependencies": {
+    "jest": "^23.6.0"
+  }
 }
