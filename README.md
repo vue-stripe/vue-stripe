@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/jofftiquez/vue-stripe-checkout.svg?style=shield)](https://circleci.com/gh/jofftiquez/vue-stripe-checkout)
+
 # Vue Stripe Checkout
 
 **Shut up and clone my repo!**
