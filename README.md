@@ -91,6 +91,7 @@ export default {
 
 See property description from official [Stripe Documentation](https://stripe.com/docs/checkout#highly-recommended)
 
+- `publishable-key`: `String`
 - `image`: `String`
 - `name`: `String`
 - `description`: `String`
