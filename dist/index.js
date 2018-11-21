@@ -74,19 +74,106 @@ module.exports =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var script = document.createElement('script');
-script.src = 'https://checkout.stripe.com/checkout.js';
-document.getElementsByTagName('head')[0].appendChild(script);
-
 var VueStripeCheckout = {
-  install: function install(Vue, options) {
-    if (!options) {
-      console.warn('Shut up and provide the options! (config options is required in Vue.use(VueStripeCheckout, options))');
+  install: function install(Vue, key) {
+
+    console.log('option key', key);
+
+    if (!key) {
+      console.warn('Provide the stripe publishale key!');
       return;
     }
-    window.addEventListener('load', function () {
-      Vue.prototype.$checkout = StripeCheckout.configure(options);
-    });
+
+    var component = {
+      props: {
+        publishableKey: String,
+        image: String,
+        name: String,
+        description: String,
+        amount: Number,
+        locale: String,
+        zipCode: String,
+        billingAddress: Boolean,
+        currency: String,
+        panelLabel: String,
+        shippingAddress: Boolean,
+        email: String,
+        label: String,
+        allowRememberMe: Boolean
+      },
+      methods: {
+        open: function open() {
+          var _this = this;
+
+          return new Promise(function (resolve, reject) {
+            var script = document.createElement('script');
+            script.src = 'https://checkout.stripe.com/checkout.js';
+            document.getElementsByTagName('head')[0].appendChild(script);
+
+            var $checkout = null;
+
+            var publishableKey = _this.publishableKey,
+                image = _this.image,
+                name = _this.name,
+                description = _this.description,
+                amount = _this.amount,
+                locale = _this.locale,
+                zipCode = _this.zipCode,
+                billingAddress = _this.billingAddress,
+                currency = _this.currency,
+                panelLabel = _this.panelLabel,
+                shippingAddress = _this.shippingAddress,
+                email = _this.email,
+                label = _this.label,
+                allowRememberMe = _this.allowRememberMe;
+
+
+            setTimeout(function () {
+              var useThisKey = key;
+
+              // Use the publishable key from props if available
+              // this will override the key from Vue.use(VueStripeCheckout, key).
+              if (_this.publishableKey) {
+                useThisKey = _this.publishableKey;
+              } else {
+                useThisKey = key;
+              }
+
+              $checkout = StripeCheckout.configure({ key: useThisKey });
+
+              $checkout.open({
+                key: useThisKey,
+                image: image,
+                name: name,
+                description: description,
+                amount: amount,
+                locale: locale,
+                zipCode: zipCode,
+                billingAddress: billingAddress,
+                currency: currency,
+                panelLabel: panelLabel,
+                shippingAddress: shippingAddress,
+                email: email,
+                label: label,
+                allowRememberMe: allowRememberMe,
+                token: function token(_token) {
+                  _this.$emit('done', _token);
+                  resolve(_token);
+                },
+                opened: function opened() {
+                  _this.$emit('opened');
+                },
+                closed: function closed() {
+                  _this.$emit('closed');
+                }
+              });
+            }, 100);
+          });
+        }
+      }
+    };
+
+    Vue.component('vue-stripe-checkout', component);
   }
 };
 
