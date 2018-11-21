@@ -89,21 +89,21 @@ export default {
 
 ### Props
 
-See property description from official [Stripe Documentation](https://stripe.com/docs/checkout#integration-simple-options)
+See property description from official [Stripe Documentation](https://stripe.com/docs/checkout#highly-recommended)
 
-- image
-- name
-- description
-- amount
-- locale
-- zipCode
-- billingAddress
-- currency
-- panelLabel
-- shippingAddress
-- email
-- label
-- allowRememberMe
+- `image`: `String`
+- `name`: `String`
+- `description`: `String`
+- `amount`: `Number`
+- `locale`: `String`
+- `zip-code`: `Boolean`
+- `billing-address`: `Boolean`
+- `currency`: `String`
+- `panelLabel`: `String`
+- `shipping-address`: `Boolean`
+- `email`: `String`
+- `label`: `String`
+- `allow-remember-me`: `Boolean`
 
 ### Events
 
