@@ -2,42 +2,35 @@
 <html>
 <head>
 	<title>Vue Stripe Checkout</title>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.js"></script>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js"></script>
+  
   <script src="./build/vue-stripe-checkout.js"></script>
-  <style type="text/css">
-    code, pre {
-      border-radius: 4px;
-      border: 1px solid white;
-      padding: 10px;
-    }
-
-    #body {
+  <style>
+    body {
       color: white;
-      background-color: #42b883;
+      font-family: 'PT Sans', sans-serif;
       -webkit-transition: background-color 1000ms linear;
       -ms-transition: background-color 1000ms linear;
       transition: background-color 1000ms linear;
+    }
+
+    .form-control {
+      margin-bottom: 10px;
     }
 
     .logo {
       box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
     }
 
-    #app {
-      padding-top: 80px;
-      font-family: 'PT Sans', sans-serif;
-    }
-
     #btn {
-      margin-top: 20px;
-      width: 250px;
-      height: 50px;
-      background-color: #6772e5;
       color: white;
-      border: none;
-      outline: none;
-      border-radius: 5px;
       -webkit-transition: background-color 1000ms linear;
       -ms-transition: background-color 1000ms linear;
       transition: background-color 1000ms linear;
@@ -47,33 +40,59 @@
       box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
       cursor: pointer;
     }
-
-    #preHolder {
-      width: 400px;
-      margin: 0 auto;
-    }
   </style>
 </head>
 <body id="body">
-  <a href="https://github.com/jofftiquez/vue-stripe-checkout"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
-
-	<div id="app" class="color1">
-    <center>
-      <h1>Vue Stripe Checkout</h1>
-      <img class="logo" src="./vue-stripe-checkout-logo.png">
-      <br>
-      <button id="btn" @click="checkout">SHUT UP AND TAKE MY MONEY!</button>
-      <br><br>
-      <span>Copy sample card number:</span>
-      <br>
-      <br>
-      <code>4242 4242 4242 4242</code>
-    </center>
-    <br><br>
-    <div id="preHolder" v-if="!!token">
-      <span>Output token:</span>
-      <pre>{{ token }}</pre>
+	<div id="app">
+    <div class="container">
+      <div style="height: 100vh;" class="row pt-5">
+        <div class="col-xs-12 col-md-8 text-center mb-3">
+          <img class="logo" width="150" src="./vue-stripe-checkout-logo.png" alt="Vue Stripe Checkout"> 
+          <br>
+          <br>
+          <h3>Vue Stripe Checkout</h3>
+          <pre style="color: white;">Status: {{status}}</pre>
+          <br>
+          <button id="btn" class="btn" @click="checkout">Pay {{currency}}{{(amount / 100).toFixed(2)}}</button>
+          <div class="row text-left mt-3">
+            <div class="col-xs-12 col-md-6">
+              <h5>Token from promise</h5>
+              <pre style="color: white;">{{tokenFromPromise}}</pre>
+            </div>
+            <div class="col-xs-12 col-md-6">
+              <h5>Token from @done event</h5>
+              <pre style="color: white;">{{tokenFromEvent}}</pre>
+            </div>
+          </div>
+        </div>
+        <div class="col-xs-12 col-md-4">
+          <label for="">Use this sample card number</label>
+          <input v-model="sampleCard" type="text" class="form-control" placeholder="Sample Card">
+          <label for="">Image</label>
+          <input v-model="image" type="text" class="form-control" placeholder="Image URL">
+          <label for="">Name</label>
+          <input v-model="name" type="text" class="form-control" placeholder="Name">
+          <label for="">Description</label>
+          <input v-model="description" type="text" class="form-control" placeholder="Description">
+          <label for="">Currency</label>
+          <input v-model="currency" type="text" class="form-control" placeholder="Currency">
+          <label for="">Amount</label>
+          <input v-model="amount" type="number" class="form-control" placeholder="Amount in number">
+        </div>
+      </div>
     </div>
+    <vue-stripe-checkout
+      ref="checkoutRef"
+      :image="image"
+      :name="name"
+      :description="description"
+      :currency="currency"
+      :amount="amount"
+      :allow-remember-me="false"
+      @done="done"
+      @opened="opened"
+      @closed="closed"
+    ></vue-stripe-checkout>
 	</div>
   <script>
     (function() {
@@ -94,39 +113,40 @@
     })();
   </script>
 	<script>
-    Vue.use(VueStripeCheckout, {
-      key: 'pk_test_INH6o8QUdJyZM1TuGKs5PIsT',
-      image: 'https://i.imgur.com/HhqxVCW.jpg',
-      locale: 'auto',
-      panelLabel: 'Subscribe {{amount}}'
-    });
+    Vue.use(VueStripeCheckout, 'pk_test_INH6o8QUdJyZM1TuGKs5PIsT');
 
     var vm = new Vue({
       el: '#app',
       data() {
         return {
-          token: null
+          status: 'Closed',
+          tokenFromPromise: {},
+          tokenFromEvent: {},
+          sampleCard: '4242 4242 4242 4242',
+          image: 'https://i.imgur.com/HhqxVCW.jpg',
+          name: 'Shut up and take my money!',
+          description: 'Cats are the best dog!',
+          currency: 'PHP',
+          amount: 99999
         }
       },
       methods: {
+        async checkout () {
+          this.tokenFromPromise = await this.$refs.checkoutRef.open();
+        },
+        done(token) {
+          this.tokenFromEvent = token;
+        },
+        opened() {
+          this.status = 'Opened';
+        },
+        closed() {
+          this.status = 'Closed';
+        },
         submit(token) {
           console.log('token', token);
           console.log('Submit this token to your server to perform a stripe charge, or subscription.');
         },
-        checkout() {
-          this.$checkout.open({
-            name: 'Shut up and take my money!',
-            currency: 'USD',
-            amount: 99999,
-            token: (token) => {
-              console.log(token);
-              this.token = token;
-            },
-            closed: () => {
-              console.log('Closed...')
-            }
-          });
-        }
       }
     });
   </script>
