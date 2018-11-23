@@ -51,7 +51,7 @@ If you liked this repo then leave a :star:, if not, I don't care. *(Seriously le
 import Vue from 'vue';
 import VueStripeCheckout from 'vue-stripe-checkout';
 
-Vue.use(VueStripeCheckout, process.env.PUBLISHABLE_KEY);
+Vue.use(VueStripeCheckout, 'your-publishable-key-here');
 ```
 
 Just see the [stripe docu](https://stripe.com/docs/checkout#integration-simple-options) for all of the available options.
