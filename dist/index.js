@@ -74,29 +74,6 @@ module.exports =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _stripeCheckout = __webpack_require__(1);
-
-Object.keys(_stripeCheckout).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _stripeCheckout[key];
-    }
-  });
-});
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 var VueStripeCheckout = {
   install: function install(Vue, key) {
 
