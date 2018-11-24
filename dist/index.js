@@ -74,10 +74,31 @@ module.exports =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _stripeCheckout = __webpack_require__(1);
+
+Object.keys(_stripeCheckout).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _stripeCheckout[key];
+    }
+  });
+});
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 var VueStripeCheckout = {
   install: function install(Vue, key) {
-
-    console.log('option key', key);
 
     if (!key) {
       console.warn('Provide the stripe publishale key!');
@@ -85,21 +106,42 @@ var VueStripeCheckout = {
     }
 
     var component = {
+      template: '<div></div>',
       props: {
         publishableKey: String,
         image: String,
         name: String,
         description: String,
         amount: Number,
-        locale: String,
-        zipCode: String,
-        billingAddress: Boolean,
-        currency: String,
-        panelLabel: String,
-        shippingAddress: Boolean,
+        locale: {
+          type: String,
+          default: ''
+        },
+        zipCode: {
+          type: Boolean,
+          default: false
+        },
+        billingAddress: {
+          type: Boolean,
+          default: false
+        },
+        currency: {
+          type: String,
+          default: 'USD'
+        },
+        panelLabel: {
+          type: String,
+          default: ''
+        },
+        shippingAddress: {
+          type: Boolean,
+          default: false
+        },
         email: String,
-        label: String,
-        allowRememberMe: Boolean
+        allowRememberMe: {
+          type: Boolean,
+          default: true
+        }
       },
       methods: {
         open: function open() {
@@ -124,7 +166,6 @@ var VueStripeCheckout = {
                 panelLabel = _this.panelLabel,
                 shippingAddress = _this.shippingAddress,
                 email = _this.email,
-                label = _this.label,
                 allowRememberMe = _this.allowRememberMe;
 
 
@@ -134,7 +175,7 @@ var VueStripeCheckout = {
               // Use the publishable key from props if available
               // this will override the key from Vue.use(VueStripeCheckout, key).
               if (_this.publishableKey) {
-                useThisKey = _this.publishableKey;
+                useThisKey = publishableKey;
               } else {
                 useThisKey = key;
               }
@@ -154,7 +195,6 @@ var VueStripeCheckout = {
                 panelLabel: panelLabel,
                 shippingAddress: shippingAddress,
                 email: email,
-                label: label,
                 allowRememberMe: allowRememberMe,
                 token: function token(_token) {
                   _this.$emit('done', _token);
@@ -167,7 +207,7 @@ var VueStripeCheckout = {
                   _this.$emit('closed');
                 }
               });
-            }, 100);
+            }, 500);
           });
         }
       }
