@@ -16,7 +16,7 @@ const VueStripeCheckout = {
         description: String,
         amount: Number,
         locale: String,
-        zipCode: String,
+        zipCode: Boolean,
         billingAddress: Boolean,
         currency: String,
         panelLabel: String,
