@@ -5,10 +5,13 @@
     <a href="https://circleci.com/gh/jofftiquez/vue-stripe-checkout" title="Circle CI">
       <img src="https://circleci.com/gh/jofftiquez/vue-stripe-checkout.svg?style=shield" alt="Circle CI"/>
     </a>
-  </span>
-  <span class="badge-buymeacoffee">
+  </span><span>
+    <a href="https://www.npmjs.com/package/vue-stripe-checkout" title="NPM">
+      <img src="https://img.shields.io/npm/dt/vue-stripe-checkout.svg?style=shield" alt="NPM"/>
+    </a>
+  </span><span class="badge-buymeacoffee">
     <a href="https://www.buymeacoffee.com/jofftiquez" title="Donate to this project using Buy Me A Coffee">
-      <img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-brightgreen.svg" alt="Buy Me A Coffee donate button" />
+      <img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-brightgreen.svg" alt="Buy Me A Coffee donate button"/>
     </a>
   </span>
 </center>
