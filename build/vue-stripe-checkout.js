@@ -6,8 +6,6 @@
 
 const VueStripeCheckout = {
   install(Vue, key) {
-
-    console.log('option key', key);
     
     if(!key) {
       console.warn('Provide the stripe publishale key!');
@@ -15,21 +13,42 @@ const VueStripeCheckout = {
     }
     
     const component = {
+      template: '<div></div>',
       props: {
         publishableKey: String,
         image: String,
         name: String,
         description: String,
         amount: Number,
-        locale: String,
-        zipCode: String,
-        billingAddress: Boolean,
-        currency: String,
-        panelLabel: String,
-        shippingAddress: Boolean,
+        locale: {
+          type: String,
+          default: ''
+        },
+        zipCode: {
+          type: Boolean,
+          default: false
+        },
+        billingAddress: {
+          type: Boolean,
+          default: false
+        },
+        currency: {
+          type: String,
+          default: 'USD'
+        },
+        panelLabel: {
+          type: String,
+          default: ''
+        },
+        shippingAddress: {
+          type: Boolean,
+          default: false
+        },
         email: String,
-        label: String,
-        allowRememberMe: Boolean
+        allowRememberMe: {
+          type: Boolean,
+          default: true
+        }
       },
       methods: {
         open () {
@@ -53,7 +72,6 @@ const VueStripeCheckout = {
               panelLabel,
               shippingAddress,
               email,
-              label,
               allowRememberMe
             } = this;
 
@@ -63,7 +81,7 @@ const VueStripeCheckout = {
               // Use the publishable key from props if available
               // this will override the key from Vue.use(VueStripeCheckout, key).
               if(this.publishableKey) {
-                useThisKey = this.publishableKey;
+                useThisKey = publishableKey;
               } else {
                 useThisKey = key;
               }
@@ -83,7 +101,6 @@ const VueStripeCheckout = {
                 panelLabel,
                 shippingAddress,
                 email,
-                label,
                 allowRememberMe,
                 token: (token) => {
                   this.$emit('done', token);
@@ -96,7 +113,7 @@ const VueStripeCheckout = {
                   this.$emit('closed');
                 }
               });
-            }, 100);
+            }, 500);
           });
         }
       }
