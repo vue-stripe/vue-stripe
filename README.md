@@ -122,7 +122,6 @@ See property description from official [Stripe Documentation](https://stripe.com
 - `panelLabel`: `String`
 - `shipping-address`: `Boolean`
 - `email`: `String`
-- `label`: `String`
 - `allow-remember-me`: `Boolean`
 
 ### Events
