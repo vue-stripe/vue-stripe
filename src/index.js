@@ -82,7 +82,7 @@ const VueStripeCheckout = {
       computed: {
         key() {
           return this.publishableKey || key;
-        },
+        }
       },
       methods: {
         setCheckout() {
@@ -126,10 +126,10 @@ const VueStripeCheckout = {
               });
             this.checkout.open(options);
           });
-        },
-      },
+        }
+      }
     });
-  },
+  }
 };
 
 export default VueStripeCheckout;
