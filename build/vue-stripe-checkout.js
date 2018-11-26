@@ -1,128 +1,143 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.VueStripeCheckout = factory());
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global.VueStripeCheckout = factory());
 }(this, (function () { 'use strict';
 
-const VueStripeCheckout = {
-  install(Vue, key) {
-    
-    if(!key) {
-      console.warn('Provide the stripe publishale key!');
-      return;
-    }
-    
-    const component = {
-      template: '<div></div>',
-      props: {
-        publishableKey: String,
-        image: String,
-        name: String,
-        description: String,
-        amount: Number,
-        locale: {
-          type: String,
-          default: ''
+  const VueStripeCheckout = {
+    install(Vue, key) {
+      Vue.component('vue-stripe-checkout', {
+        render: h => h('div', { style: { display: 'none' } }),
+        props: {
+          publishableKey: {
+            type: String,
+            required: !key,
+          },
+          image: {
+            type: String,
+            default: null,
+          },
+          name: {
+            type: String,
+            default: null,
+          },
+          description: {
+            type: String,
+            default: null,
+          },
+          amount: {
+            type: Number,
+            default: 0,
+          },
+          locale: {
+            type: String,
+            default: 'en',
+          },
+          zipCode: {
+            type: Boolean,
+            default: false,
+          },
+          billingAddress: {
+            type: Boolean,
+            default: false,
+          },
+          currency: {
+            type: String,
+            default: 'USD',
+          },
+          panelLabel: {
+            type: String,
+            default: 'Pay with Card',
+          },
+          shippingAddress: {
+            type: Boolean,
+            default: false,
+          },
+          email: {
+            type: String,
+            default: null,
+          },
+          allowRememberMe: {
+            type: Boolean,
+            default: true,
+          },
         },
-        zipCode: {
-          type: Boolean,
-          default: false
+        mounted() {
+          if (document.querySelector('script#_stripe-checkout-script')) {
+            return this.setCheckout();
+          }
+          const script = document.createElement('script');
+          script.id = '_stripe-checkout-script';
+          script.src = 'https://checkout.stripe.com/checkout.js';
+          script.onload = this.setCheckout;
+          document.querySelector('head').append(script);
         },
-        billingAddress: {
-          type: Boolean,
-          default: false
+        // NOTE: Should this be enabled for dynamic keys?
+        // Cause if it gets updated very quickly, I
+        // would imagine bad things would happen
+        // updated() {
+        //  this.setCheckout();
+        // },
+        beforeDestroy() {
+          const stripeApp = document.querySelector('iframe.stripe_checkout_app');
+          if (stripeApp) stripeApp.remove();
         },
-        currency: {
-          type: String,
-          default: 'USD'
+        data: () => ({
+          checkout: null,
+        }),
+        computed: {
+          key() {
+            return this.publishableKey || key;
+          },
         },
-        panelLabel: {
-          type: String,
-          default: ''
-        },
-        shippingAddress: {
-          type: Boolean,
-          default: false
-        },
-        email: String,
-        allowRememberMe: {
-          type: Boolean,
-          default: true
-        }
-      },
-      methods: {
-        open () {
-          return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://checkout.stripe.com/checkout.js';
-            document.getElementsByTagName('head')[0].appendChild(script);
-            
-            let $checkout = null;
-
-            const { 
-              publishableKey,
-              image,
-              name,
-              description,
-              amount,
-              locale,
-              zipCode,
-              billingAddress,
-              currency,
-              panelLabel,
-              shippingAddress,
-              email,
-              allowRememberMe
-            } = this;
-
-            setTimeout(() => {
-              let useThisKey = key;
-
-              // Use the publishable key from props if available
-              // this will override the key from Vue.use(VueStripeCheckout, key).
-              if(this.publishableKey) {
-                useThisKey = publishableKey;
-              } else {
-                useThisKey = key;
-              }
-
-              $checkout = StripeCheckout.configure({key: useThisKey});
-
-              $checkout.open({
-                key: useThisKey,
-                image,
-                name,
-                description,
-                amount,
-                locale,
-                zipCode,
-                billingAddress,
-                currency,
-                panelLabel,
-                shippingAddress,
-                email,
-                allowRememberMe,
-                token: (token) => {
+        methods: {
+          setCheckout() {
+            const stripeApp = document.querySelector(
+              'iframe.stripe_checkout_app'
+            );
+            if (stripeApp) stripeApp.remove();
+            this.checkout = StripeCheckout.configure({ key: this.key });
+          },
+          open() {
+            if (!this.key) {
+              return Promise.reject(
+                new Error('Public key is required for VueStripeCheckout')
+              );
+            }
+            return new Promise((resolve, _reject) => {
+              const options = {
+                key: this.key,
+                image: this.image,
+                name: this.name,
+                description: this.description,
+                amount: this.amount,
+                locale: this.locale,
+                zipCode: this.zipCode,
+                currency: this.currency,
+                panelLabel: this.panelLabel,
+                email: this.email,
+                billingAddress: this.billingAddress,
+                allowRememberMe: this.allowRememberMe,
+                token: token => {
                   this.$emit('done', token);
                   resolve(token);
                 },
-                opened: () => {
-                  this.$emit('opened');
-                },
-                closed: () => {
-                  this.$emit('closed');
-                }
-              });
-            }, 500);
-          });
-        }
-      }
-    };
+                opened: () => this.$emit('opened'),
+                closed: () => this.$emit('closed'),
+              };
+              if (this.shippingAddress)
+                Object.assign(options, {
+                  shippingAddress: true,
+                  billingAddress: true,
+                });
+              this.checkout.open(options);
+            });
+          },
+        },
+      });
+    },
+  };
 
-    Vue.component('vue-stripe-checkout', component);
-  }
-};
-
-return VueStripeCheckout;
+  return VueStripeCheckout;
 
 })));
