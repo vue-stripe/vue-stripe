@@ -197,10 +197,10 @@ var VueStripeCheckout = {
                 resolve(_token);
               },
               opened: function opened() {
-                return _this.$emit('opened');
+                _this.$emit('opened');
               },
               closed: function closed() {
-                return _this.$emit('closed');
+                _this.$emit('closed');
               }
             };
             if (_this.shippingAddress) Object.assign(options, {
