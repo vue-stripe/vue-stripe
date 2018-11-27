@@ -116,8 +116,8 @@ const VueStripeCheckout = {
                 this.$emit('done', token);
                 resolve(token);
               },
-              opened: () => this.$emit('opened'),
-              closed: () => this.$emit('closed'),
+              opened: () => { this.$emit('opened') },
+              closed: () => { this.$emit('closed') },
             };
             if (this.shippingAddress)
               Object.assign(options, {
