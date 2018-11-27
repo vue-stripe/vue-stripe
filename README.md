@@ -18,7 +18,7 @@
 
 ### ⚠️ BREAKING CHANGES SINCE `1.1.x` ⚠️
 
-1. Initialization options now only accepts stripe publishable token. E.g. `Vue.use(VueStripeCheckout, process.env.PUBLISHABLE_TOKEN)`.
+1. Initialization options now only accepts stripe publishable key. E.g. `Vue.use(VueStripeCheckout, 'your-publishable-key-here')`.
 
 2. Global mixin `$checkout` was removed in favor of the component `vue-stripe-checkout`.
 
