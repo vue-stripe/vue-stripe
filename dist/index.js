@@ -192,9 +192,9 @@ var VueStripeCheckout = {
               email: _this.email,
               billingAddress: _this.billingAddress,
               allowRememberMe: _this.allowRememberMe,
-              token: function token(_token) {
-                _this.$emit('done', _token);
-                resolve(_token);
+              token: function token(_token, args) {
+                _this.$emit('done', _token, args);
+                resolve(_token, args);
               },
               opened: function opened() {
                 _this.$emit('opened');
