@@ -93,10 +93,14 @@ export default {
   },
   methods: {
     async checkout () {
-      const token = await this.$refs.checkoutRef.open();
+      // token - is the token object
+      // args - is an object containing the billing and shipping address if enabled
+      const { token, args } = await this.$refs.checkoutRef.open();
     },
-    done (token) {
-      // do stuff
+    done ({token, args}) {
+      // token - is the token object
+      // args - is an object containing the billing and shipping address if enabled
+      // do stuff...
     },
     opened () {
       // do stuff 
@@ -129,7 +133,7 @@ See property description from official [Stripe Documentation](https://stripe.com
 
 ### Events
 
-- `done` - Emits the stripe token.
+- `done` - Emits an object containing the stripe `token` and `args` (an object containing the billing and shipping address if enabled).
 - `opened` - Called when the stripe checkout dialog has been opened.
 - `closed` - Called when the stripe checkout dialog has been closed.
 
