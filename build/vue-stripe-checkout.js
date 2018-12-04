@@ -119,8 +119,8 @@ const VueStripeCheckout = {
               billingAddress: this.billingAddress,
               allowRememberMe: this.allowRememberMe,
               token: (token, args) => {
-                this.$emit('done', token, args);
-                resolve(token, args);
+                this.$emit('done', {token, args});
+                resolve({token, args});
               },
               opened: () => { this.$emit('opened'); },
               closed: () => { this.$emit('closed'); },
