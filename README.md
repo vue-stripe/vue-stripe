@@ -16,6 +16,14 @@
   </span>
 </center>
 
+### ⚠️ BREAKING CHANGES SINCE `1.2.x` ⚠️
+
+1. `done` event now returns an object which contains the `token` and `args` object. 
+  - token - the object containing the checkout details.
+  - args - the object containing the shipping and billing address if enabled.
+
+Please see example for changes.
+
 ### ⚠️ BREAKING CHANGES SINCE `1.1.x` ⚠️
 
 1. Initialization options now only accepts stripe publishable key. E.g. `Vue.use(VueStripeCheckout, 'your-publishable-key-here')`.
