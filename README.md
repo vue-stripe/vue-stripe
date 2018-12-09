@@ -112,7 +112,7 @@ export default {
     },
     opened () {
       // do stuff 
-    }
+    },
     closed () {
       // do stuff 
     }
