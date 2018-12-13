@@ -157,6 +157,7 @@ See property description from official [Stripe Documentation](https://stripe.com
   @done="done"
   @opened="opened"
   @closed="closed"
+  @canceled="canceled"
 ></vue-stripe-checkout>
 ```
 
