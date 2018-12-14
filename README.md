@@ -147,8 +147,8 @@ See property description from official [Stripe Documentation](https://stripe.com
 
 - `done` - Emits an object containing the stripe `token` and `args` (an object containing the billing and shipping address if enabled).
 - `opened` - Called when the stripe checkout dialog has been opened.
-- `closed` - Called when the stripe checkout dialog has been closed.
-- `canceled` - Called when the stripe checkout dialog has been closed while cancelling.
+- `closed` - Called when the stripe checkout dialog has been closed after a successful transaction or when the x button was clicked.
+- `canceled` - Called when x button has been clicked.
 
 **Usage**
 
