@@ -78,6 +78,7 @@ const VueStripeCheckout = {
       },
       data: () => ({
         checkout: null,
+        doneEmitted: false
       }),
       computed: {
         key() {
@@ -113,11 +114,18 @@ const VueStripeCheckout = {
               billingAddress: this.billingAddress,
               allowRememberMe: this.allowRememberMe,
               token: (token, args) => {
+                this.doneEmitted = true;
                 this.$emit('done', {token, args});
                 resolve({token, args});
               },
               opened: () => { this.$emit('opened') },
-              closed: () => { this.$emit('closed') },
+              closed: () => { 
+                if (!this.doneEmitted) {
+                    this.$emit('canceled');
+                }
+                this.doneEmitted = false;
+                this.$emit('closed'); 
+              },
             };
             if (this.shippingAddress)
               Object.assign(options, {

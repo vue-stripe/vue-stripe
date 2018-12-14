@@ -82,7 +82,8 @@ Just see the [stripe docu](https://stripe.com/docs/checkout#integration-simple-o
       :allow-remember-me="false"
       @done="done"
       @opened="opened"
-      @closed="closed"
+      @closed="closed",
+      @canceled="canceled"
     ></vue-stripe-checkout>
     <button @click="checkout">Checkout</button>
   </div>
@@ -115,6 +116,9 @@ export default {
     },
     closed () {
       // do stuff 
+    },
+    canceled () {
+      // do stuff 
     }
   }
 }
@@ -144,6 +148,7 @@ See property description from official [Stripe Documentation](https://stripe.com
 - `done` - Emits an object containing the stripe `token` and `args` (an object containing the billing and shipping address if enabled).
 - `opened` - Called when the stripe checkout dialog has been opened.
 - `closed` - Called when the stripe checkout dialog has been closed.
+- `canceled` - Called when the stripe checkout dialog has been closed while cancelling.
 
 **Usage**
 
@@ -152,6 +157,7 @@ See property description from official [Stripe Documentation](https://stripe.com
   @done="done"
   @opened="opened"
   @closed="closed"
+  @canceled="canceled"
 ></vue-stripe-checkout>
 ```
 
