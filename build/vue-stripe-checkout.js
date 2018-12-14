@@ -84,6 +84,7 @@ const VueStripeCheckout = {
       },
       data: () => ({
         checkout: null,
+        doneEmitted: false
       }),
       computed: {
         key() {
@@ -121,9 +122,16 @@ const VueStripeCheckout = {
               token: (token, args) => {
                 this.$emit('done', {token, args});
                 resolve({token, args});
+                this.doneEmitted = true;
               },
               opened: () => { this.$emit('opened'); },
-              closed: () => { this.$emit('closed'); },
+              closed: () => { 
+                if (!this.doneEmitted) {
+                  this.$emit('canceled');
+                }
+                this.$emit('closed'); 
+                this.doneEmitted = false;
+              },
             };
             if (this.shippingAddress)
               Object.assign(options, {

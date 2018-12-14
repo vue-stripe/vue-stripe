@@ -158,7 +158,8 @@ var VueStripeCheckout = {
 
       data: function data() {
         return {
-          checkout: null
+          checkout: null,
+          doneEmitted: false
         };
       },
       computed: {
@@ -195,12 +196,17 @@ var VueStripeCheckout = {
               token: function token(_token, args) {
                 _this.$emit('done', { token: _token, args: args });
                 resolve({ token: _token, args: args });
+                _this.doneEmitted = true;
               },
               opened: function opened() {
                 _this.$emit('opened');
               },
               closed: function closed() {
+                if (!_this.doneEmitted) {
+                  _this.$emit('canceled');
+                }
                 _this.$emit('closed');
+                _this.doneEmitted = false;
               }
             };
             if (_this.shippingAddress) Object.assign(options, {
