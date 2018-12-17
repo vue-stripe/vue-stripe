@@ -142,6 +142,7 @@ See property description from official [Stripe Documentation](https://stripe.com
 - `shipping-address`: `Boolean`
 - `email`: `String`
 - `allow-remember-me`: `Boolean`
+- `auto-open-modal`: `Boolean`
 
 ### Events
 
