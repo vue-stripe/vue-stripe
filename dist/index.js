@@ -132,6 +132,10 @@ var VueStripeCheckout = {
         allowRememberMe: {
           type: Boolean,
           default: true
+        },
+        autoOpenModal: {
+          type: Boolean,
+          default: false
         }
       },
       mounted: function mounted() {
@@ -172,6 +176,7 @@ var VueStripeCheckout = {
           var stripeApp = document.querySelector('iframe.stripe_checkout_app');
           if (stripeApp) stripeApp.remove();
           this.checkout = StripeCheckout.configure({ key: this.key });
+          if (this.autoOpenModal) this.open();
         },
         open: function open() {
           var _this = this;

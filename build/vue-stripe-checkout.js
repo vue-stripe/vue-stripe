@@ -61,6 +61,10 @@ const VueStripeCheckout = {
           type: Boolean,
           default: true,
         },
+        autoOpenModal: {
+          type: Boolean,
+          default: false,
+        },
       },
       mounted() {
         if (document.querySelector('script#_stripe-checkout-script')) {
@@ -98,6 +102,7 @@ const VueStripeCheckout = {
           );
           if (stripeApp) stripeApp.remove();
           this.checkout = StripeCheckout.configure({ key: this.key });
+          if (this.autoOpenModal) this.open();
         },
         open() {
           if (!this.key) {
