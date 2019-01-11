@@ -82,7 +82,7 @@ Just see the [stripe docu](https://stripe.com/docs/checkout#integration-simple-o
       :allow-remember-me="false"
       @done="done"
       @opened="opened"
-      @closed="closed",
+      @closed="closed"
       @canceled="canceled"
     ></vue-stripe-checkout>
     <button @click="checkout">Checkout</button>
