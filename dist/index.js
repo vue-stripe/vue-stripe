@@ -76,7 +76,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 var VueStripeCheckout = {
   install: function install(Vue, _key) {
-    Vue.component('vue-stripe-checkout', {
+    Vue.component('VueStripeCheckout', {
       render: function render(h) {
         return h('div', { style: { display: 'none' } });
       },

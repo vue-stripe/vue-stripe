@@ -6,7 +6,7 @@
 
 const VueStripeCheckout = {
   install(Vue, key) {
-    Vue.component('vue-stripe-checkout', {
+    Vue.component('VueStripeCheckout', {
       render: h => h('div', { style: { display: 'none' } }),
       props: {
         publishableKey: {
