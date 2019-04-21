@@ -1,6 +1,14 @@
+import $ from "jquery";
+
 const VueStripeCheckout = {
   install(Vue, key) {
     Vue.component('VueStripeCheckout', {
+      data() {
+        return {
+          token: undefined,
+          args: undefined
+        };
+      },
       render: h => h('div', { style: { display: 'none' } }),
       props: {
         publishableKey: {
@@ -61,14 +69,26 @@ const VueStripeCheckout = {
         },
       },
       mounted() {
-        if (document.querySelector('script#_stripe-checkout-script')) {
+        /*if (document.querySelector('script#_stripe-checkout-script')) {
           return this.setCheckout();
-        }
-        const script = document.createElement('script');
-        script.id = '_stripe-checkout-script';
-        script.src = 'https://checkout.stripe.com/checkout.js';
-        script.onload = this.setCheckout;
-        document.querySelector('head').append(script);
+        }*/
+        const scriptCheckout = document.createElement('script');
+        scriptCheckout.id = '_stripe-checkout-script';
+        scriptCheckout.src = 'https://checkout.stripe.com/checkout.js';
+        scriptCheckout.onload = this.setCheckout;
+        document.querySelector('head').append(scriptCheckout);
+
+        const scriptStripeV2 = document.createElement('script');
+        scriptStripeV2.id = '_stripe-v2-script';
+        scriptStripeV2.src = 'https://js.stripe.com/v2/';//TODO superheri use V3
+        scriptStripeV2.onload = this.setCheckout;
+        document.querySelector('head').append(scriptStripeV2);
+
+        const scriptFeatherlight = document.createElement('script');
+        scriptFeatherlight.id = '_stripe-featherlight-script';
+        scriptFeatherlight.src = 'https://cdnjs.cloudflare.com/ajax/libs/featherlight/1.7.6/featherlight.min.js';
+        scriptFeatherlight.onload = this.setCheckout;
+        document.querySelector('head').append(scriptFeatherlight);
       },
       // NOTE: Should this be enabled for dynamic keys?
       // Cause if it gets updated very quickly, I
@@ -97,6 +117,7 @@ const VueStripeCheckout = {
           if (stripeApp) stripeApp.remove();
           this.checkout = StripeCheckout.configure({ key: this.key });
           if (this.autoOpenModal) this.open();
+          Stripe.setPublishableKey(this.key);
         },
         open() {
           if (!this.key) {
@@ -119,17 +140,23 @@ const VueStripeCheckout = {
               billingAddress: this.billingAddress,
               allowRememberMe: this.allowRememberMe,
               token: (token, args) => {
-                this.$emit('done', {token, args});
-                resolve({token, args});
-                this.doneEmitted = true;
+                this.token = token;
+                this.args = args;
+
+                Stripe.source.create({
+                  type: 'card',
+                  token: token.id
+                }, this.stripeCardResponseHandler);
               },
               opened: () => { this.$emit('opened') },
-              closed: () => { 
+              closed: () => {
                 if (!this.doneEmitted) {
                   this.$emit('canceled');
                 }
-                this.$emit('closed'); 
+                this.$emit('closed');
                 this.doneEmitted = false;
+                this.token = undefined;
+                this.args = undefined;
               },
             };
             if (this.shippingAddress)
@@ -139,6 +166,91 @@ const VueStripeCheckout = {
               });
             this.checkout.open(options);
           });
+        },
+        stripeCardResponseHandler(status, response) {
+          if (response.error) {
+            this.displayResult("Unexpected card source creation response status: " + status + ". Error: " + response.error.message);
+            return;
+          }
+
+          // check if the card supports 3DS
+          if (response.card.three_d_secure == 'not_supported') {
+            this.displayResult("This card does not support 3D Secure.");
+            return;
+          }
+
+          // since we're going to use an iframe in this example, the
+          // return URL will only be displayed briefly before the iframe
+          // is closed. Set it to a static page on your site that says
+          // something like "Please wait while your transaction is processed"
+          const returnURL = "https://shop.example.com/static_page";//TODO superheri add this into props
+
+          // create the 3DS source from the card source
+          Stripe.source.create({
+            type: 'three_d_secure',
+            amount: 1099,
+            currency: "eur",
+            three_d_secure: {
+              card: response.id
+            },
+            redirect: {
+              return_url: returnURL
+            }
+          }, this.stripe3DSecureResponseHandler);
+        },
+
+        stripe3DSecureResponseHandler(status, response) {
+          if (response.error) {
+            this.displayResult("Unexpected 3DS source creation response status: " + status + ". Error: " + response.error.message);
+            return;
+          }
+
+          // check the 3DS source's status
+          if (response.status == 'chargeable') {
+            this.displayResult("This card does not support 3D Secure authentication, but liability will be shifted to the card issuer.");
+            return;
+          } else if (response.status != 'pending') {
+            this.displayResult("Unexpected 3D Secure status: " + response.status);
+            return;
+          }
+
+          // start polling the source (to detect the change from pending
+          // to either chargeable or failed)
+          Stripe.source.poll(
+            response.id,
+            response.client_secret,
+            this.stripe3DSStatusChangedHandler
+          );
+
+          // open the redirect URL in an iframe
+          // (in this example we're using Featherlight for convenience,
+          // but this is of course not a requirement)
+          $.featherlight({
+            iframe: response.redirect.url,
+            iframeWidth: '800',
+            iframeHeight: '600'
+          });
+
+          console.log(response);
+        },
+
+        stripe3DSStatusChangedHandler(status, source) {
+          if (source.status == 'chargeable') {
+            $.featherlight.current().close();
+            this.displayResult('3D Secure authentication succeeded: ' + source.id + '. In a real app you would send this source ID to your backend to create the charge.');
+          } else if (source.status == 'failed') {
+            $.featherlight.current().close();
+            this.displayResult('3D Secure authentication failed.');
+          } else if (source.status != 'pending') {
+            $.featherlight.current().close();
+            this.displayResult("Unexpected 3D Secure status: " + source.status);
+          }
+        },
+        displayResult(resultText) {
+          alert(resultText);
+          this.$emit('done', { token: this.token, args: this.args });//TODO superheri fix these events
+          //resolve({ token: this.token, args: this.args });
+          this.doneEmitted = true;
         }
       }
     });
