@@ -76,7 +76,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 var VueStripeCheckout = {
   install: function install(Vue, _key) {
-    Vue.component('vue-stripe-checkout', {
+    Vue.component('VueStripeCheckout', {
       render: function render(h) {
         return h('div', { style: { display: 'none' } });
       },
@@ -132,6 +132,10 @@ var VueStripeCheckout = {
         allowRememberMe: {
           type: Boolean,
           default: true
+        },
+        autoOpenModal: {
+          type: Boolean,
+          default: false
         }
       },
       mounted: function mounted() {
@@ -172,6 +176,7 @@ var VueStripeCheckout = {
           var stripeApp = document.querySelector('iframe.stripe_checkout_app');
           if (stripeApp) stripeApp.remove();
           this.checkout = StripeCheckout.configure({ key: this.key });
+          if (this.autoOpenModal) this.open();
         },
         open: function open() {
           var _this = this;
