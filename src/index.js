@@ -71,7 +71,7 @@ const VueStripeCheckout = {
       mounted() {
         /*if (document.querySelector('script#_stripe-checkout-script')) {
           return this.setCheckout();
-        }*/
+        }*///TODO superheri Why does it stops working with this if?
         const scriptCheckout = document.createElement('script');
         scriptCheckout.id = '_stripe-checkout-script';
         scriptCheckout.src = 'https://checkout.stripe.com/checkout.js';
@@ -88,7 +88,7 @@ const VueStripeCheckout = {
         scriptFeatherlight.id = '_stripe-featherlight-script';
         scriptFeatherlight.src = 'https://cdnjs.cloudflare.com/ajax/libs/featherlight/1.7.6/featherlight.min.js';
         scriptFeatherlight.onload = this.setCheckout;
-        document.querySelector('head').append(scriptFeatherlight);
+        document.querySelector('head').append(scriptFeatherlight);//TODO superheri Too much scripts added here. There must be a solution to this...
       },
       // NOTE: Should this be enabled for dynamic keys?
       // Cause if it gets updated very quickly, I
