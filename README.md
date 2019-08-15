@@ -16,19 +16,9 @@
   </span>
 </center>
 
-### ⚠️ BREAKING CHANGES SINCE `1.2.x` ⚠️
+# ⚠️ LEGACY VERSION ⚠️
 
-1. `done` event now returns an object which contains the `token` and `args` object. 
-  - token - the object containing the checkout details.
-  - args - the object containing the shipping and billing address if enabled.
-
-Please see example for changes.
-
-### ⚠️ BREAKING CHANGES SINCE `1.1.x` ⚠️
-
-1. Initialization options now only accepts stripe publishable key. E.g. `Vue.use(VueStripeCheckout, 'your-publishable-key-here')`.
-
-2. Global mixin `$checkout` was removed in favor of the component `vue-stripe-checkout`.
+This version of Vue Stripe Checkout is based on Stripe Checkout V2. Stripe is now using Stripe Checkout V3. Development for V3 integration is still ongoing. Kindly refer to #56 and #64 for more information.
 
 ---- 
 
