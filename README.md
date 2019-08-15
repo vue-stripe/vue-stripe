@@ -18,7 +18,7 @@
 
 # ⚠️ LEGACY VERSION ⚠️
 
-This version of Vue Stripe Checkout is based on Stripe Checkout V2. Stripe is now using Stripe Checkout V3. Development for V3 integration is still ongoing. Kindly refer to #56 and #64 for more information.
+This version of Vue Stripe Checkout is based on Stripe Checkout V2. Stripe is now using Stripe Checkout V3. Development for V3 integration is still ongoing. Kindly refer to [#56](https://github.com/jofftiquez/vue-stripe-checkout/issues/56) and [#64](https://github.com/jofftiquez/vue-stripe-checkout/issues/64) for more information.
 
 ---- 
 
