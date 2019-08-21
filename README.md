@@ -1,155 +1,55 @@
 
-<center>
-  <h1> Vue Stripe Checkout </h1>
-  <span>
-    <a href="https://circleci.com/gh/jofftiquez/vue-stripe-checkout" title="Circle CI">
-      <img src="https://circleci.com/gh/jofftiquez/vue-stripe-checkout.svg?style=shield" alt="Circle CI"/>
-    </a>
-  </span><span>
-    <a href="https://www.npmjs.com/package/vue-stripe-checkout" title="NPM">
-      <img src="https://img.shields.io/npm/dt/vue-stripe-checkout.svg?style=shield" alt="NPM"/>
-    </a>
-  </span><span class="badge-buymeacoffee">
-    <a href="https://www.buymeacoffee.com/jofftiquez" title="Donate to this project using Buy Me A Coffee">
-      <img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-brightgreen.svg" alt="Buy Me A Coffee donate button"/>
-    </a>
-  </span>
-</center>
+# Vue Stripe Checkout 3 Beta
 
-# ⚠️ LEGACY VERSION ⚠️
+Welcome to the Vue Stripe Checkout 3 Beta! This version is still incomplete, but please let me know what's missing or what you're expecting from this version by [creating an issue](https://github.com/jofftiquez/vue-stripe-checkout/issues/new). Every feedback helps.
 
-This version of Vue Stripe Checkout is based on Stripe Checkout V2. Stripe is now using Stripe Checkout V3. Development for V3 integration is still ongoing. Kindly refer to [#55](https://github.com/jofftiquez/vue-stripe-checkout/issues/56), [#56](https://github.com/jofftiquez/vue-stripe-checkout/issues/56), and [#64](https://github.com/jofftiquez/vue-stripe-checkout/issues/64) for more information.
+Note: Not all Stripe Checkout options are available yet.
 
----- 
+### IMPORTANT
 
-**Shut up and clone my repo!**
-
-A Vue plugin for Stripe checkout. I sh\*t you not, this plugin is the easiest to use. 
-
-### Demo
-
-[Shut up and see the demo!](https://jofftiquez.github.io/vue-stripe-checkout/)
-
-If you liked this repo then leave a :star:, if not, I don't care. *(Seriously leave a :star: please)*
-
-![Screen Shot](https://i.imgur.com/hV6iNj3.png)
-
-## Install
-
-*NPM* or *Yarn*
-
-`npm install vue-stripe-checkout --save`
-
-`yarn add vue-stripe-checkout`
-
-*CDN*
-
-`https://unpkg.com/vue-stripe-checkout/build/vue-stripe-checkout.js`
-
-*Usage*
-
-```javascript
-import Vue from 'vue';
-import VueStripeCheckout from 'vue-stripe-checkout';
-
-Vue.use(VueStripeCheckout, 'your-publishable-key-here');
-```
-
-Just see the [stripe docu](https://stripe.com/docs/checkout#integration-simple-options) for all of the available options.
+To be able to start using Stripe Checkout version 3, kindly follow [these instructions](https://stripe.com/docs/payments/checkout/client) first.
 
 ### Sample
 
-```vue
+Direct import the checkout component into your component.
+
+```html
 <template>
-  <div>
-    <vue-stripe-checkout
-      ref="checkoutRef"
-      :image="image"
-      :name="name"
-      :description="description"
-      :currency="currency"
-      :amount="amount"
-      :allow-remember-me="false"
-      @done="done"
-      @opened="opened"
-      @closed="closed"
-      @canceled="canceled"
-    ></vue-stripe-checkout>
-    <button @click="checkout">Checkout</button>
-  </div>
+  <vue-stripe-checkout
+    ref="checkoutRef"
+    publishableKey="YOUR_PUBLISHABLE_KEY_HERE"
+    :items="items"
+  >
+    <template slot="checkout-button">
+      <button @click="checkout">Shutup and take my money!</button>
+    </template>
+  </vue-stripe-checkout>
 </template>
 
 <script>
+import { VueStripeCheckout } from 'vue-stripe-checkout';
 export default {
-  data() {
-    return {
-      image: 'https://i.imgur.com/HhqxVCW.jpg',
-      name: 'Shut up and take my money!',
-      description: 'Cats are the best dog!',
-      currency: 'PHP',
-      amount: 99999
-    }
+  components: {
+    VueStripeCheckout
   },
+  data: () => ({
+    loading: false,
+    items: [
+      {
+        sku: 'sku_FdQKocNoVzznpJ', 
+        quantity: 1
+      }
+    ],
+    successUrl: 'your-success-url',
+    cancelUrl: 'your-cancel-url',
+  }),
   methods: {
-    async checkout () {
-      // token - is the token object
-      // args - is an object containing the billing and shipping address if enabled
-      const { token, args } = await this.$refs.checkoutRef.open();
-    },
-    done ({token, args}) {
-      // token - is the token object
-      // args - is an object containing the billing and shipping address if enabled
-      // do stuff...
-    },
-    opened () {
-      // do stuff 
-    },
-    closed () {
-      // do stuff 
-    },
-    canceled () {
-      // do stuff 
+    checkout () {
+      this.$refs.checkoutRef.redirectToCheckout();
     }
   }
 }
 </script>
-```
-
-### Props
-
-See property description from official [Stripe Documentation](https://stripe.com/docs/checkout#highly-recommended)
-
-- `publishable-key`: `String`
-- `image`: `String`
-- `name`: `String`
-- `description`: `String`
-- `amount`: `Number`
-- `locale`: `String`
-- `zip-code`: `Boolean`
-- `billing-address`: `Boolean`
-- `currency`: `String`
-- `panelLabel`: `String`
-- `shipping-address`: `Boolean`
-- `email`: `String`
-- `allow-remember-me`: `Boolean`
-- `auto-open-modal`: `Boolean`
-
-### Events
-
-- `done` - Emits an object containing the stripe `token` and `args` (an object containing the billing and shipping address if enabled).
-- `opened` - Called when the stripe checkout dialog has been opened.
-- `closed` - Called when the stripe checkout dialog has been closed after a successful transaction or when the x button was clicked.
-- `canceled` - Called when x button has been clicked.
-
-**Usage**
-
-```vue
-<vue-stripe-checkout
-  @done="done"
-  @opened="opened"
-  @closed="closed"
-  @canceled="canceled"
-></vue-stripe-checkout>
 ```
 
 **SPECIAL THANKS TO THE FOLLOWING SPONSOR(S):**
