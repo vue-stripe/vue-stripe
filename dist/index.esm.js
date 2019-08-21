@@ -1,10 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var __vue_normalize__ = _interopDefault(require('vue-runtime-helpers/dist/normalize-component.js'));
+import __vue_normalize__ from 'vue-runtime-helpers/dist/normalize-component.js';
 
 //
 //
@@ -99,5 +93,5 @@ var Plugin = {
   }
 };
 
-exports.VueStripeCheckout = VueStripeCheckout;
-exports.default = Plugin;
+export default Plugin;
+export { VueStripeCheckout };
