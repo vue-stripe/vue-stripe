@@ -9,6 +9,10 @@ Note: Not all Stripe Checkout options are available yet.
 
 To be able to start using Stripe Checkout version 3, kindly follow [these instructions](https://stripe.com/docs/payments/checkout/client) first.
 
+### Demo
+
+https://vue-stripe-checkout-v3.surge.sh/vue-stripe-checkout
+
 ### Sample
 
 Direct import the checkout component into your component.
