@@ -13,6 +13,16 @@ To be able to start using Stripe Checkout version 3, kindly follow [these instru
 
 https://vue-stripe-checkout-v3.surge.sh/vue-stripe-checkout
 
+### Install Beta
+
+```bash
+yarn add vue-stripe-checkout@beta
+```
+
+```bash
+npm install vue-stripe-checkout@beta
+```
+
 ### Sample
 
 Direct import the checkout component into your component.
