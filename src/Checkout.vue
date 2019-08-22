@@ -5,12 +5,21 @@
 </template>
 
 <script>
+/**
+ * @typedef
+ */
 export default {
   props: {
+    /**
+     * @type {string} - Stripe's publishable key, from Stripe dashboard.
+     */
     publishableKey: {
       type: String,
       required: true,
     },
+    /**
+     * @type {SKUItem} - Stripe's publishable key, from Stripe dashboard.
+     */
     items: {
       type: Array
     },
@@ -21,6 +30,9 @@ export default {
     cancelUrl: {
       type: String,
       default: window.location.href
+    },
+    submitType: {
+      type: String
     }
   },
   mounted () {
@@ -32,19 +44,23 @@ export default {
   computed: {
     key () {
       return this.publishableKey;
+    },
+    stripe () {
+      return Stripe(this.key);
     }
   },
   methods: {
     redirectToCheckout () {
       try {
         this.$emit('loading', true);
-        Stripe(this.key).redirectToCheckout({
+        this.stripe.redirectToCheckout({
           items: this.items,
           successUrl: this.successUrl,
           cancelUrl: this.cancelUrl,
+          submitType: this.submitType 
         });
       } catch (e) {
-        
+        this.$emit('error', e);
       } finally {
         this.$emit('loading', false);
       }
