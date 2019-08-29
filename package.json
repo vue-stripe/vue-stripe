@@ -1,22 +1,20 @@
 {
   "name": "vue-stripe-checkout",
-  "version": "3.0.0-beta.5",
+  "version": "3.0.0-beta.7",
   "description": "Vue plugin for Stripe checkout.",
   "main": "dist",
   "module": "dist",
   "typings": "typings/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "rimraf dist && bili"
+    "build": "rimraf dist && npx rollup --config"
   },
   "devDependencies": {
-    "bili": "^4.8.1",
     "jest": "^24.9.0",
     "rimraf": "^3.0.0",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-vue": "^5.0.1",
     "vue": "^2.6.10",
-    "vue-runtime-helpers": "^1.0.2",
     "vue-template-compiler": "^2.6.10"
   },
   "repository": {
