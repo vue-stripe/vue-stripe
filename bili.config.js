@@ -4,7 +4,6 @@ module.exports = {
   output: {
     dir: 'dist',
     moduleName: 'vue-stipe-checkout',
-    format: ['cjs', 'es', 'umd'],
     target: 'node'
   },
   exports: 'named',
