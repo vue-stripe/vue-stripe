@@ -13,6 +13,7 @@
     "bili": "^4.8.1",
     "jest": "^24.9.0",
     "rimraf": "^3.0.0",
+    "rollup-plugin-commonjs": "^ 10.0.1",
     "rollup-plugin-vue": "^5.0.1",
     "vue": "^2.6.10",
     "vue-template-compiler": "^2.6.10"
