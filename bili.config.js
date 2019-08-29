@@ -9,6 +9,7 @@ module.exports = {
   },
   exports: 'named',
   plugins: {
-    vue: true
+    vue: true,
+    commonjs: true
   }
 }
