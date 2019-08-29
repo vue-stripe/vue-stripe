@@ -10,12 +10,23 @@
   //
   //
   //
+
+  /**
+   * @typedef
+   */
   var script = {
     props: {
+      /**
+       * @type {string} - Stripe's publishable key, from Stripe dashboard.
+       */
       publishableKey: {
         type: String,
         required: true
       },
+
+      /**
+       * @type {SKUItem} - Stripe's publishable key, from Stripe dashboard.
+       */
       items: {
         type: Array
       },
@@ -26,6 +37,9 @@
       cancelUrl: {
         type: String,
         "default": window.location.href
+      },
+      submitType: {
+        type: String
       }
     },
     mounted: function mounted() {
@@ -37,18 +51,24 @@
     computed: {
       key: function key() {
         return this.publishableKey;
+      },
+      stripe: function stripe() {
+        return Stripe(this.key);
       }
     },
     methods: {
       redirectToCheckout: function redirectToCheckout() {
         try {
           this.$emit('loading', true);
-          Stripe(this.key).redirectToCheckout({
+          this.stripe.redirectToCheckout({
             items: this.items,
             successUrl: this.successUrl,
-            cancelUrl: this.cancelUrl
+            cancelUrl: this.cancelUrl,
+            submitType: this.submitType
           });
-        } catch (e) {} finally {
+        } catch (e) {
+          this.$emit('error', e);
+        } finally {
           this.$emit('loading', false);
         }
       }
