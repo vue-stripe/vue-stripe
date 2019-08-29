@@ -8,7 +8,7 @@ import __vue_normalize__ from 'vue-runtime-helpers/dist/normalize-component.js';
 //
 
 /**
- * @typedef
+ * @typedef SKUItem
  */
 var script = {
   props: {
@@ -21,7 +21,7 @@ var script = {
     },
 
     /**
-     * @type {SKUItem} - Stripe's publishable key, from Stripe dashboard.
+     * @type {SKUItem} - Stripe's SKU item.
      */
     items: {
       type: Array

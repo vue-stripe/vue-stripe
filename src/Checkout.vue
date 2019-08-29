@@ -6,7 +6,7 @@
 
 <script>
 /**
- * @typedef
+ * @typedef SKUItem
  */
 export default {
   props: {
@@ -18,7 +18,7 @@ export default {
       required: true,
     },
     /**
-     * @type {SKUItem} - Stripe's publishable key, from Stripe dashboard.
+     * @type {SKUItem} - Stripe's SKU item.
      */
     items: {
       type: Array

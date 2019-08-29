@@ -12,7 +12,7 @@
   //
 
   /**
-   * @typedef
+   * @typedef SKUItem
    */
   var script = {
     props: {
@@ -25,7 +25,7 @@
       },
 
       /**
-       * @type {SKUItem} - Stripe's publishable key, from Stripe dashboard.
+       * @type {SKUItem} - Stripe's SKU item.
        */
       items: {
         type: Array

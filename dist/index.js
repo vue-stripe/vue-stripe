@@ -14,7 +14,7 @@ var __vue_normalize__ = _interopDefault(require('vue-runtime-helpers/dist/normal
 //
 
 /**
- * @typedef
+ * @typedef SKUItem
  */
 var script = {
   props: {
@@ -27,7 +27,7 @@ var script = {
     },
 
     /**
-     * @type {SKUItem} - Stripe's publishable key, from Stripe dashboard.
+     * @type {SKUItem} - Stripe's SKU item.
      */
     items: {
       type: Array
