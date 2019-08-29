@@ -6046,6 +6046,11 @@ vue-runtime-helpers@1.0.1:
   resolved "https://registry.yarnpkg.com/vue-runtime-helpers/-/vue-runtime-helpers-1.0.1.tgz#9a7f527d43fdecf83638188fb0e5bae699c2b5bb"
   integrity sha512-yodqdAWt/QrUkb51jN2DS4dtF4vQWg5YejYdBAcHIOi6kBoGLRVEDz5NYGdh5IhzLrElgi+eKX1DQJmj3bCuJw==
 
+vue-runtime-helpers@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/vue-runtime-helpers/-/vue-runtime-helpers-1.0.2.tgz#2af50a4bb788a8344add51d995a8b4cb9a32e81f"
+  integrity sha512-dJPRv2sL4bzjAlLUmHvl/PlgBqW3zTkHcF8bPwAZMjwOAml7bosnJ70KL/tC94qeaNlNChnTw5v5v/BuQa8aXw==
+
 vue-template-compiler@^2.6.10:
   version "2.6.10"
   resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.6.10.tgz#323b4f3495f04faa3503337a82f5d6507799c9cc"
