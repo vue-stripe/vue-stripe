@@ -2,28 +2,39 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-//
-//
-//
-//
-//
-//
+const SUPPORTED_LANGS = [
+  'auto',
+  'da',
+  'de',
+  'en',
+  'es',
+  'fi',
+  'fr',
+  'it',
+  'ja',
+  'nb',
+  'nl',
+  'pl',
+  'pt',
+  'sv',
+  'zh'
+];
 
-/**
- * @typedef SKUItem
- */
+const SUPPORTED_SUBMIT_TYPES = [
+  'auto', 
+  'book', 
+  'donate', 
+  'pay'
+];
+
+const BILLING_ADDRESS_COLLECTION_TYPES = [
+  'required', 
+  'auto'
+];
+
+//
 var script = {
   props: {
-    /**
-     * @type {string} - Stripe's publishable key, from Stripe dashboard.
-     */
-    publishableKey: {
-      type: String,
-      required: true,
-    },
-    /**
-     * @type {SKUItem} - Stripe's SKU item.
-     */
     items: {
       type: Array
     },
@@ -38,18 +49,12 @@ var script = {
     submitType: {
       type: String,
       default: 'auto',
-      validator (value) {
-        let supportedValues = ['auto', 'book', 'donate', 'pay'];
-        return supportedValues.includes(value);
-      }
+      validator: (value) => SUPPORTED_SUBMIT_TYPES.includes(value)
     },
     billingAddressCollection: {
       type: String,
       default: 'auto',
-      validator (value) {
-        let supportedValues = ['required', 'auto'];
-        return supportedValues.includes(value);
-      }
+      validator: (value) => BILLING_ADDRESS_COLLECTION_TYPES.includes(value)
     },
     clientReferenceId: {
       type: String,
@@ -63,34 +68,14 @@ var script = {
     locale: {
       type: String,
       default: 'auto',
-      validator (value) {
-        let supportedValues = ['auto', 'da', 'de', 'en', 'es', 'fi', 'fr', 'it', 'ja', 'nb', 'nl', 'pl', 'pt', 'sv', 'zh'];
-        return supportedValues.includes(value);
-      }
-    }
-  },
-  created () {
-    const script = document.createElement('script');
-    script.id = '_stripe-redirect-to-checkout';
-    script.src = 'https://js.stripe.com/v3';
-    document.querySelector('head').append(script);
-  },
-  computed: {
-    key () {
-      return this.publishableKey;
-    },
-    stripe () {
-      return Stripe(this.key);
-    },
-    stripeElements () {
-      return this.stripe.elements();
+      validator: (value) => SUPPORTED_LANGS.includes(value)
     }
   },
   methods: {
     redirectToCheckout () {
       try {
         this.$emit('loading', true);
-        this.stripe.redirectToCheckout({
+        this.$stripe.redirectToCheckout({
           billingAddressCollection: this.billingAddressCollection,
           cancelUrl: this.cancelUrl,
           clientReferenceId: this.clientReferenceId,
@@ -98,29 +83,11 @@ var script = {
           items: this.items,
           locale: this.locale,
           sessionId: this.sessionId,
-          submitType: this.submitType ,
+          submitType: this.submitType,
           successUrl: this.successUrl,
         });
       } catch (e) {
-        this.$emit('error', e);
-      } finally {
-        this.$emit('loading', false);
-      }
-    },
-    /** TODO: Create stripe elements
-     * @param {Object} cardElement
-     * @param {Object} data - Refer to https://stripe.com/docs/api/payment_methods/create
-     */
-    async createPaymentMethod (cardElement, data) {
-      try {
-        this.$emit('loading', true);
-        const { paymentMethod } = await this.stripe.createPaymentMethod(
-          'card',
-          cardElement,
-          data
-        );
-        this.$emit('paymentMethod', paymentMethod);
-      } catch (e) {
+        console.error(e);
         this.$emit('error', e);
       } finally {
         this.$emit('loading', false);
@@ -252,11 +219,222 @@ __vue_render__._withStripped = true;
     undefined
   );
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+var script$1 = {
+  data () {
+    return {
+      loading: false
+    }
+  },
+  mounted () {
+    this.card.mount('#card-element');
+    this.card.addEventListener('change', ({ error }) => {
+      const displayError = document.getElementById('card-errors');
+      if (error) {
+        displayError.textContent = error.message;
+      } else {
+        displayError.textContent = '';
+      }
+    });
+    
+    this.form.addEventListener('submit', async (event) => {
+      try {
+        this.$emit('loading', true);
+        event.preventDefault();
+        const { token, error } = await this.$stripe.createToken({...this.card, amount: 1000});
+        if (error) {
+          const errorElement = document.getElementById('card-errors');
+          errorElement.textContent = error.message;
+          this.$emit('error', error);
+        } else {
+          this.$emit('token', token);
+        }
+      } catch (e) {
+        this.$emit('error', error);
+      } finally {
+        this.$emit('loading', false);
+      }
+    });
+  },
+  computed: {
+    style () {
+      return {
+        base: {
+          color: '#32325d',
+          fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+          fontSmoothing: 'antialiased',
+          fontSize: '16px',
+          '::placeholder': {
+            color: '#aab7c4'
+          }
+        },
+        invalid: {
+          color: '#fa755a',
+          iconColor: '#fa755a'
+        }
+      };
+    },
+    elements () {
+      return this.$stripe.elements();
+    },
+    card () {
+      return this.elements.create('card', { style: this.style });
+    },
+    form () {
+      return document.getElementById('payment-form');
+    }
+  },
+  methods: {
+    submit () {
+      this.$refs.submitButtonRef.click();
+    }
+  }
+};
+
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
+function createInjector(context) {
+  return function (id, style) {
+    return addStyle(id, style);
+  };
+}
+var HEAD;
+var styles = {};
+
+function addStyle(id, css) {
+  var group = isOldIE ? css.media || 'default' : id;
+  var style = styles[group] || (styles[group] = {
+    ids: new Set(),
+    styles: []
+  });
+
+  if (!style.ids.has(id)) {
+    style.ids.add(id);
+    var code = css.source;
+
+    if (css.map) {
+      // https://developer.chrome.com/devtools/docs/javascript-debugging
+      // this makes source maps inside style tags work properly in Chrome
+      code += '\n/*# sourceURL=' + css.map.sources[0] + ' */'; // http://stackoverflow.com/a/26603875
+
+      code += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) + ' */';
+    }
+
+    if (!style.element) {
+      style.element = document.createElement('style');
+      style.element.type = 'text/css';
+      if (css.media) style.element.setAttribute('media', css.media);
+
+      if (HEAD === undefined) {
+        HEAD = document.head || document.getElementsByTagName('head')[0];
+      }
+
+      HEAD.appendChild(style.element);
+    }
+
+    if ('styleSheet' in style.element) {
+      style.styles.push(code);
+      style.element.styleSheet.cssText = style.styles.filter(Boolean).join('\n');
+    } else {
+      var index = style.ids.size - 1;
+      var textNode = document.createTextNode(code);
+      var nodes = style.element.childNodes;
+      if (nodes[index]) style.element.removeChild(nodes[index]);
+      if (nodes.length) style.element.insertBefore(textNode, nodes[index]);else style.element.appendChild(textNode);
+    }
+  }
+}
+
+var browser = createInjector;
+
+/* script */
+const __vue_script__$1 = script$1;
+
+/* template */
+var __vue_render__$1 = function() {
+  var _vm = this;
+  var _h = _vm.$createElement;
+  var _c = _vm._self._c || _h;
+  return _c("div", [
+    _c(
+      "form",
+      { attrs: { id: "payment-form" } },
+      [
+        _vm._t("card-element", [_c("div", { attrs: { id: "card-element" } })]),
+        _vm._v(" "),
+        _vm._t("card-errors", [
+          _c("div", { attrs: { id: "card-errors", role: "alert" } })
+        ]),
+        _vm._v(" "),
+        _c("button", { ref: "submitButtonRef", attrs: { type: "submit" } })
+      ],
+      2
+    )
+  ])
+};
+var __vue_staticRenderFns__$1 = [];
+__vue_render__$1._withStripped = true;
+
+  /* style */
+  const __vue_inject_styles__$1 = function (inject) {
+    if (!inject) return
+    inject("data-v-30856faa_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/**\n * The CSS shown here will not be introduced in the Quickstart guide, but shows\n * how you can use CSS to style your Element's container.\n */\n.StripeElement[data-v-30856faa] {\n  box-sizing: border-box;\n\n  height: 40px;\n\n  padding: 10px 12px;\n\n  border: 1px solid transparent;\n  border-radius: 4px;\n  background-color: white;\n\n  box-shadow: 0 1px 3px 0 #e6ebf1;\n  -webkit-transition: box-shadow 150ms ease;\n  transition: box-shadow 150ms ease;\n}\n.StripeElement--focus[data-v-30856faa] {\n  box-shadow: 0 1px 3px 0 #cfd7df;\n}\n.StripeElement--invalid[data-v-30856faa] {\n  border-color: #fa755a;\n}\n.StripeElement--webkit-autofill[data-v-30856faa] {\n  background-color: #fefde5 !important;\n}\n", map: {"version":3,"sources":["/home/centipede/Documents/workspace/personal/vue-stripe-checkout/src/Elements.vue"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAwFA;;;EAGA;AACA;EACA,sBAAA;;EAEA,YAAA;;EAEA,kBAAA;;EAEA,6BAAA;EACA,kBAAA;EACA,uBAAA;;EAEA,+BAAA;EACA,yCAAA;EACA,iCAAA;AACA;AAEA;EACA,+BAAA;AACA;AAEA;EACA,qBAAA;AACA;AAEA;EACA,oCAAA;AACA","file":"Elements.vue","sourcesContent":["<template>\n  <div>\n    <form id=\"payment-form\">\n      <slot name=\"card-element\">\n        <div id=\"card-element\"></div>\n      </slot>\n      <slot name=\"card-errors\">\n        <div id=\"card-errors\" role=\"alert\"></div>\n      </slot>\n      <button ref=\"submitButtonRef\" type=\"submit\"></button>\n    </form>\n  </div>\n</template>\n\n<script>\nexport default {\n  data () {\n    return {\n      loading: false\n    }\n  },\n  mounted () {\n    this.card.mount('#card-element');\n    this.card.addEventListener('change', ({ error }) => {\n      const displayError = document.getElementById('card-errors');\n      if (error) {\n        displayError.textContent = error.message;\n      } else {\n        displayError.textContent = '';\n      }\n    });\n    \n    this.form.addEventListener('submit', async (event) => {\n      try {\n        this.$emit('loading', true);\n        event.preventDefault();\n        const { token, error } = await this.$stripe.createToken({...this.card, amount: 1000});\n        if (error) {\n          const errorElement = document.getElementById('card-errors');\n          errorElement.textContent = error.message;\n          this.$emit('error', error);\n        } else {\n          this.$emit('token', token);\n        }\n      } catch (e) {\n        this.$emit('error', error);\n      } finally {\n        this.$emit('loading', false);\n      }\n    });\n  },\n  computed: {\n    style () {\n      return {\n        base: {\n          color: '#32325d',\n          fontFamily: '\"Helvetica Neue\", Helvetica, sans-serif',\n          fontSmoothing: 'antialiased',\n          fontSize: '16px',\n          '::placeholder': {\n            color: '#aab7c4'\n          }\n        },\n        invalid: {\n          color: '#fa755a',\n          iconColor: '#fa755a'\n        }\n      };\n    },\n    elements () {\n      return this.$stripe.elements();\n    },\n    card () {\n      return this.elements.create('card', { style: this.style });\n    },\n    form () {\n      return document.getElementById('payment-form');\n    }\n  },\n  methods: {\n    submit () {\n      this.$refs.submitButtonRef.click();\n    }\n  }\n}\n</script>\n\n<style scoped>\n/**\n * The CSS shown here will not be introduced in the Quickstart guide, but shows\n * how you can use CSS to style your Element's container.\n */\n.StripeElement {\n  box-sizing: border-box;\n\n  height: 40px;\n\n  padding: 10px 12px;\n\n  border: 1px solid transparent;\n  border-radius: 4px;\n  background-color: white;\n\n  box-shadow: 0 1px 3px 0 #e6ebf1;\n  -webkit-transition: box-shadow 150ms ease;\n  transition: box-shadow 150ms ease;\n}\n\n.StripeElement--focus {\n  box-shadow: 0 1px 3px 0 #cfd7df;\n}\n\n.StripeElement--invalid {\n  border-color: #fa755a;\n}\n\n.StripeElement--webkit-autofill {\n  background-color: #fefde5 !important;\n}\n</style>"]}, media: undefined });
+
+  };
+  /* scoped */
+  const __vue_scope_id__$1 = "data-v-30856faa";
+  /* module identifier */
+  const __vue_module_identifier__$1 = undefined;
+  /* functional template */
+  const __vue_is_functional_template__$1 = false;
+  /* style inject SSR */
+  
+
+  
+  var VueStripeElements = normalizeComponent_1(
+    { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
+    __vue_inject_styles__$1,
+    __vue_script__$1,
+    __vue_scope_id__$1,
+    __vue_is_functional_template__$1,
+    __vue_module_identifier__$1,
+    browser,
+    undefined
+  );
+
 const Plugin = {
-  install (Vue, options) {
+  install (Vue, opts) {
+    if (!opts || !opts.publishableKey) {
+      console.warn('Vue Stripe Checkout Error: Publishable key is required.');
+      return;
+    }
+
+    if (window.Stripe) {
+      Vue.prototype.$stripe = Stripe(opts && opts.publishableKey);
+    } else {
+      document.querySelector('#stripe-js').addEventListener('load', () => {
+        Vue.prototype.$stripe = Stripe(opts && opts.publishableKey);
+      });
+    }
+    
     Vue.component('vue-stripe-checkout', VueStripeCheckout);
+    Vue.component('vue-stripe-elements', VueStripeElements);
   }
 };
 
 exports.VueStripeCheckout = VueStripeCheckout;
+exports.VueStripeElements = VueStripeElements;
 exports.default = Plugin;
