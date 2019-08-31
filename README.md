@@ -93,6 +93,8 @@ export default {
 
 Create custom Stripe form using [Stripe Elements](https://stripe.com/docs/stripe-js).
 
+Docs for additional Stripe Charge Object [options](https://stripe.com/docs/api/charges/object) like `amount`, `description`, `currenct`, etc.
+
 ```html
 <template>
   <vue-stripe-elements
@@ -118,6 +120,7 @@ export default {
     },
     tokenCreated (token) {
       this.token = token;
+      // for additional charge objects go to https://stripe.com/docs/api/charges/object
       this.charge = {
         source: token.card,
         amount: this.amount,
