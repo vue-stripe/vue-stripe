@@ -147,8 +147,8 @@ When the SKU items has been created, you can now use the [`vue-stripe-checkout`]
 
 **SPECIAL THANKS TO THE FOLLOWING SPONSOR(S):**
 
-[MYCURE INC.](https://www.mycure.md)
-
-[TEAM O.P.S. INC.](http://myteamops.com/)
+[<img src="https://i.imgur.com/Ttv4fMw.png" width="200px">](https://mightyminds.org)
+[<img src="https://i.imgur.com/x0SERyj.png" width="200px">](https://mycure.md)
+[<img src="https://i.imgur.com/4jF5M4A.png">](http://myteamops.com)
 
 Made with :heart: by Jofferson Ramirez Tiquez
