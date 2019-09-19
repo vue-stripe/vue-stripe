@@ -49,7 +49,14 @@ If you liked this repo then leave a :star:, if not, I don't care. *(Seriously le
 
 *CDN*
 
-`https://unpkg.com/vue-stripe-checkout/build/vue-stripe-checkout.js`
+For specific version prior to v3:
+`https://unpkg.com/vue-stripe-checkout@1.2.6/build/vue-stripe-checkout.js`
+
+For v3 releases:
+`https://unpkg.com/vue-stripe-checkout@3.0.0-beta.11/dist/index.js`
+
+For the newest release:
+`https://unpkg.com/vue-stripe-checkout`
 
 *Usage*
 
