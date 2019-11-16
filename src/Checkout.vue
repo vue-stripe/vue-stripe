@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { 
+import {
   SUPPORTED_LANGS,
   SUPPORTED_SUBMIT_TYPES,
   BILLING_ADDRESS_COLLECTION_TYPES
@@ -25,7 +25,7 @@ export default {
     },
     submitType: {
       type: String,
-      default: 'auto',
+      default: null,
       validator: (value) => SUPPORTED_SUBMIT_TYPES.includes(value)
     },
     billingAddressCollection: {
@@ -52,7 +52,7 @@ export default {
     redirectToCheckout () {
       try {
         this.$emit('loading', true);
-        this.$stripe.redirectToCheckout({
+        let checkoutOptions = {
           billingAddressCollection: this.billingAddressCollection,
           cancelUrl: this.cancelUrl,
           clientReferenceId: this.clientReferenceId,
@@ -60,9 +60,14 @@ export default {
           items: this.items,
           locale: this.locale,
           sessionId: this.sessionId,
-          submitType: this.submitType,
           successUrl: this.successUrl,
-        });
+        }
+
+        if (this.submitType) {
+          checkoutOptions.submitType = this.submitType
+        }
+
+        this.$stripe.redirectToCheckout(checkoutOptions);
       } catch (e) {
         console.error(e);
         this.$emit('error', e);
