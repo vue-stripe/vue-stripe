@@ -32,7 +32,6 @@ export default {
     },
     submitType: {
       type: String,
-      default: 'auto',
       validator: (value) => SUPPORTED_SUBMIT_TYPES.includes(value)
     },
     billingAddressCollection: {
