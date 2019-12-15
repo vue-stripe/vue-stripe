@@ -1,11 +1,11 @@
 
-# Vue Stripe Checkout 3 Beta
+# Vue Stripe Checkout
 
-Welcome to the Vue Stripe Checkout 3 Beta! This version is still incomplete, but please let me know what's missing or what you're expecting from this version by [creating an issue](https://github.com/jofftiquez/vue-stripe-checkout/issues/new). Every feedback helps.
+Welcome to the Vue Stripe Checkout 3! This version is still incomplete, but please let me know what's missing or what you're expecting from this version by [creating an issue](https://github.com/jofftiquez/vue-stripe-checkout/issues/new). Every feedback helps.
 
-### IMPORTANT
+### LEGACY
 
-To be able to start using Stripe Checkout version 3, kindly follow [these instructions](https://stripe.com/docs/payments/checkout/client) first.
+Old version (version 2) is still available [here](https://github.com/jofftiquez/vue-stripe-checkout/tree/v2).
 
 ### Table of Contents
 
@@ -19,32 +19,16 @@ To be able to start using Stripe Checkout version 3, kindly follow [these instru
 
 ### Demo
 
-[Live Demo](https://vue-stripe-checkout-v3.surge.sh/vue-stripe-checkout)
+[Live Demo](https://jofftiquez.github.io/vue-stripe-checkout)
 
-### Install Beta
-
-```bash
-yarn add vue-stripe-checkout@beta
-```
+### Install
 
 ```bash
-npm install vue-stripe-checkout@beta
+yarn add vue-stripe-checkout
 ```
 
-### Usage
-
-Add the stripe js link in your `index.html` just before the `</head>` closing tag.
-
-```html
-<script id="stripe-js" src="https://js.stripe.com/v3/" async></script>
-```
-
-```javascript
-import Vue from 'vue';
-import VueStripeCheckout from 'vue-stripe-checkout';
-Vue.use(VueStripeCheckout, {
-  publishableKey: 'your-publishable-key'
-});
+```bash
+npm install vue-stripe-checkout
 ```
 
 ### Vue Stripe Checkout
@@ -55,8 +39,9 @@ Stripe's new [Checkout](https://stripe.com/docs/payments/checkout).
 
 ```html
 <template>
-  <vue-stripe-checkout
+  <stripe-checkout
     ref="checkoutRef"
+    :pk="publishableKey"
     :items="items"
     :successUrl="successUrl"
     :cancelUrl="cancelUrl"
@@ -64,13 +49,18 @@ Stripe's new [Checkout](https://stripe.com/docs/payments/checkout).
     <template slot="checkout-button">
       <button @click="checkout">Shutup and take my money!</button>
     </template>
-  </vue-stripe-checkout>
+  </stripe-checkout>
 </template>
 
 <script>
+import { StripeCheckout } from 'vue-stripe-checkout';
 export default {
+  componens: {
+    StripeCheckout
+  },
   data: () => ({
     loading: false,
+    publishableKey: process.env.PUBLISHABLE_KEY 
     items: [
       {
         sku: 'sku_FdQKocNoVzznpJ', 
@@ -97,13 +87,17 @@ Docs for additional Stripe Charge Object [options](https://stripe.com/docs/api/c
 
 ```html
 <template>
-  <vue-stripe-elements
-    ref="elementsRef"
-    @token="tokenCreated"
-    @loading="loading = $event"
-  >
-  </vue-stripe-elements>
-  <button @click="submit">Pay ${{amount / 100}}</button>
+  <div>
+    <stripe-elements
+      ref="elementsRef"
+      :pk="publishableKey"
+      :amount="amount"
+      @token="tokenCreated"
+      @loading="loading = $event"
+    >
+    </stripe-elements>
+    <button @click="submit">Pay ${{amount / 100}}</button>
+  </div>
 </template>
 
 <script>
@@ -111,6 +105,7 @@ export default {
   data: () => ({
     loading: false,
     amount: 1000,
+    publishableKey: process.env.PUBLISHABLE_KEY 
     token: null,
     charge: null
   }),
