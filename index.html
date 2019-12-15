@@ -18,7 +18,7 @@
   <div id="app">
     <v-app>
       <v-app-bar dark class="elevation-1" color="#6772e5" app flat>
-        <h2 id="app-bar-title">Vue Stripe Checkout</h2>
+          <v-btn href="/" text x-large>Vue Stripe Checkout</v-btn>
         <v-spacer></v-spacer>
         <v-btn large text href="https://github.com/jofftiquez/vue-stripe-checkout">Github</v-btn>
       </v-app-bar>
@@ -141,8 +141,8 @@
               quantity: 1
             }
           ],
-          successUrl: 'http://localhost:8080/',
-          cancelUrl: 'http://localhost:8080/',
+          successUrl: `${document.location.origin}/success.html`,
+          cancelUrl: `${document.location.origin}/cancel.html`,
         };
       },
       methods: {
