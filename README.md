@@ -3,6 +3,8 @@
 
 Welcome to the Vue Stripe Checkout 3! This version is still incomplete, but please let me know what's missing or what you're expecting from this version by [creating an issue](https://github.com/jofftiquez/vue-stripe-checkout/issues/new). Every feedback helps.
 
+![Screen Shot](https://i.imgur.com/JVAdRza.png)
+
 ### LEGACY
 
 Old version (version 2) is still available [here](https://github.com/jofftiquez/vue-stripe-checkout/tree/v2).
@@ -10,7 +12,7 @@ Old version (version 2) is still available [here](https://github.com/jofftiquez/
 ### Table of Contents
 
 - [Demo](#demo)
-- [Install Beta](#install-beta)
+- [Install](#install)
 - [Usage](#usage)
 - [Vue Stripe Checkout V3](#vue-stripe-checkout)
 - [Vue Stripe Elements (Custom charge)](#vue-stripe-elements)
