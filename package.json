@@ -48,5 +48,8 @@
   "bugs": {
     "url": "https://github.com/jofftiquez/vue-stripe-checkout/issues"
   },
-  "homepage": "https://github.com/jofftiquez/vue-stripe-checkout#readme"
+  "homepage": "https://github.com/jofftiquez/vue-stripe-checkout#readme",
+  "dependencies": {
+    "package-lock-only": "0.0.4"
+  }
 }
