@@ -22,7 +22,7 @@ export default {
     }
   ],
   plugins: [ 
-    // terser(),
+    terser(),
     vue(),
     resolve(),
     babel({
