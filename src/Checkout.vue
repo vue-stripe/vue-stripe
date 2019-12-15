@@ -1,6 +1,8 @@
 <template>
   <div>
-    <slot name="checkout-button" />
+    <slot name="checkout-button">
+      <button @click="redirectToCheckout">Checkout</button>
+    </slot>
   </div>
 </template>
 
@@ -9,9 +11,14 @@ import {
   SUPPORTED_LANGS,
   SUPPORTED_SUBMIT_TYPES,
   BILLING_ADDRESS_COLLECTION_TYPES
-} from './contants';
+} from './constants';
+import { loadStripeCheckout } from './load-checkout';
 export default {
   props: {
+    pk: {
+      type: String,
+      required: true
+    },
     items: {
       type: Array
     },
@@ -50,25 +57,28 @@ export default {
   },
   methods: {
     redirectToCheckout () {
-      try {
-        this.$emit('loading', true);
-        this.$stripe.redirectToCheckout({
-          billingAddressCollection: this.billingAddressCollection,
-          cancelUrl: this.cancelUrl,
-          clientReferenceId: this.clientReferenceId,
-          customerEmail: this.customerEmail,
-          items: this.items,
-          locale: this.locale,
-          sessionId: this.sessionId,
-          submitType: this.submitType,
-          successUrl: this.successUrl,
-        });
-      } catch (e) {
-        console.error(e);
-        this.$emit('error', e);
-      } finally {
-        this.$emit('loading', false);
-      }
+      this.$emit('loading', true);
+      loadStripeCheckout(this.pk, 'v3', () => {
+        try {
+          let stripe = window.Stripe(this.pk);
+          stripe.redirectToCheckout({
+            billingAddressCollection: this.billingAddressCollection,
+            cancelUrl: this.cancelUrl,
+            clientReferenceId: this.clientReferenceId,
+            customerEmail: this.customerEmail,
+            items: this.items,
+            locale: this.locale,
+            sessionId: this.sessionId,
+            submitType: this.submitType,
+            successUrl: this.successUrl,
+          });
+        } catch (e) {
+          console.error(e);
+          this.$emit('error', e);
+        } finally {
+          this.$emit('loading', false);
+        } 
+      });
     }
   }
 }
