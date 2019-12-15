@@ -13,41 +13,25 @@
 </template>
 
 <script>
+import { loadStripeCheckout } from './load-checkout';
 export default {
-  data () {
-    return {
-      loading: false
+  props: {
+    pk: {
+      type: String,
+      required: true
+    },
+    amount: {
+      type: Number,
+      required: true
     }
   },
-  mounted () {
-    this.card.mount('#card-element');
-    this.card.addEventListener('change', ({ error }) => {
-      const displayError = document.getElementById('card-errors');
-      if (error) {
-        displayError.textContent = error.message;
-      } else {
-        displayError.textContent = '';
-      }
-    });
-    
-    this.form.addEventListener('submit', async (event) => {
-      try {
-        this.$emit('loading', true);
-        event.preventDefault();
-        const { token, error } = await this.$stripe.createToken({...this.card, amount: 1000});
-        if (error) {
-          const errorElement = document.getElementById('card-errors');
-          errorElement.textContent = error.message;
-          this.$emit('error', error);
-        } else {
-          this.$emit('token', token);
-        }
-      } catch (e) {
-        this.$emit('error', error);
-      } finally {
-        this.$emit('loading', false);
-      }
-    });
+  data () {
+    return {
+      loading: false,
+      stripe: null,
+      elements: null,
+      card: null
+    }
   },
   computed: {
     style () {
@@ -67,12 +51,6 @@ export default {
         }
       };
     },
-    elements () {
-      return this.$stripe.elements();
-    },
-    card () {
-      return this.elements.create('card', { style: this.style });
-    },
     form () {
       return document.getElementById('payment-form');
     }
@@ -81,15 +59,49 @@ export default {
     submit () {
       this.$refs.submitButtonRef.click();
     }
+  },
+  mounted () {
+    loadStripeCheckout(this.pk, 'v3', () => {
+      this.stripe = window.Stripe(this.pk);
+      this.elements = this.stripe.elements();
+      this.card = this.elements.create('card', { style: this.style });
+      this.card.mount('#card-element');
+
+      this.card.addEventListener('change', ({ error }) => {
+        const displayError = document.getElementById('card-errors');
+        if (error) {
+          displayError.textContent = error.message;
+        } else {
+          displayError.textContent = '';
+        }
+      });
+      
+      this.form.addEventListener('submit', async (event) => {
+        try {
+          this.$emit('loading', true);
+          event.preventDefault();
+          const { token, error } = await this.stripe.createToken({ ...this.card, amount: this.amount })
+          if (error) {
+            const errorElement = document.getElementById('card-errors');
+            errorElement.textContent = error.message;
+            console.error(error);
+            this.$emit('error 1', error);
+          } else {
+            this.$emit('token', token);
+          }
+        } catch (error) {
+          console.error(error);
+          this.$emit('error 2', error);
+        } finally {
+          this.$emit('loading', false);
+        }
+      });
+    });
   }
 }
 </script>
 
 <style scoped>
-/**
- * The CSS shown here will not be introduced in the Quickstart guide, but shows
- * how you can use CSS to style your Element's container.
- */
 .StripeElement {
   box-sizing: border-box;
 
