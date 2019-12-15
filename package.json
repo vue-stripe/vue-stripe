@@ -2,20 +2,35 @@
   "name": "vue-stripe-checkout",
   "version": "3.0.0-beta.11",
   "description": "Vue plugin for Stripe checkout.",
-  "main": "dist",
+  "main": "dist/index.js",
   "module": "dist",
   "typings": "typings/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "rimraf dist && npx rollup --config"
+    "prebuild": "rimraf dist",
+    "build": "rollup -c"
   },
   "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/plugin-proposal-export-default-from": "^7.7.4",
+    "@babel/plugin-transform-runtime": "^7.7.5",
+    "@babel/preset-env": "^7.7.5",
+    "@babel/preset-es2015": "^7.0.0-beta.53",
+    "@babel/runtime": "^7.7.5",
+    "@rollup/plugin-node-resolve": "^6.0.0",
+    "babel-minify": "^0.5.1",
+    "cross-env": "^6.0.3",
     "jest": "^24.9.0",
     "rimraf": "^3.0.0",
+    "rollup": "^1.27.9",
+    "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-vue": "^5.0.1",
-    "vue": "^2.6.10",
-    "vue-template-compiler": "^2.6.10"
+    "rollup-plugin-postcss": "^2.0.3",
+    "rollup-plugin-terser": "^5.1.3",
+    "rollup-plugin-uglify": "^6.0.3",
+    "rollup-plugin-vue": "^5.1.4",
+    "vue-template-compiler": "^2.6.11"
   },
   "repository": {
     "type": "git",
