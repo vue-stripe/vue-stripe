@@ -8,12 +8,6 @@
   <title>Vue Stripe Checkout by Jofferson R Tiquez</title>
   <meta description="Vue Stripe Checkout by Jofferson R Tiquez">
 
-  <style>
-    #app {
-      /* background-color: #42b883; */
-    }
-  </style>
-
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
@@ -98,6 +92,25 @@
           </v-row>
         </v-container>
       </v-content>
+      <v-dialog v-model="dialog" width="700" scrollable>
+        <v-card>
+          <v-toolbar flat>
+            <v-spacer></v-spacer>
+            <v-btn @click="dialog = false" text>Close</v-btn>
+          </v-toolbar>
+          <v-divider></v-divider>
+          <v-card-text>
+            <br>
+            <h1>Token</h1>
+            <pre>{{token}}</pre>
+            <br>
+            <v-divider></v-divider>
+            <br>
+            <h1>Charge</h1>
+            <pre>{{charge}}</pre>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
       <v-footer app absolute dark color="#42b883">
         <v-col class="text-right pa-1">
           Made with ❤️ by <a class="white--text" target="_blank" href="https://twitter.com/jrtiquez">@jrtiquez</a>
@@ -117,6 +130,9 @@
       vuetify: new Vuetify(),
       data () {
         return {
+          token: null,
+          charge: null,
+          dialog: false,
           amount: 10000,
           loading: false,
           items: [
@@ -132,16 +148,17 @@
       methods: {
         tokenCreated (token) {
           console.warn(token);
-          const charge = {
+          this.token = token;
+          this.charge = {
             source: token.card,
             amount: this.amount,
             description: this.description
           }
-          this.sendTokenToServer(charge);
+          this.sendTokenToServer(this.charge);
         },
         sendTokenToServer (charge) {
           // Send to server
-          console.warn(charge);
+          this.dialog = true;
         }
       }
     });
