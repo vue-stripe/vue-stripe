@@ -39,7 +39,7 @@
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="#42b883" dark large href="/">Done</v-btn>
+                  <v-btn color="#42b883" dark large :href="home">Done</v-btn>
                 </v-card-actions>
               </v-card>
             </v-col>
@@ -59,7 +59,12 @@
   <script>
     new Vue({
       el: '#app',
-      vuetify: new Vuetify()
+      vuetify: new Vuetify(),
+      data () {
+        return {
+          home: location.href
+        }
+      }
     });
   </script>
 </body>
