@@ -59,7 +59,7 @@ Stripe's new [Checkout](https://stripe.com/docs/payments/checkout).
 <script>
 import { StripeCheckout } from 'vue-stripe-checkout';
 export default {
-  componens: {
+  components: {
     StripeCheckout
   },
   data: () => ({
