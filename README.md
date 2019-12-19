@@ -137,11 +137,14 @@ export default {
 
 ### FAQs
 
-- **How to create SKUs for one-time and recurring payments?**
+- **How to create SKUs**
+  - [Create SKU](https://stripe.com/docs/api/skus/create)
+
+- **How to create one-time and recurring payments?**
   - [One-time Payments](https://stripe.com/docs/payments/checkout/one-time).
   - [Recurring Payments](https://stripe.com/docs/payments/checkout/subscriptions).
 
-When the SKU items has been created, you can now use the [`vue-stripe-checkout`](#vue-stripe-checkout) component.
+When the SKU items has been created, you can now use the [`vue-stripe-checkout`](#vue-stripe-checkout) component to create a client-only one-time payment.
 
 
 **SPECIAL THANKS TO THE FOLLOWING SPONSOR(S):**
