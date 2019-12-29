@@ -109,7 +109,7 @@ export default {
   data: () => ({
     loading: false,
     amount: 1000,
-    publishableKey: process.env.PUBLISHABLE_KEY 
+    publishableKey: process.env.PUBLISHABLE_KEY, 
     token: null,
     charge: null
   }),
