@@ -64,7 +64,7 @@ export default {
   },
   data: () => ({
     loading: false,
-    publishableKey: process.env.PUBLISHABLE_KEY 
+    publishableKey: process.env.PUBLISHABLE_KEY,
     items: [
       {
         sku: 'sku_FdQKocNoVzznpJ', 
