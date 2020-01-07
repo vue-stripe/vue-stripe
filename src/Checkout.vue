@@ -68,7 +68,6 @@ export default {
               customerEmail: this.customerEmail,
               items: this.items,
               locale: this.locale,
-              sessionId: this.sessionId,
               submitType: this.submitType,
               successUrl: this.successUrl,
             });
