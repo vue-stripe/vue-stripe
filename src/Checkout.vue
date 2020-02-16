@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { 
+import {
   SUPPORTED_LANGS,
   SUPPORTED_SUBMIT_TYPES,
   BILLING_ADDRESS_COLLECTION_TYPES
@@ -60,23 +60,28 @@ export default {
       loadStripeCheckout(this.pk, 'v3', () => {
         try {
           let stripe = window.Stripe(this.pk);
-          stripe.redirectToCheckout({
-            billingAddressCollection: this.billingAddressCollection,
-            cancelUrl: this.cancelUrl,
-            clientReferenceId: this.clientReferenceId,
-            customerEmail: this.customerEmail,
-            items: this.items,
-            locale: this.locale,
-            sessionId: this.sessionId,
-            submitType: this.submitType,
-            successUrl: this.successUrl,
-          });
+          if (this.sessionId == null) {
+            stripe.redirectToCheckout({
+              billingAddressCollection: this.billingAddressCollection,
+              cancelUrl: this.cancelUrl,
+              clientReferenceId: this.clientReferenceId,
+              customerEmail: this.customerEmail,
+              items: this.items,
+              locale: this.locale,
+              submitType: this.submitType,
+              successUrl: this.successUrl,
+            });
+          } else {
+            stripe.redirectToCheckout({
+              sessionId: this.sessionId
+            });
+          }
         } catch (e) {
           console.error(e);
           this.$emit('error', e);
         } finally {
           this.$emit('loading', false);
-        } 
+        }
       });
     }
   }
