@@ -5,7 +5,7 @@
 
 Welcome to the Vue Stripe Checkout 3! This version is still incomplete, but please let me know what's missing or what you're expecting from this version by [creating an issue](https://github.com/jofftiquez/vue-stripe-checkout/issues/new). Every feedback helps.
 
-If you like this project, please give it a start, and consider following the author. :)
+If you like this project, please give it a star, and consider following the author. :)
 
 ![Screen Shot](https://i.imgur.com/JVAdRza.png)
 
