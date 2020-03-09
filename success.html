@@ -69,9 +69,13 @@
     new Vue({
       el: '#app',
       vuetify: new Vuetify(),
-      data () {
-        return {
-          home: location.origin
+      computed: {
+        home () {
+          if (location.hostname === 'localhost') {
+            return location.origin;
+          } else {
+            return `${location.origin}/vue-stripe-checkout`;
+          }
         }
       }
     });
