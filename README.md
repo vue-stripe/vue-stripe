@@ -15,7 +15,7 @@ Old version (version 2) is still available [here](https://github.com/jofftiquez/
 
 ### Table of Contents
 
-- [Demo](#demo)
+- [Demo (*Now with recurring payment subscription)](#demo)
 - [Install](#install)
 - [Usage](#usage)
 - [Vue Stripe Checkout V3](#vue-stripe-checkout)
