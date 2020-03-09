@@ -20,15 +20,50 @@
       <v-app-bar dark class="elevation-1" color="#6772e5" app flat>
           <v-btn :href="home" text x-large>Vue Stripe Checkout</v-btn>
         <v-spacer></v-spacer>
-        <v-btn large text href="https://github.com/jofftiquez/vue-stripe-checkout">Github</v-btn>
+        <v-btn large text href="https://github.com/jofftiquez/vue-stripe-checkout">Star on Github</v-btn>
       </v-app-bar>
       <v-content>
         <v-container>
           <v-row justify="center">
-            <v-col cols="12" sm="12" md="6">
+            <v-col cols="12" sm="12" md="7">
               <v-card height="100%">
                 <v-card-text>
-                  <h1>Checkout Demo</h1>
+                  <h1>Recurring Subscription Demo</h1>
+                </v-card-text>
+                <v-card-text>
+                  <p>
+                    Create a recurring product with a monthly plan in your Stripe dashboard.
+                  </p>
+                  <v-card flat color="#f1f1f1">
+                    <v-card-text>
+                      <pre>items: {{itemsRecurring}}</pre>
+                    </v-card-text>
+                  </v-card>
+                </v-card-text>
+                <v-card-text class="pt-0">
+                  <vue-stripe-checkout
+                    pk="pk_test_INH6o8QUdJyZM1TuGKs5PIsT"
+                    ref="subscribeRef"
+                    :items="itemsRecurring"
+                    :success-url="successUrl"
+                    :cancel-url="cancelUrl" 
+                  >
+                    <template slot="checkout-button">
+                      <v-btn 
+                        @click="$refs.subscribeRef.redirectToCheckout()"
+                        color="#42b883"
+                        large
+                        dark
+                      >Subscribe</v-btn>
+                    </template>
+                  </vue-stripe-checkout>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="12" md="7">
+              <v-card height="100%">
+                <v-card-text>
+                  <h1>One-time Payment Demo</h1>
                 </v-card-text>
                 <v-card-text>
                   <p>
@@ -60,7 +95,7 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="12" sm="12" md="6">
+            <v-col cols="12" sm="12" md="7">
               <v-card height="100%">
                 <v-card-text>
                   <h1>Elements Demo</h1>
@@ -139,6 +174,12 @@
             {
               sku: 'sku_FdQKocNoVzznpJ', 
               quantity: 1
+            }
+          ],
+          itemsRecurring: [
+            {
+              plan: 'plan_GsW5WXeHdTwLbF',
+              quantity: 2
             }
           ],
           successUrl: `${document.location.href}success.html`,
