@@ -34,7 +34,7 @@
       <v-content>
         <v-container>
           <v-row justify="center">
-            <v-col cols="12" sm="12" md="7">
+            <v-col cols="12" sm="10" md="6">
               <v-card height="100%">
                 <v-card-text>
                   <h1>Recurring Subscription Demo</h1>
@@ -55,7 +55,8 @@
                     ref="subscribeRef"
                     :items="itemsRecurring"
                     :success-url="successUrl"
-                    :cancel-url="cancelUrl" 
+                    :cancel-url="cancelUrl"
+                    :client-reference-id="'org-id-abc123'"
                   >
                     <template slot="checkout-button">
                       <v-btn 
@@ -69,7 +70,40 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="12" sm="12" md="7">
+            <v-col cols="12" sm="10" md="6">
+              <v-card height="100%">
+                <v-card-text>
+                  <h1>Subscription Demo using Session</h1>
+                </v-card-text>
+                <v-card-text>
+                  <p>
+                    Create a session in your backend and paste the session id below.
+                  </p>
+                  <v-card flat color="#f1f1f1">
+                    <v-card-text>
+                      <v-text-field v-model="sessionId" solo label="Session Id" hint="Session Id starts with cs_test_" persistent-hint />
+                    </v-card-text>
+                  </v-card>
+                </v-card-text>
+                <v-card-text class="pt-0">
+                  <vue-stripe-checkout
+                    pk="pk_test_INH6o8QUdJyZM1TuGKs5PIsT"
+                    ref="sessionRef"
+                    :session-id="sessionId"
+                  >
+                    <template slot="checkout-button">
+                      <v-btn 
+                        @click="$refs.sessionRef.redirectToCheckout()"
+                        color="#42b883"
+                        large
+                        dark
+                      >Subscribe</v-btn>
+                    </template>
+                  </vue-stripe-checkout>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="10" md="6">
               <v-card height="100%">
                 <v-card-text>
                   <h1>One-time Payment Demo</h1>
@@ -104,7 +138,7 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="12" sm="12" md="7">
+            <v-col cols="12" sm="10" md="6">
               <v-card height="100%">
                 <v-card-text>
                   <h1>Elements Demo</h1>
@@ -179,6 +213,7 @@
           dialog: false,
           amount: 10000,
           loading: false,
+          sessionId: '',
           items: [
             {
               sku: 'sku_FdQKocNoVzznpJ', 
@@ -188,7 +223,11 @@
           itemsRecurring: [
             {
               plan: 'plan_GsW5WXeHdTwLbF',
-              quantity: 2
+              quantity: 1
+            },
+            {
+              plan: 'plan_GsmXPUVY4OelPZ',
+              quantity: 1
             }
           ],
           successUrl: `${document.location.href}success.html`,
