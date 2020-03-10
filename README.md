@@ -3,7 +3,7 @@
 
 ![npm bundle size](https://img.shields.io/bundlephobia/min/vue-stripe-checkout?style=flat-square) ![npm](https://img.shields.io/npm/dw/vue-stripe-checkout?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jofftiquez/vue-stripe-checkout/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://paypal.me/jofftiquez)
 
-Welcome to the Vue Stripe Checkout 3! This version is still incomplete, but please let me know what's missing or what you're expecting from this version by [creating an issue](https://github.com/jofftiquez/vue-stripe-checkout/issues/new). Every feedback helps.
+Welcome to the Vue Stripe Checkout 3!
 
 This project is now available in [Open Collective](https://opencollective.com/vue-stripe-checkout#section-contribute). I would really appreciate if you guys would check it out. Also, if you like this project kindly give it a star, or consider following me on [GitHub](https://github.com/jofftiquez). Thanks! :heart:
 
