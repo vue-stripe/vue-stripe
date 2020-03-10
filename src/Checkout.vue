@@ -20,7 +20,8 @@ export default {
       required: true
     },
     items: {
-      type: Array
+      type: Array,
+      default: undefined
     },
     successUrl: {
       type: String,
@@ -41,12 +42,15 @@ export default {
     },
     clientReferenceId: {
       type: String,
+      default: undefined
     },
     customerEmail: {
-      type: String
+      type: String,
+      default: undefined
     },
     sessionId: {
-      type: String
+      type: String,
+      default: undefined
     },
     locale: {
       type: String,
@@ -60,7 +64,7 @@ export default {
       loadStripeCheckout(this.pk, 'v3', () => {
         try {
           let stripe = window.Stripe(this.pk);
-          if (this.sessionId == null) {
+          if (!this.sessionId) {
             stripe.redirectToCheckout({
               billingAddressCollection: this.billingAddressCollection,
               cancelUrl: this.cancelUrl,
