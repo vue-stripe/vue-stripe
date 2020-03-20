@@ -107,7 +107,11 @@ Docs for additional Stripe Charge Object [options](https://stripe.com/docs/api/c
 </template>
 
 <script>
+import { StripeElements } from 'vue-stripe-checkout';
 export default {
+  components: {
+    StripeElements
+  },
   data: () => ({
     loading: false,
     amount: 1000,
