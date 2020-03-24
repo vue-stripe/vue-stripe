@@ -52,6 +52,11 @@ export default {
       type: String,
       default: undefined
     },
+    shippingIn: {
+      type: Array,
+      default: [],
+      validator: (value) => !['AS', 'CX', 'CC', 'CU', 'HM', 'IR', 'KP', 'MH', 'FM', 'NF', 'MP', 'PW', 'SD', 'SY', 'UM', 'VI'].includes(value)
+    },
     locale: {
       type: String,
       default: 'auto',
@@ -71,6 +76,7 @@ export default {
               clientReferenceId: this.clientReferenceId,
               customerEmail: this.customerEmail,
               items: this.items,
+              shippingAddressCollection: {allowedCountries:this.shipping},
               locale: this.locale,
               submitType: this.submitType,
               successUrl: this.successUrl,
