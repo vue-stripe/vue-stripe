@@ -22,7 +22,7 @@ export default {
     },
     amount: {
       type: Number,
-      required: true
+      default: undefined
     }
   },
   data () {
@@ -80,7 +80,11 @@ export default {
         try {
           this.$emit('loading', true);
           event.preventDefault();
-          const { token, error } = await this.stripe.createToken({ ...this.card, amount: this.amount })
+          const data = {
+            ...this.card
+          };
+          if (this.amount) data.amount = this.amount;
+          const { token, error } = await this.stripe.createToken(data);
           if (error) {
             const errorElement = document.getElementById('card-errors');
             errorElement.textContent = error.message;
@@ -91,7 +95,7 @@ export default {
           }
         } catch (error) {
           console.error(error);
-          this.$emit('error 2', error);
+          this.$emit('error', error);
         } finally {
           this.$emit('loading', false);
         }
