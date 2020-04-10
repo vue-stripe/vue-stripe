@@ -15,17 +15,17 @@ export const SUPPORTED_LANGS = [
   'pl',
   'pt',
   'sv',
-  'zh'
+  'zh',
 ];
 
 export const SUPPORTED_SUBMIT_TYPES = [
   'auto', 
   'book', 
   'donate', 
-  'pay'
+  'pay',
 ];
 
 export const BILLING_ADDRESS_COLLECTION_TYPES = [
   'required', 
-  'auto'
+  'auto',
 ];

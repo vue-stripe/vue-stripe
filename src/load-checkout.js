@@ -6,4 +6,4 @@ export const loadStripeCheckout = (pk, version = 'v3', callback) => {
   e.type='text/javascript';
   document.getElementsByTagName('head')[0].appendChild(e);
   e.addEventListener('load', callback);
-}
+};
