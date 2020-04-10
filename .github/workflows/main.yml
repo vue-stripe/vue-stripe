@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-test-publish:
-    name: Build, Test, and Publish to NPM
+    name: Lint, Test, Build, and Publish to NPM
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,13 +22,18 @@ jobs:
         run: npm install yarn@latest -g
       - name: Install dependencies
         run: yarn
-      - name: Run build
-        run: yarn build
-      - name: Run test
-        run: yarn test
-      - name: Run CI
-        run: npm ci
-      - name: Run publish
-        run: npm publish --access=public
+      - name: Run lint, test, build
+        run: |
+          yarn lint
+          yarn test
+          yarn build
+      - name: Ensure package-lock.json
+        run: |
+          rm -rf node_modules
+          npm install
+      - name: Publish
+        run: |
+          npm ci
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
