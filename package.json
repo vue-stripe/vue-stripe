@@ -7,6 +7,7 @@
   "typings": "typings/index.d.ts",
   "scripts": {
     "test": "jest",
+    "lint": "npx eslint src --fix -c .eslintrc",
     "prebuild": "rimraf dist",
     "build": "rollup -c"
   },
@@ -19,8 +20,10 @@
     "@babel/preset-es2015": "^7.0.0-beta.53",
     "@babel/runtime": "^7.7.5",
     "@rollup/plugin-node-resolve": "^6.0.0",
+    "babel-eslint": "^10.1.0",
     "babel-minify": "^0.5.1",
     "cross-env": "^6.0.3",
+    "eslint": "^6.8.0",
     "jest": "^24.9.0",
     "rimraf": "^3.0.0",
     "rollup": "^1.27.9",
