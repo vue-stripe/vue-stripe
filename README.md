@@ -153,13 +153,6 @@ export default {
 When the SKU items has been created, you can now use the [`vue-stripe-checkout`](#vue-stripe-checkout) component to create a client-only one-time payment.
 
 
-**SPECIAL THANKS TO THE FOLLOWING SPONSOR(S):**
-
-[<img src="https://i.imgur.com/Ttv4fMw.png" width="200px">](https://mightyminds.org)
-[<img src="https://i.imgur.com/x0SERyj.png" width="200px">](https://mycure.md)
-[<img src="https://i.imgur.com/4jF5M4A.png">](http://myteamops.com)
-
-Made with :heart: by Jofferson Ramirez Tiquez
 
 ## Contributors
 
@@ -190,3 +183,12 @@ Support this project with your organization. Your logo will show up here with a 
 <a href="https://opencollective.com/vue-stripe-checkout/organization/7/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/7/avatar.svg"></a>
 <a href="https://opencollective.com/vue-stripe-checkout/organization/8/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/8/avatar.svg"></a>
 <a href="https://opencollective.com/vue-stripe-checkout/organization/9/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/9/avatar.svg"></a>
+
+
+**SPECIAL THANKS TO THE FOLLOWING SPONSOR(S):**
+
+[<img src="https://i.imgur.com/Ttv4fMw.png" width="200px">](https://mightyminds.org)
+[<img src="https://i.imgur.com/x0SERyj.png" width="200px">](https://mycure.md)
+[<img src="https://i.imgur.com/4jF5M4A.png">](http://myteamops.com)
+
+Made with :heart: by Jofferson Ramirez Tiquez
