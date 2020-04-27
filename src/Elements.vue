@@ -7,7 +7,7 @@
       <slot name="card-errors">
         <div id="card-errors" role="alert"></div>
       </slot>
-      <button ref="submitButtonRef" type="submit"></button>
+      <button ref="submitButtonRef" type="submit" class="hide"></button>
     </form>
   </div>
 </template>
@@ -149,5 +149,9 @@ export default {
 
 .StripeElement--webkit-autofill {
   background-color: #fefde5 !important;
+}
+
+.hide {
+  visibility: hidden;
 }
 </style>
