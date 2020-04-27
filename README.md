@@ -87,6 +87,14 @@ export default {
 
 ### Vue Stripe Elements
 
+Elements [options](https://stripe.com/docs/js/initializing#init_stripe_js-options).
+
+| Prop | Description |
+| ---- | ----------- |
+| `stripeAccount` | For usage with [Connect](https://stripe.com/docs/connect) only. Specifying a connected account ID (e.g., `acct_24BFMpJ1svR5A89k`) allows you to perform actions on behalf of that account. |
+| `apiVersion` | Override your account's [API version](https://stripe.com/docs/api/versioning). |
+| `locale` | A [locale](https://stripe.com/docs/js/appendix/supported_locales) used to globally configure localization in Stripe. Setting the locale here will localize error strings for all Stripe.js methods. It will also configure the locale for Elements and Checkout. Default is `auto` (Stripe detects the locale of the browser). |
+
 Create custom Stripe form using [Stripe Elements](https://stripe.com/docs/stripe-js).
 
 Docs for additional Stripe Charge Object [options](https://stripe.com/docs/api/charges/object) like `amount`, `description`, `currenct`, etc.
@@ -98,6 +106,7 @@ Docs for additional Stripe Charge Object [options](https://stripe.com/docs/api/c
       ref="elementsRef"
       :pk="publishableKey"
       :amount="amount"
+      locale="de"
       @token="tokenCreated"
       @loading="loading = $event"
     >
