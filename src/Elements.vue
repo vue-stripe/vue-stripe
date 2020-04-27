@@ -23,7 +23,19 @@ export default {
     amount: {
       type: Number,
       default: undefined
-    }
+    },
+    stripeAccount: {
+      type: String,
+      default: undefined,
+    },
+    apiVersion: {
+      type: String,
+      default: undefined,
+    },
+    locale: {
+      type: String,
+      default: 'auto',
+    },
   },
   data () {
     return {
@@ -62,7 +74,12 @@ export default {
   },
   mounted () {
     loadStripeCheckout(this.pk, 'v3', () => {
-      this.stripe = window.Stripe(this.pk);
+      const options = {
+        stripeAccount: this.stripeAccount,
+        apiVersion: this.apiVersion,
+        locale: this.locale,
+      };
+      this.stripe = window.Stripe(this.pk, options);
       this.elements = this.stripe.elements();
       this.card = this.elements.create('card', { style: this.style });
       this.card.mount('#card-element');
