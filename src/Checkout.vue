@@ -21,7 +21,11 @@ export default {
     },
     mode:{
       type: String,
-      required: undefined
+      required: false
+    },
+    items: {
+      type: Array,
+      default: undefined
     },
     lineItems: {
       type: Array,
@@ -74,6 +78,7 @@ export default {
               cancelUrl: this.cancelUrl,
               clientReferenceId: this.clientReferenceId,
               customerEmail: this.customerEmail,
+              items: this.items,
               lineItems: this.lineItems,
               locale: this.locale,
               mode: this.mode,
