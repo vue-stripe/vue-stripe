@@ -21,13 +21,13 @@ export default {
     },
     mode:{
       type: String,
-      required: false
-    },
-    items: {
-      type: Array,
       default: undefined
     },
     lineItems: {
+      type: Array,
+      default: undefined
+    },
+    items: {
       type: Array,
       default: undefined
     },
@@ -73,18 +73,48 @@ export default {
         try {
           let stripe = window.Stripe(this.pk);
           if (!this.sessionId) {
-            stripe.redirectToCheckout({
-              billingAddressCollection: this.billingAddressCollection,
-              cancelUrl: this.cancelUrl,
-              clientReferenceId: this.clientReferenceId,
-              customerEmail: this.customerEmail,
-              items: this.items,
-              lineItems: this.lineItems,
-              locale: this.locale,
-              mode: this.mode,
-              submitType: this.submitType,
-              successUrl: this.successUrl,
-            });
+            if(this.mode){
+              // new price request
+              // sample
+              // mode: 'payment'
+              // lineItems: [
+              //   {
+              //     price: 'price_xxxx',
+              //     quantity: 1
+              //   }
+              // ]
+              stripe.redirectToCheckout({
+                billingAddressCollection: this.billingAddressCollection,
+                cancelUrl: this.cancelUrl,
+                clientReferenceId: this.clientReferenceId,
+                customerEmail: this.customerEmail,
+                lineItems: this.lineItems,
+                locale: this.locale,
+                mode: this.mode,
+                submitType: this.submitType,
+                successUrl: this.successUrl,
+              });
+            } else {
+              // old sku request
+              // sample
+              // items: [
+              //   {
+              //     type: 'sku',
+              //     parent: 'sku_xxxx',
+              //     quantity: 2
+              //   }
+              // ]
+              stripe.redirectToCheckout({
+                billingAddressCollection: this.billingAddressCollection,
+                cancelUrl: this.cancelUrl,
+                clientReferenceId: this.clientReferenceId,
+                customerEmail: this.customerEmail,
+                items: this.items,
+                locale: this.locale,
+                submitType: this.submitType,
+                successUrl: this.successUrl,
+              });
+            }
           } else {
             stripe.redirectToCheckout({
               sessionId: this.sessionId
