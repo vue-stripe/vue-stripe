@@ -17,6 +17,7 @@ Welcome to the Vue Stripe Checkout 3!
 This project is now available in [Open Collective](https://opencollective.com/vue-stripe-checkout#section-contribute). I would really appreciate if you guys would check it out. Also, if you like this project kindly give it a star, or consider following me on [GitHub](https://github.com/jofftiquez). Thanks! :heart:
 
 ![Screen Shot](https://i.imgur.com/JVAdRza.png)
+*This screenshot is an example of Stripe Checkout*
 
 ### LEGACY
 
@@ -26,9 +27,9 @@ Old version (version 2) is still available [here](https://github.com/jofftiquez/
 
 - [Demo (*Now with recurring payment subscription)](#demo)
 - [Install](#install)
-- [Usage](#usage)
 - [Vue Stripe Checkout V3](#vue-stripe-checkout)
 - [Vue Stripe Elements (Custom charge)](#vue-stripe-elements)
+- [Stripe Sessions](#stripe-sessions)
 - [FAQs](#faqs)
 
 
@@ -52,6 +53,8 @@ Stripe's new [Checkout](https://stripe.com/docs/payments/checkout).
 
 **Props**
 
+See [Checkout documentation](https://stripe.com/docs/js/checkout/redirect_to_checkout).
+
 ```html
 <template>
   <stripe-checkout
@@ -62,7 +65,7 @@ Stripe's new [Checkout](https://stripe.com/docs/payments/checkout).
     :cancelUrl="cancelUrl"
   >
     <template slot="checkout-button">
-      <button @click="checkout">Shutup and take my money!</button>
+      <button @click="checkout">Shut up and take my money!</button>
     </template>
   </stripe-checkout>
 </template>
@@ -98,11 +101,16 @@ export default {
 
 Elements [options](https://stripe.com/docs/js/initializing#init_stripe_js-options).
 
-| Prop | Description |
+| Props | Description |
 | ---- | ----------- |
 | `stripeAccount` | For usage with [Connect](https://stripe.com/docs/connect) only. Specifying a connected account ID (e.g., `acct_24BFMpJ1svR5A89k`) allows you to perform actions on behalf of that account. |
 | `apiVersion` | Override your account's [API version](https://stripe.com/docs/api/versioning). |
 | `locale` | A [locale](https://stripe.com/docs/js/appendix/supported_locales) used to globally configure localization in Stripe. Setting the locale here will localize error strings for all Stripe.js methods. It will also configure the locale for Elements and Checkout. Default is `auto` (Stripe detects the locale of the browser). |
+
+| Slots | Description |
+| ----- | ----------- |
+| `card-element` | Slot for mounting custom elements. [See](https://stripe.com/docs/js/element/mount) |
+| `card-errors` | Slot for mounting custom errors |
 
 Create custom Stripe form using [Stripe Elements](https://stripe.com/docs/stripe-js).
 
@@ -161,6 +169,36 @@ export default {
 </script>
 ```
 
+### Stripe Sessions
+
+This section is only more of a description of how the session flow should go.
+
+The flow: Client -> Backend -> Client for checkout use.
+
+1. On the client side, prepare all the items, or subscription that the user wants to pay.
+2. Send these information to your backend to create a stripe `session`. [See doc](https://stripe.com/docs/api/checkout/sessions/create).
+3. Return the `session id` you just created to the client.
+4. Use that `session id` from your backend and pass it to `vue-stripe-checkout`, like so:
+
+```html
+<vue-stripe-checkout
+  ref="sessionRef"
+  :pk="publishableKey"
+  :session-id="sessionId"
+>
+  <template slot="checkout-button">
+    <v-btn 
+      @click="$refs.sessionRef.redirectToCheckout()"
+      color="#42b883"
+      large
+      dark
+    >Subscribe</v-btn>
+  </template>
+</vue-stripe-checkout>
+```
+
+You'll notice that when using sessions, you'll only need the `session-id`. This is because the session is the representation of all of the information about the payment to done. 
+
 ### FAQs
 
 - **How to create SKUs**
@@ -171,8 +209,6 @@ export default {
   - [Recurring Payments](https://stripe.com/docs/payments/checkout/subscriptions).
 
 When the SKU items has been created, you can now use the [`vue-stripe-checkout`](#vue-stripe-checkout) component to create a client-only one-time payment.
-
-
 
 ## Contributors
 
