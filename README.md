@@ -106,6 +106,7 @@ Elements [options](https://stripe.com/docs/js/initializing#init_stripe_js-option
 | `stripeAccount` | For usage with [Connect](https://stripe.com/docs/connect) only. Specifying a connected account ID (e.g., `acct_24BFMpJ1svR5A89k`) allows you to perform actions on behalf of that account. |
 | `apiVersion` | Override your account's [API version](https://stripe.com/docs/api/versioning). |
 | `locale` | A [locale](https://stripe.com/docs/js/appendix/supported_locales) used to globally configure localization in Stripe. Setting the locale here will localize error strings for all Stripe.js methods. It will also configure the locale for Elements and Checkout. Default is `auto` (Stripe detects the locale of the browser). |
+| `styleObject` | The custom [style object](https://stripe.com/docs/js/appendix/style) |
 
 | Slots | Description |
 | ----- | ----------- |
