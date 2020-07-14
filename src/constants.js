@@ -29,3 +29,22 @@ export const BILLING_ADDRESS_COLLECTION_TYPES = [
   'required', 
   'auto',
 ];
+
+export const SHIPPING_ADDRESS_COLLECTION_UNSUPPORTED_COUNTRIES = [
+  'AS',
+  'CX',
+  'CC',
+  'CU',
+  'HM',
+  'IR',
+  'KP',
+  'MH',
+  'FM',
+  'NF',
+  'MP',
+  'PW',
+  'SD',
+  'SY',
+  'UM',
+  'VI',
+];
