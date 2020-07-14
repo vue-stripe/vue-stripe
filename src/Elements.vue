@@ -36,6 +36,10 @@ export default {
       type: String,
       default: 'auto',
     },
+    styleObject: {
+      type: Object,
+      default: null,
+    }
   },
   data () {
     return {
@@ -81,7 +85,7 @@ export default {
       };
       this.stripe = window.Stripe(this.pk, options);
       this.elements = this.stripe.elements();
-      this.card = this.elements.create('card', { style: this.style });
+      this.card = this.elements.create('card', { style: this.styleObject || this.style });
       this.card.mount('#card-element');
 
       this.card.addEventListener('change', ({ error }) => {
