@@ -18,19 +18,19 @@ export default {
   props: {
     pk: {
       type: String,
-      required: true
+      required: true,
     },
     amount: {
       type: Number,
-      default: undefined
+      default: null
     },
     stripeAccount: {
       type: String,
-      default: undefined,
+      default: null,
     },
     apiVersion: {
       type: String,
-      default: undefined,
+      default: null,
     },
     locale: {
       type: String,
@@ -42,8 +42,8 @@ export default {
       loading: false,
       stripe: null,
       elements: null,
-      card: null
-    }
+      card: null,
+    };
   },
   computed: {
     style () {
@@ -65,12 +65,12 @@ export default {
     },
     form () {
       return document.getElementById('payment-form');
-    }
+    },
   },
   methods: {
     submit () {
       this.$refs.submitButtonRef.click();
-    }
+    },
   },
   mounted () {
     loadStripeCheckout(this.pk, 'v3', () => {
@@ -88,9 +88,9 @@ export default {
         const displayError = document.getElementById('card-errors');
         if (error) {
           displayError.textContent = error.message;
-        } else {
-          displayError.textContent = '';
+          return;
         }
+        displayError.textContent = '';
       });
       
       this.form.addEventListener('submit', async (event) => {
@@ -107,9 +107,9 @@ export default {
             errorElement.textContent = error.message;
             console.error(error);
             this.$emit('error 1', error);
-          } else {
-            this.$emit('token', token);
+            return;
           }
+          this.$emit('token', token);
         } catch (error) {
           console.error(error);
           this.$emit('error', error);
