@@ -85,7 +85,7 @@ export default {
             return;
           }
 
-          if (this.lineItems.length && !this.mode) {
+          if (this.lineItems?.length && !this.mode) {
             console.error(`Error: Property 'mode' is required when using 'lineItems'. See https://stripe.com/docs/js/checkout/redirect_to_checkout#stripe_checkout_redirect_to_checkout-options-mode`);
             return;
           }
