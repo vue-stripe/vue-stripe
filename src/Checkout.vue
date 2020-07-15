@@ -21,16 +21,13 @@ export default {
     },
     mode: {
       type: String,
-      default: null,
       validator: value => ['payment', 'subscription'].includes(value),
     },
     lineItems: {
       type: Array,
-      default: null,
     },
     items: {
       type: Array,
-      default: null,
     },
     successUrl: {
       type: String,
@@ -51,15 +48,12 @@ export default {
     },
     clientReferenceId: {
       type: String,
-      default: null,
     },
     customerEmail: {
       type: String,
-      default: null,
     },
     sessionId: {
       type: String,
-      default: null,
     },
     locale: {
       type: String,
