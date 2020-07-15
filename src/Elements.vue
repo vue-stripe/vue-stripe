@@ -22,15 +22,12 @@ export default {
     },
     amount: {
       type: Number,
-      default: null
     },
     stripeAccount: {
       type: String,
-      default: null,
     },
     apiVersion: {
       type: String,
-      default: null,
     },
     locale: {
       type: String,
@@ -38,7 +35,6 @@ export default {
     },
     styleObject: {
       type: Object,
-      default: null,
     }
   },
   data () {
