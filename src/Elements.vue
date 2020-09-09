@@ -13,28 +13,29 @@
 </template>
 
 <script>
-import { loadStripeCheckout } from './load-checkout';
+import { loadStripeCheckout } from './load-checkout'
+
 export default {
   props: {
     pk: {
       type: String,
-      required: true,
+      required: true
     },
     amount: {
-      type: Number,
+      type: Number
     },
     stripeAccount: {
-      type: String,
+      type: String
     },
     apiVersion: {
-      type: String,
+      type: String
     },
     locale: {
       type: String,
-      default: 'auto',
+      default: 'auto'
     },
     styleObject: {
-      type: Object,
+      type: Object
     }
   },
   data () {
@@ -43,7 +44,8 @@ export default {
       stripe: null,
       elements: null,
       card: null,
-    };
+      clientSecret: null
+    }
   },
   computed: {
     style () {
@@ -55,70 +57,77 @@ export default {
           fontSize: '16px',
           '::placeholder': {
             color: '#aab7c4'
-          }
+          },
         },
         invalid: {
           color: '#fa755a',
           iconColor: '#fa755a'
-        }
-      };
+        },
+      }
     },
     form () {
-      return document.getElementById('payment-form');
+      return document.getElementById('payment-form')
     },
   },
   methods: {
     submit () {
-      this.$refs.submitButtonRef.click();
-    },
+      this.$refs.submitButtonRef.click()
+    }
   },
   mounted () {
     loadStripeCheckout(this.pk, 'v3', () => {
       const options = {
         stripeAccount: this.stripeAccount,
         apiVersion: this.apiVersion,
-        locale: this.locale,
-      };
-      this.stripe = window.Stripe(this.pk, options);
-      this.elements = this.stripe.elements();
-      this.card = this.elements.create('card', { style: this.styleObject || this.style });
-      this.card.mount('#card-element');
+        locale: this.locale
+      }
+      this.stripe = window.Stripe(this.pk, options)
+      this.elements = this.stripe.elements()
+      this.card = this.elements.create('card', {
+        style: this.styleObject || this.style
+      })
+      this.card.mount('#card-element')
 
       this.card.addEventListener('change', ({ error }) => {
-        const displayError = document.getElementById('card-errors');
+        const displayError = document.getElementById('card-errors')
         if (error) {
-          displayError.textContent = error.message;
-          return;
+          displayError.textContent = error.message
+          return
         }
-        displayError.textContent = '';
-      });
-      
+        displayError.textContent = ''
+      })
+
       this.form.addEventListener('submit', async (event) => {
         try {
-          this.$emit('loading', true);
-          event.preventDefault();
+          this.$emit('loading', true)
+          event.preventDefault()
           const data = {
             ...this.card
-          };
-          if (this.amount) data.amount = this.amount;
-          const { token, error } = await this.stripe.createToken(data);
-          if (error) {
-            const errorElement = document.getElementById('card-errors');
-            errorElement.textContent = error.message;
-            console.error(error);
-            this.$emit('error 1', error);
-            return;
           }
-          this.$emit('token', token);
+          if (this.amount) data.amount = this.amount
+          const { paymentIntent, error } = await this.stripe.confirmCardPayment(
+            this.clientSecret,
+            {
+              payment_method: { card: this.card }
+            }
+          )
+          if (error) {
+            const errorElement = document.getElementById('card-errors')
+            errorElement.textContent = error.message
+            console.error(error)
+            this.$emit('error 1', error)
+            return
+          }
+          this.$emit('paymentIntent', paymentIntent)
         } catch (error) {
-          console.error(error);
-          this.$emit('error', error);
+          console.error(error)
+          this.$emit('error', error)
         } finally {
-          this.$emit('loading', false);
+          this.$emit('loading', false)
         }
-      });
-    });
-  }
+      })
+    })
+  },
 }
 </script>
 
