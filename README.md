@@ -31,7 +31,7 @@ Old version (version 2) is still available [here](https://github.com/jofftiquez/
 - [Vue Stripe Elements (Custom charge)](#vue-stripe-elements)
 - [Stripe Sessions](#stripe-sessions)
 - [FAQs](#faqs)
-
+- [Demos & Examples Using Vue Stripe Checkout](#demos-&-examples)
 
 ### Demo
 
@@ -208,6 +208,10 @@ You'll notice that when using sessions, you'll only need the `session-id`. This 
 - **How to create one-time and recurring payments?**
   - [One-time Payments](https://stripe.com/docs/payments/checkout/one-time).
   - [Recurring Payments](https://stripe.com/docs/payments/checkout/subscriptions).
+
+### Demos & Examples
+
+- [AWS Quickstart for creating a SaaS with Stripe](https://saas-app.t3chflicks.org/) - [T3ck Flicks](https://github.com/sk-t3ch)
 
 When the SKU items has been created, you can now use the [`vue-stripe-checkout`](#vue-stripe-checkout) component to create a client-only one-time payment.
 
