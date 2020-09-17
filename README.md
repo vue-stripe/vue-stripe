@@ -179,10 +179,10 @@ The flow: Client -> Backend -> Client for checkout use.
 1. On the client side, prepare all the items, or subscription that the user wants to pay.
 2. Send these information to your backend to create a stripe `session`. [See doc](https://stripe.com/docs/api/checkout/sessions/create).
 3. Return the `session id` you just created to the client.
-4. Use that `session id` from your backend and pass it to `vue-stripe-checkout`, like so:
+4. Use that `session id` from your backend and pass it to `stripe-checkout`, like so:
 
 ```html
-<vue-stripe-checkout
+<stripe-checkout
   ref="sessionRef"
   :pk="publishableKey"
   :session-id="sessionId"
@@ -195,7 +195,7 @@ The flow: Client -> Backend -> Client for checkout use.
       dark
     >Subscribe</v-btn>
   </template>
-</vue-stripe-checkout>
+</stripe-checkout>
 ```
 
 You'll notice that when using sessions, you'll only need the `session-id`. This is because the session is the representation of all of the information about the payment to done. 
