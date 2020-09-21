@@ -12,10 +12,10 @@
 
 [Read here](https://randomcodetips.com/vue-stripe-checkout-whats-next/)
 
-<center>
+<p align="center">
   <img src="./vue-stripe-checkout-logo-variant-1.png" alt="drawing" width="250"/>
-  <h1>Vue Stripe Checkout 💳</h1>
-</center>
+  <h1 align="center">Vue Stripe Checkout 💳</h1>
+</p>
 
 [![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/vue-stripe-checkout?style=flat-square) ![npm](https://img.shields.io/npm/dw/vue-stripe-checkout?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jofftiquez/vue-stripe-checkout/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://paypal.me/jofftiquez)
 
