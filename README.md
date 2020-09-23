@@ -32,6 +32,7 @@ Old version (version 2) is still available [here](https://github.com/jofftiquez/
 
 ### Table of Contents
 
+- [Nuxt Demo](#nuxt-demo)
 - [Demo (*Now with recurring payment subscription)](#demo)
 - [Install](#install)
 - [Vue Stripe Checkout V3](#vue-stripe-checkout)
@@ -39,6 +40,12 @@ Old version (version 2) is still available [here](https://github.com/jofftiquez/
 - [Stripe Sessions](#stripe-sessions)
 - [FAQs](#faqs)
 - [Demos & Examples Using Vue Stripe Checkout](#demos-&-examples)
+
+### Nuxt Demo
+
+- Code - https://github.com/jofftiquez/vue-stripe-checkout-nuxt-demo
+- SPA Demo on Firebase Hosting - https://vue-stripe-checkout-nuxt-demo.web.app
+- SSR Demo on Heroku - https://vue-stripe-checkout-nuxt-demo.herokuapp.com
 
 ### Demo
 
