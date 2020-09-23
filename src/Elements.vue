@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { loadStripeCheckout } from './load-checkout';
+import { loadStripeSdk } from './load-checkout';
 export default {
   props: {
     pk: {
@@ -73,7 +73,7 @@ export default {
     },
   },
   mounted () {
-    loadStripeCheckout(this.pk, 'v3', () => {
+    loadStripeSdk(this.pk, 'v3', () => {
       const options = {
         stripeAccount: this.stripeAccount,
         apiVersion: this.apiVersion,

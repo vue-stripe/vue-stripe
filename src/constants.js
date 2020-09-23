@@ -1,4 +1,4 @@
-export const STRIPE_CHECKOUT_URL = 'https://js.stripe.com';
+export const STRIPE_JS_SDK_URL = 'https://js.stripe.com';
 
 export const SUPPORTED_LANGS = [
   'auto',

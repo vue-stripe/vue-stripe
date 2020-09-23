@@ -12,7 +12,7 @@ import {
   SUPPORTED_SUBMIT_TYPES,
   BILLING_ADDRESS_COLLECTION_TYPES
 } from './constants';
-import { loadStripeCheckout } from './load-checkout';
+import { loadStripeSdk } from './load-checkout';
 export default {
   props: {
     pk: {
@@ -68,7 +68,7 @@ export default {
   methods: {
     redirectToCheckout () {
       this.$emit('loading', true);
-      loadStripeCheckout(this.pk, 'v3', () => {
+      loadStripeSdk(this.pk, 'v3', () => {
         try {
           let stripe = window.Stripe(this.pk);
 
