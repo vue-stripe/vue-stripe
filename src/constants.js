@@ -1,5 +1,17 @@
 export const STRIPE_JS_SDK_URL = 'https://js.stripe.com';
 
+export const SUPPORTED_ELEMENT_TYPE = [
+  'card',
+  'cardNumber',
+  'cardExpiry',
+  'cardCvc',
+  'fpxBank',
+  'iban',
+  'idealBank',
+  'paymentRequestButton',
+  'auBankAccount',
+];
+
 export const SUPPORTED_LANGS = [
   'auto',
   'da',

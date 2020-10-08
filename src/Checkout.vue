@@ -12,7 +12,7 @@ import {
   SUPPORTED_SUBMIT_TYPES,
   BILLING_ADDRESS_COLLECTION_TYPES
 } from './constants';
-import { loadStripeSdk } from './load-checkout';
+import { loadStripeSdk } from './load-stripe-sdk';
 export default {
   props: {
     pk: {

@@ -13,7 +13,8 @@
 </template>
 
 <script>
-import { loadStripeSdk } from './load-checkout';
+import { loadStripeSdk } from './load-stripe-sdk';
+import { SUPPORTED_ELEMENT_TYPE } from './constants';
 export default {
   props: {
     pk: {
@@ -33,9 +34,29 @@ export default {
       type: String,
       default: 'auto',
     },
-    styleObject: {
+    elementType: {
+      type: String,
+      default: 'card',
+      validator: value => SUPPORTED_ELEMENT_TYPE.includes(value),
+    },
+    elementStyle: {
       type: Object,
-    }
+      default: () => ({
+        base: {
+          color: '#32325d',
+          fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+          fontSmoothing: 'antialiased',
+          fontSize: '16px',
+          '::placeholder': {
+            color: '#aab7c4',
+          }
+        },
+        invalid: {
+          color: '#fa755a',
+          iconColor: '#fa755a',
+        },
+      }),
+    },
   },
   data () {
     return {
@@ -46,23 +67,6 @@ export default {
     };
   },
   computed: {
-    style () {
-      return {
-        base: {
-          color: '#32325d',
-          fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-          fontSmoothing: 'antialiased',
-          fontSize: '16px',
-          '::placeholder': {
-            color: '#aab7c4'
-          }
-        },
-        invalid: {
-          color: '#fa755a',
-          iconColor: '#fa755a'
-        }
-      };
-    },
     form () {
       return document.getElementById('payment-form');
     },
@@ -73,18 +77,17 @@ export default {
     },
   },
   mounted () {
-    loadStripeSdk(this.pk, 'v3', () => {
+    loadStripeSdk('v3', () => {
       const options = {
         stripeAccount: this.stripeAccount,
         apiVersion: this.apiVersion,
         locale: this.locale,
       };
       this.stripe = window.Stripe(this.pk, options);
-      this.elements = this.stripe.elements();
-      this.card = this.elements.create('card', { style: this.styleObject || this.style });
-      this.card.mount('#card-element');
+      this.element = this.stripe.elements().create(this.elementType, { style: this.elementStyle });
+      this.element.mount('#card-element');
 
-      this.card.addEventListener('change', ({ error }) => {
+      this.element.addEventListener('change', ({ error }) => {
         const displayError = document.getElementById('card-errors');
         if (error) {
           displayError.textContent = error.message;
@@ -98,7 +101,7 @@ export default {
           this.$emit('loading', true);
           event.preventDefault();
           const data = {
-            ...this.card
+            ...this.element
           };
           if (this.amount) data.amount = this.amount;
           const { token, error } = await this.stripe.createToken(data);
