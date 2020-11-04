@@ -6,6 +6,7 @@ export const SUPPORTED_LANGS = [
   'de',
   'en',
   'es',
+  'es-419',
   'fi',
   'fr',
   'it',
@@ -19,14 +20,14 @@ export const SUPPORTED_LANGS = [
 ];
 
 export const SUPPORTED_SUBMIT_TYPES = [
-  'auto', 
-  'book', 
-  'donate', 
+  'auto',
+  'book',
+  'donate',
   'pay',
 ];
 
 export const BILLING_ADDRESS_COLLECTION_TYPES = [
-  'required', 
+  'required',
   'auto',
 ];
 
