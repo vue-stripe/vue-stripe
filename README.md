@@ -29,6 +29,7 @@ Old version (version 2) is still available [here](https://github.com/jofftiquez/
 - [Vue Stripe Elements (Custom charge)](#vue-stripe-elements)
 - [Stripe Sessions](#stripe-sessions)
 - [FAQs](#faqs)
+- [Change Log](#change-log)
 - [Demos & Examples Using Vue Stripe Checkout](#demos-&-examples)
 
 ### Nuxt Demo
@@ -212,6 +213,12 @@ You'll notice that when using sessions, you'll only need the `session-id`. This 
 - **How to create one-time and recurring payments?**
   - [One-time Payments](https://stripe.com/docs/payments/checkout/one-time).
   - [Recurring Payments](https://stripe.com/docs/payments/checkout/subscriptions).
+
+### Change Log
+
+`3.5.12`
+
+- Add support for Latin America Spanish locale
 
 ### Demos & Examples
 
