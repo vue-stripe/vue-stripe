@@ -78,7 +78,7 @@ export default {
       };
       const elementOptions = {
         classes: this.classes,
-        elementStyle: this.elementStyle,
+        style: this.elementStyle,
         value: this.value,
         hidePostalCode: this.hidePostalCode,
         iconStyle: this.iconStyle,
