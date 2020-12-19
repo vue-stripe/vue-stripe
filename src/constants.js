@@ -8,6 +8,8 @@ export const SUPPORTED_ELEMENT_TYPE = [
   'fpxBank',
   'iban',
   'idealBank',
+  'p24Bank',
+  'epsBank',
   'paymentRequestButton',
   'auBankAccount',
 ];
@@ -60,3 +62,19 @@ export const SHIPPING_ADDRESS_COLLECTION_UNSUPPORTED_COUNTRIES = [
   'UM',
   'VI',
 ];
+
+export const DEFAULT_ELEMENT_STYLE = {
+  base: {
+    color: '#32325d',
+    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+    fontSmoothing: 'antialiased',
+    fontSize: '16px',
+    '::placeholder': {
+      color: '#aab7c4',
+    }
+  },
+  invalid: {
+    color: '#fa755a',
+    iconColor: '#fa755a',
+  },
+};
