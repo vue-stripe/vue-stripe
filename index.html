@@ -16,18 +16,19 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-159972005-1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'UA-159972005-1');
   </script>
+  <!-- <script src="https://js.stripe.com/v3"></script> -->
 </head>
 
 <body>
   <div id="app">
     <v-app>
       <v-app-bar dark class="elevation-1" color="#6772e5" app flat>
-          <v-btn :href="home" text x-large>Vue Stripe Checkout</v-btn>
+        <v-btn :href="home" text x-large>Vue Stripe Checkout</v-btn>
         <v-spacer></v-spacer>
         <v-btn large text href="https://github.com/jofftiquez/vue-stripe-checkout">Star on Github</v-btn>
       </v-app-bar>
@@ -37,13 +38,36 @@
             <v-col cols="12" sm="10" md="6">
               <v-card height="100%">
                 <v-card-text>
-                  <elements-form
-                    ref="elementsFormRef"
-                  >
-                    <elements-card-number/>
-                  </elements-form>
-                  <v-btn @click="$refs.elementsFormRef.submit()">Submit</v-btn>
+                  <h2>Card</h2>
                 </v-card-text>
+                <v-card-text>
+                  <!-- <stripe-element-card
+                    ref="cardRef"
+                    pk="pk_test_INH6o8QUdJyZM1TuGKs5PIsT"
+                    @token="tokenCreated"
+                  /> -->
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn @click="$refs.cardRef.submit()">Submit</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="10" md="6">
+              <v-card height="100%">
+                <v-card-text>
+                  <h2>FPX Bank</h2>
+                </v-card-text>
+                <v-card-text>
+                  <stripe-element-fpx-bank
+                    ref="fpxBankRef"
+                    pk="pk_test_INH6o8QUdJyZM1TuGKs5PIsT"
+                    account-holder-type="individual"
+                    @token="tokenCreated"
+                  />
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn @click="$refs.fpxBankRef.submit()">Submit</v-btn>
+                </v-card-actions>
               </v-card>
             </v-col>
           </v-row>
@@ -78,18 +102,43 @@
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-  <script src="./dist/vue-stripe-checkout.js"></script>
+  <script src="./dist/vue-stripe.js"></script>
   <script>
-    Vue.use(VueStripeCheckout.StripeMixin, {
-      publishableKey: 'pk_test_INH6o8QUdJyZM1TuGKs5PIsT',
-    });
-    Vue.component('elements-form', VueStripeCheckout.StripeElementsForm);
-    Vue.component('elements-card-number', VueStripeCheckout.StripeElementsCardNumber);
+    // const stripe = window.Stripe('pk_test_INH6o8QUdJyZM1TuGKs5PIsT');
+    // const elements = stripe.elements();
+
+    // elements.create('cardNumber').mount('#card');
+    // elements.create('cardExpiry').mount('#expiry');
+    // elements.create('cardCvc').mount('#cvc');
+
+    // Vue.use(VueStripe.StripeElements, {
+    //   pk: 'pk_test_INH6o8QUdJyZM1TuGKs5PIsT',
+    // });
+
+    Vue.component('stripe-element-card', VueStripe.StripeElementCard);
+    Vue.component('stripe-element-fpx-bank', VueStripe.StripeElementFpxBank);
     new Vue({
       el: '#app',
       vuetify: new Vuetify(),
-      data () {
+      data() {
         return {
+          paymentRequestButtonOpts: {
+            paymentRequest: {
+              country: 'US',
+              currency: 'usd',
+              total: {
+                label: 'Demo total',
+                amount: 1099
+              },
+              requestPayerName: true,
+              requestPayerEmail: true
+            },
+            // style: {
+            //   paymentRequestButton: {
+            //     theme: 'light'
+            //   }
+            // }
+          },
           token: null,
           charge: null,
           dialog: false,
@@ -98,7 +147,7 @@
           sessionId: '',
           items: [
             {
-              sku: 'sku_FdQKocNoVzznpJ', 
+              sku: 'sku_FdQKocNoVzznpJ',
               quantity: 1
             }
           ],
@@ -117,8 +166,16 @@
           home: location.href
         };
       },
+      mounted() {
+        // console.warn(this.$stripe);
+        // console.warn(this.$stripeElements);
+        // console.warn(this.$vueStripePublishableKey);
+        // this.$refs.cardNumberRef.mount();
+        // this.$refs.cardExpiryRef.mount();
+        // this.$refs.cardCvcRef.mount();
+      },
       methods: {
-        tokenCreated (token) {
+        tokenCreated(token) {
           console.warn(token);
           this.token = token;
           this.charge = {
@@ -128,7 +185,7 @@
           }
           this.sendTokenToServer(this.charge);
         },
-        sendTokenToServer (charge) {
+        sendTokenToServer(charge) {
           // Send to server
           this.dialog = true;
         }
