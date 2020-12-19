@@ -1,13 +1,11 @@
-import StripeCheckout from './Checkout.vue';
-import StripeElements from './Elements.vue';
-import StripeElementsCardNumber from './ElementsCardNumber.vue';
-import StripeElementsForm from './ElementsForm.vue';
-import StripeMixin from './stripe-mixin';
+import StripeCheckout from './checkout/index.vue';
+import StripeElementCard from './elements/Card.vue';
+import StripeElementFpxBank from './elements/FpxBank.vue';
+import StripeElementsPlugin from './elements';
 
 export {
   StripeCheckout,
-  StripeElements,
-  StripeElementsCardNumber,
-  StripeElementsForm,
-  StripeMixin,
+  StripeElementCard,
+  StripeElementFpxBank,
+  StripeElementsPlugin,
 };
