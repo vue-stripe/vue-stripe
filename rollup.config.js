@@ -10,14 +10,14 @@ export default {
   output: [
     {
       exports: 'named',
-      name: 'vue-stripe-checkout',
+      name: 'vue-stripe',
       file: 'dist/index.js',
       format: 'cjs'
     },
     {
       exports: 'named',
-      name: 'VueStripeCheckout',
-      file: 'dist/vue-stripe-checkout.js',
+      name: 'VueStripe',
+      file: 'dist/vue-stripe.js',
       format: 'umd'
     }
   ],
