@@ -41,11 +41,11 @@
                   <h2>Card</h2>
                 </v-card-text>
                 <v-card-text>
-                  <!-- <stripe-element-card
+                  <stripe-element-card
                     ref="cardRef"
                     pk="pk_test_INH6o8QUdJyZM1TuGKs5PIsT"
                     @token="tokenCreated"
-                  /> -->
+                  />
                 </v-card-text>
                 <v-card-actions>
                   <v-btn @click="$refs.cardRef.submit()">Submit</v-btn>
@@ -55,18 +55,18 @@
             <v-col cols="12" sm="10" md="6">
               <v-card height="100%">
                 <v-card-text>
-                  <h2>FPX Bank</h2>
+                  <h2>Checkout</h2>
                 </v-card-text>
                 <v-card-text>
-                  <stripe-element-fpx-bank
-                    ref="fpxBankRef"
+                  <stripe-checkout
+                    ref="checkoutRef"
                     pk="pk_test_INH6o8QUdJyZM1TuGKs5PIsT"
-                    account-holder-type="individual"
+                    :items="itemsRecurring"
                     @token="tokenCreated"
                   />
                 </v-card-text>
                 <v-card-actions>
-                  <v-btn @click="$refs.fpxBankRef.submit()">Submit</v-btn>
+                  <v-btn @click="$refs.checkoutRef.redirectToCheckout()">Submit</v-btn>
                 </v-card-actions>
               </v-card>
             </v-col>
@@ -104,41 +104,13 @@
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
   <script src="./dist/vue-stripe.js"></script>
   <script>
-    // const stripe = window.Stripe('pk_test_INH6o8QUdJyZM1TuGKs5PIsT');
-    // const elements = stripe.elements();
-
-    // elements.create('cardNumber').mount('#card');
-    // elements.create('cardExpiry').mount('#expiry');
-    // elements.create('cardCvc').mount('#cvc');
-
-    // Vue.use(VueStripe.StripeElements, {
-    //   pk: 'pk_test_INH6o8QUdJyZM1TuGKs5PIsT',
-    // });
-
+    Vue.component('stripe-checkout', VueStripe.StripeCheckout);
     Vue.component('stripe-element-card', VueStripe.StripeElementCard);
-    Vue.component('stripe-element-fpx-bank', VueStripe.StripeElementFpxBank);
     new Vue({
       el: '#app',
       vuetify: new Vuetify(),
       data() {
         return {
-          paymentRequestButtonOpts: {
-            paymentRequest: {
-              country: 'US',
-              currency: 'usd',
-              total: {
-                label: 'Demo total',
-                amount: 1099
-              },
-              requestPayerName: true,
-              requestPayerEmail: true
-            },
-            // style: {
-            //   paymentRequestButton: {
-            //     theme: 'light'
-            //   }
-            // }
-          },
           token: null,
           charge: null,
           dialog: false,
@@ -165,14 +137,6 @@
           cancelUrl: `${document.location.href}cancel.html`,
           home: location.href
         };
-      },
-      mounted() {
-        // console.warn(this.$stripe);
-        // console.warn(this.$stripeElements);
-        // console.warn(this.$vueStripePublishableKey);
-        // this.$refs.cardNumberRef.mount();
-        // this.$refs.cardExpiryRef.mount();
-        // this.$refs.cardCvcRef.mount();
       },
       methods: {
         tokenCreated(token) {
