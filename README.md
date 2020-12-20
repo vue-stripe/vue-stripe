@@ -1,3 +1,13 @@
+# IMPORTANT! THIS REPOSITORY WILL SOON MOVE TO HTTPS://GITHUB.COM/VUE-STRIPE
+
+### What to expect:
+- New better docs
+- Updated vue stripe checkout
+- Updated vue stripe elements
+- Samples, samples, samples
+
+--------------------------
+
 # Announcement
 
 [Read here](https://randomcodetips.com/vue-stripe-checkout-whats-next/)
