@@ -30,6 +30,10 @@ export default {
       type: String,
       default: 'auto',
     },
+    elementsOptions: {
+      type: Object,
+      default: () => ({}),
+    },
     // element specific options
     classes: {
       type: Object,
@@ -56,6 +60,7 @@ export default {
       loading: false,
       stripe: null,
       elements: null,
+      element: null,
       card: null,
     };
   },
@@ -76,7 +81,7 @@ export default {
         apiVersion: this.apiVersion,
         locale: this.locale,
       };
-      const elementOptions = {
+      const createOptions = {
         classes: this.classes,
         style: this.elementStyle,
         value: this.value,
@@ -87,9 +92,8 @@ export default {
       };
 
       this.stripe = window.Stripe(this.pk, stripeOptions);
-      this.element = this.stripe
-        .elements()
-        .create(ELEMENT_TYPE, elementOptions)
+      this.elements = this.stripe.elements(this.elementsOptions);
+      this.element = this.elements.create(ELEMENT_TYPE, createOptions)
       this.element.mount('#stripe-element-mount-point');
 
       this.element.on('change', (event) => {
@@ -99,7 +103,14 @@ export default {
         } else {
           displayError.textContent = '';
         }
+        this.change(event);
       });
+
+      this.element.on('ready', this.ready);
+      this.element.on('focus', this.focus);
+      this.element.on('blur', this.blur);
+      this.element.on('escape', this.escape);
+      this.element.on('click', this.click);
 
       this.form.addEventListener('submit', async (event) => {
         try {
@@ -125,6 +136,26 @@ export default {
         }
       });
     });
+  },
+  methods: {
+    change (e) {
+      this.$emit('element-change', e);
+    },
+    ready (e) {
+      this.$emit('element-ready', e);
+    },
+    focus (e) {
+      this.$emit('element-focus', e);
+    },
+    blur (e) {
+      this.$emit('element-blur', e);
+    },
+    escape (e) {
+      this.$emit('element-escape', e);
+    },
+    click (e) {
+      this.$emit('element-click', e);
+    },
   }
 }
 </script>
