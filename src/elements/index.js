@@ -6,9 +6,10 @@ export default {
       stripeAccount,
       apiVersion,
       locale,
+      elementsOptions,
     } = options;
     const stripe = window.Stripe(pk, { stripeAccount, apiVersion, locale });
-    const elements = stripe.elements();
+    const elements = stripe.elements(elementsOptions);
     Vue.prototype.$stripe = stripe;
     Vue.prototype.$stripeElements = elements;
   }
