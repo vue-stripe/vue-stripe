@@ -1,6 +1,6 @@
 {
   "name": "@vue-stripe/vue-stripe",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-beta.1",
   "description": "Vue plugin for Stripe checkout.",
   "main": "dist/index.js",
   "module": "dist",
