@@ -1,7 +1,7 @@
 {
   "name": "@vue-stripe/vue-stripe",
   "version": "4.0.0",
-  "description": "Vue plugin for Stripe checkout.",
+  "description": "Stripe Checkout & Elements for Vue.js",
   "main": "dist/index.js",
   "module": "dist",
   "typings": "typings/index.d.ts",
@@ -38,7 +38,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jofftiquez/vue-stripe-checkout.git"
+    "url": "git@github.com:vue-stripe/vue-stripe.git"
   },
   "keywords": [
     "vue",
@@ -50,8 +50,8 @@
   "author": "jofftiquez@gmail.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jofftiquez/vue-stripe-checkout/issues"
+    "url": "https://github.com/vue-stripe/vue-stripe/issues"
   },
-  "homepage": "https://github.com/jofftiquez/vue-stripe-checkout#readme",
+  "homepage": "https://github.com/vue-stripe/vue-stripe#readme",
   "dependencies": {}
 }
