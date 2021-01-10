@@ -1,6 +1,6 @@
 import { STRIPE_JS_SDK_URL } from './constants';
 
-export const loadStripeSdk = (pk, version = 'v3', callback) => {
+export const loadStripeSdk = (version = 'v3', callback) => {
   if (window.Stripe) {
     callback();
     return;
