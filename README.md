@@ -1,18 +1,3 @@
-# !!!IMPORTANT!!!
-# THIS PROJECT WILL SOON MOVE TO HTTPS://GITHUB.COM/VUE-STRIPE
-
-### What to expect:
-- New better docs
-- Updated vue stripe checkout
-- Updated vue stripe elements
-- Samples, samples, samples
-
---------------------------
-
-# Announcement
-
-[Read here](https://randomcodetips.com/vue-stripe-checkout-whats-next/)
-
 <p align="center">
   <img src="./vue-stripe-logo-variant-1.png" alt="drawing" width="200"/>
   <h2 style="font-size: 55px; line-height: 1px;" align="center">Vue Stripe 💳</h2>
@@ -23,7 +8,7 @@
 
 [![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/vue-stripe-checkout?style=flat-square) ![npm](https://img.shields.io/npm/dw/vue-stripe-checkout?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jofftiquez/vue-stripe-checkout/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://paypal.me/jofftiquez)
 
-Vue Stripe is an easy to implement, and well maintained Vue.js plugin for Stripe Checkout, and Elements.
+Welcome to [version 4](https://randomcodetips.com/vue-stripe-checkout-whats-next/). Vue Stripe is an easy to implement, and well maintained Vue.js plugin for Stripe Checkout, and Elements.
 
 This project is now available in [Open Collective](https://opencollective.com/vue-stripe-checkout#section-contribute). I would really appreciate if you guys would check it out. Also, if you like this project kindly give it a star, or consider following me on [GitHub](https://github.com/jofftiquez). Thanks! :heart:
 
