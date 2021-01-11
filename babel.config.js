@@ -8,15 +8,15 @@ module.exports = function (api) {
   const plugins = [
     '@babel/transform-runtime',
     '@babel/plugin-proposal-export-default-from',
-    '@babel/plugin-proposal-optional-chaining'
+    '@babel/plugin-proposal-optional-chaining',
   ];
-  const ignore = [
-    '**/*.test.js'
-  ]
+  // const ignore = [
+  //   '**/*.test.js',
+  // ];
 
   return {
     presets,
     plugins,
     // ignore
   };
-}
+};

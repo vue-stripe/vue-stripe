@@ -5,9 +5,9 @@ export const loadStripeSdk = (version = 'v3', callback) => {
     callback();
     return;
   }
-  let e = document.createElement('script');
+  const e = document.createElement('script');
   e.src = `${STRIPE_JS_SDK_URL}/${version}`;
-  e.type='text/javascript';
+  e.type = 'text/javascript';
   document.getElementsByTagName('head')[0].appendChild(e);
   e.addEventListener('load', callback);
 };

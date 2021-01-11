@@ -8,17 +8,17 @@ export default {
       this.$emit('loading', true);
       loadStripeSdk('v3', () => {
         try {
-          let stripe = window.Stripe(this.pk);
+          const stripe = window.Stripe(this.pk);
 
           if (this.sessionId) {
             stripe.redirectToCheckout({
-              sessionId: this.sessionId
+              sessionId: this.sessionId,
             });
             return;
           }
 
-          if (this.lineItems?.length && !this.mode) {
-            console.error(`Error: Property 'mode' is required when using 'lineItems'. See https://stripe.com/docs/js/checkout/redirect_to_checkout#stripe_checkout_redirect_to_checkout-options-mode`);
+          if (this.lineItems && this.lineItems.length && !this.mode) {
+            console.error('Error: Property \'mode\' is required when using \'lineItems\'. See https://stripe.com/docs/js/checkout/redirect_to_checkout#stripe_checkout_redirect_to_checkout-options-mode');
             return;
           }
 
@@ -44,6 +44,6 @@ export default {
           this.$emit('loading', false);
         }
       });
-    }
-  }
+    },
+  },
 };

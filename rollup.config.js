@@ -12,26 +12,26 @@ export default {
       exports: 'named',
       name: 'vue-stripe',
       file: 'dist/index.js',
-      format: 'cjs'
+      format: 'cjs',
     },
     {
       exports: 'named',
       name: 'VueStripe',
       file: 'dist/vue-stripe.js',
-      format: 'umd'
-    }
+      format: 'umd',
+    },
   ],
-  plugins: [ 
+  plugins: [
     terser(),
     vue(),
     resolve(),
     babel({
       runtimeHelpers: true,
-      exclude: /node_modules/
+      exclude: /node_modules/,
     }),
     postcss({
-      plugins: []
+      plugins: [],
     }),
-    commonjs()
-  ]
+    commonjs(),
+  ],
 };
