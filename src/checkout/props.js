@@ -1,7 +1,7 @@
 import {
   SUPPORTED_LANGS,
   SUPPORTED_SUBMIT_TYPES,
-  BILLING_ADDRESS_COLLECTION_TYPES
+  BILLING_ADDRESS_COLLECTION_TYPES,
 } from '../constants';
 
 export default {
@@ -15,6 +15,7 @@ export default {
   },
   lineItems: {
     type: Array,
+    default: null,
   },
   items: {
     type: Array,
@@ -52,6 +53,6 @@ export default {
   },
   shippingAddressCollection: {
     type: Object,
-    validator: value => value.hasOwnProperty('allowedCountries'),
+    validator: value => Object.prototype.hasOwnProperty.call(value, 'allowedCountries'),
   },
 };

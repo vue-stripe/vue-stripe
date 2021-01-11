@@ -1,6 +1,6 @@
 // import { SUPPORTED_ELEMENT_TYPE } from '../constants';
 export default {
-  install(Vue, options) {
+  install (Vue, options) {
     const {
       pk,
       stripeAccount,
@@ -12,5 +12,5 @@ export default {
     const elements = stripe.elements(elementsOptions);
     Vue.prototype.$stripe = stripe;
     Vue.prototype.$stripeElements = elements;
-  }
+  },
 };

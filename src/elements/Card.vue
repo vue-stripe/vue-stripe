@@ -12,7 +12,7 @@
 
 <script>
 import { loadStripeSdk } from '../load-stripe-sdk';
-import { SUPPORTED_ELEMENT_TYPE, DEFAULT_ELEMENT_STYLE } from '../constants';
+import { DEFAULT_ELEMENT_STYLE } from '../constants';
 const ELEMENT_TYPE = 'card';
 export default {
   props: {
@@ -88,7 +88,7 @@ export default {
 
       this.stripe = window.Stripe(this.pk, stripeOptions);
       this.elements = this.stripe.elements(this.elementsOptions);
-      this.element = this.elements.create(ELEMENT_TYPE, createOptions)
+      this.element = this.elements.create(ELEMENT_TYPE, createOptions);
       this.element.mount('#stripe-element-mount-point');
 
       this.element.on('change', (event) => {
@@ -112,7 +112,7 @@ export default {
           this.$emit('loading', true);
           event.preventDefault();
           const data = {
-            ...this.element
+            ...this.element,
           };
           if (this.amount) data.amount = this.amount;
           const { token, error } = await this.stripe.createToken(data);
@@ -154,8 +154,8 @@ export default {
     click (e) {
       this.$emit('element-click', e);
     },
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
