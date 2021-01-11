@@ -69,11 +69,6 @@ export default {
       return document.getElementById('stripe-element-form');
     },
   },
-  methods: {
-    submit () {
-      this.$refs.submitButtonRef.click();
-    },
-  },
   mounted () {
     loadStripeSdk(this.apiVersion, () => {
       const stripeOptions = {
@@ -138,6 +133,9 @@ export default {
     });
   },
   methods: {
+    submit () {
+      this.$refs.submitButtonRef.click();
+    },
     change (e) {
       this.$emit('element-change', e);
     },
