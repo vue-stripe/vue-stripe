@@ -1,6 +1,6 @@
 {
   "name": "@vue-stripe/vue-stripe",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Stripe Checkout & Elements for Vue.js",
   "main": "dist/index.js",
   "module": "dist",
