@@ -1,3 +1,4 @@
+// This is outdated
 export interface _VueStripeCheckout {
   install: (Vue: any, options?: any) => void
 }
