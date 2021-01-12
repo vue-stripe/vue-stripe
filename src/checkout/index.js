@@ -2,7 +2,9 @@ import { loadStripeSdk } from '../load-stripe-sdk';
 import props from './props';
 export default {
   props,
-  template: '<div></div>',
+  render (createElement) {
+    return createElement('div');
+  },
   methods: {
     redirectToCheckout () {
       this.$emit('loading', true);
