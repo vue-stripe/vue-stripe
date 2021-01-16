@@ -3,7 +3,7 @@
   <h1 align="center">Vue Stripe 💳</h1>
 </p>
 
-[![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square) ![npm](https://img.shields.io/npm/dw/@vue-stripe/vue-stripe?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vue-stripe/vue-stripe/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://paypal.me/jofftiquez)
+[![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square) ![npm](https://img.shields.io/npm/dw/@vue-stripe/vue-stripe?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vue-stripe/vue-stripe/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://opencollective.com/vue-stripe-checkout)
 
 Welcome to [version 4](https://randomcodetips.com/vue-stripe-checkout-whats-next/) of **Vue Stripe**, an easy to implement, and well maintained **Vue.js** components/plugins for **Stripe Checkout**, and **Stripe Elements**.
 
