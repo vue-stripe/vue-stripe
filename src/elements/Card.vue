@@ -98,14 +98,14 @@ export default {
         } else {
           displayError.textContent = '';
         }
-        this.change(event);
+        this.onChange(event);
       });
 
-      this.element.on('ready', this.ready);
-      this.element.on('focus', this.focus);
-      this.element.on('blur', this.blur);
-      this.element.on('escape', this.escape);
-      this.element.on('click', this.click);
+      this.element.on('blur', this.onBlur);
+      this.element.on('click', this.onClick);
+      this.element.on('escape', this.onEscape);
+      this.element.on('focus', this.onFocus);
+      this.element.on('ready', this.onReady);
 
       this.form.addEventListener('submit', async (event) => {
         try {
@@ -133,25 +133,77 @@ export default {
     });
   },
   methods: {
+    /**
+     * Triggers the submission of the form
+     * @return {void}
+     */
     submit () {
       this.$refs.submitButtonRef.click();
     },
-    change (e) {
+    /**
+     * Clears the element
+     * @return {void}
+     */
+    clear () {
+      this.element.clear();
+    },
+    /**
+     * Destroys the element
+     * @return {void}
+     */
+    destroy () {
+      this.element.destroy();
+    },
+    /**
+     * Focuses on the element
+     * @return {void}
+     */
+    focus () {
+      console.warn('This method will currently not work on iOS 13+ due to a system limitation.');
+      this.element.focus();
+    },
+    /**
+     * Unmounts the element
+     * @return {void}
+     */
+    unmount () {
+      this.element.unmount();
+    },
+    /**
+     * Updates the element
+     * @param {string} opts.classes.base The base class applied to the container. Defaults to StripeElement.
+     * @param {string} opts.classes.complete The class name to apply when the Element is complete. Defaults to StripeElement--complete.
+     * @param {string} opts.classes.empty The class name to apply when the Element is empty. Defaults to StripeElement--empty.
+     * @param {string} opts.classes.focus The class name to apply when the Element is focused. Defaults to StripeElement--focus.
+     * @param {string} opts.classes.invalid The class name to apply when the Element is invalid. Defaults to StripeElement--invalid.
+     * @param {string} opts.classes.webkitAutoFill The class name to apply when the Element has its value autofilled by the browser (only on Chrome and Safari). Defaults to StripeElement--webkit-autofill.
+     * @param {Object} opts.style Customize the appearance of this element using CSS properties passed in a Style object.
+     * @param {string} opts.value A pre-filled set of values to include in the input (e.g., {postalCode: '94110'}). Note that sensitive card information (card number, CVC, and expiration date) cannot be pre-filled
+     * @param {boolean} opts.hidePostalCode Hide the postal code field. Default is false. If you are already collecting a full billing address or postal code elsewhere, set this to true.
+     * @param {string} opts.iconStyle Appearance of the icon in the Element. Either solid or default.
+     * @param {boolean} opts.hideIcon Hides the icon in the Element. Default is false.
+     * @param {boolean} opts.disabled Applies a disabled state to the Element such that user input is not accepted. Default is false.
+     */
+    update (opts) {
+      this.element.update(opts);
+    },
+    // events
+    onChange (e) {
       this.$emit('element-change', e);
     },
-    ready (e) {
+    onReady (e) {
       this.$emit('element-ready', e);
     },
-    focus (e) {
+    onFocus (e) {
       this.$emit('element-focus', e);
     },
-    blur (e) {
+    onBlur (e) {
       this.$emit('element-blur', e);
     },
-    escape (e) {
+    onEscape (e) {
       this.$emit('element-escape', e);
     },
-    click (e) {
+    onClick (e) {
       this.$emit('element-click', e);
     },
   },
