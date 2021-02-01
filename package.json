@@ -11,7 +11,9 @@
   },
   "main": "dist/index.js",
   "module": "dist",
-  "dependencies": {},
+  "dependencies": {
+    "vue-coerce-props": "^1.0.0"
+  },
   "devDependencies": {
     "@babel/cli": "^7.7.5",
     "@babel/core": "^7.7.5",
