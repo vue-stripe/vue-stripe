@@ -1,7 +1,9 @@
 import { loadStripeSdk } from '../load-stripe-sdk';
+import CoercePropsMixin from 'vue-coerce-props';
 import props from './props';
 export default {
   props,
+  mixins: [CoercePropsMixin],
   render (createElement) {
     return createElement('div');
   },
@@ -31,7 +33,7 @@ export default {
             customerEmail: this.customerEmail,
             items: this.items,
             lineItems: this.lineItems,
-            locale: this.locale,
+            locale: this.$coerced.locale,
             mode: this.mode,
             shippingAddressCollection: this.shippingAddressCollection,
             submitType: this.submitType,

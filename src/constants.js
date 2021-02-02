@@ -14,23 +14,45 @@ export const SUPPORTED_ELEMENT_TYPE = [
   'auBankAccount',
 ];
 
-export const SUPPORTED_LANGS = [
+export const DEFAULT_LOCALE = 'auto';
+
+export const SUPPORTED_LOCALES = [
   'auto',
+  'bg',
+  'cs',
   'da',
   'de',
+  'el',
   'en',
+  'en-GB',
   'es',
   'es-419',
+  'et',
   'fi',
   'fr',
+  'fr-CA',
+  'hu',
+  'id',
   'it',
   'ja',
+  'lt',
+  'lv',
+  'ms',
+  'mt',
   'nb',
   'nl',
   'pl',
   'pt',
+  'pt-BR',
+  'ro',
+  'ru',
+  'sk',
+  'sl',
   'sv',
+  'tr',
   'zh',
+  'zh-HK',
+  'zh-TW',
 ];
 
 export const SUPPORTED_SUBMIT_TYPES = [
