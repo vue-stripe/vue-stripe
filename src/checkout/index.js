@@ -10,7 +10,10 @@ export default {
   methods: {
     redirectToCheckout () {
       this.$emit('loading', true);
-      loadStripeSdk('v3', () => {
+      loadStripeSdk({
+        version: 'v3',
+        disableAdvancedFraudDetection: this.disableAdvancedFraudDetection,
+      }, () => {
         try {
           const stripe = window.Stripe(this.pk);
 

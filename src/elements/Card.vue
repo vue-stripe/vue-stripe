@@ -34,6 +34,9 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    disableAdvancedFraudDetection: {
+      type: Boolean,
+    },
     // element specific options
     classes: {
       type: Object,
@@ -70,7 +73,10 @@ export default {
     },
   },
   mounted () {
-    loadStripeSdk(this.apiVersion, () => {
+    loadStripeSdk({
+      version: this.apiVersion,
+      disableAdvancedFraudDetection: this.disableAdvancedFraudDetection,
+    }, () => {
       const stripeOptions = {
         stripeAccount: this.stripeAccount,
         apiVersion: this.apiVersion,

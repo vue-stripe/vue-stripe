@@ -60,4 +60,7 @@ export default {
     type: Object,
     validator: value => Object.prototype.hasOwnProperty.call(value, 'allowedCountries'),
   },
+  disableAdvancedFraudDetection: {
+    type: Boolean,
+  },
 };
