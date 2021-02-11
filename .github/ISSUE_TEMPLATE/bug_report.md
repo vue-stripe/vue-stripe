@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+## NOTE: Moving forward, issues that does not conform with this format will be closed automatically. (You can delete this part)
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
