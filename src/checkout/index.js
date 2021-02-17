@@ -4,8 +4,8 @@ import props from './props';
 export default {
   props,
   mixins: [CoercePropsMixin],
-  render (createElement) {
-    return createElement('div');
+  render (element) {
+    return element;
   },
   methods: {
     redirectToCheckout () {
