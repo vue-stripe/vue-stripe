@@ -46,7 +46,7 @@ export interface StripeElementsPluginObject extends PluginObject<StripeElementsP
 
 export declare const StripeElementsPlugin: StripePluginObject;
 
-export class StripeElementsCard extends Vue {
+export class StripeElementCard extends Vue {
   pk: string;
   stripeAccount: string;
   apiVersion: string;
