@@ -28,6 +28,7 @@ export class StripeCheckout extends Vue {
   locale: string;
   shippingAddressCollection?: any;
   disableAdvancedFarudDetection: boolean;
+  enableCrossOrigin: boolean;
 
   redirectToCheckout(): void;
 }
@@ -53,6 +54,7 @@ export class StripeElementCard extends Vue {
   locale: string;
   elementsOptions: any;
   disableAdvancedFraudDetection: boolean;
+  enableCrossOrigin: boolean;
   classes: any;
   elementStyle: any;
   value?: string;

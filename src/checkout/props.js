@@ -63,4 +63,8 @@ export default {
   disableAdvancedFraudDetection: {
     type: Boolean,
   },
+  enableCrossOrigin: {
+    type: Boolean,
+    default: false,
+  },
 };

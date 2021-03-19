@@ -13,6 +13,7 @@ export default {
       loadStripeSdk({
         version: 'v3',
         disableAdvancedFraudDetection: this.disableAdvancedFraudDetection,
+        enableCrossOrigin: this.enableCrossOrigin,
       }, () => {
         try {
           const stripe = window.Stripe(this.pk);

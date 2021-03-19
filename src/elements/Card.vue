@@ -37,6 +37,10 @@ export default {
     disableAdvancedFraudDetection: {
       type: Boolean,
     },
+    enableCrossOrigin: {
+      type: Boolean,
+      default: false,
+    },
     // element specific options
     classes: {
       type: Object,
@@ -76,6 +80,7 @@ export default {
     loadStripeSdk({
       version: this.apiVersion,
       disableAdvancedFraudDetection: this.disableAdvancedFraudDetection,
+      enableCrossOrigin: this.enableCrossOrigin,
     }, () => {
       const stripeOptions = {
         stripeAccount: this.stripeAccount,
