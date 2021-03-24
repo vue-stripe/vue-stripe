@@ -10,4 +10,3 @@ yarn-error.log
 *.ntvs*
 *.njsproj
 *.sln
-.npmignore
