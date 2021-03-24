@@ -16,8 +16,8 @@ export declare const StripePlugin: StripePluginObject;
 export class StripeCheckout extends Vue {
   pk: string;
   mode?: string;
-  lineItems: Array<any> = null;
-  items: Array<any> = null;
+  lineItems: Array<any> | null;
+  items: Array<any> | null;
   successUrl: string;
   cancelUrl: string;
   submitType?: string;
