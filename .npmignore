@@ -1,0 +1,11 @@
+test/
+src/
+node_modules/
+.github/
+.editorconfig
+.eslintignore
+.eslintrc
+.babel.config.js
+.rollup.config.js
+vue-stripe-logo-*
+CODE_OF_CONDUCT.md
