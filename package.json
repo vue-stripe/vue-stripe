@@ -12,6 +12,7 @@
   "main": "dist/index.js",
   "module": "dist",
   "dependencies": {
+    "@stripe/stripe-js": "^1.13.2",
     "vue-coerce-props": "^1.0.0"
   },
   "devDependencies": {
