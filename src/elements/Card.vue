@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { loadStripeSdk } from '../load-stripe-sdk';
+import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
 import { DEFAULT_ELEMENT_STYLE } from '../constants';
 const ELEMENT_TYPE = 'card';
 export default {
@@ -72,70 +72,67 @@ export default {
       return document.getElementById('stripe-element-form');
     },
   },
-  mounted () {
-    loadStripeSdk({
-      version: this.apiVersion,
-      disableAdvancedFraudDetection: this.disableAdvancedFraudDetection,
-    }, () => {
-      const stripeOptions = {
-        stripeAccount: this.stripeAccount,
-        apiVersion: this.apiVersion,
-        locale: this.locale,
-      };
-      const createOptions = {
-        classes: this.classes,
-        style: this.elementStyle,
-        value: this.value,
-        hidePostalCode: this.hidePostalCode,
-        iconStyle: this.iconStyle,
-        hideIcon: this.hideIcon,
-        disabled: this.disabled,
-      };
+  async mounted () {
+    if (this.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
 
-      this.stripe = window.Stripe(this.pk, stripeOptions);
-      this.elements = this.stripe.elements(this.elementsOptions);
-      this.element = this.elements.create(ELEMENT_TYPE, createOptions);
-      this.element.mount('#stripe-element-mount-point');
+    const stripeOptions = {
+      stripeAccount: this.stripeAccount,
+      apiVersion: this.apiVersion,
+      locale: this.locale,
+    };
+    const createOptions = {
+      classes: this.classes,
+      style: this.elementStyle,
+      value: this.value,
+      hidePostalCode: this.hidePostalCode,
+      iconStyle: this.iconStyle,
+      hideIcon: this.hideIcon,
+      disabled: this.disabled,
+    };
 
-      this.element.on('change', (event) => {
-        var displayError = document.getElementById('stripe-element-errors');
-        if (event.error) {
-          displayError.textContent = event.error.message;
-        } else {
-          displayError.textContent = '';
-        }
-        this.onChange(event);
-      });
+    this.stripe = await loadStripe(this.pk, stripeOptions);
+    this.elements = this.stripe.elements(this.elementsOptions);
+    this.element = this.elements.create(ELEMENT_TYPE, createOptions);
+    this.element.mount('#stripe-element-mount-point');
 
-      this.element.on('blur', this.onBlur);
-      this.element.on('click', this.onClick);
-      this.element.on('escape', this.onEscape);
-      this.element.on('focus', this.onFocus);
-      this.element.on('ready', this.onReady);
+    this.element.on('change', (event) => {
+      var displayError = document.getElementById('stripe-element-errors');
+      if (event.error) {
+        displayError.textContent = event.error.message;
+      } else {
+        displayError.textContent = '';
+      }
+      this.onChange(event);
+    });
 
-      this.form.addEventListener('submit', async (event) => {
-        try {
-          this.$emit('loading', true);
-          event.preventDefault();
-          const data = {
-            ...this.element,
-          };
-          if (this.amount) data.amount = this.amount;
-          const { token, error } = await this.stripe.createToken(data);
-          if (error) {
-            const errorElement = document.getElementById('stripe-element-errors');
-            errorElement.textContent = error.message;
-            this.$emit('error', error);
-            return;
-          }
-          this.$emit('token', token);
-        } catch (error) {
-          console.error(error);
+    this.element.on('blur', this.onBlur);
+    this.element.on('click', this.onClick);
+    this.element.on('escape', this.onEscape);
+    this.element.on('focus', this.onFocus);
+    this.element.on('ready', this.onReady);
+
+    this.form.addEventListener('submit', async (event) => {
+      try {
+        this.$emit('loading', true);
+        event.preventDefault();
+        const data = {
+          ...this.element,
+        };
+        if (this.amount) data.amount = this.amount;
+        const { token, error } = await this.stripe.createToken(data);
+        if (error) {
+          const errorElement = document.getElementById('stripe-element-errors');
+          errorElement.textContent = error.message;
           this.$emit('error', error);
-        } finally {
-          this.$emit('loading', false);
+          return;
         }
-      });
+        this.$emit('token', token);
+      } catch (error) {
+        console.error(error);
+        this.$emit('error', error);
+      } finally {
+        this.$emit('loading', false);
+      }
     });
   },
   methods: {
