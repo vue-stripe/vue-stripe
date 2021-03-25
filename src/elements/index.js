@@ -1,6 +1,6 @@
-// import { SUPPORTED_ELEMENT_TYPE } from '../constants';
+import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
 export default {
-  install (Vue, options) {
+  async install (Vue, options) {
     const {
       pk,
       stripeAccount,
@@ -8,8 +8,9 @@ export default {
       locale,
       elementsOptions,
     } = options;
-    const stripe = window.Stripe(pk, { stripeAccount, apiVersion, locale });
+    const stripe = await loadStripe(pk, { stripeAccount, apiVersion, locale });
     const elements = stripe.elements(elementsOptions);
+    Vue.prototype.$stripe = stripe;
     Vue.prototype.$stripeElements = elements;
   },
 };
