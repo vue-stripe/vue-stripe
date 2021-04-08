@@ -35,6 +35,8 @@ Become a financial contributor and help us sustain our community. [[Contribute](
 
 <a href="https://opencollective.com/vue-stripe-checkout"><img src="https://opencollective.com/vue-stripe-checkout/individuals.svg?width=890"></a>
 
+<a href="https://opencollective.com/guest-fc8960e6"><img src="https://opencollective.com/vue-stripe-checkout/individual/0/avatar.svg"></a>
+
 #### Organizations
 
 Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/vue-stripe-checkout/contribute)]
