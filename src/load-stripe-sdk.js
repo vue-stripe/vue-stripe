@@ -6,7 +6,7 @@ export const loadStripeSdk = ({ version = 'v3', disableAdvancedFraudDetection },
     return;
   }
   let url = `${STRIPE_JS_SDK_URL}/${version}`;
-  if (disableAdvancedFraudDetection) url += `?advancedFraudSignals=false`;
+  if (disableAdvancedFraudDetection) url += '?advancedFraudSignals=false';
   const e = document.createElement('script');
   e.src = url;
   e.type = 'text/javascript';
