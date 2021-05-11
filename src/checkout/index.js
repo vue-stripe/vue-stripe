@@ -1,3 +1,4 @@
+import { STRIPE_PARTNER_DETAILS } from '../constants';
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
 import CoercePropsMixin from 'vue-coerce-props';
 import props from './props';
@@ -15,7 +16,7 @@ export default {
 
         if (this.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
 
-        const stripe = await loadStripe(this.pk);
+        const stripe = await loadStripe(this.pk).registerAppInfo(STRIPE_PARTNER_DETAILS);
 
         if (this.sessionId) {
           stripe.redirectToCheckout({

@@ -1,3 +1,4 @@
+import { STRIPE_PARTNER_DETAILS } from '../constants';
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
 export default {
   async install (Vue, options) {
@@ -7,6 +8,7 @@ export default {
       apiVersion,
       locale,
     } = options;
-    Vue.prototype.$stripe = await loadStripe(pk, { stripeAccount, apiVersion, locale });
+    Vue.prototype.$stripe = await loadStripe(pk, { stripeAccount, apiVersion, locale })
+      .registerAppInfo(STRIPE_PARTNER_DETAILS);
   },
 };
