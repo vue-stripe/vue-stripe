@@ -29,11 +29,11 @@ export default {
     },
     stripeAccount: {
       type: String,
-      default: null,
+      default: undefined,
     },
     apiVersion: {
       type: String,
-      default: null,
+      default: undefined,
     },
     locale: {
       type: String,
@@ -57,7 +57,7 @@ export default {
     },
     value: {
       type: String,
-      default: null,
+      default: undefined,
     },
     hidePostalCode: Boolean,
     iconStyle: {

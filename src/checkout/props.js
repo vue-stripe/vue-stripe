@@ -16,7 +16,7 @@ export default {
   },
   lineItems: {
     type: Array,
-    default: null,
+    default: undefined,
   },
   items: {
     type: Array,
