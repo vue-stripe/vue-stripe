@@ -101,3 +101,12 @@ export const DEFAULT_ELEMENT_STYLE = {
     iconColor: '#fa755a',
   },
 };
+
+export const VUE_STRIPE_VERSION = require('../package.json').version;
+
+export const STRIPE_PARTNER_DETAILS = {
+  name: 'vue-stripe',
+  version: VUE_STRIPE_VERSION,
+  url: process.env.VUE_STRIPE_WEBSITE,
+  partner_id: process.env.VUE_STRIPE_PARTNER_ID,
+};
