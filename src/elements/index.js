@@ -1,3 +1,6 @@
+/**
+ * @deprecated - This can be achieved by using the Stripe plugin.
+ */
 export default {
   async install (Vue, options) {
     const {
