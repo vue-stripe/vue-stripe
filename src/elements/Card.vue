@@ -1,11 +1,18 @@
 <template>
   <div>
     <form id="stripe-element-form">
-      <div id="stripe-element-mount-point"></div>
+      <div id="stripe-element-mount-point" />
       <slot name="stripe-element-errors">
-        <div id="stripe-element-errors" role="alert"></div>
+        <div
+          id="stripe-element-errors"
+          role="alert"
+        />
       </slot>
-      <button ref="submitButtonRef" type="submit" class="hide"></button>
+      <button
+        ref="submitButtonRef"
+        type="submit"
+        class="hide"
+      />
     </form>
   </div>
 </template>
@@ -22,9 +29,11 @@ export default {
     },
     stripeAccount: {
       type: String,
+      default: undefined,
     },
     apiVersion: {
       type: String,
+      default: undefined,
     },
     locale: {
       type: String,
@@ -48,6 +57,7 @@ export default {
     },
     value: {
       type: String,
+      default: undefined,
     },
     hidePostalCode: Boolean,
     iconStyle: {
