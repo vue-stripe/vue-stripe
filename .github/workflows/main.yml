@@ -23,6 +23,9 @@ jobs:
       - name: Install dependencies
         run: yarn
       - name: Run lint, test, build
+        env:
+          VUE_STRIPE_WEBSITE: ${{ secrets.VUE_STRIPE_WEBSITE }}
+          VUE_STRIPE_PARTNER_ID: ${{ secrets.VUE_STRIPE_PARTNER_ID }}
         run: |
           yarn lint
           yarn test

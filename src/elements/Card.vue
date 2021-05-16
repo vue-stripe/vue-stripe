@@ -19,7 +19,7 @@
 
 <script>
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
-import { DEFAULT_ELEMENT_STYLE } from '../constants';
+import { DEFAULT_ELEMENT_STYLE, STRIPE_PARTNER_DETAILS } from '../constants';
 const ELEMENT_TYPE = 'card';
 export default {
   props: {
@@ -101,6 +101,7 @@ export default {
     };
 
     this.stripe = await loadStripe(this.pk, stripeOptions);
+    this.stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
     this.elements = this.stripe.elements(this.elementsOptions);
     this.element = this.elements.create(ELEMENT_TYPE, createOptions);
     this.element.mount('#stripe-element-mount-point');
