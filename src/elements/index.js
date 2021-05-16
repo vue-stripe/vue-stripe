@@ -11,8 +11,8 @@ export default {
       locale,
       elementsOptions,
     } = options;
-    const stripe = window.Stripe(pk, { stripeAccount, apiVersion, locale })
-      .registerAppInfo(STRIPE_PARTNER_DETAILS);
+    const stripe = window.Stripe(pk, { stripeAccount, apiVersion, locale });
+    stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
     const elements = stripe.elements(elementsOptions);
     Vue.prototype.$stripe = stripe;
     Vue.prototype.$stripeElements = elements;

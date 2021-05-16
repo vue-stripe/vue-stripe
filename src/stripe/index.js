@@ -1,5 +1,4 @@
 import { STRIPE_PARTNER_DETAILS } from '../constants';
-console.warn(STRIPE_PARTNER_DETAILS);
 export default {
   install (Vue, options) {
     const {
@@ -8,7 +7,8 @@ export default {
       apiVersion,
       locale,
     } = options;
-    Vue.prototype.$stripe = window.Stripe(pk, { stripeAccount, apiVersion, locale })
-      .registerAppInfo(STRIPE_PARTNER_DETAILS);
+    const stripe = window.Stripe(pk, { stripeAccount, apiVersion, locale });
+    stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
+    Vue.prototype.$stripe = stripe;
   },
 };

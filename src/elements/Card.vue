@@ -100,7 +100,8 @@ export default {
       disabled: this.disabled,
     };
 
-    this.stripe = await loadStripe(this.pk, stripeOptions).registerAppInfo(STRIPE_PARTNER_DETAILS);
+    this.stripe = await loadStripe(this.pk, stripeOptions);
+    this.stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
     this.elements = this.stripe.elements(this.elementsOptions);
     this.element = this.elements.create(ELEMENT_TYPE, createOptions);
     this.element.mount('#stripe-element-mount-point');

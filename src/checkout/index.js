@@ -11,12 +11,12 @@ export default {
   methods: {
     async redirectToCheckout () {
       try {
-        console.warn('new implementation');
         this.$emit('loading', true);
 
         if (this.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
 
-        const stripe = await loadStripe(this.pk).registerAppInfo(STRIPE_PARTNER_DETAILS);
+        const stripe = await loadStripe(this.pk);
+        stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
 
         if (this.sessionId) {
           stripe.redirectToCheckout({
@@ -48,8 +48,6 @@ export default {
       } catch (e) {
         console.error(e);
         this.$emit('error', e);
-      } finally {
-        this.$emit('loading', false);
       }
     },
   },
