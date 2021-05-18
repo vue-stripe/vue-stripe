@@ -5,6 +5,8 @@
 
 <a href="https://stripe.com/partbers/vue-stripe" target="_blank"><img src="./stripe_partner_badge_verified_blurple.png" alt="drawing" width="98"/></a> [![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square) ![npm](https://img.shields.io/npm/dw/@vue-stripe/vue-stripe?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vue-stripe/vue-stripe/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://opencollective.com/vue-stripe-checkout)
 
+> [Vue Stripe](https://vuestripe.com) is now an official [Stripe partner](https://stripe.com/partners/vue-stripe) 🎉
+
 Stripe Checkout & Elements for Vue.js
 
 You can support this project by giving it a star, or following the author. You can also send your love through [Open Collective](https://opencollective.com/vue-stripe-checkout#section-contribute) :heart:.
@@ -53,4 +55,4 @@ Support this project with your organization. Your logo will show up here with a 
 [<img src="https://i.imgur.com/x0SERyj.png" width="200px">](https://mycure.md)
 [<img src="https://i.imgur.com/4jF5M4A.png">](http://myteamops.com)
 
-Made with :heart: by Joff Tiquez
+Made with :heart: by [Joff Tiquez](https://twitter.com/jrtiquez)
