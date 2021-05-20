@@ -74,7 +74,10 @@ export default {
     console.warn('canMakePayment', result);
     if (result) {
       this.element.mount('#stripe-payment-request-button');
-      this.element.on('paymentmethod', this.onPaymentmethod);
+      // it`s working!
+      this.paymentRequest.on('paymentmethod', this.onPaymentmethod)
+      // not this
+      // this.element.on('paymentmethod', this.onPaymentmethod);
     }
   },
   methods: {
