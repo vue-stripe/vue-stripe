@@ -1,5 +1,9 @@
-import { STRIPE_PARTNER_DETAILS } from '../constants';
+import {
+  STRIPE_PARTNER_DETAILS,
+  INSECURE_HOST_ERROR_MESSAGE,
+} from '../constants';
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
+import { isSecureHost } from '../utils';
 import CoercePropsMixin from 'vue-coerce-props';
 import props from './props';
 export default {
@@ -8,9 +12,16 @@ export default {
   render (element) {
     return element;
   },
+  mounted () {
+    if (!isSecureHost()) console.warn(INSECURE_HOST_ERROR_MESSAGE);
+  },
   methods: {
     async redirectToCheckout () {
       try {
+        if (!isSecureHost()) {
+          throw Error(INSECURE_HOST_ERROR_MESSAGE);
+        }
+
         this.$emit('loading', true);
 
         if (this.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });

@@ -19,7 +19,12 @@
 
 <script>
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
-import { DEFAULT_ELEMENT_STYLE, STRIPE_PARTNER_DETAILS } from '../constants';
+import { isSecureHost } from '../utils';
+import {
+  DEFAULT_ELEMENT_STYLE,
+  STRIPE_PARTNER_DETAILS,
+  INSECURE_HOST_ERROR_MESSAGE,
+} from '../constants';
 const ELEMENT_TYPE = 'card';
 export default {
   props: {
@@ -83,6 +88,11 @@ export default {
     },
   },
   async mounted () {
+    if (!isSecureHost()) {
+      document.getElementById('stripe-element-mount-point').innerHTML = `<p style="color: red">${INSECURE_HOST_ERROR_MESSAGE}</p>`;
+      return;
+    }
+
     if (this.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
 
     const stripeOptions = {
