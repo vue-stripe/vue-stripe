@@ -268,6 +268,6 @@ export default {
 }
 
 .hide {
-  visibility: hidden;
+  display: none;
 }
 </style>
