@@ -1,65 +1,79 @@
 import {
   STRIPE_PARTNER_DETAILS,
   INSECURE_HOST_ERROR_MESSAGE,
+  SUPPORTED_LOCALES,
+  DEFAULT_LOCALE,
 } from '../constants';
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
 import { isSecureHost } from '../utils';
-import CoercePropsMixin from 'vue-coerce-props';
 import props from './props';
+
+import { h, computed } from 'vue';
+
+function render () {
+  return h('div', {}, 'Checkout Component');
+}
+
 export default {
   props,
-  mixins: [CoercePropsMixin],
-  render (element) {
-    return element;
-  },
-  mounted () {
+  render,
+  setup (props, { emit }) {
     if (!isSecureHost()) console.warn(INSECURE_HOST_ERROR_MESSAGE);
-  },
-  methods: {
-    async redirectToCheckout () {
+
+    const locale = computed(() => {
+      if (SUPPORTED_LOCALES.includes(props.locale)) return props.locale;
+      console.warn(`VueStripe Warning: '${props.locale}' is not supported by Stripe yet. Falling back to default '${DEFAULT_LOCALE}'.`);
+      return DEFAULT_LOCALE;
+    });
+
+    const redirectToCheckout = async () => {
       try {
         if (!isSecureHost()) {
           throw Error(INSECURE_HOST_ERROR_MESSAGE);
         }
 
-        this.$emit('loading', true);
+        emit('loading', true);
 
-        if (this.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
+        if (props.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
 
-        const stripe = await loadStripe(this.pk);
+        const stripe = await loadStripe(props.pk);
         stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
 
-        if (this.sessionId) {
+        if (props.sessionId) {
           stripe.redirectToCheckout({
-            sessionId: this.sessionId,
+            sessionId: props.sessionId,
           });
+
           return;
         }
 
-        if (this.lineItems && this.lineItems.length && !this.mode) {
+        if (props.lineItems && props.lineItems.length && !props.mode) {
           console.error('Error: Property \'mode\' is required when using \'lineItems\'. See https://stripe.com/docs/js/checkout/redirect_to_checkout#stripe_checkout_redirect_to_checkout-options-mode');
           return;
         }
 
         const options = {
-          billingAddressCollection: this.billingAddressCollection,
-          cancelUrl: this.cancelUrl,
-          clientReferenceId: this.clientReferenceId,
-          customerEmail: this.customerEmail,
-          items: this.items,
-          lineItems: this.lineItems,
-          locale: this.$coerced.locale,
-          mode: this.mode,
-          shippingAddressCollection: this.shippingAddressCollection,
-          submitType: this.submitType,
-          successUrl: this.successUrl,
+          billingAddressCollection: props.billingAddressCollection,
+          cancelUrl: props.cancelUrl,
+          clientReferenceId: props.clientReferenceId,
+          customerEmail: props.customerEmail,
+          items: props.items,
+          lineItems: props.lineItems,
+          locale: locale.value,
+          mode: props.mode,
+          shippingAddressCollection: props.shippingAddressCollection,
+          submitType: props.submitType,
+          successUrl: props.successUrl,
         };
 
         stripe.redirectToCheckout(options);
-      } catch (e) {
-        console.error(e);
-        this.$emit('error', e);
+      } catch (error) {
+        emit('error', error);
       }
-    },
+    };
+
+    return {
+      redirectToCheckout,
+    };
   },
 };

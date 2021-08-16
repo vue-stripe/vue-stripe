@@ -1,11 +1,11 @@
-import StripePlugin from './stripe';
+// import StripePlugin from './stripe';
 import StripeCheckout from './checkout';
-import StripeElementCard from './elements/Card.vue';
-import StripeElementsPlugin from './elements';
+// import StripeElementCard from './elements/Card.vue';
+// import StripeElementsPlugin from './elements';
 
 export {
-  StripePlugin,
+  // StripePlugin,
   StripeCheckout,
-  StripeElementCard,
-  StripeElementsPlugin,
+  // StripeElementCard,
+  // StripeElementsPlugin,
 };
