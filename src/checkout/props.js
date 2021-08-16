@@ -1,7 +1,6 @@
 import {
   BILLING_ADDRESS_COLLECTION_TYPES,
   DEFAULT_LOCALE,
-  SUPPORTED_LOCALES,
   SUPPORTED_SUBMIT_TYPES,
 } from '../constants';
 
@@ -50,11 +49,6 @@ export default {
   locale: {
     type: String,
     default: DEFAULT_LOCALE,
-    coerce: (locale) => {
-      if (SUPPORTED_LOCALES.includes(locale)) return locale;
-      console.warn(`VueStripe Warning: '${locale}' is not supported by Stripe yet. Falling back to default '${DEFAULT_LOCALE}'.`);
-      return DEFAULT_LOCALE;
-    },
   },
   shippingAddressCollection: {
     type: Object,
