@@ -11,7 +11,7 @@ import props from './props';
 import { h, computed } from 'vue';
 
 function render () {
-  return h('div', {}, 'Checkout Component');
+  return h('div', {});
 }
 
 export default {
