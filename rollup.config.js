@@ -11,13 +11,13 @@ export default {
     {
       exports: 'named',
       name: 'vue-stripe',
-      file: '../hello-world/stripe/dist/index.js',
+      file: 'dist/index.js',
       format: 'cjs',
     },
     {
       exports: 'named',
       name: 'VueStripe',
-      file: '../hello-world/stripe/dist/vue-stripe.js',
+      file: 'dist/vue-stripe.js',
       format: 'umd',
     },
   ],
