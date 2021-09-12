@@ -57,4 +57,6 @@ export class StripeElementCard extends Vue {
   elementStyle: any;
   value?: string;
   hidePostalCode: boolean;
+
+  submit(): void;
 }
