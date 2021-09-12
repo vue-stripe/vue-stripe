@@ -60,3 +60,45 @@ export class StripeElementCard extends Vue {
 
   submit(): void;
 }
+
+export interface StripePaymentToken {
+  client_ip: string;
+  created: number;
+  id: string;
+  livemode: boolean;
+  object: string;
+  type: StripeTokenType;
+  used: boolean;
+  card?: StripeCard;
+  back_account?: StripeBankAccount;
+}
+
+export interface StripeCard {
+  address_city: string | null;
+  address_country: string | null;
+  address_line1: string | null;
+  address_line1_check: StripeAddressLineCheck;
+  address_line2: string | null;
+  address_state: string | null;
+  address_zip: string;
+  address_zip_check: StripeAddressCheck;
+  brand: StripeCardBrand;
+  country: string;
+  cvc_check: StripeAddressCheck;
+  dynamic_last4: string | null;
+  exp_month: number;
+  exp_year: number;
+  funding: StripeCardFundingType;
+  id: string;
+  last4: string;
+  name: string | null;
+  object: string;
+  tokenization_method: StripeTokenizationMethod;
+}
+
+export type StripeAccountHolder = 'individual' | 'company';
+export type StripeCardBrand = 'American Express' | 'Diners Club' | 'Discover' | 'JCB' | 'MasterCard' | 'UnionPay' | 'Visa' | 'Unknown';
+export type StripeCardFundingType = 'credit' | 'debit' | 'prepaid' | 'unknown';
+export type StripeTokenizationMethod = 'android_pay' | 'apple_pay' | 'masterpass' | 'visa_checkout' | null;
+export type StripeAddressCheck = 'pass' | 'fail' | 'unchecked' | 'unavailable' | null;
+export type StripeTokenType = 'account' | 'bank_account' | 'card' | 'pii';
