@@ -70,7 +70,6 @@ export interface StripePaymentToken {
   type: StripeTokenType;
   used: boolean;
   card?: StripeCard;
-  back_account?: StripeBankAccount;
 }
 
 export interface StripeCard {
