@@ -231,6 +231,13 @@ export default {
       submit,
       modifiedSlot,
       onSubmit,
+      stripe,
+      element,
+      clear,
+      destroy,
+      focus,
+      unmount,
+      update,
     };
   },
   render () {
