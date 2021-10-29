@@ -52,6 +52,7 @@ export class StripeElementCard extends Vue {
   apiVersion: string;
   locale: string;
   elementsOptions: any;
+  tokenData: any;
   disableAdvancedFraudDetection: boolean;
   classes: any;
   elementStyle: any;
