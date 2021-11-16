@@ -27,7 +27,7 @@ export class StripeCheckout extends Vue {
   sessionId?: string;
   locale: string;
   shippingAddressCollection?: any;
-  disableAdvancedFarudDetection: boolean;
+  disableAdvancedFraudDetection: boolean;
 
   redirectToCheckout(): void;
 }
