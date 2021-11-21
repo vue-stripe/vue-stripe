@@ -107,8 +107,8 @@ export const VUE_STRIPE_VERSION = require('../package.json').version;
 export const STRIPE_PARTNER_DETAILS = {
   name: 'vue-stripe',
   version: VUE_STRIPE_VERSION,
-  url: process?.env?.VUE_STRIPE_WEBSITE || "",
-  partner_id: process?.env?.VUE_STRIPE_PARTNER_ID  || "",
+  url: process.env.VUE_STRIPE_WEBSITE || '',
+  partner_id: process.env.VUE_STRIPE_PARTNER_ID  || '',
 };
 
 export const INSECURE_HOST_ERROR_MESSAGE = 'Vue Stripe will not work on an insecure host. Make sure that your site is using TCP/SSL.';
