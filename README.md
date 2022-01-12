@@ -16,9 +16,10 @@ You can support this project by giving it a star, or following the author. You c
 ## Documentation
 
 - [Website (https://vuestripe.com)](https://vuestripe.com)
-- [Stripe Checkout](https://vuestripe.com/stripe-checkout/getting-started)
-- [Stripe Elements](https://vuestripe.com/stripe-elements/getting-started)
-- [Stripe Plugin](https://vuestripe.com/stripe-plugin/getting-started)
+- [Documentation](https://docs.vuestripe.com/vue-stripe/)
+- [Stripe Checkout](https://docs.vuestripe.com/vue-stripe/stripe-checkout)
+- [Stripe Elements](https://docs.vuestripe.com/vue-stripe/stripe-elements)
+- [Stripe Plugin](https://docs.vuestripe.com/vue-stripe/vue-stripe-plugin)
 
 ## Contributors
 
