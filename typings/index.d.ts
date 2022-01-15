@@ -59,3 +59,15 @@ export class StripeElementCard extends Vue {
   value?: string;
   hidePostalCode: boolean;
 }
+
+export class StripePaymentElement extends Vue {
+  pk: string;
+  elementsOptions: any;
+  confirmParams: any;
+  createOptions: any;
+  redirect?: string;
+  stripeAccount?: string;
+  apiVersion?: string;
+  locale?: string;
+  disableAdvancedFraudDetection?: boolean;
+}
