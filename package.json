@@ -1,6 +1,6 @@
 {
   "name": "@vue-stripe/vue-stripe",
-  "version": "4.2.10",
+  "version": "4.3.0",
   "description": "Stripe Checkout & Elements for Vue.js",
   "author": "jofftiquez@gmail.com",
   "scripts": {
