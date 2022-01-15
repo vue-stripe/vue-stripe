@@ -45,10 +45,6 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    redirect: {
-      type: String,
-      default: 'always',
-    },
     stripeAccount: {
       type: String,
       default: undefined,
@@ -206,23 +202,23 @@ export default {
      * @param {string} opts.fields.billingDetails.email Specify 'never' to avoid collecting an email address as part of the billing details in the Payment Element.
      * @param {string} opts.fields.billingDetails.phone Specify 'never' to avoid collecting a phone number as part of the billing details in the Payment Element.
      * @param {string | Object} opts.fields.billingDetails.address Specify 'never' to avoid collecting an address as part of the billing details in the Payment Element.
-     * @param {string } opts.fields.billingDetails.address.line1 Specify 'never' to avoid collecting an address line1 as part of the billing details in the Payment Element.
-     * @param {string } opts.fields.billingDetails.address.line2 Specify 'never' to avoid collecting an address line2 as part of the billing details in the Payment Element.
-     * @param {string } opts.fields.billingDetails.address.city Specify 'never' to avoid collecting an address city as part of the billing details in the Payment Element.
-     * @param {string } opts.fields.billingDetails.address.state Specify 'never' to avoid collecting an address state as part of the billing details in the Payment Element.
-     * @param {string } opts.fields.billingDetails.address.country Specify 'never' to avoid collecting an address country as part of the billing details in the Payment Element.
-     * @param {string } opts.fields.billingDetails.address.postalCode Specify 'never' to avoid collecting an address postal code as part of the billing details in the Payment Element.
-     * @param {string } opts.fields.terms The Payment Element automatically displays mandates or other legal agreements when required by the payment method, like SEPA debit. Specify 'never' to never show legal agreements.
-     * @param {string } opts.fields.terms.auBecsDebit Specify 'never' to never show legal agreements for the BECS Debit payment method.
-     * @param {string } opts.fields.terms.bancontact Specify 'never' to never show legal agreements for the Bancontact payment method.
-     * @param {string } opts.fields.terms.card Specify 'never' to never show legal agreements for the credit card payment method.
-     * @param {string } opts.fields.terms.ideal Specify 'never' to never show legal agreements for the iDEAL payment method.
-     * @param {string } opts.fields.terms.sepaDebit Specify 'never' to never show legal agreements for the SEPA Debit payment method.
-     * @param {string } opts.fields.terms.sofort Specify 'never' to never show legal agreements for the SOFORT payment method.
-     * @param {string } opts.fields.terms.usBankAccount Specify 'never' to never show legal agreements for the US Bank accounts payment method.
-     * @param {string } opts.wallets Specify 'never' to never show digital wallet payment methods like Apple Pay and Google Pay.
-     * @param {string } opts.wallets.applePay Specify 'never' to never show the Apple Pay digital wallet payment method.
-     * @param {string } opts.wallets.googlePay Specify 'never' to never show the Google Pay digital wallet payment method.
+     * @param {string} opts.fields.billingDetails.address.line1 Specify 'never' to avoid collecting an address line1 as part of the billing details in the Payment Element.
+     * @param {string} opts.fields.billingDetails.address.line2 Specify 'never' to avoid collecting an address line2 as part of the billing details in the Payment Element.
+     * @param {string} opts.fields.billingDetails.address.city Specify 'never' to avoid collecting an address city as part of the billing details in the Payment Element.
+     * @param {string} opts.fields.billingDetails.address.state Specify 'never' to avoid collecting an address state as part of the billing details in the Payment Element.
+     * @param {string} opts.fields.billingDetails.address.country Specify 'never' to avoid collecting an address country as part of the billing details in the Payment Element.
+     * @param {string} opts.fields.billingDetails.address.postalCode Specify 'never' to avoid collecting an address postal code as part of the billing details in the Payment Element.
+     * @param {string} opts.fields.terms The Payment Element automatically displays mandates or other legal agreements when required by the payment method, like SEPA debit. Specify 'never' to never show legal agreements.
+     * @param {string} opts.fields.terms.auBecsDebit Specify 'never' to never show legal agreements for the BECS Debit payment method.
+     * @param {string} opts.fields.terms.bancontact Specify 'never' to never show legal agreements for the Bancontact payment method.
+     * @param {string} opts.fields.terms.card Specify 'never' to never show legal agreements for the credit card payment method.
+     * @param {string} opts.fields.terms.ideal Specify 'never' to never show legal agreements for the iDEAL payment method.
+     * @param {string} opts.fields.terms.sepaDebit Specify 'never' to never show legal agreements for the SEPA Debit payment method.
+     * @param {string} opts.fields.terms.sofort Specify 'never' to never show legal agreements for the SOFORT payment method.
+     * @param {string} opts.fields.terms.usBankAccount Specify 'never' to never show legal agreements for the US Bank accounts payment method.
+     * @param {string} opts.wallets Specify 'never' to never show digital wallet payment methods like Apple Pay and Google Pay.
+     * @param {string} opts.wallets.applePay Specify 'never' to never show the Apple Pay digital wallet payment method.
+     * @param {string} opts.wallets.googlePay Specify 'never' to never show the Google Pay digital wallet payment method.
      */
     update (opts) {
       this.element.update(opts);
