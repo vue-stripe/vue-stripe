@@ -60,7 +60,7 @@ export class StripeElementCard extends Vue {
   hidePostalCode: boolean;
 }
 
-export class StripePaymentElement extends Vue {
+export class StripeElementPayment extends Vue {
   pk: string;
   elementsOptions: any;
   confirmParams: any;
