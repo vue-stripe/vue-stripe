@@ -55,7 +55,7 @@ export default {
           successUrl: this.successUrl,
         };
 
-        stripe.redirectToCheckout(options);
+        return stripe.redirectToCheckout(options);
       } catch (e) {
         console.error(e);
         this.$emit('error', e);
