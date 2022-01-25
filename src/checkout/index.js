@@ -26,7 +26,13 @@ export default {
 
         if (this.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
 
-        const stripe = await loadStripe(this.pk);
+        const stripeOptions = {
+          stripeAccount: this.stripeAccount,
+          apiVersion: this.apiVersion,
+          locale: this.locale,
+        };
+
+        const stripe = await loadStripe(this.pk, stripeOptions);
         stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
 
         if (this.sessionId) {

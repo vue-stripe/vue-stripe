@@ -47,6 +47,14 @@ export default {
   sessionId: {
     type: String,
   },
+  stripeAccount: {
+    type: String,
+    default: undefined,
+  },
+  apiVersion: {
+    type: String,
+    default: undefined,
+  },
   locale: {
     type: String,
     default: DEFAULT_LOCALE,
@@ -62,5 +70,9 @@ export default {
   },
   disableAdvancedFraudDetection: {
     type: Boolean,
+  },
+  stripeOptions: {
+    type: Object,
+    default: null,
   },
 };
