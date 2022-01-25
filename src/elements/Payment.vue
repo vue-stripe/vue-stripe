@@ -31,6 +31,10 @@ export default {
       type: String,
       required: true,
     },
+    testMode: {
+      type: Boolean,
+      default: false,
+    },
     elementsOptions: {
       type: Object,
       required: true,
@@ -75,7 +79,7 @@ export default {
     },
   },
   async mounted () {
-    if (!isSecureHost()) {
+    if (!isSecureHost(this.testMode)) {
       document.getElementById(
         'stripe-payment-element-mount-point',
       ).innerHTML = `<p style="color: red">${INSECURE_HOST_ERROR_MESSAGE}</p>`;

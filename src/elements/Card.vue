@@ -32,6 +32,10 @@ export default {
       type: String,
       required: true,
     },
+    testMode: {
+      type: Boolean,
+      default: false,
+    },
     stripeAccount: {
       type: String,
       default: undefined,
@@ -92,7 +96,7 @@ export default {
     },
   },
   async mounted () {
-    if (!isSecureHost()) {
+    if (!isSecureHost(this.testMode)) {
       document.getElementById('stripe-element-mount-point').innerHTML = `<p style="color: red">${INSECURE_HOST_ERROR_MESSAGE}</p>`;
       return;
     }
