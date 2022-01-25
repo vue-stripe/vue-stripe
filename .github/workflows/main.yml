@@ -24,9 +24,10 @@ jobs:
         run: yarn
       - name: Run lint, build
         env:
-          VUE_STRIPE_WEBSITE: ${{ secrets.VUE_STRIPE_WEBSITE }}
+          VUE_STRIPE_WEBSITE: https://vuestripe.com
           VUE_STRIPE_PARTNER_ID: ${{ secrets.VUE_STRIPE_PARTNER_ID }}
         run: |
+          echo ${{ secrets.VUE_STRIPE_PARTNER_ID }}
           yarn lint
           yarn build
       - name: Ensure package-lock.json
