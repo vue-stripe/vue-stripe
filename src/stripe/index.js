@@ -5,7 +5,7 @@ import {
 import { isSecureHost } from '../utils';
 export default {
   install (Vue, options) {
-    if (!isSecureHost()) console.warn(INSECURE_HOST_ERROR_MESSAGE);
+    if (!isSecureHost(options.testMode)) console.warn(INSECURE_HOST_ERROR_MESSAGE);
     const {
       pk,
       stripeAccount,
