@@ -45,6 +45,10 @@ export default {
       required: true,
       default: () => ({}),
     },
+    redirect: {
+      type: String,
+      default: 'always'
+    },
     createOptions: {
       type: Object,
       default: () => ({}),
@@ -128,6 +132,7 @@ export default {
         const { error } = await this.stripe.confirmPayment({
           elements: this.elements,
           confirmParams: this.confirmParams,
+          redirect: this.redirect
         });
         if (error) {
           const errorElement = document.getElementById(
