@@ -144,14 +144,14 @@ export default {
           this.$emit('error', response.error);
           return;
 
-        } else {
+        } else if( response.paymentIntent ) {
           // if the user has passed prop redirect="if_required"
           // and the payment confirmation was successful
           // and the payment method is not forced to redirect
           // then stripe.confirmPayment resolves with a paymentIntent
           // so we sould pass it back up to the caller for consumption
           // https://stripe.com/docs/js/payment_intents/confirm_payment?type=pii#confirm_payment_intent-options-redirect
-          this.$emit('confirmed', response)
+          this.$emit('confirmed', response.paymentIntent)
         }
 
       } catch (error) {
