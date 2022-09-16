@@ -129,22 +129,22 @@ export default {
       try {
         this.$emit('loading', true);
         event.preventDefault();
-        const response = await this.stripe.confirmPayment({
+        const { error, paymentIntent } = await this.stripe.confirmPayment({
           elements: this.elements,
           confirmParams: this.confirmParams,
           redirect: this.redirect
         });
 
         // if the response is an error
-        if ( response.error ) {
+        if ( error ) {
           const errorElement = document.getElementById(
             'stripe-payment-element-errors',
           );
-          errorElement.textContent = response.error.message;
-          this.$emit('error', response.error);
+          errorElement.textContent = error.message;
+          this.$emit('error', error);
           return;
 
-        } else if( response.paymentIntent ) {
+        } else if( paymentIntent ) {
           // if the user has passed prop redirect="if_required"
           // and the payment confirmation was successful
           // and the payment method is not forced to redirect
