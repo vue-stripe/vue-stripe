@@ -144,7 +144,7 @@ export default {
           this.$emit('error', error);
           return;
 
-        } else if( paymentIntent ) {
+        } else if ( paymentIntent ) {
           // if the user has passed prop redirect="if_required"
           // and the payment confirmation was successful
           // and the payment method is not forced to redirect
