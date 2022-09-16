@@ -137,24 +137,22 @@ export default {
         });
 
         // if the response is an error
-        if ( error ) {
+        if (error) {
           const errorElement = document.getElementById(
             'stripe-payment-element-errors',
           );
           errorElement.textContent = error.message;
           this.$emit('error', error);
           return;
-
-        } else if ( paymentIntent ) {
+        } else if (paymentIntent) {
           // if the user has passed prop redirect="if_required"
           // and the payment confirmation was successful
           // and the payment method is not forced to redirect
           // then stripe.confirmPayment resolves with a paymentIntent
           // so we sould pass it back up to the caller for consumption
           // https://stripe.com/docs/js/payment_intents/confirm_payment?type=pii#confirm_payment_intent-options-redirect
-          this.$emit('confirmed', response.paymentIntent)
+          this.$emit('confirmed', paymentIntent);
         }
-
       } catch (error) {
         console.error(error);
         this.$emit('error', error);
