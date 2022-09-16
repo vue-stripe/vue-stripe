@@ -19,10 +19,10 @@
 
 <script>
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
-import { isSecureHost } from '../utils';
+// import { isSecureHost } from '../utils';
 import {
   STRIPE_PARTNER_DETAILS,
-  INSECURE_HOST_ERROR_MESSAGE,
+  // INSECURE_HOST_ERROR_MESSAGE,
 } from '../constants';
 const ELEMENT_TYPE = 'payment';
 export default {
@@ -47,7 +47,7 @@ export default {
     },
     redirect: {
       type: String,
-      default: 'always'
+      default: 'always',
     },
     createOptions: {
       type: Object,
@@ -83,12 +83,13 @@ export default {
     },
   },
   async mounted () {
-    if (!isSecureHost(this.testMode)) {
-      document.getElementById(
-        'stripe-payment-element-mount-point',
-      ).innerHTML = `<p style="color: red">${INSECURE_HOST_ERROR_MESSAGE}</p>`;
-      return;
-    }
+    // FIXME: temporarily remove to avoid problems with remote non-production deployments
+    // if (!isSecureHost(this.testMode)) {
+    //   document.getElementById(
+    //     'stripe-payment-element-mount-point',
+    //   ).innerHTML = `<p style="color: red">${INSECURE_HOST_ERROR_MESSAGE}</p>`;
+    //   return;
+    // }
 
     if (this.disableAdvancedFraudDetection) {
       loadStripe.setLoadParameters({ advancedFraudSignals: false });
@@ -132,7 +133,7 @@ export default {
         const { error, paymentIntent } = await this.stripe.confirmPayment({
           elements: this.elements,
           confirmParams: this.confirmParams,
-          redirect: this.redirect
+          redirect: this.redirect,
         });
 
         // if the response is an error

@@ -19,11 +19,11 @@
 
 <script>
 import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
-import { isSecureHost } from '../utils';
+// import { isSecureHost } from '../utils';
 import {
   DEFAULT_ELEMENT_STYLE,
   STRIPE_PARTNER_DETAILS,
-  INSECURE_HOST_ERROR_MESSAGE,
+  // INSECURE_HOST_ERROR_MESSAGE,
 } from '../constants';
 const ELEMENT_TYPE = 'card';
 export default {
@@ -96,10 +96,11 @@ export default {
     },
   },
   async mounted () {
-    if (!isSecureHost(this.testMode)) {
-      document.getElementById('stripe-element-mount-point').innerHTML = `<p style="color: red">${INSECURE_HOST_ERROR_MESSAGE}</p>`;
-      return;
-    }
+    // FIXME: temporarily remove to avoid problems with remote non-production deployments
+    // if (!isSecureHost(this.testMode)) {
+    //   document.getElementById('stripe-element-mount-point').innerHTML = `<p style="color: red">${INSECURE_HOST_ERROR_MESSAGE}</p>`;
+    //   return;
+    // }
 
     if (this.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
 
