@@ -58,6 +58,7 @@ Support this project with your organization. Your logo will show up here with a 
 [<img src="https://i.imgur.com/x0SERyj.png" width="200px">](https://mycure.md)
 [<img src="https://i.imgur.com/4jF5M4A.png">](http://myteamops.com)
 
+
 **Vue Stripe is now powered by GitBook**
 
 [<img src="https://guanqr.com/images/gitbook-logo.png" width="300px"/>](https://gitbook.com)
