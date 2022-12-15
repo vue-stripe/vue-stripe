@@ -3,29 +3,22 @@
     <form id="stripe-element-form">
       <div id="stripe-element-mount-point" />
       <slot name="stripe-element-errors">
-        <div
-          id="stripe-element-errors"
-          role="alert"
-        />
+        <div id="stripe-element-errors" role="alert" />
       </slot>
-      <button
-        ref="submitButtonRef"
-        type="submit"
-        class="hide"
-      />
+      <button ref="submitButtonRef" type="submit" class="hide" />
     </form>
   </div>
 </template>
 
 <script>
-import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
+import { loadStripe } from "@stripe/stripe-js/dist/pure.esm.js";
 // import { isSecureHost } from '../utils';
 import {
   DEFAULT_ELEMENT_STYLE,
   STRIPE_PARTNER_DETAILS,
   // INSECURE_HOST_ERROR_MESSAGE,
-} from '../constants';
-const ELEMENT_TYPE = 'card';
+} from "../constants";
+const ELEMENT_TYPE = "card";
 export default {
   props: {
     pk: {
@@ -46,7 +39,7 @@ export default {
     },
     locale: {
       type: String,
-      default: 'auto',
+      default: "auto",
     },
     elementsOptions: {
       type: Object,
@@ -66,7 +59,7 @@ export default {
     },
     elementStyle: {
       type: Object,
-      default: () => (DEFAULT_ELEMENT_STYLE),
+      default: () => DEFAULT_ELEMENT_STYLE,
     },
     value: {
       type: String,
@@ -75,13 +68,13 @@ export default {
     hidePostalCode: Boolean,
     iconStyle: {
       type: String,
-      default: 'default',
-      validator: value => ['solid', 'default'].includes(value),
+      default: "default",
+      validator: (value) => ["solid", "default"].includes(value),
     },
     hideIcon: Boolean,
     disabled: Boolean,
   },
-  data () {
+  data() {
     return {
       loading: false,
       stripe: null,
@@ -91,18 +84,21 @@ export default {
     };
   },
   computed: {
-    form () {
-      return document.getElementById('stripe-element-form');
+    form() {
+      return document.getElementById("stripe-element-form");
     },
   },
-  async mounted () {
+  async mounted() {
     // FIXME: temporarily remove to avoid problems with remote non-production deployments
     // if (!isSecureHost(this.testMode)) {
     //   document.getElementById('stripe-element-mount-point').innerHTML = `<p style="color: red">${INSECURE_HOST_ERROR_MESSAGE}</p>`;
     //   return;
     // }
 
-    if (this.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
+    if (this.disableAdvancedFraudDetection)
+      loadStripe.setLoadParameters({
+        advancedFraudSignals: false,
+      });
 
     const stripeOptions = {
       stripeAccount: this.stripeAccount,
@@ -123,45 +119,48 @@ export default {
     this.stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
     this.elements = this.stripe.elements(this.elementsOptions);
     this.element = this.elements.create(ELEMENT_TYPE, createOptions);
-    this.element.mount('#stripe-element-mount-point');
+    this.element.mount("#stripe-element-mount-point");
 
-    this.element.on('change', (event) => {
-      var displayError = document.getElementById('stripe-element-errors');
+    this.element.on("change", (event) => {
+      var displayError = document.getElementById("stripe-element-errors");
       if (event.error) {
         displayError.textContent = event.error.message;
       } else {
-        displayError.textContent = '';
+        displayError.textContent = "";
       }
       this.onChange(event);
     });
 
-    this.element.on('blur', this.onBlur);
-    this.element.on('click', this.onClick);
-    this.element.on('escape', this.onEscape);
-    this.element.on('focus', this.onFocus);
-    this.element.on('ready', this.onReady);
+    this.element.on("blur", this.onBlur);
+    this.element.on("click", this.onClick);
+    this.element.on("escape", this.onEscape);
+    this.element.on("focus", this.onFocus);
+    this.element.on("ready", this.onReady);
 
-    this.form.addEventListener('submit', async (event) => {
+    this.form.addEventListener("submit", async (event) => {
       try {
-        this.$emit('loading', true);
+        this.$emit("loading", true);
         event.preventDefault();
         const data = {
           ...this.element,
         };
         if (this.amount) data.amount = this.amount;
-        const { token, error } = await this.stripe.createToken(data, this.tokenData);
+        const { token, error } = await this.stripe.createToken(
+          data,
+          this.tokenData
+        );
         if (error) {
-          const errorElement = document.getElementById('stripe-element-errors');
+          const errorElement = document.getElementById("stripe-element-errors");
           errorElement.textContent = error.message;
-          this.$emit('error', error);
+          this.$emit("error", error);
           return;
         }
-        this.$emit('token', token);
+        this.$emit("token", token);
       } catch (error) {
         console.error(error);
-        this.$emit('error', error);
+        this.$emit("error", error);
       } finally {
-        this.$emit('loading', false);
+        this.$emit("loading", false);
       }
     });
   },
@@ -170,36 +169,38 @@ export default {
      * Triggers the submission of the form
      * @return {void}
      */
-    submit () {
+    submit() {
       this.$refs.submitButtonRef.click();
     },
     /**
      * Clears the element
      * @return {void}
      */
-    clear () {
+    clear() {
       this.element.clear();
     },
     /**
      * Destroys the element
      * @return {void}
      */
-    destroy () {
+    destroy() {
       this.element.destroy();
     },
     /**
      * Focuses on the element
      * @return {void}
      */
-    focus () {
-      console.warn('This method will currently not work on iOS 13+ due to a system limitation.');
+    focus() {
+      console.warn(
+        "This method will currently not work on iOS 13+ due to a system limitation."
+      );
       this.element.focus();
     },
     /**
      * Unmounts the element
      * @return {void}
      */
-    unmount () {
+    unmount() {
       this.element.unmount();
     },
     /**
@@ -217,27 +218,27 @@ export default {
      * @param {boolean} opts.hideIcon Hides the icon in the Element. Default is false.
      * @param {boolean} opts.disabled Applies a disabled state to the Element such that user input is not accepted. Default is false.
      */
-    update (opts) {
+    update(opts) {
       this.element.update(opts);
     },
     // events
-    onChange (e) {
-      this.$emit('element-change', e);
+    onChange(e) {
+      this.$emit("element-change", e);
     },
-    onReady (e) {
-      this.$emit('element-ready', e);
+    onReady(e) {
+      this.$emit("element-ready", e);
     },
-    onFocus (e) {
-      this.$emit('element-focus', e);
+    onFocus(e) {
+      this.$emit("element-focus", e);
     },
-    onBlur (e) {
-      this.$emit('element-blur', e);
+    onBlur(e) {
+      this.$emit("element-blur", e);
     },
-    onEscape (e) {
-      this.$emit('element-escape', e);
+    onEscape(e) {
+      this.$emit("element-escape", e);
     },
-    onClick (e) {
-      this.$emit('element-click', e);
+    onClick(e) {
+      this.$emit("element-click", e);
     },
   },
 };

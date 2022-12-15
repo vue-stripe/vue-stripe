@@ -3,7 +3,7 @@ import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
   SUPPORTED_SUBMIT_TYPES,
-} from '../constants';
+} from "../constants";
 
 export default {
   pk: {
@@ -12,7 +12,7 @@ export default {
   },
   mode: {
     type: String,
-    validator: value => ['payment', 'subscription'].includes(value),
+    validator: (value) => ["payment", "subscription"].includes(value),
   },
   lineItems: {
     type: Array,
@@ -35,7 +35,7 @@ export default {
   },
   billingAddressCollection: {
     type: String,
-    default: 'auto',
+    default: "auto",
     validator: (value) => BILLING_ADDRESS_COLLECTION_TYPES.includes(value),
   },
   clientReferenceId: {
@@ -60,13 +60,16 @@ export default {
     default: DEFAULT_LOCALE,
     coerce: (locale) => {
       if (SUPPORTED_LOCALES.includes(locale)) return locale;
-      console.warn(`VueStripe Warning: '${locale}' is not supported by Stripe yet. Falling back to default '${DEFAULT_LOCALE}'.`);
+      console.warn(
+        `VueStripe Warning: '${locale}' is not supported by Stripe yet. Falling back to default '${DEFAULT_LOCALE}'.`
+      );
       return DEFAULT_LOCALE;
     },
   },
   shippingAddressCollection: {
     type: Object,
-    validator: value => Object.prototype.hasOwnProperty.call(value, 'allowedCountries'),
+    validator: (value) =>
+      Object.prototype.hasOwnProperty.call(value, "allowedCountries"),
   },
   disableAdvancedFraudDetection: {
     type: Boolean,

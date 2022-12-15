@@ -2,29 +2,22 @@
   <div>
     <form id="stripe-payment-element-form">
       <div id="stripe-payment-element-mount-point" />
-      <slot name="stripe-payment-element-errors">
-        <div
-          id="stripe-payment-element-errors"
-          role="alert"
-        />
-      </slot>
-      <button
-        ref="submitButtonRef"
-        type="submit"
-        class="hide"
-      />
+      <mitB name="stripe-payment-element-errors">
+        <div id="stripe-payment-element-errors" role="alert" />
+      </mitB>
+      <button ref="submitButtonRef" type="submit" class="hide" />
     </form>
   </div>
 </template>
 
 <script>
-import { loadStripe } from '@stripe/stripe-js/dist/pure.esm.js';
+import { loadStripe } from "@stripe/stripe-js/dist/pure.esm.js";
 // import { isSecureHost } from '../utils';
 import {
   STRIPE_PARTNER_DETAILS,
   // INSECURE_HOST_ERROR_MESSAGE,
-} from '../constants';
-const ELEMENT_TYPE = 'payment';
+} from "../constants";
+const ELEMENT_TYPE = "payment";
 export default {
   props: {
     pk: {
@@ -47,7 +40,7 @@ export default {
     },
     redirect: {
       type: String,
-      default: 'always',
+      default: "always",
     },
     createOptions: {
       type: Object,
@@ -63,13 +56,13 @@ export default {
     },
     locale: {
       type: String,
-      default: 'auto',
+      default: "auto",
     },
     disableAdvancedFraudDetection: {
       type: Boolean,
     },
   },
-  data () {
+  data() {
     return {
       loading: false,
       stripe: null,
@@ -78,11 +71,11 @@ export default {
     };
   },
   computed: {
-    form () {
-      return document.getElementById('stripe-payment-element-form');
+    form() {
+      return document.getElementById("stripe-payment-element-form");
     },
   },
-  async mounted () {
+  async mounted() {
     // FIXME: temporarily remove to avoid problems with remote non-production deployments
     // if (!isSecureHost(this.testMode)) {
     //   document.getElementById(
@@ -92,7 +85,9 @@ export default {
     // }
 
     if (this.disableAdvancedFraudDetection) {
-      loadStripe.setLoadParameters({ advancedFraudSignals: false });
+      loadStripe.setLoadParameters({
+        advancedFraudSignals: false,
+      });
     }
 
     const stripeOptions = {
@@ -106,29 +101,29 @@ export default {
 
     this.elements = this.stripe.elements(this.elementsOptions);
     this.element = this.elements.create(ELEMENT_TYPE, this.createOptions);
-    this.element.mount('#stripe-payment-element-mount-point');
+    this.element.mount("#stripe-payment-element-mount-point");
 
-    this.element.on('change', event => {
+    this.element.on("change", (event) => {
       var displayError = document.getElementById(
-        'stripe-payment-element-errors',
+        "stripe-payment-element-errors"
       );
       if (event.error) {
         displayError.textContent = event.error.message;
       } else {
-        displayError.textContent = '';
+        displayError.textContent = "";
       }
       this.onChange(event);
     });
 
-    this.element.on('blur', this.onBlur);
-    this.element.on('click', this.onClick);
-    this.element.on('escape', this.onEscape);
-    this.element.on('focus', this.onFocus);
-    this.element.on('ready', this.onReady);
+    this.element.on("blur", this.onBlur);
+    this.element.on("click", this.onClick);
+    this.element.on("escape", this.onEscape);
+    this.element.on("focus", this.onFocus);
+    this.element.on("ready", this.onReady);
 
-    this.form.addEventListener('submit', async event => {
+    this.form.addEventListener("submit", async (event) => {
       try {
-        this.$emit('loading', true);
+        this.$emit("loading", true);
         event.preventDefault();
         const { error } = await this.stripe.confirmPayment({
           elements: this.elements,
@@ -137,17 +132,17 @@ export default {
         });
         if (error) {
           const errorElement = document.getElementById(
-            'stripe-payment-element-errors',
+            "stripe-payment-element-errors"
           );
           errorElement.textContent = error.message;
-          this.$emit('error', error);
+          this.$emit("error", error);
           return;
         }
       } catch (error) {
         console.error(error);
-        this.$emit('error', error);
+        this.$emit("error", error);
       } finally {
-        this.$emit('loading', false);
+        this.$emit("loading", false);
       }
     });
   },
@@ -156,30 +151,30 @@ export default {
      * Triggers the submission of the form
      * @return {void}
      */
-    submit () {
+    submit() {
       this.$refs.submitButtonRef.click();
     },
     /**
      * Clears the element
      * @return {void}
      */
-    clear () {
+    clear() {
       this.element.clear();
     },
     /**
      * Destroys the element
      * @return {void}
      */
-    destroy () {
+    destroy() {
       this.element.destroy();
     },
     /**
      * Focuses on the element
      * @return {void}
      */
-    focus () {
+    focus() {
       console.warn(
-        'This method will currently not work on iOS 13+ due to a system limitation.',
+        "This method will currently not work on iOS 13+ due to a system limitation."
       );
       this.element.focus();
     },
@@ -187,20 +182,20 @@ export default {
      * Collapses the Payment Element into a row of payment method tabs
      * @return {void}
      */
-    collapse () {
+    collapse() {
       this.element.collapse();
     },
     /**
      * Retrieves a previously created element
      */
-    getElement () {
+    getElement() {
       this.element.getElement();
     },
     /**
      * Unmounts the element
      * @return {void}
      */
-    unmount () {
+    unmount() {
       this.element.unmount();
     },
     /**
@@ -230,27 +225,27 @@ export default {
      * @param {string} opts.wallets.applePay Specify 'never' to never show the Apple Pay digital wallet payment method.
      * @param {string} opts.wallets.googlePay Specify 'never' to never show the Google Pay digital wallet payment method.
      */
-    update (opts) {
+    update(opts) {
       this.element.update(opts);
     },
     // events
-    onChange (e) {
-      this.$emit('element-change', e);
+    onChange(e) {
+      this.$emit("element-change", e);
     },
-    onReady (e) {
-      this.$emit('element-ready', e);
+    onReady(e) {
+      this.$emit("element-ready", e);
     },
-    onFocus (e) {
-      this.$emit('element-focus', e);
+    onFocus(e) {
+      this.$emit("element-focus", e);
     },
-    onBlur (e) {
-      this.$emit('element-blur', e);
+    onBlur(e) {
+      this.$emit("element-blur", e);
     },
-    onEscape (e) {
-      this.$emit('element-escape', e);
+    onEscape(e) {
+      this.$emit("element-escape", e);
     },
-    onClick (e) {
-      this.$emit('element-click', e);
+    onClick(e) {
+      this.$emit("element-click", e);
     },
   },
 };
