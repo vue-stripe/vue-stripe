@@ -1,9 +1,9 @@
-import babel from 'rollup-plugin-babel';
+import babel from '@rollup/plugin-babel';
 import vue from 'rollup-plugin-vue';
 import postcss from 'rollup-plugin-postcss';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import commonjs from '@rollup/plugin-commonjs';
 
 export default {
   input: 'src/index.js',
@@ -26,7 +26,7 @@ export default {
     vue(),
     resolve(),
     babel({
-      runtimeHelpers: true,
+      babelHelpers: 'runtime',
       exclude: /node_modules/,
     }),
     postcss({
