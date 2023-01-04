@@ -94,8 +94,8 @@ export const DEFAULT_ELEMENT_STYLE = {
   },
 };
 
-import version from "../package.json";
-export const VUE_STRIPE_VERSION = version;
+import packageObj from "../package.json";
+export const VUE_STRIPE_VERSION = packageObj.version;
 
 export const STRIPE_PARTNER_DETAILS = {
   name: "vue-stripe",
