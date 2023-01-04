@@ -1,8 +1,5 @@
 import { fileURLToPath, URL } from "node:url";
-import process from "node:process";
-
 import { defineConfig } from "vite";
-import { createHtmlPlugin } from "vite-plugin-html";
 import vue from "@vitejs/plugin-vue";
 // import typescript2 from "rollup-plugin-typescript2";
 
@@ -23,20 +20,14 @@ export default defineConfig({
       //     exclude: ["vite.config.ts"],
       //   },
       // }),
-    ],
-    createHtmlPlugin({
-      inject: {
-        data: { BASE_URL: process.env.CF_PAGES_URL ?? "http://localhost:5173" },
-      },
-    }),
+    ]
   ],
   build: {
     cssCodeSplit: false,
     lib: {
       entry: "./src/index.js",
-      formats: ["cjs"],
       name: "@vue-stripe/vue-stripe",
-      fileName: "index",
+      fileName: "vue-stripe",
     },
     rollupOptions: {
       external: ["vue"],

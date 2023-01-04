@@ -3,18 +3,18 @@
   "version": "4.4.4",
   "description": "Stripe Checkout & Elements for Vue.js",
   "author": "jofftiquez@gmail.com",
-  "type": "module",
-  "exports": {
-    ".": "./dist/index.cjs",
-    "./style.css": "./dist/style.css"
-  },
-  "browser": {
-    "./style.css": "./dist/style.css"
-  },
-  "activationEvents": [
-    "dist"
-  ],
   "private": true,
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/vue-stripe.mjs",
+  "module": "./dist/vue-stripe.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vue-stripe.js",
+      "require": "./dist/vue-stripe.umd.js"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

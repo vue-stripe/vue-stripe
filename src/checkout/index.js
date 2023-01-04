@@ -1,3 +1,4 @@
+import { h } from "vue";
 import {
   STRIPE_PARTNER_DETAILS,
   // INSECURE_HOST_ERROR_MESSAGE,
@@ -9,8 +10,8 @@ import props from "./props";
 export default {
   props,
   mixins: [CoercePropsMixin],
-  render(element) {
-    return element;
+  render() {
+    return h("div", this.$slots.default ? this.$slots.default() : []);
   },
   // FIXME: temporarily remove to avoid problems with remote non-production deployments
   // mounted () {
