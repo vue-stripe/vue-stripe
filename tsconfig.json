@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "allowJs": true,
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "allowUnreachableCode": false,
+        "noImplicitReturns": true,
+        "noImplicitAny": true,
+        "outFile": "./dist/vue-stripe.d.ts",
+        "skipLibCheck": true
+    },
+    "include": [
+        "./src"
+    ],
+}

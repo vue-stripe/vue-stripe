@@ -1,14 +1,14 @@
-# This is a Vue3 fork of https://github.com/vue-stripe/vue-stripe/
+# This is a Vue3 fork of https://github.com/james090500/vue-stripe/
 
 
-# [Important Notice!](https://github.com/vue-stripe/vue-stripe/discussions/261)
+# [Important Notice!](https://github.com/james090500/vue-stripe/discussions/261)
 
 <p align="center">
   <img src="./vue-stripe-logo-variant-1.png" alt="drawing" width="250"/>
   <h1 align="center">Vue Stripe 💳</h1>
 </p>
 
-<a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="./stripe_partner_badge_verified_blurple.png" alt="drawing" width="98"/></a> [![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/@james090500/vue-stripe?style=flat-square) ![npm](https://img.shields.io/npm/dw/@james090500/vue-stripe?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vue-stripe/vue-stripe/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://opencollective.com/vue-stripe-checkout)
+<a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="./stripe_partner_badge_verified_blurple.png" alt="drawing" width="98"/></a> [![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/@james090500/vue-stripe?style=flat-square) ![npm](https://img.shields.io/npm/dw/@james090500/vue-stripe?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/james090500/vue-stripe/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://opencollective.com/vue-stripe-checkout)
 
 > [Vue Stripe](https://vuestripe.com) is now an official [Stripe partner](https://stripe.com/partners/vue-stripe) 🎉
 
@@ -22,7 +22,7 @@ You can support this project by giving it a star, or following the author. You c
 - [Documentation](https://docs.vuestripe.com/vue-stripe/)
 - [Stripe Checkout](https://docs.vuestripe.com/vue-stripe/stripe-checkout)
 - [Stripe Elements](https://docs.vuestripe.com/vue-stripe/stripe-elements)
-- [Stripe Plugin](https://docs.vuestripe.com/vue-stripe/vue-stripe-plugin)
+- [Stripe Plugin](https://docs.vuestripe.com/james090500/vue-stripe-plugin)
 
 ## Contributors
 

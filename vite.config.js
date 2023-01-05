@@ -5,23 +5,7 @@ import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    [
-      vue(),
-      // typescript2({
-      //   check: false,
-      //   include: ["./src/*.vue"],
-      //   tsconfigOverride: {
-      //     compilerOptions: {
-      //       sourceMap: true,
-      //       declaration: true,
-      //       declarationMap: true,
-      //     },
-      //     exclude: ["vite.config.ts"],
-      //   },
-      // }),
-    ]
-  ],
+  plugins: [[vue()]],
   build: {
     cssCodeSplit: false,
     lib: {

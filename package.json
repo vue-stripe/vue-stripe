@@ -1,25 +1,22 @@
 {
   "name": "@james090500/vue-stripe",
-  "version": "4.4.4",
+  "version": "4.4.5",
   "description": "Stripe Checkout & Elements for Vue.js",
   "author": "jofftiquez@gmail.com",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/vue-stripe.mjs",
   "module": "./dist/vue-stripe.js",
-  "exports": {
-    ".": {
-      "import": "./dist/vue-stripe.js",
-      "require": "./dist/vue-stripe.umd.js"
-    },
-    "./dist/style.css": "./dist/style.css"
-  },
+  "typings": "dist/vue-stripe.d.ts",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && vue-tsc --declaration --emitDeclarationOnly",
     "preview": "vite preview --port 4173",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "declartion": "vue-tsc --declaration --emitDeclarationOnly",
+    "publish": "npm version patch --force && npm publish"
   },
   "dependencies": {
     "@stripe/stripe-js": "^1.46.0",
@@ -36,6 +33,23 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.1",
     "vite": "^4.0.4",
-    "vite-plugin-html": "^3.2.0"
+    "vite-plugin-html": "^3.2.0",
+    "vue-tsc": "^1.0.22"
+  },
+  "bugs": {
+    "url": "https://github.com/james090500/vue-stripe/issues"
+  },
+  "homepage": "https://github.com/james090500/vue-stripe#readme",
+  "keywords": [
+    "vue",
+    "vuejs",
+    "stripe",
+    "checkout",
+    "payment"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:james090500/vue-stripe.git"
   }
 }
