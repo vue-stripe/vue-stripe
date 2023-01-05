@@ -15,8 +15,7 @@
     "build": "vite build && vue-tsc --declaration --emitDeclarationOnly",
     "preview": "vite preview --port 4173",
     "prepare": "npm run build",
-    "declartion": "vue-tsc --declaration --emitDeclarationOnly",
-    "publish": "npm version patch --force && npm publish"
+    "declartion": "vue-tsc --declaration --emitDeclarationOnly"
   },
   "dependencies": {
     "@stripe/stripe-js": "^1.46.0",
