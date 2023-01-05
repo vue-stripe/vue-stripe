@@ -26,7 +26,7 @@ export default defineConfig({
     cssCodeSplit: false,
     lib: {
       entry: "./src/index.js",
-      name: "@vue-stripe/vue-stripe",
+      name: "@james090500/vue-stripe",
       fileName: "vue-stripe",
     },
     rollupOptions: {

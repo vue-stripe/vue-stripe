@@ -1,3 +1,6 @@
+# This is a Vue3 fork of https://github.com/vue-stripe/vue-stripe/
+
+
 # [Important Notice!](https://github.com/vue-stripe/vue-stripe/discussions/261)
 
 <p align="center">
@@ -5,7 +8,7 @@
   <h1 align="center">Vue Stripe 💳</h1>
 </p>
 
-<a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="./stripe_partner_badge_verified_blurple.png" alt="drawing" width="98"/></a> [![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square) ![npm](https://img.shields.io/npm/dw/@vue-stripe/vue-stripe?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vue-stripe/vue-stripe/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://opencollective.com/vue-stripe-checkout)
+<a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="./stripe_partner_badge_verified_blurple.png" alt="drawing" width="98"/></a> [![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/@james090500/vue-stripe?style=flat-square) ![npm](https://img.shields.io/npm/dw/@james090500/vue-stripe?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vue-stripe/vue-stripe/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://opencollective.com/vue-stripe-checkout)
 
 > [Vue Stripe](https://vuestripe.com) is now an official [Stripe partner](https://stripe.com/partners/vue-stripe) 🎉
 
