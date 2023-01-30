@@ -1,13 +1,7 @@
-import StripePlugin from './stripe';
-import StripeCheckout from './checkout';
-import StripeElementCard from './elements/Card.vue';
-import StripeElementPayment from './elements/Payment.vue';
-import StripeElementsPlugin from './elements';
+import { useStripe } from './stripe';
+import VueStripePlugin from './plugins';
 
 export {
-  StripePlugin,
-  StripeCheckout,
-  StripeElementCard,
-  StripeElementPayment,
-  StripeElementsPlugin,
+  VueStripePlugin,
+  useStripe,
 };

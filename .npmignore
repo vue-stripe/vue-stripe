@@ -1,12 +1,1 @@
-test/
-src/
-node_modules/
-.github/
-.editorconfig
-.eslintignore
-.eslintrc
-.babel.config.js
-.rollup.config.js
-vue-stripe-logo-*
-stripe_partner_badge_verified_blurple.png
-CODE_OF_CONDUCT.md
+node_modules

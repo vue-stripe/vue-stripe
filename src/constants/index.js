@@ -1,3 +1,4 @@
+
 export const STRIPE_JS_SDK_URL = 'https://js.stripe.com';
 
 export const SUPPORTED_ELEMENT_TYPE = [
@@ -17,24 +18,29 @@ export const SUPPORTED_ELEMENT_TYPE = [
 export const DEFAULT_LOCALE = 'auto';
 
 export const SUPPORTED_LOCALES = [
+  'ar',
   'auto',
   'bg',
   'cs',
   'da',
   'de',
   'el',
-  'en',
   'en-GB',
-  'es',
+  'en',
   'es-419',
+  'es',
   'et',
   'fi',
-  'fr',
+  'fil',
   'fr-CA',
+  'fr',
+  'he',
+  'hr',
   'hu',
   'id',
   'it',
   'ja',
+  'ko',
   'lt',
   'lv',
   'ms',
@@ -42,17 +48,20 @@ export const SUPPORTED_LOCALES = [
   'nb',
   'nl',
   'pl',
-  'pt',
   'pt-BR',
+  'pt',
   'ro',
   'ru',
   'sk',
   'sl',
   'sv',
+  'th',
   'tr',
-  'zh',
+  'tr',
+  'vi',
   'zh-HK',
   'zh-TW',
+  'zh',
 ];
 
 export const SUPPORTED_SUBMIT_TYPES = [

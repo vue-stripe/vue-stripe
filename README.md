@@ -1,65 +1,206 @@
-# [Important Notice!](https://github.com/vue-stripe/vue-stripe/discussions/261)
+# Vue Footprints
 
-<p align="center">
-  <img src="./vue-stripe-logo-variant-1.png" alt="drawing" width="250"/>
-  <h1 align="center">Vue Stripe 💳</h1>
-</p>
+Breadcrumbs plugin for Vue.js & Vue Router. Why footprints? Coz it's similar to the idea of breadcrumbs. Also, there's already a bunch of packages that has "breadcrumbs" on their name.
 
-<a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="./stripe_partner_badge_verified_blurple.png" alt="drawing" width="98"/></a> [![Financial Contributors on Open Collective](https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors)](https://opencollective.com/vue-stripe-checkout) ![npm bundle size](https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square) ![npm](https://img.shields.io/npm/dw/@vue-stripe/vue-stripe?style=flat-square) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vue-stripe/vue-stripe/Deploy?style=flat-square) [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://opencollective.com/vue-stripe-checkout)
+> NOTE: This requires Vue Router to work.
 
-> [Vue Stripe](https://vuestripe.com) is now an official [Stripe partner](https://stripe.com/partners/vue-stripe) 🎉
+> Is this compatible with Vue 2? I don't know, I haven't tried. It might tho, give it a try.
 
-Stripe Checkout & Elements for Vue.js
+## Installation
 
-You can support this project by giving it a star, or following the author. You can also send your love through [Open Collective](https://opencollective.com/vue-stripe-checkout#section-contribute) :heart:.
+**Yarn**
 
-## Documentation
+```bash
+yarn add vue-footprints
+```
 
-- [Website (https://vuestripe.com)](https://vuestripe.com)
-- [Documentation](https://docs.vuestripe.com/vue-stripe/)
-- [Stripe Checkout](https://docs.vuestripe.com/vue-stripe/stripe-checkout)
-- [Stripe Elements](https://docs.vuestripe.com/vue-stripe/stripe-elements)
-- [Stripe Plugin](https://docs.vuestripe.com/vue-stripe/vue-stripe-plugin)
+**NPM**
 
-## Contributors
+```bash
+npm install vue-footprints
+```
 
-### Code Contributors
+## Usage
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/jofftiquez/vue-stripe-checkout/graphs/contributors"><img src="https://opencollective.com/vue-stripe-checkout/contributors.svg?width=890&button=false" /></a>
+This will add a global computed mixin array called `$footprints`. Remember this one, we'll talk about it in the implmentation part.
 
-### Financial Contributors
+```js
+import { createApp } from 'vue'
+import VueFootprints from 'vue-footprints';
 
-Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/vue-stripe-checkout/contribute)]
+const app = createApp({});
 
-#### Individuals
+app.use(VueFootprints);
+```
 
-<a href="https://opencollective.com/vue-stripe-checkout"><img src="https://opencollective.com/vue-stripe-checkout/individuals.svg?width=890"></a>
+## Implementation with Vue App
 
-#### Organizations
+**Step 1**
 
-Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/vue-stripe-checkout/contribute)]
+In your Vue Router routes, add the object `footprint` in the `meta` object of each route that you want to be added to the footprints. Assumming that you have the routes below:
 
-<a href="https://opencollective.com/vue-stripe-checkout/organization/0/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/0/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/1/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/1/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/2/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/2/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/3/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/3/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/4/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/4/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/5/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/5/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/6/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/6/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/7/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/7/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/8/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/8/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/9/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/9/avatar.svg"></a>
+```
+|- grandparent
+  |- parent
+    |- child 1
+    |- child 2
+```
 
+```diff
+...
+{
+  path: '/grandparent',
+  name: 'grandparent',
+  meta: {
++    footprint: {
++      name: 'Grandparent',
++    },
+  },
+  component: () => import('pages/GrandParentPage'),
+  children: [
+    {
+      path: 'parent',
+      name: 'parent',
+      component: () => import('pages/ParentPage'),
+      meta: {
++        footprint: {
++          name: 'Parent',
++        },
+      },
+      children: [
+        {
+          path: 'child-1',
+          name: 'child-1',
+          component: () => import('pages/ChildOnePage'),
+          meta: {
++            footprint: {
++              name: 'Child 1',
++            },
+          },
+        },
+        {
+          path: 'child-2',
+          name: 'child-2',
+          component: () => import('pages/ChildTwoPage'),
+          meta: {
++            footprint: {
++              name: 'Child 2',
++            },
+          },
+        },
+      ],
+    },
+  ],
+}
+```
 
-**SPECIAL THANKS TO:**
+**Step 2**
 
-[<img src="https://i.imgur.com/Ttv4fMw.png" width="200px">](https://mightyminds.org)
-[<img src="https://i.imgur.com/x0SERyj.png" width="200px">](https://mycure.md)
-[<img src="https://i.imgur.com/4jF5M4A.png">](http://myteamops.com)
+Given the input above, the `$footprints` will look like this depending on how deep you are in the route history. Say you're just in the `/grandparent` it will look like:
 
-**Vue Stripe is now powered by GitBook**
+```js
+$footprints: [
+  {
+    footprint: {
+      name: 'Grandparent'
+    },
+    active: true,
+    route: {
+      name: 'grandparent',
+      path: '/grandparent'
+    }
+  }
+]
+```
 
-[<img src="https://guanqr.com/images/gitbook-logo.png" width="300px"/>](https://gitbook.com)
+But if you're in the `/grandparent/parent` it will look like:
 
-Made with :heart: by [Joff Tiquez](https://twitter.com/jrtiquez)
+```js
+$footprints: [
+  {
+    footprint: {
+      name: 'Grandparent'
+    },
+    active: false,
+    route: {
+      name: 'grandparent',
+      path: '/grandparent'
+    }
+  },
+  {
+    footprint: {
+      name: 'Parent'
+    },
+    active: true,
+    route: {
+      name: 'parent',
+      path: '/grandparent/parent'
+    }
+  }
+]
+```
+
+And finally if you're in `/granparent/parent/child-1` it will look like:
+
+```js
+$footprints: [
+  {
+    footprint: {
+      name: 'Grandparent'
+    },
+    active: false,
+    route: {
+      name: 'grandparent',
+      path: '/grandparent'
+    }
+  },
+  {
+    footprint: {
+      name: 'Parent'
+    },
+    active: false,
+    route: {
+      name: 'parent',
+      path: '/grandparent/parent'
+    }
+  },
+  {
+    footprint: {
+      name: 'Child 1'
+    },
+    active: true,
+    route: {
+      name: 'child-1',
+      path: '/grandparent/parent/child-1'
+    }
+  }
+]
+```
+
+**Step 3**
+
+Do whatever you want with the `$footprints` object. In my case I made this for my quasar app so I used their [`QBreadcrumbs`](https://quasar.dev/vue-components/breadcrumbs) component.
+
+## API (Object structure)
+
+```js
+$footprints: [
+  {
+    // Whatever you put Route#meta.footer will appear here
+    footprint: Object,
+    // True if the this footprint is the active route. False, otherwise.
+    active: Boolean,
+    // The route object in case you want to use it.
+    // You can return everything or just the essential by
+    // passing returnRoute: true in the options. 
+    // E.x. app.use(VueFootprints, { returnRoute: true });
+    route: Object,
+  }
+]
+```
+
+## Example
+
+This is just a screenshot from my app, I don't have time create an example, sorry. If you have a question, join our [discord server](https://discord.com/invite/4ujGbRJyDN).
+
+<img src="./example.png">

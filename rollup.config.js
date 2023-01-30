@@ -1,37 +1,25 @@
-import babel from 'rollup-plugin-babel';
-import vue from 'rollup-plugin-vue';
-import postcss from 'rollup-plugin-postcss';
-import { terser } from 'rollup-plugin-terser';
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+const babel = require('@rollup/plugin-babel');
+const commonjs = require('@rollup/plugin-commonjs');
+const terser = require('@rollup/plugin-terser');
+const resolve = require('@rollup/plugin-node-resolve');
 
-export default {
+module.exports = {
   input: 'src/index.js',
   output: [
     {
-      exports: 'named',
-      name: 'vue-stripe',
       file: 'dist/index.js',
       format: 'cjs',
-    },
-    {
-      exports: 'named',
-      name: 'VueStripe',
-      file: 'dist/vue-stripe.js',
-      format: 'umd',
     },
   ],
   plugins: [
     terser(),
-    vue(),
-    resolve(),
-    babel({
-      runtimeHelpers: true,
-      exclude: /node_modules/,
-    }),
-    postcss({
-      plugins: [],
-    }),
     commonjs(),
+    resolve(),
+    babel.getBabelOutputPlugin({
+      presets: ['@babel/preset-env'],
+      plugins: [
+        ['@babel/plugin-proposal-optional-chaining'],
+      ],
+    }),
   ],
 };
