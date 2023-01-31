@@ -8,10 +8,7 @@
   "scripts": {
     "build": "esbuild src/index.js --bundle --format=cjs --outfile=dist/index.js",
     "build:rollup": "rollup --config",
-    "lint": "eslint --fix --ext .js,.vue ./",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "lint": "eslint --fix --ext .js,.vue ./"
   },
   "dependencies": {
     "@stripe/stripe-js": "^1.13.2"
@@ -34,8 +31,7 @@
     "eslint-plugin-vue": "^9.0.0",
     "eslint-webpack-plugin": "^3.1.1",
     "rimraf": "^4.1.2",
-    "rollup": "^3.12.0",
-    "vitepress": "^1.0.0-alpha.43"
+    "rollup": "^3.12.0"
   },
   "peerDependencies": {
     "vue": "^3.2.45"
