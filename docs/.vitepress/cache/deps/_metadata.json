@@ -1,0 +1,19 @@
+{
+  "hash": "bf6600db",
+  "browserHash": "7b24c78b",
+  "optimized": {
+    "vue": {
+      "src": "../../../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "4cacb4e0",
+      "needsInterop": false
+    },
+    "@theme/index": {
+      "src": "../../../../node_modules/vitepress/dist/client/theme-default/index.js",
+      "file": "@theme_index.js",
+      "fileHash": "14e3870b",
+      "needsInterop": false
+    }
+  },
+  "chunks": {}
+}
