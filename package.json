@@ -8,7 +8,6 @@
   "scripts": {
     "build": "esbuild src/index.js --bundle --format=cjs --outfile=dist/index.js",
     "build:rollup": "rollup --config",
-    "prebuild": "rimraf dist",
     "lint": "eslint --fix --ext .js,.vue ./"
   },
   "dependencies": {
@@ -32,7 +31,9 @@
     "eslint-plugin-vue": "^9.0.0",
     "eslint-webpack-plugin": "^3.1.1",
     "rimraf": "^4.1.2",
-    "rollup": "^3.12.0",
+    "rollup": "^3.12.0"
+  },
+  "peerDependencies": {
     "vue": "^3.2.45"
   },
   "bugs": {

@@ -1,9 +1,8 @@
 import { loadStripe } from '@stripe/stripe-js';
-import { ref } from 'vue';
 import { STRIPE_PARTNER_DETAILS } from '../constants';
 
 export const useVueStripe = (pk, options) => {
-  const stripe = ref({});
+  let stripe = null;
   if (options?.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
   const stripeOptions = {
     stripeAccount: options?.stripeAccount,
@@ -12,14 +11,14 @@ export const useVueStripe = (pk, options) => {
   };
 
   async function init () {
-    stripe.value = await loadStripe(pk, stripeOptions);
-    stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
+    stripe = await loadStripe(pk, stripeOptions);
+    stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
   }
 
   async function redirectToCheckout (options) {
     try {
       if (options?.sessionId) {
-        stripe.value.redirectToCheckout({
+        stripe.redirectToCheckout({
           sessionId: options.sessionId,
         });
         return;
@@ -47,7 +46,7 @@ export const useVueStripe = (pk, options) => {
         successUrl: options.successUrl,
       };
 
-      stripe.value.redirectToCheckout(checkoutOptions);
+      stripe.redirectToCheckout(checkoutOptions);
     } catch (e) {
       console.error(e);
     }
