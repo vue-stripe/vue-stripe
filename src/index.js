@@ -1,7 +1,7 @@
-import { useStripe } from './stripe';
+import { useVueStripe } from './stripe';
 import VueStripePlugin from './plugins';
 
 export {
   VueStripePlugin,
-  useStripe,
+  useVueStripe,
 };

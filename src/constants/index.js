@@ -111,7 +111,7 @@ export const DEFAULT_ELEMENT_STYLE = {
   },
 };
 
-export const VUE_STRIPE_VERSION = require('../package.json').version;
+export const VUE_STRIPE_VERSION = require('../../package.json').version;
 
 export const STRIPE_PARTNER_DETAILS = {
   name: 'vue-stripe',

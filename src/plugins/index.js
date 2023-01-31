@@ -1,15 +1,22 @@
 import { loadStripe } from '@stripe/stripe-js';
-// import { STRIPE_PARTNER_DETAILS } from '../constants';
+import { STRIPE_PARTNER_DETAILS } from '../constants';
 
 export default {
-  async install (app, options) {
-    const pk = options?.pk;
+  async install (app, { pk, stripeAccount, apiVersion, locale }) {
+    if (!pk) throw new Error('Publishable key is required');
     const stripeOptions = {};
-    if (options?.stripeAccount) stripeOptions.stripeAccount = options.stripeAccount;
-    if (options?.apiVersion) stripeOptions.apiVersion = options.apiVersion;
-    if (options?.locale) stripeOptions.locale = options.locale;
+    if (stripeAccount) stripeOptions.stripeAccount = stripeAccount;
+    if (apiVersion) stripeOptions.apiVersion = apiVersion;
+    if (locale) stripeOptions.locale = locale;
     const stripe = await loadStripe(pk, stripeOptions);
-    // stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
-    app.config.globalProperties.$axios = stripe;
+    stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
+    app.mixin({
+      computed: {
+        $stripe () {
+          return stripe;
+        },
+      },
+    });
+    app.provide('$stripe', stripe);
   },
 };
