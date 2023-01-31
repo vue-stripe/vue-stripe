@@ -6,7 +6,8 @@
   "main": "dist/index.js",
   "type": "commonjs",
   "scripts": {
-    "build": "rollup --config",
+    "build": "esbuild src/index.js --bundle --format=cjs --outfile=dist/index.js",
+    "build:rollup": "rollup --config",
     "prebuild": "rimraf dist",
     "lint": "eslint --fix --ext .js,.vue ./"
   },
@@ -22,6 +23,7 @@
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-terser": "^0.4.0",
+    "esbuild": "^0.17.5",
     "eslint": "^8.10.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.19.1",
