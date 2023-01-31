@@ -60,6 +60,9 @@ export default {
   - minor validation changes in plugin
   - make plugin injectable
   - make plugin a global mixin
+  - convert stripe variable to non ref
+  - make vue a peer dependency
+
 - 2023/01/30
   - Update the old branch and add various tooling setup
   - Make checkout a composable instead of a component
