@@ -54,6 +54,13 @@ export default {
 ```
 
 ## Development logs
+- 2023/02/03
+  - add esbuild vue 3 loader
+  - refactor stripe composable
+  - create elements composable
+  - create payment element component
+  - create payment element composable
+
 - 2023/02/01
   - create vuepress docs https://github.com/vue-stripe/docs
 
