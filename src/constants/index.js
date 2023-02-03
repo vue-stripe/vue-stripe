@@ -121,3 +121,5 @@ export const STRIPE_PARTNER_DETAILS = {
 };
 
 export const INSECURE_HOST_ERROR_MESSAGE = 'Vue Stripe will not work on an insecure host. Make sure that your site is using TCP/SSL.';
+
+export const PAYMENT_ELEMENT_TYPE = 'payment';

@@ -30,7 +30,7 @@ var require_package = __commonJS({
       main: "dist/index.js",
       type: "commonjs",
       scripts: {
-        build: "esbuild src/index.js --bundle --format=cjs --outfile=dist/index.js",
+        build: "node esbuild.js",
         "build:rollup": "rollup --config",
         lint: "eslint --fix --ext .js,.vue ./"
       },
@@ -47,6 +47,7 @@ var require_package = __commonJS({
         "@rollup/plugin-node-resolve": "^15.0.1",
         "@rollup/plugin-terser": "^0.4.0",
         esbuild: "^0.17.5",
+        "esbuild-plugin-vue3": "^0.3.2",
         eslint: "^8.10.0",
         "eslint-config-standard": "^17.0.0",
         "eslint-plugin-import": "^2.19.1",
@@ -90,8 +91,12 @@ var require_package = __commonJS({
 // src/index.js
 var src_exports = {};
 __export(src_exports, {
+  PaymentElement: () => PaymentElement_default2,
   VueStripePlugin: () => plugins_default,
-  useVueStripe: () => useVueStripe
+  useCheckout: () => useCheckout,
+  useElements: () => useElements,
+  usePaymentElement: () => usePaymentElement,
+  useStripe: () => useStripe
 });
 module.exports = __toCommonJS(src_exports);
 
@@ -208,10 +213,12 @@ var STRIPE_PARTNER_DETAILS = {
   url: "https://vuestripe.com",
   partner_id: "pp_partner_IqtOXpBSuz0IE2"
 };
+var PAYMENT_ELEMENT_TYPE = "payment";
 
-// src/stripe/index.js
-var useVueStripe = (pk, options) => {
-  let stripe = null;
+// src/stripe/checkout.js
+var import_vue = require("vue");
+var useCheckout = (pk, options) => {
+  const stripe = (0, import_vue.ref)(null);
   if (options?.disableAdvancedFraudDetection)
     loadStripe.setLoadParameters({ advancedFraudSignals: false });
   const stripeOptions = {
@@ -219,14 +226,14 @@ var useVueStripe = (pk, options) => {
     apiVersion: options?.apiVersion,
     locale: options?.locale
   };
-  async function init() {
-    stripe = await loadStripe(pk, stripeOptions);
-    stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
-  }
+  (0, import_vue.onMounted)(async () => {
+    stripe.value = await loadStripe(pk, stripeOptions);
+    stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
+  });
   async function redirectToCheckout(options2) {
     try {
       if (options2?.sessionId) {
-        stripe.redirectToCheckout({
+        stripe.value.redirectToCheckout({
           sessionId: options2.sessionId
         });
         return;
@@ -250,17 +257,118 @@ var useVueStripe = (pk, options) => {
         submitType: options2?.submitType,
         successUrl: options2.successUrl
       };
-      stripe.redirectToCheckout(checkoutOptions);
+      stripe.value.redirectToCheckout(checkoutOptions);
     } catch (e) {
       console.error(e);
     }
   }
-  init();
   return {
     stripe,
     redirectToCheckout
   };
 };
+
+// src/stripe/elements.js
+var import_vue2 = require("vue");
+var useElements = () => {
+  const elements = (0, import_vue2.ref)(null);
+  function createElements(stripe, options) {
+    return stripe.elements(options);
+  }
+  return {
+    elements,
+    createElements
+  };
+};
+
+// src/stripe/payment-element.js
+var import_vue3 = require("vue");
+var usePaymentElement = (elements, options) => {
+  (0, import_vue3.onMounted)(() => {
+    elements.create(PAYMENT_ELEMENT_TYPE, options);
+  });
+};
+
+// src/stripe/index.js
+var import_vue4 = require("vue");
+var useStripe = () => {
+  const stripe = (0, import_vue4.ref)(null);
+  async function initialize(pk, options) {
+    if (options?.disableAdvancedFraudDetection)
+      loadStripe.setLoadParameters({ advancedFraudSignals: false });
+    const stripeOptions = {
+      stripeAccount: options?.stripeAccount,
+      apiVersion: options?.apiVersion,
+      locale: options?.locale
+    };
+    stripe.value = await loadStripe(pk, stripeOptions);
+    stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
+    return stripe.value;
+  }
+  return {
+    stripe,
+    initialize
+  };
+};
+
+// sfc-script:/Users/centipede/Documents/workspace/personal/vue-stripe/vue-stripe-v5/src/stripe/PaymentElement.vue?type=script
+var import_vue5 = require("vue");
+var PaymentElement_default = {
+  props: {
+    pk: {
+      type: String,
+      default: void 0,
+      required: true
+    },
+    stripeAccount: {
+      type: String,
+      default: void 0
+    },
+    apiVersion: {
+      type: String,
+      default: void 0
+    },
+    locale: {
+      type: String,
+      default: void 0
+    },
+    //
+    elementsOptions: {
+      type: Object,
+      default: () => ({}),
+      validator: (value) => {
+        return true;
+      }
+    }
+  },
+  setup(props) {
+    const stripe = (0, import_vue5.ref)(null);
+    const elements = (0, import_vue5.ref)(null);
+    const paymentElement = (0, import_vue5.ref)(null);
+    if (props?.disableAdvancedFraudDetection)
+      loadStripe.setLoadParameters({ advancedFraudSignals: false });
+    (0, import_vue5.onMounted)(async () => {
+      const pk = props?.stripeOptions?.pk;
+      stripe.value = await loadStripe(pk, props?.stripeOptions);
+      console.warn(stripe.value);
+      stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
+      elements.value = stripe.value.elements(props?.elementsOptions);
+      paymentElement.value = elements.value.create(PAYMENT_ELEMENT_TYPE);
+    });
+  }
+};
+
+// sfc-template:/Users/centipede/Documents/workspace/personal/vue-stripe/vue-stripe-v5/src/stripe/PaymentElement.vue?type=template
+var import_vue6 = require("vue");
+var _hoisted_1 = { id: "vue-stripe-payment-element-mount-point" };
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (0, import_vue6.openBlock)(), (0, import_vue6.createElementBlock)("div", _hoisted_1, "Payment Element Mount Point");
+}
+
+// src/stripe/PaymentElement.vue
+PaymentElement_default.render = render;
+PaymentElement_default.__file = "src/stripe/PaymentElement.vue";
+var PaymentElement_default2 = PaymentElement_default;
 
 // src/plugins/index.js
 var plugins_default = {
