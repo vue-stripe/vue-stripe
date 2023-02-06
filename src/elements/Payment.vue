@@ -130,11 +130,13 @@ export default {
       try {
         this.$emit('loading', true);
         event.preventDefault();
-        const { error } = await this.stripe.confirmPayment({
+        const { error, paymentIntent } = await this.stripe.confirmPayment({
           elements: this.elements,
           confirmParams: this.confirmParams,
           redirect: this.redirect,
         });
+
+        // if the response is an error
         if (error) {
           const errorElement = document.getElementById(
             'stripe-payment-element-errors',
@@ -142,6 +144,14 @@ export default {
           errorElement.textContent = error.message;
           this.$emit('error', error);
           return;
+        } else if (paymentIntent) {
+          // if the user has passed prop redirect="if_required"
+          // and the payment confirmation was successful
+          // and the payment method is not forced to redirect
+          // then stripe.confirmPayment resolves with a paymentIntent
+          // so we sould pass it back up to the caller for consumption
+          // https://stripe.com/docs/js/payment_intents/confirm_payment?type=pii#confirm_payment_intent-options-redirect
+          this.$emit('confirmed', paymentIntent);
         }
       } catch (error) {
         console.error(error);
