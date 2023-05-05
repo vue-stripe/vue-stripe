@@ -3,7 +3,7 @@ const vuePlugin = require('esbuild-plugin-vue3');
 require('esbuild').build({
   entryPoints: ['src/index.js'],
   outfile: 'dist/index.js',
-  format: 'cjs',
+  format: 'esm',
   bundle: true,
   external: ['vue'],
   plugins: [vuePlugin()],
