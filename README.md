@@ -26,19 +26,19 @@ npm install @vue-stripe/vue-stripe
 </template>
 
 <script>
-import { useCheckout } from "@vue-stripe/vue-stripe";
+import { useCheckout } from '@vue-stripe/vue-stripe';
 export default {
   setup() {
-    const { redirectToCheckout } = useCheckout("pk_test_JKS1.....Ais2Fa9");
+    const { redirectToCheckout } = useCheckout('pk_test_JKS1.....Ais2Fa9');
 
     async function onCheckout() {
       await redirectToCheckout({
         successUrl: window.location.origin,
         cancelUrl: window.location.origin,
-        mode: "subscription",
+        mode: 'subscription',
         lineItems: [
           {
-            price: "price_XXX...",
+            price: 'price_XXX...',
             quantity: 1,
           },
         ],
