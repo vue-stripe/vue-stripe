@@ -3,7 +3,9 @@ import { STRIPE_PARTNER_DETAILS } from '../constants';
 import { onMounted, ref } from 'vue';
 export const useCheckout = (pk, options) => {
   const stripe = ref(null);
-  if (options?.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
+  if (options?.disableAdvancedFraudDetection) {
+    loadStripe.setLoadParameters({ advancedFraudSignals: false });
+  }
   const stripeOptions = {
     stripeAccount: options?.stripeAccount,
     apiVersion: options?.apiVersion,
@@ -29,7 +31,7 @@ export const useCheckout = (pk, options) => {
       }
 
       if (!options?.successUrl || !options?.cancelUrl) {
-        throw new Error('Error: successUrl and cencelUrl is required.');
+        throw new Error('Error: successUrl and cancelUrl is required.');
       }
 
       const checkoutOptions = {
