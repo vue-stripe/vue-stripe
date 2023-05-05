@@ -1,28 +1,12 @@
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // package.json
 var require_package = __commonJS({
-  "package.json"(exports, module2) {
-    module2.exports = {
+  "package.json"(exports, module) {
+    module.exports = {
       name: "@vue-stripe/vue-stripe",
       version: "5.0.0",
       description: "Stripe Checkout & Elements for Vue.js",
@@ -88,18 +72,6 @@ var require_package = __commonJS({
   }
 });
 
-// src/index.js
-var src_exports = {};
-__export(src_exports, {
-  PaymentElement: () => PaymentElement_default2,
-  VueStripePlugin: () => plugins_default,
-  useCheckout: () => useCheckout,
-  useElements: () => useElements,
-  usePaymentElement: () => usePaymentElement,
-  useStripe: () => useStripe
-});
-module.exports = __toCommonJS(src_exports);
-
 // node_modules/@stripe/stripe-js/dist/stripe.esm.js
 var V3_URL = "https://js.stripe.com/v3";
 var V3_URL_REGEX = /^https:\/\/js\.stripe\.com\/v3\/?(\?.*)?$/;
@@ -132,7 +104,7 @@ var registerWrapper = function registerWrapper2(stripe, startTime) {
   }
   stripe._registerWrapper({
     name: "stripe-js",
-    version: "1.46.0",
+    version: "1.52.1",
     startTime
   });
 };
@@ -142,7 +114,7 @@ var loadScript = function loadScript2(params) {
     return stripePromise;
   }
   stripePromise = new Promise(function(resolve, reject) {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || typeof document === "undefined") {
       resolve(null);
       return;
     }
@@ -216,17 +188,18 @@ var STRIPE_PARTNER_DETAILS = {
 var PAYMENT_ELEMENT_TYPE = "payment";
 
 // src/stripe/checkout.js
-var import_vue = require("vue");
+import { onMounted, ref } from "vue";
 var useCheckout = (pk, options) => {
-  const stripe = (0, import_vue.ref)(null);
-  if (options?.disableAdvancedFraudDetection)
+  const stripe = ref(null);
+  if (options?.disableAdvancedFraudDetection) {
     loadStripe.setLoadParameters({ advancedFraudSignals: false });
+  }
   const stripeOptions = {
     stripeAccount: options?.stripeAccount,
     apiVersion: options?.apiVersion,
     locale: options?.locale
   };
-  (0, import_vue.onMounted)(async () => {
+  onMounted(async () => {
     stripe.value = await loadStripe(pk, stripeOptions);
     stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
   });
@@ -242,7 +215,7 @@ var useCheckout = (pk, options) => {
         throw new Error("Error: Property 'mode' is required when using 'lineItems'. See https://stripe.com/docs/js/checkout/redirect_to_checkout#stripe_checkout_redirect_to_checkout-options-mode");
       }
       if (!options2?.successUrl || !options2?.cancelUrl) {
-        throw new Error("Error: successUrl and cencelUrl is required.");
+        throw new Error("Error: successUrl and cancelUrl is required.");
       }
       const checkoutOptions = {
         billingAddressCollection: options2?.billingAddressCollection,
@@ -269,11 +242,28 @@ var useCheckout = (pk, options) => {
 };
 
 // src/stripe/elements.js
-var import_vue2 = require("vue");
+import { ref as ref2 } from "vue";
+
+// src/utilities/index.js
+var hasElementIntent = (options) => {
+  return options.mode && options.currency && options.amount;
+};
+
+// src/stripe/elements.js
 var useElements = () => {
-  const elements = (0, import_vue2.ref)(null);
+  const elements = ref2(null);
   function createElements(stripe, options) {
-    return stripe.elements(options);
+    if (!stripe?.value) {
+      throw new Error("Error: Stripe instance is not initiated!");
+    }
+    if (!hasElementIntent(options)) {
+      throw new Error("Error: Properties 'mode', 'amount', and 'currency' is required!");
+    } else if (!options.clientSecret) {
+      throw new Error("Error: 'clientsSecret' is required!");
+    }
+    const elementsInstance = stripe.elements(options);
+    elements.value = elementsInstance;
+    return elementsInstance;
   }
   return {
     elements,
@@ -282,17 +272,17 @@ var useElements = () => {
 };
 
 // src/stripe/payment-element.js
-var import_vue3 = require("vue");
+import { onMounted as onMounted2 } from "vue";
 var usePaymentElement = (elements, options) => {
-  (0, import_vue3.onMounted)(() => {
+  onMounted2(() => {
     elements.create(PAYMENT_ELEMENT_TYPE, options);
   });
 };
 
 // src/stripe/index.js
-var import_vue4 = require("vue");
+import { ref as ref3 } from "vue";
 var useStripe = () => {
-  const stripe = (0, import_vue4.ref)(null);
+  const stripe = ref3(null);
   async function initialize(pk, options) {
     if (options?.disableAdvancedFraudDetection)
       loadStripe.setLoadParameters({ advancedFraudSignals: false });
@@ -311,8 +301,8 @@ var useStripe = () => {
   };
 };
 
-// sfc-script:/Users/centipede/Documents/workspace/personal/vue-stripe/vue-stripe-v5/src/stripe/PaymentElement.vue?type=script
-var import_vue5 = require("vue");
+// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=script
+import { ref as ref4, onMounted as onMounted3 } from "vue";
 var PaymentElement_default = {
   props: {
     pk: {
@@ -332,6 +322,10 @@ var PaymentElement_default = {
       type: String,
       default: void 0
     },
+    disableAdvancedFraudDetection: {
+      type: Boolean,
+      default: false
+    },
     //
     elementsOptions: {
       type: Object,
@@ -339,35 +333,175 @@ var PaymentElement_default = {
       validator: (value) => {
         return true;
       }
+    },
+    paymentElementOptions: {
+      type: Object,
+      default: () => ({}),
+      validator: (value) => {
+        return true;
+      }
+    },
+    confirmParams: {
+      type: Object,
+      default: () => ({}),
+      validator: (value) => {
+        return true;
+      }
     }
   },
-  setup(props) {
-    const stripe = (0, import_vue5.ref)(null);
-    const elements = (0, import_vue5.ref)(null);
-    const paymentElement = (0, import_vue5.ref)(null);
-    if (props?.disableAdvancedFraudDetection)
+  setup(props, { emit }) {
+    const stripe = ref4(null);
+    const elements = ref4(null);
+    const paymentElement = ref4(null);
+    if (props?.disableAdvancedFraudDetection) {
       loadStripe.setLoadParameters({ advancedFraudSignals: false });
-    (0, import_vue5.onMounted)(async () => {
-      const pk = props?.stripeOptions?.pk;
-      stripe.value = await loadStripe(pk, props?.stripeOptions);
-      console.warn(stripe.value);
+    }
+    onMounted3(async () => {
+      const pk = props?.pk;
+      console.log(props);
+      const stripeOptions = {
+        stripeAccount: props.stripeAccount,
+        apiVersion: props.apiVersion,
+        locale: props.locale
+      };
+      stripe.value = await loadStripe(pk, stripeOptions);
       stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
       elements.value = stripe.value.elements(props?.elementsOptions);
-      paymentElement.value = elements.value.create(PAYMENT_ELEMENT_TYPE);
+      paymentElement.value = elements.value.create(
+        PAYMENT_ELEMENT_TYPE,
+        props?.paymentElementOptions
+      );
+      paymentElement.value.mount("#vue-stripe-payment-element-mount-point");
+      paymentElement.value.on("change", (event) => {
+        const displayError = document.getElementById(
+          "vue-stripe-payment-element-errors"
+        );
+        if (event?.error) {
+          displayError.textContent = event?.error?.message;
+        } else {
+          displayError.textContent = "";
+        }
+        emit("element-change", event);
+      });
+      paymentElement.value.on("ready", (event) => {
+        emit("element-ready", event);
+      });
+      paymentElement.value.on("focus", (event) => {
+        emit("element-focus", event);
+      });
+      paymentElement.value.on("blur", (event) => {
+        emit("element-blur", event);
+      });
+      paymentElement.value.on("escape", (event) => {
+        emit("element-escape", event);
+      });
+      paymentElement.value.on("click", (event) => {
+        emit("element-click", event);
+      });
     });
+    return {
+      paymentElement
+    };
+  },
+  methods: {
+    submit() {
+      try {
+        this.$emit("loading", true);
+      } catch (error) {
+        this.$emit("error", error);
+      }
+    },
+    /**
+     * Blurs the [Element](https://stripe.com/docs/js/element)
+     */
+    blur() {
+      this.paymentElement.blur();
+    },
+    /**
+     * Clears the values of the [Element](https://stripe.com/docs/js/element)
+     */
+    clear() {
+      this.paymentElement.clear();
+    },
+    /**
+     * Destroys the [Element](https://stripe.com/docs/js/element).
+     * A destroyed `Element` cannot be re-activated or re-mounted to the DOM
+     */
+    destroy() {
+      this.paymentElement.destroy();
+    },
+    /**
+     * Focuses the [Element](https://stripe.com/docs/js/element)
+     * This method will currently not work on iOS 13+ due to a system limitation.
+     */
+    focus() {
+      console.warn(
+        "This method will currently not work on iOS 13+ due to a system limitation."
+      );
+      this.paymentElement.focus();
+    },
+    /**
+     * Unmounts the [Element](https://stripe.com/docs/js/element)
+     */
+    unmount() {
+      this.paymentElement.unmount();
+    },
+    /**
+     * Retrieves the current [Element](https://stripe.com/docs/js/element)
+     *
+     * @returns [Payment Element](https://stripe.com/docs/js/element/payment_element) Object
+     */
+    getElement() {
+      this.elements.getElement(PAYMENT_ELEMENT_TYPE);
+    },
+    /**
+     * Updates the [Element](https://stripe.com/docs/js/element)
+     *
+     * See full docs here: https://stripe.com/docs/js/elements_object/update_payment_element
+     */
+    update: (options) => {
+      (void 0).paymentElement.update(options);
+    }
   }
 };
 
-// sfc-template:/Users/centipede/Documents/workspace/personal/vue-stripe/vue-stripe-v5/src/stripe/PaymentElement.vue?type=template
-var import_vue6 = require("vue");
-var _hoisted_1 = { id: "vue-stripe-payment-element-mount-point" };
+// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=template
+import { createElementVNode as _createElementVNode, renderSlot as _renderSlot, Fragment as _Fragment, openBlock as _openBlock, createElementBlock as _createElementBlock } from "vue";
+var _hoisted_1 = /* @__PURE__ */ _createElementVNode(
+  "div",
+  { id: "vue-stripe-payment-element-mount-point" },
+  null,
+  -1
+  /* HOISTED */
+);
+var _hoisted_2 = /* @__PURE__ */ _createElementVNode(
+  "div",
+  {
+    id: "vue-stripe-payment-element-errors",
+    role: "alert"
+  },
+  null,
+  -1
+  /* HOISTED */
+);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0, import_vue6.openBlock)(), (0, import_vue6.createElementBlock)("div", _hoisted_1, "Payment Element Mount Point");
+  return _openBlock(), _createElementBlock(
+    _Fragment,
+    null,
+    [
+      _hoisted_1,
+      _renderSlot(_ctx.$slots, "vue-stripe-payment-element-errors", {}, () => [
+        _hoisted_2
+      ])
+    ],
+    64
+    /* STABLE_FRAGMENT */
+  );
 }
 
 // src/stripe/PaymentElement.vue
 PaymentElement_default.render = render;
-PaymentElement_default.__file = "src/stripe/PaymentElement.vue";
+PaymentElement_default.__file = "src\\stripe\\PaymentElement.vue";
 var PaymentElement_default2 = PaymentElement_default;
 
 // src/plugins/index.js
@@ -393,4 +527,12 @@ var plugins_default = {
     });
     app.provide("$stripe", stripe);
   }
+};
+export {
+  PaymentElement_default2 as PaymentElement,
+  plugins_default as VueStripePlugin,
+  useCheckout,
+  useElements,
+  usePaymentElement,
+  useStripe
 };
