@@ -6,7 +6,7 @@ Stripe Checkout and Elements for Vue.js 3
 
 This version is still under development, use at your own risk.
 
-### Installation 
+### Installation
 
 ```sh
 yarn add @vue-stripe/vue-stripe
@@ -22,39 +22,48 @@ npm install @vue-stripe/vue-stripe
 
 ```vue
 <template>
-<button @click="onCheckout">Checkout</button>
+  <button @click="onCheckout">Checkout</button>
 </template>
 
 <script>
-import { useVueStripe } from '@vue-stripe/vue-stripe'
+import { useCheckout } from "@vue-stripe/vue-stripe";
 export default {
-  setup () {
-    const { redirectToCheckout } = useVueStripe('pk_test_JKS1.....Ais2Fa9');
+  setup() {
+    const { redirectToCheckout } = useCheckout("pk_test_JKS1.....Ais2Fa9");
 
-    async function onCheckout () {
-      await redirectToCheckout({ 
+    async function onCheckout() {
+      await redirectToCheckout({
         successUrl: window.location.origin,
         cancelUrl: window.location.origin,
-        mode: 'subscription',
+        mode: "subscription",
         lineItems: [
           {
-            price: 'price_XXX...',
-            quantity: 1
-          }
-        ]  
+            price: "price_XXX...",
+            quantity: 1,
+          },
+        ],
       });
     }
 
     return {
       onCheckout,
-    }
+    };
   },
-}
+};
 </script>
 ```
 
 ## Development logs
+
+- 2023/05/05
+
+  - edit payment element component
+  - edit create element composable
+  - refactor checkout composable
+  - change esbuild output from cjs to esm
+
 - 2023/02/03
+
   - add esbuild vue 3 loader
   - refactor stripe composable
   - create elements composable
@@ -62,9 +71,11 @@ export default {
   - create payment element composable
 
 - 2023/02/01
-  - create vuepress docs https://github.com/vue-stripe/docs
+
+  - create vuepress docs <https://github.com/vue-stripe/docs>
 
 - 2023/01/31
+
   - rename checkout composable
   - minor validation changes in plugin
   - make plugin injectable
