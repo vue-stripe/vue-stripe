@@ -8,6 +8,7 @@
 <script>
 import { loadStripe } from '@stripe/stripe-js';
 import { ref, onMounted } from 'vue';
+import { hasElementIntent } from '../utilities';
 import { STRIPE_PARTNER_DETAILS, PAYMENT_ELEMENT_TYPE } from '../constants';
 
 export default {
@@ -39,7 +40,7 @@ export default {
       default: () => ({}),
       validator: (value) => {
         // if (!value?.)
-        return true;
+        return value.clientSecret || hasElementIntent(value);
       },
     },
     paymentElementOptions: {
@@ -122,77 +123,84 @@ export default {
       });
     });
 
-    return {
-      paymentElement,
-    };
-  },
-  methods: {
-    submit () {
+    // Methods
+    const submit = () => {
       try {
         this.$emit('loading', true);
         // const { } = stripe.value.confirmPayment
       } catch (error) {
         this.$emit('error', error);
       }
-    },
+    };
 
     /**
      * Blurs the [Element](https://stripe.com/docs/js/element)
      */
-    blur () {
-      this.paymentElement.blur();
-    },
+    const blur = () => {
+      paymentElement.value.blur();
+    };
 
     /**
      * Clears the values of the [Element](https://stripe.com/docs/js/element)
      */
-    clear () {
-      this.paymentElement.clear();
-    },
+    const clear = () => {
+      paymentElement.value.clear();
+    };
 
     /**
      * Destroys the [Element](https://stripe.com/docs/js/element).
      * A destroyed `Element` cannot be re-activated or re-mounted to the DOM
      */
-    destroy () {
-      this.paymentElement.destroy();
-    },
+    const destroy = () => {
+      paymentElement.value.destroy();
+    };
 
     /**
      * Focuses the [Element](https://stripe.com/docs/js/element)
      * This method will currently not work on iOS 13+ due to a system limitation.
      */
-    focus () {
+    const focus = () => {
       console.warn(
         'This method will currently not work on iOS 13+ due to a system limitation.',
       );
-      this.paymentElement.focus();
-    },
+      paymentElement.value.focus();
+    };
 
     /**
      * Unmounts the [Element](https://stripe.com/docs/js/element)
      */
-    unmount () {
-      this.paymentElement.unmount();
-    },
+    const unmount = () => {
+      paymentElement.value.unmount();
+    };
 
     /**
      * Retrieves the current [Element](https://stripe.com/docs/js/element)
      *
      * @returns [Payment Element](https://stripe.com/docs/js/element/payment_element) Object
      */
-    getElement () {
+    const getElement = () => {
       this.elements.getElement(PAYMENT_ELEMENT_TYPE);
-    },
+    };
 
     /**
      * Updates the [Element](https://stripe.com/docs/js/element)
      *
      * See full docs here: https://stripe.com/docs/js/elements_object/update_payment_element
      */
-    update: (options) => {
-      this.paymentElement.update(options);
-    },
+    const update = (options) => {
+      paymentElement.value.update(options);
+    };
+
+    return {
+      submit,
+      blur,
+      clear,
+      destroy,
+      focus,
+      unmount,
+      getElement,
+      update,
+    };
   },
 };
 </script>
