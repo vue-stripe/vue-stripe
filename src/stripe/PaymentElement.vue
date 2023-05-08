@@ -39,24 +39,18 @@ export default {
       type: Object,
       default: () => ({}),
       validator: (value) => {
-        // if (!value?.)
         return value.clientSecret || hasElementIntent(value);
       },
     },
     paymentElementOptions: {
       type: Object,
       default: () => ({}),
-      validator: (value) => {
-        // if (!value?.)
-        return true;
-      },
     },
     confirmParams: {
       type: Object,
       default: () => ({}),
       validator: (value) => {
-        // if (!value?.)
-        return true;
+        return value.return_url !== null;
       },
     },
   },
@@ -71,7 +65,6 @@ export default {
 
     onMounted(async () => {
       const pk = props?.pk;
-      console.log(props);
       const stripeOptions = {
         stripeAccount: props.stripeAccount,
         apiVersion: props.apiVersion,
@@ -126,10 +119,18 @@ export default {
     // Methods
     const submit = () => {
       try {
-        this.$emit('loading', true);
-        // const { } = stripe.value.confirmPayment
+        emit('loading', true);
+        const { error } = stripe.value.confirmPayment({
+          elements: elements.value,
+          confirmParams: props?.confirmParams,
+        });
+
+        if (error) {
+          console.error(error);
+          emit('error', error);
+        }
       } catch (error) {
-        this.$emit('error', error);
+        emit('error', error);
       }
     };
 
