@@ -186,6 +186,7 @@ var STRIPE_PARTNER_DETAILS = {
   partner_id: "pp_partner_IqtOXpBSuz0IE2"
 };
 var PAYMENT_ELEMENT_TYPE = "payment";
+var LINK_AUTHENTICATION_ELEMENT_TYPE = "linkAuthentication";
 
 // src/stripe/checkout.js
 import { onMounted, ref } from "vue";
@@ -301,7 +302,7 @@ var useStripe = () => {
   };
 };
 
-// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=script
+// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=script
 import { ref as ref4, onMounted as onMounted3 } from "vue";
 var PaymentElement_default = {
   props: {
@@ -326,7 +327,7 @@ var PaymentElement_default = {
       type: Boolean,
       default: false
     },
-    //
+    // Element options
     elementsOptions: {
       type: Object,
       default: () => ({}),
@@ -447,7 +448,7 @@ var PaymentElement_default = {
   }
 };
 
-// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=template
+// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=template
 import { createElementVNode as _createElementVNode, renderSlot as _renderSlot, Fragment as _Fragment, openBlock as _openBlock, createElementBlock as _createElementBlock } from "vue";
 var _hoisted_1 = /* @__PURE__ */ _createElementVNode(
   "div",
@@ -483,8 +484,86 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
 // src/stripe/PaymentElement.vue
 PaymentElement_default.render = render;
-PaymentElement_default.__file = "src/stripe/PaymentElement.vue";
+PaymentElement_default.__file = "src\\stripe\\PaymentElement.vue";
 var PaymentElement_default2 = PaymentElement_default;
+
+// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\LinkAuthenticationElement.vue?type=script
+import { ref as ref5, onMounted as onMounted4 } from "vue";
+var LinkAuthenticationElement_default = {
+  props: {
+    pk: {
+      type: String,
+      default: void 0,
+      required: true
+    },
+    stripeAccount: {
+      type: String,
+      default: void 0
+    },
+    apiVersion: {
+      type: String,
+      default: void 0
+    },
+    locale: {
+      type: String,
+      default: void 0
+    },
+    disableAdvancedFraudDetection: {
+      type: Boolean,
+      default: false
+    },
+    elementsOptions: {
+      type: Object,
+      default: () => ({})
+    }
+  },
+  setup(props, { emit }) {
+    const stripe = ref5(null);
+    const elements = ref5(null);
+    const linkAuthElement = ref5(null);
+    onMounted4(async () => {
+      if (props.disableAdvancedFraudDetection) {
+        loadStripe.setLoadParameters({ advancedFraudSignals: false });
+      }
+      const stripeOptions = {
+        apiVersion: props.apiVersion,
+        locale: props.locale,
+        stripeAccount: props.stripeAccount
+      };
+      if (props.disableAdvancedFraudDetection) {
+        stripeOptions.advancedFraudSignals = false;
+      }
+      stripe.value = await loadStripe(props.pk, stripeOptions);
+      stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
+      elements.value = stripe.value.elements(props.elementsOptions);
+      linkAuthElement.value = elements.value.create(
+        LINK_AUTHENTICATION_ELEMENT_TYPE
+      );
+      linkAuthElement.value.mount("#link-authentication-mount-point");
+    });
+  }
+};
+
+// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\LinkAuthenticationElement.vue?type=template
+import { createElementVNode as _createElementVNode2, openBlock as _openBlock2, createElementBlock as _createElementBlock2 } from "vue";
+var _hoisted_12 = /* @__PURE__ */ _createElementVNode2(
+  "div",
+  { id: "link-authentication-mount-point" },
+  null,
+  -1
+  /* HOISTED */
+);
+var _hoisted_22 = [
+  _hoisted_12
+];
+function render2(_ctx, _cache, $props, $setup, $data, $options) {
+  return _openBlock2(), _createElementBlock2("div", null, _hoisted_22);
+}
+
+// src/stripe/LinkAuthenticationElement.vue
+LinkAuthenticationElement_default.render = render2;
+LinkAuthenticationElement_default.__file = "src\\stripe\\LinkAuthenticationElement.vue";
+var LinkAuthenticationElement_default2 = LinkAuthenticationElement_default;
 
 // src/plugins/index.js
 var plugins_default = {
@@ -511,6 +590,7 @@ var plugins_default = {
   }
 };
 export {
+  LinkAuthenticationElement_default2 as LinkAuthenticationElement,
   PaymentElement_default2 as PaymentElement,
   plugins_default as VueStripePlugin,
   useCheckout,

@@ -1,4 +1,3 @@
-
 export const STRIPE_JS_SDK_URL = 'https://js.stripe.com';
 
 export const SUPPORTED_ELEMENT_TYPE = [
@@ -64,17 +63,9 @@ export const SUPPORTED_LOCALES = [
   'zh',
 ];
 
-export const SUPPORTED_SUBMIT_TYPES = [
-  'auto',
-  'book',
-  'donate',
-  'pay',
-];
+export const SUPPORTED_SUBMIT_TYPES = ['auto', 'book', 'donate', 'pay'];
 
-export const BILLING_ADDRESS_COLLECTION_TYPES = [
-  'required',
-  'auto',
-];
+export const BILLING_ADDRESS_COLLECTION_TYPES = ['required', 'auto'];
 
 export const SHIPPING_ADDRESS_COLLECTION_UNSUPPORTED_COUNTRIES = [
   'AS',
@@ -120,6 +111,8 @@ export const STRIPE_PARTNER_DETAILS = {
   partner_id: 'pp_partner_IqtOXpBSuz0IE2',
 };
 
-export const INSECURE_HOST_ERROR_MESSAGE = 'Vue Stripe will not work on an insecure host. Make sure that your site is using TCP/SSL.';
+export const INSECURE_HOST_ERROR_MESSAGE =
+  'Vue Stripe will not work on an insecure host. Make sure that your site is using TCP/SSL.';
 
 export const PAYMENT_ELEMENT_TYPE = 'payment';
+export const LINK_AUTHENTICATION_ELEMENT_TYPE = 'linkAuthentication';

@@ -3,6 +3,7 @@ import { useElements } from './stripe/elements';
 import { usePaymentElement } from './stripe/payment-element';
 import { useStripe } from './stripe';
 import PaymentElement from './stripe/PaymentElement.vue';
+import LinkAuthenticationElement from './stripe/LinkAuthenticationElement.vue';
 import VueStripePlugin from './plugins';
 
 export {
@@ -11,5 +12,6 @@ export {
   usePaymentElement,
   useStripe,
   PaymentElement,
+  LinkAuthenticationElement,
   VueStripePlugin,
 };

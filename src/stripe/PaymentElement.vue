@@ -34,7 +34,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    //
+    // Element options
     elementsOptions: {
       type: Object,
       default: () => ({}),
