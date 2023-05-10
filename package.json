@@ -11,7 +11,7 @@
     "lint": "eslint --fix --ext .js,.vue ./"
   },
   "dependencies": {
-    "@stripe/stripe-js": "^1.13.2"
+    "@stripe/stripe-js": "^1.52.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",

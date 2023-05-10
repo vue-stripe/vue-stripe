@@ -19,7 +19,7 @@ var require_package = __commonJS({
         lint: "eslint --fix --ext .js,.vue ./"
       },
       dependencies: {
-        "@stripe/stripe-js": "^1.13.2"
+        "@stripe/stripe-js": "^1.52.1"
       },
       devDependencies: {
         "@babel/core": "^7.20.12",
@@ -301,7 +301,7 @@ var useStripe = () => {
   };
 };
 
-// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=script
+// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=script
 import { ref as ref4, onMounted as onMounted3 } from "vue";
 var PaymentElement_default = {
   props: {
@@ -447,7 +447,7 @@ var PaymentElement_default = {
   }
 };
 
-// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=template
+// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=template
 import { createElementVNode as _createElementVNode, renderSlot as _renderSlot, Fragment as _Fragment, openBlock as _openBlock, createElementBlock as _createElementBlock } from "vue";
 var _hoisted_1 = /* @__PURE__ */ _createElementVNode(
   "div",
@@ -483,7 +483,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
 // src/stripe/PaymentElement.vue
 PaymentElement_default.render = render;
-PaymentElement_default.__file = "src\\stripe\\PaymentElement.vue";
+PaymentElement_default.__file = "src/stripe/PaymentElement.vue";
 var PaymentElement_default2 = PaymentElement_default;
 
 // src/plugins/index.js
