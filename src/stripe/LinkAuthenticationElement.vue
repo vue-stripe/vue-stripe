@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <div id="link-authentication-mount-point"></div>
-  </div>
+  <div id="link-authentication-mount-point"></div>
 </template>
 
 <script>
@@ -44,7 +42,7 @@ export default {
     const elements = ref(null);
     const linkAuthElement = ref(null);
 
-    onMounted(async () => {
+    async function init () {
       if (props.disableAdvancedFraudDetection) {
         loadStripe.setLoadParameters({ advancedFraudSignals: false });
       }
@@ -66,6 +64,10 @@ export default {
         LINK_AUTHENTICATION_ELEMENT_TYPE,
       );
       linkAuthElement.value.mount('#link-authentication-mount-point');
+    }
+
+    onMounted(async () => {
+      await init();
     });
   },
 };
