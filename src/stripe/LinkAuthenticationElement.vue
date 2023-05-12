@@ -67,7 +67,7 @@ export default {
     }
 
     onMounted(async () => {
-      await init();
+      init();
     });
   },
 };
