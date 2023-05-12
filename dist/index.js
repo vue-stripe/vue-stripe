@@ -302,7 +302,7 @@ var useStripe = () => {
   };
 };
 
-// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=script
+// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=script
 import { ref as ref4, onMounted as onMounted3 } from "vue";
 var PaymentElement_default = {
   props: {
@@ -448,7 +448,7 @@ var PaymentElement_default = {
   }
 };
 
-// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=template
+// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=template
 import { createElementVNode as _createElementVNode, renderSlot as _renderSlot, Fragment as _Fragment, openBlock as _openBlock, createElementBlock as _createElementBlock } from "vue";
 var _hoisted_1 = /* @__PURE__ */ _createElementVNode(
   "div",
@@ -484,10 +484,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
 // src/stripe/PaymentElement.vue
 PaymentElement_default.render = render;
-PaymentElement_default.__file = "src\\stripe\\PaymentElement.vue";
+PaymentElement_default.__file = "src/stripe/PaymentElement.vue";
 var PaymentElement_default2 = PaymentElement_default;
 
-// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\LinkAuthenticationElement.vue?type=script
+// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/LinkAuthenticationElement.vue?type=script
 import { ref as ref5, onMounted as onMounted4 } from "vue";
 var LinkAuthenticationElement_default = {
   props: {
@@ -521,7 +521,7 @@ var LinkAuthenticationElement_default = {
     const stripe = ref5(null);
     const elements = ref5(null);
     const linkAuthElement = ref5(null);
-    onMounted4(async () => {
+    async function init() {
       if (props.disableAdvancedFraudDetection) {
         loadStripe.setLoadParameters({ advancedFraudSignals: false });
       }
@@ -540,12 +540,64 @@ var LinkAuthenticationElement_default = {
         LINK_AUTHENTICATION_ELEMENT_TYPE
       );
       linkAuthElement.value.mount("#link-authentication-mount-point");
+      linkAuthElement.value.on("change", (event) => {
+        const displayError = document.getElementById(
+          "link-authentication-errors"
+        );
+        if (event?.error) {
+          displayError.textContent = event?.error?.message;
+        } else {
+          displayError.textContent = "";
+        }
+        emit("element-change", event);
+      });
+      linkAuthElement.value.on("ready", (event) => {
+        emit("element-ready", event);
+      });
+      linkAuthElement.value.on("focus", (event) => {
+        emit("element-focus", event);
+      });
+      linkAuthElement.value.on("blur", (event) => {
+        emit("element-blur", event);
+      });
+      linkAuthElement.value.on("escape", (event) => {
+        emit("element-escape", event);
+      });
+    }
+    onMounted4(async () => {
+      init();
     });
+    function blur() {
+      linkAuthElement.value.blur();
+    }
+    function clear() {
+      linkAuthElement.value.clear();
+    }
+    function destroy() {
+      linkAuthElement.value.destroy();
+    }
+    function focus() {
+      linkAuthElement.value.focus();
+    }
+    function unmount() {
+      linkAuthElement.value.unmount();
+    }
+    function getElement() {
+      elements.value.getElement(LINK_AUTHENTICATION_ELEMENT_TYPE);
+    }
+    return {
+      blur,
+      clear,
+      destroy,
+      focus,
+      unmount,
+      getElement
+    };
   }
 };
 
-// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\LinkAuthenticationElement.vue?type=template
-import { createElementVNode as _createElementVNode2, openBlock as _openBlock2, createElementBlock as _createElementBlock2 } from "vue";
+// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/LinkAuthenticationElement.vue?type=template
+import { createElementVNode as _createElementVNode2, renderSlot as _renderSlot2, Fragment as _Fragment2, openBlock as _openBlock2, createElementBlock as _createElementBlock2 } from "vue";
 var _hoisted_12 = /* @__PURE__ */ _createElementVNode2(
   "div",
   { id: "link-authentication-mount-point" },
@@ -553,16 +605,34 @@ var _hoisted_12 = /* @__PURE__ */ _createElementVNode2(
   -1
   /* HOISTED */
 );
-var _hoisted_22 = [
-  _hoisted_12
-];
+var _hoisted_22 = /* @__PURE__ */ _createElementVNode2(
+  "div",
+  {
+    id: "link-authentication-errors",
+    role: "alert"
+  },
+  null,
+  -1
+  /* HOISTED */
+);
 function render2(_ctx, _cache, $props, $setup, $data, $options) {
-  return _openBlock2(), _createElementBlock2("div", null, _hoisted_22);
+  return _openBlock2(), _createElementBlock2(
+    _Fragment2,
+    null,
+    [
+      _hoisted_12,
+      _renderSlot2(_ctx.$slots, "link-authentication-errors", {}, () => [
+        _hoisted_22
+      ])
+    ],
+    64
+    /* STABLE_FRAGMENT */
+  );
 }
 
 // src/stripe/LinkAuthenticationElement.vue
 LinkAuthenticationElement_default.render = render2;
-LinkAuthenticationElement_default.__file = "src\\stripe\\LinkAuthenticationElement.vue";
+LinkAuthenticationElement_default.__file = "src/stripe/LinkAuthenticationElement.vue";
 var LinkAuthenticationElement_default2 = LinkAuthenticationElement_default;
 
 // src/plugins/index.js
