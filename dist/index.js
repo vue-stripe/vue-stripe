@@ -303,7 +303,7 @@ var useStripe = () => {
   };
 };
 
-// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=script
+// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=script
 import { ref as ref4, onMounted as onMounted3 } from "vue";
 var PaymentElement_default = {
   props: {
@@ -449,7 +449,7 @@ var PaymentElement_default = {
   }
 };
 
-// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=template
+// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=template
 import { createElementVNode as _createElementVNode, renderSlot as _renderSlot, Fragment as _Fragment, openBlock as _openBlock, createElementBlock as _createElementBlock } from "vue";
 var _hoisted_1 = /* @__PURE__ */ _createElementVNode(
   "div",
@@ -485,10 +485,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
 // src/stripe/PaymentElement.vue
 PaymentElement_default.render = render;
-PaymentElement_default.__file = "src\\stripe\\PaymentElement.vue";
+PaymentElement_default.__file = "src/stripe/PaymentElement.vue";
 var PaymentElement_default2 = PaymentElement_default;
 
-// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\LinkAuthenticationElement.vue?type=script
+// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/LinkAuthenticationElement.vue?type=script
 import { ref as ref5, onMounted as onMounted4 } from "vue";
 var LinkAuthenticationElement_default = {
   props: {
@@ -597,7 +597,7 @@ var LinkAuthenticationElement_default = {
   }
 };
 
-// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\LinkAuthenticationElement.vue?type=template
+// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/LinkAuthenticationElement.vue?type=template
 import { createElementVNode as _createElementVNode2, renderSlot as _renderSlot2, Fragment as _Fragment2, openBlock as _openBlock2, createElementBlock as _createElementBlock2 } from "vue";
 var _hoisted_12 = /* @__PURE__ */ _createElementVNode2(
   "div",
@@ -633,10 +633,10 @@ function render2(_ctx, _cache, $props, $setup, $data, $options) {
 
 // src/stripe/LinkAuthenticationElement.vue
 LinkAuthenticationElement_default.render = render2;
-LinkAuthenticationElement_default.__file = "src\\stripe\\LinkAuthenticationElement.vue";
+LinkAuthenticationElement_default.__file = "src/stripe/LinkAuthenticationElement.vue";
 var LinkAuthenticationElement_default2 = LinkAuthenticationElement_default;
 
-// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\ExpressCheckoutElement.vue?type=script
+// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/ExpressCheckoutElement.vue?type=script
 import { ref as ref6, onMounted as onMounted5 } from "vue";
 var ExpressCheckoutElement_default = {
   props: {
@@ -742,43 +742,16 @@ var ExpressCheckoutElement_default = {
   }
 };
 
-// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\ExpressCheckoutElement.vue?type=template
-import { createElementVNode as _createElementVNode3, renderSlot as _renderSlot3, Fragment as _Fragment3, openBlock as _openBlock3, createElementBlock as _createElementBlock3 } from "vue";
-var _hoisted_13 = /* @__PURE__ */ _createElementVNode3(
-  "div",
-  { id: "express-checkout-element-mount-point" },
-  null,
-  -1
-  /* HOISTED */
-);
-var _hoisted_23 = /* @__PURE__ */ _createElementVNode3(
-  "div",
-  {
-    id: "express-checkout-element-errors",
-    role: "alert"
-  },
-  null,
-  -1
-  /* HOISTED */
-);
+// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/ExpressCheckoutElement.vue?type=template
+import { openBlock as _openBlock3, createElementBlock as _createElementBlock3 } from "vue";
+var _hoisted_13 = { id: "express-checkout-element-mount-point" };
 function render3(_ctx, _cache, $props, $setup, $data, $options) {
-  return _openBlock3(), _createElementBlock3(
-    _Fragment3,
-    null,
-    [
-      _hoisted_13,
-      _renderSlot3(_ctx.$slots, "express-checkout-element-errors", {}, () => [
-        _hoisted_23
-      ])
-    ],
-    64
-    /* STABLE_FRAGMENT */
-  );
+  return _openBlock3(), _createElementBlock3("div", _hoisted_13);
 }
 
 // src/stripe/ExpressCheckoutElement.vue
 ExpressCheckoutElement_default.render = render3;
-ExpressCheckoutElement_default.__file = "src\\stripe\\ExpressCheckoutElement.vue";
+ExpressCheckoutElement_default.__file = "src/stripe/ExpressCheckoutElement.vue";
 var ExpressCheckoutElement_default2 = ExpressCheckoutElement_default;
 
 // src/plugins/index.js

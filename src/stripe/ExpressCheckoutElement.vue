@@ -1,9 +1,5 @@
 <template>
   <div id="express-checkout-element-mount-point"></div>
-
-  <slot name="express-checkout-element-errors">
-    <div id="express-checkout-element-errors" role="alert" />
-  </slot>
 </template>
 
 <script>
@@ -77,6 +73,7 @@ export default {
 
       // Events
       expressCheckoutElement.value.on('click', (event) => {
+        // ? Should we add the stripe confirm payment method here?
         emit('element-click', event);
       });
       expressCheckoutElement.value.on('ready', (event) => {
