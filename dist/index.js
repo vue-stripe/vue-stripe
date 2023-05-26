@@ -188,6 +188,7 @@ var STRIPE_PARTNER_DETAILS = {
 var PAYMENT_ELEMENT_TYPE = "payment";
 var LINK_AUTHENTICATION_ELEMENT_TYPE = "linkAuthentication";
 var EXPRESS_CHECKOUT_ELEMENT_TYPE = "expressCheckout";
+var ADDRESS_ELEMENT_TYPE = "address";
 
 // src/stripe/checkout.js
 import { onMounted, ref } from "vue";
@@ -303,7 +304,7 @@ var useStripe = () => {
   };
 };
 
-// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=script
+// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=script
 import { ref as ref4, onMounted as onMounted3 } from "vue";
 var PaymentElement_default = {
   props: {
@@ -449,7 +450,7 @@ var PaymentElement_default = {
   }
 };
 
-// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/PaymentElement.vue?type=template
+// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\PaymentElement.vue?type=template
 import { createElementVNode as _createElementVNode, renderSlot as _renderSlot, Fragment as _Fragment, openBlock as _openBlock, createElementBlock as _createElementBlock } from "vue";
 var _hoisted_1 = /* @__PURE__ */ _createElementVNode(
   "div",
@@ -485,10 +486,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
 // src/stripe/PaymentElement.vue
 PaymentElement_default.render = render;
-PaymentElement_default.__file = "src/stripe/PaymentElement.vue";
+PaymentElement_default.__file = "src\\stripe\\PaymentElement.vue";
 var PaymentElement_default2 = PaymentElement_default;
 
-// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/LinkAuthenticationElement.vue?type=script
+// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\LinkAuthenticationElement.vue?type=script
 import { ref as ref5, onMounted as onMounted4 } from "vue";
 var LinkAuthenticationElement_default = {
   props: {
@@ -597,7 +598,7 @@ var LinkAuthenticationElement_default = {
   }
 };
 
-// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/LinkAuthenticationElement.vue?type=template
+// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\LinkAuthenticationElement.vue?type=template
 import { createElementVNode as _createElementVNode2, renderSlot as _renderSlot2, Fragment as _Fragment2, openBlock as _openBlock2, createElementBlock as _createElementBlock2 } from "vue";
 var _hoisted_12 = /* @__PURE__ */ _createElementVNode2(
   "div",
@@ -633,10 +634,10 @@ function render2(_ctx, _cache, $props, $setup, $data, $options) {
 
 // src/stripe/LinkAuthenticationElement.vue
 LinkAuthenticationElement_default.render = render2;
-LinkAuthenticationElement_default.__file = "src/stripe/LinkAuthenticationElement.vue";
+LinkAuthenticationElement_default.__file = "src\\stripe\\LinkAuthenticationElement.vue";
 var LinkAuthenticationElement_default2 = LinkAuthenticationElement_default;
 
-// sfc-script:/Users/mahomuri/Github/vue-stripe/src/stripe/ExpressCheckoutElement.vue?type=script
+// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\ExpressCheckoutElement.vue?type=script
 import { ref as ref6, onMounted as onMounted5 } from "vue";
 var ExpressCheckoutElement_default = {
   props: {
@@ -742,7 +743,7 @@ var ExpressCheckoutElement_default = {
   }
 };
 
-// sfc-template:/Users/mahomuri/Github/vue-stripe/src/stripe/ExpressCheckoutElement.vue?type=template
+// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\ExpressCheckoutElement.vue?type=template
 import { openBlock as _openBlock3, createElementBlock as _createElementBlock3 } from "vue";
 var _hoisted_13 = { id: "express-checkout-element-mount-point" };
 function render3(_ctx, _cache, $props, $setup, $data, $options) {
@@ -751,8 +752,167 @@ function render3(_ctx, _cache, $props, $setup, $data, $options) {
 
 // src/stripe/ExpressCheckoutElement.vue
 ExpressCheckoutElement_default.render = render3;
-ExpressCheckoutElement_default.__file = "src/stripe/ExpressCheckoutElement.vue";
+ExpressCheckoutElement_default.__file = "src\\stripe\\ExpressCheckoutElement.vue";
 var ExpressCheckoutElement_default2 = ExpressCheckoutElement_default;
+
+// sfc-script:D:\Github_Projects\vue-stripe\src\stripe\AddressElement.vue?type=script
+import { ref as ref7, onMounted as onMounted6 } from "vue";
+var AddressElement_default = {
+  props: {
+    pk: {
+      type: String,
+      default: void 0,
+      required: true
+    },
+    stripeAccount: {
+      type: String,
+      default: void 0
+    },
+    apiVersion: {
+      type: String,
+      default: void 0
+    },
+    locale: {
+      type: String,
+      default: void 0
+    },
+    disableAdvancedFraudDetection: {
+      type: Boolean,
+      default: false
+    },
+    elementsOptions: {
+      type: Object,
+      default: () => ({})
+    },
+    addressElementOptions: {
+      type: Object,
+      default: () => ({})
+    }
+  },
+  setup(props, { emit }) {
+    const stripe = ref7(null);
+    const elements = ref7(null);
+    const addressElement = ref7(null);
+    onMounted6(async () => {
+      if (props.disableAdvancedFraudDetection) {
+        loadStripe.setLoadParameters({ advancedFraudSignals: false });
+      }
+      const stripeOptions = {
+        apiVersion: props.apiVersion,
+        locale: props.locale,
+        stripeAccount: props.stripeAccount
+      };
+      if (props.disableAdvancedFraudDetection) {
+        stripeOptions.advancedFraudSignals = false;
+      }
+      stripe.value = await loadStripe(props.pk, stripeOptions);
+      stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
+      elements.value = stripe.value.elements(props.elementsOptions);
+      addressElement.value = elements.value.create(
+        ADDRESS_ELEMENT_TYPE,
+        props.addressElementOptions
+      );
+      addressElement.value.mount("#address-element-mount-point");
+      addressElement.value.on("change", (event) => {
+        const displayError = document.getElementById("address-element-errors");
+        if (event?.error) {
+          displayError.textContent = event?.error?.message;
+        } else {
+          displayError.textContent = "";
+        }
+        emit("element-change", event);
+      });
+      addressElement.value.on("ready", () => {
+        emit("element-ready");
+      });
+      addressElement.value.on("blur", () => {
+        emit("element-blur");
+      });
+      addressElement.value.on("focus", () => {
+        emit("element-focus");
+      });
+      addressElement.value.on("escape", () => {
+        emit("element-escape");
+      });
+    });
+    const blur = () => {
+      addressElement.value.blur();
+    };
+    const clear = () => {
+      addressElement.value.clear();
+    };
+    const destroy = () => {
+      addressElement.value.destroy();
+    };
+    const focus = () => {
+      console.warn(
+        "This method will currently not work on iOS 13+ due to a system limitation."
+      );
+      addressElement.value.focus();
+    };
+    const unmount = () => {
+      addressElement.value.unmount();
+    };
+    const getElement = () => {
+      this.elements.getElement(ADDRESS_ELEMENT_TYPE);
+    };
+    const update = (options) => {
+      addressElement.value.update(options);
+    };
+    const getValue = () => {
+      addressElement.value.getValue();
+    };
+    return {
+      blur,
+      clear,
+      destroy,
+      focus,
+      unmount,
+      getElement,
+      getValue,
+      update
+    };
+  }
+};
+
+// sfc-template:D:\Github_Projects\vue-stripe\src\stripe\AddressElement.vue?type=template
+import { createElementVNode as _createElementVNode3, renderSlot as _renderSlot3, Fragment as _Fragment3, openBlock as _openBlock4, createElementBlock as _createElementBlock4 } from "vue";
+var _hoisted_14 = /* @__PURE__ */ _createElementVNode3(
+  "div",
+  { id: "address-element-mount-point" },
+  null,
+  -1
+  /* HOISTED */
+);
+var _hoisted_23 = /* @__PURE__ */ _createElementVNode3(
+  "div",
+  {
+    id: "address-element-errors",
+    role: "alert"
+  },
+  null,
+  -1
+  /* HOISTED */
+);
+function render4(_ctx, _cache, $props, $setup, $data, $options) {
+  return _openBlock4(), _createElementBlock4(
+    _Fragment3,
+    null,
+    [
+      _hoisted_14,
+      _renderSlot3(_ctx.$slots, "address-element-errors", {}, () => [
+        _hoisted_23
+      ])
+    ],
+    64
+    /* STABLE_FRAGMENT */
+  );
+}
+
+// src/stripe/AddressElement.vue
+AddressElement_default.render = render4;
+AddressElement_default.__file = "src\\stripe\\AddressElement.vue";
+var AddressElement_default2 = AddressElement_default;
 
 // src/plugins/index.js
 var plugins_default = {
@@ -779,6 +939,7 @@ var plugins_default = {
   }
 };
 export {
+  AddressElement_default2 as AddressElement,
   ExpressCheckoutElement_default2 as ExpressCheckoutElement,
   LinkAuthenticationElement_default2 as LinkAuthenticationElement,
   PaymentElement_default2 as PaymentElement,
