@@ -54,6 +54,13 @@ export default {
       },
     },
   },
+  emits: [
+    'elementChange',
+    'elementReady',
+    'elementFocus',
+    'elementBlur',
+    'elementEscape',
+  ],
   setup (props, { emit }) {
     const stripe = ref(null);
     const elements = ref(null);
@@ -92,27 +99,23 @@ export default {
           displayError.textContent = '';
         }
 
-        emit('element-change', event);
+        emit('elementChange', event);
       });
 
       paymentElement.value.on('ready', (event) => {
-        emit('element-ready', event);
+        emit('elementReady', event);
       });
 
       paymentElement.value.on('focus', (event) => {
-        emit('element-focus', event);
+        emit('elementFocus', event);
       });
 
       paymentElement.value.on('blur', (event) => {
-        emit('element-blur', event);
+        emit('elementBlur', event);
       });
 
       paymentElement.value.on('escape', (event) => {
-        emit('element-escape', event);
-      });
-
-      paymentElement.value.on('click', (event) => {
-        emit('element-click', event);
+        emit('elementEscape', event);
       });
     });
 

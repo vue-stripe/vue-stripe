@@ -349,6 +349,13 @@ var PaymentElement_default = {
       }
     }
   },
+  emits: [
+    "elementChange",
+    "elementReady",
+    "elementFocus",
+    "elementBlur",
+    "elementEscape"
+  ],
   setup(props, { emit }) {
     const stripe = ref4(null);
     const elements = ref4(null);
@@ -380,22 +387,19 @@ var PaymentElement_default = {
         } else {
           displayError.textContent = "";
         }
-        emit("element-change", event);
+        emit("elementChange", event);
       });
       paymentElement.value.on("ready", (event) => {
-        emit("element-ready", event);
+        emit("elementReady", event);
       });
       paymentElement.value.on("focus", (event) => {
-        emit("element-focus", event);
+        emit("elementFocus", event);
       });
       paymentElement.value.on("blur", (event) => {
-        emit("element-blur", event);
+        emit("elementBlur", event);
       });
       paymentElement.value.on("escape", (event) => {
-        emit("element-escape", event);
-      });
-      paymentElement.value.on("click", (event) => {
-        emit("element-click", event);
+        emit("elementEscape", event);
       });
     });
     const submit = () => {
@@ -789,6 +793,13 @@ var AddressElement_default = {
       default: () => ({})
     }
   },
+  emits: [
+    "elementChange",
+    "elementReady",
+    "elementFocus",
+    "elementBlur",
+    "elementEscape"
+  ],
   setup(props, { emit }) {
     const stripe = ref7(null);
     const elements = ref7(null);
@@ -820,19 +831,19 @@ var AddressElement_default = {
         } else {
           displayError.textContent = "";
         }
-        emit("element-change", event);
+        emit("elementChange", event);
       });
       addressElement.value.on("ready", () => {
-        emit("element-ready");
+        emit("elementReady");
       });
       addressElement.value.on("blur", () => {
-        emit("element-blur");
+        emit("elementBlur");
       });
       addressElement.value.on("focus", () => {
-        emit("element-focus");
+        emit("elementFocus");
       });
       addressElement.value.on("escape", () => {
-        emit("element-escape");
+        emit("elementEscape");
       });
     });
     const blur = () => {

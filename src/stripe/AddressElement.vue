@@ -42,6 +42,13 @@ export default {
       default: () => ({}),
     },
   },
+  emits: [
+    'elementChange',
+    'elementReady',
+    'elementFocus',
+    'elementBlur',
+    'elementEscape',
+  ],
   setup (props, { emit }) {
     const stripe = ref(null);
     const elements = ref(null);
@@ -80,23 +87,23 @@ export default {
         } else {
           displayError.textContent = '';
         }
-        emit('element-change', event);
+        emit('elementChange', event);
       });
 
       addressElement.value.on('ready', () => {
-        emit('element-ready');
+        emit('elementReady');
       });
 
       addressElement.value.on('blur', () => {
-        emit('element-blur');
+        emit('elementBlur');
       });
 
       addressElement.value.on('focus', () => {
-        emit('element-focus');
+        emit('elementFocus');
       });
 
       addressElement.value.on('escape', () => {
-        emit('element-escape');
+        emit('elementEscape');
       });
     });
 
