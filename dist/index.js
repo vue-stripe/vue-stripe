@@ -330,7 +330,7 @@ var PaymentElement_default = {
       default: false
     },
     // Element options
-    elementsOptions: {
+    elementOptions: {
       type: Object,
       default: () => ({}),
       validator: (value) => {
@@ -372,7 +372,7 @@ var PaymentElement_default = {
       };
       stripe.value = await loadStripe(pk, stripeOptions);
       stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
-      elements.value = stripe.value.elements(props?.elementsOptions);
+      elements.value = stripe.value.elements(props?.elementOptions);
       paymentElement.value = elements.value.create(
         PAYMENT_ELEMENT_TYPE,
         props?.paymentElementOptions
@@ -518,7 +518,7 @@ var LinkAuthenticationElement_default = {
       type: Boolean,
       default: false
     },
-    elementsOptions: {
+    elementOptions: {
       type: Object,
       default: () => ({})
     }
@@ -541,7 +541,7 @@ var LinkAuthenticationElement_default = {
       }
       stripe.value = await loadStripe(props.pk, stripeOptions);
       stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
-      elements.value = stripe.value.elements(props.elementsOptions);
+      elements.value = stripe.value.elements(props.elementOptions);
       linkAuthElement.value = elements.value.create(
         LINK_AUTHENTICATION_ELEMENT_TYPE
       );
@@ -666,7 +666,7 @@ var ExpressCheckoutElement_default = {
       type: Boolean,
       default: false
     },
-    elementsOptions: {
+    elementOptions: {
       type: Object,
       default: () => ({})
     },
@@ -693,7 +693,7 @@ var ExpressCheckoutElement_default = {
       }
       stripe.value = await loadStripe(props.pk, stripeOptions);
       stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
-      elements.value = stripe.value.elements(props.elementsOptions);
+      elements.value = stripe.value.elements(props.elementOptions);
       expressCheckoutElement.value = elements.value.create(
         EXPRESS_CHECKOUT_ELEMENT_TYPE,
         props.expressCheckoutOptions
@@ -784,9 +784,12 @@ var AddressElement_default = {
       type: Boolean,
       default: false
     },
-    elementsOptions: {
+    elementOptions: {
       type: Object,
-      default: () => ({})
+      default: () => ({}),
+      validator(value) {
+        return value.mode;
+      }
     },
     addressElementOptions: {
       type: Object,
@@ -818,7 +821,7 @@ var AddressElement_default = {
       }
       stripe.value = await loadStripe(props.pk, stripeOptions);
       stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
-      elements.value = stripe.value.elements(props.elementsOptions);
+      elements.value = stripe.value.elements(props.elementOptions);
       addressElement.value = elements.value.create(
         ADDRESS_ELEMENT_TYPE,
         props.addressElementOptions

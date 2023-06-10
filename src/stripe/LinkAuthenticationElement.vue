@@ -33,7 +33,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    elementsOptions: {
+    elementOptions: {
       type: Object,
       default: () => ({}),
     },
@@ -60,7 +60,7 @@ export default {
 
       stripe.value = await loadStripe(props.pk, stripeOptions);
       stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
-      elements.value = stripe.value.elements(props.elementsOptions);
+      elements.value = stripe.value.elements(props.elementOptions);
       linkAuthElement.value = elements.value.create(
         LINK_AUTHENTICATION_ELEMENT_TYPE,
       );

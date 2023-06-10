@@ -33,9 +33,12 @@ export default {
       type: Boolean,
       default: false,
     },
-    elementsOptions: {
+    elementOptions: {
       type: Object,
       default: () => ({}),
+      validator (value) {
+        return value.mode;
+      },
     },
     addressElementOptions: {
       type: Object,
@@ -71,7 +74,7 @@ export default {
 
       stripe.value = await loadStripe(props.pk, stripeOptions);
       stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
-      elements.value = stripe.value.elements(props.elementsOptions);
+      elements.value = stripe.value.elements(props.elementOptions);
       addressElement.value = elements.value.create(
         ADDRESS_ELEMENT_TYPE,
         props.addressElementOptions,

@@ -35,7 +35,7 @@ export default {
       default: false,
     },
     // Element options
-    elementsOptions: {
+    elementOptions: {
       type: Object,
       default: () => ({}),
       validator: (value) => {
@@ -80,7 +80,7 @@ export default {
 
       stripe.value = await loadStripe(pk, stripeOptions);
       stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
-      elements.value = stripe.value.elements(props?.elementsOptions);
+      elements.value = stripe.value.elements(props?.elementOptions);
       paymentElement.value = elements.value.create(
         PAYMENT_ELEMENT_TYPE,
         props?.paymentElementOptions,

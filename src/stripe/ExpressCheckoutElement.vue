@@ -33,7 +33,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    elementsOptions: {
+    elementOptions: {
       type: Object,
       default: () => ({}),
     },
@@ -64,7 +64,7 @@ export default {
 
       stripe.value = await loadStripe(props.pk, stripeOptions);
       stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
-      elements.value = stripe.value.elements(props.elementsOptions);
+      elements.value = stripe.value.elements(props.elementOptions);
       expressCheckoutElement.value = elements.value.create(
         EXPRESS_CHECKOUT_ELEMENT_TYPE,
         props.expressCheckoutOptions,
