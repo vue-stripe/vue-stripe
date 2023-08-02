@@ -1,9 +1,9 @@
 {
-  "name": "vue-stripe-next",
-  "version": "0.1.0",
+  "name": "@vue-stripe/vue-stripe",
+  "version": "5.0.0",
   "private": true,
-  "main": "dist/vue-stripe-next.common.js",
-  "module": "dist/vue-stripe-next.umd.min.js",
+  "main": "dist/vue-stripe.common.js",
+  "module": "dist/vue-stripe.umd.min.js",
   "scripts": {
     "serve": "concurrently \"yarn serve:client\" \"yarn serve:server\"",
     "serve:client": "vue-cli-service serve",
@@ -11,7 +11,7 @@
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint --fix",
     "build": "npm run build:lib",
-    "build:lib": "vue-cli-service build --target lib --name vue-stripe-next src/vue-stripe/index.js"
+    "build:lib": "vue-cli-service build --target lib --name vue-stripe src/vue-stripe/index.js"
   },
   "files": [
     "dist/*.{js,css}"
