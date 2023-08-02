@@ -2,7 +2,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { ref } from 'vue';
 import { STRIPE_PARTNER_DETAILS } from '../constants';
 
-export const useStripe = () => {
+export default () => {
   const stripe = ref(null);
 
   async function initialize (pk, options) {

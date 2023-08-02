@@ -1,63 +1,48 @@
 {
-  "name": "@vue-stripe/vue-stripe",
-  "version": "5.0.0",
-  "description": "Stripe Checkout & Elements for Vue.js",
-  "author": "jofftiquez@gmail.com",
-  "main": "dist/index.js",
-  "type": "commonjs",
+  "name": "vue-stripe-next",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/vue-stripe-next.common.js",
+  "module": "dist/vue-stripe-next.umd.min.js",
   "scripts": {
-    "build": "node esbuild.js",
-    "build:rollup": "rollup --config",
-    "lint": "eslint --fix --ext .js,.vue ./"
+    "serve": "concurrently \"yarn serve:client\" \"yarn serve:server\"",
+    "serve:client": "vue-cli-service serve",
+    "serve:server": "nodemon src/server/index.js",
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "vue-cli-service lint --fix",
+    "build": "npm run build:lib",
+    "build:lib": "vue-cli-service build --target lib --name vue-stripe-next src/vue-stripe/index.js"
   },
+  "files": [
+    "dist/*.{js,css}"
+  ],
   "dependencies": {
-    "@stripe/stripe-js": "^1.13.2"
+    "@stripe/stripe-js": "^1.54.2",
+    "core-js": "^3.8.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.1",
+    "stripe": "^12.16.0",
+    "vue": "^3.2.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.12",
-    "@babel/eslint-parser": "^7.13.14",
-    "@babel/plugin-proposal-optional-chaining": "^7.20.7",
-    "@babel/preset-env": "^7.20.2",
-    "@rollup/plugin-babel": "^6.0.3",
-    "@rollup/plugin-commonjs": "^24.0.1",
-    "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-terser": "^0.4.0",
-    "esbuild": "^0.17.5",
-    "esbuild-plugin-vue3": "^0.3.2",
-    "eslint": "^8.10.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.19.1",
-    "eslint-plugin-n": "^15.0.0",
-    "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-vue": "^9.0.0",
-    "eslint-webpack-plugin": "^3.1.1",
-    "rimraf": "^4.1.2",
-    "rollup": "^3.12.0"
-  },
-  "peerDependencies": {
-    "vue": "^3.2.45"
-  },
-  "bugs": {
-    "url": "https://github.com/vue-stripe/vue-stripe/issues"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "homepage": "https://github.com/vue-stripe/vue-stripe#readme",
-  "keywords": [
-    "vue",
-    "vuejs",
-    "stripe",
-    "checkout",
-    "payment"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:vue-stripe/vue-stripe.git"
-  },
-  "typings": "typings/index.d.ts",
-  "engines": {
-    "node": "16"
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-unit-jest": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "@vue/eslint-config-standard": "^6.1.0",
+    "@vue/test-utils": "^2.0.0-0",
+    "@vue/vue3-jest": "^27.0.0-alpha.1",
+    "babel-jest": "^27.0.6",
+    "concurrently": "^8.2.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "jest": "^27.0.5",
+    "vue-cli-plugin-tailwind": "^3.0.0"
   }
 }
