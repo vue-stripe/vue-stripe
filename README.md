@@ -1,3 +1,8 @@
+# See major updates for vue 3 in [here](https://github.com/vue-stripe/vue-stripe/tree/refactor/v5)
+
+- Project - https://github.com/orgs/vue-stripe/projects/2?query=is%3Aopen+sort%3Aupdated-desc
+- Discussion - https://github.com/vue-stripe/vue-stripe/issues/148
+
 # [Important Notice!](https://github.com/vue-stripe/vue-stripe/discussions/261)
 
 <p align="center">
