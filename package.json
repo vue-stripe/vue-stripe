@@ -1,78 +1,28 @@
 {
-  "name": "@vue-stripe/vue-stripe",
-  "version": "4.5.0",
-  "description": "Stripe Checkout & Elements for Vue.js",
-  "author": "jofftiquez@gmail.com",
-  "scripts": {
-    "build": "rollup -c",
-    "lint": "vue-cli-service lint --fix",
-    "prebuild": "rimraf dist",
-    "test": "jest"
+  "name": "@vue-stripe/vue-stripe-v5-vite",
+  "version": "5.0.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/vue-stripe.umd.js",
+  "module": "./dist/vue-stripe.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vue-stripe.es.js",
+      "require": "./dist/vue-stripe.umd.js"
+    }
   },
-  "main": "dist/index.js",
-  "module": "dist",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "@stripe/stripe-js": "^1.13.2",
-    "vue-coerce-props": "^1.0.0"
+    "vue": "^3.3.4"
   },
   "devDependencies": {
-    "@babel/cli": "^7.7.5",
-    "@babel/core": "^7.7.5",
-    "@babel/plugin-proposal-export-default-from": "^7.7.4",
-    "@babel/plugin-proposal-optional-chaining": "^7.10.4",
-    "@babel/plugin-transform-runtime": "^7.7.5",
-    "@babel/preset-env": "^7.7.5",
-    "@babel/preset-es2015": "^7.0.0-beta.53",
-    "@babel/runtime": "^7.7.5",
-    "@rollup/plugin-node-resolve": "^6.0.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-service": "^4.5.10",
-    "@vue/eslint-config-standard": "^5.1.2",
-    "babel-eslint": "^10.1.0",
-    "babel-minify": "^0.5.1",
-    "cross-env": "^6.0.3",
-    "eslint": "^6.8.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "eslint-plugin-vue": "^6.2.2",
-    "jest": "^24.9.0",
-    "lint-staged": "^9.5.0",
-    "rimraf": "^3.0.0",
-    "rollup": "^1.27.9",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-postcss": "^2.0.3",
-    "rollup-plugin-terser": "^5.1.3",
-    "rollup-plugin-uglify": "^6.0.3",
-    "rollup-plugin-vue": "^5.1.4",
-    "vue-template-compiler": "^2.6.11"
-  },
-  "bugs": {
-    "url": "https://github.com/vue-stripe/vue-stripe/issues"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "homepage": "https://github.com/vue-stripe/vue-stripe#readme",
-  "keywords": [
-    "vue",
-    "vuejs",
-    "stripe",
-    "checkout",
-    "payment"
-  ],
-  "license": "MIT",
-  "lint-staged": {
-    "*.{js,jsx,vue}": [
-      "vue-cli-service lint",
-      "git add"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:vue-stripe/vue-stripe.git"
-  },
-  "typings": "typings/index.d.ts"
+    "@vitejs/plugin-vue": "^4.2.3",
+    "vite": "^4.4.5"
+  }
 }
