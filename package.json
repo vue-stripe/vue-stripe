@@ -18,10 +18,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:unit": "vitest",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
     "@stripe/stripe-js": "^2.3.0",
@@ -35,7 +32,6 @@
     "eslint-plugin-vue": "^9.17.0",
     "jsdom": "^23.0.1",
     "vite": "^5.0.10",
-    "vitepress": "^1.0.0-rc.39",
     "vitest": "^1.0.4",
     "vue": "^3.3.11"
   },
