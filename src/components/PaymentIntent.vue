@@ -1,16 +1,11 @@
 <template>
-  <div ref="stripeElementMountPoint"/>
+  <div ref="mountPoint"/>
 </template>
 
 <script>
 import { PAYMENT_ELEMENT_TYPE  } from '../constants';
-import {
-  defineComponent,
-  reactive,
-  install,
-  ref,
-  watch,
-} from 'vue-demi';
+import { useElement } from '../composables/use-element';
+import { defineComponent, install, ref, watch } from 'vue-demi';
 
 install();
 
@@ -37,29 +32,27 @@ export default defineComponent({
     expose({
       submit,
     });
-    
-    const stripeElementMountPoint = ref(null);
 
-    const data = reactive({
-      paymentIntent: null,
-    });
+    const mountPoint = ref(null);
+    
+    const { createElement, mountElement } = useElement(emit);
 
     watch(props, () => {
-      if (stripeElementMountPoint.value) init(props.elements, props.options);
-    }, { immediate: false });
+      init();
+    });
 
-    async function init(elements, options) {
-      data.paymentIntent = elements.create(PAYMENT_ELEMENT_TYPE, options);
-      data.paymentIntent.mount(stripeElementMountPoint.value);
-
-      // Handle emits
-      data.paymentIntent.on('change', handleElementChange);
-      data.paymentIntent.on('ready', handleElementReady);
-      data.paymentIntent.on('focus', handleElementFocus);
-      data.paymentIntent.on('blur', handleElementBlur);
-      data.paymentIntent.on('escape', handleElementEscape);
-      data.paymentIntent.on('submit', submit);
-    };
+    function init () {
+      try {
+        emit('loading', true);
+        createElement(PAYMENT_ELEMENT_TYPE, props.elements, props.options);
+        mountElement(mountPoint.value);
+      } catch (e) {
+        console.error(e);
+        emit('error', error);
+      } finally {
+        emit('loading', false);
+      }
+    }
 
     // Methods
     async function submit () {
@@ -74,34 +67,16 @@ export default defineComponent({
           console.error(error);
           emit('error', error);
         }
+
       } catch (error) {
         emit('error', error);
+      } finally {
+        emit('loading', false);
       }
     }
-    
-    // Emit events
-    function handleElementChange (event) {
-      emit('change', event);
-    }
-
-    function handleElementReady (event) {
-      emit('ready', event);
-    }
-
-    function handleElementFocus (event) {
-      emit('focus', event);
-    }
-
-    function handleElementBlur (event) {
-      emit('blur', event);
-    }
-
-    function handleElementEscape (event) {
-      emit('escape', event);
-    }
-
+  
     return {
-      stripeElementMountPoint,
+      mountPoint,
     }
   },
 });
