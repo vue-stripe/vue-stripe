@@ -1,9 +1,6 @@
-# See major updates for vue 3 in [here](https://github.com/vue-stripe/vue-stripe/tree/refactor/v5)
+# Jan 23, 2024 - See major updates [here](https://github.com/vue-stripe/vue-stripe/tree/refactor/next)
 
-- Project - https://github.com/orgs/vue-stripe/projects/2?query=is%3Aopen+sort%3Aupdated-desc
-- Discussion - https://github.com/vue-stripe/vue-stripe/issues/148
-
-# [Important Notice!](https://github.com/vue-stripe/vue-stripe/discussions/261)
+# Discussion here - https://github.com/vue-stripe/vue-stripe/discussions/236
 
 <p align="center">
   <img src="./vue-stripe-logo-variant-1.png" alt="drawing" width="250"/>
