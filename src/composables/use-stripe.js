@@ -1,8 +1,9 @@
-import { provide } from 'vue-demi';
 import { loadStripe } from '@stripe/stripe-js';
 import { STRIPE_PARTNER_DETAILS } from '../constants';
 
 export function useStripe () {
+  console.log('useStripe');
+  console.log(import.meta.env);
   async function initializeStripe (pk, options) {
     if (options?.disableAdvancedFraudDetection) loadStripe.setLoadParameters({ advancedFraudSignals: false });
     const stripeOptions = {
@@ -12,7 +13,6 @@ export function useStripe () {
     };
     const stripe = await loadStripe(pk, stripeOptions);
     stripe.registerAppInfo(STRIPE_PARTNER_DETAILS);
-    provide('stripe-instance', stripe);
     return stripe;
   }
 
