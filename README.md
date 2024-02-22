@@ -11,7 +11,7 @@
 
 > [Vue Stripe](https://vuestripe.com) is now an official [Stripe partner](https://stripe.com/partners/vue-stripe) 🎉
 
-Stripe Checkout & Elements for Vue.js
+Stripe Checkout & Elements for Vue.js (support for Vue3 is currently in development)
 
 You can support this project by giving it a star, or following the author. You can also send your love through [Open Collective](https://opencollective.com/vue-stripe-checkout#section-contribute) :heart:.
 
