@@ -1,6 +1,6 @@
 <script setup>
 import { VPTeamMembers } from 'vitepress/theme'
-import PaymentIntentDemo from './demo/PaymentIntentDemo.vue'
+import PaymentElementDemo from './demo/PaymentElementDemo.vue'
 
 const members = [
   {
@@ -27,7 +27,7 @@ const members = [
 
 # Welcome to Vue Stripe
 
-<PaymentIntentDemo />
+<PaymentElementDemo />
 
 ## What is Vue Stripe?
 
