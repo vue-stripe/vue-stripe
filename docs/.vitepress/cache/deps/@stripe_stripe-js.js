@@ -1,6 +1,6 @@
-import "./chunk-CSAU5B4Q.js";
+import "./chunk-PZ5AY32C.js";
 
-// node_modules/@stripe/stripe-js/dist/stripe.esm.js
+// node_modules/@stripe/stripe-js/dist/index.mjs
 var V3_URL = "https://js.stripe.com/v3";
 var V3_URL_REGEX = /^https:\/\/js\.stripe\.com\/v3\/?(\?.*)?$/;
 var EXISTING_SCRIPT_MESSAGE = "loadStripe.setLoadParameters was called but an existing Stripe.js script already exists in the document; existing script parameters will be used";
@@ -32,7 +32,7 @@ var registerWrapper = function registerWrapper2(stripe, startTime) {
   }
   stripe._registerWrapper({
     name: "stripe-js",
-    version: "2.3.0",
+    version: "4.3.0",
     startTime
   });
 };

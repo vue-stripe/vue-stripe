@@ -1,4 +1,4 @@
-// node_modules/vue-demi/lib/index.mjs
+// node_modules/vitepress/lib/vue-demi.mjs
 var isVue2 = false;
 var isVue3 = true;
 var Vue2 = void 0;
@@ -29,4 +29,13 @@ export {
   set,
   del
 };
-//# sourceMappingURL=chunk-FEMQUFDV.js.map
+/*! Bundled license information:
+
+vitepress/lib/vue-demi.mjs:
+  (**
+   * vue-demi v0.14.7
+   * Copyright (c) 2020-present, Anthony Fu
+   * @license MIT
+   *)
+*/
+//# sourceMappingURL=chunk-ZDT2FX2F.js.map
