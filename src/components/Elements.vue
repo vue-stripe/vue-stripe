@@ -22,14 +22,14 @@ export default defineComponent({
       default: () => ({}),
     },
   },
-  setup(props, { slots, emit, expose }) {
+  setup(props, { slots }) {
     const data = reactive({
       elements: null,
     });
 
     watch(props, () => {
       init(props.stripe, props.clientSecret, props.options);
-    }, { immediate: false });
+    }, { deep: true, immediate: false });
 
     async function init(stripe, clientSecret, options) {
       data.elements = stripe.elements({ 
