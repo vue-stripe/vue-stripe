@@ -3,7 +3,6 @@ import { ref } from 'vue-demi';
 export function useElement (emit) {
 
   const element = ref(null);
-  const loading = ref(false);
 
   async function createElement(type, elements, options) {
     if (!elements) return;
@@ -19,27 +18,27 @@ export function useElement (emit) {
   function mountElement (mountPoint) {
     if (!element.value) return;
     element.value.mount(mountPoint);
-  }
+  };
 
   function handleElementChange (event) {
     emit('change', event);
-  }
+  };
 
   function handleElementReady (event) {
     emit('ready', event);
-  }
+  };
 
   function handleElementFocus (event) {
     emit('focus', event);
-  }
+  };
 
   function handleElementBlur (event) {
     emit('blur', event);
-  }
+  };
 
   function handleElementEscape (event) {
     emit('escape', event);
-  }
+  };
 
   return {
     element,
@@ -50,5 +49,5 @@ export function useElement (emit) {
     handleElementFocus,
     handleElementBlur,
     handleElementEscape,
-  }
-}
+  };
+};
