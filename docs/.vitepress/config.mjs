@@ -51,9 +51,9 @@ export default defineConfig(({ command, mode }) => {
           text: 'Components',
           items: [
             { text: 'Payment Element', link: '/components/payment-element' },
-            { text: 'Link Authentication Element', link: '/components/link-authentication-element' },
             { text: 'Express Checkout Element', link: '/components/express-checkout-element' },
-            { text: 'Address Element', link: '/components/address-element' },
+            { text: 'Link Authentication Element', link: '/components/link-authentication-element' },
+            // { text: 'Address Element', link: '/components/address-element' },
           ]
         },
         {

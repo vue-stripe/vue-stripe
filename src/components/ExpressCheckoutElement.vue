@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { LINK_AUTHENTICATION_ELEMENT_TYPE as ELEMENT_TYPE  } from '../constants';
+import { EXPRESS_CHECKOUT_ELEMENT_TYPE as ELEMENT_TYPE } from '../constants';
 import { install, ref, toRef, watch, defineEmits, defineProps, defineExpose } from 'vue-demi';
 
 install();
@@ -12,6 +12,8 @@ const emit = defineEmits(['change', 'ready', 'focus', 'blur', 'escape']);
 
 defineExpose({
   getElement,
+  updateElement,
+  fetchUpdates,
 });
 
 const props = defineProps({
@@ -39,9 +41,24 @@ function init () {
 
   element.value = elements.value.create(ELEMENT_TYPE, options.value);
   element.value.mount(mountPoint.value);
+
+  // Handle emits
+  element.value.on('click', () => emit('click'));
+  element.value.on('confirm', () => emit('confirm'));
+  element.value.on('cancel', () => emit('cancel'));
+  element.value.on('shippingaddresschange', () => emit('shippingaddresschange'));
+  element.value.on('shippingratechange', () => emit('shippingratechange'));
 };
 
 async function getElement () {
   return elements.value.getElement(ELEMENT_TYPE);
+};
+
+async function updateElement (options) {
+  return element.value.update(options);
+};
+
+async function fetchUpdates () {
+  return elements.value.fetchUpdates();
 };
 </script>

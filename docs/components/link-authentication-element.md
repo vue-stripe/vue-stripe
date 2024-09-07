@@ -1,77 +1,74 @@
+<script setup>
+import LinkAuthenticationElementDemo from '../demo/LinkAuthenticationElementDemo.vue';
+import PaymentElementDemo from '../demo/PaymentElementDemo.vue';
+</script>
+
 # The Link Authentication Element Component
 
 The Link Authentication Element is an embeddable UI component that allows you to accept a payment with Stripe Link Payment.
 
-<!-- <script setup>
-import { PaymentIntent, LinkAuthentication, useStripe } from 'vue-stripe-demi';;
-import { onMounted, ref } from 'vue';
+## Demo
 
-const { initStripe, initElements } = useStripe();
+<LinkAuthenticationElementDemo />
 
-const pk = 'pk_test_51OIHqMIx2Vb66eaKneiRI89KWckP2FB7c75OLUZGezoXDiCHlIXMh6dBkTyWRe8oz77CO6B0udvWS6yWWdDaiwS800oW2Na8mk';
-const clientSecret = 'pi_3OaBhKIx2Vb66eaK1aVjXXAS_secret_GbvadXNEF04Uzx80WZxqSefKi';
+The Link Authentication Element only interacts with the Payment Element by prefilling payment information for returning Link users. However, it can still be displayed with other elements as well, like the following example with the Link Authentication Element, Address Element, and Payment Element. Read more [here](https://docs.stripe.com/payments/elements/link-authentication-element).
 
-const stripe = ref(null);
-const elements = ref(null);
+## Link Authentication Element and Payment Element Demo
 
+<LinkAuthenticationElementDemo />
+<PaymentElementDemo />
 
-const linkAuthenticationRef = ref(null);
-const paymentIntentRef = ref(null);
+## Usage 
 
-onMounted(async () => {
-  stripe.value = await initStripe(pk, {});
-  elements.value = await initElements(stripe.value, clientSecret, {});
-});
+```vue
+<script setup>
+import { ref } from 'vue';
+import { useStripe, LinkAuthenticationElement, PaymentElement } from '@vue-stripe/vue-stripe';
 
-const confirmParams = {
-  return_url: 'https://example.com',
-  payment_method_data: {
-    billing_details: {
-      name: 'Jenny Rosen',
-      email: 'jenny.rosen@example.com',
-    }
-  }
-};
+const pk = ref(import.meta.env.VITE_VUE_STRIPE_PUBLISHABLE_KEY);
+const clientSecret = ref(import.meta.env.VITE_STRIPE_CLIENT_SECRET);
 
-const loading = ref(false);
+const { stripe, elements, initializeElements } = useStripe(pk.value);
 
-async function submit () {
-  await paymentIntentRef.value.submit();
-}
+initializeElements(clientSecret.value);
 
-// window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', event => {
-//   if (event.matches) {
-//     // User has switched to dark mode
-//     console.log('dark mode');
-//   } else {
-//     console.log('light mode');
-//   }
-// });
-
+const linkOptions = {};
+const paymentOptions = {};
 </script>
 
-<LinkAuthentication
-  ref="linkAuthenticationRef"
-  :stripe="stripe"
-  :elements="elements"
-  :options="{defaultValues: { email: 'foo@bar.com'}}"
-  @change="() => console.log('change')"
-  @ready="() => console.log('ready')"
-  @focus="() => console.log('focus')"
-  @blur="() => console.log('blur')"
-  @escape="() => console.log('escape')"
-/>
+<template>
+  <template>
+    <div>
+      <LinkAuthenticationElement 
+        :elements="elements" 
+        :options="linkOptions"
+      />
+      <PaymentElement 
+        :elements="elements" 
+        :options="paymentOptions"
+      />
+    </div>
+  </template>
+</template>
+```
 
-<br>
+## Props
 
-<PaymentIntent
-  ref="paymentIntentRef"
-  :stripe="stripe"
-  :elements="elements"
-  :confirm-params="confirmParams"
-  @change="() => console.log('change')"
-  @ready="() => console.log('ready')"
-  @focus="() => console.log('focus')"
-  @blur="() => console.log('blur')"
-  @escape="() => console.log('escape')"
-/> -->
+| Prop | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `elements` | `Elements` | `null` | `true` | The Elements instance |
+| `options` | `Object` | `{}` | `false` | Options for creating the Link Authentication Element. Read more [here](https://docs.stripe.com/js/elements_object/create_link_authentication_element?link_authentication_element_create-options#link_authentication_element_create-options). |
+
+## Events
+
+> There are no events for this component.
+
+## Methods
+
+| Method | Description |
+|--------|-------------|
+| `getElement` | Get the Payment Element instance. |
+
+## Slots
+
+> No slots are exposed by this component.

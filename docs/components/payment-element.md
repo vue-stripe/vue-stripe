@@ -47,6 +47,8 @@ const { stripe, elements, initializeElements } = useStripe(pk.value);
 
 initializeElements(clientSecret.value);
 
+const options = {};
+
 async function onSubmit () {
   try {
     stripe.value.confirmPayment({
@@ -63,8 +65,8 @@ async function onSubmit () {
 
 <template>
   <PaymentElement
-    :stripe="stripe"
     :elements="elements"
+    :options="options"
   />
   <button class="btn" @click="onSubmit">Submit</button>
 </template>
@@ -80,18 +82,25 @@ Using the `stripe` object, you can also call the `confirmPayment` method to conf
 | `elements` | `Elements` | `true` | `null` | The Elements instance |
 | `options` | `Object` | `false` | `{}` | Options to pass to the Stripe Payment Element instance. Read more [here](https://docs.stripe.com/js/elements_object/create_payment_element#payment_element_create-options). |
 
-## Slots 
-
-> No slots are exposed by this component.
-
 ## Events
 
 | Event | Description |
 |-------|-------------|
-| `error` | Emitted when an error occurs during the payment process. |
-| `loading` | Emitted when the payment process is loading. |
+| `change` | Emitted when the element changes |
+| `ready` | Emitted when the element is ready |
+| `focus` | Emitted when the element is focused |
+| `blur` | Emitted when the element is blurred |
+| `escape` | Emitted when the element is escaped |
 
 ## Methods
 
-> No methods are exposed by this component.
+| Method | Description |
+|--------|-------------|
+| `getElement` | Get the Payment Element instance. |
+| `updateElement` | Update the Payment Element instance. |
+| `fetchUpdates` | Fetch updates for the Payment Element instance. |
+| `collapse` | Collapse the Payment Element UI. |
 
+## Slots 
+
+> No slots are exposed by this component.
