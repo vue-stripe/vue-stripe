@@ -3,14 +3,9 @@
 </template>
 
 <script setup>
-import { LINK_AUTHENTICATION_ELEMENT_TYPE as ELEMENT_TYPE  } from '../constants';
-import { install, ref, toRef, watch, defineProps, defineExpose } from 'vue-demi';
+import { install, ref, toRef, watch, defineProps } from 'vue-demi';
 
 install();
-
-defineExpose({
-  getElement,
-});
 
 const props = defineProps({
   elements: {
@@ -20,10 +15,15 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  elementType: {
+    type: String,
+    required: true,
+  },
 });
 
 const elements = toRef(props, 'elements');
 const options = toRef(props, 'options');
+const elementType = toRef(props, 'elementType');
 
 const mountPoint = ref(null);
 const element = ref(null);
@@ -35,11 +35,7 @@ watch(props, () => {
 function init () {
   if (!elements.value) return;
 
-  element.value = elements.value.create(ELEMENT_TYPE, options.value);
+  element.value = elements.value.create(elementType.value, options.value);
   element.value.mount(mountPoint.value);
-};
-
-async function getElement () {
-  return elements.value.getElement(ELEMENT_TYPE);
 };
 </script>

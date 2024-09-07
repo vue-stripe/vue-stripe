@@ -4,11 +4,9 @@
 
 <script setup>
 import { ADDRESS_ELEMENT_TYPE as ELEMENT_TYPE  } from '../constants';
-import { install, ref, toRef, watch, defineEmits, defineProps, defineExpose } from 'vue-demi';
+import { install, ref, toRef, watch, defineProps, defineExpose } from 'vue-demi';
 
 install();
-
-const emit = defineEmits(['change', 'ready', 'focus', 'blur', 'escape']);
 
 defineExpose({
   getElement,
@@ -54,6 +52,6 @@ async function updateElement (options) {
 };
 
 async function getValue () {
-  return elements.value.getValue();
+  return element.value.getValue();
 };
 </script>

@@ -1,5 +1,5 @@
 <script setup>
-import AddressElementDemo from '../demo/AddressElementDemo.vue'
+import AddressElementDemo from '../demo/AddressElementDemo.vue';
 </script>
 
 # The Address Element Component
@@ -37,8 +37,8 @@ const options = {
 const addressElementRef = ref(null);
 
 function getAddressValue () {
-  const addressElement = addressElementRef.value.getValue();
-  console.log(addressElement); // The address value
+  const addressValue = addressElementRef.value.getValue();
+  console.log(addressValue); // The address value
 };
 </script>
 

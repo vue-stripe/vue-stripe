@@ -8,7 +8,13 @@ import { install, ref, toRef, watch, defineEmits, defineProps, defineExpose } fr
 
 install();
 
-const emit = defineEmits(['change', 'ready', 'focus', 'blur', 'escape']);
+const emit = defineEmits([
+  'click',
+  'confirm',
+  'cancel',
+  'shippingaddresschange',
+  'shippingratechange',
+]);
 
 defineExpose({
   getElement,

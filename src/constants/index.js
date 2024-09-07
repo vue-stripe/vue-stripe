@@ -120,3 +120,9 @@ export const PAYMENT_ELEMENT_TYPE = 'payment';
 export const LINK_AUTHENTICATION_ELEMENT_TYPE = 'linkAuthentication';
 export const EXPRESS_CHECKOUT_ELEMENT_TYPE = 'expressCheckout';
 export const ADDRESS_ELEMENT_TYPE = 'address';
+
+export const ISSUING_CARD_NUMBER_DISPLAY_ELEMENT_TYPE = 'issuingCardNumberDisplay';
+export const ISSUING_CARD_CVC_DISPLAY_ELEMENT_TYPE = 'issuingCardCvcDisplay';
+export const ISSUING_CARD_EXPIRY_DISPLAY_ELEMENT_TYPE = 'issuingCardExpiryDisplay';
+export const ISSUING_CARD_PIN_DISPLAY_ELEMENT_TYPE = 'issuingCardPinDisplay';
+export const ISSUING_CARD_COPY_BUTTON_ELEMENT_TYPE = 'issuingCardCopyButton';
