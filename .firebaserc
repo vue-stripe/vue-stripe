@@ -5,6 +5,9 @@
   "targets": {
     "vue-stripe-docs": {
       "hosting": {
+        "staging": [
+          "vue-stripe-docs-next"
+        ],
         "prod": [
           "vue-stripe-docs-next"
         ]

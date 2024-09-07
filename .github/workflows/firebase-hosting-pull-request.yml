@@ -30,4 +30,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VUE_STRIPE_DOCS }}
-          projectId: vue-stripe-docs-next
+          target: staging
+          expires: 30d
