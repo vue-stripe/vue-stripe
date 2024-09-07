@@ -1,5 +1,5 @@
 {
-  "name": "vue-stripe-demi",
+  "name": "@vue-stripe/vue-stripe",
   "version": "5.0.0",
   "type": "module",
   "files": [

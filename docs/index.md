@@ -19,20 +19,20 @@ hero:
 
 features:
   - icon: 💰
-    title: Payment Intent
+    title: Payment Element
     details: Accept payment methods from around the globe with a single secure, embeddable UI component
-  - icon: 🔗
-    title: Link Authentication Element
-    details: Accept a payment with Stripe Link Payment
   - icon: 💸
     title: Express Checkout Element
     details: Show multiple one-click payment buttons (including Apple Pay and Google Pay) to your customers at the same time
+  - icon: 🔗
+    title: Link Authentication Element
+    details: Accept a payment with Stripe Link Payment
   - icon: 💳
     title: Address Element
     details: The Address Element is an embeddable UI component that autofills your customers’ billing and shipping addresses quickly and accurately
-  - icon: 🧱
-    title: Advanced UI Elements
-    details: Implement more of Stripe's advanced UI Elements
+  - icon: 📦
+    title: Issuing Element
+    details: Display the sensitive data of your Issuing cards in a PCI-compliant manner
 ---
 
 <!-- <style>

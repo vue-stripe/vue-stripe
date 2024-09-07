@@ -67,7 +67,7 @@ export default defineConfig(({ command, mode }) => {
         {
           text: 'Vue 2 Support',
           items: [
-            { text: 'Intro', link: '/vue-2/introduction' },
+            { text: 'README', link: '/vue-2/introduction' },
           ]
         }
       ],

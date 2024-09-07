@@ -29,7 +29,7 @@ export function useStripe (pk, options) {
     };
 
     stripe.value = await loadStripe(pk, stripeOptions);
-    stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS);
+    stripe.value?.registerAppInfo(STRIPE_PARTNER_DETAILS);
   }
 
   /**
@@ -41,7 +41,7 @@ export function useStripe (pk, options) {
     if (!stripe.value) {
       await init(); // Wait until stripe is loaded
     }
-    elements.value = stripe.value.elements({
+    elements.value = stripe.value?.elements({
       ...elementsOptions,
       clientSecret,
     });
