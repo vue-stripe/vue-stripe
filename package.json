@@ -1,5 +1,7 @@
 {
   "name": "@vue-stripe/vue-stripe",
+  "description": "Vue.js composables & components for Stripe",
+  "author": "jofftiquez@gmail.com",
   "version": "5.0.0",
   "type": "module",
   "files": [

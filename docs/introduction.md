@@ -24,12 +24,17 @@ const members = [
 ]
 </script>
 
-
 # Welcome to Vue Stripe
 
 <PaymentElementDemo />
 
+<!-- <img src="./images/vue-stripe-logo-variant-1-small.png" alt="Vue Stripe Logo" style="width: 200px;"> -->
+
 ## What is Vue Stripe?
+
+<a href="https://stripe.com/partners/vue-stripe?ref=https://vuestripe.com" target="_blank">
+  <img src="./images/stripe_partner_badge_verified_blurple.png" alt="Vue Stripe Logo" style="width: 200px;">
+</a>
 
 Vue Stripe is the official Stripe partner component library for Vue.js. It provides a set of composable components and utilities for working with Stripe.
 
