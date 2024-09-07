@@ -15,73 +15,33 @@ yarn add @vue-stripe/vue-stripe
 ```
 
 
-### Composable Usage
+## Usage
 
 This is an example of how you can use the `useStripe` composable to initialize Stripe.js.
 
 ```vue
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useStripe } from '@vue-stripe/vue-stripe';
 
-const { initStripe } = useStripe();
-const stripe = ref(null);
+const pk = ref(process.env.PUBLISHABLE_KEY);
+const clientSecret = ref('client_secret'); // This should be the client secret from the server
 
-onMounted(async () => {
-  // Initialize Stripe.js
-  stripe.value = await initStripe('pk_...');
-});
+const { stripe, elements, initializeElements } = useStripe(pk.value);
+
+initializeElements(clientSecret.value);
 </script>
 ```
 
-Vue Stripe has 3 main composables, `useStripe`, `useElements`, and `useElement`. You can use these composables to initialize Stripe.js, create Elements, and create Elements with options.
+Vue Stripe have a new composable called `useStripe`. You can use it to initialize Stripe.js, and initialize the Elements intance.
 
-**Why are they needed?**
+This will give you access to the `stripe` object, the `elements` object, and the `initializeElements` function. You can use the `stripe` object to call the `confirmPayment` method to confirm a payment, and more methods provided by the Stripe object as seen in the [Stripe.js documentation](https://stripe.com/docs/js?ref=https://vuestripe.com).
 
-- `useStripe` - Initializes Stripe.js and returns the Stripe instance.
-- `useElements` - Creates an Elements instance and returns it.
-- `useElement` - Creates an Element with options and returns it.
+This allows you to implement your own UI components without the hassle of managing the Stripe.js library.
 
-In case you need the option to create your own UI, you can still Vue Stripe composable to easily create Elements and Elements with options.
-
-
-### Component Usage
-
-This is an example of how you can use the `VueStripe`, `Elements`, and `Payment` components to create a payment form.
-
-```vue
-<script setup>
-import { VueStripe, Elements, Payment } from '@vue-stripe/vue-stripe';
-const pk = 'pk_...';
-</script>
-
-<template>
-  <VueStripe 
-    :pk="pk"
-    v-slot:default="{ stripe }"
-  >
-    <Elements 
-      :stripe="stripe" 
-      :client-secret="clientSecret"
-      v-slot:default="{ element }"
-    >
-      <Payment 
-        :stripe="stripe" 
-        :element="element"
-      />
-    </Elements>
-  </VueStripe>
-</template>
-```
-
-**What are other components available?**
+## Components
 
 Learn more about the other components available in Vue Stripe in the next section. But here are the main components available in Vue Stripe:
-
-*Core*
-
-- `VueStripe` - Initializes Stripe.js and returns the Stripe instance.
-- `Elements` - Creates an Elements instance and returns it.
 
 *Elements Components*
 
