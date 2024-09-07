@@ -22,7 +22,7 @@ export default defineComponent({
       default: () => ({}),
     },
   },
-  setup (props, { slots, emit, expose }) {
+  setup (props, { slots }) {
     const data = reactive({
       stripe: null,
     });
