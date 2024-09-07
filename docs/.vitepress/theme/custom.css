@@ -32,3 +32,11 @@
     #fad86a 65%);
   --vp-home-hero-image-filter: blur(50px);
 }
+
+.btn {
+  background-color: var(--vp-c-brand-1);
+  color: white;
+  padding: 0.5em 1em;
+  border-radius: 0.5em;
+  text-decoration: none;
+}
