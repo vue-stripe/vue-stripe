@@ -1,0 +1,23 @@
+{
+  "projects": {
+    "default": "vue-stripe-docs"
+  }
+}
+
+
+{
+  "projects": {
+    "default": "vue-stripe-docs"
+  },
+  "targets": {
+    "vue-stripe-docs": {
+      "hosting": {
+        "prod": [
+          "vue-stripe-docs-next"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}
