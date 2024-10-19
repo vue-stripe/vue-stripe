@@ -120,6 +120,8 @@ export const PAYMENT_ELEMENT_TYPE = 'payment';
 export const LINK_AUTHENTICATION_ELEMENT_TYPE = 'linkAuthentication';
 export const EXPRESS_CHECKOUT_ELEMENT_TYPE = 'expressCheckout';
 export const ADDRESS_ELEMENT_TYPE = 'address';
+export const AU_BANK_ACCOUNT_ELEMENT_TYPE = 'auBankAccount';
+export const IBAN_ELEMENT_TYPE = 'iban';
 
 export const ISSUING_CARD_NUMBER_DISPLAY_ELEMENT_TYPE = 'issuingCardNumberDisplay';
 export const ISSUING_CARD_CVC_DISPLAY_ELEMENT_TYPE = 'issuingCardCvcDisplay';
