@@ -1,13 +1,19 @@
-import StripePlugin from './stripe';
-import StripeCheckout from './checkout';
-import StripeElementCard from './elements/Card.vue';
-import StripeElementPayment from './elements/Payment.vue';
-import StripeElementsPlugin from './elements';
+import AddressElement from './components/AddressElement.vue';
+import AuBankAccountElement from './components/AuBankAccountElement.vue';
+import ExpressCheckoutElement from './components/ExpressCheckoutElement.vue';
+import IbanElement from './components/IbanElement.vue';
+import IssuingElement from './components/IssuingElement.vue';
+import LinkAuthenticationElement from './components/LinkAuthenticationElement.vue';
+import PaymentElement from './components/PaymentElement.vue';
+import { useStripe } from './composables/use-stripe';
 
-export {
-  StripePlugin,
-  StripeCheckout,
-  StripeElementCard,
-  StripeElementPayment,
-  StripeElementsPlugin,
+export { 
+  AddressElement,
+  AuBankAccountElement,
+  ExpressCheckoutElement,
+  IssuingElement,
+  IbanElement,
+  LinkAuthenticationElement,
+  PaymentElement,
+  useStripe,
 };
