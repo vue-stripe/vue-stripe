@@ -1,11 +1,81 @@
 <script setup lang="ts">
-import { ref, inject, computed, watch } from 'vue'
+import { ref, inject, computed, watch, defineComponent, h } from 'vue'
 import {
   StripeProvider,
   StripeElements,
   StripePaymentElement,
-  usePaymentIntent
+  usePaymentIntent,
+  useStripe,
+  useStripeElements
 } from '@vue-stripe/vue-stripe'
+
+// Child component for payment submission (needs to be inside StripeElements)
+const PaymentForm = defineComponent({
+  name: 'PaymentForm',
+  props: {
+    clientSecret: { type: String, required: true },
+    paymentComplete: { type: Boolean, default: false }
+  },
+  emits: ['payment-success', 'payment-error'],
+  setup(props, { emit }) {
+    const { stripe } = useStripe()
+    const { elements } = useStripeElements()
+
+    const processing = ref(false)
+
+    const handleSubmit = async () => {
+      if (!stripe.value || !elements.value) {
+        emit('payment-error', 'Stripe not ready')
+        return
+      }
+
+      processing.value = true
+
+      try {
+        // IMPORTANT: Must call elements.submit() before confirmPayment
+        const { error: submitError } = await elements.value.submit()
+        if (submitError) {
+          emit('payment-error', submitError.message)
+          processing.value = false
+          return
+        }
+
+        // Now confirm the payment
+        const { error, paymentIntent } = await stripe.value.confirmPayment({
+          elements: elements.value,
+          clientSecret: props.clientSecret,
+          confirmParams: {
+            return_url: window.location.href
+          },
+          redirect: 'if_required'
+        })
+
+        if (error) {
+          emit('payment-error', error.message)
+        } else if (paymentIntent?.status === 'succeeded') {
+          emit('payment-success')
+        }
+      } catch (err: any) {
+        emit('payment-error', err.message || 'Payment failed')
+      } finally {
+        processing.value = false
+      }
+    }
+
+    return () => h('div', { class: 'payment-actions' }, [
+      h('button', {
+        class: 'btn btn-primary',
+        disabled: !props.paymentComplete || processing.value,
+        onClick: handleSubmit
+      }, processing.value ? 'Processing...' : 'Pay Now'),
+      h('p', { class: 'payment-hint' }, [
+        'Use test card ',
+        h('code', '4242 4242 4242 4242'),
+        ' with any future date and CVC'
+      ])
+    ])
+  }
+})
 
 const stripeConfig = inject<{
   publishableKey: string
@@ -330,78 +400,6 @@ const onLoaderStop = () => {
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { useStripe, useStripeElements, usePaymentIntent } from '@vue-stripe/vue-stripe'
-
-// Child component for payment submission (needs to be inside StripeElements)
-const PaymentForm = defineComponent({
-  name: 'PaymentForm',
-  props: {
-    clientSecret: { type: String, required: true },
-    paymentComplete: { type: Boolean, default: false }
-  },
-  emits: ['payment-success', 'payment-error'],
-  setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const { elements } = useStripeElements()
-    const { confirmPayment, loading, error } = usePaymentIntent()
-
-    const processing = ref(false)
-
-    const handleSubmit = async () => {
-      if (!stripe.value || !elements.value) {
-        emit('payment-error', 'Stripe not ready')
-        return
-      }
-
-      processing.value = true
-
-      const result = await confirmPayment({
-        clientSecret: props.clientSecret,
-        confirmParams: {
-          return_url: window.location.href
-        },
-        redirect: 'if_required'
-      })
-
-      processing.value = false
-
-      if (result.error) {
-        emit('payment-error', result.error.message)
-      } else if (result.paymentIntent?.status === 'succeeded') {
-        emit('payment-success')
-      }
-    }
-
-    return {
-      handleSubmit,
-      processing,
-      loading,
-      error
-    }
-  },
-  template: `
-    <div class="payment-actions">
-      <button
-        class="btn btn-primary"
-        :disabled="!paymentComplete || processing"
-        @click="handleSubmit"
-      >
-        {{ processing ? 'Processing...' : 'Pay Now' }}
-      </button>
-      <p class="payment-hint">
-        Use test card <code>4242 4242 4242 4242</code> with any future date and CVC
-      </p>
-    </div>
-  `
-})
-
-export default {
-  components: { PaymentForm }
-}
-</script>
 
 <style scoped>
 * {
