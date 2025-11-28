@@ -272,8 +272,12 @@ export default {
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 .payment-element-view {
-  max-width: 600px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -321,6 +325,7 @@ export default {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 1.5rem;
+  overflow: hidden;
 }
 
 .secret-form h4 {
@@ -347,12 +352,14 @@ export default {
 
 .secret-form .input {
   width: 100%;
+  box-sizing: border-box;
   padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 0.875rem;
   font-family: 'Monaco', 'Menlo', monospace;
   transition: all 0.2s ease;
+  word-break: break-all;
 }
 
 .secret-form .input:focus {

@@ -268,7 +268,7 @@ const brandIcon = computed(() => {
 
 <style scoped>
 .split-card-view {
-  max-width: 600px;
+  max-width: 900px;
   margin: 0 auto;
 }
 

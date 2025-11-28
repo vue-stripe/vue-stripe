@@ -144,7 +144,7 @@ const getStatusIcon = (status: string) => {
 
 <style scoped>
 .home {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 

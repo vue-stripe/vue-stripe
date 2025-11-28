@@ -241,7 +241,7 @@ const resetConfig = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -268,7 +268,7 @@ const resetConfig = () => {
 }
 
 .nav {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 1rem auto 0;
   display: flex;
   gap: 0.5rem;
@@ -295,7 +295,7 @@ const resetConfig = () => {
 }
 
 .config-status {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 1rem auto 0;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -344,7 +344,7 @@ const resetConfig = () => {
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
