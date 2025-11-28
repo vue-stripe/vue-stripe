@@ -433,135 +433,52 @@ if (elements.value) {
 </template>
 
 <style scoped>
-.test-page {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.api-reference {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
-}
-
-.api-reference h3 {
-  margin: 0 0 1.5rem 0;
-  color: #1a1a2e;
-}
-
-.api-reference h4 {
-  margin: 2rem 0 1rem 0;
-  color: #333;
-}
-
-.props-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.props-table th,
-.props-table td {
-  text-align: left;
-  padding: 0.875rem 1rem;
-  border: 1px solid #e0e0e0;
-}
-
-.props-table th {
-  background: #f5f5f5;
-  font-weight: 600;
-}
-
-.props-table code {
-  background: #e9ecef;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-.note {
-  font-size: 0.875rem;
-  color: #666;
-  margin: 1rem 0 0 0;
-  line-height: 1.6;
-}
-
-.scenario-buttons {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.btn {
-  background: #635bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn:hover {
-  background: #5a52e8;
-}
-
-.btn.active {
-  background: #4840d6;
-  box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.3);
-}
-
-.btn-small {
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-}
+/* View-specific styles - most styles are now in design-system.css */
 
 .input-group {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .input {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  transition: border-color 0.2s ease;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  transition: border-color var(--transition-base);
 }
 
 .input-valid {
-  border-color: #28a745;
+  border-color: var(--color-success);
   background-color: #f8fff9;
 }
 
 .input-invalid {
-  border-color: #dc3545;
+  border-color: var(--color-danger);
   background-color: #fff8f8;
 }
 
 .secret-status {
-  margin-top: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
 }
 
 .status-valid {
-  background: #d4edda;
+  background: var(--color-success-light);
   color: #155724;
 }
 
 .status-invalid {
-  background: #f8d7da;
+  background: var(--color-danger-light);
   color: #721c24;
 }
 
 .status-none {
-  background: #e9ecef;
-  color: #666;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
 }
 
 .secret-type {
@@ -571,129 +488,55 @@ if (elements.value) {
 .how-to-get {
   background: #f0f7ff;
   border: 1px solid #cce5ff;
-  border-radius: 8px;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.5rem;
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
 }
 
 .how-to-get h4 {
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
+  margin: 0 0 var(--space-4) 0;
+  font-size: var(--text-base);
   color: #004085;
 }
 
 .how-to-get ol {
   margin: 0;
-  padding-left: 1.5rem;
-  font-size: 0.9rem;
+  padding-left: var(--space-5);
+  font-size: var(--text-sm);
 }
 
 .how-to-get li {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
   line-height: 1.6;
 }
 
 .how-to-get a {
-  color: #635bff;
-}
-
-.how-to-get code {
-  background: rgba(0, 0, 0, 0.08);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  color: var(--color-primary);
 }
 
 .code-snippet {
   display: inline-block;
-  background: #1a1a2e !important;
+  background: var(--color-bg-dark) !important;
   color: #00ff88 !important;
-  padding: 0.375rem 0.625rem !important;
-  border-radius: 4px;
-  font-family: 'Monaco', 'Menlo', monospace;
-  margin-top: 0.375rem;
-}
-
-.demo-container {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 2rem;
-  min-height: 180px;
-}
-
-.demo-container.dark {
-  background: #1a1a2e;
-  color: #f8f9fa;
-}
-
-.success-content {
-  text-align: center;
-  padding: 1rem 0;
-}
-
-.success-icon,
-.error-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.75rem;
-}
-
-.success-content p {
-  margin: 0.75rem 0 0 0;
-  color: #666;
-  line-height: 1.6;
-}
-
-.demo-container.dark .success-content p {
-  color: #aaa;
-}
-
-.custom-loading {
-  text-align: center;
-  padding: 3rem 2rem;
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 3px solid #eee;
-  border-top-color: #635bff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1.5rem;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  padding: var(--space-1) var(--space-2) !important;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  margin-top: var(--space-1);
 }
 
 .error-display {
   text-align: center;
-  color: #dc3545;
-  padding: 1.5rem;
-}
-
-.no-key-warning {
-  background: #fff3cd;
-  padding: 1.5rem;
-  border-radius: 8px;
-  text-align: center;
-  line-height: 1.6;
-}
-
-.no-key-warning code {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  color: var(--color-danger);
+  padding: var(--space-5);
 }
 
 .elements-status {
-  margin-top: 1.5rem;
-  padding: 1.25rem;
+  margin-top: var(--space-5);
+  padding: var(--space-4);
   background: rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   text-align: left;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
 }
 
 .demo-container.dark .elements-status {
@@ -701,20 +544,20 @@ if (elements.value) {
 }
 
 .elements-status h4 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1rem;
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--text-base);
 }
 
 .elements-status ul {
-  margin: 0 0 0.75rem 0;
-  padding-left: 1.5rem;
+  margin: 0 0 var(--space-3) 0;
+  padding-left: var(--space-5);
 }
 
 .elements-note {
-  margin: 0.75rem 0 0 0;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  margin: var(--space-3) 0 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
 }
 
 .elements-note.success {
@@ -728,49 +571,38 @@ if (elements.value) {
 }
 
 .secret-provided {
-  color: #28a745;
+  color: var(--color-success);
 }
 
 .secret-not-provided {
-  color: #6c757d;
+  color: var(--color-text-secondary);
 }
 
 .elements-status li {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
   line-height: 1.5;
 }
 
 .code-inline {
   background: rgba(0, 0, 0, 0.05);
-  padding: 0.75rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
   text-align: left;
   overflow-x: auto;
-  margin-top: 0.75rem;
+  margin-top: var(--space-3);
 }
 
 .demo-container.dark .code-inline {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.event-log {
-  background: #1a1a2e;
-  color: #00ff88;
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.85rem;
-  padding: 1.25rem;
-  border-radius: 8px;
-  max-height: 250px;
-  overflow-y: auto;
-  margin-bottom: 0.75rem;
-}
-
+/* Event log styles */
 .event {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
   display: flex;
-  gap: 0.75rem;
-  padding: 0.25rem 0;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
 }
 
 .event.empty {
@@ -785,47 +617,5 @@ if (elements.value) {
 .event-type {
   font-weight: bold;
   min-width: 60px;
-}
-
-.code-block {
-  background: #1a1a2e;
-  color: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-size: 0.85rem;
-  margin: 1rem 0 1.5rem 0;
-  line-height: 1.5;
-}
-
-.code-block code {
-  font-family: 'Monaco', 'Menlo', monospace;
-}
-
-.learning {
-  background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%);
-  border-left: 4px solid #17a2b8;
-}
-
-.learning h3 {
-  color: #17a2b8;
-  margin-bottom: 1.25rem;
-}
-
-.learning ul {
-  margin: 0;
-  padding-left: 1.5rem;
-}
-
-.learning li {
-  margin-bottom: 0.875rem;
-  line-height: 1.7;
-}
-
-.learning code {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
 }
 </style>

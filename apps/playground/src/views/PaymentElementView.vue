@@ -62,13 +62,13 @@ const PaymentForm = defineComponent({
       }
     }
 
-    return () => h('div', { class: 'payment-actions' }, [
+    return () => h('div', { class: 'payment-form-actions' }, [
       h('button', {
-        class: 'btn btn-primary',
+        class: 'btn btn-primary btn-lg',
         disabled: !props.paymentComplete || processing.value,
         onClick: handleSubmit
       }, processing.value ? 'Processing...' : 'Pay Now'),
-      h('p', { class: 'payment-hint' }, [
+      h('p', { class: 'text-muted text-sm mt-3 text-center' }, [
         'Use test card ',
         h('code', '4242 4242 4242 4242'),
         ' with any future date and CVC'
@@ -195,70 +195,69 @@ const onLoaderStop = () => {
 </script>
 
 <template>
-  <div class="payment-element-view">
-    <div class="demo-card">
-      <h2>StripePaymentElement</h2>
-      <p class="description">
+  <div class="test-page">
+    <div class="card">
+      <h2 class="card-title">StripePaymentElement</h2>
+      <p class="text-secondary">
         The Payment Element is Stripe's recommended all-in-one payment UI.
         It automatically handles cards, wallets, bank transfers, and more.
       </p>
 
       <!-- Warning if no publishable key -->
-      <div v-if="!publishableKey" class="warning">
+      <div v-if="!publishableKey" class="alert alert-warning mt-4">
         Add your Stripe publishable key using the header button to test this component.
       </div>
 
       <!-- Client Secret Form -->
-      <div v-else-if="showSecretForm" class="secret-form">
+      <div v-else-if="showSecretForm" class="secret-form mt-4">
         <h4>Enter Client Secret</h4>
-        <p>The Payment Element requires a <code>clientSecret</code> from a PaymentIntent.</p>
+        <p class="text-secondary text-sm">The Payment Element requires a <code>clientSecret</code> from a PaymentIntent.</p>
 
-        <div class="form-group">
-          <label for="clientSecret">Client Secret</label>
+        <div class="form-group mt-4">
+          <label class="form-label">Client Secret</label>
           <input
-            id="clientSecret"
             v-model="localClientSecret"
             type="text"
             placeholder="pi_xxx_secret_xxx"
-            class="input"
-            :class="{ 'input-valid': localClientSecret.includes('_secret_') }"
+            class="form-input form-input-mono"
+            :class="{ 'is-valid': localClientSecret.includes('_secret_') }"
           />
         </div>
 
-        <div class="instructions">
+        <div class="instructions mt-4">
           <h5>How to get a Client Secret:</h5>
           <ol>
-            <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank">Stripe Dashboard → Payments</a></li>
+            <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="link">Stripe Dashboard → Payments</a></li>
             <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
             <li>Enter an amount (e.g., $10.00)</li>
             <li>Copy the <code>client_secret</code> from the response</li>
           </ol>
-          <p class="hint">
+          <p class="text-muted text-sm mt-2">
             The client secret looks like: <code>pi_xxx_secret_xxx</code>
           </p>
         </div>
       </div>
 
       <!-- Payment Element -->
-      <div v-else class="payment-form">
+      <div v-else class="payment-form mt-4">
         <!-- Show current secret and allow clearing -->
         <div class="secret-status">
           <span class="secret-label">Client Secret:</span>
           <code class="secret-value">{{ clientSecret.slice(0, 15) }}...{{ clientSecret.slice(-8) }}</code>
-          <button class="btn-clear" @click="localClientSecret = ''" title="Clear and enter new secret">
+          <button class="btn btn-sm btn-ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
             Clear
           </button>
         </div>
 
         <!-- Variant Controls -->
-        <div class="variant-controls">
+        <div class="variant-controls mt-4">
           <div class="control-group">
             <label>Layout</label>
-            <div class="button-group">
+            <div class="btn-group btn-group-sm">
               <button
                 v-for="layout in ['tabs', 'accordion', 'auto']"
                 :key="layout"
-                :class="['variant-btn', { active: selectedLayout === layout }]"
+                :class="['btn btn-secondary', { active: selectedLayout === layout }]"
                 @click="selectedLayout = layout as any"
               >
                 {{ layout }}
@@ -268,11 +267,11 @@ const onLoaderStop = () => {
 
           <div class="control-group">
             <label>Theme</label>
-            <div class="button-group">
+            <div class="btn-group btn-group-sm">
               <button
                 v-for="theme in ['stripe', 'night', 'flat']"
                 :key="theme"
-                :class="['variant-btn', { active: selectedTheme === theme }]"
+                :class="['btn btn-secondary', { active: selectedTheme === theme }]"
                 @click="selectedTheme = theme as any"
               >
                 {{ theme }}
@@ -282,15 +281,15 @@ const onLoaderStop = () => {
 
           <div class="control-group">
             <label>Wallets</label>
-            <div class="button-group">
+            <div class="btn-group btn-group-sm">
               <button
-                :class="['variant-btn', { active: showWallets }]"
+                :class="['btn btn-secondary', { active: showWallets }]"
                 @click="showWallets = true"
               >
                 Show
               </button>
               <button
-                :class="['variant-btn', { active: !showWallets }]"
+                :class="['btn btn-secondary', { active: !showWallets }]"
                 @click="showWallets = false"
               >
                 Hide
@@ -304,7 +303,7 @@ const onLoaderStop = () => {
               v-model="businessName"
               type="text"
               placeholder="Your Company Name"
-              class="input-small"
+              class="form-input form-input-sm"
             />
           </div>
         </div>
@@ -338,20 +337,20 @@ const onLoaderStop = () => {
         </div>
 
         <!-- Status display -->
-        <div v-if="paymentStatus === 'succeeded'" class="success-message">
+        <div v-if="paymentStatus === 'succeeded'" class="alert alert-success mt-4">
           Payment successful! Check your Stripe Dashboard.
         </div>
-        <div v-if="paymentError" class="error-message">
+        <div v-if="paymentError" class="alert alert-danger mt-4">
           {{ paymentError }}
         </div>
       </div>
     </div>
 
     <!-- Event Log -->
-    <div class="demo-card">
+    <div class="card">
       <h3>Event Log</h3>
       <div class="event-log">
-        <div v-if="eventLog.length === 0" class="no-events">
+        <div v-if="eventLog.length === 0" class="event-empty">
           Interact with the Payment Element to see events...
         </div>
         <div v-for="(entry, index) in eventLog" :key="index" class="event-entry">
@@ -363,7 +362,7 @@ const onLoaderStop = () => {
     </div>
 
     <!-- Info -->
-    <div class="demo-card info">
+    <div class="card card-info">
       <h3>About Payment Element Variants</h3>
 
       <h4>Layout Options</h4>
@@ -372,10 +371,10 @@ const onLoaderStop = () => {
         <li><strong>accordion</strong> - Collapsible accordion sections</li>
         <li><strong>auto</strong> - Stripe chooses the best layout</li>
       </ul>
-      <div class="note">
+      <div class="alert alert-info mt-3">
         <strong>Note:</strong> Tabs/accordion only appear when multiple payment methods are enabled.
         If you only see a card form, your PaymentIntent may only have <code>card</code> enabled.
-        Enable more methods in <a href="https://dashboard.stripe.com/settings/payment_methods" target="_blank">Dashboard → Payment Methods</a>.
+        Enable more methods in <a href="https://dashboard.stripe.com/settings/payment_methods" target="_blank" class="link">Dashboard → Payment Methods</a>.
       </div>
 
       <h4>Theme Options</h4>
@@ -386,7 +385,7 @@ const onLoaderStop = () => {
       </ul>
 
       <h4>Wallets (Apple Pay / Google Pay)</h4>
-      <div class="note">
+      <div class="alert alert-info mt-3">
         Wallets require: HTTPS, domain verification, and a supported device/browser.
         They won't appear on localhost unless you use a tunnel service.
       </div>
@@ -402,204 +401,92 @@ const onLoaderStop = () => {
 </template>
 
 <style scoped>
-* {
-  box-sizing: border-box;
-}
+/* View uses .test-page from design-system.css for consistent width */
 
-.payment-element-view {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.demo-card {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  margin-bottom: 1.5rem;
-}
-
-.demo-card h2 {
-  margin: 0 0 0.5rem 0;
-  color: #1a1a2e;
-}
-
-.demo-card h3 {
-  margin: 0 0 1rem 0;
-  color: #1a1a2e;
-  font-size: 1.1rem;
-}
-
-.demo-card h4 {
-  margin: 1.5rem 0 0.5rem 0;
-  color: #1a1a2e;
-  font-size: 1rem;
-}
-
-.description {
-  color: #666;
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
-}
-
-.warning {
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 8px;
-  padding: 1.25rem;
-  color: #856404;
+.card-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--text-xl);
 }
 
 .secret-form {
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  overflow: hidden;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
 }
 
 .secret-form h4 {
-  margin: 0 0 0.5rem 0;
-  color: #1a1a2e;
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text);
 }
 
-.secret-form > p {
-  margin: 0 0 1.25rem 0;
-  color: #666;
-  font-size: 0.9rem;
+.instructions {
+  background: white;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
 }
 
-.secret-form .form-group {
-  margin-bottom: 1.25rem;
+.instructions h5 {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text);
+  font-size: var(--text-sm);
 }
 
-.secret-form label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-.secret-form .input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-family: 'Monaco', 'Menlo', monospace;
-  transition: all 0.2s ease;
-  word-break: break-all;
-}
-
-.secret-form .input:focus {
-  outline: none;
-  border-color: #635bff;
-  box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
-}
-
-.secret-form .input-valid {
-  border-color: #28a745;
-}
-
-.secret-form .instructions {
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  padding: 1rem;
-}
-
-.secret-form .instructions h5 {
-  margin: 0 0 0.75rem 0;
-  color: #333;
-  font-size: 0.9rem;
-}
-
-.secret-form .instructions ol {
-  margin: 0 0 0.75rem 0;
-  padding-left: 1.25rem;
-}
-
-.secret-form .instructions li {
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-  color: #666;
-}
-
-.secret-form .instructions code {
-  background: #e9ecef;
-  padding: 0.125rem 0.375rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-
-.secret-form .hint {
+.instructions ol {
   margin: 0;
-  font-size: 0.8rem;
-  color: #888;
+  padding-left: var(--space-5);
+  color: var(--color-text-muted);
+}
+
+.instructions li {
+  margin-bottom: var(--space-2);
+  line-height: 1.6;
+  font-size: var(--text-sm);
 }
 
 .secret-status {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: #d4edda;
-  border: 1px solid #28a745;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-success-light);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
   flex-wrap: wrap;
 }
 
-.secret-label {
-  color: #155724;
+.secret-status .secret-label {
+  color: var(--color-success-dark);
   font-weight: 500;
+  font-size: var(--text-sm);
 }
 
-.secret-value {
+.secret-status .secret-value {
   background: rgba(0, 0, 0, 0.1);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.btn-clear {
-  padding: 0.25rem 0.75rem;
-  background: white;
-  border: 1px solid #28a745;
-  border-radius: 4px;
-  color: #28a745;
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-clear:hover {
-  background: #28a745;
-  color: white;
-}
-
 /* Variant Controls */
 .variant-controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
 }
 
 .control-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .control-group.full-width {
@@ -607,63 +494,30 @@ const onLoaderStop = () => {
 }
 
 .control-group label {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.button-group {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.variant-btn {
-  padding: 0.5rem 0.75rem;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.btn-group-sm .btn {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
   text-transform: capitalize;
-}
-
-.variant-btn:hover {
-  border-color: #635bff;
-}
-
-.variant-btn.active {
-  background: #635bff;
-  color: white;
-  border-color: #635bff;
-}
-
-.input-small {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  width: 100%;
-}
-
-.input-small:focus {
-  outline: none;
-  border-color: #635bff;
-  box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.1);
 }
 
 /* Payment Element Wrapper with theme backgrounds */
 .payment-element-wrapper {
-  padding: 1.5rem;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-4);
+  transition: background-color var(--transition-base);
 }
 
 .payment-element-wrapper.theme-stripe {
   background: white;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border-light);
 }
 
 .payment-element-wrapper.theme-night {
@@ -672,151 +526,64 @@ const onLoaderStop = () => {
 }
 
 .payment-element-wrapper.theme-flat {
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
 }
 
-.payment-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.payment-form-actions {
+  margin-top: var(--space-5);
 }
 
-.payment-actions {
-  margin-top: 1.5rem;
-}
-
-.btn {
-  padding: 0.875rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
+.btn-lg {
   width: 100%;
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--text-base);
 }
 
-.btn-primary {
-  background: #635bff;
-  color: white;
+.card-info {
+  background: linear-gradient(135deg, var(--color-info-light) 0%, #f0f7fa 100%);
+  border-left: 4px solid var(--color-info);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: #5a52e8;
+.card-info h3 {
+  color: var(--color-info-dark);
+  margin-bottom: var(--space-4);
 }
 
-.btn-primary:disabled {
-  background: #c4c1ff;
-  cursor: not-allowed;
+.card-info h4 {
+  margin: var(--space-5) 0 var(--space-2) 0;
+  color: var(--color-text);
+  font-size: var(--text-base);
 }
 
-.payment-hint {
-  margin-top: 0.75rem;
-  font-size: 0.85rem;
-  color: #666;
-  text-align: center;
-}
-
-.payment-hint code {
-  background: #f3f4f6;
-  padding: 0.125rem 0.375rem;
-  border-radius: 4px;
-}
-
-.success-message {
-  background: #d4edda;
-  border: 1px solid #28a745;
-  color: #155724;
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
-  font-weight: 500;
-}
-
-.error-message {
-  background: #f8d7da;
-  border: 1px solid #dc3545;
-  color: #721c24;
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.event-log {
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.8rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1rem;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.no-events {
-  color: #9ca3af;
-  font-style: italic;
-}
-
-.event-entry {
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.375rem 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.event-entry:last-child {
-  border-bottom: none;
-}
-
-.event-time {
-  color: #9ca3af;
-  min-width: 80px;
-}
-
-.event-name {
-  color: #635bff;
-  font-weight: 500;
-}
-
-.event-data {
-  color: #6b7280;
-}
-
-.info ul {
+.card-info ul {
   margin: 0;
-  padding-left: 1.25rem;
-  color: #666;
+  padding-left: var(--space-5);
+  color: var(--color-text-muted);
 }
 
-.info li {
-  margin-bottom: 0.5rem;
+.card-info li {
+  margin-bottom: var(--space-2);
   line-height: 1.5;
 }
 
-.info code {
-  background: #f3f4f6;
-  padding: 0.125rem 0.375rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
+.card-info .alert {
+  font-size: var(--text-sm);
 }
 
-.note {
-  background: #e8f4f8;
-  border-left: 4px solid #17a2b8;
-  padding: 0.75rem 1rem;
-  margin: 0.75rem 0;
-  font-size: 0.85rem;
-  border-radius: 0 4px 4px 0;
-  color: #0c5460;
-}
+@media (max-width: 768px) {
+  .variant-controls {
+    grid-template-columns: 1fr;
+  }
 
-.note a {
-  color: #0c5460;
-  text-decoration: underline;
-}
+  .secret-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
 
-.note code {
-  background: rgba(0, 0, 0, 0.1);
+  .secret-status .btn {
+    align-self: flex-end;
+  }
 }
 </style>

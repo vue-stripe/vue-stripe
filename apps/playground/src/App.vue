@@ -96,48 +96,49 @@ const resetConfig = () => {
 <template>
   <div id="app">
     <header class="header">
-      <div class="header-content">
-        <div class="header-title">
-          <RouterLink to="/" style="text-decoration: none; color: inherit;">
-            <h1>Vue Stripe Testing</h1>
-          </RouterLink>
-          <p>Component & Composable Test Playground</p>
-        </div>
+      <!-- Navbar with brand -->
+      <div class="navbar">
+        <RouterLink to="/" class="navbar-brand">
+          <span class="navbar-logo">💳</span>
+          <div class="navbar-brand-text">
+            <span class="navbar-title">Vue Stripe</span>
+            <span class="navbar-subtitle">Component Testing Playground</span>
+          </div>
+        </RouterLink>
 
-        <button
-          class="menu-toggle"
-          @click="isMenuOpen = !isMenuOpen"
-          v-if="routes.length > 0"
-        >
-          ☰
+        <button class="navbar-toggle" @click="isMenuOpen = !isMenuOpen" v-if="routes.length > 0">
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
       </div>
 
-      <nav class="nav" :class="{ 'nav-open': isMenuOpen }" v-if="routes.length > 0">
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" :class="{ 'nav-open': isMenuOpen }" v-if="routes.length > 0">
         <RouterLink
           v-for="route in routes"
           :key="route.path"
           :to="route.path"
-          class="nav-link"
+          class="nav-tab"
           @click="isMenuOpen = false"
         >
           {{ route.name }}
         </RouterLink>
       </nav>
 
-      <!-- Config Status Banner -->
-      <div class="config-status" :class="{ 'has-key': hasKey }">
-        <div class="config-status-content">
-          <template v-if="hasKey">
-            <span>✅ Stripe key: <code>{{ stripeConfig.publishableKey.slice(0, 12) }}...{{ stripeConfig.publishableKey.slice(-4) }}</code></span>
-          </template>
-          <template v-else>
-            <span>⚠️ No Stripe key configured</span>
-          </template>
-          <button class="config-btn" @click="openConfigModal">
-            {{ hasKey ? '⚙️ Change' : '🔑 Add Key' }}
-          </button>
-        </div>
+      <!-- Status Bar for Config -->
+      <div class="status-bar" :class="hasKey ? 'status-bar-success' : 'status-bar-warning'">
+        <span v-if="hasKey" class="status-bar-content">
+          <span class="status-dot"></span>
+          <code>{{ stripeConfig.publishableKey.slice(0, 12) }}...{{ stripeConfig.publishableKey.slice(-4) }}</code>
+        </span>
+        <span v-else class="status-bar-content">
+          <span class="status-dot"></span>
+          No Stripe key configured
+        </span>
+        <button class="btn btn-sm btn-ghost" @click="openConfigModal">
+          {{ hasKey ? 'Change' : 'Add Key' }}
+        </button>
       </div>
     </header>
 
@@ -148,626 +149,260 @@ const resetConfig = () => {
     </main>
 
     <footer class="footer">
-      <p>Vue Stripe Test Playground</p>
+      <p>Vue Stripe Playground</p>
     </footer>
 
     <!-- Config Modal -->
-    <div v-if="showConfigModal" class="modal-overlay" @click.self="showConfigModal = false">
-      <div class="modal">
-        <h2>🔑 Stripe Configuration</h2>
-        <p class="modal-description">
-          Enter your Stripe test keys. These are stored in your browser's localStorage
-          and never sent anywhere.
-        </p>
+    <Teleport to="body">
+      <div v-if="showConfigModal" class="modal-backdrop" @click.self="showConfigModal = false">
+        <div class="modal">
+          <div class="modal-header">
+            <h2>Stripe Configuration</h2>
+            <button class="modal-close" @click="showConfigModal = false">&times;</button>
+          </div>
 
-        <div class="form-group">
-          <label for="publishableKey">Publishable Key <span class="required">*</span></label>
-          <input
-            id="publishableKey"
-            v-model="tempPublishableKey"
-            type="text"
-            placeholder="pk_test_..."
-            class="input"
-            :class="{ 'input-valid': tempPublishableKey.startsWith('pk_test_') }"
-          />
-          <p class="hint">
-            Get this from <a href="https://dashboard.stripe.com/test/apikeys" target="_blank">Stripe Dashboard → API Keys</a>
-          </p>
-        </div>
+          <div class="modal-body">
+            <p class="text-secondary text-sm mb-6">
+              Enter your Stripe test keys. These are stored in your browser's localStorage and never sent anywhere.
+            </p>
 
-        <div class="form-group">
-          <label for="clientSecret">Client Secret <span class="optional">(optional)</span></label>
-          <input
-            id="clientSecret"
-            v-model="tempClientSecret"
-            type="text"
-            placeholder="pi_xxx_secret_xxx or seti_xxx_secret_xxx"
-            class="input"
-          />
-          <p class="hint">
-            Needed for Payment Element. Create a PaymentIntent in your Dashboard or via API.
-          </p>
-        </div>
+            <div class="form-group">
+              <label class="form-label">
+                Publishable Key <span class="text-danger">*</span>
+              </label>
+              <input
+                v-model="tempPublishableKey"
+                type="text"
+                placeholder="pk_test_..."
+                class="form-input form-input-mono"
+                :class="{ 'is-valid': tempPublishableKey.startsWith('pk_test_') }"
+              />
+              <p class="form-hint">
+                Get this from <a href="https://dashboard.stripe.com/test/apikeys" target="_blank">Stripe Dashboard → API Keys</a>
+              </p>
+            </div>
 
-        <div class="modal-actions">
-          <button class="btn btn-secondary" @click="showConfigModal = false">
-            Cancel
-          </button>
-          <button
-            class="btn btn-danger"
-            @click="resetConfig"
-            v-if="hasKey"
-          >
-            Reset All
-          </button>
-          <button
-            class="btn btn-primary"
-            @click="saveConfigModal"
-            :disabled="!tempPublishableKey.startsWith('pk_')"
-          >
-            Save & Reload
-          </button>
-        </div>
+            <div class="form-group">
+              <label class="form-label">
+                Client Secret <span class="text-muted">(optional)</span>
+              </label>
+              <input
+                v-model="tempClientSecret"
+                type="text"
+                placeholder="pi_xxx_secret_xxx"
+                class="form-input form-input-mono"
+              />
+              <p class="form-hint">
+                Needed for Payment Element. Create a PaymentIntent via CLI or API.
+              </p>
+            </div>
+          </div>
 
-        <div class="security-note">
-          <strong>🔒 Security Note:</strong> Only use test keys (pk_test_...) here.
-          Never enter live keys in development tools.
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="showConfigModal = false">
+              Cancel
+            </button>
+            <button v-if="hasKey" class="btn btn-danger" @click="resetConfig">
+              Reset All
+            </button>
+            <button
+              class="btn btn-primary"
+              @click="saveConfigModal"
+              :disabled="!tempPublishableKey.startsWith('pk_')"
+            >
+              Save & Reload
+            </button>
+          </div>
+
+          <div class="alert alert-warning mt-4">
+            <strong>Security:</strong> Only use test keys (pk_test_...) here. Never enter live keys.
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
-* {
-  box-sizing: border-box;
-}
-
 #app {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   flex-direction: column;
 }
 
+/* Header Layout */
 .header {
   color: white;
-  padding: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.header-content {
+  padding: var(--space-4);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1600px;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: var(--container-max);
   margin: 0 auto;
+  width: 100%;
 }
 
-.header-title h1 {
-  font-size: 1.5rem;
-  margin: 0 0 0.25rem 0;
-  font-weight: 700;
-}
-
-.header-title p {
-  font-size: 0.875rem;
-  opacity: 0.9;
-  margin: 0;
-}
-
-.menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-}
-
-.nav {
-  max-width: 1600px;
-  margin: 1rem auto 0;
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.nav-link {
-  color: white;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+/* Navbar customization for app header */
+.navbar {
   background: rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
 }
 
-.nav-link:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.nav-link.router-link-active {
-  background: rgba(255, 255, 255, 0.3);
-  font-weight: 600;
-}
-
-.config-status {
-  max-width: 1600px;
-  margin: 1rem auto 0;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  background: rgba(255, 193, 7, 0.2);
-  border: 1px solid rgba(255, 193, 7, 0.3);
-}
-
-.config-status.has-key {
-  background: rgba(40, 167, 69, 0.2);
-  border-color: rgba(40, 167, 69, 0.3);
-}
-
-.config-status-content {
+.navbar-brand-text {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
 }
 
-.config-status code {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 0.125rem 0.375rem;
-  border-radius: 3px;
-  font-size: 0.8rem;
+.navbar-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-.config-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+.navbar-subtitle {
+  font-size: var(--text-xs);
+  opacity: 0.85;
+}
+
+.navbar-logo {
+  font-size: var(--text-2xl);
+}
+
+/* Status bar code styling */
+.status-bar code {
+  background: rgba(0, 0, 0, 0.15);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+}
+
+.status-bar .btn-ghost {
   color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
-.config-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+.status-bar .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
+/* Main */
 .main {
   flex: 1;
-  padding: 2rem 1rem;
+  padding: var(--space-8) var(--space-4);
 }
 
 .container {
-  max-width: 1600px;
+  max-width: var(--container-max);
   margin: 0 auto;
 }
 
+/* Footer */
 .footer {
   text-align: center;
-  padding: 1rem;
+  padding: var(--space-4);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
 }
 
-/* Modal styles */
-.modal-overlay {
+.footer p {
+  margin: 0;
+}
+
+/* Modal */
+.modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: var(--space-4);
 }
 
 .modal {
   background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  max-width: 500px;
+  border-radius: var(--radius-xl);
   width: 100%;
+  max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
 }
 
-.modal h2 {
-  margin: 0 0 0.5rem 0;
-  color: #1a1a2e;
-}
-
-.modal-description {
-  color: #666;
-  font-size: 0.875rem;
-  margin: 0 0 1.5rem 0;
-}
-
-.form-group {
-  margin-bottom: 1.25rem;
-}
-
-.form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-.required {
-  color: #dc3545;
-}
-
-.optional {
-  color: #888;
-  font-weight: normal;
-  font-size: 0.85rem;
-}
-
-.input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-family: 'Monaco', 'Menlo', monospace;
-  transition: all 0.2s ease;
-}
-
-.input:focus {
-  outline: none;
-  border-color: #635bff;
-  box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
-}
-
-.input-valid {
-  border-color: #28a745;
-}
-
-.hint {
-  font-size: 0.75rem;
-  color: #888;
-  margin: 0.5rem 0 0 0;
-}
-
-.hint a {
-  color: #635bff;
-}
-
-.modal-actions {
+.modal-header {
   display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #eee;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
-.btn {
-  padding: 0.625rem 1.25rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.modal-header h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+.modal-close {
+  background: none;
   border: none;
+  font-size: var(--text-2xl);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
 }
 
-.btn-primary {
-  background: #635bff;
-  color: white;
+.modal-close:hover {
+  color: var(--color-text);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: #5a52e8;
+.modal-body {
+  padding: var(--space-6);
 }
 
-.btn-primary:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+.modal-footer {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-secondary);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
 }
 
-.btn-secondary {
-  background: #f8f9fa;
-  color: #333;
-  border: 1px solid #ddd;
-}
-
-.btn-secondary:hover {
-  background: #e9ecef;
-}
-
-.btn-danger {
-  background: #dc3545;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #c82333;
-}
-
-.security-note {
-  margin-top: 1.5rem;
-  padding: 0.75rem;
-  background: #fff3cd;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  color: #856404;
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-  .menu-toggle {
-    display: block;
+  .navbar-toggle {
+    display: flex;
   }
 
-  .nav {
+  .nav-tabs {
     display: none;
     flex-direction: column;
   }
 
-  .nav-open {
+  .nav-tabs.nav-open {
     display: flex;
   }
 
   .main {
-    padding: 1rem;
+    padding: var(--space-4);
   }
 
-  .config-status-content {
+  .status-bar {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--space-2);
   }
 
-  .modal-actions {
+  .modal-footer {
     flex-direction: column;
   }
 
-  .modal-actions .btn {
+  .modal-footer .btn {
     width: 100%;
   }
-}
-</style>
-
-<style>
-/* Global styles */
-body {
-  margin: 0;
-  padding: 0;
-}
-
-.demo-card {
-  background: white;
-  border-radius: 12px;
-  padding: 2.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-}
-
-.demo-card h2 {
-  margin: 0 0 1rem 0;
-  color: #1a1a2e;
-}
-
-.demo-card h3 {
-  margin: 0 0 1.25rem 0;
-  color: #1a1a2e;
-}
-
-.demo-card h4 {
-  margin: 1.5rem 0 1rem 0;
-  color: #333;
-}
-
-.demo-card p {
-  color: #666;
-  margin: 0 0 1.5rem 0;
-  line-height: 1.6;
-}
-
-.demo-card ul, .demo-card ol {
-  margin: 0 0 1.5rem 0;
-  padding-left: 1.5rem;
-}
-
-.demo-card li {
-  margin-bottom: 0.75rem;
-  line-height: 1.6;
-}
-
-.btn {
-  background: #635bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn:hover:not(:disabled) {
-  background: #5a52e8;
-}
-
-.btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.event-log {
-  background: #1a1a2e;
-  color: #00ff88;
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.85rem;
-  padding: 1.25rem;
-  border-radius: 8px;
-  max-height: 250px;
-  overflow-y: auto;
-}
-
-.event-log .event {
-  margin-bottom: 0.5rem;
-  opacity: 0.9;
-  padding: 0.25rem 0;
-}
-
-.event-log .event:last-child {
-  opacity: 1;
-}
-
-.event-log .timestamp {
-  color: #888;
-  margin-right: 0.75rem;
-}
-
-.state-display {
-  display: grid;
-  gap: 0.75rem;
-  font-size: 0.9rem;
-}
-
-.state-item {
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.state-item .label {
-  font-weight: 600;
-  color: #666;
-  min-width: 120px;
-}
-
-.state-item .value {
-  color: #1a1a2e;
-}
-
-.state-item .value.success { color: #28a745; }
-.state-item .value.error { color: #dc3545; }
-.state-item .value.loading { color: #ffc107; }
-
-/* Global table styles */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0 1.5rem 0;
-}
-
-table th,
-table td {
-  text-align: left;
-  padding: 0.875rem 1rem;
-  border: 1px solid #e0e0e0;
-}
-
-table th {
-  background: #f5f5f5;
-  font-weight: 600;
-  color: #333;
-}
-
-table code {
-  background: #e9ecef;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-/* Global code block styles */
-.code-block {
-  background: #1a1a2e;
-  color: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-size: 0.85rem;
-  margin: 1rem 0 1.5rem 0;
-  line-height: 1.5;
-}
-
-.code-block code {
-  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-}
-
-/* Global form spacing */
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: #333;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 0.875rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #635bff;
-  box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
-}
-
-/* Section dividers */
-.section-divider {
-  border-top: 1px solid #eee;
-  margin: 2rem 0;
-  padding-top: 2rem;
-}
-
-/* Button groups */
-.button-group {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin: 1.5rem 0;
-}
-
-/* Info/Warning boxes */
-.info-box {
-  background: #e8f4f8;
-  border-left: 4px solid #17a2b8;
-  padding: 1.25rem 1.5rem;
-  border-radius: 0 8px 8px 0;
-  margin: 1.5rem 0;
-}
-
-.warning-box {
-  background: #fff3cd;
-  border-left: 4px solid #ffc107;
-  padding: 1.25rem 1.5rem;
-  border-radius: 0 8px 8px 0;
-  margin: 1.5rem 0;
-}
-
-.success-box {
-  background: #d4edda;
-  border-left: 4px solid #28a745;
-  padding: 1.25rem 1.5rem;
-  border-radius: 0 8px 8px 0;
-  margin: 1.5rem 0;
 }
 </style>

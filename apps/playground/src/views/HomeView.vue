@@ -75,25 +75,25 @@ const getStatusIcon = (status: string) => {
 </script>
 
 <template>
-  <div class="home">
-    <div class="demo-card intro">
-      <h2>Vue Stripe Component Testing</h2>
-      <p>
+  <div class="test-page">
+    <div class="card">
+      <h2 class="card-title">Vue Stripe Component Testing</h2>
+      <p class="text-secondary">
         This playground helps you test each Vue Stripe component and composable one by one.
         Work through the phases below, testing each item before moving to the next.
       </p>
 
-      <div class="setup-section" v-if="!hasKey">
-        <h3>🔑 Add Your Stripe Key</h3>
+      <div v-if="!hasKey" class="alert alert-warning mt-4">
+        <h4 class="alert-title">Add Your Stripe Key</h4>
         <p>Click the <strong>"Add Key"</strong> button in the header above to enter your Stripe test publishable key.</p>
-        <p class="hint">
+        <p class="text-sm mt-2">
           Get your test key from:
-          <a href="https://dashboard.stripe.com/test/apikeys" target="_blank">Stripe Dashboard → API Keys</a>
+          <a href="https://dashboard.stripe.com/test/apikeys" target="_blank" class="link">Stripe Dashboard → API Keys</a>
         </p>
       </div>
 
-      <div class="setup-section success" v-else>
-        <h3>✅ Ready to Test</h3>
+      <div v-else class="alert alert-success mt-4">
+        <h4 class="alert-title">Ready to Test</h4>
         <p>Your Stripe key is configured. Start with Phase 1 below!</p>
       </div>
     </div>
@@ -102,9 +102,9 @@ const getStatusIcon = (status: string) => {
       <div
         v-for="phase in testingPhases"
         :key="phase.name"
-        class="demo-card phase"
+        class="card phase-card"
       >
-        <h3>{{ phase.name }}</h3>
+        <h3 class="phase-title">{{ phase.name }}</h3>
         <p class="phase-desc">{{ phase.description }}</p>
 
         <ul class="checklist">
@@ -113,114 +113,70 @@ const getStatusIcon = (status: string) => {
             :key="item.name"
             :class="['checklist-item', item.status]"
           >
-            <span class="status">{{ getStatusIcon(item.status) }}</span>
+            <span class="status-icon">{{ getStatusIcon(item.status) }}</span>
             <div class="item-info">
               <strong>{{ item.name }}</strong>
-              <span class="description">{{ item.description }}</span>
+              <span class="item-desc">{{ item.description }}</span>
             </div>
             <router-link
               v-if="item.status !== 'pending' || phase.name.includes('Phase 1') || phase.name.includes('Phase 2') || phase.name.includes('Phase 3') || phase.name.includes('Phase 4')"
               :to="item.route"
-              class="test-link"
+              class="btn btn-sm btn-primary"
             >
               Test →
             </router-link>
-            <span v-else class="coming-soon">Coming soon</span>
+            <span v-else class="badge badge-secondary">Coming soon</span>
           </li>
         </ul>
       </div>
     </div>
 
-    <div class="demo-card resources">
-      <h3>Resources</h3>
-      <ul>
-        <li><a href="https://stripe.com/docs/stripe-js" target="_blank">Stripe.js Documentation</a></li>
-        <li><a href="https://stripe.com/docs/testing" target="_blank">Test Card Numbers</a></li>
-        <li><a href="https://dashboard.stripe.com/test/apikeys" target="_blank">Get Test API Keys</a></li>
+    <div class="card">
+      <h3 class="card-title">Resources</h3>
+      <ul class="resource-list">
+        <li><a href="https://stripe.com/docs/stripe-js" target="_blank" class="link">Stripe.js Documentation</a></li>
+        <li><a href="https://stripe.com/docs/testing" target="_blank" class="link">Test Card Numbers</a></li>
+        <li><a href="https://dashboard.stripe.com/test/apikeys" target="_blank" class="link">Get Test API Keys</a></li>
       </ul>
     </div>
   </div>
 </template>
 
 <style scoped>
-.home {
-  max-width: 1200px;
-  margin: 0 auto;
+/* View uses .test-page from design-system.css for consistent 900px width */
+
+.card-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--text-xl);
+  color: var(--color-text);
 }
 
-.intro h2 {
-  margin-bottom: 1rem;
+.alert-title {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--text-base);
+  font-weight: 600;
 }
 
-.intro p {
-  color: #666;
-  line-height: 1.7;
+.phases {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-.setup-section {
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 10px;
-  padding: 1.5rem;
-  margin-top: 1.5rem;
+.phase-card {
+  margin-bottom: 0;
 }
 
-.setup-section.success {
-  background: #d4edda;
-  border-color: #28a745;
-}
-
-.setup-section h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.1rem;
-}
-
-.setup-section p {
-  margin: 0 0 0.75rem 0;
-  line-height: 1.6;
-}
-
-.setup-section ol {
-  margin: 0;
-  padding-left: 1.5rem;
-}
-
-.setup-section li {
-  margin-bottom: 0.75rem;
-  line-height: 1.6;
-}
-
-.setup-section code {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-}
-
-.hint {
-  margin: 1rem 0 0 0;
-  font-size: 0.9rem;
-  color: #666;
-  line-height: 1.6;
-}
-
-.hint a {
-  color: #635bff;
-}
-
-.phase {
-  margin-bottom: 1.5rem;
-}
-
-.phase h3 {
-  margin: 0 0 0.5rem 0;
-  color: #1a1a2e;
+.phase-title {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text);
+  font-size: var(--text-lg);
 }
 
 .phase-desc {
-  color: #666;
-  font-size: 0.9rem;
-  margin: 0 0 1.25rem 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-4) 0;
   line-height: 1.5;
 }
 
@@ -233,83 +189,84 @@ const getStatusIcon = (status: string) => {
 .checklist-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+}
+
+.checklist-item:last-child {
+  margin-bottom: 0;
 }
 
 .checklist-item.done {
-  background: #d4edda;
+  background: var(--color-success-light);
 }
 
 .checklist-item.in-progress {
-  background: #fff3cd;
+  background: var(--color-warning-light);
 }
 
-.status {
-  font-size: 1.5rem;
+.status-icon {
+  font-size: var(--text-xl);
+  flex-shrink: 0;
 }
 
 .item-info {
   flex: 1;
+  min-width: 0;
 }
 
 .item-info strong {
   display: block;
-  color: #1a1a2e;
-  margin-bottom: 0.25rem;
+  color: var(--color-text);
+  margin-bottom: 2px;
 }
 
-.item-info .description {
-  font-size: 0.85rem;
-  color: #666;
-  line-height: 1.5;
+.item-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.4;
 }
 
-.test-link {
-  background: #635bff;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.test-link:hover {
-  background: #5a52e8;
-}
-
-.coming-soon {
-  color: #999;
-  font-size: 0.85rem;
-  font-style: italic;
-}
-
-.resources h3 {
-  margin: 0 0 1.25rem 0;
-}
-
-.resources ul {
+.resource-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.resources li {
-  margin-bottom: 0.875rem;
+.resource-list li {
+  margin-bottom: var(--space-3);
 }
 
-.resources a {
-  color: #635bff;
+.resource-list li:last-child {
+  margin-bottom: 0;
+}
+
+.link {
+  color: var(--color-primary);
   text-decoration: none;
-  font-size: 0.95rem;
+  font-weight: 500;
 }
 
-.resources a:hover {
+.link:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .checklist-item {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .item-info {
+    flex-basis: calc(100% - 40px);
+  }
+
+  .checklist-item .btn,
+  .checklist-item .badge {
+    margin-left: auto;
+  }
 }
 </style>

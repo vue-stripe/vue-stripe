@@ -1,17 +1,28 @@
 <script setup lang="ts">
-import { ref, inject, computed } from 'vue'
+import { ref, inject, computed, defineComponent, h } from 'vue'
 import {
   StripeProvider,
   StripeElements,
   StripeCardNumberElement,
   StripeCardExpiryElement,
-  StripeCardCvcElement
+  StripeCardCvcElement,
+  useStripe
 } from '@vue-stripe/vue-stripe'
+import type { StripeCardNumberElement as StripeCardNumberElementType } from '@stripe/stripe-js'
+
+// Mark StripeElements as used (it's used in template)
+void StripeElements
 
 const stripeConfig = inject<{
   publishableKey: string
   clientSecret: string
 }>('stripeConfig')
+
+// Payment confirmation state
+const localClientSecret = ref('')
+const paymentStatus = ref<'idle' | 'processing' | 'succeeded' | 'error'>('idle')
+const paymentMessage = ref('')
+const showPaymentSection = ref(false)
 
 const publishableKey = computed(() => stripeConfig?.publishableKey || '')
 
@@ -39,7 +50,9 @@ const eventLog = ref<Array<{ time: string; event: string; data?: string }>>([])
 
 const logEvent = (event: string, data?: string) => {
   const time = new Date().toLocaleTimeString()
-  eventLog.value.unshift({ time, event, data })
+  const entry: { time: string; event: string; data?: string } = { time, event }
+  if (data !== undefined) entry.data = data
+  eventLog.value.unshift(entry)
   if (eventLog.value.length > 10) {
     eventLog.value.pop()
   }
@@ -129,24 +142,115 @@ const brandIcon = computed(() => {
   }
   return icons[cardBrand.value] || '💳'
 })
+
+// Get active client secret (from header config or local input)
+const activeClientSecret = computed(() => {
+  return localClientSecret.value.trim() || stripeConfig?.clientSecret || ''
+})
+
+// Show secret form if no client secret is provided (when in payment mode)
+const showSecretForm = computed(() => {
+  return showPaymentSection.value && !activeClientSecret.value
+})
+
+// PaymentButton component to use inside StripeElements
+// For split elements, we use the cardNumber element for confirmCardPayment
+const PaymentButton = defineComponent({
+  name: 'PaymentButton',
+  props: {
+    clientSecret: { type: String, required: true },
+    cardComplete: { type: Boolean, default: false },
+    cardNumberElement: { type: Object as () => StripeCardNumberElementType | null, default: null }
+  },
+  emits: ['payment-success', 'payment-error', 'payment-processing'],
+  setup(props, { emit }) {
+    const { stripe } = useStripe()
+    const processing = ref(false)
+
+    const handlePayment = async () => {
+      if (!stripe.value || !props.cardNumberElement) {
+        emit('payment-error', 'Stripe not initialized')
+        return
+      }
+
+      processing.value = true
+      emit('payment-processing')
+
+      try {
+        // For split elements, use the cardNumber element
+        const { error, paymentIntent } = await stripe.value.confirmCardPayment(
+          props.clientSecret,
+          {
+            payment_method: {
+              card: props.cardNumberElement
+            }
+          }
+        )
+
+        if (error) {
+          emit('payment-error', error.message || 'Payment failed')
+        } else if (paymentIntent?.status === 'succeeded') {
+          emit('payment-success', paymentIntent)
+        } else {
+          emit('payment-error', `Payment status: ${paymentIntent?.status}`)
+        }
+      } catch (err: any) {
+        emit('payment-error', err.message || 'Payment failed')
+      } finally {
+        processing.value = false
+      }
+    }
+
+    return () => h('button', {
+      class: 'btn btn-success',
+      disabled: !props.cardComplete || processing.value || !props.clientSecret,
+      onClick: handlePayment
+    }, processing.value ? 'Processing...' : 'Confirm Payment')
+  }
+})
+
+// Payment event handlers
+const handlePaymentSuccess = (paymentIntent: any) => {
+  paymentStatus.value = 'succeeded'
+  paymentMessage.value = `Payment succeeded! ID: ${paymentIntent.id}`
+  logEvent('payment:success', `PaymentIntent: ${paymentIntent.id}`)
+}
+
+const handlePaymentError = (message: string) => {
+  paymentStatus.value = 'error'
+  paymentMessage.value = message
+  logEvent('payment:error', message)
+}
+
+const handlePaymentProcessing = () => {
+  paymentStatus.value = 'processing'
+  paymentMessage.value = 'Processing payment...'
+  logEvent('payment:processing')
+}
+
+const resetPaymentState = () => {
+  paymentStatus.value = 'idle'
+  paymentMessage.value = ''
+  localClientSecret.value = ''
+}
 </script>
 
 <template>
-  <div class="split-card-view">
-    <div class="demo-card">
-      <h2>Split Card Elements</h2>
-      <p class="description">
+  <div class="test-page">
+    <div class="card">
+      <h2 class="card-title">Split Card Elements</h2>
+      <p class="text-secondary">
         Three separate inputs for card number, expiry, and CVC.
         Provides more control over layout and styling than the unified CardElement.
       </p>
 
-      <div v-if="!publishableKey" class="warning">
+      <div v-if="!publishableKey" class="alert alert-warning mt-4">
         Add your Stripe publishable key using the header button to test this component.
       </div>
 
       <StripeProvider v-else :publishable-key="publishableKey">
         <StripeElements>
-          <div class="split-card-form">
+          <div class="split-card-form mt-4">
             <!-- Card Number -->
             <div class="form-group">
               <label class="form-label">
@@ -207,19 +311,98 @@ const brandIcon = computed(() => {
             </div>
 
             <!-- Actions -->
-            <div class="actions">
-              <button
-                class="btn btn-primary"
-                :disabled="!allComplete"
-              >
-                {{ allComplete ? 'Ready to Pay' : 'Complete all fields' }}
-              </button>
-              <button class="btn btn-secondary" @click="focusCardNumber">
+            <div class="btn-group mt-4">
+              <button class="btn btn-sm btn-secondary" @click="focusCardNumber">
                 Focus Number
               </button>
-              <button class="btn btn-secondary" @click="clearAll">
+              <button class="btn btn-sm btn-secondary" @click="clearAll">
                 Clear All
               </button>
+              <button
+                :class="['btn btn-sm', showPaymentSection ? 'btn-primary active' : 'btn-secondary']"
+                @click="showPaymentSection = !showPaymentSection"
+              >
+                {{ showPaymentSection ? 'Hide Payment' : 'Test Payment' }}
+              </button>
+            </div>
+
+            <!-- Payment Mode: Client Secret Form -->
+            <div v-if="showSecretForm" class="secret-form mt-4">
+              <h4>Enter Client Secret</h4>
+              <p class="text-secondary text-sm">
+                To test payment confirmation, you need a <code>client_secret</code> from a PaymentIntent.
+              </p>
+
+              <div class="form-group">
+                <label class="form-label">Client Secret</label>
+                <input
+                  v-model="localClientSecret"
+                  type="text"
+                  placeholder="pi_xxx_secret_xxx"
+                  class="form-input form-input-mono"
+                  :class="{ 'is-valid': localClientSecret.includes('_secret_') }"
+                />
+              </div>
+
+              <div class="instructions">
+                <h5>How to get a Client Secret:</h5>
+                <ol>
+                  <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="link">Stripe Dashboard → Payments</a></li>
+                  <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
+                  <li>Enter an amount (e.g., $10.00)</li>
+                  <li>Copy the <code>client_secret</code> from the response</li>
+                </ol>
+                <p class="text-muted text-sm mt-2">
+                  The client secret looks like: <code>pi_xxx_secret_xxx</code>
+                </p>
+              </div>
+            </div>
+
+            <!-- Payment Mode: Ready to Pay -->
+            <div v-else-if="showPaymentSection && activeClientSecret" class="payment-ready mt-4">
+              <div class="secret-status">
+                <span class="secret-label">Client Secret:</span>
+                <code class="secret-value">{{ activeClientSecret.slice(0, 15) }}...{{ activeClientSecret.slice(-8) }}</code>
+                <button class="btn btn-sm btn-ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
+                  Clear
+                </button>
+              </div>
+
+              <div class="btn-group mt-3">
+                <PaymentButton
+                  v-if="cardNumberRef?.element"
+                  :client-secret="activeClientSecret"
+                  :card-complete="allComplete"
+                  :card-number-element="cardNumberRef.element"
+                  @payment-success="handlePaymentSuccess"
+                  @payment-error="handlePaymentError"
+                  @payment-processing="handlePaymentProcessing"
+                />
+                <button
+                  v-if="paymentStatus !== 'idle'"
+                  class="btn btn-sm btn-secondary"
+                  @click="resetPaymentState"
+                >
+                  Reset
+                </button>
+              </div>
+
+              <!-- Payment Status -->
+              <div
+                v-if="paymentMessage"
+                :class="['alert mt-3', {
+                  'alert-warning': paymentStatus === 'processing',
+                  'alert-success': paymentStatus === 'succeeded',
+                  'alert-danger': paymentStatus === 'error'
+                }]"
+              >
+                {{ paymentMessage }}
+              </div>
+
+              <p class="text-muted text-sm mt-3">
+                Use test card <code>4242 4242 4242 4242</code> with any future date and CVC.
+                <br><small>For split elements, Stripe collects data from all three fields when you pass the cardNumber element.</small>
+              </p>
             </div>
           </div>
         </StripeElements>
@@ -227,10 +410,10 @@ const brandIcon = computed(() => {
     </div>
 
     <!-- Event Log -->
-    <div class="demo-card">
+    <div class="card">
       <h3>Event Log</h3>
       <div class="event-log">
-        <div v-if="eventLog.length === 0" class="no-events">
+        <div v-if="eventLog.length === 0" class="event-empty">
           Interact with the card fields to see events...
         </div>
         <div v-for="(entry, index) in eventLog" :key="index" class="event-entry">
@@ -242,7 +425,7 @@ const brandIcon = computed(() => {
     </div>
 
     <!-- Info -->
-    <div class="demo-card info">
+    <div class="card card-info">
       <h3>About Split Card Elements</h3>
       <ul>
         <li><strong>StripeCardNumberElement</strong> - Card number with brand detection</li>
@@ -267,64 +450,22 @@ const brandIcon = computed(() => {
 </template>
 
 <style scoped>
-.split-card-view {
-  max-width: 900px;
-  margin: 0 auto;
-}
+/* View uses .test-page from design-system.css for consistent width */
 
-.demo-card {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  margin-bottom: 1.5rem;
-}
-
-.demo-card h2 {
-  margin: 0 0 0.5rem 0;
-  color: #1a1a2e;
-}
-
-.demo-card h3 {
-  margin: 0 0 1rem 0;
-  color: #1a1a2e;
-  font-size: 1.1rem;
-}
-
-.demo-card h4 {
-  margin: 1.5rem 0 0.5rem 0;
-  color: #1a1a2e;
-  font-size: 1rem;
-}
-
-.description {
-  color: #666;
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
-}
-
-.warning {
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 8px;
-  padding: 1rem;
-  color: #856404;
+.card-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--text-xl);
 }
 
 .split-card-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
 }
 
 .form-row {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .form-group.half {
@@ -335,162 +476,156 @@ const brandIcon = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
 }
 
 .brand-indicator {
-  font-size: 0.8rem;
-  color: #6b7280;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 
 .field-error {
-  color: #dc3545;
-  font-size: 0.8rem;
-  margin-top: 0.375rem;
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
 }
 
 .field-success {
-  color: #28a745;
-  font-size: 0.8rem;
-  margin-top: 0.375rem;
+  color: var(--color-success);
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
 }
 
 .status-bar {
   display: flex;
-  gap: 1rem;
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border-radius: 8px;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  background: white;
+  border-radius: var(--radius-md);
   justify-content: center;
+  margin-top: var(--space-4);
 }
 
 .status-item {
-  font-size: 0.875rem;
-  color: #6b7280;
-  transition: color 0.2s ease;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
 }
 
 .status-item.complete {
-  color: #28a745;
+  color: var(--color-success);
   font-weight: 500;
 }
 
-.actions {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+.secret-form {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
 }
 
-.btn {
-  padding: 0.75rem 1.25rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
+.secret-form h4 {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-text);
 }
 
-.btn-primary {
-  background: #635bff;
-  color: white;
+.instructions {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: #5a52e8;
+.instructions h5 {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text);
+  font-size: var(--text-sm);
 }
 
-.btn-primary:disabled {
-  background: #c4c1ff;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.btn-secondary:hover {
-  background: #e5e7eb;
-}
-
-.event-log {
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.8rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1rem;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.no-events {
-  color: #9ca3af;
-  font-style: italic;
-}
-
-.event-entry {
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.375rem 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.event-entry:last-child {
-  border-bottom: none;
-}
-
-.event-time {
-  color: #9ca3af;
-  min-width: 80px;
-}
-
-.event-name {
-  color: #635bff;
-  font-weight: 500;
-}
-
-.event-data {
-  color: #6b7280;
-}
-
-.info ul {
+.instructions ol {
   margin: 0;
-  padding-left: 1.25rem;
-  color: #666;
+  padding-left: var(--space-5);
+  color: var(--color-text-muted);
 }
 
-.info li {
-  margin-bottom: 0.5rem;
+.instructions li {
+  margin-bottom: var(--space-2);
+  line-height: 1.6;
+}
+
+.secret-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-info-light);
+  border: 1px solid var(--color-info);
+  border-radius: var(--radius-md);
+}
+
+.secret-status .secret-label {
+  font-size: var(--text-sm);
+  color: var(--color-info-dark);
+  font-weight: 500;
+}
+
+.secret-status .secret-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  background: white;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-info-dark);
+}
+
+.secret-status .btn-ghost {
+  margin-left: auto;
+}
+
+.card-info {
+  background: linear-gradient(135deg, var(--color-info-light) 0%, #f0f7fa 100%);
+  border-left: 4px solid var(--color-info);
+}
+
+.card-info h3 {
+  color: var(--color-info-dark);
+  margin-bottom: var(--space-4);
+}
+
+.card-info h4 {
+  margin: var(--space-4) 0 var(--space-2) 0;
+  color: var(--color-text);
+  font-size: var(--text-base);
+}
+
+.card-info ul {
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--color-text-muted);
+}
+
+.card-info li {
+  margin-bottom: var(--space-2);
   line-height: 1.5;
-}
-
-.info code {
-  background: #f3f4f6;
-  padding: 0.125rem 0.375rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
 }
 
 /* Override default element styles */
 :deep(.vue-stripe-cardNumber-element-mount),
 :deep(.vue-stripe-cardExpiry-element-mount),
 :deep(.vue-stripe-cardCvc-element-mount) {
-  padding: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   background: white;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 :deep(.vue-stripe-cardNumber-element-mount:focus-within),
 :deep(.vue-stripe-cardExpiry-element-mount:focus-within),
 :deep(.vue-stripe-cardCvc-element-mount:focus-within) {
-  border-color: #635bff;
-  box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 :deep(.vue-stripe-cardNumber-element-error),
@@ -503,5 +638,17 @@ const brandIcon = computed(() => {
 :deep(.vue-stripe-cardExpiry-element-loader),
 :deep(.vue-stripe-cardCvc-element-loader) {
   display: none;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .status-bar {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
 }
 </style>

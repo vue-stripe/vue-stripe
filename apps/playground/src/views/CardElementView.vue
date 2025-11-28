@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { ref, inject, computed } from 'vue'
-import { StripeProvider, StripeElements, StripeCardElement } from '@vue-stripe/vue-stripe'
+import { ref, inject, computed, defineComponent, h } from 'vue'
+import { StripeProvider, StripeElements, StripeCardElement, useStripe } from '@vue-stripe/vue-stripe'
 import type { StripeCardElement as StripeCardElementType, StripeCardElementChangeEvent } from '@stripe/stripe-js'
+
+// Mark StripeElements as used (it's used in template)
+void StripeElements
 
 const stripeConfig = inject<{
   publishableKey: string
+  clientSecret: string
 }>('stripeConfig')
+
+// Payment confirmation state
+const localClientSecret = ref('')
+const paymentStatus = ref<'idle' | 'processing' | 'succeeded' | 'error'>('idle')
+const paymentMessage = ref('')
+const showPaymentSection = ref(false)
 
 // Event log for tracking what happens
 const events = ref<{ time: string; type: string; message: string }[]>([])
@@ -72,7 +82,7 @@ const styleOptions = computed(() => {
 })
 
 // Event handlers
-const handleReady = (element: StripeCardElementType) => {
+const handleReady = (_element: StripeCardElementType) => {
   log('ready', 'Card element mounted and ready')
 }
 
@@ -124,20 +134,111 @@ const testCards = [
   { number: '5555 5555 5555 4444', brand: 'Mastercard', description: 'Successful payment' },
   { number: '3782 822463 10005', brand: 'Amex', description: 'Successful payment' }
 ]
+
+// Get active client secret (from header config or local input)
+const activeClientSecret = computed(() => {
+  return localClientSecret.value.trim() || stripeConfig?.clientSecret || ''
+})
+
+// Show secret form if no client secret is provided (when in payment mode)
+const showSecretForm = computed(() => {
+  return showPaymentSection.value && !activeClientSecret.value
+})
+
+// PaymentButton component to use inside StripeElements
+const PaymentButton = defineComponent({
+  name: 'PaymentButton',
+  props: {
+    clientSecret: { type: String, required: true },
+    cardComplete: { type: Boolean, default: false },
+    cardElement: { type: Object as () => StripeCardElementType | null, default: null }
+  },
+  emits: ['payment-success', 'payment-error', 'payment-processing'],
+  setup(props, { emit }) {
+    const { stripe } = useStripe()
+    const processing = ref(false)
+
+    const handlePayment = async () => {
+      if (!stripe.value || !props.cardElement) {
+        emit('payment-error', 'Stripe not initialized')
+        return
+      }
+
+      processing.value = true
+      emit('payment-processing')
+
+      try {
+        const { error, paymentIntent } = await stripe.value.confirmCardPayment(
+          props.clientSecret,
+          {
+            payment_method: {
+              card: props.cardElement
+            }
+          }
+        )
+
+        if (error) {
+          emit('payment-error', error.message || 'Payment failed')
+        } else if (paymentIntent?.status === 'succeeded') {
+          emit('payment-success', paymentIntent)
+        } else {
+          emit('payment-error', `Payment status: ${paymentIntent?.status}`)
+        }
+      } catch (err: any) {
+        emit('payment-error', err.message || 'Payment failed')
+      } finally {
+        processing.value = false
+      }
+    }
+
+    return () => h('button', {
+      class: 'btn btn-success',
+      disabled: !props.cardComplete || processing.value || !props.clientSecret,
+      onClick: handlePayment
+    }, processing.value ? 'Processing...' : 'Confirm Payment')
+  }
+})
+
+// Payment event handlers
+const handlePaymentSuccess = (paymentIntent: any) => {
+  paymentStatus.value = 'succeeded'
+  paymentMessage.value = `Payment succeeded! ID: ${paymentIntent.id}`
+  log('payment', `SUCCESS - PaymentIntent: ${paymentIntent.id}`)
+}
+
+const handlePaymentError = (message: string) => {
+  paymentStatus.value = 'error'
+  paymentMessage.value = message
+  log('payment', `ERROR - ${message}`)
+}
+
+const handlePaymentProcessing = () => {
+  paymentStatus.value = 'processing'
+  paymentMessage.value = 'Processing payment...'
+  log('payment', 'Processing...')
+}
+
+const resetPaymentState = () => {
+  paymentStatus.value = 'idle'
+  paymentMessage.value = ''
+  localClientSecret.value = ''
+}
 </script>
 
 <template>
   <div class="test-page">
-    <div class="demo-card">
-      <h2>StripeCardElement Component Test</h2>
-      <p>
+    <div class="card">
+      <h2 class="card-title">StripeCardElement Component Test</h2>
+      <p class="text-secondary">
         A single unified card input for collecting card number, expiry, CVC, and postal code.
         This is the classic Stripe card input - simpler than PaymentElement but card-only.
       </p>
 
-      <div class="api-reference">
+      <div class="api-section">
         <h3>API Reference</h3>
-        <table class="props-table">
+
+        <h4>Props</h4>
+        <table class="table">
           <thead>
             <tr>
               <th>Prop</th>
@@ -155,7 +256,7 @@ const testCards = [
         </table>
 
         <h4>Events</h4>
-        <table class="props-table">
+        <table class="table">
           <thead>
             <tr>
               <th>Event</th>
@@ -193,7 +294,7 @@ const testCards = [
         </table>
 
         <h4>Exposed Methods (via ref)</h4>
-        <ul>
+        <ul class="method-list">
           <li><code>focus()</code> - Focus the card input</li>
           <li><code>blur()</code> - Blur the card input</li>
           <li><code>clear()</code> - Clear the card input</li>
@@ -203,23 +304,23 @@ const testCards = [
     </div>
 
     <!-- Style Options -->
-    <div class="demo-card">
+    <div class="card">
       <h3>Style Options</h3>
-      <div class="scenario-buttons">
+      <div class="btn-group">
         <button
-          :class="['btn', { active: styleOption === 'default' }]"
+          :class="['btn btn-secondary', { active: styleOption === 'default' }]"
           @click="styleOption = 'default'"
         >
           Default
         </button>
         <button
-          :class="['btn', { active: styleOption === 'minimal' }]"
+          :class="['btn btn-secondary', { active: styleOption === 'minimal' }]"
           @click="styleOption = 'minimal'"
         >
           Minimal (no postal)
         </button>
         <button
-          :class="['btn', { active: styleOption === 'custom' }]"
+          :class="['btn btn-secondary', { active: styleOption === 'custom' }]"
           @click="styleOption = 'custom'"
         >
           Custom Styled
@@ -228,25 +329,25 @@ const testCards = [
     </div>
 
     <!-- Live Demo -->
-    <div class="demo-card">
+    <div class="card">
       <h3>Live Demo</h3>
 
-      <div v-if="!stripeConfig?.publishableKey" class="no-key-warning">
-        <p>⚠️ No Stripe key configured. Click <strong>"🔑 Add Key"</strong> in the header above.</p>
+      <div v-if="!stripeConfig?.publishableKey" class="alert alert-warning">
+        <p>No Stripe key configured. Click <strong>"Add Key"</strong> in the header above.</p>
       </div>
 
       <div v-else class="demo-container">
         <StripeProvider :publishable-key="stripeConfig.publishableKey">
           <StripeElements>
             <template #loading>
-              <div class="custom-loading">
+              <div class="loading-state">
                 <div class="spinner"></div>
                 <p>Initializing Stripe Elements...</p>
               </div>
             </template>
 
             <div class="card-form">
-              <label class="card-label">Card Details</label>
+              <label class="form-label">Card Details</label>
               <StripeCardElement
                 ref="cardElementRef"
                 :options="styleOptions"
@@ -280,9 +381,93 @@ const testCards = [
               </div>
 
               <!-- Action Buttons -->
-              <div class="action-buttons">
-                <button class="btn btn-small" @click="focusCard">Focus</button>
-                <button class="btn btn-small" @click="clearCard">Clear</button>
+              <div class="btn-group mt-4">
+                <button class="btn btn-sm btn-secondary" @click="focusCard">Focus</button>
+                <button class="btn btn-sm btn-secondary" @click="clearCard">Clear</button>
+                <button
+                  :class="['btn btn-sm', showPaymentSection ? 'btn-primary active' : 'btn-secondary']"
+                  @click="showPaymentSection = !showPaymentSection"
+                >
+                  {{ showPaymentSection ? 'Hide Payment' : 'Test Payment' }}
+                </button>
+              </div>
+
+              <!-- Payment Mode: Client Secret Form -->
+              <div v-if="showSecretForm" class="secret-form mt-4">
+                <h4>Enter Client Secret</h4>
+                <p class="text-secondary text-sm">
+                  To test payment confirmation, you need a <code>client_secret</code> from a PaymentIntent.
+                </p>
+
+                <div class="form-group">
+                  <label class="form-label">Client Secret</label>
+                  <input
+                    v-model="localClientSecret"
+                    type="text"
+                    placeholder="pi_xxx_secret_xxx"
+                    class="form-input form-input-mono"
+                    :class="{ 'is-valid': localClientSecret.includes('_secret_') }"
+                  />
+                </div>
+
+                <div class="instructions">
+                  <h5>How to get a Client Secret:</h5>
+                  <ol>
+                    <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="link">Stripe Dashboard → Payments</a></li>
+                    <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
+                    <li>Enter an amount (e.g., $10.00)</li>
+                    <li>Copy the <code>client_secret</code> from the response</li>
+                  </ol>
+                  <p class="text-muted text-sm mt-2">
+                    The client secret looks like: <code>pi_xxx_secret_xxx</code>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Payment Mode: Ready to Pay -->
+              <div v-else-if="showPaymentSection && activeClientSecret" class="payment-ready mt-4">
+                <div class="secret-status">
+                  <span class="secret-label">Client Secret:</span>
+                  <code class="secret-value">{{ activeClientSecret.slice(0, 15) }}...{{ activeClientSecret.slice(-8) }}</code>
+                  <button class="btn btn-sm btn-ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
+                    Clear
+                  </button>
+                </div>
+
+                <div class="btn-group mt-3">
+                  <PaymentButton
+                    v-if="cardElementRef?.element"
+                    :client-secret="activeClientSecret"
+                    :card-complete="cardState.complete"
+                    :card-element="cardElementRef.element"
+                    @payment-success="handlePaymentSuccess"
+                    @payment-error="handlePaymentError"
+                    @payment-processing="handlePaymentProcessing"
+                  />
+                  <button
+                    v-if="paymentStatus !== 'idle'"
+                    class="btn btn-sm btn-secondary"
+                    @click="resetPaymentState"
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                <!-- Payment Status -->
+                <div
+                  v-if="paymentMessage"
+                  :class="['alert mt-3', {
+                    'alert-warning': paymentStatus === 'processing',
+                    'alert-success': paymentStatus === 'succeeded',
+                    'alert-danger': paymentStatus === 'error'
+                  }]"
+                >
+                  {{ paymentMessage }}
+                </div>
+
+                <p class="text-muted text-sm mt-3">
+                  Use test card <code>4242 4242 4242 4242</code> with any future date and CVC
+                </p>
               </div>
             </div>
           </StripeElements>
@@ -291,10 +476,10 @@ const testCards = [
     </div>
 
     <!-- Test Cards -->
-    <div class="demo-card">
+    <div class="card">
       <h3>Test Card Numbers</h3>
-      <p class="note">Use these test card numbers with any future expiry date and any 3-digit CVC.</p>
-      <table class="test-cards-table">
+      <p class="text-secondary text-sm mb-4">Use these test card numbers with any future expiry date and any 3-digit CVC.</p>
+      <table class="table">
         <thead>
           <tr>
             <th>Card Number</th>
@@ -313,18 +498,18 @@ const testCards = [
     </div>
 
     <!-- Event Log -->
-    <div class="demo-card">
+    <div class="card">
       <h3>Event Log</h3>
       <div class="event-log">
-        <div v-if="events.length === 0" class="event empty">
+        <div v-if="events.length === 0" class="event-empty">
           No events yet. Interact with the card input to see events.
         </div>
         <div
           v-for="(event, index) in events"
           :key="index"
-          class="event"
+          class="event-entry"
         >
-          <span class="timestamp">{{ event.time }}</span>
+          <span class="event-time">{{ event.time }}</span>
           <span :class="['event-type', event.type]">{{ event.type }}</span>
           <span class="event-message">{{ event.message }}</span>
         </div>
@@ -332,7 +517,7 @@ const testCards = [
     </div>
 
     <!-- Code Examples -->
-    <div class="demo-card">
+    <div class="card">
       <h3>Code Examples</h3>
 
       <h4>Basic Usage</h4>
@@ -403,7 +588,7 @@ const handleSubmit = async () => {
     </div>
 
     <!-- Learning Notes -->
-    <div class="demo-card learning">
+    <div class="card card-info">
       <h3>Learning Notes</h3>
       <ul>
         <li><strong>No clientSecret needed:</strong> CardElement works without a clientSecret on StripeElements.</li>
@@ -418,128 +603,57 @@ const handleSubmit = async () => {
 </template>
 
 <style scoped>
-.test-page {
-  max-width: 900px;
-  margin: 0 auto;
+/* View uses .test-page from design-system.css for consistent 900px width */
+
+.card-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--text-xl);
 }
 
-.api-reference {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
+.api-section {
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border-light);
 }
 
-.api-reference h3 {
-  margin: 0 0 1.5rem 0;
-  color: #1a1a2e;
+.api-section h3 {
+  margin: 0 0 var(--space-4) 0;
 }
 
-.api-reference h4 {
-  margin: 2rem 0 1rem 0;
-  color: #333;
+.api-section h4 {
+  margin: var(--space-5) 0 var(--space-3) 0;
+  color: var(--color-text);
 }
 
-.api-reference ul {
-  margin: 1rem 0 0 0;
-  padding-left: 1.5rem;
+.method-list {
+  margin: var(--space-3) 0 0 0;
+  padding-left: var(--space-5);
 }
 
-.api-reference li {
-  margin-bottom: 0.75rem;
+.method-list li {
+  margin-bottom: var(--space-2);
   line-height: 1.6;
-}
-
-.props-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.props-table th,
-.props-table td {
-  text-align: left;
-  padding: 0.875rem 1rem;
-  border: 1px solid #e0e0e0;
-}
-
-.props-table th {
-  background: #f5f5f5;
-  font-weight: 600;
-}
-
-.props-table code {
-  background: #e9ecef;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-.note {
-  font-size: 0.875rem;
-  color: #666;
-  margin: 1rem 0 1.5rem 0;
-  line-height: 1.6;
-}
-
-.scenario-buttons {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.btn {
-  background: #635bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn:hover {
-  background: #5a52e8;
-}
-
-.btn.active {
-  background: #4840d6;
-  box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.3);
-}
-
-.btn-small {
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
 }
 
 .demo-container {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
 }
 
-.no-key-warning {
-  background: #fff3cd;
-  padding: 1.5rem;
-  border-radius: 8px;
+.loading-state {
   text-align: center;
-  line-height: 1.6;
-}
-
-.custom-loading {
-  text-align: center;
-  padding: 3rem 2rem;
+  padding: var(--space-8) var(--space-6);
 }
 
 .spinner {
   width: 48px;
   height: 48px;
-  border: 3px solid #eee;
-  border-top-color: #635bff;
+  border: 3px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto var(--space-4);
 }
 
 @keyframes spin {
@@ -548,43 +662,35 @@ const handleSubmit = async () => {
 
 .card-form {
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-}
-
-.card-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: #1a1a2e;
-  font-size: 0.95rem;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .card-state {
   display: flex;
-  gap: 1.25rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
-  margin-top: 1.5rem;
-  padding: 1rem 1.25rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
 }
 
 .state-item {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .state-item.error {
   flex-basis: 100%;
-  color: #dc3545;
-  margin-top: 0.5rem;
+  color: var(--color-danger);
+  margin-top: var(--space-2);
 }
 
 .state-label {
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .state-value {
@@ -592,125 +698,97 @@ const handleSubmit = async () => {
 }
 
 .state-value.success {
-  color: #28a745;
+  color: var(--color-success);
 }
 
 .state-value.brand {
   text-transform: capitalize;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+.secret-form {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
 }
 
-.test-cards-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
+.secret-form h4 {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-text);
 }
 
-.test-cards-table th,
-.test-cards-table td {
-  text-align: left;
-  padding: 0.875rem 1rem;
-  border: 1px solid #e0e0e0;
+.instructions {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
 }
 
-.test-cards-table th {
-  background: #f5f5f5;
-  font-weight: 600;
+.instructions h5 {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text);
+  font-size: var(--text-sm);
 }
 
-.test-cards-table code {
-  background: #e9ecef;
-  padding: 0.25rem 0.625rem;
-  border-radius: 4px;
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.85rem;
-}
-
-.event-log {
-  background: #1a1a2e;
-  color: #00ff88;
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.85rem;
-  padding: 1.25rem;
-  border-radius: 8px;
-  max-height: 250px;
-  overflow-y: auto;
-}
-
-.event {
-  margin-bottom: 0.5rem;
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.25rem 0;
-}
-
-.event.empty {
-  color: #888;
-  font-style: italic;
-}
-
-.timestamp {
-  color: #888;
-}
-
-.event-type {
-  font-weight: bold;
-  min-width: 80px;
-}
-
-.event-type.ready { color: #00ff88; }
-.event-type.change { color: #87ceeb; }
-.event-type.complete { color: #00ff88; }
-.event-type.focus { color: #ffd700; }
-.event-type.blur { color: #ffa500; }
-.event-type.error { color: #ff6b6b; }
-.event-type.action { color: #da70d6; }
-.event-type.escape { color: #ff69b4; }
-
-.code-block {
-  background: #1a1a2e;
-  color: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-size: 0.85rem;
-  margin: 1rem 0 1.5rem 0;
-  line-height: 1.5;
-}
-
-.code-block code {
-  font-family: 'Monaco', 'Menlo', monospace;
-}
-
-.learning {
-  background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%);
-  border-left: 4px solid #17a2b8;
-}
-
-.learning h3 {
-  color: #17a2b8;
-  margin-bottom: 1.25rem;
-}
-
-.learning ul {
+.instructions ol {
   margin: 0;
-  padding-left: 1.5rem;
+  padding-left: var(--space-5);
+  color: var(--color-text-muted);
 }
 
-.learning li {
-  margin-bottom: 0.875rem;
+.instructions li {
+  margin-bottom: var(--space-2);
+  line-height: 1.6;
+}
+
+.secret-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-info-light);
+  border: 1px solid var(--color-info);
+  border-radius: var(--radius-md);
+}
+
+.secret-status .secret-label {
+  font-size: var(--text-sm);
+  color: var(--color-info-dark);
+  font-weight: 500;
+}
+
+.secret-status .secret-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  background: white;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-info-dark);
+}
+
+.secret-status .btn-ghost {
+  margin-left: auto;
+}
+
+.payment-ready h4 {
+  margin: 0 0 var(--space-3) 0;
+}
+
+.card-info {
+  background: linear-gradient(135deg, var(--color-info-light) 0%, #f0f7fa 100%);
+  border-left: 4px solid var(--color-info);
+}
+
+.card-info h3 {
+  color: var(--color-info-dark);
+  margin-bottom: var(--space-4);
+}
+
+.card-info ul {
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+.card-info li {
+  margin-bottom: var(--space-3);
   line-height: 1.7;
-}
-
-.learning code {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
 }
 </style>

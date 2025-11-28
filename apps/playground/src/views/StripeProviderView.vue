@@ -310,192 +310,27 @@ const onStripeError = (error) => {
 </template>
 
 <style scoped>
-.test-page {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.api-reference {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
-}
-
-.api-reference h3 {
-  margin: 0 0 1.5rem 0;
-  color: #1a1a2e;
-}
-
-.api-reference h4 {
-  margin: 2rem 0 1rem 0;
-  color: #333;
-}
-
-.props-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.props-table th,
-.props-table td {
-  text-align: left;
-  padding: 0.875rem 1rem;
-  border: 1px solid #e0e0e0;
-}
-
-.props-table th {
-  background: #f5f5f5;
-  font-weight: 600;
-}
-
-.props-table code {
-  background: #e9ecef;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-.note {
-  font-size: 0.875rem;
-  color: #666;
-  margin: 1rem 0 0 0;
-  line-height: 1.6;
-}
-
-.scenario-buttons {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.btn {
-  background: #635bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn:hover {
-  background: #5a52e8;
-}
-
-.btn.active {
-  background: #4840d6;
-  box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.3);
-}
-
-.btn-danger {
-  background: #dc3545;
-}
-
-.btn-danger:hover {
-  background: #c82333;
-}
-
-.btn-danger.active {
-  background: #bd2130;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
-}
-
-.btn-small {
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-}
-
-.demo-container {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 2rem;
-  min-height: 120px;
-}
-
-.success-content {
-  text-align: center;
-  padding: 1rem 0;
-}
-
-.success-icon,
-.error-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.75rem;
-}
-
-.success-content p {
-  margin: 0.75rem 0 0 0;
-  color: #666;
-  line-height: 1.6;
-}
+/* View-specific styles - most styles are now in design-system.css */
 
 .hint {
-  font-size: 0.875rem;
-  color: #888;
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
   font-style: italic;
-}
-
-.custom-loading {
-  text-align: center;
-  padding: 3rem 2rem;
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 3px solid #eee;
-  border-top-color: #635bff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1.5rem;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .custom-error {
   text-align: center;
-  background: #fff3cd;
-  padding: 2rem;
-  border-radius: 8px;
+  background: var(--color-warning-light);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
 }
 
-.no-key-warning {
-  background: #fff3cd;
-  padding: 1.5rem;
-  border-radius: 8px;
-  text-align: center;
-  line-height: 1.6;
-}
-
-.no-key-warning code {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-}
-
-.event-log {
-  background: #1a1a2e;
-  color: #00ff88;
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.85rem;
-  padding: 1.25rem;
-  border-radius: 8px;
-  max-height: 250px;
-  overflow-y: auto;
-  margin-bottom: 0.75rem;
-}
-
+/* Event log styles */
 .event {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
   display: flex;
-  gap: 0.75rem;
-  padding: 0.25rem 0;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
 }
 
 .event.empty {
@@ -518,47 +353,5 @@ const onStripeError = (error) => {
 
 .event-type.error {
   color: #ff6b6b;
-}
-
-.code-block {
-  background: #1a1a2e;
-  color: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-size: 0.85rem;
-  margin: 1rem 0 1.5rem 0;
-  line-height: 1.5;
-}
-
-.code-block code {
-  font-family: 'Monaco', 'Menlo', monospace;
-}
-
-.learning {
-  background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%);
-  border-left: 4px solid #17a2b8;
-}
-
-.learning h3 {
-  color: #17a2b8;
-  margin-bottom: 1.25rem;
-}
-
-.learning ul {
-  margin: 0;
-  padding-left: 1.5rem;
-}
-
-.learning li {
-  margin-bottom: 0.875rem;
-  line-height: 1.7;
-}
-
-.learning code {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
 }
 </style>

@@ -277,231 +277,102 @@ const { stripe, loading, error } = useStripe()
 </template>
 
 <style scoped>
-.test-page {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.api-reference {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
-}
-
-.api-reference h3 {
-  margin: 0 0 1.5rem 0;
-  color: #1a1a2e;
-}
-
-.api-reference h4 {
-  margin: 2rem 0 1rem 0;
-  color: #333;
-}
-
-.props-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.props-table th,
-.props-table td {
-  text-align: left;
-  padding: 0.875rem 1rem;
-  border: 1px solid #e0e0e0;
-}
-
-.props-table th {
-  background: #f5f5f5;
-  font-weight: 600;
-}
-
-.props-table code {
-  background: #e9ecef;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-.note {
-  font-size: 0.9rem;
-  color: #666;
-  margin: 0 0 1.5rem 0;
-  line-height: 1.6;
-}
-
-.btn {
-  background: #635bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn:hover {
-  background: #5a52e8;
-}
-
-.btn-small {
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-}
-
-.demo-container {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 2rem;
-  min-height: 120px;
-}
+/* View-specific styles - most styles are now in design-system.css */
 
 .error-demo {
   background: #fff5f5;
   border: 1px solid #fecaca;
 }
 
-.no-key-warning {
-  background: #fff3cd;
-  padding: 1.5rem;
-  border-radius: 8px;
-  text-align: center;
-  line-height: 1.6;
-}
-
-.no-key-warning code {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-}
-
 .loading-state {
   text-align: center;
-  padding: 3rem 2rem;
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 3px solid #eee;
-  border-top-color: #635bff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1.5rem;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  padding: var(--space-8) var(--space-6);
 }
 
 .consumer-output {
   background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
 }
 
 .consumer-output h4 {
-  margin: 0 0 1.25rem 0;
-  color: #1a1a2e;
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-text);
 }
 
 .consumer-output h5 {
-  margin: 1.25rem 0 0.75rem 0;
-  color: #333;
+  margin: var(--space-4) 0 var(--space-3) 0;
+  color: var(--color-text);
 }
 
 .value-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
+  gap: var(--space-4);
 }
 
 .value-item {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
 }
 
 .value-item label {
   display: block;
-  font-size: 0.8rem;
-  color: #666;
-  margin-bottom: 0.375rem;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
 }
 
 .value-item code {
-  font-size: 0.9rem;
-  color: #1a1a2e;
+  font-size: var(--text-sm);
+  color: var(--color-text);
 }
 
 .stripe-methods {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #eee;
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .stripe-methods ul {
   margin: 0;
-  padding-left: 1.5rem;
-  font-size: 0.9rem;
+  padding-left: var(--space-5);
+  font-size: var(--text-sm);
 }
 
 .stripe-methods li {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
   line-height: 1.5;
-}
-
-.stripe-methods code {
-  background: #e9ecef;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
 }
 
 .error-result {
   text-align: center;
-  padding: 1rem;
-}
-
-.error-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.75rem;
+  padding: var(--space-4);
 }
 
 .error-result strong {
   display: block;
-  color: #dc3545;
-  margin-bottom: 0.75rem;
-  font-size: 1.1rem;
+  color: var(--color-danger);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-lg);
 }
 
 .error-result code {
   display: block;
   background: rgba(220, 53, 69, 0.1);
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 1.25rem;
-  font-size: 0.9rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-sm);
 }
 
-.event-log {
-  background: #1a1a2e;
-  color: #00ff88;
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.85rem;
-  padding: 1.25rem;
-  border-radius: 8px;
-  max-height: 250px;
-  overflow-y: auto;
-}
-
+/* Event log styles */
 .event {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
   display: flex;
-  gap: 0.75rem;
-  padding: 0.25rem 0;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
 }
 
 .event.empty {
@@ -522,45 +393,9 @@ const { stripe, loading, error } = useStripe()
   color: #ff6b6b;
 }
 
-.code-block {
-  background: #1a1a2e;
-  color: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-size: 0.85rem;
-  margin: 1rem 0 1.5rem 0;
-  line-height: 1.5;
-}
-
-.code-block code {
-  font-family: 'Monaco', 'Menlo', monospace;
-}
-
-.learning {
-  background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 100%);
-  border-left: 4px solid #17a2b8;
-}
-
-.learning h3 {
-  color: #17a2b8;
-  margin-bottom: 1.25rem;
-}
-
-.learning ul {
-  margin: 0;
-  padding-left: 1.5rem;
-}
-
-.learning li {
-  margin-bottom: 0.875rem;
-  line-height: 1.7;
-}
-
-.learning code {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
+@media (max-width: 768px) {
+  .value-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
