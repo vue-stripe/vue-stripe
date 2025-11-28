@@ -3,7 +3,7 @@
 Complete API documentation for Vue Stripe components and composables.
 
 ::: tip Work in Progress
-This documentation is being updated as components are tested and finalized. Components marked with 🔄 are currently being tested.
+This documentation is being updated as components are tested and finalized. Components marked with ✅ are complete.
 :::
 
 ## Components
@@ -13,11 +13,11 @@ This documentation is being updated as components are tested and finalized. Comp
 - [StripeElements](/api/components/stripe-elements) - Creates Stripe Elements instance ✅
 
 ### Element Components
-- [StripeCardElement](/api/components/stripe-card-element) - Single card input
-- [Split Card Elements](/api/components/stripe-split-card-elements) - Number + Expiry + CVC
+- [StripeCardElement](/api/components/stripe-card-element) - Single card input ✅
+- [Split Card Elements](/api/components/stripe-split-card-elements) - Number + Expiry + CVC ✅
+- [StripePaymentElement](/api/components/stripe-payment-element) - All-in-one payment UI ✅
 
 #### Coming Soon
-- StripePaymentElement - All-in-one payment UI
 - StripeExpressCheckoutElement - Apple Pay, Google Pay, Link
 - StripeAddressElement - Address collection
 - StripeLinkAuthenticationElement - Link authentication
@@ -27,9 +27,9 @@ This documentation is being updated as components are tested and finalized. Comp
 
 - [useStripe](/api/composables/use-stripe) - Access Stripe instance ✅
 - [useStripeElements](/api/composables/use-stripe-elements) - Access Elements instance ✅
+- [usePaymentIntent](/api/composables/use-payment-intent) - Payment confirmation helpers ✅
 
 #### Coming Soon
-- usePaymentIntent - Payment confirmation helpers
 - useSetupIntent - SetupIntent confirmation helpers
 - useStripeCheckout - Redirect to Stripe Checkout
 

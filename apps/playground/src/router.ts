@@ -5,6 +5,7 @@ import StripeElementsView from './views/StripeElementsView.vue'
 import UseStripeView from './views/UseStripeView.vue'
 import CardElementView from './views/CardElementView.vue'
 import SplitCardView from './views/SplitCardView.vue'
+import PaymentElementView from './views/PaymentElementView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -38,6 +39,11 @@ const router = createRouter({
       path: '/stripe-split-card',
       name: 'SplitCardElements',
       component: SplitCardView
+    },
+    {
+      path: '/stripe-payment-element',
+      name: 'StripePaymentElement',
+      component: PaymentElementView
     }
     // Routes will be added as we test each component
   ]

@@ -41,8 +41,8 @@ const testingPhases = [
     name: 'Phase 4: Modern Payment',
     description: 'Recommended payment flow',
     items: [
-      { name: 'StripePaymentElement', route: '/stripe-payment-element', status: 'pending', description: 'All-in-one payment UI (cards, wallets, bank)' },
-      { name: 'usePaymentIntent()', route: '/use-payment-intent', status: 'pending', description: 'Composable to confirm payments' }
+      { name: 'StripePaymentElement', route: '/stripe-payment-element', status: 'done', description: 'All-in-one payment UI (cards, wallets, bank)' },
+      { name: 'usePaymentIntent()', route: '/stripe-payment-element', status: 'done', description: 'Composable to confirm payments (tested via PaymentElement)' }
     ]
   },
   {
@@ -119,7 +119,7 @@ const getStatusIcon = (status: string) => {
               <span class="description">{{ item.description }}</span>
             </div>
             <router-link
-              v-if="item.status !== 'pending' || phase.name.includes('Phase 1') || phase.name.includes('Phase 2') || phase.name.includes('Phase 3')"
+              v-if="item.status !== 'pending' || phase.name.includes('Phase 1') || phase.name.includes('Phase 2') || phase.name.includes('Phase 3') || phase.name.includes('Phase 4')"
               :to="item.route"
               class="test-link"
             >
