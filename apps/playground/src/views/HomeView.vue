@@ -25,15 +25,15 @@ const testingPhases = [
     name: 'Phase 2: Elements Container',
     description: 'Can test without clientSecret (for CardElement)',
     items: [
-      { name: 'StripeElements', route: '/stripe-elements', status: 'in-progress', description: 'Creates Elements instance for child components' },
-      { name: 'useStripeElements()', route: '/use-stripe-elements', status: 'pending', description: 'Composable to access Elements instance' }
+      { name: 'StripeElements', route: '/stripe-elements', status: 'done', description: 'Creates Elements instance for child components' },
+      { name: 'useStripeElements()', route: '/stripe-elements', status: 'done', description: 'Composable to access Elements instance (tested via ElementsConsumer)' }
     ]
   },
   {
     name: 'Phase 3: Card Elements',
     description: 'Classic card input components',
     items: [
-      { name: 'StripeCardElement', route: '/stripe-card-element', status: 'in-progress', description: 'Single unified card input' },
+      { name: 'StripeCardElement', route: '/stripe-card-element', status: 'done', description: 'Single unified card input' },
       { name: 'Split Card Elements', route: '/stripe-split-card', status: 'pending', description: 'Number + Expiry + CVC separate inputs' }
     ]
   },

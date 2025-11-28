@@ -63,10 +63,16 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Components',
+          text: 'Provider Components',
           items: [
             { text: 'StripeProvider', link: '/api/components/stripe-provider' },
             { text: 'StripeElements', link: '/api/components/stripe-elements' },
+          ]
+        },
+        {
+          text: 'Element Components',
+          items: [
+            { text: 'StripeCardElement', link: '/api/components/stripe-card-element' },
           ]
         },
         {
