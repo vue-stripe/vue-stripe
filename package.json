@@ -1,0 +1,54 @@
+{
+  "name": "vue-stripe-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "build": "turbo run build",
+    "build:watch": "turbo run build:watch",
+    "dev": "turbo run dev --parallel",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "type-check": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "docs:dev": "turbo run docs:dev",
+    "docs:build": "turbo run docs:build",
+    "playground:dev": "turbo run dev --filter=playground",
+    "vue-stripe:build": "turbo run build --filter=@vue-stripe/vue-stripe",
+    "vue-stripe:test": "turbo run test --filter=@vue-stripe/vue-stripe",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.5",
+    "@turbo/gen": "^2.5.8",
+    "@vue-stripe/eslint-config": "workspace:*",
+    "@vue-stripe/typescript-config": "workspace:*",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.11",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=8"
+  },
+  "lint-staged": {
+    "*.{js,ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+# Build outputs
+dist
+.vitepress/dist
+.vitepress/cache
+coverage
+lib
+
+# Dependencies
+node_modules
+.pnpm-store
+
+# Logs
+*.log
+
+# Misc
+.DS_Store
+.env
+.env.*
+
+# IDE
+.idea
+.vscode
+
+# Turbo
+.turbo
+
+# Changesets
+.changeset
+
+# Firebase
+.firebase
+firebase-debug.log
+
+# Generated files
+*.d.ts
+pnpm-lock.yaml

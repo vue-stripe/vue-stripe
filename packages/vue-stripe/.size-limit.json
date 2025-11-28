@@ -1,0 +1,24 @@
+[
+  {
+    "name": "ESM Bundle",
+    "path": "dist/index.js",
+    "limit": "30 KB"
+  },
+  {
+    "name": "CJS Bundle",
+    "path": "dist/index.cjs",
+    "limit": "30 KB"
+  },
+  {
+    "name": "Core Components (Tree-shaken)",
+    "path": "dist/index.js",
+    "import": "{ StripeProvider, StripeElements, StripePaymentElement }",
+    "limit": "15 KB"
+  },
+  {
+    "name": "Composables Only",
+    "path": "dist/index.js",
+    "import": "{ useStripe, useStripeElements, usePaymentIntent }",
+    "limit": "5 KB"
+  }
+]

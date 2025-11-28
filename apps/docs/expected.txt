@@ -1,0 +1,52 @@
+          { text: 'GitHub', link: 'https://github.com/vue-stripe/vue-stripe-demi' },
+          { text: 'NPM', link: 'https://www.npmjs.com/package/@vue-stripe/vue-stripe' },
+          { text: 'Open Collective', link: 'https://opencollective.com/vue-stripe-checkout' }
+      { icon: 'discord', link: 'https://discord.gg/vue-stripe' }
+      { icon: 'github', link: 'https://github.com/vue-stripe/vue-stripe-demi' },
+      { icon: 'twitter', link: 'https://twitter.com/jrtiquez' },
+api/.md
+api/components/card-elements.md
+api/components/express-checkout.md
+api/components/payment-element.md
+api/components/stripe-checkout.md
+api/components/stripe-elements.md
+api/components/stripe-provider.md
+api/composables/use-payment-intent.md
+api/composables/use-setup-intent.md
+api/composables/use-stripe-checkout.md
+api/composables/use-stripe-elements.md
+api/composables/use-stripe.md
+api/plugin-options.md
+api/types/enums.md
+api/types/interfaces.md
+examples/.md
+examples/connect-platform.md
+examples/mobile.md
+examples/multi-step.md
+examples/nuxt-2.md
+examples/nuxt-3.md
+examples/save-payment-method.md
+examples/simple-payment.md
+examples/subscription.md
+examples/vite.md
+examples/vue-cli.md
+guide/.md
+guide/address-element.md
+guide/card-elements.md
+guide/checkout-button.md
+guide/connect.md
+guide/customization.md
+guide/elements-container.md
+guide/error-handling.md
+guide/express-checkout.md
+guide/getting-started.md
+guide/installation.md
+guide/link-auth.md
+guide/migration.md
+guide/payment-element.md
+guide/payment-processing.md
+guide/quick-start.md
+guide/ssr-nuxt.md
+guide/stripe-provider.md
+guide/testing.md
+guide/typescript.md

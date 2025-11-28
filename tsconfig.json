@@ -1,0 +1,15 @@
+{
+  "extends": "@vue-stripe/typescript-config/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@vue-stripe/vue-stripe": ["packages/vue-stripe/src"],
+      "@vue-stripe/vue-stripe/*": ["packages/vue-stripe/src/*"]
+    }
+  },
+  "references": [
+    { "path": "./packages/vue-stripe" },
+    { "path": "./apps/playground" },
+    { "path": "./apps/docs" }
+  ]
+}
