@@ -65,3 +65,6 @@ export const createMockElement = () => ({
 })
 
 export const waitForStripeLoad = () => new Promise(resolve => setTimeout(resolve, 100))
+
+// Flush all pending promises - useful for waiting on async operations
+export const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0))

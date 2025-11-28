@@ -215,7 +215,7 @@ const showInvalidKey = ref(false)
 
       <!-- No key configured -->
       <div v-else class="no-key-warning">
-        <p>⚠️ No Stripe key configured. Add your test key to <code>.env.local</code></p>
+        <p>⚠️ No Stripe key configured. Click <strong>"🔑 Add Key"</strong> in the header above.</p>
       </div>
     </div>
 
@@ -316,33 +316,33 @@ const onStripeError = (error) => {
 }
 
 .api-reference {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
   border-top: 1px solid #eee;
 }
 
 .api-reference h3 {
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.5rem 0;
   color: #1a1a2e;
 }
 
 .api-reference h4 {
-  margin: 1.5rem 0 0.5rem 0;
+  margin: 2rem 0 1rem 0;
   color: #333;
 }
 
 .props-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
 }
 
 .props-table th,
 .props-table td {
   text-align: left;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
+  padding: 0.875rem 1rem;
+  border: 1px solid #e0e0e0;
 }
 
 .props-table th {
@@ -352,20 +352,21 @@ const onStripeError = (error) => {
 
 .props-table code {
   background: #e9ecef;
-  padding: 0.125rem 0.375rem;
-  border-radius: 3px;
-  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
 }
 
 .note {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: #666;
-  margin: 0.5rem 0 0 0;
+  margin: 1rem 0 0 0;
+  line-height: 1.6;
 }
 
 .scenario-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
@@ -374,8 +375,8 @@ const onStripeError = (error) => {
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -403,52 +404,54 @@ const onStripeError = (error) => {
 }
 
 .btn-small {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.8rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
 }
 
 .demo-container {
   background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
-  min-height: 100px;
+  border-radius: 12px;
+  padding: 2rem;
+  min-height: 120px;
 }
 
 .success-content {
   text-align: center;
+  padding: 1rem 0;
 }
 
 .success-icon,
 .error-icon {
-  font-size: 2rem;
+  font-size: 2.5rem;
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .success-content p {
-  margin: 0.5rem 0 0 0;
+  margin: 0.75rem 0 0 0;
   color: #666;
+  line-height: 1.6;
 }
 
 .hint {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: #888;
   font-style: italic;
 }
 
 .custom-loading {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem 2rem;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border: 3px solid #eee;
   border-top-color: #635bff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
+  margin: 0 auto 1.5rem;
 }
 
 @keyframes spin {
@@ -458,39 +461,41 @@ const onStripeError = (error) => {
 .custom-error {
   text-align: center;
   background: #fff3cd;
-  padding: 1.5rem;
+  padding: 2rem;
   border-radius: 8px;
 }
 
 .no-key-warning {
   background: #fff3cd;
-  padding: 1rem;
+  padding: 1.5rem;
   border-radius: 8px;
   text-align: center;
+  line-height: 1.6;
 }
 
 .no-key-warning code {
   background: rgba(0, 0, 0, 0.1);
-  padding: 0.125rem 0.375rem;
-  border-radius: 3px;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
 }
 
 .event-log {
   background: #1a1a2e;
   color: #00ff88;
   font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.8rem;
-  padding: 1rem;
+  font-size: 0.85rem;
+  padding: 1.25rem;
   border-radius: 8px;
-  max-height: 200px;
+  max-height: 250px;
   overflow-y: auto;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .event {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
 }
 
 .event.empty {
@@ -504,7 +509,7 @@ const onStripeError = (error) => {
 
 .event-type {
   font-weight: bold;
-  min-width: 50px;
+  min-width: 60px;
 }
 
 .event-type.load {
@@ -518,11 +523,12 @@ const onStripeError = (error) => {
 .code-block {
   background: #1a1a2e;
   color: #f8f9fa;
-  padding: 1rem;
+  padding: 1.5rem;
   border-radius: 8px;
   overflow-x: auto;
-  font-size: 0.8rem;
-  margin: 0.5rem 0 1rem 0;
+  font-size: 0.85rem;
+  margin: 1rem 0 1.5rem 0;
+  line-height: 1.5;
 }
 
 .code-block code {
@@ -536,22 +542,23 @@ const onStripeError = (error) => {
 
 .learning h3 {
   color: #17a2b8;
+  margin-bottom: 1.25rem;
 }
 
 .learning ul {
   margin: 0;
-  padding-left: 1.25rem;
+  padding-left: 1.5rem;
 }
 
 .learning li {
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
+  margin-bottom: 0.875rem;
+  line-height: 1.7;
 }
 
 .learning code {
   background: rgba(0, 0, 0, 0.1);
-  padding: 0.125rem 0.375rem;
-  border-radius: 3px;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
   font-size: 0.85rem;
 }
 </style>

@@ -16,16 +16,16 @@ const testingPhases = [
     name: 'Phase 1: Foundation',
     description: 'No backend required',
     items: [
-      { name: 'StripeProvider', route: '/stripe-provider', status: 'in-progress', description: 'Root component that loads Stripe.js' },
-      { name: 'useStripe()', route: '/use-stripe', status: 'pending', description: 'Composable to access Stripe instance' },
+      { name: 'StripeProvider', route: '/stripe-provider', status: 'done', description: 'Root component that loads Stripe.js' },
+      { name: 'useStripe()', route: '/use-stripe', status: 'done', description: 'Composable to access Stripe instance' },
       { name: 'StripeAddressElement', route: '/stripe-address-element', status: 'pending', description: 'Address collection form' }
     ]
   },
   {
     name: 'Phase 2: Elements Container',
-    description: 'Needs clientSecret from Payment Intent',
+    description: 'Can test without clientSecret (for CardElement)',
     items: [
-      { name: 'StripeElements', route: '/stripe-elements', status: 'pending', description: 'Creates Elements instance for child components' },
+      { name: 'StripeElements', route: '/stripe-elements', status: 'in-progress', description: 'Creates Elements instance for child components' },
       { name: 'useStripeElements()', route: '/use-stripe-elements', status: 'pending', description: 'Composable to access Elements instance' }
     ]
   },
@@ -33,7 +33,7 @@ const testingPhases = [
     name: 'Phase 3: Card Elements',
     description: 'Classic card input components',
     items: [
-      { name: 'StripeCardElement', route: '/stripe-card-element', status: 'pending', description: 'Single unified card input' },
+      { name: 'StripeCardElement', route: '/stripe-card-element', status: 'in-progress', description: 'Single unified card input' },
       { name: 'Split Card Elements', route: '/stripe-split-card', status: 'pending', description: 'Number + Expiry + CVC separate inputs' }
     ]
   },
@@ -84,12 +84,8 @@ const getStatusIcon = (status: string) => {
       </p>
 
       <div class="setup-section" v-if="!hasKey">
-        <h3>⚠️ Setup Required</h3>
-        <ol>
-          <li>Copy <code>.env.example</code> to <code>.env.local</code></li>
-          <li>Add your Stripe test publishable key (starts with <code>pk_test_</code>)</li>
-          <li>Restart the dev server</li>
-        </ol>
+        <h3>🔑 Add Your Stripe Key</h3>
+        <p>Click the <strong>"Add Key"</strong> button in the header above to enter your Stripe test publishable key.</p>
         <p class="hint">
           Get your test key from:
           <a href="https://dashboard.stripe.com/test/apikeys" target="_blank">Stripe Dashboard → API Keys</a>
@@ -98,7 +94,7 @@ const getStatusIcon = (status: string) => {
 
       <div class="setup-section success" v-else>
         <h3>✅ Ready to Test</h3>
-        <p>Your Stripe key is configured. Start with Phase 1 below.</p>
+        <p>Your Stripe key is configured. Start with Phase 1 below!</p>
       </div>
     </div>
 
@@ -123,7 +119,7 @@ const getStatusIcon = (status: string) => {
               <span class="description">{{ item.description }}</span>
             </div>
             <router-link
-              v-if="item.status !== 'pending' || phase.name === 'Phase 1: Foundation'"
+              v-if="item.status !== 'pending' || phase.name.includes('Phase 1') || phase.name.includes('Phase 2')"
               :to="item.route"
               class="test-link"
             >
@@ -153,20 +149,20 @@ const getStatusIcon = (status: string) => {
 }
 
 .intro h2 {
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .intro p {
   color: #666;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .setup-section {
   background: #fff3cd;
   border: 1px solid #ffc107;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-top: 1rem;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .setup-section.success {
@@ -175,30 +171,37 @@ const getStatusIcon = (status: string) => {
 }
 
 .setup-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+.setup-section p {
   margin: 0 0 0.75rem 0;
-  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .setup-section ol {
   margin: 0;
-  padding-left: 1.25rem;
+  padding-left: 1.5rem;
 }
 
 .setup-section li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
 }
 
 .setup-section code {
   background: rgba(0, 0, 0, 0.1);
-  padding: 0.125rem 0.375rem;
-  border-radius: 3px;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
   font-size: 0.875rem;
 }
 
 .hint {
-  margin: 0.75rem 0 0 0;
-  font-size: 0.875rem;
+  margin: 1rem 0 0 0;
+  font-size: 0.9rem;
   color: #666;
+  line-height: 1.6;
 }
 
 .hint a {
@@ -206,18 +209,19 @@ const getStatusIcon = (status: string) => {
 }
 
 .phase {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .phase h3 {
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.5rem 0;
   color: #1a1a2e;
 }
 
 .phase-desc {
   color: #666;
-  font-size: 0.875rem;
-  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  margin: 0 0 1.25rem 0;
+  line-height: 1.5;
 }
 
 .checklist {
@@ -229,11 +233,11 @@ const getStatusIcon = (status: string) => {
 .checklist-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
   background: #f8f9fa;
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
 }
 
 .checklist-item.done {
@@ -245,7 +249,7 @@ const getStatusIcon = (status: string) => {
 }
 
 .status {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
 }
 
 .item-info {
@@ -255,21 +259,24 @@ const getStatusIcon = (status: string) => {
 .item-info strong {
   display: block;
   color: #1a1a2e;
+  margin-bottom: 0.25rem;
 }
 
 .item-info .description {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #666;
+  line-height: 1.5;
 }
 
 .test-link {
   background: #635bff;
   color: white;
-  padding: 0.375rem 0.75rem;
-  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .test-link:hover {
@@ -278,12 +285,12 @@ const getStatusIcon = (status: string) => {
 
 .coming-soon {
   color: #999;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-style: italic;
 }
 
 .resources h3 {
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 1.25rem 0;
 }
 
 .resources ul {
@@ -293,12 +300,13 @@ const getStatusIcon = (status: string) => {
 }
 
 .resources li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.875rem;
 }
 
 .resources a {
   color: #635bff;
   text-decoration: none;
+  font-size: 0.95rem;
 }
 
 .resources a:hover {
