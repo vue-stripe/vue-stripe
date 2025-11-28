@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject, computed } from 'vue'
+import { ref, inject, computed, watch } from 'vue'
 import {
   StripeProvider,
   StripeElements,
@@ -27,6 +27,63 @@ const paymentStatus = ref<string>('')
 // Element state
 const elementReady = ref(false)
 const elementLoading = ref(true)
+
+// Layout and appearance variants
+const selectedLayout = ref<'tabs' | 'accordion' | 'auto'>('tabs')
+const selectedTheme = ref<'stripe' | 'night' | 'flat'>('stripe')
+const showWallets = ref(true)
+const businessName = ref('')
+
+// Key to force remount when options change
+const elementKey = ref(0)
+
+// Watch for layout/theme changes - remount element
+watch([selectedLayout, selectedTheme, showWallets], () => {
+  elementKey.value++
+  elementReady.value = false
+  elementLoading.value = true
+  paymentComplete.value = false
+})
+
+// Computed element options
+const elementOptions = computed(() => ({
+  layout: {
+    type: selectedLayout.value,
+    defaultCollapsed: selectedLayout.value === 'accordion',
+    radios: selectedLayout.value === 'accordion',
+    spacedAccordionItems: selectedLayout.value === 'accordion'
+  },
+  business: businessName.value ? { name: businessName.value } : undefined,
+  wallets: showWallets.value ? { applePay: 'auto', googlePay: 'auto' } : { applePay: 'never', googlePay: 'never' }
+}))
+
+// Computed appearance based on theme
+const appearance = computed(() => {
+  const themes = {
+    stripe: {
+      theme: 'stripe' as const,
+      variables: {
+        colorPrimary: '#635bff'
+      }
+    },
+    night: {
+      theme: 'night' as const,
+      variables: {
+        colorPrimary: '#635bff',
+        colorBackground: '#1a1a2e',
+        colorText: '#ffffff'
+      }
+    },
+    flat: {
+      theme: 'flat' as const,
+      variables: {
+        colorPrimary: '#635bff',
+        borderRadius: '0px'
+      }
+    }
+  }
+  return themes[selectedTheme.value]
+})
 
 // Event log
 const eventLog = ref<Array<{ time: string; event: string; data?: string }>>([])
@@ -64,14 +121,6 @@ const onLoaderStart = () => {
 const onLoaderStop = () => {
   elementLoading.value = false
   logEvent('loaderstop')
-}
-
-// Appearance options
-const appearance = {
-  theme: 'stripe' as const,
-  variables: {
-    colorPrimary: '#635bff'
-  }
 }
 </script>
 
@@ -131,29 +180,92 @@ const appearance = {
           </button>
         </div>
 
-        <StripeProvider :publishable-key="publishableKey">
-          <StripeElements
-            :client-secret="clientSecret"
-            :options="{ appearance }"
-          >
-            <StripePaymentElement
-              @ready="onReady"
-              @change="onChange"
-              @focus="onFocus"
-              @blur="onBlur"
-              @loaderstart="onLoaderStart"
-              @loaderstop="onLoaderStop"
-            />
+        <!-- Variant Controls -->
+        <div class="variant-controls">
+          <div class="control-group">
+            <label>Layout</label>
+            <div class="button-group">
+              <button
+                v-for="layout in ['tabs', 'accordion', 'auto']"
+                :key="layout"
+                :class="['variant-btn', { active: selectedLayout === layout }]"
+                @click="selectedLayout = layout as any"
+              >
+                {{ layout }}
+              </button>
+            </div>
+          </div>
 
-            <!-- Payment Form Child Component -->
-            <PaymentForm
-              :client-secret="clientSecret"
-              :payment-complete="paymentComplete"
-              @payment-success="paymentStatus = 'succeeded'"
-              @payment-error="(msg) => paymentError = msg"
+          <div class="control-group">
+            <label>Theme</label>
+            <div class="button-group">
+              <button
+                v-for="theme in ['stripe', 'night', 'flat']"
+                :key="theme"
+                :class="['variant-btn', { active: selectedTheme === theme }]"
+                @click="selectedTheme = theme as any"
+              >
+                {{ theme }}
+              </button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Wallets</label>
+            <div class="button-group">
+              <button
+                :class="['variant-btn', { active: showWallets }]"
+                @click="showWallets = true"
+              >
+                Show
+              </button>
+              <button
+                :class="['variant-btn', { active: !showWallets }]"
+                @click="showWallets = false"
+              >
+                Hide
+              </button>
+            </div>
+          </div>
+
+          <div class="control-group full-width">
+            <label>Business Name (optional)</label>
+            <input
+              v-model="businessName"
+              type="text"
+              placeholder="Your Company Name"
+              class="input-small"
             />
-          </StripeElements>
-        </StripeProvider>
+          </div>
+        </div>
+
+        <div :class="['payment-element-wrapper', `theme-${selectedTheme}`]">
+          <StripeProvider :publishable-key="publishableKey">
+            <StripeElements
+              :key="elementKey"
+              :client-secret="clientSecret"
+              :options="{ appearance }"
+            >
+              <StripePaymentElement
+                :options="elementOptions"
+                @ready="onReady"
+                @change="onChange"
+                @focus="onFocus"
+                @blur="onBlur"
+                @loaderstart="onLoaderStart"
+                @loaderstop="onLoaderStop"
+              />
+
+              <!-- Payment Form Child Component -->
+              <PaymentForm
+                :client-secret="clientSecret"
+                :payment-complete="paymentComplete"
+                @payment-success="paymentStatus = 'succeeded'"
+                @payment-error="(msg) => paymentError = msg"
+              />
+            </StripeElements>
+          </StripeProvider>
+        </div>
 
         <!-- Status display -->
         <div v-if="paymentStatus === 'succeeded'" class="success-message">
@@ -182,13 +294,33 @@ const appearance = {
 
     <!-- Info -->
     <div class="demo-card info">
-      <h3>About Payment Element</h3>
+      <h3>About Payment Element Variants</h3>
+
+      <h4>Layout Options</h4>
       <ul>
-        <li><strong>All-in-one</strong> - Cards, Apple Pay, Google Pay, bank transfers</li>
-        <li><strong>Dynamic</strong> - Shows relevant payment methods based on customer</li>
-        <li><strong>Localized</strong> - Automatically adapts to customer's locale</li>
-        <li><strong>Optimized</strong> - Stripe handles conversion optimization</li>
+        <li><strong>tabs</strong> - Payment methods shown as tabs (default)</li>
+        <li><strong>accordion</strong> - Collapsible accordion sections</li>
+        <li><strong>auto</strong> - Stripe chooses the best layout</li>
       </ul>
+      <div class="note">
+        <strong>Note:</strong> Tabs/accordion only appear when multiple payment methods are enabled.
+        If you only see a card form, your PaymentIntent may only have <code>card</code> enabled.
+        Enable more methods in <a href="https://dashboard.stripe.com/settings/payment_methods" target="_blank">Dashboard → Payment Methods</a>.
+      </div>
+
+      <h4>Theme Options</h4>
+      <ul>
+        <li><strong>stripe</strong> - Default Stripe appearance</li>
+        <li><strong>night</strong> - Dark mode theme</li>
+        <li><strong>flat</strong> - Minimal flat design</li>
+      </ul>
+
+      <h4>Wallets (Apple Pay / Google Pay)</h4>
+      <div class="note">
+        Wallets require: HTTPS, domain verification, and a supported device/browser.
+        They won't appear on localhost unless you use a tunnel service.
+      </div>
+
       <h4>Test Cards:</h4>
       <ul>
         <li><code>4242 4242 4242 4242</code> - Succeeds</li>
@@ -419,6 +551,7 @@ export default {
   border-radius: 6px;
   font-size: 0.85rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .secret-label {
@@ -432,6 +565,9 @@ export default {
   border-radius: 4px;
   font-size: 0.8rem;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-clear {
@@ -451,10 +587,101 @@ export default {
   color: white;
 }
 
+/* Variant Controls */
+.variant-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.control-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.variant-btn {
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: capitalize;
+}
+
+.variant-btn:hover {
+  border-color: #635bff;
+}
+
+.variant-btn.active {
+  background: #635bff;
+  color: white;
+  border-color: #635bff;
+}
+
+.input-small {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.input-small:focus {
+  outline: none;
+  border-color: #635bff;
+  box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.1);
+}
+
+/* Payment Element Wrapper with theme backgrounds */
+.payment-element-wrapper {
+  padding: 1.5rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.payment-element-wrapper.theme-stripe {
+  background: white;
+  border: 1px solid #e0e0e0;
+}
+
+.payment-element-wrapper.theme-night {
+  background: #1a1a2e;
+  border: 1px solid #333;
+}
+
+.payment-element-wrapper.theme-flat {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+}
+
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .payment-actions {
@@ -574,5 +801,24 @@ export default {
   padding: 0.125rem 0.375rem;
   border-radius: 4px;
   font-size: 0.85rem;
+}
+
+.note {
+  background: #e8f4f8;
+  border-left: 4px solid #17a2b8;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+  border-radius: 0 4px 4px 0;
+  color: #0c5460;
+}
+
+.note a {
+  color: #0c5460;
+  text-decoration: underline;
+}
+
+.note code {
+  background: rgba(0, 0, 0, 0.1);
 }
 </style>
