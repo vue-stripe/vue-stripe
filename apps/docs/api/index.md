@@ -13,13 +13,11 @@ This documentation is being updated as components are tested and finalized. Comp
 - [StripeElements](/api/components/stripe-elements) - Creates Stripe Elements instance ✅
 
 ### Element Components
-- [StripeCardElement](/api/components/stripe-card-element) - Single card input 🔄
+- [StripeCardElement](/api/components/stripe-card-element) - Single card input
+- [Split Card Elements](/api/components/stripe-split-card-elements) - Number + Expiry + CVC
 
 #### Coming Soon
 - StripePaymentElement - All-in-one payment UI
-- StripeCardNumberElement - Card number input (split)
-- StripeCardExpiryElement - Card expiry input (split)
-- StripeCardCvcElement - Card CVC input (split)
 - StripeExpressCheckoutElement - Apple Pay, Google Pay, Link
 - StripeAddressElement - Address collection
 - StripeLinkAuthenticationElement - Link authentication

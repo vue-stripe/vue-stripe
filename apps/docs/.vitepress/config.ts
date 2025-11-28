@@ -73,6 +73,7 @@ export default defineConfig({
           text: 'Element Components',
           items: [
             { text: 'StripeCardElement', link: '/api/components/stripe-card-element' },
+            { text: 'Split Card Elements', link: '/api/components/stripe-split-card-elements' },
           ]
         },
         {

@@ -34,7 +34,7 @@ const testingPhases = [
     description: 'Classic card input components',
     items: [
       { name: 'StripeCardElement', route: '/stripe-card-element', status: 'done', description: 'Single unified card input' },
-      { name: 'Split Card Elements', route: '/stripe-split-card', status: 'pending', description: 'Number + Expiry + CVC separate inputs' }
+      { name: 'Split Card Elements', route: '/stripe-split-card', status: 'done', description: 'Number + Expiry + CVC separate inputs' }
     ]
   },
   {
@@ -119,7 +119,7 @@ const getStatusIcon = (status: string) => {
               <span class="description">{{ item.description }}</span>
             </div>
             <router-link
-              v-if="item.status !== 'pending' || phase.name.includes('Phase 1') || phase.name.includes('Phase 2')"
+              v-if="item.status !== 'pending' || phase.name.includes('Phase 1') || phase.name.includes('Phase 2') || phase.name.includes('Phase 3')"
               :to="item.route"
               class="test-link"
             >
