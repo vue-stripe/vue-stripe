@@ -100,22 +100,27 @@ const validateAddress = async () => {
 
 ### StripeLinkAuthenticationElement
 
-Enable Stripe Link for faster checkout by collecting and authenticating customer email:
+Enable Stripe Link for faster checkout by collecting and authenticating customer email.
+
+> **Pairing Note:** This element collects email only and **must be paired with `StripePaymentElement`** for a complete checkout flow. It cannot process payments on its own.
 
 ```vue
 <template>
   <StripeProvider :publishable-key="publishableKey">
     <StripeElements :client-secret="clientSecret">
-      <!-- Email first - enables Link autofill -->
+      <!-- Step 1: Email + Link authentication -->
       <StripeLinkAuthenticationElement @change="onEmailChange" />
 
-      <!-- Payment methods -->
-      <StripePaymentElement />
+      <!-- Step 2: Payment methods (auto-fills if Link authenticated) -->
+      <StripePaymentElement @change="onPaymentChange" />
+
+      <button :disabled="!canPay">Pay Now</button>
     </StripeElements>
   </StripeProvider>
 </template>
 
 <script setup>
+import { ref, computed } from 'vue'
 import {
   StripeProvider,
   StripeElements,
@@ -123,10 +128,19 @@ import {
   StripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
+const emailComplete = ref(false)
+const paymentComplete = ref(false)
+const canPay = computed(() => emailComplete.value && paymentComplete.value)
+
 const onEmailChange = (event) => {
+  emailComplete.value = event.complete
   if (event.complete) {
     console.log('Email:', event.value.email)
   }
+}
+
+const onPaymentChange = (event) => {
+  paymentComplete.value = event.complete
 }
 </script>
 ```

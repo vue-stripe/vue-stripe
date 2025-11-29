@@ -2,28 +2,58 @@
 
 Collects customer email and authenticates them with Stripe Link for faster checkout.
 
+::: tip Pairing Requirement
+**This element must be paired with `StripePaymentElement`** to create a complete checkout flow. It cannot process payments on its own—it only handles email collection and Link authentication.
+:::
+
 ::: warning Requires clientSecret
 StripeLinkAuthenticationElement requires a `clientSecret` from a PaymentIntent or SetupIntent. Ensure StripeElements has a valid clientSecret configured.
 :::
 
+## What This Element Does
+
+| Capability | Description |
+|------------|-------------|
+| **Email Collection** | Validates and collects customer email address |
+| **Link Detection** | Automatically checks if email has a saved Link account |
+| **OTP Authentication** | Sends one-time password for Link account verification |
+| **Auto-fill Trigger** | When authenticated, triggers auto-fill in PaymentElement |
+
+## What This Element Does NOT Do
+
+| Limitation | Explanation |
+|------------|-------------|
+| **Cannot process payments** | Must be paired with PaymentElement or other payment components |
+| **Cannot collect payment info** | Only handles email, not card numbers or payment methods |
+| **Cannot work standalone** | Requires StripeElements with a clientSecret |
+
 ## Usage
+
+### Basic Usage (Paired with PaymentElement)
 
 ```vue
 <template>
   <StripeProvider :publishable-key="publishableKey">
     <StripeElements :client-secret="clientSecret">
+      <!-- Step 1: Email collection + Link detection -->
       <StripeLinkAuthenticationElement
-        :options="options"
-        @ready="onReady"
-        @change="onChange"
+        @change="onEmailChange"
       />
-      <StripePaymentElement />
-      <button @click="handleSubmit">Pay</button>
+
+      <!-- Step 2: Payment method selection -->
+      <StripePaymentElement
+        @change="onPaymentChange"
+      />
+
+      <button :disabled="!canPay" @click="handleSubmit">
+        Pay Now
+      </button>
     </StripeElements>
   </StripeProvider>
 </template>
 
 <script setup>
+import { ref, computed } from 'vue'
 import {
   StripeProvider,
   StripeElements,
@@ -34,22 +64,45 @@ import {
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 
-const options = {
-  defaultValues: {
-    email: 'customer@example.com'
-  }
-}
+const emailComplete = ref(false)
+const paymentComplete = ref(false)
 
-const onReady = (element) => {
-  console.log('Link Authentication element ready')
-}
+const canPay = computed(() => emailComplete.value && paymentComplete.value)
 
-const onChange = (event) => {
+const onEmailChange = (event) => {
+  emailComplete.value = event.complete
   if (event.complete) {
     console.log('Email:', event.value.email)
   }
 }
+
+const onPaymentChange = (event) => {
+  paymentComplete.value = event.complete
+}
 </script>
+```
+
+## How Link Authentication Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Customer enters email                                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Stripe checks: Does this email have a Link account?        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  YES - Link Account     │     │  NO - New Customer          │
+│                         │     │                             │
+│  1. OTP sent to phone   │     │  Continue to PaymentElement │
+│  2. User enters code    │     │  Enter card details manually│
+│  3. Payment auto-fills! │     │                             │
+└─────────────────────────┘     └─────────────────────────────┘
 ```
 
 ## Props
@@ -63,7 +116,7 @@ const onChange = (event) => {
 ```ts
 interface StripeLinkAuthenticationElementOptions {
   defaultValues?: {
-    email?: string
+    email?: string  // Pre-fill email for logged-in users
   }
 }
 ```
@@ -80,9 +133,9 @@ interface StripeLinkAuthenticationElementOptions {
 ```ts
 interface StripeLinkAuthenticationElementChangeEvent {
   elementType: 'linkAuthentication'
-  complete: boolean
+  complete: boolean        // true when email is valid
   value: {
-    email: string
+    email: string         // The entered email address
   }
 }
 ```
@@ -135,6 +188,7 @@ const clearEmail = () => linkAuthRef.value?.clear()
 <script setup>
 import { computed } from 'vue'
 
+// User from your auth system
 const user = { email: 'john@example.com' }
 
 const options = computed(() => ({
@@ -149,11 +203,13 @@ const options = computed(() => ({
 </template>
 ```
 
-### Complete Checkout with Link Authentication
+### Complete Checkout Flow with Link
+
+This example shows the recommended pattern for integrating Link Authentication:
 
 ```vue
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, defineComponent, h } from 'vue'
 import {
   StripeProvider,
   StripeElements,
@@ -164,68 +220,161 @@ import {
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = ref('') // Fetch from your backend
+const clientSecret = ref('pi_xxx_secret_xxx') // Fetch from backend
 
-const email = ref('')
-const isEmailComplete = ref(false)
+// Track form state
+const customerEmail = ref('')
+const emailComplete = ref(false)
+const paymentComplete = ref(false)
+const isProcessing = ref(false)
+const paymentError = ref('')
 
-const handleEmailChange = (event) => {
-  isEmailComplete.value = event.complete
-  email.value = event.value.email
+const canSubmit = computed(() =>
+  emailComplete.value && paymentComplete.value && !isProcessing.value
+)
+
+const onEmailChange = (event) => {
+  emailComplete.value = event.complete
+  if (event.complete) {
+    customerEmail.value = event.value.email
+  }
 }
 
-const handleSubmit = async () => {
-  // Payment confirmation handled by PaymentElement
+const onPaymentChange = (event) => {
+  paymentComplete.value = event.complete
 }
+
+// Submit button component (needs StripeElements context)
+const SubmitButton = defineComponent({
+  props: ['clientSecret', 'disabled', 'email'],
+  emits: ['success', 'error'],
+  setup(props, { emit }) {
+    const { stripe } = useStripe()
+    const { elements } = useStripeElements()
+
+    const handleSubmit = async () => {
+      if (!stripe.value || !elements.value) return
+
+      isProcessing.value = true
+      paymentError.value = ''
+
+      const { error } = await elements.value.submit()
+      if (error) {
+        emit('error', error.message)
+        isProcessing.value = false
+        return
+      }
+
+      const { error: confirmError, paymentIntent } = await stripe.value.confirmPayment({
+        elements: elements.value,
+        clientSecret: props.clientSecret,
+        confirmParams: {
+          return_url: window.location.href,
+          receipt_email: props.email
+        },
+        redirect: 'if_required'
+      })
+
+      if (confirmError) {
+        emit('error', confirmError.message)
+      } else {
+        emit('success', paymentIntent)
+      }
+      isProcessing.value = false
+    }
+
+    return () => h('button', {
+      disabled: props.disabled,
+      onClick: handleSubmit,
+      class: 'pay-button'
+    }, isProcessing.value ? 'Processing...' : 'Pay Now')
+  }
+})
 </script>
 
 <template>
   <StripeProvider :publishable-key="publishableKey">
     <StripeElements :client-secret="clientSecret">
       <div class="checkout-form">
-        <label>Email</label>
-        <StripeLinkAuthenticationElement @change="handleEmailChange" />
+        <!-- Email + Link Authentication -->
+        <div class="form-section">
+          <label>Email</label>
+          <StripeLinkAuthenticationElement @change="onEmailChange" />
+        </div>
 
-        <label>Payment</label>
-        <StripePaymentElement />
+        <!-- Payment Methods -->
+        <div class="form-section">
+          <label>Payment</label>
+          <StripePaymentElement @change="onPaymentChange" />
+        </div>
 
-        <button :disabled="!isEmailComplete" @click="handleSubmit">
-          Pay Now
-        </button>
+        <!-- Error Display -->
+        <div v-if="paymentError" class="error">
+          {{ paymentError }}
+        </div>
+
+        <!-- Submit Button -->
+        <SubmitButton
+          :client-secret="clientSecret"
+          :disabled="!canSubmit"
+          :email="customerEmail"
+          @error="paymentError = $event"
+        />
       </div>
     </StripeElements>
   </StripeProvider>
 </template>
 ```
 
-### Collecting Email Separately
+### Email-Only Demo (Testing the Element)
+
+If you just want to test the element's email collection without payment:
 
 ```vue
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
+import {
+  StripeProvider,
+  StripeElements,
+  StripeLinkAuthenticationElement
+} from '@vue-stripe/vue-stripe'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const clientSecret = 'pi_xxx_secret_xxx'
 
 const linkAuthRef = ref()
-const customerEmail = ref('')
-
-const collectEmail = async () => {
-  // Focus the element for user input
-  linkAuthRef.value?.focus()
-}
+const collectedEmail = ref('')
+const isComplete = ref(false)
 
 const handleChange = (event) => {
-  if (event.complete) {
-    customerEmail.value = event.value.email
-    console.log('Customer email collected:', customerEmail.value)
-  }
+  isComplete.value = event.complete
+  collectedEmail.value = event.value.email
 }
 </script>
 
 <template>
-  <StripeLinkAuthenticationElement
-    ref="linkAuthRef"
-    @change="handleChange"
-  />
-  <p v-if="customerEmail">Email: {{ customerEmail }}</p>
+  <StripeProvider :publishable-key="publishableKey">
+    <StripeElements :client-secret="clientSecret">
+      <div class="email-demo">
+        <label>Email</label>
+        <StripeLinkAuthenticationElement
+          ref="linkAuthRef"
+          @change="handleChange"
+        />
+
+        <div class="controls">
+          <button @click="linkAuthRef?.focus()">Focus</button>
+          <button @click="linkAuthRef?.blur()">Blur</button>
+          <button @click="linkAuthRef?.clear()">Clear</button>
+        </div>
+
+        <div class="status">
+          <p>Status: {{ isComplete ? '✅ Valid' : '⏳ Incomplete' }}</p>
+          <p v-if="collectedEmail">Email: {{ collectedEmail }}</p>
+        </div>
+      </div>
+    </StripeElements>
+  </StripeProvider>
 </template>
 ```
 
@@ -267,45 +416,51 @@ const focusEmail = () => {
 
 ## What is Stripe Link?
 
-Stripe Link is a one-click checkout solution that securely saves and autofills customer payment and shipping information. When a customer enters an email associated with a Link account:
+Stripe Link is a one-click checkout solution that saves customer payment information across all Stripe merchants:
 
-1. They receive a one-time password (OTP) to their phone
-2. After verification, their saved payment methods are available
-3. Checkout is completed in seconds
+| Feature | Benefit |
+|---------|---------|
+| **Cross-merchant** | Saved once, works everywhere that accepts Stripe |
+| **Secure** | OTP verification, no passwords stored |
+| **Fast** | Returning customers checkout in seconds |
+| **Higher conversion** | Less friction = more completed purchases |
 
-## Key Features
+### The Link Experience
 
-- **Email Collection**: Validates email format automatically
-- **Link Detection**: Automatically detects if email has a Link account
-- **OTP Authentication**: Secure phone verification for Link users
-- **Pre-fill Support**: Set default email for logged-in customers
-- **Seamless Integration**: Works alongside PaymentElement
+**For returning customers (has Link account):**
+1. Enter email → Stripe detects Link account
+2. Receive OTP on phone → Enter code
+3. Payment details auto-fill → One-click checkout!
+
+**For new customers (no Link account):**
+1. Enter email → Continue normally
+2. Fill payment details manually
+3. Option to save to Link for next time
 
 ## Requirements
 
-1. **clientSecret Required**: Must have a PaymentIntent or SetupIntent clientSecret
-2. **Link Enabled**: Link must be enabled in your [Stripe Dashboard](https://dashboard.stripe.com/settings/link)
-3. **Payment Methods**: Works best with card and Link payment methods
+| Requirement | Details |
+|-------------|---------|
+| **clientSecret** | From PaymentIntent or SetupIntent |
+| **Link enabled** | In [Stripe Dashboard](https://dashboard.stripe.com/settings/link) |
+| **Paired element** | Must use with PaymentElement for payments |
 
-## Integration Pattern
+## Integration Checklist
 
-For the best user experience, place StripeLinkAuthenticationElement above StripePaymentElement:
+- [ ] StripeProvider with publishable key
+- [ ] StripeElements with clientSecret
+- [ ] StripeLinkAuthenticationElement for email
+- [ ] StripePaymentElement for payment methods
+- [ ] Submit button with payment confirmation logic
+- [ ] Link enabled in Stripe Dashboard
 
-```vue
-<template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <!-- Email first - enables Link autofill -->
-      <StripeLinkAuthenticationElement @change="onEmailChange" />
+## Related Components
 
-      <!-- Payment methods - will use Link if authenticated -->
-      <StripePaymentElement />
-
-      <button @click="submit">Complete Payment</button>
-    </StripeElements>
-  </StripeProvider>
-</template>
-```
+| Component | Relationship |
+|-----------|--------------|
+| [StripeElements](/api/components/stripe-elements) | **Required parent** - Provides Elements context |
+| [StripePaymentElement](/api/components/stripe-payment-element) | **Required pair** - Handles payment method selection |
+| [StripeAddressElement](/api/components/stripe-address-element) | Optional - Add shipping/billing address collection |
 
 ## See Also
 
