@@ -5,6 +5,9 @@ hero:
   name: Vue Stripe
   text: Stripe Elements for Vue.js
   tagline: Build beautiful payment forms with Vue 2 and Vue 3
+  image:
+    src: /vue-stripe-logo-variant-1.png
+    alt: Vue Stripe
   actions:
     - theme: brand
       text: Get Started

@@ -18,7 +18,7 @@ const testingPhases = [
     items: [
       { name: 'StripeProvider', route: '/stripe-provider', status: 'done', description: 'Root component that loads Stripe.js' },
       { name: 'useStripe()', route: '/use-stripe', status: 'done', description: 'Composable to access Stripe instance' },
-      { name: 'StripeAddressElement', route: '/stripe-address-element', status: 'pending', description: 'Address collection form' }
+      { name: 'StripeAddressElement', route: '/stripe-address-element', status: 'done', description: 'Address collection form' }
     ]
   },
   {
@@ -49,7 +49,7 @@ const testingPhases = [
     name: 'Phase 5: Advanced Features',
     description: 'Express checkout and saved cards',
     items: [
-      { name: 'StripeLinkAuthenticationElement', route: '/stripe-link-auth', status: 'pending', description: 'Stripe Link email input' },
+      { name: 'StripeLinkAuthenticationElement', route: '/stripe-link-authentication', status: 'done', description: 'Stripe Link email input' },
       { name: 'StripeExpressCheckoutElement', route: '/stripe-express-checkout', status: 'pending', description: 'Apple Pay, Google Pay buttons' },
       { name: 'useSetupIntent()', route: '/use-setup-intent', status: 'pending', description: 'Save payment methods for later' }
     ]

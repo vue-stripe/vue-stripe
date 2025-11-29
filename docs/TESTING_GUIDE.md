@@ -122,7 +122,7 @@ Use for: Using the pre-built Stripe element components
 |-----------|--------|------------|------------|---------|-------|
 | StripeProvider | ✅ Done | ✅ `/stripe-provider` | ✅ 10 tests | ✅ Complete | Loads Stripe.js, provides instance via inject |
 | useStripe() | ✅ Done | ✅ `/use-stripe` | ✅ 3 tests | ✅ Complete | Returns reactive refs: stripe, loading, error |
-| StripeAddressElement | ⬜ Pending | ⬜ | ⬜ | ⬜ | Can work without clientSecret |
+| StripeAddressElement | ✅ Done | ✅ `/stripe-address-element` | ✅ 19 tests | ✅ Complete | Address collection with autocomplete, exposes getValue/focus/clear |
 
 ### Phase 2: Elements Container (Can test without clientSecret for CardElement)
 | Component | Status | Playground | Unit Tests | API Doc | Notes |
@@ -145,7 +145,7 @@ Use for: Using the pre-built Stripe element components
 ### Phase 5: Advanced Features
 | Component | Status | Playground | Unit Tests | API Doc | Notes |
 |-----------|--------|------------|------------|---------|-------|
-| StripeLinkAuthenticationElement | ⬜ Pending | ⬜ | ⬜ | ⬜ | Stripe Link email |
+| StripeLinkAuthenticationElement | ✅ Done | ✅ `/stripe-link-authentication` | ✅ 10 tests | ✅ Complete | Stripe Link email authentication, exposes focus/blur/clear |
 | StripeExpressCheckoutElement | ⬜ Pending | ⬜ | ⬜ | ⬜ | Apple/Google Pay |
 | useSetupIntent() | ⬜ Pending | ⬜ | ⬜ | ⬜ | Save payment methods |
 
@@ -156,9 +156,20 @@ Use for: Using the pre-built Stripe element components
 | useStripeCheckout() | ⬜ Pending | ⬜ | ⬜ | ⬜ | Programmatic redirect |
 
 ### Test Summary
-- **Total Unit Tests**: 97 passing (8 test files)
-- **Playground Views**: 7 complete (`/stripe-provider`, `/use-stripe`, `/stripe-elements`, `/stripe-card-element`, `/stripe-split-card`, `/stripe-payment-element`, `/`)
-- **API Docs**: 8 complete (StripeProvider, StripeElements, StripeCardElement, Split Card Elements, StripePaymentElement, useStripe, useStripeElements, usePaymentIntent)
+- **Total Unit Tests**: 126 passing (10 test files)
+- **Playground Views**: 9 complete (`/stripe-provider`, `/use-stripe`, `/stripe-elements`, `/stripe-card-element`, `/stripe-split-card`, `/stripe-payment-element`, `/stripe-address-element`, `/stripe-link-authentication`, `/`)
+- **API Docs**: 10 complete (StripeProvider, StripeElements, StripeCardElement, Split Card Elements, StripePaymentElement, StripeAddressElement, StripeLinkAuthenticationElement, useStripe, useStripeElements, usePaymentIntent)
+
+### Documentation Checklist
+
+When completing a component, ensure the following are updated:
+
+1. **Playground View** - Interactive test page at `apps/playground/src/views/`
+2. **Unit Tests** - Test file at `packages/vue-stripe/tests/components/`
+3. **API Doc** - Documentation at `apps/docs/api/components/`
+4. **VitePress Sidebar** - Add to `apps/docs/.vitepress/config.ts`
+5. **This Guide** - Update progress tracker above
+6. **READMEs** - Update root `README.md` and `packages/vue-stripe/README.md` with new features
 
 ## Key Implementation Details
 

@@ -8,6 +8,7 @@ vi.mock('@stripe/stripe-js', () => ({
     elements: vi.fn(() => ({
       create: vi.fn(() => ({
         mount: vi.fn(),
+        unmount: vi.fn(),
         destroy: vi.fn(),
         on: vi.fn(),
         off: vi.fn(),
@@ -17,11 +18,11 @@ vi.mock('@stripe/stripe-js', () => ({
         clear: vi.fn()
       }))
     })),
-    confirmPayment: vi.fn(() => Promise.resolve({ 
-      paymentIntent: { id: 'pi_test_123', status: 'succeeded' } 
+    confirmPayment: vi.fn(() => Promise.resolve({
+      paymentIntent: { id: 'pi_test_123', status: 'succeeded' }
     })),
-    confirmCardSetup: vi.fn(() => Promise.resolve({ 
-      setupIntent: { id: 'seti_test_123', status: 'succeeded' } 
+    confirmCardSetup: vi.fn(() => Promise.resolve({
+      setupIntent: { id: 'seti_test_123', status: 'succeeded' }
     }))
   }))
 }))
@@ -55,13 +56,30 @@ export const createMockStripe = () => ({
 
 export const createMockElement = () => ({
   mount: vi.fn(),
+  unmount: vi.fn(),
   destroy: vi.fn(),
   on: vi.fn(),
   off: vi.fn(),
   update: vi.fn(),
   focus: vi.fn(),
   blur: vi.fn(),
-  clear: vi.fn()
+  clear: vi.fn(),
+  // Address element specific
+  getValue: vi.fn(() => Promise.resolve({
+    complete: true,
+    isNewAddress: true,
+    value: {
+      name: 'John Doe',
+      address: {
+        line1: '123 Main St',
+        line2: null,
+        city: 'San Francisco',
+        state: 'CA',
+        postal_code: '94102',
+        country: 'US'
+      }
+    }
+  }))
 })
 
 export const waitForStripeLoad = () => new Promise(resolve => setTimeout(resolve, 100))

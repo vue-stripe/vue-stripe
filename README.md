@@ -1,86 +1,141 @@
-# Vue Stripe Monorepo
+<p align="center">
+  <img src="./.github/assets/vue-stripe-logo-variant-1.png" alt="Vue Stripe Logo" width="250"/>
+  <h1 align="center">Vue Stripe</h1>
+</p>
 
-This is the official monorepo for Vue Stripe - a universal Vue.js library for Stripe Checkout and Elements supporting both Vue 2 and Vue 3.
+<p align="center">
+  <a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="./.github/assets/stripe_partner_badge_verified_blurple.png" alt="Stripe Partner" width="98"/></a>
+  <a href="https://opencollective.com/vue-stripe-checkout"><img src="https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors" alt="Financial Contributors on Open Collective"/></a>
+  <a href="https://www.npmjs.com/package/@vue-stripe/vue-stripe"><img src="https://img.shields.io/npm/v/@vue-stripe/vue-stripe.svg?style=flat-square" alt="npm version"/></a>
+  <img src="https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square" alt="npm bundle size"/>
+  <img src="https://img.shields.io/npm/dw/@vue-stripe/vue-stripe?style=flat-square" alt="npm downloads"/>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/></a>
+</p>
 
-## 📦 Packages
+<p align="center">
+  <strong>Universal Vue.js library for Stripe Checkout and Elements</strong><br/>
+  Supporting both Vue 2.6+ and Vue 3.x with TypeScript-first development
+</p>
 
-- **[@vue-stripe/vue-stripe](./packages/vue-stripe)** - Main library package
-- **[@vue-stripe/docs](./apps/docs)** - VitePress documentation
-- **[@vue-stripe/playground](./apps/playground)** - Development playground
+<p align="center">
+  <a href="https://vuestripe.com">Website</a> |
+  <a href="https://vue-stripe.github.io/vue-stripe/">Documentation</a> |
+  <a href="https://vue-stripe.github.io/vue-stripe/examples/">Examples</a>
+</p>
 
-## 🚀 Getting Started
+---
+
+> [Vue Stripe](https://vuestripe.com) is an official [Stripe partner](https://stripe.com/partners/vue-stripe)
+
+## Features
+
+- **Universal Vue Support** - Works with Vue 2.6+ and Vue 3.x via `vue-demi`
+- **TypeScript First** - Full TypeScript support with comprehensive types
+- **Modern Elements** - Payment Element supporting 40+ payment methods
+- **Composition API** - Vue 3 Composition API with Vue 2 compatibility
+- **Customizable** - Full support for Stripe's Appearance API
+- **Well Tested** - Comprehensive test suite
+- **SSR Ready** - Support for Nuxt 2/3 and server-side rendering
+
+## Quick Start
+
+```bash
+npm install @vue-stripe/vue-stripe @stripe/stripe-js
+```
+
+```vue
+<template>
+  <StripeProvider :publishable-key="publishableKey">
+    <StripeElements>
+      <StripePaymentElement @ready="onReady" />
+      <button @click="processPayment">Pay Now</button>
+    </StripeElements>
+  </StripeProvider>
+</template>
+
+<script setup lang="ts">
+import {
+  StripeProvider,
+  StripeElements,
+  StripePaymentElement,
+  usePaymentIntent
+} from '@vue-stripe/vue-stripe'
+
+const publishableKey = 'pk_test_...'
+const { confirmPayment } = usePaymentIntent()
+
+const processPayment = async () => {
+  const result = await confirmPayment(clientSecret)
+  // Handle result
+}
+</script>
+```
+
+## Documentation
+
+- [Installation Guide](https://vue-stripe.github.io/vue-stripe/guide/installation)
+- [Quick Start](https://vue-stripe.github.io/vue-stripe/guide/quick-start)
+- [API Reference](https://vue-stripe.github.io/vue-stripe/api/)
+- [Examples](https://vue-stripe.github.io/vue-stripe/examples/)
+
+## Monorepo Structure
+
+This repository is organized as a monorepo using pnpm workspaces and Turborepo:
+
+```
+vue-stripe/
+├── packages/
+│   └── vue-stripe/        # Main library (@vue-stripe/vue-stripe)
+├── apps/
+│   ├── docs/              # VitePress documentation site
+│   └── playground/        # Development playground
+└── tools/
+    ├── eslint-config/     # Shared ESLint configuration
+    └── typescript-config/ # Shared TypeScript configuration
+```
+
+### Packages
+
+| Package | Description |
+|---------|-------------|
+| [@vue-stripe/vue-stripe](./packages/vue-stripe) | Main library package |
+| [@vue-stripe/docs](./apps/docs) | VitePress documentation |
+| [@vue-stripe/playground](./apps/playground) | Development playground |
+
+## Development
 
 ### Prerequisites
 
 - Node.js 18+
 - pnpm 8+
 
-### Installation
+### Getting Started
 
 ```bash
 # Install dependencies
 pnpm install
 
-# Start development
+# Start development (all apps)
 pnpm dev
+
+# Start playground only
+pnpm playground:dev
+
+# Start documentation only
+pnpm docs:dev
 ```
 
-### Available Scripts
+### Building & Testing
 
 ```bash
-# Development
-pnpm dev                    # Start all apps in development mode
-pnpm playground:dev         # Start playground only
-pnpm docs:dev              # Start documentation only
-
-# Building
-pnpm build                 # Build all packages
-pnpm vue-stripe:build      # Build main library only
-
-# Testing
-pnpm test                  # Run all tests
-pnpm vue-stripe:test       # Test main library only
-
-# Linting
-pnpm lint                  # Lint all packages
-pnpm lint:fix              # Fix linting issues
-```
-
-## 🏗️ Project Structure
-
-```
-vue-stripe/
-├── apps/
-│   ├── docs/              # VitePress documentation
-│   └── playground/        # Development playground
-├── packages/
-│   ├── vue-stripe/        # Main library
-│   └── shared/            # Shared utilities
-├── tools/
-│   ├── eslint-config/     # Shared ESLint config
-│   └── typescript-config/ # Shared TypeScript config
-└── turbo.json             # Turborepo configuration
-```
-
-## 🔧 Development Workflow
-
-### Making Changes
-
-1. **Work on the library**: Edit files in `packages/vue-stripe/src/`
-2. **Test changes**: Use the playground app at `apps/playground/`
-3. **Update docs**: Modify documentation in `apps/docs/`
-4. **Run tests**: Execute `pnpm test` to ensure everything works
-
-### Building
-
-The project uses Turborepo for efficient builds:
-
-```bash
-# Build everything with dependency resolution
+# Build all packages
 pnpm build
 
-# Build specific package
-pnpm vue-stripe:build
+# Run all tests
+pnpm test
+
+# Lint all packages
+pnpm lint
 ```
 
 ### Testing Vue 2 vs Vue 3
@@ -97,20 +152,47 @@ npx vue-demi-switch 3
 pnpm test
 ```
 
-## 📚 Documentation
+## Contributors
 
-- **Local Development**: `pnpm docs:dev`
-- **Production**: [https://vue-stripe.github.io/vue-stripe/](https://vue-stripe.github.io/vue-stripe/)
+### Code Contributors
 
-## 🤝 Contributing
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)]
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Update documentation
-6. Submit a pull request
+<a href="https://github.com/jofftiquez/vue-stripe-checkout/graphs/contributors"><img src="https://opencollective.com/vue-stripe-checkout/contributors.svg?width=890&button=false" /></a>
 
-## 📄 License
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/vue-stripe-checkout/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/vue-stripe-checkout"><img src="https://opencollective.com/vue-stripe-checkout/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/vue-stripe-checkout/contribute)]
+
+<a href="https://opencollective.com/vue-stripe-checkout/organization/0/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/vue-stripe-checkout/organization/1/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/vue-stripe-checkout/organization/2/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/vue-stripe-checkout/organization/3/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/vue-stripe-checkout/organization/4/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/vue-stripe-checkout/organization/5/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/vue-stripe-checkout/organization/6/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/vue-stripe-checkout/organization/7/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/vue-stripe-checkout/organization/8/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/vue-stripe-checkout/organization/9/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/9/avatar.svg"></a>
+
+## Special Thanks
+
+[<img src="https://i.imgur.com/Ttv4fMw.png" width="200px">](https://mightyminds.org)
+[<img src="https://i.imgur.com/x0SERyj.png" width="200px">](https://mycure.md)
+[<img src="https://i.imgur.com/4jF5M4A.png">](http://myteamops.com)
+
+## License
 
 [MIT](LICENSE) License © 2024 Vue Stripe Contributors
+
+---
+
+Made with :heart: by [Joff Tiquez](https://twitter.com/jrtiquez)

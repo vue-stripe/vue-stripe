@@ -16,7 +16,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "docs:dev": "turbo run docs:dev",
     "docs:build": "turbo run docs:build",
-    "playground:dev": "turbo run dev --filter=playground",
+    "playground:dev": "turbo run dev --filter=@vue-stripe/playground",
     "vue-stripe:build": "turbo run build --filter=@vue-stripe/vue-stripe",
     "vue-stripe:test": "turbo run test --filter=@vue-stripe/vue-stripe",
     "changeset": "changeset",

@@ -12,12 +12,13 @@ import type {
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { StripeElementsError } from '../utils/errors'
 
-// Extended element type to include event methods with looser typing
+// Extended element type to include event methods and getValue with looser typing
 interface AddressElementWithEvents extends StripeAddressElementType {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(eventType: string, handler: (...args: any[]) => void): this
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   off(eventType: string, handler?: (...args: any[]) => void): this
+  getValue(): Promise<Pick<StripeAddressElementChangeEvent, 'complete' | 'isNewAddress' | 'value'>>
 }
 
 export default defineComponent({
@@ -31,9 +32,9 @@ export default defineComponent({
     }
   },
   emits: ['ready', 'change', 'blur', 'focus', 'escape', 'loadError'],
-  setup(props, { emit }) {
+  setup(props, { emit, expose }) {
     const addressRef = ref<HTMLDivElement>()
-    let addressElement: AddressElementWithEvents | null = null
+    const elementRef = ref<AddressElementWithEvents | null>(null)
 
     const elementsInstance = inject(stripeElementsInjectionKey)
 
@@ -68,34 +69,50 @@ export default defineComponent({
     const mountElement = () => {
       if (!elementsInstance.elements.value || !addressRef.value) return
 
-      addressElement = elementsInstance.elements.value.create('address', props.options) as AddressElementWithEvents
-      addressElement.mount(addressRef.value)
+      elementRef.value = elementsInstance.elements.value.create('address', props.options) as AddressElementWithEvents
+      elementRef.value.mount(addressRef.value)
 
-      addressElement.on('ready', handleReady)
-      addressElement.on('change', handleChange)
-      addressElement.on('blur', handleBlur)
-      addressElement.on('focus', handleFocus)
-      addressElement.on('escape', handleEscape)
-      addressElement.on('loaderror', handleLoadError)
+      elementRef.value.on('ready', handleReady)
+      elementRef.value.on('change', handleChange)
+      elementRef.value.on('blur', handleBlur)
+      elementRef.value.on('focus', handleFocus)
+      elementRef.value.on('escape', handleEscape)
+      elementRef.value.on('loaderror', handleLoadError)
     }
 
     const updateElement = () => {
-      if (!addressElement) return
-      addressElement.update(props.options)
+      if (!elementRef.value) return
+      elementRef.value.update(props.options)
     }
 
     const destroyElement = () => {
-      if (!addressElement) return
+      if (!elementRef.value) return
 
-      addressElement.off('ready', handleReady)
-      addressElement.off('change', handleChange)
-      addressElement.off('blur', handleBlur)
-      addressElement.off('focus', handleFocus)
-      addressElement.off('escape', handleEscape)
-      addressElement.off('loaderror', handleLoadError)
+      elementRef.value.off('ready', handleReady)
+      elementRef.value.off('change', handleChange)
+      elementRef.value.off('blur', handleBlur)
+      elementRef.value.off('focus', handleFocus)
+      elementRef.value.off('escape', handleEscape)
+      elementRef.value.off('loaderror', handleLoadError)
 
-      addressElement.destroy()
-      addressElement = null
+      elementRef.value.destroy()
+      elementRef.value = null
+    }
+
+    // Exposed methods
+    const getValue = async () => {
+      if (!elementRef.value) {
+        throw new StripeElementsError('Address element not mounted')
+      }
+      return elementRef.value.getValue()
+    }
+
+    const focus = () => {
+      elementRef.value?.focus()
+    }
+
+    const clear = () => {
+      elementRef.value?.clear()
     }
 
     onMounted(() => {
@@ -110,9 +127,20 @@ export default defineComponent({
       updateElement()
     }, { deep: true })
 
+    // Expose element and methods to parent via ref
+    expose({
+      element: elementRef,
+      getValue,
+      focus,
+      clear
+    })
+
     return {
       addressRef,
-      element: addressElement
+      element: elementRef,
+      getValue,
+      focus,
+      clear
     }
   }
 })

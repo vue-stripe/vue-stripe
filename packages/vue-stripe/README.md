@@ -1,29 +1,26 @@
-# Vue Stripe
+# @vue-stripe/vue-stripe
 
-[![npm version](https://badge.fury.io/js/%40vue-stripe%2Fvue-stripe.svg)](https://www.npmjs.com/package/@vue-stripe/vue-stripe)
+[![npm version](https://img.shields.io/npm/v/@vue-stripe/vue-stripe.svg?style=flat-square)](https://www.npmjs.com/package/@vue-stripe/vue-stripe)
+[![npm bundle size](https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square)](https://bundlephobia.com/package/@vue-stripe/vue-stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Vue Stripe** is a universal Vue.js library for Stripe Checkout and Elements. It supports both Vue 2.6+ and Vue 3.x with TypeScript-first development and modern Composition API.
+Universal Vue.js library for Stripe Checkout and Elements. Supports both Vue 2.6+ and Vue 3.x with TypeScript-first development and modern Composition API.
 
-## ✨ Features
+> This package is part of the [Vue Stripe monorepo](../../README.md). For contributing guidelines and development setup, see the root README.
 
-- 🔥 **Universal Vue Support** - Works with Vue 2.6+ and Vue 3.x
-- 📦 **TypeScript First** - Full TypeScript support with comprehensive types
-- 🎨 **Modern Elements** - Payment Element supporting 40+ payment methods
-- ⚡ **Composition API** - Vue 3 Composition API with Vue 2 compatibility
-- 🔧 **Customizable** - Full support for Stripe's Appearance API
-- 🧪 **Well Tested** - Comprehensive test suite
-- 📱 **SSR Ready** - Support for Nuxt 2/3 and server-side rendering
-
-## 🚀 Quick Start
-
-### Installation
+## Installation
 
 ```bash
 npm install @vue-stripe/vue-stripe @stripe/stripe-js
 ```
 
-### Basic Usage
+For Vue 2 projects, also install the Composition API plugin:
+
+```bash
+npm install @vue/composition-api
+```
+
+## Basic Usage
 
 ```vue
 <template>
@@ -36,11 +33,11 @@ npm install @vue-stripe/vue-stripe @stripe/stripe-js
 </template>
 
 <script setup lang="ts">
-import { 
-  StripeProvider, 
-  StripeElements, 
+import {
+  StripeProvider,
+  StripeElements,
   StripePaymentElement,
-  usePaymentIntent 
+  usePaymentIntent
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = 'pk_test_...'
@@ -53,74 +50,125 @@ const processPayment = async () => {
 </script>
 ```
 
-## 📚 Documentation
+## Components
+
+### Provider Components
+
+| Component | Description |
+|-----------|-------------|
+| `StripeProvider` | Root component that loads Stripe.js and provides context |
+| `StripeElements` | Creates Elements instance and provides it to child components |
+
+### Payment Components
+
+| Component | Description |
+|-----------|-------------|
+| `StripePaymentElement` | Modern payment element supporting 40+ payment methods |
+| `StripeExpressCheckoutElement` | Wallet payments (Apple Pay, Google Pay, etc.) |
+| `StripeLinkAuthenticationElement` | Link authentication |
+| `StripeAddressElement` | Address collection with Google Maps autocomplete |
+| `StripeCheckout` | Embedded Stripe Checkout |
+
+### StripeAddressElement
+
+Collect shipping or billing addresses with built-in Google Maps autocomplete:
+
+```vue
+<template>
+  <StripeAddressElement
+    ref="addressRef"
+    :options="{ mode: 'shipping' }"
+    @change="onAddressChange"
+  />
+  <button @click="validateAddress">Validate</button>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const addressRef = ref()
+
+// Use getValue() to programmatically get address data
+const validateAddress = async () => {
+  const result = await addressRef.value?.getValue()
+  if (result.complete) {
+    console.log('Valid address:', result.value)
+  }
+}
+</script>
+```
+
+### StripeLinkAuthenticationElement
+
+Enable Stripe Link for faster checkout by collecting and authenticating customer email:
+
+```vue
+<template>
+  <StripeProvider :publishable-key="publishableKey">
+    <StripeElements :client-secret="clientSecret">
+      <!-- Email first - enables Link autofill -->
+      <StripeLinkAuthenticationElement @change="onEmailChange" />
+
+      <!-- Payment methods -->
+      <StripePaymentElement />
+    </StripeElements>
+  </StripeProvider>
+</template>
+
+<script setup>
+import {
+  StripeProvider,
+  StripeElements,
+  StripeLinkAuthenticationElement,
+  StripePaymentElement
+} from '@vue-stripe/vue-stripe'
+
+const onEmailChange = (event) => {
+  if (event.complete) {
+    console.log('Email:', event.value.email)
+  }
+}
+</script>
+```
+
+### Legacy Card Components
+
+| Component | Description |
+|-----------|-------------|
+| `StripeCardElement` | Single card input field |
+| `StripeCardNumberElement` | Card number only |
+| `StripeCardExpiryElement` | Expiry date only |
+| `StripeCardCvcElement` | CVC only |
+
+## Composables
+
+| Composable | Description |
+|------------|-------------|
+| `useStripe()` | Access Stripe instance |
+| `useStripeElements()` | Access Elements instance |
+| `usePaymentIntent()` | Payment confirmation helpers |
+| `useSetupIntent()` | Setup intent handling |
+| `useStripeCheckout()` | Checkout session management |
+
+## TypeScript
+
+Full TypeScript support with re-exported Stripe.js types:
+
+```typescript
+import type {
+  StripeElementChangeEvent,
+  PaymentIntent,
+  SetupIntent
+} from '@vue-stripe/vue-stripe'
+```
+
+## Documentation
 
 - [Installation Guide](https://vue-stripe.github.io/vue-stripe/guide/installation)
 - [Quick Start](https://vue-stripe.github.io/vue-stripe/guide/quick-start)
 - [API Reference](https://vue-stripe.github.io/vue-stripe/api/)
 - [Examples](https://vue-stripe.github.io/vue-stripe/examples/)
 
-## 🎯 Components
-
-### Provider Components
-- `StripeProvider` - Stripe instance provider
-- `StripeElements` - Elements context provider
-
-### Payment Components
-- `StripePaymentElement` - Modern payment element (40+ methods)
-- `StripeExpressCheckoutElement` - Wallet payments (Apple Pay, Google Pay, etc.)
-- `StripeLinkAuthElement` - Link authentication
-- `StripeAddressElement` - Address collection
-- `StripeCheckout` - Redirect to Stripe Checkout
-
-### Legacy Components
-- `StripeCardElement` - Single card field
-- `StripeCardNumberElement` - Card number only
-- `StripeCardExpiryElement` - Expiry only
-- `StripeCardCvcElement` - CVC only
-
-## 🪝 Composables
-
-- `useStripe()` - Core Stripe instance management
-- `useStripeElements()` - Elements management
-- `usePaymentIntent()` - Payment processing
-- `useSetupIntent()` - Setup intent handling
-- `useStripeCheckout()` - Checkout session management
-
-## 🔧 Vue 2 Support
-
-Vue Stripe automatically handles Vue 2 compatibility through `vue-demi`. For Vue 2 projects, install the Composition API plugin:
-
-```bash
-npm install @vue/composition-api
-```
-
-## 📦 TypeScript
-
-Vue Stripe is built with TypeScript and provides comprehensive type definitions:
-
-```typescript
-import type { 
-  StripeElementChangeEvent,
-  PaymentIntent,
-  SetupIntent 
-} from '@vue-stripe/vue-stripe'
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-## 📄 License
+## License
 
 [MIT](LICENSE) License © 2024 Vue Stripe Contributors
-
-## 🙏 Credits
-
-- Built with [vue-demi](https://github.com/vueuse/vue-demi) for universal Vue support
-- Powered by [Stripe.js](https://stripe.com/docs/js) official library
-- Inspired by the Vue.js community
-
----
-
-**Stripe Partner** - Vue Stripe is an official Stripe partner library.

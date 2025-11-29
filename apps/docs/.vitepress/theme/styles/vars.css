@@ -3,11 +3,17 @@
  */
 
 :root {
-  /* Stripe brand colors */
+  /* Stripe purple (primary) */
   --vp-c-brand-1: #635bff;
   --vp-c-brand-2: #7c6dff;
   --vp-c-brand-3: #a396ff;
   --vp-c-brand-soft: rgba(99, 91, 255, 0.14);
+
+  /* Vue Stripe yellow accent */
+  --vp-c-yellow-1: #fed968;
+  --vp-c-yellow-2: #fde047;
+  --vp-c-yellow-3: #fef08a;
+  --vp-c-yellow-soft: rgba(254, 217, 104, 0.14);
 
   /* Vue green accent */
   --vp-c-green-1: #42b883;
@@ -90,4 +96,71 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/**
+ * Hero image glow effect - yellow above (smaller), purple below (larger)
+ */
+.VPHero .image-container {
+  position: relative;
+}
+
+.VPHero .image-container::before,
+.VPHero .image-container::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -1;
+}
+
+/* Yellow glow - top (smaller) */
+.VPHero .image-container::before {
+  top: -10%;
+  width: 150px;
+  height: 150px;
+  filter: blur(60px);
+  background: #fed968;
+  opacity: 0.8;
+}
+
+/* Purple glow - bottom (larger) */
+.VPHero .image-container::after {
+  bottom: -25%;
+  width: 280px;
+  height: 280px;
+  filter: blur(100px);
+  background: #635bff;
+  opacity: 0.7;
+}
+
+/* Dark mode */
+.dark .VPHero .image-container::before {
+  opacity: 0.7;
+}
+
+.dark .VPHero .image-container::after {
+  opacity: 0.6;
+}
+
+/**
+ * Dark mode: Yellow accent for links, purple buttons
+ */
+.dark {
+  /* Yellow links and highlights */
+  --vp-c-brand-1: #fed968;
+  --vp-c-brand-2: #fde047;
+  --vp-c-brand-3: #fef08a;
+
+  /* Keep buttons purple */
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-text: #fff;
+  --vp-button-brand-bg: #635bff;
+  --vp-button-brand-hover-border: transparent;
+  --vp-button-brand-hover-text: #fff;
+  --vp-button-brand-hover-bg: #7c6dff;
+  --vp-button-brand-active-border: transparent;
+  --vp-button-brand-active-text: #fff;
+  --vp-button-brand-active-bg: #5046e5;
 }
