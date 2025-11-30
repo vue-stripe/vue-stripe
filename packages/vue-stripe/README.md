@@ -1,12 +1,39 @@
-# @vue-stripe/vue-stripe
+<p align="center">
+  <img src="https://raw.githubusercontent.com/vue-stripe/vue-stripe/main/.github/assets/vue-stripe-logo-variant-1.png" alt="Vue Stripe Logo" width="250"/>
+  <h1 align="center">
+    Vue Stripe
+    <div style="height: 10px;"></div>
+    <a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="https://raw.githubusercontent.com/vue-stripe/vue-stripe/main/.github/assets/stripe_partner_badge_verified_blurple.png" alt="Stripe Partner" height="30"/></a>
+  </h1>
+</p>
 
-[![npm version](https://img.shields.io/npm/v/@vue-stripe/vue-stripe.svg?style=flat-square)](https://www.npmjs.com/package/@vue-stripe/vue-stripe)
-[![npm bundle size](https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square)](https://bundlephobia.com/package/@vue-stripe/vue-stripe)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="https://raw.githubusercontent.com/vue-stripe/vue-stripe/main/.github/assets/stripe_partner_badge_verified_blurple.png" alt="Stripe Partner" width="98"/></a>
+  <a href="https://opencollective.com/vue-stripe-checkout"><img src="https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors" alt="Financial Contributors on Open Collective"/></a>
+  <a href="https://www.npmjs.com/package/@vue-stripe/vue-stripe"><img src="https://img.shields.io/npm/v/@vue-stripe/vue-stripe.svg?style=flat-square" alt="npm version"/></a>
+  <img src="https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square" alt="npm bundle size"/>
+  <img src="https://img.shields.io/npm/dw/@vue-stripe/vue-stripe?style=flat-square" alt="npm downloads"/>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/></a>
+</p>
 
-Vue.js library for Stripe Checkout and Elements. Built for Vue 3.x with TypeScript-first development and a modern Composition API.
+<p align="center">
+  <strong>Vue.js library for Stripe Checkout and Elements</strong><br/>
+  Vue 3.x with TypeScript-first development
+</p>
 
-> This package is part of the [Vue Stripe monorepo](../../README.md). For contributing guidelines and development setup, see the root README.
+<p align="center">
+  <a href="https://vuestripe.com">Website</a> |
+  <a href="https://vuestripe.com/guide/introduction">Guides</a> |
+  <a href="https://vuestripe.com/api/">API</a>
+</p>
+
+---
+
+> [Vue Stripe](https://vuestripe.com) is an official [Stripe partner](https://stripe.com/partners/vue-stripe)
+
+## Announcement
+
+Thank you for your patience! This is an early release of the new Vue Stripe. As with any early release, you may encounter bugs. If you find any issues or have suggestions, please [create an issue](https://github.com/vue-stripe/vue-stripe/issues) or [submit a pull request](https://github.com/vue-stripe/vue-stripe/pulls). Your contributions are greatly appreciated!
 
 ## Installation
 
