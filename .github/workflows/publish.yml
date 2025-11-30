@@ -38,6 +38,7 @@ jobs:
         run: pnpm build
 
       - name: Publish to npm
-        run: pnpm --filter @vue-stripe/vue-stripe publish --access public --no-git-checks
+        working-directory: packages/vue-stripe
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
