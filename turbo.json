@@ -44,7 +44,8 @@
     },
     "docs:build": {
       "dependsOn": ["^build"],
-      "outputs": [".vitepress/dist/**"]
+      "outputs": [".vitepress/dist/**"],
+      "env": ["VITE_GA_MEASUREMENT_ID"]
     },
     "clean": {
       "cache": false
