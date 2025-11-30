@@ -1,0 +1,11 @@
+{
+  "extends": "@vue-stripe/typescript-config/vue.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./.vitepress/*"]
+    }
+  },
+  "include": [".vitepress/**/*", ".vitepress/**/*.vue"],
+  "exclude": ["node_modules", ".vitepress/dist", ".vitepress/cache"]
+}

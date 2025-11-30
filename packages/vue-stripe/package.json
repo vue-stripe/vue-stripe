@@ -1,0 +1,79 @@
+{
+  "name": "@vue-stripe/vue-stripe",
+  "version": "5.0.0",
+  "description": "Vue Stripe elements and composables for Stripe.js",
+  "author": "Joff Tiquez <jofftiquez@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vue-stripe/vue-stripe.git"
+  },
+  "homepage": "https://vuestripe.com",
+  "bugs": "https://github.com/vue-stripe/vue-stripe/issues",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/es/index.js",
+  "types": "./dist/types/index.d.ts",
+  "unpkg": "./dist/umd/index.js",
+  "jsdelivr": "./dist/umd/index.js",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/es/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "build:watch": "vite build --watch",
+    "dev": "vite build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts,.vue",
+    "lint:fix": "eslint src --ext .ts,.vue --fix",
+    "type-check": "vue-tsc --noEmit",
+    "typecheck": "vue-tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "vue",
+    "vue2",
+    "vue3",
+    "stripe",
+    "payment",
+    "checkout",
+    "elements",
+    "composition-api",
+    "typescript"
+  ],
+  "peerDependencies": {
+    "@stripe/stripe-js": "^7.5.0",
+    "vue": "^2.6.0 || ^3.0.0"
+  },
+  "dependencies": {
+    "vue-demi": "^0.14.10"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "@stripe/stripe-js": "^7.5.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue-stripe/eslint-config": "workspace:*",
+    "@vue-stripe/typescript-config": "workspace:*",
+    "@vue/test-utils": "^2.4.6",
+    "eslint-plugin-vue": "^10.3.0",
+    "jsdom": "^26.1.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
+    "vite": "^7.1.11",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.2.4",
+    "vue": "^3.5.22",
+    "vue-tsc": "^3.0.3"
+  }
+}

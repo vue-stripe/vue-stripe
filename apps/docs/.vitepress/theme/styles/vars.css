@@ -1,0 +1,166 @@
+/**
+ * Colors - Vue Stripe brand colors
+ */
+
+:root {
+  /* Stripe purple (primary) */
+  --vp-c-brand-1: #635bff;
+  --vp-c-brand-2: #7c6dff;
+  --vp-c-brand-3: #a396ff;
+  --vp-c-brand-soft: rgba(99, 91, 255, 0.14);
+
+  /* Vue Stripe yellow accent */
+  --vp-c-yellow-1: #fed968;
+  --vp-c-yellow-2: #fde047;
+  --vp-c-yellow-3: #fef08a;
+  --vp-c-yellow-soft: rgba(254, 217, 104, 0.14);
+
+  /* Vue green accent */
+  --vp-c-green-1: #42b883;
+  --vp-c-green-2: #42d392;
+  --vp-c-green-3: #42d392;
+  --vp-c-green-soft: rgba(66, 184, 131, 0.14);
+
+  /* Custom purple/violet theme */
+  --vp-c-purple-1: #8b5cf6;
+  --vp-c-purple-2: #a78bfa;
+  --vp-c-purple-3: #c4b5fd;
+  --vp-c-purple-soft: rgba(139, 92, 246, 0.14);
+
+  /* Background colors */
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-alt: #f6f8fa;
+  --vp-c-bg-elv: #ffffff;
+  --vp-c-bg-soft: #f6f8fa;
+
+  /* Text colors */
+  --vp-c-text-1: rgba(60, 60, 67);
+  --vp-c-text-2: rgba(60, 60, 67, 0.78);
+  --vp-c-text-3: rgba(60, 60, 67, 0.56);
+
+  /* Border colors */
+  --vp-c-divider: rgba(60, 60, 67, 0.29);
+  --vp-c-border: rgba(60, 60, 67, 0.23);
+
+  /* Custom component colors */
+  --vp-code-block-bg: rgba(125, 125, 125, 0.04);
+  --vp-code-tab-divider: rgba(125, 125, 125, 0.3);
+  --vp-code-copy-code-border-color: rgba(125, 125, 125, 0.3);
+  --vp-code-copy-code-active-text: rgba(235, 235, 245, 0.6);
+}
+
+.dark {
+  /* Dark mode colors */
+  --vp-c-bg: #1b1b1f;
+  --vp-c-bg-alt: #161618;
+  --vp-c-bg-elv: #202127;
+  --vp-c-bg-soft: #202127;
+
+  --vp-c-text-1: rgba(255, 255, 245, 0.86);
+  --vp-c-text-2: rgba(235, 235, 245, 0.6);
+  --vp-c-text-3: rgba(235, 235, 245, 0.38);
+
+  --vp-c-divider: rgba(84, 84, 88, 0.65);
+  --vp-c-border: rgba(82, 82, 89, 0.68);
+
+  --vp-code-block-bg: rgba(0, 0, 0, 0.2);
+}
+
+/**
+ * Carbon Ads Styles (placeholder for when you get the actual ad code)
+ */
+#carbonads {
+  margin: 28px 0;
+  padding: 20px;
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#carbonads a {
+  color: var(--vp-c-text-1);
+  text-decoration: none;
+  transition: color 0.25s;
+}
+
+#carbonads a:hover {
+  color: var(--vp-c-brand-1);
+}
+
+#carbonads .carbon-poweredby {
+  display: block;
+  margin-top: 10px;
+  color: var(--vp-c-text-3);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/**
+ * Hero image glow effect - yellow above (smaller), purple below (larger)
+ */
+.VPHero .image-container {
+  position: relative;
+}
+
+.VPHero .image-container::before,
+.VPHero .image-container::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -1;
+}
+
+/* Yellow glow - top (smaller) */
+.VPHero .image-container::before {
+  top: -10%;
+  width: 150px;
+  height: 150px;
+  filter: blur(60px);
+  background: #fed968;
+  opacity: 0.8;
+}
+
+/* Purple glow - bottom (larger) */
+.VPHero .image-container::after {
+  bottom: -25%;
+  width: 280px;
+  height: 280px;
+  filter: blur(100px);
+  background: #635bff;
+  opacity: 0.7;
+}
+
+/* Dark mode */
+.dark .VPHero .image-container::before {
+  opacity: 0.7;
+}
+
+.dark .VPHero .image-container::after {
+  opacity: 0.6;
+}
+
+/**
+ * Dark mode: Yellow accent for links, purple buttons
+ */
+.dark {
+  /* Yellow links and highlights */
+  --vp-c-brand-1: #fed968;
+  --vp-c-brand-2: #fde047;
+  --vp-c-brand-3: #fef08a;
+
+  /* Keep buttons purple */
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-text: #fff;
+  --vp-button-brand-bg: #635bff;
+  --vp-button-brand-hover-border: transparent;
+  --vp-button-brand-hover-text: #fff;
+  --vp-button-brand-hover-bg: #7c6dff;
+  --vp-button-brand-active-border: transparent;
+  --vp-button-brand-active-text: #fff;
+  --vp-button-brand-active-bg: #5046e5;
+}

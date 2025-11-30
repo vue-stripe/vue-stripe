@@ -1,0 +1,53 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", ".vitepress/dist/**"],
+      "env": ["NODE_ENV"]
+    },
+    "build:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"],
+      "env": ["NODE_ENV"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "src/**/*.vue", "*.js", "*.ts"]
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "src/**/*.vue", "*.ts", "tsconfig.json"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "src/**/*.vue", "*.ts", "tsconfig.json"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "docs:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "docs:build": {
+      "dependsOn": ["^build"],
+      "outputs": [".vitepress/dist/**"]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "extends": "./base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "types": ["vite/client", "vitest/globals"],
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "vue": ["./node_modules/vue-demi/lib/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*", "src/**/*.vue"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@vue-stripe/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "docs:dev": "vitepress dev",
+    "build": "vitepress build",
+    "docs:build": "vitepress build",
+    "preview": "vitepress preview",
+    "clean": "rm -rf .vitepress/dist"
+  },
+  "dependencies": {
+    "@vue-stripe/vue-stripe": "workspace:*"
+  },
+  "devDependencies": {
+    "@nolebase/vitepress-plugin-og-image": "^2.18.2",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.22"
+  }
+}

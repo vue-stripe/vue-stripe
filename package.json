@@ -1,78 +1,54 @@
 {
-  "name": "@vue-stripe/vue-stripe",
-  "version": "4.5.0",
-  "description": "Stripe Checkout & Elements for Vue.js",
-  "author": "jofftiquez@gmail.com",
+  "name": "vue-stripe-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "build": "rollup -c",
-    "lint": "vue-cli-service lint --fix",
-    "prebuild": "rimraf dist",
-    "test": "jest"
-  },
-  "main": "dist/index.js",
-  "module": "dist",
-  "dependencies": {
-    "@stripe/stripe-js": "^1.13.2",
-    "vue-coerce-props": "^1.0.0"
+    "build": "turbo run build",
+    "build:watch": "turbo run build:watch",
+    "dev": "turbo run dev --parallel",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "type-check": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "docs:dev": "turbo run docs:dev",
+    "docs:build": "turbo run docs:build",
+    "playground:dev": "turbo run dev --filter=@vue-stripe/playground",
+    "vue-stripe:build": "turbo run build --filter=@vue-stripe/vue-stripe",
+    "vue-stripe:test": "turbo run test --filter=@vue-stripe/vue-stripe",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build && changeset publish"
   },
   "devDependencies": {
-    "@babel/cli": "^7.7.5",
-    "@babel/core": "^7.7.5",
-    "@babel/plugin-proposal-export-default-from": "^7.7.4",
-    "@babel/plugin-proposal-optional-chaining": "^7.10.4",
-    "@babel/plugin-transform-runtime": "^7.7.5",
-    "@babel/preset-env": "^7.7.5",
-    "@babel/preset-es2015": "^7.0.0-beta.53",
-    "@babel/runtime": "^7.7.5",
-    "@rollup/plugin-node-resolve": "^6.0.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-service": "^4.5.10",
-    "@vue/eslint-config-standard": "^5.1.2",
-    "babel-eslint": "^10.1.0",
-    "babel-minify": "^0.5.1",
-    "cross-env": "^6.0.3",
-    "eslint": "^6.8.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "eslint-plugin-vue": "^6.2.2",
-    "jest": "^24.9.0",
-    "lint-staged": "^9.5.0",
-    "rimraf": "^3.0.0",
-    "rollup": "^1.27.9",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-postcss": "^2.0.3",
-    "rollup-plugin-terser": "^5.1.3",
-    "rollup-plugin-uglify": "^6.0.3",
-    "rollup-plugin-vue": "^5.1.4",
-    "vue-template-compiler": "^2.6.11"
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.5",
+    "@turbo/gen": "^2.5.8",
+    "@vue-stripe/eslint-config": "workspace:*",
+    "@vue-stripe/typescript-config": "workspace:*",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.11",
+    "vitest": "^3.2.4"
   },
-  "bugs": {
-    "url": "https://github.com/vue-stripe/vue-stripe/issues"
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=8"
   },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "homepage": "https://github.com/vue-stripe/vue-stripe#readme",
-  "keywords": [
-    "vue",
-    "vuejs",
-    "stripe",
-    "checkout",
-    "payment"
-  ],
-  "license": "MIT",
   "lint-staged": {
-    "*.{js,jsx,vue}": [
-      "vue-cli-service lint",
-      "git add"
+    "*.{js,ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
     ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:vue-stripe/vue-stripe.git"
-  },
-  "typings": "typings/index.d.ts"
+  }
 }

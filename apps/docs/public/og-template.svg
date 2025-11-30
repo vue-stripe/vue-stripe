@@ -1,0 +1,58 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Golden Yellow Background -->
+  <rect width="1200" height="630" fill="#fed968"/>
+
+  <!-- Subtle pattern overlay for texture -->
+  <rect width="1200" height="630" fill="url(#pattern)" opacity="0.03"/>
+
+  <!-- Vue Stripe Logo (simplified V shape) in top right -->
+  <g transform="translate(1020, 40)">
+    <!-- Outer V (purple) -->
+    <path d="M0 0 L70 0 L90 35 L110 0 L140 0 L90 90 L40 0 Z" fill="#635bff"/>
+    <!-- Inner V (dark) -->
+    <path d="M40 0 L70 0 L90 35 L110 0 L100 0 L90 18 L80 0 Z" fill="#35495E"/>
+  </g>
+
+  <!-- Category text placeholder -->
+  <text fill="#635bff" fill-opacity="0.8" xml:space="preserve" style="white-space: pre" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="500" letter-spacing="0.05em">
+    <tspan x="60" y="180">{{category}}</tspan>
+  </text>
+
+  <!-- Title lines -->
+  <text fill="#1a1a2e" xml:space="preserve" style="white-space: pre" font-family="Inter, system-ui, sans-serif" font-size="64" font-weight="700" letter-spacing="-0.02em">
+    <tspan x="60" y="270">{{line1}}</tspan>
+  </text>
+  <text fill="#1a1a2e" xml:space="preserve" style="white-space: pre" font-family="Inter, system-ui, sans-serif" font-size="64" font-weight="700" letter-spacing="-0.02em">
+    <tspan x="60" y="350">{{line2}}</tspan>
+  </text>
+  <text fill="#1a1a2e" xml:space="preserve" style="white-space: pre" font-family="Inter, system-ui, sans-serif" font-size="64" font-weight="700" letter-spacing="-0.02em">
+    <tspan x="60" y="430">{{line3}}</tspan>
+  </text>
+
+  <!-- Site name (bottom left) -->
+  <text fill="#1a1a2e" fill-opacity="0.7" xml:space="preserve" style="white-space: pre" font-family="Inter, system-ui, sans-serif" font-size="26" font-weight="600" letter-spacing="0em">
+    <tspan x="60" y="560">{{siteName}}</tspan>
+  </text>
+
+  <!-- Site description (bottom right) -->
+  <text fill="#1a1a2e" fill-opacity="0.5" xml:space="preserve" style="white-space: pre; text-anchor: end;" font-family="Inter, system-ui, sans-serif" font-size="24" letter-spacing="0em">
+    <tspan x="1140" y="560">{{siteDescription}}</tspan>
+  </text>
+
+  <!-- Purple gradient stripe at bottom -->
+  <rect y="600" width="1200" height="30" fill="url(#purpleGradient)"/>
+
+  <defs>
+    <!-- Purple gradient for bottom stripe -->
+    <linearGradient id="purpleGradient" x1="0" y1="615" x2="1200" y2="615" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#635bff"/>
+      <stop offset="0.5" stop-color="#7c6dff"/>
+      <stop offset="1" stop-color="#635bff"/>
+    </linearGradient>
+
+    <!-- Subtle dot pattern -->
+    <pattern id="pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="1" fill="#635bff"/>
+    </pattern>
+  </defs>
+</svg>

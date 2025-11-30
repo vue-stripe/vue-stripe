@@ -1,0 +1,11 @@
+{
+  "name": "@vue-stripe/typescript-config",
+  "private": true,
+  "files": [
+    "base.json",
+    "vue.json"
+  ],
+  "dependencies": {
+    "typescript": "^5.9.3"
+  }
+}
