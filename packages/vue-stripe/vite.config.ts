@@ -38,10 +38,11 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      external: ['vue', 'vue-demi', '@stripe/stripe-js'],
+      // Note: 'vue' is NOT externalized - it gets aliased to vue-demi
+      // This ensures all vue imports become vue-demi imports for Vue 2/3 compatibility
+      external: ['vue-demi', '@stripe/stripe-js'],
       output: {
         globals: {
-          vue: 'Vue',
           'vue-demi': 'VueDemi',
           '@stripe/stripe-js': 'Stripe'
         }
@@ -51,7 +52,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
+      '@': resolve(__dirname, 'src'),
+      // Alias vue to vue-demi so compiled SFC templates use vue-demi
+      // This is critical for Vue 2 compatibility
+      'vue': 'vue-demi'
     }
   }
 })
