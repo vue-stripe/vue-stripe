@@ -12,7 +12,7 @@
   {
     "name": "Core Components (Tree-shaken)",
     "path": "dist/index.js",
-    "import": "{ StripeProvider, StripeElements, StripePaymentElement }",
+    "import": "{ VueStripeProvider, VueStripeElements, VueStripePaymentElement }",
     "limit": "15 KB"
   },
   {

@@ -16,12 +16,20 @@ vi.mock('@stripe/stripe-js', () => ({
         focus: vi.fn(),
         blur: vi.fn(),
         clear: vi.fn()
-      }))
+      })),
+      // Elements instance methods
+      submit: vi.fn(() => Promise.resolve({ error: null })),
+      getElement: vi.fn(),
+      update: vi.fn(),
+      fetchUpdates: vi.fn(() => Promise.resolve({ error: null }))
     })),
     confirmPayment: vi.fn(() => Promise.resolve({
       paymentIntent: { id: 'pi_test_123', status: 'succeeded' }
     })),
     confirmCardSetup: vi.fn(() => Promise.resolve({
+      setupIntent: { id: 'seti_test_123', status: 'succeeded' }
+    })),
+    confirmSetup: vi.fn(() => Promise.resolve({
       setupIntent: { id: 'seti_test_123', status: 'succeeded' }
     })),
     registerAppInfo: vi.fn()
@@ -49,10 +57,16 @@ export const createMockStripe = () => ({
       focus: vi.fn(),
       blur: vi.fn(),
       clear: vi.fn()
-    }))
+    })),
+    // Elements instance methods
+    submit: vi.fn(() => Promise.resolve({ error: null })),
+    getElement: vi.fn(),
+    update: vi.fn(),
+    fetchUpdates: vi.fn(() => Promise.resolve({ error: null }))
   })),
   confirmPayment: vi.fn(),
   confirmCardSetup: vi.fn(),
+  confirmSetup: vi.fn(),
   registerAppInfo: vi.fn()
 })
 

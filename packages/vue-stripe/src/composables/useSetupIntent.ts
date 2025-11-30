@@ -33,6 +33,8 @@ export interface ConfirmSetupOptions {
   redirect?: 'if_required' | 'always'
   /** Optional elements override (uses injected elements if not provided) */
   elements?: StripeElements
+  /** Skip elements.submit() validation (not recommended, defaults to false) */
+  skipSubmit?: boolean
 }
 
 /**
@@ -87,8 +89,18 @@ export function useSetupIntent(): UseSetupIntentReturn {
       // Use provided elements or fallback to injected elements
       const elements = options.elements ?? elementsInstance?.elements.value
 
+      // Call elements.submit() first to trigger form validation and wallet collection
+      // This is required by Stripe before calling confirmSetup
+      // See: https://docs.stripe.com/payments/payment-element/migration
+      if (elements && !options.skipSubmit) {
+        const { error: submitError } = await elements.submit()
+        if (submitError) {
+          error.value = submitError.message || 'Form validation failed'
+          return { error: submitError }
+        }
+      }
+
       // Use stripe.confirmSetup() which works with Payment Element
-       
       const result = await (stripeInstance.stripe.value as any).confirmSetup({
         elements: elements ?? undefined,
         clientSecret: options.clientSecret,

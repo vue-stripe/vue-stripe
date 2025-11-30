@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Vue Stripe
   text: Stripe Elements for Vue.js
-  tagline: Build beautiful payment forms with Vue 2 and Vue 3
+  tagline: Build beautiful payment forms with Vue.js
   image:
     src: /vue-stripe-logo-variant-1.png
     alt: Vue Stripe
@@ -18,8 +18,8 @@ hero:
 
 features:
   - icon: 🔄
-    title: Vue 2 & 3 Compatible
-    details: Built with vue-demi for seamless compatibility with both Vue 2 and Vue 3 projects.
+    title: Vue 3 Ready
+    details: Built for Vue 3 with full Composition API support and modern Vue patterns.
   - icon: 💳
     title: All Stripe Elements
     details: Payment Element, Card Element, Express Checkout, and more - all wrapped in Vue components.

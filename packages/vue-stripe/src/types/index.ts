@@ -66,8 +66,59 @@ export interface VueStripeProviderProps {
   locale?: string
 }
 
+/**
+ * Mode for Payment Element - determines the type of intent
+ */
+export type ElementsMode = 'payment' | 'setup' | 'subscription'
+
+/**
+ * Indicates intent to save payment method for future use
+ */
+export type SetupFutureUsage = 'off_session' | 'on_session'
+
+/**
+ * Controls when to capture funds from customer's account
+ */
+export type CaptureMethod = 'automatic' | 'automatic_async' | 'manual'
+
 export interface VueStripeElementsProps {
+  /**
+   * Client secret from PaymentIntent or SetupIntent.
+   * When provided, Elements will use the intent-based flow.
+   */
   clientSecret?: string | undefined
+  /**
+   * Mode for deferred intent creation (without clientSecret).
+   * Required when clientSecret is not provided.
+   */
+  mode?: ElementsMode | undefined
+  /**
+   * Currency code (e.g., 'usd', 'eur') for deferred intent creation.
+   * Required when using mode without clientSecret.
+   */
+  currency?: string | undefined
+  /**
+   * Amount in smallest currency unit (e.g., cents for USD).
+   * Required for 'payment' and 'subscription' modes.
+   */
+  amount?: number | undefined
+  /**
+   * Indicates intent to save payment method for future use.
+   * When set, displays additional input fields and mandates as needed.
+   */
+  setupFutureUsage?: SetupFutureUsage | undefined
+  /**
+   * Controls when to capture funds from customer's account.
+   */
+  captureMethod?: CaptureMethod | undefined
+  /**
+   * List of payment method types to display.
+   * Omit to use Dashboard payment method settings.
+   */
+  paymentMethodTypes?: string[] | undefined
+  /**
+   * Additional options passed to stripe.elements().
+   */
   options?: StripeElementsOptions | undefined
 }
 
@@ -85,8 +136,22 @@ export interface UseStripeReturn {
   initialize: () => Promise<void>
 }
 
+/**
+ * Result of elements.submit() call
+ * Matches the return type from Stripe's elements.submit()
+ */
+export type ElementsSubmitResult =
+  | { error?: undefined; selectedPaymentMethod?: string }
+  | { error: { type?: string; code?: string; message?: string } }
+
 export interface UseStripeElementsReturn {
   elements: Readonly<Ref<StripeElements | null>>
+  /**
+   * Triggers form validation and collects data required for wallets (Apple Pay, Google Pay).
+   * This should be called before confirmPayment/confirmSetup.
+   * Note: usePaymentIntent and useSetupIntent call this automatically unless skipSubmit is true.
+   */
+  submit: () => Promise<ElementsSubmitResult>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
@@ -96,6 +161,8 @@ export interface ConfirmPaymentOptions {
   confirmParams?: ConfirmPaymentData
   redirect?: 'if_required' | 'always'
   elements?: StripeElements
+  /** Skip elements.submit() validation (not recommended, defaults to false) */
+  skipSubmit?: boolean
 }
 
 export interface UsePaymentIntentReturn {
@@ -132,6 +199,8 @@ export interface ConfirmSetupOptions {
   }
   redirect?: 'if_required' | 'always'
   elements?: StripeElements
+  /** Skip elements.submit() validation (not recommended, defaults to false) */
+  skipSubmit?: boolean
 }
 
 // Payment method types for modern elements

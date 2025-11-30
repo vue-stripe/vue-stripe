@@ -92,7 +92,8 @@ describe('useSetupIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: vi.fn(),
       confirmSetup: vi.fn(async () => {
@@ -137,7 +138,8 @@ describe('useSetupIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: vi.fn(),
       confirmSetup: mockConfirmSetup,
@@ -178,7 +180,8 @@ describe('useSetupIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: vi.fn(),
       confirmSetup: mockConfirmSetup,
@@ -211,7 +214,8 @@ describe('useSetupIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: vi.fn(),
       confirmSetup: mockConfirmSetup,
@@ -241,7 +245,8 @@ describe('useSetupIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: vi.fn(),
       confirmSetup: mockConfirmSetup,
@@ -311,7 +316,8 @@ describe('useSetupIntent', () => {
         mount: vi.fn(),
         destroy: vi.fn(),
         on: vi.fn()
-      }))
+      })),
+      submit: vi.fn(() => Promise.resolve({ error: null }))
     }
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe

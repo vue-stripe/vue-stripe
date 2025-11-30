@@ -1,18 +1,52 @@
 import { defineConfig } from 'vitepress'
+import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
+
+// Google Analytics Measurement ID - Set via VITE_GA_MEASUREMENT_ID environment variable
+const GA_MEASUREMENT_ID = process.env.VITE_GA_MEASUREMENT_ID || ''
 
 export default defineConfig({
   title: 'Vue Stripe',
-  description: 'Stripe Elements for Vue.js - Vue 2 & 3 compatible',
+  description: 'Stripe Elements for Vue.js',
   lang: 'en-US',
   base: '/',
 
   head: [
+    // Google Analytics
+    ['script', { async: '', src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}` }],
+    ['script', {}, `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_MEASUREMENT_ID}');`],
+
+    // Favicon
     ['link', { rel: 'icon', href: '/favicon.ico' }],
+    ['link', { rel: 'canonical', href: 'https://vuestripe.com/' }],
+
+    // Basic meta
     ['meta', { name: 'theme-color', content: '#635bff' }],
+    ['meta', { name: 'author', content: 'Vue Stripe Contributors' }],
+    ['meta', { name: 'keywords', content: 'vue, stripe, payment, checkout, vue.js, vue 3, stripe elements, payment element, card element' }],
+
+    // Open Graph
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'Vue Stripe' }],
     ['meta', { property: 'og:title', content: 'Vue Stripe' }],
     ['meta', { property: 'og:description', content: 'Stripe Checkout & Elements for Vue.js' }],
-    ['meta', { property: 'og:image', content: '/og-image.png' }],
+    ['meta', { property: 'og:url', content: 'https://vuestripe.com/' }],
+    ['meta', { property: 'og:image', content: 'https://vuestripe.com/og-image.png' }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+
+    // Twitter Card
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:title', content: 'Vue Stripe' }],
+    ['meta', { name: 'twitter:description', content: 'Stripe Checkout & Elements for Vue.js' }],
+    ['meta', { name: 'twitter:image', content: 'https://vuestripe.com/og-image.png' }],
   ],
+
+  sitemap: {
+    hostname: 'https://vuestripe.com'
+  },
 
   themeConfig: {
     logo: { src: '/vue-stripe-logo-variant-1-small.png', alt: 'Vue Stripe' },
@@ -162,5 +196,16 @@ export default defineConfig({
   cleanUrls: true,
 
   // Ignore dead links while building docs
-  ignoreDeadLinks: true
+  ignoreDeadLinks: true,
+
+  // Generate OG images at build time
+  async buildEnd(siteConfig) {
+    await buildEndGenerateOpenGraphImages({
+      baseUrl: 'https://vuestripe.com',
+      category: {
+        byLevel: 2,
+      },
+      templateSvgPath: './public/og-template.svg',
+    })(siteConfig)
+  },
 })

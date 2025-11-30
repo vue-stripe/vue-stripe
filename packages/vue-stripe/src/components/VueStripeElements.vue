@@ -4,12 +4,76 @@ import type { StripeElements } from '@stripe/stripe-js'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 
-// Use a looser type for options since Stripe has multiple option shapes
- 
+// Use a looser type for additional options since Stripe has multiple option shapes
 type ElementsOptions = Record<string, any>
 
+/**
+ * Mode for Payment Element - determines the type of intent
+ * - 'payment': For PaymentIntent (one-time payments)
+ * - 'setup': For SetupIntent (saving payment methods for future use)
+ * - 'subscription': For Subscription billing
+ */
+type ElementsMode = 'payment' | 'setup' | 'subscription'
+
+/**
+ * Indicates intent to save payment method for future use
+ * - 'off_session': Save for off-session payments (e.g., recurring charges)
+ * - 'on_session': Save for on-session payments (customer present)
+ */
+type SetupFutureUsage = 'off_session' | 'on_session'
+
+/**
+ * Controls when to capture funds from customer's account
+ * - 'automatic': Capture automatically after authorization
+ * - 'automatic_async': Capture automatically with async processing
+ * - 'manual': Capture manually via API call
+ */
+type CaptureMethod = 'automatic' | 'automatic_async' | 'manual'
+
 interface Props {
+  /**
+   * Client secret from PaymentIntent or SetupIntent.
+   * When provided, Elements will use the intent-based flow.
+   * When omitted, use mode/currency/amount for deferred intent creation.
+   */
   clientSecret?: string | undefined
+  /**
+   * Mode for deferred intent creation (without clientSecret).
+   * Required when clientSecret is not provided.
+   * - 'payment': One-time payment
+   * - 'setup': Save payment method for future
+   * - 'subscription': Recurring billing
+   */
+  mode?: ElementsMode | undefined
+  /**
+   * Currency code (e.g., 'usd', 'eur') for deferred intent creation.
+   * Required when using mode without clientSecret.
+   */
+  currency?: string | undefined
+  /**
+   * Amount in smallest currency unit (e.g., cents for USD).
+   * Required for 'payment' and 'subscription' modes.
+   * Shown in Apple Pay, Google Pay, and BNPL UIs.
+   */
+  amount?: number | undefined
+  /**
+   * Indicates intent to save payment method for future use.
+   * When set, displays additional input fields and mandates as needed.
+   */
+  setupFutureUsage?: SetupFutureUsage | undefined
+  /**
+   * Controls when to capture funds from customer's account.
+   */
+  captureMethod?: CaptureMethod | undefined
+  /**
+   * List of payment method types to display.
+   * Omit to use Dashboard payment method settings.
+   */
+  paymentMethodTypes?: string[] | undefined
+  /**
+   * Additional options passed to stripe.elements().
+   * See Stripe documentation for all available options.
+   */
   options?: ElementsOptions | undefined
 }
 
@@ -38,17 +102,40 @@ const createElements = () => {
     error.value = null
     loading.value = true
 
-    // Build options object with clientSecret if provided
+    // Build options object from explicit props and additional options
     const elementsOptions: ElementsOptions = {
       ...props.options
     }
 
+    // Intent-based flow: use clientSecret
     if (props.clientSecret) {
       elementsOptions['clientSecret'] = props.clientSecret
     }
 
+    // Deferred intent flow: use mode, currency, amount
+    // See: https://docs.stripe.com/payments/payment-element/migration
+    if (props.mode) {
+      elementsOptions['mode'] = props.mode
+    }
+    if (props.currency) {
+      elementsOptions['currency'] = props.currency
+    }
+    if (props.amount !== undefined) {
+      elementsOptions['amount'] = props.amount
+    }
+
+    // Optional configuration
+    if (props.setupFutureUsage) {
+      elementsOptions['setupFutureUsage'] = props.setupFutureUsage
+    }
+    if (props.captureMethod) {
+      elementsOptions['captureMethod'] = props.captureMethod
+    }
+    if (props.paymentMethodTypes) {
+      elementsOptions['paymentMethodTypes'] = props.paymentMethodTypes
+    }
+
     // Use type assertion since Stripe has complex overloads
-     
     elements.value = (stripeInstance.stripe.value as any).elements(elementsOptions)
     loading.value = false
   } catch (err) {
@@ -73,6 +160,16 @@ watch(
 // Watch for clientSecret changes
 watch(
   () => props.clientSecret,
+  () => {
+    if (stripeInstance.stripe.value) {
+      createElements()
+    }
+  }
+)
+
+// Watch for deferred intent props changes (mode, currency, amount)
+watch(
+  () => [props.mode, props.currency, props.amount, props.setupFutureUsage],
   () => {
     if (stripeInstance.stripe.value) {
       createElements()

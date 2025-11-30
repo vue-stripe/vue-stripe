@@ -57,8 +57,8 @@ watch(stripe, (newStripe) => {
 })
 ```
 
-### 3. Vue 2 & Vue 3 Support
-Built with [vue-demi](https://github.com/vueuse/vue-demi), the library works identically in both Vue versions.
+### 3. Vue 3 Support
+Built for Vue 3 with full Composition API support and modern Vue patterns.
 
 ## How this guide is structured
 
@@ -77,6 +77,6 @@ Before you begin, you should:
 
 - Have a [Stripe account](https://dashboard.stripe.com/register) (test mode is fine)
 - Know the basics of Vue.js (components, props, events)
-- Have a Vue 2 or Vue 3 project set up
+- Have a Vue 3 project set up
 
 Ready? Let's [install the library](/guide/installation).

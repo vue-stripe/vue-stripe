@@ -92,7 +92,8 @@ describe('usePaymentIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: vi.fn(async () => {
         await paymentPromise
@@ -137,7 +138,8 @@ describe('usePaymentIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: mockConfirmPayment,
       confirmCardSetup: vi.fn(),
@@ -180,7 +182,8 @@ describe('usePaymentIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: mockConfirmPayment,
       confirmCardSetup: vi.fn(),
@@ -213,7 +216,8 @@ describe('usePaymentIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: mockConfirmPayment,
       confirmCardSetup: vi.fn(),
@@ -243,7 +247,8 @@ describe('usePaymentIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: mockConfirmPayment,
       confirmCardSetup: vi.fn(),
@@ -319,7 +324,8 @@ describe('usePaymentIntent', () => {
           mount: vi.fn(),
           destroy: vi.fn(),
           on: vi.fn()
-        }))
+        })),
+        submit: vi.fn(() => Promise.resolve({}))
       })),
       confirmPayment: mockConfirmPayment,
       confirmCardSetup: vi.fn(),
@@ -352,7 +358,8 @@ describe('usePaymentIntent', () => {
         mount: vi.fn(),
         destroy: vi.fn(),
         on: vi.fn()
-      }))
+      })),
+      submit: vi.fn(() => Promise.resolve({}))
     }
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -390,10 +397,11 @@ describe('usePaymentIntent', () => {
         mount: vi.fn(),
         destroy: vi.fn(),
         on: vi.fn()
-      }))
+      })),
+      submit: vi.fn(() => Promise.resolve({}))
     }
 
-    const customElements = { custom: true } as any
+    const customElements = { custom: true, submit: vi.fn(() => Promise.resolve({})) } as any
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
