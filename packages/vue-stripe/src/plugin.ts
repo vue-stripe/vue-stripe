@@ -27,7 +27,7 @@ export function createVueStripe(options: VueStripeOptions): Plugin {
     install(app: App) {
       // Provide global stripe config
       app.provide('vue-stripe-config', options)
-      
+
       // Provide global stripe instance (lazy loaded)
       let stripeInstance: Promise<Stripe | null> | null = null
 
@@ -52,5 +52,3 @@ export function createVueStripe(options: VueStripeOptions): Plugin {
     }
   }
 }
-
-export default createVueStripe

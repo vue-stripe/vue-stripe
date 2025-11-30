@@ -48,7 +48,7 @@ const initialize = async () => {
     error.value = null
 
     // Build options object, only including defined values
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const options: any = {}
     const stripeAccount = props.stripeAccount || props.options?.stripeAccount
     const apiVersion = props.apiVersion || props.options?.apiVersion

@@ -9,6 +9,17 @@ export default tseslint.config(
   {
     files: ['**/*.{ts,vue}'],
     languageOptions: {
+      globals: {
+        // Browser globals
+        window: 'readonly',
+        document: 'readonly',
+        console: 'readonly',
+        HTMLElement: 'readonly',
+        HTMLDivElement: 'readonly',
+        MutationObserver: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly'
+      },
       parserOptions: {
         parser: tseslint.parser,
         ecmaVersion: 'latest',
@@ -18,6 +29,7 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-empty-object-type': 'off',
       'vue/multi-word-component-names': 'off',
       'vue/require-default-prop': 'off',
       'vue/no-v-html': 'off'

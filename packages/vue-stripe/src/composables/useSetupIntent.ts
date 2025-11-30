@@ -88,7 +88,7 @@ export function useSetupIntent(): UseSetupIntentReturn {
       const elements = options.elements ?? elementsInstance?.elements.value
 
       // Use stripe.confirmSetup() which works with Payment Element
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const result = await (stripeInstance.stripe.value as any).confirmSetup({
         elements: elements ?? undefined,
         clientSecret: options.clientSecret,

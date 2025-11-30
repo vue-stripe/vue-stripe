@@ -115,7 +115,5 @@ test-results/
 playwright-report/
 playwright/.cache/
 
+.claude
 CLAUDE.md
-UPGRADE_STATUS.md
-UPGRADE_STATUS_PHASE2.md
-UPGRADE_PLAN.md

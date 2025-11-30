@@ -37,7 +37,6 @@ export * from './composables'
 
 // Export plugin
 export { createVueStripe } from './plugin'
-export { default } from './plugin'
 
 // Re-export Stripe.js for convenience
 export { loadStripe } from '@stripe/stripe-js'

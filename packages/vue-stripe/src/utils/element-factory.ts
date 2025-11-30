@@ -74,7 +74,7 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
           loading.value = true
 
           // Create element - use type assertion since we know our element types are valid
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           
           const createdElement = (elementsInstance.elements.value as any).create(elementType, props.options) as StripeElementLike
           element.value = createdElement
 

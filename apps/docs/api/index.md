@@ -2,36 +2,34 @@
 
 Complete API documentation for Vue Stripe components and composables.
 
-::: tip Work in Progress
-This documentation is being updated as components are tested and finalized. Components marked with ✅ are complete.
-:::
-
 ## Components
 
 ### Provider Components
-- [StripeProvider](/api/components/stripe-provider) - Root component that loads Stripe.js ✅
-- [StripeElements](/api/components/stripe-elements) - Creates Stripe Elements instance ✅
+- [StripeProvider](/api/components/stripe-provider) - Root component that loads Stripe.js
+- [StripeElements](/api/components/stripe-elements) - Creates Stripe Elements instance
 
 ### Element Components
-- [StripeCardElement](/api/components/stripe-card-element) - Single card input ✅
-- [Split Card Elements](/api/components/stripe-split-card-elements) - Number + Expiry + CVC ✅
-- [StripePaymentElement](/api/components/stripe-payment-element) - All-in-one payment UI ✅
+- [StripePaymentElement](/api/components/stripe-payment-element) - All-in-one payment UI (recommended)
+- [StripeExpressCheckoutElement](/api/components/stripe-express-checkout-element) - Apple Pay, Google Pay, Link
+- [StripeCardElement](/api/components/stripe-card-element) - Single card input
+- [Split Card Elements](/api/components/stripe-split-card-elements) - Number + Expiry + CVC
+- [StripeAddressElement](/api/components/stripe-address-element) - Address collection
+- [StripeLinkAuthenticationElement](/api/components/stripe-link-authentication-element) - Link authentication
 
-#### Coming Soon
-- StripeExpressCheckoutElement - Apple Pay, Google Pay, Link
-- StripeAddressElement - Address collection
-- StripeLinkAuthenticationElement - Link authentication
-- StripeCheckout - Redirect to Stripe Checkout
+### Checkout
+- [StripeCheckout](/api/components/stripe-checkout) - Embedded Stripe Checkout
 
 ## Composables
 
-- [useStripe](/api/composables/use-stripe) - Access Stripe instance ✅
-- [useStripeElements](/api/composables/use-stripe-elements) - Access Elements instance ✅
-- [usePaymentIntent](/api/composables/use-payment-intent) - Payment confirmation helpers ✅
+- [useStripe](/api/composables/use-stripe) - Access Stripe instance
+- [useStripeElements](/api/composables/use-stripe-elements) - Access Elements instance
+- [usePaymentIntent](/api/composables/use-payment-intent) - Payment confirmation helpers
+- [useSetupIntent](/api/composables/use-setup-intent) - SetupIntent confirmation helpers
+- [useStripeCheckout](/api/composables/use-stripe-checkout) - Redirect to Stripe Checkout
 
-#### Coming Soon
-- useSetupIntent - SetupIntent confirmation helpers
-- useStripeCheckout - Redirect to Stripe Checkout
+## Plugin
+
+- [createVueStripe](/api/plugin) - Vue plugin for global Stripe configuration
 
 ## Types
 
@@ -42,6 +40,9 @@ import type {
   StripeProviderProps,
   StripeElementsProps,
   UseStripeReturn,
-  UseStripeElementsReturn
+  UseStripeElementsReturn,
+  UsePaymentIntentReturn,
+  UseSetupIntentReturn,
+  VueStripeOptions
 } from '@vue-stripe/vue-stripe'
 ```

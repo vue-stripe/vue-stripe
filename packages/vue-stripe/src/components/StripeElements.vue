@@ -5,7 +5,7 @@ import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injecti
 import { StripeProviderError } from '../utils/errors'
 
 // Use a looser type for options since Stripe has multiple option shapes
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 type ElementsOptions = Record<string, any>
 
 interface Props {
@@ -48,7 +48,7 @@ const createElements = () => {
     }
 
     // Use type assertion since Stripe has complex overloads
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     elements.value = (stripeInstance.stripe.value as any).elements(elementsOptions)
     loading.value = false
   } catch (err) {

@@ -71,7 +71,7 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
       const elements = options.elements ?? elementsInstance?.elements.value
 
       // Use type assertion to handle complex Stripe overloads
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const result = await (stripeInstance.stripe.value as any).confirmPayment({
         elements: elements ?? undefined,
         clientSecret: options.clientSecret,

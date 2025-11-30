@@ -14,9 +14,9 @@ import { StripeElementsError } from '../utils/errors'
 
 // Extended element type to include event methods and getValue with looser typing
 interface AddressElementWithEvents extends StripeAddressElementType {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   on(eventType: string, handler: (...args: any[]) => void): this
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   off(eventType: string, handler?: (...args: any[]) => void): this
   getValue(): Promise<Pick<StripeAddressElementChangeEvent, 'complete' | 'isNewAddress' | 'value'>>
 }

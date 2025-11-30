@@ -317,9 +317,4 @@ describe('createVueStripe Plugin', () => {
 
     app.unmount()
   })
-
-  it('should export default as createVueStripe', async () => {
-    const defaultExport = (await import('../src/plugin')).default
-    expect(defaultExport).toBe(createVueStripe)
-  })
 })

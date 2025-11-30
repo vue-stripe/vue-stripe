@@ -83,9 +83,9 @@ watch(
 watch(
   () => props.options,
   (newOptions) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     if (element.value && newOptions && typeof (element.value as any).update === 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       (element.value as any).update(newOptions)
     }
   },

@@ -11,7 +11,7 @@ import { StripeElementsError } from '../utils/errors'
 // Extended interface for Payment Element with loader events - uses standalone interface
 // since TypeScript has issues extending the complex Stripe type
 interface StripePaymentElementWithLoaderEvents {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   on(eventType: string, handler: (...args: any[]) => void): void
 }
 
