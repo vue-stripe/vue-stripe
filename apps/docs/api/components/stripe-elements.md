@@ -2,6 +2,54 @@
 
 Creates a Stripe Elements instance and provides it to child element components.
 
+## What is StripeElements?
+
+StripeElements is the bridge between StripeProvider and individual Stripe element components. It:
+
+| Capability | Description |
+|------------|-------------|
+| **Elements Instance** | Creates the Stripe Elements instance required by all element components |
+| **Payment Intent Binding** | Binds Elements to a specific PaymentIntent or SetupIntent via clientSecret |
+| **Appearance Control** | Configures theme, colors, fonts, and styling for all child elements |
+| **Context Provision** | Makes Elements available to child components via Vue's provide/inject |
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  StripeElements mounts inside StripeProvider                │
+│  (Receives Stripe instance from parent context)             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Waits for Stripe instance to be available                  │
+│  (Shows #loading slot while waiting)                        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Calls stripe.elements({ clientSecret, appearance, ... })   │
+│  Creates Elements instance with configuration               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  SUCCESS                │     │  FAILURE                    │
+│                         │     │                             │
+│  1. Store Elements ref  │     │  1. Store error message     │
+│  2. provide() to tree   │     │  2. Show #error slot        │
+│  3. Render #default     │     │                             │
+└─────────────────────────┘     └─────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Child element components (PaymentElement, CardElement,     │
+│  etc.) inject Elements and mount their specific elements    │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Usage
 
 ```vue

@@ -15,3 +15,6 @@ export { default as StripeCardCvcElement } from './StripeCardCvcElement.vue'
 // Other Elements
 export { default as StripeLinkAuthenticationElement } from './StripeLinkAuthenticationElement.vue'
 export { default as StripeAddressElement } from './StripeAddressElement.vue'
+
+// Checkout
+export { default as StripeCheckout } from './StripeCheckout.vue'

@@ -447,12 +447,12 @@ Stripe Link is a one-click checkout solution that saves customer payment informa
 
 ## Integration Checklist
 
-- [ ] StripeProvider with publishable key
-- [ ] StripeElements with clientSecret
-- [ ] StripeLinkAuthenticationElement for email
-- [ ] StripePaymentElement for payment methods
-- [ ] Submit button with payment confirmation logic
-- [ ] Link enabled in Stripe Dashboard
+- StripeProvider with publishable key
+- StripeElements with clientSecret
+- StripeLinkAuthenticationElement for email
+- StripePaymentElement for payment methods
+- Submit button with payment confirmation logic
+- Link enabled in Stripe Dashboard
 
 ## Related Components
 

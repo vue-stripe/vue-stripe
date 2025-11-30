@@ -128,126 +128,6 @@ const handleSubmit = async () => {
 }
 ```
 
-## Props
-
-All card elements accept these props:
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `options` | `object` | Element configuration options |
-
-### Options
-
-```vue
-<StripeCardElement
-  :options="{
-    style: {
-      base: {
-        fontSize: '16px',
-        color: '#424770',
-        '::placeholder': {
-          color: '#aab7c4'
-        }
-      },
-      invalid: {
-        color: '#9e2146'
-      }
-    },
-    hidePostalCode: true,
-    disabled: false
-  }"
-/>
-```
-
-### Styling Options
-
-```js
-{
-  style: {
-    base: {
-      // Normal state
-      color: '#32325d',
-      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-      fontSmoothing: 'antialiased',
-      fontSize: '16px',
-      '::placeholder': {
-        color: '#aab7c4'
-      }
-    },
-    invalid: {
-      // Invalid input state
-      color: '#fa755a',
-      iconColor: '#fa755a'
-    },
-    complete: {
-      // Valid input state
-      color: '#00d66b'
-    }
-  }
-}
-```
-
-## Events
-
-| Event | Payload | Description |
-|-------|---------|-------------|
-| `@ready` | `Element` | Element mounted |
-| `@change` | `{ complete, empty, error, value }` | Input changed |
-| `@focus` | — | Element focused |
-| `@blur` | — | Element blurred |
-| `@escape` | — | Escape key pressed |
-
-```vue
-<StripeCardElement
-  @ready="onReady"
-  @change="onChange"
-  @focus="onFocus"
-  @blur="onBlur"
-/>
-
-<script setup>
-const cardComplete = ref(false)
-const cardError = ref('')
-
-const onChange = (event) => {
-  cardComplete.value = event.complete
-  cardError.value = event.error?.message || ''
-}
-</script>
-```
-
-## Exposed Methods
-
-Access element methods via template refs:
-
-```vue
-<script setup>
-import { ref } from 'vue'
-
-const cardRef = ref()
-
-const focusCard = () => {
-  cardRef.value?.focus()
-}
-
-const clearCard = () => {
-  cardRef.value?.clear()
-}
-</script>
-
-<template>
-  <StripeCardElement ref="cardRef" />
-  <button @click="focusCard">Focus</button>
-  <button @click="clearCard">Clear</button>
-</template>
-```
-
-Available methods:
-- `focus()` - Focus the element
-- `blur()` - Blur the element
-- `clear()` - Clear the input
-- `element` - Access the underlying Stripe element
-
 ## Complete Example
 
 ```vue
@@ -432,6 +312,7 @@ button:disabled {
 
 ## Next Steps
 
-- [Payment Element](/guide/payment-element) - For multi-method support
-- [Express Checkout](/guide/express-checkout) - Add Apple Pay and Google Pay
-- [Customization](/guide/customization) - Style your elements
+- [Payment Element](/guide/payment-element) — For multi-method support
+- [Express Checkout](/guide/express-checkout) — Add Apple Pay and Google Pay
+- [Customization](/guide/customization) — Style your elements
+- [API Reference](/api/components/stripe-card-element) — Full props, events, and options

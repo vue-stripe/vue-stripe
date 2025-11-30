@@ -2,6 +2,64 @@
 
 A composable for handling payment confirmations with Stripe's Payment Element.
 
+## What is usePaymentIntent?
+
+A composable that simplifies payment confirmation with built-in state management:
+
+| Capability | Description |
+|------------|-------------|
+| **Payment Confirmation** | Wraps `stripe.confirmPayment()` with error handling |
+| **Loading State** | Tracks whether a payment is being processed |
+| **Error State** | Captures and exposes payment errors |
+| **Auto Elements Injection** | Automatically uses Elements from context |
+| **Redirect Handling** | Supports both redirect and inline confirmation flows |
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Component calls usePaymentIntent()                         │
+│  Returns { confirmPayment, loading, error }                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  User clicks Pay button, triggers confirmPayment()          │
+│                                                             │
+│  await confirmPayment({                                     │
+│    clientSecret: 'pi_xxx_secret_xxx',                       │
+│    confirmParams: { return_url: '...' },                    │
+│    redirect: 'if_required'                                  │
+│  })                                                         │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Composable sets loading.value = true                       │
+│  Calls stripe.confirmPayment() with injected elements       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  SUCCESS                │     │  ERROR                      │
+│                         │     │                             │
+│  loading = false        │     │  loading = false            │
+│  Returns {              │     │  error.value = message      │
+│    paymentIntent: {     │     │  Returns {                  │
+│      status: 'succeeded'│     │    error: { message, code } │
+│    }                    │     │  }                          │
+│  }                      │     │                             │
+└─────────────────────────┘     └─────────────────────────────┘
+              │                               │
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  Show success message   │     │  Display error to user      │
+│  or redirect to         │     │  Allow retry                │
+│  confirmation page      │     │                             │
+└─────────────────────────┘     └─────────────────────────────┘
+```
+
 ::: tip Usage Context
 This composable must be called within a component that is a descendant of both `StripeProvider` and optionally `StripeElements`. The elements instance is automatically injected if available.
 :::

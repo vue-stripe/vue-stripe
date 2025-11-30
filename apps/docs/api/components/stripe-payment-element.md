@@ -6,6 +6,61 @@ Stripe's recommended all-in-one payment component that supports cards, wallets (
 This is Stripe's recommended component for accepting payments. It automatically displays the most relevant payment methods based on the customer's location and transaction.
 :::
 
+## What is Payment Element?
+
+Payment Element is Stripe's modern, unified payment interface that:
+
+| Capability | Description |
+|------------|-------------|
+| **40+ Payment Methods** | Cards, wallets, bank transfers, BNPL, and regional methods |
+| **Dynamic Display** | Automatically shows relevant methods based on customer location |
+| **Built-in Validation** | Real-time error handling and input validation |
+| **Responsive Design** | Adapts to any screen size and device |
+| **Localization** | Automatic translation based on customer's locale |
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Customer lands on checkout page                            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  PaymentElement renders inside StripeElements               │
+│  (Receives Elements instance + clientSecret from context)   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Stripe determines available payment methods based on:      │
+│  - PaymentIntent currency and amount                        │
+│  - Customer's location and device                           │
+│  - Your Dashboard payment method settings                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Customer fills payment details                             │
+│  (Emits @change with { complete, value } on each input)    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  On submit: Call stripe.confirmPayment()                    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  SUCCESS                │     │  REQUIRES ACTION            │
+│                         │     │                             │
+│  PaymentIntent status:  │     │  Redirect to 3D Secure,     │
+│  "succeeded"            │     │  bank auth, or other flow   │
+│                         │     │  then return to return_url  │
+└─────────────────────────┘     └─────────────────────────────┘
+```
+
 ## Usage
 
 ```vue

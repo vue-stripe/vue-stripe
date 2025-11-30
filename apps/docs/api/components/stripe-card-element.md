@@ -6,6 +6,63 @@ A single, unified card input field that collects card number, expiration date, a
 Use StripeCardElement for a classic card-only payment experience. For modern payments that support cards, wallets, and bank transfers, consider [StripePaymentElement](/api/components/stripe-payment-element) instead.
 :::
 
+## What is Card Element?
+
+Card Element is the classic Stripe card input that provides:
+
+| Capability | Description |
+|------------|-------------|
+| **Unified Input** | Single field for card number, expiry, and CVC |
+| **Real-time Validation** | Validates card number format, expiry, and CVC as user types |
+| **Card Brand Detection** | Automatically detects and displays card brand icon |
+| **Customizable Styling** | Full control over fonts, colors, and appearance |
+| **No clientSecret Required** | Can be used without a PaymentIntent (flexible integration) |
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  CardElement mounts inside StripeElements                   │
+│  (Does NOT require clientSecret - more flexible than        │
+│   PaymentElement)                                           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Renders a single input field with embedded Stripe iframe   │
+│  Emits @ready when mounted                                  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Customer types card details                                │
+│  - Card number (auto-formats, detects brand)                │
+│  - MM/YY expiry (auto-formats)                              │
+│  - CVC (3 or 4 digits based on brand)                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Emits @change on each keystroke                            │
+│  { complete, empty, error, brand, value }                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  On submit: Two approaches available                        │
+└─────────────────────────────────────────────────────────────┘
+              │                               │
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  With PaymentIntent     │     │  Create Payment Method Only │
+│                         │     │                             │
+│  stripe.confirmCard-    │     │  stripe.createPayment-      │
+│  Payment(clientSecret,  │     │  Method({ type: 'card',     │
+│  { payment_method: {    │     │    card: cardElement })     │
+│    card: cardElement}}) │     │  → Returns PaymentMethod ID │
+└─────────────────────────┘     └─────────────────────────────┘
+```
+
 ## Usage
 
 ```vue

@@ -51,7 +51,16 @@ export default defineConfig({
           items: [
             { text: 'Payment Element', link: '/guide/payment-element' },
             { text: 'Card Element', link: '/guide/card-element' },
+            { text: 'Address Element', link: '/guide/address-element' },
+            { text: 'Link Authentication', link: '/guide/link-authentication' },
             { text: 'Express Checkout', link: '/guide/express-checkout' },
+          ]
+        },
+        {
+          text: 'Advanced',
+          items: [
+            { text: 'Saving Payment Methods', link: '/guide/setup-intent' },
+            { text: 'Checkout', link: '/guide/checkout' },
           ]
         },
       ],
@@ -73,10 +82,17 @@ export default defineConfig({
           text: 'Element Components',
           items: [
             { text: 'StripePaymentElement', link: '/api/components/stripe-payment-element' },
+            { text: 'StripeExpressCheckoutElement', link: '/api/components/stripe-express-checkout-element' },
             { text: 'StripeCardElement', link: '/api/components/stripe-card-element' },
             { text: 'Split Card Elements', link: '/api/components/stripe-split-card-elements' },
             { text: 'StripeAddressElement', link: '/api/components/stripe-address-element' },
             { text: 'StripeLinkAuthenticationElement', link: '/api/components/stripe-link-authentication-element' },
+          ]
+        },
+        {
+          text: 'Checkout',
+          items: [
+            { text: 'StripeCheckout', link: '/api/components/stripe-checkout' },
           ]
         },
         {
@@ -85,6 +101,14 @@ export default defineConfig({
             { text: 'useStripe', link: '/api/composables/use-stripe' },
             { text: 'useStripeElements', link: '/api/composables/use-stripe-elements' },
             { text: 'usePaymentIntent', link: '/api/composables/use-payment-intent' },
+            { text: 'useSetupIntent', link: '/api/composables/use-setup-intent' },
+            { text: 'useStripeCheckout', link: '/api/composables/use-stripe-checkout' },
+          ]
+        },
+        {
+          text: 'Plugin',
+          items: [
+            { text: 'createVueStripe', link: '/api/plugin' },
           ]
         },
       ],

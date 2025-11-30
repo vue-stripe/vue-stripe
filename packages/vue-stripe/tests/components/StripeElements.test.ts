@@ -67,7 +67,8 @@ describe('StripeElements', () => {
         throw new Error('Elements creation failed')
       }),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = mountWithProvider(
@@ -97,7 +98,8 @@ describe('StripeElements', () => {
     mockLoadStripe.mockResolvedValueOnce({
       elements: mockElements,
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     mountWithProvider({
@@ -124,7 +126,8 @@ describe('StripeElements', () => {
     mockLoadStripe.mockResolvedValueOnce({
       elements: mockElements,
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     mountWithProvider({
@@ -191,7 +194,8 @@ describe('StripeElements', () => {
     mockLoadStripe.mockResolvedValue({
       elements: mockElements,
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     // Create a component that can change clientSecret
@@ -238,7 +242,8 @@ describe('StripeElements', () => {
         throw new Error('Test error')
       }),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = mountWithProvider()

@@ -62,7 +62,8 @@ describe('Split Card Elements', () => {
           create: mockCreate
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       await mountWithProviders(StripeCardNumberElement)
@@ -81,7 +82,8 @@ describe('Split Card Elements', () => {
           create: mockCreate
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       const options = {
@@ -113,7 +115,8 @@ describe('Split Card Elements', () => {
           create: vi.fn(() => mockElement)
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(StripeCardNumberElement)
@@ -147,7 +150,8 @@ describe('Split Card Elements', () => {
           create: mockCreate
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       await mountWithProviders(StripeCardNumberElement)
@@ -186,7 +190,8 @@ describe('Split Card Elements', () => {
           create: mockCreate
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       await mountWithProviders(StripeCardExpiryElement)
@@ -212,7 +217,8 @@ describe('Split Card Elements', () => {
           create: vi.fn(() => mockElement)
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(StripeCardExpiryElement)
@@ -244,7 +250,8 @@ describe('Split Card Elements', () => {
           create: vi.fn(() => mockElement)
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(StripeCardExpiryElement)
@@ -294,7 +301,8 @@ describe('Split Card Elements', () => {
           create: mockCreate
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       await mountWithProviders(StripeCardCvcElement)
@@ -320,7 +328,8 @@ describe('Split Card Elements', () => {
           create: vi.fn(() => mockElement)
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(StripeCardCvcElement)
@@ -353,7 +362,8 @@ describe('Split Card Elements', () => {
           create: vi.fn(() => mockElement)
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(StripeCardCvcElement)
@@ -388,7 +398,8 @@ describe('Split Card Elements', () => {
           create: mockCreate
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = mount(StripeProvider, {
@@ -427,7 +438,8 @@ describe('Split Card Elements', () => {
           create: mockCreate
         })),
         confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn()
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = mount(StripeProvider, {

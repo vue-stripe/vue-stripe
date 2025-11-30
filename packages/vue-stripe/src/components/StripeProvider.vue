@@ -3,6 +3,7 @@ import { provide, ref, onMounted } from 'vue-demi'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { stripeInjectionKey } from '../utils/injection-keys'
 import { StripeProviderError } from '../utils/errors'
+import { STRIPE_PARTNER_DETAILS } from '../utils/constants'
 
 interface Props {
   publishableKey?: string
@@ -62,7 +63,9 @@ const initialize = async () => {
     if (!stripe.value) {
       throw new StripeProviderError('Failed to initialize Stripe')
     }
-    
+
+    stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS)
+
     emit('load', stripe.value)
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to load Stripe'

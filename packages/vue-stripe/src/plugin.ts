@@ -1,6 +1,7 @@
 import type { App, Plugin } from 'vue-demi'
 import type { VueStripeOptions } from './types'
 import { loadStripe, type Stripe, type StripeConstructorOptions } from '@stripe/stripe-js'
+import { STRIPE_PARTNER_DETAILS } from './utils/constants'
 
 /**
  * Vue Stripe Plugin
@@ -38,7 +39,12 @@ export function createVueStripe(options: VueStripeOptions): Plugin {
             if (options.apiVersion) loadStripeOptions.apiVersion = options.apiVersion
             if (options.locale) loadStripeOptions.locale = options.locale
 
-            stripeInstance = loadStripe(options.publishableKey, loadStripeOptions)
+            stripeInstance = loadStripe(options.publishableKey, loadStripeOptions).then(stripe => {
+              if (stripe) {
+                stripe.registerAppInfo(STRIPE_PARTNER_DETAILS)
+              }
+              return stripe
+            })
           }
           return stripeInstance
         }

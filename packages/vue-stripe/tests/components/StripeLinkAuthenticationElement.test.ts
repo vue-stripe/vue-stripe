@@ -59,7 +59,8 @@ describe('StripeLinkAuthenticationElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     await mountWithProviders()
@@ -78,7 +79,8 @@ describe('StripeLinkAuthenticationElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const options = {
@@ -104,7 +106,8 @@ describe('StripeLinkAuthenticationElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     await mountWithProviders()
@@ -131,7 +134,8 @@ describe('StripeLinkAuthenticationElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -165,7 +169,8 @@ describe('StripeLinkAuthenticationElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -207,7 +212,8 @@ describe('StripeLinkAuthenticationElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -242,7 +248,8 @@ describe('StripeLinkAuthenticationElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()

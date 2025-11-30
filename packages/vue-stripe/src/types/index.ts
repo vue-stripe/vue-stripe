@@ -11,7 +11,6 @@ import type {
   StripeElement,
   StripeElementChangeEvent,
   ConfirmPaymentData,
-  ConfirmCardSetupData,
   StripeConstructorOptions
 } from '@stripe/stripe-js'
 
@@ -78,9 +77,33 @@ export interface UsePaymentIntentReturn {
 }
 
 export interface UseSetupIntentReturn {
-  confirmSetup: (data: ConfirmCardSetupData & { clientSecret: string }) => Promise<any>
+  confirmSetup: (options: ConfirmSetupOptions) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
+}
+
+export interface ConfirmSetupOptions {
+  clientSecret: string
+  confirmParams?: {
+    return_url?: string
+    payment_method_data?: {
+      billing_details?: {
+        name?: string
+        email?: string
+        phone?: string
+        address?: {
+          line1?: string
+          line2?: string
+          city?: string
+          state?: string
+          postal_code?: string
+          country?: string
+        }
+      }
+    }
+  }
+  redirect?: 'if_required' | 'always'
+  elements?: StripeElements
 }
 
 // Payment method types for modern elements

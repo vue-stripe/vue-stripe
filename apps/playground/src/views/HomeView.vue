@@ -50,16 +50,16 @@ const testingPhases = [
     description: 'Express checkout and saved cards',
     items: [
       { name: 'StripeLinkAuthenticationElement', route: '/stripe-link-authentication', status: 'done', description: 'Stripe Link email input' },
-      { name: 'StripeExpressCheckoutElement', route: '/stripe-express-checkout', status: 'pending', description: 'Apple Pay, Google Pay buttons' },
-      { name: 'useSetupIntent()', route: '/use-setup-intent', status: 'pending', description: 'Save payment methods for later' }
+      { name: 'StripeExpressCheckoutElement', route: '/stripe-express-checkout', status: 'done', description: 'Apple Pay, Google Pay buttons' },
+      { name: 'useSetupIntent()', route: '/use-setup-intent', status: 'done', description: 'Save payment methods for later' }
     ]
   },
   {
     name: 'Phase 6: Checkout Flow',
     description: 'Redirect to Stripe-hosted checkout',
     items: [
-      { name: 'StripeCheckout', route: '/stripe-checkout', status: 'pending', description: 'Button to hosted checkout page' },
-      { name: 'useStripeCheckout()', route: '/use-stripe-checkout', status: 'pending', description: 'Programmatic checkout redirect' }
+      { name: 'StripeCheckout', route: '/stripe-checkout', status: 'done', description: 'Button to hosted checkout page' },
+      { name: 'useStripeCheckout()', route: '/stripe-checkout', status: 'done', description: 'Programmatic checkout redirect (tested via StripeCheckout)' }
     ]
   }
 ]
@@ -119,7 +119,7 @@ const getStatusIcon = (status: string) => {
               <span class="item-desc">{{ item.description }}</span>
             </div>
             <router-link
-              v-if="item.status !== 'pending' || phase.name.includes('Phase 1') || phase.name.includes('Phase 2') || phase.name.includes('Phase 3') || phase.name.includes('Phase 4')"
+              v-if="item.status !== 'pending'"
               :to="item.route"
               class="btn btn-sm btn-primary"
             >

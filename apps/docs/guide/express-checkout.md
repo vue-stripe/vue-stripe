@@ -54,17 +54,6 @@ The Express Checkout Element:
 Apple Pay and Google Pay only work over HTTPS, even in development. Use a tool like [ngrok](https://ngrok.com) or [localhost.run](https://localhost.run) for local testing.
 :::
 
-## Events
-
-| Event | Payload | Description |
-|-------|---------|-------------|
-| `@click` | `{ resolve }` | Button clicked, resolve with options |
-| `@confirm` | `{ elements, expressPaymentType }` | User confirmed in wallet |
-| `@cancel` | — | User cancelled the wallet flow |
-| `@ready` | `{ availablePaymentMethods }` | Element ready, shows available methods |
-| `@shippingaddresschange` | `{ address, resolve }` | Shipping address changed |
-| `@shippingratechange` | `{ shippingRate, resolve }` | Shipping rate selected |
-
 ### Handling the Click Event
 
 Use `@click` to customize the payment sheet:
@@ -139,56 +128,6 @@ const handleShippingAddressChange = async ({ address, resolve }) => {
   />
 </template>
 ```
-
-## Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `options` | `object` | Element configuration |
-
-### Options
-
-```vue
-<StripeExpressCheckoutElement
-  :options="{
-    buttonType: {
-      applePay: 'buy',
-      googlePay: 'buy'
-    },
-    buttonTheme: {
-      applePay: 'black',
-      googlePay: 'black'
-    },
-    buttonHeight: 48,
-    layout: {
-      maxColumns: 2,
-      maxRows: 1
-    },
-    paymentMethods: {
-      applePay: 'always',
-      googlePay: 'always',
-      link: 'auto'
-    }
-  }"
-/>
-```
-
-### Button Types
-
-| Type | Apple Pay | Google Pay |
-|------|-----------|------------|
-| `buy` | "Buy with Apple Pay" | "Buy with Google Pay" |
-| `checkout` | "Check out with Apple Pay" | "Check out with GPay" |
-| `donate` | "Donate with Apple Pay" | "Donate with GPay" |
-| `plain` | Apple Pay logo only | Google Pay logo only |
-
-### Button Themes
-
-| Theme | Apple Pay | Google Pay |
-|-------|-----------|------------|
-| `black` | Black background | Black background |
-| `white` | White background | White background |
-| `white-outline` | White with border | White with border |
 
 ## Combining with Payment Element
 
@@ -393,6 +332,7 @@ const handleSubmit = async () => {
 
 ## Next Steps
 
-- [Payment Element](/guide/payment-element) - The full payment form
-- [Customization](/guide/customization) - Style your checkout
-- [Error Handling](/guide/error-handling) - Handle edge cases
+- [Payment Element](/guide/payment-element) — The full payment form
+- [Customization](/guide/customization) — Style your checkout
+- [Error Handling](/guide/error-handling) — Handle edge cases
+- [API Reference](/api/components/stripe-express-checkout-element) — Full props, events, and options

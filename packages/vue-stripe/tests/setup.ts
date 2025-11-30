@@ -23,7 +23,8 @@ vi.mock('@stripe/stripe-js', () => ({
     })),
     confirmCardSetup: vi.fn(() => Promise.resolve({
       setupIntent: { id: 'seti_test_123', status: 'succeeded' }
-    }))
+    })),
+    registerAppInfo: vi.fn()
   }))
 }))
 
@@ -51,7 +52,8 @@ export const createMockStripe = () => ({
     }))
   })),
   confirmPayment: vi.fn(),
-  confirmCardSetup: vi.fn()
+  confirmCardSetup: vi.fn(),
+  registerAppInfo: vi.fn()
 })
 
 export const createMockElement = () => ({

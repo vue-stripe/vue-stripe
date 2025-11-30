@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue-demi'
+import { ref } from 'vue-demi'
 import type { RedirectToCheckoutOptions } from '@stripe/stripe-js'
 import { useStripe } from '../composables/useStripe'
 import { StripeProviderError } from '../utils/errors'
@@ -7,7 +7,7 @@ import { StripeProviderError } from '../utils/errors'
 interface Props {
   sessionId?: string
   priceId?: string
-  mode?: 'payment' | 'subscription' | 'setup'
+  mode?: 'payment' | 'subscription'
   successUrl?: string
   cancelUrl?: string
   customerEmail?: string
@@ -55,38 +55,35 @@ const redirectToCheckout = async () => {
   try {
     loading.value = true
     emit('click')
-    
-    let checkoutOptions: RedirectToCheckoutOptions
-    
+
+    let result: { error?: { message?: string } }
+
     if (props.sessionId) {
       // Session-based checkout
-      checkoutOptions = {
+      result = await stripe.value.redirectToCheckout({
         sessionId: props.sessionId,
         ...props.options
-      }
+      })
     } else {
       // Price-based checkout
-      checkoutOptions = {
+      result = await stripe.value.redirectToCheckout({
         lineItems: [
           {
             price: props.priceId!,
             quantity: 1
           }
         ],
-        mode: props.mode,
+        mode: props.mode!,
         successUrl: props.successUrl || window.location.origin + '/success',
         cancelUrl: props.cancelUrl || window.location.origin + '/cancel',
         customerEmail: props.customerEmail,
         clientReferenceId: props.clientReferenceId,
-        submitType: props.submitType,
-        ...props.options
-      }
+        submitType: props.submitType
+      } as RedirectToCheckoutOptions)
     }
-    
-    const result = await stripe.value.redirectToCheckout(checkoutOptions)
 
     if (result.error) {
-      throw new StripeProviderError(result.error.message)
+      throw new StripeProviderError(result.error.message || 'Redirect to checkout failed')
     }
     
     emit('success')

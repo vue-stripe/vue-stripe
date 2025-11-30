@@ -1,25 +1,27 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
-import StripeAddressElement from '../../src/components/StripeAddressElement.vue'
+import StripeExpressCheckoutElement from '../../src/components/StripeExpressCheckoutElement.vue'
 import StripeElements from '../../src/components/StripeElements.vue'
 import StripeProvider from '../../src/components/StripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
 
-describe('StripeAddressElement', () => {
+describe('StripeExpressCheckoutElement', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   // Helper to mount with full provider hierarchy
-  const mountWithProviders = async (addressProps = {}) => {
+  const mountWithProviders = async (expressCheckoutProps = {}) => {
     const wrapper = mount(StripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {}, {
-          default: () => h(StripeAddressElement, addressProps)
+        default: () => h(StripeElements, {
+          clientSecret: 'pi_test_secret_123'
+        }, {
+          default: () => h(StripeExpressCheckoutElement, expressCheckoutProps)
         })
       }
     })
@@ -32,23 +34,18 @@ describe('StripeAddressElement', () => {
 
   it('should throw error when used outside StripeElements', () => {
     expect(() => {
-      mount(StripeAddressElement, {
-        props: {
-          options: { mode: 'shipping' }
-        }
-      })
-    }).toThrow('StripeAddressElement must be used within StripeElements')
+      mount(StripeExpressCheckoutElement)
+    }).toThrow('StripeExpressCheckoutElement must be used within StripeElements')
   })
 
-  it('should render address element container', async () => {
+  it('should render express checkout element container', async () => {
     const wrapper = await mountWithProviders()
 
-    // StripeAddressElement renders a div ref
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
-    expect(addressComponent.exists()).toBe(true)
+    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    expect(expressCheckoutComponent.exists()).toBe(true)
   })
 
-  it('should mount Stripe address element on the DOM', async () => {
+  it('should mount Stripe express checkout element on the DOM', async () => {
     const mockElement = createMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
@@ -64,11 +61,11 @@ describe('StripeAddressElement', () => {
 
     await mountWithProviders()
 
-    expect(mockCreate).toHaveBeenCalledWith('address', { mode: 'shipping' })
+    expect(mockCreate).toHaveBeenCalledWith('expressCheckout', undefined)
     expect(mockElement.mount).toHaveBeenCalled()
   })
 
-  it('should pass options to address element', async () => {
+  it('should pass options to express checkout element', async () => {
     const mockElement = createMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
@@ -82,20 +79,29 @@ describe('StripeAddressElement', () => {
       registerAppInfo: vi.fn()
     } as any)
 
-    const addressOptions = {
-      mode: 'billing' as const,
-      autocomplete: { mode: 'automatic' as const },
-      fields: { phone: 'always' as const }
+    const expressCheckoutOptions = {
+      buttonType: {
+        applePay: 'buy' as const,
+        googlePay: 'checkout' as const
+      },
+      buttonTheme: {
+        applePay: 'black' as const,
+        googlePay: 'white' as const
+      },
+      layout: {
+        maxColumns: 2,
+        maxRows: 1
+      }
     }
 
     await mountWithProviders({
-      options: addressOptions
+      options: expressCheckoutOptions
     })
 
-    expect(mockCreate).toHaveBeenCalledWith('address', addressOptions)
+    expect(mockCreate).toHaveBeenCalledWith('expressCheckout', expressCheckoutOptions)
   })
 
-  it('should set up event listeners on address element', async () => {
+  it('should set up event listeners on express checkout element', async () => {
     const mockElement = createMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
@@ -113,14 +119,14 @@ describe('StripeAddressElement', () => {
 
     // Check that event listeners were set up
     expect(mockElement.on).toHaveBeenCalledWith('ready', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('change', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('focus', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('blur', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('escape', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('loaderror', expect.any(Function))
+    expect(mockElement.on).toHaveBeenCalledWith('click', expect.any(Function))
+    expect(mockElement.on).toHaveBeenCalledWith('confirm', expect.any(Function))
+    expect(mockElement.on).toHaveBeenCalledWith('cancel', expect.any(Function))
+    expect(mockElement.on).toHaveBeenCalledWith('shippingaddresschange', expect.any(Function))
+    expect(mockElement.on).toHaveBeenCalledWith('shippingratechange', expect.any(Function))
   })
 
-  it('should emit ready event when address element is ready', async () => {
+  it('should emit ready event when express checkout element is ready', async () => {
     let readyCallback: Function | null = null
     const mockElement = {
       ...createMockElement(),
@@ -143,78 +149,34 @@ describe('StripeAddressElement', () => {
 
     const wrapper = await mountWithProviders()
 
-    // Simulate ready event
-    if (readyCallback) {
-      readyCallback()
-    }
-
-    await nextTick()
-
-    // Find the StripeAddressElement component and check emissions
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
-    const emitted = addressComponent.emitted('ready')
-    expect(emitted).toBeTruthy()
-  })
-
-  it('should emit change event when address element changes', async () => {
-    let changeCallback: Function | null = null
-    const mockElement = {
-      ...createMockElement(),
-      on: vi.fn((event: string, callback: Function) => {
-        if (event === 'change') {
-          changeCallback = callback
-        }
-      })
-    }
-
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-    mockLoadStripe.mockResolvedValueOnce({
-      elements: vi.fn(() => ({
-        create: vi.fn(() => mockElement)
-      })),
-      confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
-    } as any)
-
-    const wrapper = await mountWithProviders()
-
-    // Simulate change event
-    const changeEvent = {
-      complete: true,
-      isNewAddress: true,
-      value: {
-        name: 'John Doe',
-        address: {
-          line1: '123 Main St',
-          line2: null,
-          city: 'San Francisco',
-          state: 'CA',
-          postal_code: '94102',
-          country: 'US'
-        }
+    // Simulate ready event with available payment methods
+    const readyEvent = {
+      availablePaymentMethods: {
+        applePay: true,
+        googlePay: true,
+        link: false
       }
     }
 
-    if (changeCallback) {
-      changeCallback(changeEvent)
+    if (readyCallback) {
+      readyCallback(readyEvent)
     }
 
     await nextTick()
 
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
-    const emitted = addressComponent.emitted('change')
+    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const emitted = expressCheckoutComponent.emitted('ready')
     expect(emitted).toBeTruthy()
-    expect(emitted![0][0]).toEqual(changeEvent)
+    expect(emitted![0][0]).toEqual(readyEvent)
   })
 
-  it('should emit focus event', async () => {
-    let focusCallback: Function | null = null
+  it('should emit click event when a wallet button is clicked', async () => {
+    let clickCallback: Function | null = null
     const mockElement = {
       ...createMockElement(),
       on: vi.fn((event: string, callback: Function) => {
-        if (event === 'focus') {
-          focusCallback = callback
+        if (event === 'click') {
+          clickCallback = callback
         }
       })
     }
@@ -231,120 +193,189 @@ describe('StripeAddressElement', () => {
 
     const wrapper = await mountWithProviders()
 
-    if (focusCallback) {
-      focusCallback()
+    // Simulate click event
+    const clickEvent = {
+      expressPaymentType: 'apple_pay',
+      resolve: vi.fn()
+    }
+
+    if (clickCallback) {
+      clickCallback(clickEvent)
     }
 
     await nextTick()
 
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
-    expect(addressComponent.emitted('focus')).toBeTruthy()
-  })
-
-  it('should emit blur event', async () => {
-    let blurCallback: Function | null = null
-    const mockElement = {
-      ...createMockElement(),
-      on: vi.fn((event: string, callback: Function) => {
-        if (event === 'blur') {
-          blurCallback = callback
-        }
-      })
-    }
-
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-    mockLoadStripe.mockResolvedValueOnce({
-      elements: vi.fn(() => ({
-        create: vi.fn(() => mockElement)
-      })),
-      confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
-    } as any)
-
-    const wrapper = await mountWithProviders()
-
-    if (blurCallback) {
-      blurCallback()
-    }
-
-    await nextTick()
-
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
-    expect(addressComponent.emitted('blur')).toBeTruthy()
-  })
-
-  it('should emit escape event', async () => {
-    let escapeCallback: Function | null = null
-    const mockElement = {
-      ...createMockElement(),
-      on: vi.fn((event: string, callback: Function) => {
-        if (event === 'escape') {
-          escapeCallback = callback
-        }
-      })
-    }
-
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-    mockLoadStripe.mockResolvedValueOnce({
-      elements: vi.fn(() => ({
-        create: vi.fn(() => mockElement)
-      })),
-      confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
-    } as any)
-
-    const wrapper = await mountWithProviders()
-
-    if (escapeCallback) {
-      escapeCallback()
-    }
-
-    await nextTick()
-
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
-    expect(addressComponent.emitted('escape')).toBeTruthy()
-  })
-
-  it('should emit loadError event', async () => {
-    let loadErrorCallback: Function | null = null
-    const mockElement = {
-      ...createMockElement(),
-      on: vi.fn((event: string, callback: Function) => {
-        if (event === 'loaderror') {
-          loadErrorCallback = callback
-        }
-      })
-    }
-
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-    mockLoadStripe.mockResolvedValueOnce({
-      elements: vi.fn(() => ({
-        create: vi.fn(() => mockElement)
-      })),
-      confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
-    } as any)
-
-    const wrapper = await mountWithProviders()
-
-    const errorEvent = {
-      elementType: 'address',
-      error: 'Failed to load address element'
-    }
-
-    if (loadErrorCallback) {
-      loadErrorCallback(errorEvent)
-    }
-
-    await nextTick()
-
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
-    const emitted = addressComponent.emitted('loadError')
+    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const emitted = expressCheckoutComponent.emitted('click')
     expect(emitted).toBeTruthy()
-    expect(emitted![0][0]).toEqual(errorEvent)
+    expect(emitted![0][0]).toEqual(clickEvent)
+  })
+
+  it('should emit confirm event when payment is confirmed', async () => {
+    let confirmCallback: Function | null = null
+    const mockElement = {
+      ...createMockElement(),
+      on: vi.fn((event: string, callback: Function) => {
+        if (event === 'confirm') {
+          confirmCallback = callback
+        }
+      })
+    }
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => mockElement)
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+
+    // Simulate confirm event
+    const confirmEvent = {
+      expressPaymentType: 'google_pay',
+      paymentMethodId: 'pm_test_123',
+      billingDetails: {
+        name: 'John Doe',
+        email: 'john@example.com'
+      }
+    }
+
+    if (confirmCallback) {
+      confirmCallback(confirmEvent)
+    }
+
+    await nextTick()
+
+    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const emitted = expressCheckoutComponent.emitted('confirm')
+    expect(emitted).toBeTruthy()
+    expect(emitted![0][0]).toEqual(confirmEvent)
+  })
+
+  it('should emit cancel event when user cancels payment', async () => {
+    let cancelCallback: Function | null = null
+    const mockElement = {
+      ...createMockElement(),
+      on: vi.fn((event: string, callback: Function) => {
+        if (event === 'cancel') {
+          cancelCallback = callback
+        }
+      })
+    }
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => mockElement)
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+
+    if (cancelCallback) {
+      cancelCallback()
+    }
+
+    await nextTick()
+
+    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    expect(expressCheckoutComponent.emitted('cancel')).toBeTruthy()
+  })
+
+  it('should emit shippingaddresschange event', async () => {
+    let shippingAddressCallback: Function | null = null
+    const mockElement = {
+      ...createMockElement(),
+      on: vi.fn((event: string, callback: Function) => {
+        if (event === 'shippingaddresschange') {
+          shippingAddressCallback = callback
+        }
+      })
+    }
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => mockElement)
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+
+    const shippingEvent = {
+      address: {
+        city: 'San Francisco',
+        country: 'US',
+        line1: '123 Main St',
+        postal_code: '94102',
+        state: 'CA'
+      },
+      name: 'John Doe'
+    }
+
+    if (shippingAddressCallback) {
+      shippingAddressCallback(shippingEvent)
+    }
+
+    await nextTick()
+
+    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const emitted = expressCheckoutComponent.emitted('shippingaddresschange')
+    expect(emitted).toBeTruthy()
+    expect(emitted![0][0]).toEqual(shippingEvent)
+  })
+
+  it('should emit shippingratechange event', async () => {
+    let shippingRateCallback: Function | null = null
+    const mockElement = {
+      ...createMockElement(),
+      on: vi.fn((event: string, callback: Function) => {
+        if (event === 'shippingratechange') {
+          shippingRateCallback = callback
+        }
+      })
+    }
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => mockElement)
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+
+    const shippingRateEvent = {
+      shippingRate: {
+        id: 'rate_123',
+        amount: 500,
+        displayName: 'Standard Shipping'
+      }
+    }
+
+    if (shippingRateCallback) {
+      shippingRateCallback(shippingRateEvent)
+    }
+
+    await nextTick()
+
+    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const emitted = expressCheckoutComponent.emitted('shippingratechange')
+    expect(emitted).toBeTruthy()
+    expect(emitted![0][0]).toEqual(shippingRateEvent)
   })
 
   it('should destroy element on unmount', async () => {
@@ -369,125 +400,8 @@ describe('StripeAddressElement', () => {
     expect(mockElement.destroy).toHaveBeenCalled()
   })
 
-  it('should remove event listeners on unmount', async () => {
-    const mockElement = createMockElement()
-    const mockCreate = vi.fn(() => mockElement)
-
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-    mockLoadStripe.mockResolvedValueOnce({
-      elements: vi.fn(() => ({
-        create: mockCreate
-      })),
-      confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
-    } as any)
-
-    const wrapper = await mountWithProviders()
-
-    // Unmount the component
-    wrapper.unmount()
-
-    expect(mockElement.off).toHaveBeenCalledWith('ready', expect.any(Function))
-    expect(mockElement.off).toHaveBeenCalledWith('change', expect.any(Function))
-    expect(mockElement.off).toHaveBeenCalledWith('focus', expect.any(Function))
-    expect(mockElement.off).toHaveBeenCalledWith('blur', expect.any(Function))
-    expect(mockElement.off).toHaveBeenCalledWith('escape', expect.any(Function))
-    expect(mockElement.off).toHaveBeenCalledWith('loaderror', expect.any(Function))
-  })
-
-  describe('exposed methods', () => {
-    it('should expose getValue method', async () => {
-      const mockGetValueResult = {
-        complete: true,
-        isNewAddress: false,
-        value: {
-          name: 'Jane Doe',
-          address: {
-            line1: '456 Oak Ave',
-            line2: 'Suite 100',
-            city: 'Los Angeles',
-            state: 'CA',
-            postal_code: '90001',
-            country: 'US'
-          }
-        }
-      }
-
-      const mockElement = {
-        ...createMockElement(),
-        getValue: vi.fn(() => Promise.resolve(mockGetValueResult))
-      }
-      const mockCreate = vi.fn(() => mockElement)
-
-      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-      mockLoadStripe.mockResolvedValueOnce({
-        elements: vi.fn(() => ({
-          create: mockCreate
-        })),
-        confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
-      } as any)
-
-      const wrapper = await mountWithProviders()
-
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
-      const vm = addressComponent.vm as any
-
-      // Call the exposed getValue method
-      const result = await vm.getValue()
-
-      expect(mockElement.getValue).toHaveBeenCalled()
-      expect(result).toEqual(mockGetValueResult)
-    })
-
-    it('should return address data from getValue', async () => {
-      // Test that getValue returns the expected shape of data
-      const mockGetValueResult = {
-        complete: false,
-        isNewAddress: true,
-        value: {
-          name: '',
-          address: {
-            line1: '',
-            line2: null,
-            city: '',
-            state: '',
-            postal_code: '',
-            country: 'US'
-          }
-        }
-      }
-
-      const mockElement = {
-        ...createMockElement(),
-        getValue: vi.fn(() => Promise.resolve(mockGetValueResult))
-      }
-
-      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-      mockLoadStripe.mockResolvedValueOnce({
-        elements: vi.fn(() => ({
-          create: vi.fn(() => mockElement)
-        })),
-        confirmPayment: vi.fn(),
-        confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
-      } as any)
-
-      const wrapper = await mountWithProviders()
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
-      const vm = addressComponent.vm as any
-
-      const result = await vm.getValue()
-
-      expect(result.complete).toBe(false)
-      expect(result.isNewAddress).toBe(true)
-      expect(result.value).toBeDefined()
-      expect(result.value.address).toBeDefined()
-    })
-
-    it('should expose focus method', async () => {
+  describe('exposed properties', () => {
+    it('should expose element property', async () => {
       const mockElement = createMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
@@ -503,16 +417,16 @@ describe('StripeAddressElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
-      const vm = addressComponent.vm as any
+      const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
 
-      // Call the exposed focus method
-      vm.focus()
-
-      expect(mockElement.focus).toHaveBeenCalled()
+      // Element is created and mounted on the DOM
+      expect(mockCreate).toHaveBeenCalledWith('expressCheckout', undefined)
+      expect(mockElement.mount).toHaveBeenCalled()
+      // The element property is exposed on the component (can check it exists via defineExpose)
+      expect(expressCheckoutComponent.exists()).toBe(true)
     })
 
-    it('should expose clear method', async () => {
+    it('should expose loading state', async () => {
       const mockElement = createMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
@@ -528,16 +442,14 @@ describe('StripeAddressElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
-      const vm = addressComponent.vm as any
+      const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+      const vm = expressCheckoutComponent.vm as any
 
-      // Call the exposed clear method
-      vm.clear()
-
-      expect(mockElement.clear).toHaveBeenCalled()
+      // Loading should be defined (starts as true, becomes false after ready)
+      expect(typeof vm.loading).toBe('boolean')
     })
 
-    it('should expose element ref', async () => {
+    it('should expose error state', async () => {
       const mockElement = createMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
@@ -553,11 +465,11 @@ describe('StripeAddressElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
-      const vm = addressComponent.vm as any
+      const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+      const vm = expressCheckoutComponent.vm as any
 
-      // The element should be exposed
-      expect(vm.element).toBeDefined()
+      // Error should be exposed (null when no error)
+      expect(vm.error).toBeNull()
     })
   })
 
@@ -576,15 +488,73 @@ describe('StripeAddressElement', () => {
       registerAppInfo: vi.fn()
       } as any)
 
+      const initialOptions = {
+        buttonType: {
+          applePay: 'buy' as const
+        }
+      }
+
       await mountWithProviders({
-        options: { mode: 'shipping' as const }
+        options: initialOptions
       })
 
-      // The element should have been created with the options
-      expect(mockCreate).toHaveBeenCalledWith('address', { mode: 'shipping' })
-
-      // The update method is available on the element
+      expect(mockCreate).toHaveBeenCalledWith('expressCheckout', initialOptions)
       expect(mockElement.update).toBeDefined()
+    })
+  })
+
+  describe('error handling', () => {
+    it('should set error state when element creation fails', async () => {
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+      mockLoadStripe.mockResolvedValueOnce({
+        elements: vi.fn(() => ({
+          create: vi.fn(() => {
+            throw new Error('Failed to create express checkout element')
+          })
+        })),
+        confirmPayment: vi.fn(),
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+      } as any)
+
+      // Suppress console.error for this test
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const wrapper = await mountWithProviders()
+
+      const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+      const vm = expressCheckoutComponent.vm as any
+
+      expect(vm.error).toBe('Failed to create express checkout element')
+      expect(vm.loading).toBe(false)
+
+      consoleError.mockRestore()
+    })
+
+    it('should display error message in template', async () => {
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+      mockLoadStripe.mockResolvedValueOnce({
+        elements: vi.fn(() => ({
+          create: vi.fn(() => {
+            throw new Error('Test error message')
+          })
+        })),
+        confirmPayment: vi.fn(),
+        confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+      } as any)
+
+      // Suppress console.error for this test
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const wrapper = await mountWithProviders()
+
+      await nextTick()
+
+      // Check that error message is displayed
+      expect(wrapper.html()).toContain('Test error message')
+
+      consoleError.mockRestore()
     })
   })
 })

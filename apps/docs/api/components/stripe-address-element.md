@@ -6,6 +6,65 @@ A complete address collection form with built-in autocomplete powered by Google 
 StripeAddressElement works without a `clientSecret`. It only needs to be wrapped in `StripeProvider` and `StripeElements` to function.
 :::
 
+## What is Address Element?
+
+Address Element provides a complete, validated address collection form:
+
+| Capability | Description |
+|------------|-------------|
+| **Google Maps Autocomplete** | Suggests addresses as the user types |
+| **Address Validation** | Validates addresses against postal databases |
+| **International Support** | Works with addresses from 200+ countries |
+| **Phone Collection** | Optional phone number field with country code |
+| **Shipping/Billing Modes** | Configurable for different use cases |
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  AddressElement mounts inside StripeElements                │
+│  (No clientSecret required - works standalone)              │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Renders address form based on mode (shipping/billing)      │
+│  - Name field                                               │
+│  - Address line 1 (with autocomplete suggestions)           │
+│  - Address line 2                                           │
+│  - City, State/Province, Postal Code                        │
+│  - Country selector                                         │
+│  - Phone (if configured)                                    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  User starts typing address                                 │
+│  Google Maps suggests matching addresses                    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  User selects           │     │  User types manually        │
+│  suggestion             │     │                             │
+│                         │     │  Form validates each field  │
+│  Auto-fills all fields  │     │  as they complete it        │
+└─────────────────────────┘     └─────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Emits @change with { complete, isNewAddress, value }       │
+│  complete: true when all required fields are valid          │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  On submit: Call getValue() to get validated address        │
+│  const { complete, value } = await addressRef.getValue()    │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Usage
 
 ```vue

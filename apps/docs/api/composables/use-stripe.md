@@ -2,6 +2,51 @@
 
 Access the Stripe instance from any component within `StripeProvider`.
 
+## What is useStripe?
+
+A composable that provides access to the Stripe.js instance from any child component:
+
+| Capability | Description |
+|------------|-------------|
+| **Stripe Instance Access** | Get the initialized Stripe.js instance for API calls |
+| **Loading State** | Know when Stripe.js is still loading |
+| **Error State** | Detect if Stripe.js failed to load |
+| **Reactive Updates** | Values update automatically when Stripe loads |
+| **Type Safety** | Full TypeScript support with proper typing |
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Component calls useStripe()                                │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Composable checks for StripeProvider context               │
+│  (Uses Vue's inject with stripeInjectionKey)                │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  Context Found          │     │  No Context Found           │
+│                         │     │                             │
+│  Returns { stripe,      │     │  Throws Error:              │
+│  loading, error }       │     │  "useStripe must be called  │
+│                         │     │   within StripeProvider"    │
+└─────────────────────────┘     └─────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Component uses stripe.value for API calls                  │
+│                                                             │
+│  if (stripe.value) {                                        │
+│    await stripe.value.confirmPayment({ ... })               │
+│  }                                                          │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Usage
 
 ```vue

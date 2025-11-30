@@ -2,6 +2,48 @@
 
 The root component that loads Stripe.js and provides the Stripe instance to all descendant components.
 
+## What is StripeProvider?
+
+StripeProvider is the foundation of any Vue Stripe integration. It handles:
+
+| Capability | Description |
+|------------|-------------|
+| **Stripe.js Loading** | Asynchronously loads Stripe.js from Stripe's CDN |
+| **Instance Management** | Creates and manages the Stripe instance lifecycle |
+| **Context Provision** | Makes Stripe available to all child components via Vue's provide/inject |
+| **Error Handling** | Catches and exposes loading errors for graceful degradation |
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  StripeProvider mounts with publishableKey                  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Calls loadStripe() from @stripe/stripe-js                  │
+│  (Shows #loading slot while waiting)                        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  SUCCESS                │     │  FAILURE                    │
+│                         │     │                             │
+│  1. Store Stripe in ref │     │  1. Store error message     │
+│  2. provide() to tree   │     │  2. Emit @error event       │
+│  3. Emit @load event    │     │  3. Show #error slot        │
+│  4. Render #default     │     │                             │
+└─────────────────────────┘     └─────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Child components access Stripe via useStripe() composable  │
+│  or inject stripeInjectionKey directly                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Usage
 
 ```vue

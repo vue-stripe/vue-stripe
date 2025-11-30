@@ -54,79 +54,6 @@ const handleSubmit = async () => {
 </template>
 ```
 
-## Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `options` | `object` | Payment Element options |
-
-### Options
-
-```vue
-<StripePaymentElement
-  :options="{
-    layout: 'tabs',
-    defaultValues: {
-      billingDetails: {
-        name: 'John Doe',
-        email: 'john@example.com'
-      }
-    },
-    business: {
-      name: 'My Store'
-    }
-  }"
-/>
-```
-
-#### Layout Options
-
-```js
-// Tabs layout (default) - payment methods as tabs
-{ layout: 'tabs' }
-
-// Accordion layout - payment methods as collapsible sections
-{ layout: 'accordion' }
-
-// Detailed configuration
-{
-  layout: {
-    type: 'tabs',
-    defaultCollapsed: false,
-    radios: false,
-    spacedAccordionItems: true
-  }
-}
-```
-
-## Events
-
-| Event | Payload | Description |
-|-------|---------|-------------|
-| `@ready` | `PaymentElement` | Element mounted and ready |
-| `@change` | `{ complete, empty, value }` | Input state changed |
-| `@focus` | `{ elementType }` | Element received focus |
-| `@blur` | `{ elementType }` | Element lost focus |
-
-```vue
-<StripePaymentElement
-  @ready="onReady"
-  @change="onChange"
-/>
-
-<script setup>
-const onReady = (element) => {
-  console.log('Payment Element ready')
-}
-
-const onChange = (event) => {
-  if (event.complete) {
-    // All required fields are filled
-  }
-}
-</script>
-```
-
 ## Customizing Appearance
 
 Use Stripe's Appearance API via `StripeElements`:
@@ -160,16 +87,6 @@ Use Stripe's Appearance API via `StripeElements`:
 >
   <StripePaymentElement />
 </StripeElements>
-```
-
-### Theme Options
-
-```js
-// Built-in themes
-appearance: { theme: 'stripe' }      // Default light theme
-appearance: { theme: 'night' }       // Dark theme
-appearance: { theme: 'flat' }        // Minimal borders
-appearance: { theme: 'none' }        // No styling (BYO CSS)
 ```
 
 ## Pre-filling Customer Data
@@ -383,6 +300,7 @@ button:disabled {
 
 ## Next Steps
 
-- [Express Checkout](/guide/express-checkout) - Add Apple Pay and Google Pay
-- [Customization](/guide/customization) - Theme and style your payment form
-- [Error Handling](/guide/error-handling) - Handle all error cases
+- [Express Checkout](/guide/express-checkout) — Add Apple Pay and Google Pay
+- [Customization](/guide/customization) — Theme and style your payment form
+- [Error Handling](/guide/error-handling) — Handle all error cases
+- [API Reference](/api/components/stripe-payment-element) — Full props, events, and options

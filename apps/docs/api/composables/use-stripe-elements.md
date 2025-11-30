@@ -2,6 +2,58 @@
 
 Access the Stripe Elements instance from any component within `StripeElements`.
 
+## What is useStripeElements?
+
+A composable that provides access to the Stripe Elements instance from any child component:
+
+| Capability | Description |
+|------------|-------------|
+| **Elements Instance Access** | Get the StripeElements instance for element retrieval |
+| **Element Retrieval** | Access individual elements via `getElement()` method |
+| **Loading State** | Know when Elements is still initializing |
+| **Error State** | Detect if Elements creation failed |
+| **Payment Submission** | Pass elements to `confirmPayment()` for checkout |
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Component calls useStripeElements()                        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Composable checks for StripeElements context               │
+│  (Uses Vue's inject with stripeElementsInjectionKey)        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  Context Found          │     │  No Context Found           │
+│                         │     │                             │
+│  Returns { elements,    │     │  Throws Error:              │
+│  loading, error }       │     │  "useStripeElements must be │
+│                         │     │   called within             │
+│                         │     │   StripeElements"           │
+└─────────────────────────┘     └─────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Component uses elements.value for element access           │
+│                                                             │
+│  // Get specific elements                                   │
+│  const card = elements.value?.getElement('card')            │
+│  const payment = elements.value?.getElement('payment')      │
+│                                                             │
+│  // Submit payment                                          │
+│  await stripe.value.confirmPayment({                        │
+│    elements: elements.value,                                │
+│    confirmParams: { return_url: '...' }                     │
+│  })                                                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Usage
 
 ```vue

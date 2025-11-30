@@ -55,7 +55,8 @@ describe('StripeCardElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     await mountWithProviders()
@@ -74,7 +75,8 @@ describe('StripeCardElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const cardOptions = {
@@ -104,7 +106,8 @@ describe('StripeCardElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     await mountWithProviders()
@@ -134,7 +137,8 @@ describe('StripeCardElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -169,7 +173,8 @@ describe('StripeCardElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -211,7 +216,8 @@ describe('StripeCardElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -243,7 +249,8 @@ describe('StripeCardElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -275,7 +282,8 @@ describe('StripeCardElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -307,7 +315,8 @@ describe('StripeCardElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -342,7 +351,8 @@ describe('StripeCardElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const options = ref({
@@ -390,7 +400,8 @@ describe('StripeCardElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -411,7 +422,8 @@ describe('StripeCardElement', () => {
         create: mockCreate
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
@@ -459,7 +471,8 @@ describe('StripeCardElement', () => {
         create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn()
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = mount(StripeProvider, {

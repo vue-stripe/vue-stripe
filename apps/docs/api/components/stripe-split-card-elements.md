@@ -12,6 +12,52 @@ Use Split Card Elements when you need:
 For simpler integration, consider [StripeCardElement](/api/components/stripe-card-element) instead.
 :::
 
+## What are Split Card Elements?
+
+Split Card Elements give you granular control over card input layout:
+
+| Component | Description |
+|-----------|-------------|
+| **StripeCardNumberElement** | Card number input with brand detection and Luhn validation |
+| **StripeCardExpiryElement** | MM/YY expiration date with auto-formatting |
+| **StripeCardCvcElement** | 3-4 digit security code (adapts to card brand) |
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  All three elements mount inside StripeElements             │
+│  (Share the same Elements instance and context)             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌───────────────┐     ┌───────────────┐     ┌───────────────┐
+│ CardNumber    │     │ CardExpiry    │     │ CardCvc       │
+│               │     │               │     │               │
+│ 4242 4242 ... │     │ MM / YY       │     │ CVC           │
+│               │     │               │     │               │
+│ Detects brand │     │ Auto-formats  │     │ 3 or 4 digits │
+│ Shows icon    │     │ Validates     │     │ based on brand│
+└───────────────┘     └───────────────┘     └───────────────┘
+        │                     │                     │
+        ▼                     ▼                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Each element emits @change independently                   │
+│  Track all three completion states for submit button        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  On submit: Reference the CardNumber element                │
+│  stripe.createPaymentMethod({                               │
+│    type: 'card',                                            │
+│    card: cardNumberElement  ← Just the number element!      │
+│  })                                                         │
+│  Stripe automatically collects expiry and CVC from siblings │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Components
 
 - **StripeCardNumberElement** - Card number input with brand detection

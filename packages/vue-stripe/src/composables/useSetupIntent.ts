@@ -1,20 +1,51 @@
 import { inject, ref, readonly } from 'vue-demi'
-import type { ConfirmCardSetupData } from '@stripe/stripe-js'
+import type { StripeElements } from '@stripe/stripe-js'
 import type { UseSetupIntentReturn } from '../types'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { StripeProviderError } from '../utils/errors'
 
 /**
+ * Options for confirming a setup
+ */
+export interface ConfirmSetupOptions {
+  /** Client secret from the SetupIntent */
+  clientSecret: string
+  /** Additional confirmation parameters */
+  confirmParams?: {
+    return_url?: string
+    payment_method_data?: {
+      billing_details?: {
+        name?: string
+        email?: string
+        phone?: string
+        address?: {
+          line1?: string
+          line2?: string
+          city?: string
+          state?: string
+          postal_code?: string
+          country?: string
+        }
+      }
+    }
+  }
+  /** Whether to redirect (defaults to 'if_required') */
+  redirect?: 'if_required' | 'always'
+  /** Optional elements override (uses injected elements if not provided) */
+  elements?: StripeElements
+}
+
+/**
  * Composable for handling setup intents
  * Provides a convenient way to save payment methods for future use
- * 
+ *
  * @example
  * ```vue
  * <script setup>
  * import { useSetupIntent } from '@vue-stripe/vue-stripe'
- * 
+ *
  * const { confirmSetup, loading, error } = useSetupIntent()
- * 
+ *
  * const handleSaveCard = async () => {
  *   const result = await confirmSetup({
  *     clientSecret: setupIntent.clientSecret,
@@ -22,7 +53,7 @@ import { StripeProviderError } from '../utils/errors'
  *       return_url: 'https://example.com/account/cards',
  *     },
  *   })
- *   
+ *
  *   if (result.error) {
  *     // Handle error
  *   }
@@ -43,26 +74,28 @@ export function useSetupIntent(): UseSetupIntentReturn {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const confirmSetup = async (data: ConfirmCardSetupData & { clientSecret: string }) => {
+  const confirmSetup = async (options: ConfirmSetupOptions) => {
     if (!stripeInstance.stripe.value) {
       error.value = 'Stripe not initialized'
       return { error: { message: 'Stripe not initialized' } }
     }
 
-    const { clientSecret, ...confirmData } = data
-
     loading.value = true
     error.value = null
 
     try {
-      // If elements are available, use them
-      const setupData: ConfirmCardSetupData = {
-        ...confirmData,
-        ...(elementsInstance?.elements.value && { elements: elementsInstance.elements.value })
-      }
+      // Use provided elements or fallback to injected elements
+      const elements = options.elements ?? elementsInstance?.elements.value
 
-      const result = await stripeInstance.stripe.value.confirmCardSetup(clientSecret, setupData)
-      
+      // Use stripe.confirmSetup() which works with Payment Element
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await (stripeInstance.stripe.value as any).confirmSetup({
+        elements: elements ?? undefined,
+        clientSecret: options.clientSecret,
+        confirmParams: options.confirmParams ?? {},
+        redirect: options.redirect ?? 'if_required'
+      })
+
       if (result.error) {
         error.value = result.error.message || 'Setup confirmation failed'
       }
