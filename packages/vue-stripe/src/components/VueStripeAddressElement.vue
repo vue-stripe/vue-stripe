@@ -10,7 +10,7 @@ import type {
   StripeAddressElementChangeEvent
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
-import { StripeElementsError } from '../utils/errors'
+import { VueStripeElementsError } from '../utils/errors'
 
 // Extended element type to include event methods and getValue with looser typing
 interface AddressElementWithEvents extends StripeAddressElementType {
@@ -22,7 +22,7 @@ interface AddressElementWithEvents extends StripeAddressElementType {
 }
 
 export default defineComponent({
-  name: 'StripeAddressElement',
+  name: 'VueStripeAddressElement',
   props: {
     options: {
       type: Object as () => StripeAddressElementOptions,
@@ -39,7 +39,7 @@ export default defineComponent({
     const elementsInstance = inject(stripeElementsInjectionKey)
 
     if (!elementsInstance) {
-      throw new StripeElementsError('StripeAddressElement must be used within StripeElements')
+      throw new VueStripeElementsError('VueStripeAddressElement must be used within VueStripeElements')
     }
 
     const handleReady = () => {
@@ -102,7 +102,7 @@ export default defineComponent({
     // Exposed methods
     const getValue = async () => {
       if (!elementRef.value) {
-        throw new StripeElementsError('Address element not mounted')
+        throw new VueStripeElementsError('Address element not mounted')
       }
       return elementRef.value.getValue()
     }

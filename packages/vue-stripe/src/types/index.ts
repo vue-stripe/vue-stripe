@@ -1,9 +1,6 @@
 import type { Ref } from 'vue-demi'
 
-// Re-export Stripe types with enhancements
-export * from '@stripe/stripe-js'
-
-// Import specific Stripe types we'll extend
+// Import specific Stripe types we need
 import type {
   Stripe,
   StripeElements,
@@ -12,6 +9,37 @@ import type {
   StripeElementChangeEvent,
   ConfirmPaymentData,
   StripeConstructorOptions
+} from '@stripe/stripe-js'
+
+// Re-export commonly used Stripe.js types with their original names
+// Since our Vue components now use VueStripe* prefix, there's no conflict
+export type {
+  Stripe,
+  StripeElements,
+  StripeElement,
+  StripeElementType,
+  StripeElementsOptions,
+  StripeElementChangeEvent,
+  PaymentIntent,
+  SetupIntent,
+  ConfirmPaymentData,
+  ConfirmCardSetupData,
+  // Stripe element types
+  StripeCardElement,
+  StripeCardNumberElement,
+  StripeCardExpiryElement,
+  StripeCardCvcElement,
+  StripePaymentElement,
+  StripeAddressElement,
+  StripeLinkAuthenticationElement,
+  StripeExpressCheckoutElement,
+  // Event types
+  StripeCardElementChangeEvent,
+  StripePaymentElementChangeEvent,
+  StripeAddressElementChangeEvent,
+  StripeLinkAuthenticationElementChangeEvent,
+  StripeExpressCheckoutElementConfirmEvent,
+  StripeExpressCheckoutElementClickEvent
 } from '@stripe/stripe-js'
 
 // Vue-specific plugin configuration
@@ -31,20 +59,20 @@ export interface VueStripeElement {
 }
 
 // Component props interfaces
-export interface StripeProviderProps {
+export interface VueStripeProviderProps {
   publishableKey: string
   stripeAccount?: string
   apiVersion?: string
   locale?: string
 }
 
-export interface StripeElementsProps {
-  clientSecret?: string
-  options?: StripeElementsOptions
+export interface VueStripeElementsProps {
+  clientSecret?: string | undefined
+  options?: StripeElementsOptions | undefined
 }
 
 // Event interfaces for Vue components
-export interface StripeElementEvents {
+export interface VueStripeElementEvents {
   ready: (element: StripeElement) => void
   change: (event: StripeElementChangeEvent) => void
 }
@@ -107,7 +135,7 @@ export interface ConfirmSetupOptions {
 }
 
 // Payment method types for modern elements
-export type PaymentElementType = 
+export type PaymentElementType =
   | 'card'
   | 'ideal'
   | 'sepa_debit'
@@ -132,7 +160,7 @@ export type ExpressCheckoutType =
   | 'link'
 
 // Error types
-export interface StripeError {
+export interface VueStripeError {
   type: string
   code?: string
   message: string
@@ -141,13 +169,13 @@ export interface StripeError {
 }
 
 // Context types for providers
-export interface StripeContext {
+export interface VueStripeContext {
   stripe: Ref<Stripe | null>
   loading: Ref<boolean>
   error: Ref<string | null>
 }
 
-export interface StripeElementsContext {
+export interface VueStripeElementsContext {
   elements: Ref<StripeElements | null>
   loading: Ref<boolean>
   error: Ref<string | null>

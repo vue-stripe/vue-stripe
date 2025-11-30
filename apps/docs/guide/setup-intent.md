@@ -77,13 +77,13 @@ StripeProvider
 
 | Component | Role |
 |-----------|------|
-| `StripeProvider` | Loads Stripe.js |
-| `StripeElements` | Creates Elements instance with SetupIntent secret |
-| `StripePaymentElement` | Renders the payment form UI |
+| `VueStripeProvider` | Loads Stripe.js |
+| `VueStripeElements` | Creates Elements instance with SetupIntent secret |
+| `VueStripePaymentElement` | Renders the payment form UI |
 | `useSetupIntent()` | Confirms and saves the payment method |
 
 ::: warning Component Pairing Required
-`useSetupIntent()` must be used with `StripePaymentElement` (or card elements) to collect payment details. The composable alone cannot save a card—it needs the element to capture the card information.
+`useSetupIntent()` must be used with `VueStripePaymentElement` (or card elements) to collect payment details. The composable alone cannot save a card—it needs the element to capture the card information.
 :::
 
 ## Basic Implementation
@@ -138,9 +138,9 @@ onMounted(async () => {
 
 <template>
   <div v-if="setupSecret">
-    <StripeProvider :publishable-key="publishableKey">
-      <StripeElements :client-secret="setupSecret">
-        <StripePaymentElement @change="e => isComplete = e.complete" />
+    <VueStripeProvider :publishable-key="publishableKey">
+      <VueStripeElements :client-secret="setupSecret">
+        <VueStripePaymentElement @change="e => isComplete = e.complete" />
 
         <SaveCardButton
           :client-secret="setupSecret"
@@ -148,8 +148,8 @@ onMounted(async () => {
           @success="status = 'success'"
           @error="msg => { status = 'error'; errorMessage = msg }"
         />
-      </StripeElements>
-    </StripeProvider>
+      </VueStripeElements>
+    </VueStripeProvider>
 
     <div v-if="status === 'success'" class="success">
       Card saved successfully!
@@ -163,7 +163,7 @@ onMounted(async () => {
 
 ### Step 3: Create the Submit Button Component
 
-The button component must be inside `StripeElements` to access the composable:
+The button component must be inside `VueStripeElements` to access the composable:
 
 ```vue
 <!-- SaveCardButton.vue -->

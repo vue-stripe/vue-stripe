@@ -1,7 +1,7 @@
 import { ref, readonly, type Ref } from 'vue-demi'
 import type { RedirectToCheckoutOptions } from '@stripe/stripe-js'
 import { useStripe } from './useStripe'
-import { StripeProviderError } from '../utils/errors'
+import { VueStripeProviderError } from '../utils/errors'
 
 export interface UseStripeCheckoutReturn {
   redirectToCheckout: (options: RedirectToCheckoutOptions) => Promise<void>
@@ -11,13 +11,13 @@ export interface UseStripeCheckoutReturn {
 
 export function useStripeCheckout(): UseStripeCheckoutReturn {
   const { stripe } = useStripe()
-  
+
   const loading = ref(false)
   const error = ref<string | null>(null)
-  
+
   const redirectToCheckout = async (options: RedirectToCheckoutOptions): Promise<void> => {
     if (!stripe.value) {
-      throw new StripeProviderError('Stripe not initialized')
+      throw new VueStripeProviderError('Stripe not initialized')
     }
 
     try {
@@ -29,7 +29,7 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
       if (result.error) {
         const errorMessage = result.error.message || 'Checkout redirect failed'
         error.value = errorMessage
-        throw new StripeProviderError(errorMessage)
+        throw new VueStripeProviderError(errorMessage)
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Checkout redirect failed'
@@ -39,7 +39,7 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
       loading.value = false
     }
   }
-  
+
   return {
     redirectToCheckout,
     loading: readonly(loading),

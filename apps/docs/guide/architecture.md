@@ -19,18 +19,18 @@ StripeProvider (loads Stripe.js)
 
 Let's understand each layer.
 
-## StripeProvider: The Foundation
+## VueStripeProvider: The Foundation
 
-`StripeProvider` is always the outermost component. Its job is to:
+`VueStripeProvider` is always the outermost component. Its job is to:
 
 1. **Load Stripe.js** asynchronously from Stripe's CDN
 2. **Initialize the Stripe instance** with your publishable key
 3. **Provide the instance** to all descendant components
 
 ```vue
-<StripeProvider :publishable-key="pk_test_...">
+<VueStripeProvider :publishable-key="pk_test_...">
   <!-- Everything inside can access Stripe -->
-</StripeProvider>
+</VueStripeProvider>
 ```
 
 ### Loading States
@@ -46,7 +46,7 @@ StripeProvider manages three states:
 You can customize what's shown in each state using slots:
 
 ```vue
-<StripeProvider :publishable-key="key">
+<VueStripeProvider :publishable-key="key">
   <!-- Default slot: shown when ready -->
   <PaymentForm />
 
@@ -59,7 +59,7 @@ You can customize what's shown in each state using slots:
   <template #error="{ error }">
     <p>Failed to load: {{ error }}</p>
   </template>
-</StripeProvider>
+</VueStripeProvider>
 ```
 
 ### Events
@@ -67,13 +67,13 @@ You can customize what's shown in each state using slots:
 You can also listen for lifecycle events:
 
 ```vue
-<StripeProvider
+<VueStripeProvider
   :publishable-key="key"
   @load="onStripeReady"
   @error="onStripeError"
 >
   ...
-</StripeProvider>
+</VueStripeProvider>
 
 <script setup>
 const onStripeReady = (stripe) => {
@@ -86,16 +86,16 @@ const onStripeError = (error) => {
 </script>
 ```
 
-## StripeElements: The Elements Container
+## VueStripeElements: The Elements Container
 
-`StripeElements` creates a Stripe Elements instance. This is required for any Stripe element components.
+`VueStripeElements` creates a Stripe Elements instance. This is required for any Stripe element components.
 
 ```vue
-<StripeProvider :publishable-key="key">
-  <StripeElements :client-secret="clientSecret">
+<VueStripeProvider :publishable-key="key">
+  <VueStripeElements :client-secret="clientSecret">
     <!-- Element components go here -->
-  </StripeElements>
-</StripeProvider>
+  </VueStripeElements>
+</VueStripeProvider>
 ```
 
 ### Why is `clientSecret` needed?
@@ -172,12 +172,12 @@ Depending on your use case, there are three patterns:
 Best for: One-time notifications like logging or analytics
 
 ```vue
-<StripeProvider
+<VueStripeProvider
   :publishable-key="key"
   @load="(stripe) => analytics.track('stripe_loaded')"
 >
   ...
-</StripeProvider>
+</VueStripeProvider>
 ```
 
 ### Pattern 2: Composable (Recommended)
@@ -201,13 +201,13 @@ const handlePayment = async () => {
 Best for: Using pre-built element components
 
 ```vue
-<StripeProvider :publishable-key="key">
-  <StripeElements :client-secret="secret">
+<VueStripeProvider :publishable-key="key">
+  <VueStripeElements :client-secret="secret">
     <!-- These automatically inject what they need -->
-    <StripePaymentElement />
-    <StripeCardElement />
-  </StripeElements>
-</StripeProvider>
+    <VueStripePaymentElement />
+    <VueStripeCardElement />
+  </VueStripeElements>
+</VueStripeProvider>
 ```
 
 ## Data Flow Diagram
@@ -249,9 +249,9 @@ const { stripe } = useStripe() // Throws error!
 </script>
 
 <template>
-  <StripeProvider :publishable-key="key">
+  <VueStripeProvider :publishable-key="key">
     ...
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -264,9 +264,9 @@ const { stripe } = useStripe() // Works!
 
 <!-- Parent.vue -->
 <template>
-  <StripeProvider :publishable-key="key">
+  <VueStripeProvider :publishable-key="key">
     <PaymentForm />
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -274,16 +274,16 @@ const { stripe } = useStripe() // Works!
 
 ```vue
 <!-- ❌ Wrong - StripePaymentElement needs StripeElements parent -->
-<StripeProvider :publishable-key="key">
-  <StripePaymentElement /> <!-- Throws error! -->
-</StripeProvider>
+<VueStripeProvider :publishable-key="key">
+  <VueStripePaymentElement /> <!-- Throws error! -->
+</VueStripeProvider>
 
 <!-- ✅ Correct -->
-<StripeProvider :publishable-key="key">
-  <StripeElements :client-secret="secret">
-    <StripePaymentElement />
-  </StripeElements>
-</StripeProvider>
+<VueStripeProvider :publishable-key="key">
+  <VueStripeElements :client-secret="secret">
+    <VueStripePaymentElement />
+  </VueStripeElements>
+</VueStripeProvider>
 ```
 
 ### 3. Forgetting to wait for loading

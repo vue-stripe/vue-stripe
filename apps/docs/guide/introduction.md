@@ -32,11 +32,11 @@ paymentElement.mount('#payment-element')
 
 <!-- With Vue Stripe -->
 <template>
-  <StripeProvider :publishable-key="pk">
-    <StripeElements :client-secret="secret">
-      <StripePaymentElement />
-    </StripeElements>
-  </StripeProvider>
+  <VueStripeProvider :publishable-key="pk">
+    <VueStripeElements :client-secret="secret">
+      <VueStripePaymentElement />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 

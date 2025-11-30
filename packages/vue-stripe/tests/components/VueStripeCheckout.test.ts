@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h } from 'vue-demi'
-import StripeCheckout from '../../src/components/StripeCheckout.vue'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeCheckout from '../../src/components/VueStripeCheckout.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises } from '../setup'
 
 // Get the mocked loadStripe
 const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
 
-describe('StripeCheckout', () => {
+describe('VueStripeCheckout', () => {
   let mockRedirectToCheckout: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
@@ -25,12 +25,12 @@ describe('StripeCheckout', () => {
 
   // Helper to mount with StripeProvider
   const mountWithProvider = async (props = {}, slots = {}) => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeCheckout, props, slots)
+        default: () => h(VueStripeCheckout, props, slots)
       }
     })
 
@@ -79,7 +79,7 @@ describe('StripeCheckout', () => {
   it('should emit error when sessionId and priceId are missing', async () => {
     const wrapper = await mountWithProvider({})
 
-    const checkoutComponent = wrapper.findComponent(StripeCheckout)
+    const checkoutComponent = wrapper.findComponent(VueStripeCheckout)
     const button = wrapper.find('button')
 
     await button.trigger('click')
@@ -93,7 +93,7 @@ describe('StripeCheckout', () => {
   it('should emit click event when button is clicked', async () => {
     const wrapper = await mountWithProvider({ sessionId: 'cs_test_123' })
 
-    const checkoutComponent = wrapper.findComponent(StripeCheckout)
+    const checkoutComponent = wrapper.findComponent(VueStripeCheckout)
     const button = wrapper.find('button')
 
     await button.trigger('click')
@@ -172,7 +172,7 @@ describe('StripeCheckout', () => {
 
     const wrapper = await mountWithProvider({ sessionId: 'cs_test_123' })
 
-    const checkoutComponent = wrapper.findComponent(StripeCheckout)
+    const checkoutComponent = wrapper.findComponent(VueStripeCheckout)
     const button = wrapper.find('button')
 
     await button.trigger('click')
@@ -187,12 +187,12 @@ describe('StripeCheckout', () => {
     // Override mock to return null for this test
     mockLoadStripe.mockResolvedValue(null)
 
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeCheckout, { sessionId: 'cs_test_123' })
+        default: () => h(VueStripeCheckout, { sessionId: 'cs_test_123' })
       }
     })
 

@@ -2,8 +2,8 @@
 import { ref, inject, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
-  StripeProvider,
-  StripeCheckout
+  VueStripeProvider,
+  VueStripeCheckout
 } from '@vue-stripe/vue-stripe'
 
 const route = useRoute()
@@ -236,8 +236,8 @@ const clearResult = () => {
         <!-- Checkout Button -->
         <div class="checkout-button-wrapper mt-5">
           <br>
-          <StripeProvider :publishable-key="publishableKey">
-            <StripeCheckout
+          <VueStripeProvider :publishable-key="publishableKey">
+            <VueStripeCheckout
               v-if="checkoutMode === 'session'"
               :session-id="sessionId"
               button-text="Checkout with Session"
@@ -249,7 +249,7 @@ const clearResult = () => {
               @error="onCheckoutError"
             />
 
-            <StripeCheckout
+            <VueStripeCheckout
               v-else
               :price-id="priceId"
               :mode="mode"
@@ -263,7 +263,7 @@ const clearResult = () => {
               @success="onCheckoutSuccess"
               @error="onCheckoutError"
             />
-          </StripeProvider>
+          </VueStripeProvider>
         </div>
 
         <!-- Status display -->

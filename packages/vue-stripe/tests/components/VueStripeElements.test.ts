@@ -1,34 +1,34 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, inject, ref } from 'vue-demi'
-import StripeElements from '../../src/components/StripeElements.vue'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { stripeElementsInjectionKey, stripeInjectionKey } from '../../src/utils/injection-keys'
 import { flushPromises } from '../setup'
 
-describe('StripeElements', () => {
+describe('VueStripeElements', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   // Helper to create a wrapper with StripeProvider
   const mountWithProvider = (elementsProps = {}, slots = {}) => {
-    return mount(StripeProvider, {
+    return mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, elementsProps, slots)
+        default: () => h(VueStripeElements, elementsProps, slots)
       }
     })
   }
 
   it('should throw error when used outside StripeProvider', () => {
     expect(() => {
-      mount(StripeElements, {
+      mount(VueStripeElements, {
         props: {}
       })
-    }).toThrow('StripeElements must be used within StripeProvider')
+    }).toThrow('VueStripeElements must be used within VueStripeProvider')
   })
 
   it('should render loading state initially', async () => {
@@ -161,12 +161,12 @@ describe('StripeElements', () => {
       }
     }
 
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {}, {
+        default: () => h(VueStripeElements, {}, {
           default: () => h(ChildComponent)
         })
       }
@@ -201,12 +201,12 @@ describe('StripeElements', () => {
     // Create a component that can change clientSecret
     const clientSecret = ref('pi_123_secret_456')
 
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {
+        default: () => h(VueStripeElements, {
           clientSecret: clientSecret.value
         })
       }

@@ -4,7 +4,7 @@ A Vue plugin for global Stripe configuration with lazy-loaded Stripe instance.
 
 ## What is createVueStripe?
 
-`createVueStripe` is a Vue plugin factory that provides global Stripe configuration to your entire application. It's an alternative to using `StripeProvider` as a wrapper component.
+`createVueStripe` is a Vue plugin factory that provides global Stripe configuration to your entire application. It's an alternative to using `VueStripeProvider` as a wrapper component.
 
 | Feature | Description |
 |---------|-------------|
@@ -222,12 +222,12 @@ const { stripe, loading, error } = useGlobalStripe()
 
 ### With StripeElements
 
-You can still use `StripeElements` without `StripeProvider`:
+You can still use `VueStripeElements` without `VueStripeProvider`:
 
 ```vue
 <script setup>
 import { inject, ref, onMounted } from 'vue'
-import { StripeElements, StripePaymentElement } from '@vue-stripe/vue-stripe'
+import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 
 const stripeGlobal = inject('vue-stripe-global')
 const stripe = ref(null)
@@ -239,18 +239,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <StripeElements
+  <VueStripeElements
     v-if="stripe"
     :stripe="stripe"
     :client-secret="clientSecret"
   >
-    <StripePaymentElement />
-  </StripeElements>
+    <VueStripePaymentElement />
+  </VueStripeElements>
 </template>
 ```
 
 ::: warning Note
-When using the plugin with `StripeElements`, you need to pass the `stripe` instance directly to `StripeElements` instead of using the `StripeProvider` wrapper.
+When using the plugin with `VueStripeElements`, you need to pass the `stripe` instance directly to `VueStripeElements` instead of using the `VueStripeProvider` wrapper.
 :::
 
 ## TypeScript

@@ -24,19 +24,19 @@ npm install @vue/composition-api
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements>
-      <StripePaymentElement @ready="onReady" />
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
+      <VueStripePaymentElement @ready="onReady" />
       <button @click="processPayment">Pay Now</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup lang="ts">
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement,
   usePaymentIntent
 } from '@vue-stripe/vue-stripe'
 
@@ -56,26 +56,26 @@ const processPayment = async () => {
 
 | Component | Description |
 |-----------|-------------|
-| `StripeProvider` | Root component that loads Stripe.js and provides context |
-| `StripeElements` | Creates Elements instance and provides it to child components |
+| `VueStripeProvider` | Root component that loads Stripe.js and provides context |
+| `VueStripeElements` | Creates Elements instance and provides it to child components |
 
 ### Payment Components
 
 | Component | Description |
 |-----------|-------------|
-| `StripePaymentElement` | Modern payment element supporting 40+ payment methods |
-| `StripeExpressCheckoutElement` | Wallet payments (Apple Pay, Google Pay, etc.) |
-| `StripeLinkAuthenticationElement` | Link authentication |
-| `StripeAddressElement` | Address collection with Google Maps autocomplete |
-| `StripeCheckout` | Embedded Stripe Checkout |
+| `VueStripePaymentElement` | Modern payment element supporting 40+ payment methods |
+| `VueStripeExpressCheckoutElement` | Wallet payments (Apple Pay, Google Pay, etc.) |
+| `VueStripeLinkAuthenticationElement` | Link authentication |
+| `VueStripeAddressElement` | Address collection with Google Maps autocomplete |
+| `VueStripeCheckout` | Embedded Stripe Checkout |
 
-### StripeAddressElement
+### VueStripeAddressElement
 
 Collect shipping or billing addresses with built-in Google Maps autocomplete:
 
 ```vue
 <template>
-  <StripeAddressElement
+  <VueStripeAddressElement
     ref="addressRef"
     :options="{ mode: 'shipping' }"
     @change="onAddressChange"
@@ -98,33 +98,33 @@ const validateAddress = async () => {
 </script>
 ```
 
-### StripeLinkAuthenticationElement
+### VueStripeLinkAuthenticationElement
 
 Enable Stripe Link for faster checkout by collecting and authenticating customer email.
 
-> **Pairing Note:** This element collects email only and **must be paired with `StripePaymentElement`** for a complete checkout flow. It cannot process payments on its own.
+> **Pairing Note:** This element collects email only and **must be paired with `VueStripePaymentElement`** for a complete checkout flow. It cannot process payments on its own.
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <!-- Step 1: Email + Link authentication -->
-      <StripeLinkAuthenticationElement @change="onEmailChange" />
+      <VueStripeLinkAuthenticationElement @change="onEmailChange" />
 
       <!-- Step 2: Payment methods (auto-fills if Link authenticated) -->
-      <StripePaymentElement @change="onPaymentChange" />
+      <VueStripePaymentElement @change="onPaymentChange" />
 
       <button :disabled="!canPay">Pay Now</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeLinkAuthenticationElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeLinkAuthenticationElement,
   StripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
@@ -149,10 +149,10 @@ const onPaymentChange = (event) => {
 
 | Component | Description |
 |-----------|-------------|
-| `StripeCardElement` | Single card input field |
-| `StripeCardNumberElement` | Card number only |
-| `StripeCardExpiryElement` | Expiry date only |
-| `StripeCardCvcElement` | CVC only |
+| `VueStripeCardElement` | Single card input field |
+| `VueStripeCardNumberElement` | Card number only |
+| `VueStripeCardExpiryElement` | Expiry date only |
+| `VueStripeCardCvcElement` | CVC only |
 
 ## Composables
 

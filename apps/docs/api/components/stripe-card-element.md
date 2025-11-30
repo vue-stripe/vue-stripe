@@ -1,4 +1,4 @@
-# StripeCardElement
+# VueStripeCardElement
 
 A single, unified card input field that collects card number, expiration date, and CVC.
 
@@ -67,16 +67,16 @@ Card Element is the classic Stripe card input that provides:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements>
-      <StripeCardElement
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
+      <VueStripeCardElement
         :options="cardOptions"
         @ready="onReady"
         @change="onChange"
       />
       <button @click="handleSubmit">Pay</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup>
@@ -162,7 +162,7 @@ interface StripeElementStyle {
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | `StripeCardElement` | Emitted when the element is fully rendered |
+| `@ready` | `VueStripeCardElement` | Emitted when the element is fully rendered |
 | `@change` | `StripeCardElementChangeEvent` | Emitted when the element value changes |
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |
@@ -194,11 +194,11 @@ interface StripeCardElementChangeEvent {
 Rendered while the card element is initializing:
 
 ```vue
-<StripeCardElement>
+<VueStripeCardElement>
   <template #loading>
     <div class="skeleton-loader">Loading card form...</div>
   </template>
-</StripeCardElement>
+</VueStripeCardElement>
 ```
 
 ### Error Slot
@@ -206,11 +206,11 @@ Rendered while the card element is initializing:
 Rendered when there's an error (from the change event):
 
 ```vue
-<StripeCardElement>
+<VueStripeCardElement>
   <template #error="{ error }">
     <div class="card-error">{{ error }}</div>
   </template>
-</StripeCardElement>
+</VueStripeCardElement>
 ```
 
 ## Exposed Methods
@@ -229,7 +229,7 @@ const blurCard = () => cardRef.value?.blur()
 </script>
 
 <template>
-  <StripeCardElement ref="cardRef" />
+  <VueStripeCardElement ref="cardRef" />
   <button @click="focusCard">Focus</button>
   <button @click="clearCard">Clear</button>
 </template>
@@ -245,7 +245,7 @@ const blurCard = () => cardRef.value?.blur()
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `element` | `Ref<StripeCardElement \| null>` | The Stripe card element instance |
+| `element` | `Ref<VueStripeCardElement \| null>` | The Stripe card element instance |
 | `loading` | `Ref<boolean>` | Whether the element is loading |
 | `error` | `Ref<string \| null>` | Current error message |
 
@@ -274,14 +274,14 @@ const options = {
 </script>
 
 <template>
-  <StripeCardElement :options="options" />
+  <VueStripeCardElement :options="options" />
 </template>
 ```
 
 ### Hide Postal Code
 
 ```vue
-<StripeCardElement
+<VueStripeCardElement
   :options="{ hidePostalCode: true }"
 />
 ```
@@ -302,7 +302,7 @@ const handleChange = (event) => {
 </script>
 
 <template>
-  <StripeCardElement @change="handleChange" />
+  <VueStripeCardElement @change="handleChange" />
   <p v-if="cardError" class="error">{{ cardError }}</p>
   <button :disabled="!cardComplete">Pay</button>
 </template>
@@ -363,7 +363,7 @@ const handleSubmit = async (clientSecret) => {
 ```vue
 <template>
   <div class="card-container">
-    <StripeCardElement
+    <VueStripeCardElement
       :options="options"
       @change="onChange"
     />

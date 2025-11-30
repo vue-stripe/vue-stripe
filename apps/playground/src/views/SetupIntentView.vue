@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, inject, computed, watch, defineComponent, h } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement,
   useSetupIntent,
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
 
-// Child component for setup submission (needs to be inside StripeElements)
+// Child component for setup submission (needs to be inside VueStripeElements)
 const SetupForm = defineComponent({
   name: 'SetupForm',
   props: {
@@ -242,13 +242,13 @@ const resetForm = () => {
           </div>
 
           <div class="setup-element-wrapper">
-            <StripeProvider :publishable-key="publishableKey">
-              <StripeElements
+            <VueStripeProvider :publishable-key="publishableKey">
+              <VueStripeElements
                 :key="elementKey"
                 :client-secret="setupSecret"
                 :options="{ appearance: { theme: 'stripe' } }"
               >
-                <StripePaymentElement
+                <VueStripePaymentElement
                   @ready="onReady"
                   @change="onChange"
                   @focus="onFocus"
@@ -262,8 +262,8 @@ const resetForm = () => {
                   @setup-success="handleSetupSuccess"
                   @setup-error="handleSetupError"
                 />
-              </StripeElements>
-            </StripeProvider>
+              </VueStripeElements>
+            </VueStripeProvider>
           </div>
 
           <!-- Error display -->

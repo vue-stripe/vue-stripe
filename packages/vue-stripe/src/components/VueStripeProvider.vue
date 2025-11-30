@@ -2,7 +2,7 @@
 import { provide, ref, onMounted } from 'vue-demi'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { stripeInjectionKey } from '../utils/injection-keys'
-import { StripeProviderError } from '../utils/errors'
+import { VueStripeProviderError } from '../utils/errors'
 import { STRIPE_PARTNER_DETAILS } from '../utils/constants'
 
 interface Props {
@@ -32,7 +32,7 @@ const error = ref<string | null>(null)
 // Support both publishableKey and stripeKey for backwards compatibility
 const key = props.publishableKey || props.stripeKey
 if (!key) {
-  throw new StripeProviderError('publishableKey or stripeKey is required')
+  throw new VueStripeProviderError('publishableKey or stripeKey is required')
 }
 
 const config: Record<string, string | undefined> = {
@@ -61,7 +61,7 @@ const initialize = async () => {
     stripe.value = await loadStripe(key, options)
 
     if (!stripe.value) {
-      throw new StripeProviderError('Failed to initialize Stripe')
+      throw new VueStripeProviderError('Failed to initialize Stripe')
     }
 
     stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS)

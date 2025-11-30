@@ -1,9 +1,9 @@
-# StripeLinkAuthenticationElement
+# VueStripeLinkAuthenticationElement
 
 Collects customer email and authenticates them with Stripe Link for faster checkout.
 
 ::: tip Pairing Requirement
-**This element must be paired with `StripePaymentElement`** to create a complete checkout flow. It cannot process payments on its own—it only handles email collection and Link authentication.
+**This element must be paired with `VueStripePaymentElement`** to create a complete checkout flow. It cannot process payments on its own—it only handles email collection and Link authentication.
 :::
 
 ::: warning Requires clientSecret
@@ -33,23 +33,23 @@ StripeLinkAuthenticationElement requires a `clientSecret` from a PaymentIntent o
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <!-- Step 1: Email collection + Link detection -->
-      <StripeLinkAuthenticationElement
+      <VueStripeLinkAuthenticationElement
         @change="onEmailChange"
       />
 
       <!-- Step 2: Payment method selection -->
-      <StripePaymentElement
+      <VueStripePaymentElement
         @change="onPaymentChange"
       />
 
       <button :disabled="!canPay" @click="handleSubmit">
         Pay Now
       </button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup>
@@ -125,7 +125,7 @@ interface StripeLinkAuthenticationElementOptions {
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | `StripeLinkAuthenticationElement` | Emitted when the element is mounted and ready |
+| `@ready` | `VueStripeLinkAuthenticationElement` | Emitted when the element is mounted and ready |
 | `@change` | `StripeLinkAuthenticationElementChangeEvent` | Emitted when the email value changes |
 
 ### Change Event
@@ -161,7 +161,7 @@ const clearEmail = () => linkAuthRef.value?.clear()
 </script>
 
 <template>
-  <StripeLinkAuthenticationElement ref="linkAuthRef" />
+  <VueStripeLinkAuthenticationElement ref="linkAuthRef" />
   <button @click="focusEmail">Focus</button>
   <button @click="blurEmail">Blur</button>
   <button @click="clearEmail">Clear</button>
@@ -178,7 +178,7 @@ const clearEmail = () => linkAuthRef.value?.clear()
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `element` | `Ref<StripeLinkAuthenticationElement \| null>` | The Stripe element instance |
+| `element` | `Ref<VueStripeLinkAuthenticationElement \| null>` | The Stripe element instance |
 
 ## Examples
 
@@ -199,7 +199,7 @@ const options = computed(() => ({
 </script>
 
 <template>
-  <StripeLinkAuthenticationElement :options="options" />
+  <VueStripeLinkAuthenticationElement :options="options" />
 </template>
 ```
 
@@ -293,19 +293,19 @@ const SubmitButton = defineComponent({
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <div class="checkout-form">
         <!-- Email + Link Authentication -->
         <div class="form-section">
           <label>Email</label>
-          <StripeLinkAuthenticationElement @change="onEmailChange" />
+          <VueStripeLinkAuthenticationElement @change="onEmailChange" />
         </div>
 
         <!-- Payment Methods -->
         <div class="form-section">
           <label>Payment</label>
-          <StripePaymentElement @change="onPaymentChange" />
+          <VueStripePaymentElement @change="onPaymentChange" />
         </div>
 
         <!-- Error Display -->
@@ -321,8 +321,8 @@ const SubmitButton = defineComponent({
           @error="paymentError = $event"
         />
       </div>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -353,11 +353,11 @@ const handleChange = (event) => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <div class="email-demo">
         <label>Email</label>
-        <StripeLinkAuthenticationElement
+        <VueStripeLinkAuthenticationElement
           ref="linkAuthRef"
           @change="handleChange"
         />
@@ -373,8 +373,8 @@ const handleChange = (event) => {
           <p v-if="collectedEmail">Email: {{ collectedEmail }}</p>
         </div>
       </div>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 

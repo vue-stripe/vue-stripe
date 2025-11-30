@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, inject, computed, defineComponent, h } from 'vue'
-import { StripeProvider, StripeElements, StripeCardElement, useStripe } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements, VueStripeCardElement, useStripe } from '@vue-stripe/vue-stripe'
 import type { StripeCardElement as StripeCardElementType, StripeCardElementChangeEvent } from '@stripe/stripe-js'
 
-// Mark StripeElements as used (it's used in template)
-void StripeElements
+// Mark VueStripeElements as used (it's used in template)
+void VueStripeElements
 
 const stripeConfig = inject<{
   publishableKey: string
@@ -28,7 +28,7 @@ const log = (type: string, message: string) => {
 }
 
 // Card element ref for programmatic access
-const cardElementRef = ref<InstanceType<typeof StripeCardElement> | null>(null)
+const cardElementRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
 
 // Card state from change events
 const cardState = ref<{
@@ -145,7 +145,7 @@ const showSecretForm = computed(() => {
   return showPaymentSection.value && !activeClientSecret.value
 })
 
-// PaymentButton component to use inside StripeElements
+// PaymentButton component to use inside VueStripeElements
 const PaymentButton = defineComponent({
   name: 'PaymentButton',
   props: {
@@ -337,8 +337,8 @@ const resetPaymentState = () => {
       </div>
 
       <div v-else class="demo-container">
-        <StripeProvider :publishable-key="stripeConfig.publishableKey">
-          <StripeElements>
+        <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
+          <VueStripeElements>
             <template #loading>
               <div class="loading-state">
                 <div class="spinner"></div>
@@ -348,7 +348,7 @@ const resetPaymentState = () => {
 
             <div class="card-form">
               <label class="form-label">Card Details</label>
-              <StripeCardElement
+              <VueStripeCardElement
                 ref="cardElementRef"
                 :options="styleOptions"
                 @ready="handleReady"
@@ -470,8 +470,8 @@ const resetPaymentState = () => {
                 </p>
               </div>
             </div>
-          </StripeElements>
-        </StripeProvider>
+          </VueStripeElements>
+        </VueStripeProvider>
       </div>
     </div>
 
@@ -533,7 +533,7 @@ const resetPaymentState = () => {
 &lt;/template&gt;
 
 &lt;script setup&gt;
-import { StripeProvider, StripeElements, StripeCardElement } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements, VueStripeCardElement } from '@vue-stripe/vue-stripe'
 
 const onReady = (element) => console.log('Card ready!')
 const onChange = (event) => {

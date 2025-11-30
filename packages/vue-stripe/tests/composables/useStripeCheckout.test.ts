@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue-demi'
 import { useStripeCheckout } from '../../src/composables/useStripeCheckout'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises } from '../setup'
 
 // Get the mocked loadStripe
@@ -32,9 +32,9 @@ describe('useStripeCheckout', () => {
     } as any)
   })
 
-  // Helper to mount with StripeProvider
+  // Helper to mount with VueStripeProvider
   const mountWithProvider = async (component = TestComponent) => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
@@ -47,11 +47,11 @@ describe('useStripeCheckout', () => {
     return wrapper
   }
 
-  it('should throw error when used outside StripeProvider', () => {
+  it('should throw error when used outside VueStripeProvider', () => {
     // useStripeCheckout internally calls useStripe, so the error comes from useStripe
     expect(() => {
       mount(TestComponent)
-    }).toThrow('useStripe must be called within a StripeProvider component')
+    }).toThrow('useStripe must be called within a VueStripeProvider component')
   })
 
   it('should return redirectToCheckout function and state refs', async () => {
@@ -189,7 +189,7 @@ describe('useStripeCheckout', () => {
     // Create a mock where loadStripe returns null
     mockLoadStripe.mockResolvedValue(null)
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },

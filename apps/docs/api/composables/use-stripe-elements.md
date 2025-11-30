@@ -1,6 +1,6 @@
 # useStripeElements
 
-Access the Stripe Elements instance from any component within `StripeElements`.
+Access the Stripe Elements instance from any component within `VueStripeElements`.
 
 ## What is useStripeElements?
 
@@ -69,7 +69,7 @@ const { elements, loading, error } = useStripeElements()
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `elements` | `Readonly<Ref<StripeElements \| null>>` | The Elements instance |
+| `elements` | `Readonly<Ref<VueStripeElements \| null>>` | The Elements instance |
 | `loading` | `Readonly<Ref<boolean>>` | True while Elements is initializing |
 | `error` | `Readonly<Ref<string \| null>>` | Error message if initialization failed |
 
@@ -172,7 +172,7 @@ const checkElements = () => {
 
 ## Error Handling
 
-`useStripeElements()` throws if called outside of `StripeElements`:
+`useStripeElements()` throws if called outside of `VueStripeElements`:
 
 ```vue
 <!-- ❌ Wrong - outside StripeElements -->
@@ -181,11 +181,11 @@ const { elements } = useStripeElements() // Throws error
 </script>
 
 <template>
-  <StripeProvider :publishable-key="key">
-    <StripeElements :client-secret="secret">
+  <VueStripeProvider :publishable-key="key">
+    <VueStripeElements :client-secret="secret">
       <MyPaymentForm />
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -198,11 +198,11 @@ const { elements } = useStripeElements() // Works!
 
 <!-- Parent.vue -->
 <template>
-  <StripeProvider :publishable-key="key">
-    <StripeElements :client-secret="secret">
+  <VueStripeProvider :publishable-key="key">
+    <VueStripeElements :client-secret="secret">
       <MyPaymentForm />
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 

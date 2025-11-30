@@ -1,27 +1,27 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
-import StripeExpressCheckoutElement from '../../src/components/StripeExpressCheckoutElement.vue'
-import StripeElements from '../../src/components/StripeElements.vue'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeExpressCheckoutElement from '../../src/components/VueStripeExpressCheckoutElement.vue'
+import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
 
-describe('StripeExpressCheckoutElement', () => {
+describe('VueStripeExpressCheckoutElement', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   // Helper to mount with full provider hierarchy
   const mountWithProviders = async (expressCheckoutProps = {}) => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {
+        default: () => h(VueStripeElements, {
           clientSecret: 'pi_test_secret_123'
         }, {
-          default: () => h(StripeExpressCheckoutElement, expressCheckoutProps)
+          default: () => h(VueStripeExpressCheckoutElement, expressCheckoutProps)
         })
       }
     })
@@ -34,14 +34,14 @@ describe('StripeExpressCheckoutElement', () => {
 
   it('should throw error when used outside StripeElements', () => {
     expect(() => {
-      mount(StripeExpressCheckoutElement)
-    }).toThrow('StripeExpressCheckoutElement must be used within StripeElements')
+      mount(VueStripeExpressCheckoutElement)
+    }).toThrow('VueStripeExpressCheckoutElement must be used within VueStripeElements')
   })
 
   it('should render express checkout element container', async () => {
     const wrapper = await mountWithProviders()
 
-    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
     expect(expressCheckoutComponent.exists()).toBe(true)
   })
 
@@ -164,7 +164,7 @@ describe('StripeExpressCheckoutElement', () => {
 
     await nextTick()
 
-    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
     const emitted = expressCheckoutComponent.emitted('ready')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(readyEvent)
@@ -205,7 +205,7 @@ describe('StripeExpressCheckoutElement', () => {
 
     await nextTick()
 
-    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
     const emitted = expressCheckoutComponent.emitted('click')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(clickEvent)
@@ -250,7 +250,7 @@ describe('StripeExpressCheckoutElement', () => {
 
     await nextTick()
 
-    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
     const emitted = expressCheckoutComponent.emitted('confirm')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(confirmEvent)
@@ -285,7 +285,7 @@ describe('StripeExpressCheckoutElement', () => {
 
     await nextTick()
 
-    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
     expect(expressCheckoutComponent.emitted('cancel')).toBeTruthy()
   })
 
@@ -329,7 +329,7 @@ describe('StripeExpressCheckoutElement', () => {
 
     await nextTick()
 
-    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
     const emitted = expressCheckoutComponent.emitted('shippingaddresschange')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(shippingEvent)
@@ -372,7 +372,7 @@ describe('StripeExpressCheckoutElement', () => {
 
     await nextTick()
 
-    const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+    const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
     const emitted = expressCheckoutComponent.emitted('shippingratechange')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(shippingRateEvent)
@@ -417,7 +417,7 @@ describe('StripeExpressCheckoutElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+      const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
 
       // Element is created and mounted on the DOM
       expect(mockCreate).toHaveBeenCalledWith('expressCheckout', undefined)
@@ -442,7 +442,7 @@ describe('StripeExpressCheckoutElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+      const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
       const vm = expressCheckoutComponent.vm as any
 
       // Loading should be defined (starts as true, becomes false after ready)
@@ -465,7 +465,7 @@ describe('StripeExpressCheckoutElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+      const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
       const vm = expressCheckoutComponent.vm as any
 
       // Error should be exposed (null when no error)
@@ -522,7 +522,7 @@ describe('StripeExpressCheckoutElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const expressCheckoutComponent = wrapper.findComponent(StripeExpressCheckoutElement)
+      const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
       const vm = expressCheckoutComponent.vm as any
 
       expect(vm.error).toBe('Failed to create express checkout element')

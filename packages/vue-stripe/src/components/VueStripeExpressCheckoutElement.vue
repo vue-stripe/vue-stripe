@@ -8,7 +8,7 @@ import type {
   StripeExpressCheckoutElementReadyEvent
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
-import { StripeElementsError } from '../utils/errors'
+import { VueStripeElementsError } from '../utils/errors'
 
 interface Props {
   options?: StripeExpressCheckoutElementOptions
@@ -54,8 +54,8 @@ const error = ref<string | null>(null)
 const elementsInstance = inject(stripeElementsInjectionKey)
 
 if (!elementsInstance) {
-  throw new StripeElementsError(
-    'StripeExpressCheckoutElement must be used within StripeElements'
+  throw new VueStripeElementsError(
+    'VueStripeExpressCheckoutElement must be used within VueStripeElements'
   )
 }
 

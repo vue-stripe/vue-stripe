@@ -1,9 +1,9 @@
-# StripeAddressElement
+# VueStripeAddressElement
 
 A complete address collection form with built-in autocomplete powered by Google Maps.
 
 ::: tip No Backend Required
-StripeAddressElement works without a `clientSecret`. It only needs to be wrapped in `StripeProvider` and `StripeElements` to function.
+StripeAddressElement works without a `clientSecret`. It only needs to be wrapped in `VueStripeProvider` and `VueStripeElements` to function.
 :::
 
 ## What is Address Element?
@@ -69,16 +69,16 @@ Address Element provides a complete, validated address collection form:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements>
-      <StripeAddressElement
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
+      <VueStripeAddressElement
         :options="addressOptions"
         @ready="onReady"
         @change="onChange"
       />
       <button @click="handleSubmit">Continue</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup>
@@ -218,7 +218,7 @@ const clearAddress = () => addressRef.value?.clear()
 </script>
 
 <template>
-  <StripeAddressElement ref="addressRef" />
+  <VueStripeAddressElement ref="addressRef" />
   <button @click="validateAddress">Validate</button>
   <button @click="focusAddress">Focus</button>
   <button @click="clearAddress">Clear</button>
@@ -235,7 +235,7 @@ const clearAddress = () => addressRef.value?.clear()
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `element` | `Ref<StripeAddressElement \| null>` | The Stripe address element instance |
+| `element` | `Ref<VueStripeAddressElement \| null>` | The Stripe address element instance |
 
 ## Examples
 
@@ -257,7 +257,7 @@ const options = computed(() => ({
     <button @click="mode = 'shipping'">Shipping</button>
     <button @click="mode = 'billing'">Billing</button>
   </div>
-  <StripeAddressElement :key="mode" :options="options" />
+  <VueStripeAddressElement :key="mode" :options="options" />
 </template>
 ```
 
@@ -283,7 +283,7 @@ const options = {
 </script>
 
 <template>
-  <StripeAddressElement :options="options" />
+  <VueStripeAddressElement :options="options" />
 </template>
 ```
 
@@ -305,7 +305,7 @@ const options = {
 </script>
 
 <template>
-  <StripeAddressElement :options="options" />
+  <VueStripeAddressElement :options="options" />
 </template>
 ```
 
@@ -320,7 +320,7 @@ const options = {
 </script>
 
 <template>
-  <StripeAddressElement :options="options" />
+  <VueStripeAddressElement :options="options" />
 </template>
 ```
 
@@ -335,7 +335,7 @@ const options = {
 </script>
 
 <template>
-  <StripeAddressElement :options="options" />
+  <VueStripeAddressElement :options="options" />
 </template>
 ```
 
@@ -367,7 +367,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <StripeAddressElement ref="addressRef" :options="{ mode: 'shipping' }" />
+  <VueStripeAddressElement ref="addressRef" :options="{ mode: 'shipping' }" />
   <button @click="handleSubmit">Continue to Payment</button>
 
   <div v-if="addressData">
@@ -427,24 +427,24 @@ const handlePayment = async (clientSecret) => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :options="{ clientSecret }">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :options="{ clientSecret }">
       <!-- Step 1: Address -->
       <div v-if="step === 'address'">
         <h3>Shipping Address</h3>
-        <StripeAddressElement ref="addressRef" :options="{ mode: 'shipping' }" />
+        <VueStripeAddressElement ref="addressRef" :options="{ mode: 'shipping' }" />
         <button @click="handleContinue">Continue to Payment</button>
       </div>
 
       <!-- Step 2: Payment -->
       <div v-if="step === 'payment'">
         <h3>Payment</h3>
-        <StripePaymentElement />
+        <VueStripePaymentElement />
         <button @click="handlePayment(clientSecret)">Pay Now</button>
         <button @click="step = 'address'">Back</button>
       </div>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 

@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
-import StripeCardNumberElement from '../../src/components/StripeCardNumberElement.vue'
-import StripeCardExpiryElement from '../../src/components/StripeCardExpiryElement.vue'
-import StripeCardCvcElement from '../../src/components/StripeCardCvcElement.vue'
-import StripeElements from '../../src/components/StripeElements.vue'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeCardNumberElement from '../../src/components/VueStripeCardNumberElement.vue'
+import VueStripeCardExpiryElement from '../../src/components/VueStripeCardExpiryElement.vue'
+import VueStripeCardCvcElement from '../../src/components/VueStripeCardCvcElement.vue'
+import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
 
 describe('Split Card Elements', () => {
@@ -19,12 +19,12 @@ describe('Split Card Elements', () => {
     elementProps = {},
     elementSlots = {}
   ) => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {}, {
+        default: () => h(VueStripeElements, {}, {
           default: () => h(ElementComponent, elementProps, elementSlots)
         })
       }
@@ -36,17 +36,17 @@ describe('Split Card Elements', () => {
     return wrapper
   }
 
-  describe('StripeCardNumberElement', () => {
+  describe('VueStripeCardNumberElement', () => {
     it('should throw error when used outside StripeElements', () => {
       expect(() => {
-        mount(StripeCardNumberElement, {
+        mount(VueStripeCardNumberElement, {
           props: {}
         })
-      }).toThrow('StripeCardNumberElement must be used within StripeElements')
+      }).toThrow('VueStripeCardNumberElement must be used within VueStripeElements')
     })
 
     it('should render card number element container', async () => {
-      const wrapper = await mountWithProviders(StripeCardNumberElement)
+      const wrapper = await mountWithProviders(VueStripeCardNumberElement)
 
       expect(wrapper.find('.vue-stripe-cardNumber-element').exists()).toBe(true)
       expect(wrapper.find('.vue-stripe-cardNumber-element-mount').exists()).toBe(true)
@@ -66,7 +66,7 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      await mountWithProviders(StripeCardNumberElement)
+      await mountWithProviders(VueStripeCardNumberElement)
 
       expect(mockCreate).toHaveBeenCalledWith('cardNumber', {})
       expect(mockElement.mount).toHaveBeenCalled()
@@ -93,7 +93,7 @@ describe('Split Card Elements', () => {
         showIcon: true
       }
 
-      await mountWithProviders(StripeCardNumberElement, { options })
+      await mountWithProviders(VueStripeCardNumberElement, { options })
 
       expect(mockCreate).toHaveBeenCalledWith('cardNumber', options)
     })
@@ -119,7 +119,7 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      const wrapper = await mountWithProviders(StripeCardNumberElement)
+      const wrapper = await mountWithProviders(VueStripeCardNumberElement)
 
       const changeEvent = {
         complete: false,
@@ -134,7 +134,7 @@ describe('Split Card Elements', () => {
 
       await nextTick()
 
-      const component = wrapper.findComponent(StripeCardNumberElement)
+      const component = wrapper.findComponent(VueStripeCardNumberElement)
       const emitted = component.emitted('change')
       expect(emitted).toBeTruthy()
       expect(emitted![0][0]).toMatchObject({ brand: 'visa' })
@@ -154,7 +154,7 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      await mountWithProviders(StripeCardNumberElement)
+      await mountWithProviders(VueStripeCardNumberElement)
 
       expect(mockElement.on).toHaveBeenCalledWith('ready', expect.any(Function))
       expect(mockElement.on).toHaveBeenCalledWith('change', expect.any(Function))
@@ -164,17 +164,17 @@ describe('Split Card Elements', () => {
     })
   })
 
-  describe('StripeCardExpiryElement', () => {
+  describe('VueStripeCardExpiryElement', () => {
     it('should throw error when used outside StripeElements', () => {
       expect(() => {
-        mount(StripeCardExpiryElement, {
+        mount(VueStripeCardExpiryElement, {
           props: {}
         })
-      }).toThrow('StripeCardExpiryElement must be used within StripeElements')
+      }).toThrow('VueStripeCardExpiryElement must be used within VueStripeElements')
     })
 
     it('should render card expiry element container', async () => {
-      const wrapper = await mountWithProviders(StripeCardExpiryElement)
+      const wrapper = await mountWithProviders(VueStripeCardExpiryElement)
 
       expect(wrapper.find('.vue-stripe-cardExpiry-element').exists()).toBe(true)
       expect(wrapper.find('.vue-stripe-cardExpiry-element-mount').exists()).toBe(true)
@@ -194,7 +194,7 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      await mountWithProviders(StripeCardExpiryElement)
+      await mountWithProviders(VueStripeCardExpiryElement)
 
       expect(mockCreate).toHaveBeenCalledWith('cardExpiry', {})
       expect(mockElement.mount).toHaveBeenCalled()
@@ -221,7 +221,7 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      const wrapper = await mountWithProviders(StripeCardExpiryElement)
+      const wrapper = await mountWithProviders(VueStripeCardExpiryElement)
 
       if (readyCallback) {
         readyCallback()
@@ -229,7 +229,7 @@ describe('Split Card Elements', () => {
 
       await nextTick()
 
-      const component = wrapper.findComponent(StripeCardExpiryElement)
+      const component = wrapper.findComponent(VueStripeCardExpiryElement)
       expect(component.emitted('ready')).toBeTruthy()
     })
 
@@ -254,7 +254,7 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      const wrapper = await mountWithProviders(StripeCardExpiryElement)
+      const wrapper = await mountWithProviders(VueStripeCardExpiryElement)
 
       const changeEvent = {
         complete: true,
@@ -268,24 +268,24 @@ describe('Split Card Elements', () => {
 
       await nextTick()
 
-      const component = wrapper.findComponent(StripeCardExpiryElement)
+      const component = wrapper.findComponent(VueStripeCardExpiryElement)
       const emitted = component.emitted('change')
       expect(emitted).toBeTruthy()
       expect(emitted![0][0]).toMatchObject({ complete: true })
     })
   })
 
-  describe('StripeCardCvcElement', () => {
+  describe('VueStripeCardCvcElement', () => {
     it('should throw error when used outside StripeElements', () => {
       expect(() => {
-        mount(StripeCardCvcElement, {
+        mount(VueStripeCardCvcElement, {
           props: {}
         })
-      }).toThrow('StripeCardCvcElement must be used within StripeElements')
+      }).toThrow('VueStripeCardCvcElement must be used within VueStripeElements')
     })
 
     it('should render card CVC element container', async () => {
-      const wrapper = await mountWithProviders(StripeCardCvcElement)
+      const wrapper = await mountWithProviders(VueStripeCardCvcElement)
 
       expect(wrapper.find('.vue-stripe-cardCvc-element').exists()).toBe(true)
       expect(wrapper.find('.vue-stripe-cardCvc-element-mount').exists()).toBe(true)
@@ -305,7 +305,7 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      await mountWithProviders(StripeCardCvcElement)
+      await mountWithProviders(VueStripeCardCvcElement)
 
       expect(mockCreate).toHaveBeenCalledWith('cardCvc', {})
       expect(mockElement.mount).toHaveBeenCalled()
@@ -332,7 +332,7 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      const wrapper = await mountWithProviders(StripeCardCvcElement)
+      const wrapper = await mountWithProviders(VueStripeCardCvcElement)
 
       if (focusCallback) focusCallback()
       await nextTick()
@@ -340,7 +340,7 @@ describe('Split Card Elements', () => {
       if (blurCallback) blurCallback()
       await nextTick()
 
-      const component = wrapper.findComponent(StripeCardCvcElement)
+      const component = wrapper.findComponent(VueStripeCardCvcElement)
       expect(component.emitted('focus')).toBeTruthy()
       expect(component.emitted('blur')).toBeTruthy()
     })
@@ -366,7 +366,7 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      const wrapper = await mountWithProviders(StripeCardCvcElement)
+      const wrapper = await mountWithProviders(VueStripeCardCvcElement)
 
       const changeEvent = {
         complete: false,
@@ -402,16 +402,16 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      const wrapper = mount(StripeProvider, {
+      const wrapper = mount(VueStripeProvider, {
         props: {
           publishableKey: 'pk_test_123'
         },
         slots: {
-          default: () => h(StripeElements, {}, {
+          default: () => h(VueStripeElements, {}, {
             default: () => [
-              h(StripeCardNumberElement, { key: 'number' }),
-              h(StripeCardExpiryElement, { key: 'expiry' }),
-              h(StripeCardCvcElement, { key: 'cvc' })
+              h(VueStripeCardNumberElement, { key: 'number' }),
+              h(VueStripeCardExpiryElement, { key: 'expiry' }),
+              h(VueStripeCardCvcElement, { key: 'cvc' })
             ]
           })
         }
@@ -442,16 +442,16 @@ describe('Split Card Elements', () => {
       registerAppInfo: vi.fn()
       } as any)
 
-      const wrapper = mount(StripeProvider, {
+      const wrapper = mount(VueStripeProvider, {
         props: {
           publishableKey: 'pk_test_123'
         },
         slots: {
-          default: () => h(StripeElements, {}, {
+          default: () => h(VueStripeElements, {}, {
             default: () => [
-              h(StripeCardNumberElement, { key: 'number' }),
-              h(StripeCardExpiryElement, { key: 'expiry' }),
-              h(StripeCardCvcElement, { key: 'cvc' })
+              h(VueStripeCardNumberElement, { key: 'number' }),
+              h(VueStripeCardExpiryElement, { key: 'expiry' }),
+              h(VueStripeCardCvcElement, { key: 'cvc' })
             ]
           })
         }

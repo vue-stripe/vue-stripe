@@ -72,23 +72,23 @@ const onPaymentChange = (event) => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <!-- Step 1: Email + Link detection -->
       <div class="form-field">
         <label>Email</label>
-        <StripeLinkAuthenticationElement @change="onEmailChange" />
+        <VueStripeLinkAuthenticationElement @change="onEmailChange" />
       </div>
 
       <!-- Step 2: Payment method -->
       <div class="form-field">
         <label>Payment</label>
-        <StripePaymentElement @change="onPaymentChange" />
+        <VueStripePaymentElement @change="onPaymentChange" />
       </div>
 
       <button :disabled="!canPay">Pay Now</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -127,7 +127,7 @@ const options = computed(() => ({
 </script>
 
 <template>
-  <StripeLinkAuthenticationElement :options="options" />
+  <VueStripeLinkAuthenticationElement :options="options" />
 </template>
 ```
 
@@ -173,17 +173,17 @@ const onPaymentChange = (event) => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <form @submit.prevent="handleSubmit">
         <div class="form-field">
           <label>Email</label>
-          <StripeLinkAuthenticationElement @change="onEmailChange" />
+          <VueStripeLinkAuthenticationElement @change="onEmailChange" />
         </div>
 
         <div class="form-field">
           <label>Payment</label>
-          <StripePaymentElement @change="onPaymentChange" />
+          <VueStripePaymentElement @change="onPaymentChange" />
         </div>
 
         <div v-if="error" class="error">{{ error }}</div>
@@ -193,8 +193,8 @@ const onPaymentChange = (event) => {
           :email="customerEmail"
         />
       </form>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -274,20 +274,20 @@ For a complete checkout with shipping:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <!-- Email + Link -->
-      <StripeLinkAuthenticationElement @change="onEmailChange" />
+      <VueStripeLinkAuthenticationElement @change="onEmailChange" />
 
       <!-- Shipping Address -->
-      <StripeAddressElement :options="{ mode: 'shipping' }" />
+      <VueStripeAddressElement :options="{ mode: 'shipping' }" />
 
       <!-- Payment -->
-      <StripePaymentElement @change="onPaymentChange" />
+      <VueStripePaymentElement @change="onPaymentChange" />
 
       <button :disabled="!canPay">Pay Now</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 

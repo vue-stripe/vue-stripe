@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, ref, defineComponent } from 'vue-demi'
 import { useStripeElements } from '../../src/composables/useStripeElements'
-import StripeElements from '../../src/components/StripeElements.vue'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises } from '../setup'
 
 describe('useStripeElements', () => {
@@ -11,7 +11,7 @@ describe('useStripeElements', () => {
     vi.clearAllMocks()
   })
 
-  it('should throw error when used outside StripeElements', () => {
+  it('should throw error when used outside VueStripeElements', () => {
     const TestComponent = defineComponent({
       setup() {
         // This should throw
@@ -25,7 +25,7 @@ describe('useStripeElements', () => {
     }).toThrow('Elements context not found')
   })
 
-  it('should return elements context when used inside StripeElements', async () => {
+  it('should return elements context when used inside VueStripeElements', async () => {
     let elementsContext: ReturnType<typeof useStripeElements> | null = null
 
     const TestComponent = defineComponent({
@@ -35,12 +35,12 @@ describe('useStripeElements', () => {
       }
     })
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {}, {
+        default: () => h(VueStripeElements, {}, {
           default: () => h(TestComponent)
         })
       }
@@ -64,12 +64,12 @@ describe('useStripeElements', () => {
       }
     })
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {}, {
+        default: () => h(VueStripeElements, {}, {
           default: () => h(TestComponent)
         })
       }
@@ -94,12 +94,12 @@ describe('useStripeElements', () => {
       }
     })
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {}, {
+        default: () => h(VueStripeElements, {}, {
           default: () => h(TestComponent)
         })
       }
@@ -125,12 +125,12 @@ describe('useStripeElements', () => {
       }
     })
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {}, {
+        default: () => h(VueStripeElements, {}, {
           default: () => h(TestComponent)
         })
       }
@@ -152,7 +152,7 @@ describe('useStripeElements', () => {
 
     expect(() => {
       mount(TestComponent)
-    }).toThrow('Make sure to wrap your component with StripeElements')
+    }).toThrow('Make sure to wrap your component with VueStripeElements')
   })
 
   it('should work with nested components', async () => {
@@ -171,12 +171,12 @@ describe('useStripeElements', () => {
       }
     })
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {}, {
+        default: () => h(VueStripeElements, {}, {
           default: () => h(NestedComponent)
         })
       }

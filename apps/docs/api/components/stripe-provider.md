@@ -1,4 +1,4 @@
-# StripeProvider
+# VueStripeProvider
 
 The root component that loads Stripe.js and provides the Stripe instance to all descendant components.
 
@@ -48,17 +48,17 @@ StripeProvider is the foundation of any Vue Stripe integration. It handles:
 
 ```vue
 <template>
-  <StripeProvider
+  <VueStripeProvider
     :publishable-key="publishableKey"
     @load="onLoad"
     @error="onError"
   >
     <!-- Your payment components -->
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 
 <script setup>
-import { StripeProvider } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
@@ -109,9 +109,9 @@ interface StripeProviderOptions {
 Rendered when Stripe is ready:
 
 ```vue
-<StripeProvider :publishable-key="key">
+<VueStripeProvider :publishable-key="key">
   <MyPaymentForm />
-</StripeProvider>
+</VueStripeProvider>
 ```
 
 ### Loading Slot
@@ -119,13 +119,13 @@ Rendered when Stripe is ready:
 Rendered while Stripe.js is loading:
 
 ```vue
-<StripeProvider :publishable-key="key">
+<VueStripeProvider :publishable-key="key">
   <template #loading>
     <div class="spinner">Loading payment form...</div>
   </template>
 
   <MyPaymentForm />
-</StripeProvider>
+</VueStripeProvider>
 ```
 
 ### Error Slot
@@ -133,7 +133,7 @@ Rendered while Stripe.js is loading:
 Rendered when Stripe.js fails to load:
 
 ```vue
-<StripeProvider :publishable-key="key">
+<VueStripeProvider :publishable-key="key">
   <template #error="{ error }">
     <div class="error">
       Failed to load payment form: {{ error }}
@@ -141,7 +141,7 @@ Rendered when Stripe.js fails to load:
   </template>
 
   <MyPaymentForm />
-</StripeProvider>
+</VueStripeProvider>
 ```
 
 ## Provides
@@ -161,39 +161,39 @@ Access these values using the [useStripe](/api/composables/use-stripe) composabl
 ### Basic Usage
 
 ```vue
-<StripeProvider :publishable-key="pk_test_...">
-  <StripeElements :client-secret="secret">
-    <StripePaymentElement />
-  </StripeElements>
-</StripeProvider>
+<VueStripeProvider :publishable-key="pk_test_...">
+  <VueStripeElements :client-secret="secret">
+    <VueStripePaymentElement />
+  </VueStripeElements>
+</VueStripeProvider>
 ```
 
 ### With Stripe Connect
 
 ```vue
-<StripeProvider
+<VueStripeProvider
   :publishable-key="pk_test_..."
   stripe-account="acct_1234567890"
 >
   <!-- Payments go to connected account -->
-</StripeProvider>
+</VueStripeProvider>
 ```
 
 ### With Custom Locale
 
 ```vue
-<StripeProvider
+<VueStripeProvider
   :publishable-key="pk_test_..."
   locale="es"
 >
   <!-- Stripe Elements will be in Spanish -->
-</StripeProvider>
+</VueStripeProvider>
 ```
 
 ### With All Slots
 
 ```vue
-<StripeProvider
+<VueStripeProvider
   :publishable-key="publishableKey"
   @load="onStripeLoad"
   @error="onStripeError"
@@ -210,7 +210,7 @@ Access these values using the [useStripe](/api/composables/use-stripe) composabl
   </template>
 
   <PaymentForm />
-</StripeProvider>
+</VueStripeProvider>
 ```
 
 ## Error Handling
@@ -238,7 +238,7 @@ const handleError = (error) => {
 ## TypeScript
 
 ```ts
-import { StripeProvider } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 import type { Stripe } from '@stripe/stripe-js'
 
 const onLoad = (stripe: Stripe) => {

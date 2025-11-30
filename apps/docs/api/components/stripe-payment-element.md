@@ -1,4 +1,4 @@
-# StripePaymentElement
+# VueStripePaymentElement
 
 Stripe's recommended all-in-one payment component that supports cards, wallets (Apple Pay, Google Pay), bank transfers, and more.
 
@@ -65,9 +65,9 @@ Payment Element is Stripe's modern, unified payment interface that:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement
         :options="paymentOptions"
         @ready="onReady"
         @change="onChange"
@@ -75,8 +75,8 @@ Payment Element is Stripe's modern, unified payment interface that:
       <button @click="handleSubmit" :disabled="!isComplete">
         Pay
       </button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup>
@@ -187,7 +187,7 @@ interface StripePaymentElementOptions {
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | `StripePaymentElement` | Emitted when the element is fully rendered |
+| `@ready` | `VueStripePaymentElement` | Emitted when the element is fully rendered |
 | `@change` | `StripePaymentElementChangeEvent` | Emitted when the element value changes |
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |
@@ -216,11 +216,11 @@ interface StripePaymentElementChangeEvent {
 Rendered while the payment element is initializing:
 
 ```vue
-<StripePaymentElement>
+<VueStripePaymentElement>
   <template #loading>
     <div class="skeleton-loader">Loading payment form...</div>
   </template>
-</StripePaymentElement>
+</VueStripePaymentElement>
 ```
 
 ### Error Slot
@@ -228,18 +228,18 @@ Rendered while the payment element is initializing:
 Rendered when there's an error during element creation:
 
 ```vue
-<StripePaymentElement>
+<VueStripePaymentElement>
   <template #error="{ error }">
     <div class="payment-error">{{ error }}</div>
   </template>
-</StripePaymentElement>
+</VueStripePaymentElement>
 ```
 
 ## Exposed Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `element` | `Ref<StripePaymentElement \| null>` | The Stripe payment element instance |
+| `element` | `Ref<VueStripePaymentElement \| null>` | The Stripe payment element instance |
 | `loading` | `Ref<boolean>` | Whether the element is loading |
 | `error` | `Ref<string \| null>` | Current error message |
 
@@ -248,7 +248,7 @@ Rendered when there's an error during element creation:
 ### Tabs Layout
 
 ```vue
-<StripePaymentElement
+<VueStripePaymentElement
   :options="{ layout: 'tabs' }"
 />
 ```
@@ -256,7 +256,7 @@ Rendered when there's an error during element creation:
 ### Accordion Layout
 
 ```vue
-<StripePaymentElement
+<VueStripePaymentElement
   :options="{
     layout: {
       type: 'accordion',
@@ -291,14 +291,14 @@ const options = {
 </script>
 
 <template>
-  <StripePaymentElement :options="options" />
+  <VueStripePaymentElement :options="options" />
 </template>
 ```
 
 ### Hide Billing Fields
 
 ```vue
-<StripePaymentElement
+<VueStripePaymentElement
   :options="{
     fields: {
       billingDetails: 'never'
@@ -310,7 +310,7 @@ const options = {
 ### Control Payment Method Order
 
 ```vue
-<StripePaymentElement
+<VueStripePaymentElement
   :options="{
     paymentMethodOrder: ['card', 'apple_pay', 'google_pay', 'ideal']
   }"
@@ -320,7 +320,7 @@ const options = {
 ### Disable Wallet Payments
 
 ```vue
-<StripePaymentElement
+<VueStripePaymentElement
   :options="{
     wallets: {
       applePay: 'never',
@@ -353,12 +353,12 @@ const status = ref('')
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement @change="e => isComplete = e.complete" />
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement @change="e => isComplete = e.complete" />
       <PaymentFormButton :client-secret="clientSecret" :disabled="!isComplete" />
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -431,12 +431,12 @@ const appearance = {
 </script>
 
 <template>
-  <StripeElements
+  <VueStripeElements
     :client-secret="clientSecret"
     :options="{ appearance }"
   >
-    <StripePaymentElement />
-  </StripeElements>
+    <VueStripePaymentElement />
+  </VueStripeElements>
 </template>
 ```
 

@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, ref } from 'vue-demi'
 import { usePaymentIntent } from '../../src/composables/usePaymentIntent'
-import StripeProvider from '../../src/components/StripeProvider.vue'
-import StripeElements from '../../src/components/StripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
+import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import { flushPromises } from '../setup'
 
 // Test component that uses usePaymentIntent
@@ -22,12 +22,12 @@ describe('usePaymentIntent', () => {
 
   // Helper to mount with full provider hierarchy
   const mountWithProviders = async (component = TestComponent) => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {
+        default: () => h(VueStripeElements, {
           clientSecret: 'pi_test_secret_123'
         }, {
           default: () => h(component)
@@ -39,10 +39,10 @@ describe('usePaymentIntent', () => {
     return wrapper
   }
 
-  it('should throw error when used outside StripeProvider', () => {
+  it('should throw error when used outside VueStripeProvider', () => {
     expect(() => {
       mount(TestComponent)
-    }).toThrow('usePaymentIntent must be called within a StripeProvider component')
+    }).toThrow('usePaymentIntent must be called within a VueStripeProvider component')
   })
 
   it('should return confirmPayment function and state refs', async () => {
@@ -58,8 +58,8 @@ describe('usePaymentIntent', () => {
     expect(error.value).toBe(null)
   })
 
-  it('should work with StripeProvider only (without StripeElements)', async () => {
-    const wrapper = mount(StripeProvider, {
+  it('should work with VueStripeProvider only (without VueStripeElements)', async () => {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
@@ -267,7 +267,7 @@ describe('usePaymentIntent', () => {
 
   it('should return error if Stripe is not initialized', async () => {
     // This test verifies the case where stripe.value is null
-    // The StripeProvider shows an error slot when loadStripe returns null
+    // The VueStripeProvider shows an error slot when loadStripe returns null
     // So we capture during loading state instead
 
     let capturedComposable: ReturnType<typeof usePaymentIntent> | null = null
@@ -284,7 +284,7 @@ describe('usePaymentIntent', () => {
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce(null)
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, inject, computed } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeExpressCheckoutElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeExpressCheckoutElement
 } from '@vue-stripe/vue-stripe'
 import type {
   StripeExpressCheckoutElementReadyEvent,
@@ -24,7 +24,7 @@ const clientSecret = computed(() => localClientSecret.value.trim())
 const showSecretForm = computed(() => publishableKey.value && !clientSecret.value)
 
 // Express checkout ref
-const expressCheckoutRef = ref<InstanceType<typeof StripeExpressCheckoutElement> | null>(null)
+const expressCheckoutRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement> | null>(null)
 
 // Track available wallets
 const availableWallets = ref<string[]>([])
@@ -175,10 +175,10 @@ const onShippingRateChange = (event: unknown) => {
       </div>
 
       <div class="demo-container">
-        <StripeProvider :publishable-key="publishableKey">
-          <StripeElements :client-secret="clientSecret">
+        <VueStripeProvider :publishable-key="publishableKey">
+          <VueStripeElements :client-secret="clientSecret">
             <div class="express-checkout-wrapper">
-              <StripeExpressCheckoutElement
+              <VueStripeExpressCheckoutElement
                 ref="expressCheckoutRef"
                 :options="expressCheckoutOptions"
                 @ready="onReady"
@@ -189,8 +189,8 @@ const onShippingRateChange = (event: unknown) => {
                 @shippingratechange="onShippingRateChange"
               />
             </div>
-          </StripeElements>
-        </StripeProvider>
+          </VueStripeElements>
+        </VueStripeProvider>
       </div>
 
       <!-- Available Wallets Display -->

@@ -1,25 +1,25 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
-import StripeLinkAuthenticationElement from '../../src/components/StripeLinkAuthenticationElement.vue'
-import StripeElements from '../../src/components/StripeElements.vue'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeLinkAuthenticationElement from '../../src/components/VueStripeLinkAuthenticationElement.vue'
+import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
 
-describe('StripeLinkAuthenticationElement', () => {
+describe('VueStripeLinkAuthenticationElement', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   // Helper to mount with full provider hierarchy
   const mountWithProviders = async (linkAuthProps = {}) => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, { clientSecret: 'pi_test_secret_123' }, {
-          default: () => h(StripeLinkAuthenticationElement, linkAuthProps)
+        default: () => h(VueStripeElements, { clientSecret: 'pi_test_secret_123' }, {
+          default: () => h(VueStripeLinkAuthenticationElement, linkAuthProps)
         })
       }
     })
@@ -34,18 +34,18 @@ describe('StripeLinkAuthenticationElement', () => {
 
   it('should throw error when used outside StripeElements', () => {
     expect(() => {
-      mount(StripeLinkAuthenticationElement, {
+      mount(VueStripeLinkAuthenticationElement, {
         props: {
           options: {}
         }
       })
-    }).toThrow('StripeLinkAuthenticationElement must be used within StripeElements')
+    }).toThrow('VueStripeLinkAuthenticationElement must be used within VueStripeElements')
   })
 
   it('should render link authentication element container', async () => {
     const wrapper = await mountWithProviders()
 
-    const linkAuthComponent = wrapper.findComponent(StripeLinkAuthenticationElement)
+    const linkAuthComponent = wrapper.findComponent(VueStripeLinkAuthenticationElement)
     expect(linkAuthComponent.exists()).toBe(true)
   })
 
@@ -147,7 +147,7 @@ describe('StripeLinkAuthenticationElement', () => {
 
     await nextTick()
 
-    const linkAuthComponent = wrapper.findComponent(StripeLinkAuthenticationElement)
+    const linkAuthComponent = wrapper.findComponent(VueStripeLinkAuthenticationElement)
     const emitted = linkAuthComponent.emitted('ready')
     expect(emitted).toBeTruthy()
   })
@@ -189,7 +189,7 @@ describe('StripeLinkAuthenticationElement', () => {
 
     await nextTick()
 
-    const linkAuthComponent = wrapper.findComponent(StripeLinkAuthenticationElement)
+    const linkAuthComponent = wrapper.findComponent(VueStripeLinkAuthenticationElement)
     const emitted = linkAuthComponent.emitted('change')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(changeEvent)
@@ -232,7 +232,7 @@ describe('StripeLinkAuthenticationElement', () => {
 
     await nextTick()
 
-    const linkAuthComponent = wrapper.findComponent(StripeLinkAuthenticationElement)
+    const linkAuthComponent = wrapper.findComponent(VueStripeLinkAuthenticationElement)
     const emitted = linkAuthComponent.emitted('change')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(changeEvent)
@@ -268,7 +268,7 @@ describe('StripeLinkAuthenticationElement', () => {
     it('should have exposed methods defined in component', () => {
       // This test verifies the component code has defineExpose with the correct methods
       // by checking that the component is importable and structured correctly
-      expect(StripeLinkAuthenticationElement).toBeDefined()
+      expect(VueStripeLinkAuthenticationElement).toBeDefined()
     })
   })
 })

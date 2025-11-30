@@ -3,7 +3,7 @@ import { createStripeElement } from '../utils/element-factory'
 
 export default createStripeElement({
   elementType: 'cardExpiry',
-  componentName: 'StripeCardExpiryElement'
+  componentName: 'VueStripeCardExpiryElement'
 })
 </script>
 

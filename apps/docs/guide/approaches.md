@@ -16,7 +16,7 @@ Stripe offers several ways to collect payments. Here's how to choose the right o
 The Payment Element is Stripe's modern, all-in-one solution. It automatically shows the best payment methods for your customer.
 
 ```vue
-<StripePaymentElement />
+<VueStripePaymentElement />
 ```
 
 **Pros:**
@@ -39,12 +39,12 @@ The Card Element gives you more control over the card input experience.
 
 ```vue
 <!-- Single unified input -->
-<StripeCardElement />
+<VueStripeCardElement />
 
 <!-- Or split into separate fields -->
-<StripeCardNumberElement />
-<StripeCardExpiryElement />
-<StripeCardCvcElement />
+<VueStripeCardNumberElement />
+<VueStripeCardExpiryElement />
+<VueStripeCardCvcElement />
 ```
 
 **Pros:**
@@ -66,7 +66,7 @@ The Card Element gives you more control over the card input experience.
 Shows Apple Pay, Google Pay, and Link buttons for one-tap payments.
 
 ```vue
-<StripeExpressCheckoutElement @click="onExpressClick" />
+<VueStripeExpressCheckoutElement @click="onExpressClick" />
 ```
 
 **Pros:**
@@ -143,18 +143,18 @@ You can mix approaches in the same checkout:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="key">
-    <StripeElements :client-secret="secret">
+  <VueStripeProvider :publishable-key="key">
+    <VueStripeElements :client-secret="secret">
       <!-- Quick payment options at top -->
-      <StripeExpressCheckoutElement @confirm="onExpressConfirm" />
+      <VueStripeExpressCheckoutElement @confirm="onExpressConfirm" />
 
       <div class="divider">Or pay with card</div>
 
       <!-- Full payment form below -->
-      <StripePaymentElement />
+      <VueStripePaymentElement />
       <button @click="handleSubmit">Pay</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 

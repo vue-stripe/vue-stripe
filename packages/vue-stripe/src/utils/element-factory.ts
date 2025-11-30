@@ -1,7 +1,7 @@
 import { defineComponent, ref, inject, onMounted, onUnmounted, watch, h } from 'vue-demi'
 import type { StripeElementChangeEvent } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from './injection-keys'
-import { StripeElementsError } from './errors'
+import { VueStripeElementsError } from './errors'
 
 // Stripe element types that can be created
 export type StripeElementType =
@@ -51,8 +51,8 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
       const elementsInstance = inject(stripeElementsInjectionKey)
 
       if (!elementsInstance) {
-        throw new StripeElementsError(
-          `${componentName} must be used within StripeElements`
+        throw new VueStripeElementsError(
+          `${componentName} must be used within VueStripeElements`
         )
       }
 

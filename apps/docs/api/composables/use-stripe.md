@@ -1,6 +1,6 @@
 # useStripe
 
-Access the Stripe instance from any component within `StripeProvider`.
+Access the Stripe instance from any component within `VueStripeProvider`.
 
 ## What is useStripe?
 
@@ -183,7 +183,7 @@ onMounted(async () => {
 
 ## Error Handling
 
-`useStripe()` throws an error if called outside of `StripeProvider`:
+`useStripe()` throws an error if called outside of `VueStripeProvider`:
 
 ```vue
 <!-- ❌ Wrong - useStripe() called outside StripeProvider -->
@@ -192,9 +192,9 @@ const { stripe } = useStripe() // Throws: "useStripe must be called within Strip
 </script>
 
 <template>
-  <StripeProvider :publishable-key="key">
+  <VueStripeProvider :publishable-key="key">
     <MyForm />
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -207,9 +207,9 @@ const { stripe } = useStripe() // Works!
 
 <!-- Parent.vue -->
 <template>
-  <StripeProvider :publishable-key="key">
+  <VueStripeProvider :publishable-key="key">
     <MyForm />
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 

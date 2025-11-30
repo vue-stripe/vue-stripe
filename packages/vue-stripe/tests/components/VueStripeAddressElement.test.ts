@@ -1,25 +1,25 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
-import StripeAddressElement from '../../src/components/StripeAddressElement.vue'
-import StripeElements from '../../src/components/StripeElements.vue'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeAddressElement from '../../src/components/VueStripeAddressElement.vue'
+import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
 
-describe('StripeAddressElement', () => {
+describe('VueStripeAddressElement', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   // Helper to mount with full provider hierarchy
   const mountWithProviders = async (addressProps = {}) => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {}, {
-          default: () => h(StripeAddressElement, addressProps)
+        default: () => h(VueStripeElements, {}, {
+          default: () => h(VueStripeAddressElement, addressProps)
         })
       }
     })
@@ -32,19 +32,19 @@ describe('StripeAddressElement', () => {
 
   it('should throw error when used outside StripeElements', () => {
     expect(() => {
-      mount(StripeAddressElement, {
+      mount(VueStripeAddressElement, {
         props: {
           options: { mode: 'shipping' }
         }
       })
-    }).toThrow('StripeAddressElement must be used within StripeElements')
+    }).toThrow('VueStripeAddressElement must be used within VueStripeElements')
   })
 
   it('should render address element container', async () => {
     const wrapper = await mountWithProviders()
 
     // StripeAddressElement renders a div ref
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
+    const addressComponent = wrapper.findComponent(VueStripeAddressElement)
     expect(addressComponent.exists()).toBe(true)
   })
 
@@ -151,7 +151,7 @@ describe('StripeAddressElement', () => {
     await nextTick()
 
     // Find the StripeAddressElement component and check emissions
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
+    const addressComponent = wrapper.findComponent(VueStripeAddressElement)
     const emitted = addressComponent.emitted('ready')
     expect(emitted).toBeTruthy()
   })
@@ -202,7 +202,7 @@ describe('StripeAddressElement', () => {
 
     await nextTick()
 
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
+    const addressComponent = wrapper.findComponent(VueStripeAddressElement)
     const emitted = addressComponent.emitted('change')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(changeEvent)
@@ -237,7 +237,7 @@ describe('StripeAddressElement', () => {
 
     await nextTick()
 
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
+    const addressComponent = wrapper.findComponent(VueStripeAddressElement)
     expect(addressComponent.emitted('focus')).toBeTruthy()
   })
 
@@ -270,7 +270,7 @@ describe('StripeAddressElement', () => {
 
     await nextTick()
 
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
+    const addressComponent = wrapper.findComponent(VueStripeAddressElement)
     expect(addressComponent.emitted('blur')).toBeTruthy()
   })
 
@@ -303,7 +303,7 @@ describe('StripeAddressElement', () => {
 
     await nextTick()
 
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
+    const addressComponent = wrapper.findComponent(VueStripeAddressElement)
     expect(addressComponent.emitted('escape')).toBeTruthy()
   })
 
@@ -341,7 +341,7 @@ describe('StripeAddressElement', () => {
 
     await nextTick()
 
-    const addressComponent = wrapper.findComponent(StripeAddressElement)
+    const addressComponent = wrapper.findComponent(VueStripeAddressElement)
     const emitted = addressComponent.emitted('loadError')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(errorEvent)
@@ -432,7 +432,7 @@ describe('StripeAddressElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
+      const addressComponent = wrapper.findComponent(VueStripeAddressElement)
       const vm = addressComponent.vm as any
 
       // Call the exposed getValue method
@@ -476,7 +476,7 @@ describe('StripeAddressElement', () => {
       } as any)
 
       const wrapper = await mountWithProviders()
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
+      const addressComponent = wrapper.findComponent(VueStripeAddressElement)
       const vm = addressComponent.vm as any
 
       const result = await vm.getValue()
@@ -503,7 +503,7 @@ describe('StripeAddressElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
+      const addressComponent = wrapper.findComponent(VueStripeAddressElement)
       const vm = addressComponent.vm as any
 
       // Call the exposed focus method
@@ -528,7 +528,7 @@ describe('StripeAddressElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
+      const addressComponent = wrapper.findComponent(VueStripeAddressElement)
       const vm = addressComponent.vm as any
 
       // Call the exposed clear method
@@ -553,7 +553,7 @@ describe('StripeAddressElement', () => {
 
       const wrapper = await mountWithProviders()
 
-      const addressComponent = wrapper.findComponent(StripeAddressElement)
+      const addressComponent = wrapper.findComponent(VueStripeAddressElement)
       const vm = addressComponent.vm as any
 
       // The element should be exposed

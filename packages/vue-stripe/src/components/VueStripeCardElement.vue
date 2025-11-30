@@ -6,7 +6,7 @@ import type {
   StripeCardElementChangeEvent
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
-import { StripeElementsError } from '../utils/errors'
+import { VueStripeElementsError } from '../utils/errors'
 
 interface Props {
   options?: StripeCardElementOptions
@@ -31,8 +31,8 @@ const error = ref<string | null>(null)
 const elementsInstance = inject(stripeElementsInjectionKey)
 
 if (!elementsInstance) {
-  throw new StripeElementsError(
-    'StripeCardElement must be used within StripeElements'
+  throw new VueStripeElementsError(
+    'VueStripeCardElement must be used within VueStripeElements'
   )
 }
 

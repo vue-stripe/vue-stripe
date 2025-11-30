@@ -68,7 +68,7 @@ Choose Checkout when you want the fastest integration with minimal code.
 
 ## Required Components
 
-Checkout only needs `StripeProvider` - no `StripeElements` required:
+Checkout only needs `VueStripeProvider` - no `VueStripeElements` required:
 
 ```
 StripeProvider
@@ -77,8 +77,8 @@ StripeProvider
 
 | Component | Role |
 |-----------|------|
-| `StripeProvider` | Loads Stripe.js |
-| `StripeCheckout` | Renders button, handles redirect |
+| `VueStripeProvider` | Loads Stripe.js |
+| `VueStripeCheckout` | Renders button, handles redirect |
 
 ## Basic Implementation
 
@@ -136,13 +136,13 @@ onMounted(async () => {
 <template>
   <div v-if="loading">Loading...</div>
 
-  <StripeProvider v-else :publishable-key="publishableKey">
-    <StripeCheckout
+  <VueStripeProvider v-else :publishable-key="publishableKey">
+    <VueStripeCheckout
       :session-id="sessionId"
       button-text="Pay $49.99"
       @error="(err) => console.error(err.message)"
     />
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -162,9 +162,9 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider :publishable-key="publishableKey">
     <CheckoutForm />
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -223,17 +223,17 @@ const session = await stripe.checkout.sessions.create({
 ```vue
 <!-- Frontend -->
 <template>
-  <StripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider :publishable-key="publishableKey">
     <div class="pricing-card">
       <h3>Pro Plan</h3>
       <p>$29/month</p>
 
-      <StripeCheckout
+      <VueStripeCheckout
         :session-id="proSessionId"
         button-text="Subscribe to Pro"
       />
     </div>
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -244,7 +244,7 @@ const session = await stripe.checkout.sessions.create({
 Create session on backend, pass session ID to frontend:
 
 ```vue
-<StripeCheckout :session-id="sessionId" />
+<VueStripeCheckout :session-id="sessionId" />
 ```
 
 **Pros:**
@@ -257,7 +257,7 @@ Create session on backend, pass session ID to frontend:
 Create session client-side with just a Price ID:
 
 ```vue
-<StripeCheckout
+<VueStripeCheckout
   :price-id="priceId"
   mode="payment"
   :success-url="successUrl"
@@ -350,14 +350,14 @@ const session = await stripe.checkout.sessions.create({
 ### Button Styling
 
 ```vue
-<StripeCheckout
+<VueStripeCheckout
   :session-id="sessionId"
   button-class="my-checkout-button"
 >
   <span class="button-content">
     <CreditCardIcon /> Complete Purchase
   </span>
-</StripeCheckout>
+</VueStripeCheckout>
 
 <style>
 .my-checkout-button {
@@ -387,7 +387,7 @@ const handleError = (error) => {
 </script>
 
 <template>
-  <StripeCheckout
+  <VueStripeCheckout
     :session-id="sessionId"
     @error="handleError"
   />

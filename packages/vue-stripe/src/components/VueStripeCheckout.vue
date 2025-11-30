@@ -2,7 +2,7 @@
 import { ref } from 'vue-demi'
 import type { RedirectToCheckoutOptions } from '@stripe/stripe-js'
 import { useStripe } from '../composables/useStripe'
-import { StripeProviderError } from '../utils/errors'
+import { VueStripeProviderError } from '../utils/errors'
 
 interface Props {
   sessionId?: string
@@ -41,13 +41,13 @@ const loading = ref(false)
 
 const redirectToCheckout = async () => {
   if (!stripe.value) {
-    const error = new StripeProviderError('Stripe not initialized')
+    const error = new VueStripeProviderError('Stripe not initialized')
     emit('error', error)
     return
   }
 
   if (!props.sessionId && !props.priceId) {
-    const error = new StripeProviderError('Either sessionId or priceId is required')
+    const error = new VueStripeProviderError('Either sessionId or priceId is required')
     emit('error', error)
     return
   }
@@ -83,7 +83,7 @@ const redirectToCheckout = async () => {
     }
 
     if (result.error) {
-      throw new StripeProviderError(result.error.message || 'Redirect to checkout failed')
+      throw new VueStripeProviderError(result.error.message || 'Redirect to checkout failed')
     }
     
     emit('success')

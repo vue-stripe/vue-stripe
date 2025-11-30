@@ -2,7 +2,7 @@ import { inject, ref, readonly } from 'vue-demi'
 import type { StripeElements } from '@stripe/stripe-js'
 import type { UseSetupIntentReturn } from '../types'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
-import { StripeProviderError } from '../utils/errors'
+import { VueStripeProviderError } from '../utils/errors'
 
 /**
  * Options for confirming a setup
@@ -66,8 +66,8 @@ export function useSetupIntent(): UseSetupIntentReturn {
   const elementsInstance = inject(stripeElementsInjectionKey)
 
   if (!stripeInstance) {
-    throw new StripeProviderError(
-      'useSetupIntent must be called within a StripeProvider component'
+    throw new VueStripeProviderError(
+      'useSetupIntent must be called within a VueStripeProvider component'
     )
   }
 

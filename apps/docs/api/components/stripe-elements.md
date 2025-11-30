@@ -1,4 +1,4 @@
-# StripeElements
+# VueStripeElements
 
 Creates a Stripe Elements instance and provides it to child element components.
 
@@ -54,11 +54,11 @@ StripeElements is the bridge between StripeProvider and individual Stripe elemen
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement />
-    </StripeElements>
-  </StripeProvider>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup>
@@ -111,9 +111,9 @@ interface StripeElementsOptions {
 Rendered when Elements is ready:
 
 ```vue
-<StripeElements :client-secret="secret">
-  <StripePaymentElement />
-</StripeElements>
+<VueStripeElements :client-secret="secret">
+  <VueStripePaymentElement />
+</VueStripeElements>
 ```
 
 ### Loading Slot
@@ -121,13 +121,13 @@ Rendered when Elements is ready:
 Rendered while Elements is initializing:
 
 ```vue
-<StripeElements :client-secret="secret">
+<VueStripeElements :client-secret="secret">
   <template #loading>
     <div>Initializing payment form...</div>
   </template>
 
-  <StripePaymentElement />
-</StripeElements>
+  <VueStripePaymentElement />
+</VueStripeElements>
 ```
 
 ### Error Slot
@@ -135,13 +135,13 @@ Rendered while Elements is initializing:
 Rendered if Elements fails to initialize:
 
 ```vue
-<StripeElements :client-secret="secret">
+<VueStripeElements :client-secret="secret">
   <template #error="{ error }">
     <div class="error">{{ error }}</div>
   </template>
 
-  <StripePaymentElement />
-</StripeElements>
+  <VueStripePaymentElement />
+</VueStripeElements>
 ```
 
 ## Provides
@@ -150,7 +150,7 @@ StripeElements uses Vue's `provide` to make these values available to descendant
 
 | Key | Type | Description |
 |-----|------|-------------|
-| `elements` | `Ref<StripeElements \| null>` | The Elements instance |
+| `elements` | `Ref<VueStripeElements \| null>` | The Elements instance |
 | `loading` | `Ref<boolean>` | Whether Elements is loading |
 | `error` | `Ref<string \| null>` | Error message if initialization failed |
 
@@ -163,7 +163,7 @@ Customize the look of all Stripe Elements using the Appearance API:
 ### Themes
 
 ```vue
-<StripeElements
+<VueStripeElements
   :client-secret="secret"
   :options="{
     appearance: {
@@ -176,7 +176,7 @@ Customize the look of all Stripe Elements using the Appearance API:
 ### Variables
 
 ```vue
-<StripeElements
+<VueStripeElements
   :client-secret="secret"
   :options="{
     appearance: {
@@ -201,7 +201,7 @@ Customize the look of all Stripe Elements using the Appearance API:
 Target specific elements with CSS-like rules:
 
 ```vue
-<StripeElements
+<VueStripeElements
   :client-secret="secret"
   :options="{
     appearance: {
@@ -232,7 +232,7 @@ Target specific elements with CSS-like rules:
 ### Custom Fonts
 
 ```vue
-<StripeElements
+<VueStripeElements
   :client-secret="secret"
   :options="{
     fonts: [
@@ -254,7 +254,7 @@ Target specific elements with CSS-like rules:
 ### Dark Theme
 
 ```vue
-<StripeElements
+<VueStripeElements
   :client-secret="secret"
   :options="{
     appearance: {
@@ -265,8 +265,8 @@ Target specific elements with CSS-like rules:
     }
   }"
 >
-  <StripePaymentElement />
-</StripeElements>
+  <VueStripePaymentElement />
+</VueStripeElements>
 ```
 
 ### Custom Styled
@@ -309,24 +309,24 @@ const appearance = {
 </script>
 
 <template>
-  <StripeElements
+  <VueStripeElements
     :client-secret="secret"
     :options="{ appearance }"
   >
-    <StripePaymentElement />
-  </StripeElements>
+    <VueStripePaymentElement />
+  </VueStripeElements>
 </template>
 ```
 
 ### Without clientSecret (Card Element only)
 
 ```vue
-<StripeProvider :publishable-key="key">
-  <StripeElements>
+<VueStripeProvider :publishable-key="key">
+  <VueStripeElements>
     <!-- Card Element doesn't require clientSecret on Elements -->
-    <StripeCardElement />
-  </StripeElements>
-</StripeProvider>
+    <VueStripeCardElement />
+  </VueStripeElements>
+</VueStripeProvider>
 ```
 
 ## TypeScript

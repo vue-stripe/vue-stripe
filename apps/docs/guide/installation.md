@@ -58,11 +58,11 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement />
-    </StripeElements>
-  </StripeProvider>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -125,11 +125,11 @@ defineProps<{
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <slot />
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -149,7 +149,7 @@ onMounted(async () => {
 <template>
   <ClientOnly>
     <StripeWrapper v-if="clientSecret" :client-secret="clientSecret">
-      <StripePaymentElement @change="onChange" />
+      <VueStripePaymentElement @change="onChange" />
       <button @click="handleSubmit">Pay</button>
     </StripeWrapper>
     <template #fallback>
@@ -214,11 +214,11 @@ const publishableKey = process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement />
-    </StripeElements>
-  </StripeProvider>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -238,11 +238,11 @@ pnpm add @vue-stripe/vue-stripe @stripe/stripe-js
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement @change="onChange" />
-    </StripeElements>
-  </StripeProvider>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement @change="onChange" />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script>
@@ -291,11 +291,11 @@ const clientSecret = ref('')
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement />
-    </StripeElements>
-  </StripeProvider>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -338,11 +338,11 @@ For Quasar SSR, wrap Stripe components in `<q-no-ssr>`:
 ```vue
 <template>
   <q-no-ssr>
-    <StripeProvider :publishable-key="publishableKey">
-      <StripeElements :client-secret="clientSecret">
-        <StripePaymentElement />
-      </StripeElements>
-    </StripeProvider>
+    <VueStripeProvider :publishable-key="publishableKey">
+      <VueStripeElements :client-secret="clientSecret">
+        <VueStripePaymentElement />
+      </VueStripeElements>
+    </VueStripeProvider>
   </q-no-ssr>
 </template>
 ```
@@ -415,12 +415,12 @@ onMounted(async () => {
 
 <template>
   <div v-if="loading">Loading...</div>
-  <StripeProvider v-else :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement />
+  <VueStripeProvider v-else :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement />
       <button @click="handlePay">Pay Now</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -453,9 +453,9 @@ onMounted(() => {
 
 <template>
   <div v-if="isClient">
-    <StripeProvider :publishable-key="publishableKey">
+    <VueStripeProvider :publishable-key="publishableKey">
       <!-- Payment components -->
-    </StripeProvider>
+    </VueStripeProvider>
   </div>
 </template>
 ```
@@ -486,11 +486,11 @@ Then use without importing in components:
 ```vue
 <template>
   <!-- Components available globally -->
-  <StripeProvider>
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement />
-    </StripeElements>
-  </StripeProvider>
+  <VueStripeProvider>
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -502,7 +502,7 @@ Create a simple test to verify everything is working:
 
 ```vue
 <script setup>
-import { StripeProvider } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
@@ -516,7 +516,7 @@ const onError = (error) => {
 </script>
 
 <template>
-  <StripeProvider
+  <VueStripeProvider
     :publishable-key="publishableKey"
     @load="onLoad"
     @error="onError"
@@ -528,7 +528,7 @@ const onError = (error) => {
       <p>Error: {{ message }}</p>
     </template>
     <p>✅ Stripe is ready!</p>
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -561,7 +561,7 @@ Make sure you're importing from `@vue-stripe/vue-stripe`, not `@stripe/stripe-js
 
 ```js
 // ✅ Correct
-import { StripeProvider } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
 // ❌ Wrong - This is the raw Stripe.js library
 import { loadStripe } from '@stripe/stripe-js'
@@ -575,8 +575,8 @@ import { loadStripe } from '@stripe/stripe-js'
 
 ### Components not rendering
 
-- Ensure `StripeProvider` is the outermost wrapper
-- Check that `StripeElements` has a valid `clientSecret` prop (required for most elements)
+- Ensure `VueStripeProvider` is the outermost wrapper
+- Check that `VueStripeElements` has a valid `clientSecret` prop (required for most elements)
 - Look for errors in the browser console
 
 ### TypeScript errors

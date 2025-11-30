@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref, inject, computed, defineComponent, h } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeCardNumberElement,
-  StripeCardExpiryElement,
-  StripeCardCvcElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeCardNumberElement,
+  VueStripeCardExpiryElement,
+  VueStripeCardCvcElement,
   useStripe
 } from '@vue-stripe/vue-stripe'
 import type { StripeCardNumberElement as StripeCardNumberElementType } from '@stripe/stripe-js'
 
-// Mark StripeElements as used (it's used in template)
-void StripeElements
+// Mark VueStripeElements as used (it's used in template)
+void VueStripeElements
 
 const stripeConfig = inject<{
   publishableKey: string
@@ -36,9 +36,9 @@ const cardCvcError = ref<string | null>(null)
 const cardBrand = ref<string>('unknown')
 
 // Refs for element components
-const cardNumberRef = ref<InstanceType<typeof StripeCardNumberElement> | null>(null)
-const cardExpiryRef = ref<InstanceType<typeof StripeCardExpiryElement> | null>(null)
-const cardCvcRef = ref<InstanceType<typeof StripeCardCvcElement> | null>(null)
+const cardNumberRef = ref<InstanceType<typeof VueStripeCardNumberElement> | null>(null)
+const cardExpiryRef = ref<InstanceType<typeof VueStripeCardExpiryElement> | null>(null)
+const cardCvcRef = ref<InstanceType<typeof VueStripeCardCvcElement> | null>(null)
 
 // All fields complete?
 const allComplete = computed(() =>
@@ -153,7 +153,7 @@ const showSecretForm = computed(() => {
   return showPaymentSection.value && !activeClientSecret.value
 })
 
-// PaymentButton component to use inside StripeElements
+// PaymentButton component to use inside VueStripeElements
 // For split elements, we use the cardNumber element for confirmCardPayment
 const PaymentButton = defineComponent({
   name: 'PaymentButton',
@@ -248,8 +248,8 @@ const resetPaymentState = () => {
         Add your Stripe publishable key using the header button to test this component.
       </div>
 
-      <StripeProvider v-else :publishable-key="publishableKey">
-        <StripeElements>
+      <VueStripeProvider v-else :publishable-key="publishableKey">
+        <VueStripeElements>
           <div class="split-card-form mt-4">
             <!-- Card Number -->
             <div class="form-group">
@@ -257,7 +257,7 @@ const resetPaymentState = () => {
                 Card Number
                 <span class="brand-indicator">{{ brandIcon }}</span>
               </label>
-              <StripeCardNumberElement
+              <VueStripeCardNumberElement
                 ref="cardNumberRef"
                 :options="elementStyle"
                 @ready="onCardNumberReady"
@@ -272,7 +272,7 @@ const resetPaymentState = () => {
             <div class="form-row">
               <div class="form-group half">
                 <label class="form-label">Expiration</label>
-                <StripeCardExpiryElement
+                <VueStripeCardExpiryElement
                   ref="cardExpiryRef"
                   :options="elementStyle"
                   @ready="onCardExpiryReady"
@@ -285,7 +285,7 @@ const resetPaymentState = () => {
 
               <div class="form-group half">
                 <label class="form-label">CVC</label>
-                <StripeCardCvcElement
+                <VueStripeCardCvcElement
                   ref="cardCvcRef"
                   :options="elementStyle"
                   @ready="onCardCvcReady"
@@ -405,8 +405,8 @@ const resetPaymentState = () => {
               </p>
             </div>
           </div>
-        </StripeElements>
-      </StripeProvider>
+        </VueStripeElements>
+      </VueStripeProvider>
     </div>
 
     <!-- Event Log -->
@@ -428,9 +428,9 @@ const resetPaymentState = () => {
     <div class="card card-info">
       <h3>About Split Card Elements</h3>
       <ul>
-        <li><strong>StripeCardNumberElement</strong> - Card number with brand detection</li>
-        <li><strong>StripeCardExpiryElement</strong> - MM/YY expiration date</li>
-        <li><strong>StripeCardCvcElement</strong> - 3 or 4 digit security code</li>
+        <li><strong>VueStripeCardNumberElement</strong> - Card number with brand detection</li>
+        <li><strong>VueStripeCardExpiryElement</strong> - MM/YY expiration date</li>
+        <li><strong>VueStripeCardCvcElement</strong> - 3 or 4 digit security code</li>
       </ul>
       <h4>When to use Split Elements:</h4>
       <ul>

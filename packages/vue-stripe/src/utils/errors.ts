@@ -1,32 +1,32 @@
-export class StripeProviderError extends Error {
+export class VueStripeProviderError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'StripeProviderError';
+    this.name = 'VueStripeProviderError';
   }
 }
 
-export class StripeElementsError extends Error {
+export class VueStripeElementsError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'StripeElementsError';
+    this.name = 'VueStripeElementsError';
   }
 }
 
-export class StripeLoadError extends Error {
+export class VueStripeLoadError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'StripeLoadError';
+    this.name = 'VueStripeLoadError';
   }
 }
 
-export function createError(type: 'provider' | 'elements' | 'load', message: string): Error {
+export function createVueStripeError(type: 'provider' | 'elements' | 'load', message: string): Error {
   switch (type) {
     case 'provider':
-      return new StripeProviderError(message);
+      return new VueStripeProviderError(message);
     case 'elements':
-      return new StripeElementsError(message);
+      return new VueStripeElementsError(message);
     case 'load':
-      return new StripeLoadError(message);
+      return new VueStripeLoadError(message);
     default:
       return new Error(message);
   }

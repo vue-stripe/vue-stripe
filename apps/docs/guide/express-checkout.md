@@ -34,11 +34,11 @@ const handleConfirm = async (event) => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripeExpressCheckoutElement @confirm="handleConfirm" />
-    </StripeElements>
-  </StripeProvider>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripeExpressCheckoutElement @confirm="handleConfirm" />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -59,7 +59,7 @@ Apple Pay and Google Pay only work over HTTPS, even in development. Use a tool l
 Use `@click` to customize the payment sheet:
 
 ```vue
-<StripeExpressCheckoutElement
+<VueStripeExpressCheckoutElement
   @click="handleClick"
   @confirm="handleConfirm"
 />
@@ -121,7 +121,7 @@ const handleShippingAddressChange = async ({ address, resolve }) => {
 </script>
 
 <template>
-  <StripeExpressCheckoutElement
+  <VueStripeExpressCheckoutElement
     @click="handleClick"
     @confirm="handleConfirm"
     @shippingaddresschange="handleShippingAddressChange"
@@ -135,11 +135,11 @@ A common pattern is to show Express Checkout above the Payment Element:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <div class="checkout-form">
         <!-- Express Checkout at top -->
-        <StripeExpressCheckoutElement
+        <VueStripeExpressCheckoutElement
           @confirm="handleExpressConfirm"
           @ready="handleExpressReady"
         />
@@ -151,12 +151,12 @@ A common pattern is to show Express Checkout above the Payment Element:
 
         <!-- Payment Element below -->
         <form @submit.prevent="handleSubmit">
-          <StripePaymentElement />
+          <VueStripePaymentElement />
           <button type="submit">Pay $20.00</button>
         </form>
       </div>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup>
@@ -279,10 +279,10 @@ const handleSubmit = async () => {
 
 <template>
   <div class="checkout">
-    <StripeProvider :publishable-key="publishableKey">
-      <StripeElements v-if="clientSecret" :client-secret="clientSecret">
+    <VueStripeProvider :publishable-key="publishableKey">
+      <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
         <!-- Express Checkout -->
-        <StripeExpressCheckoutElement
+        <VueStripeExpressCheckoutElement
           @ready="handleExpressReady"
           @click="handleClick"
           @confirm="handleExpressConfirm"
@@ -295,7 +295,7 @@ const handleSubmit = async () => {
 
         <!-- Regular Payment Form -->
         <form @submit.prevent="handleSubmit">
-          <StripePaymentElement />
+          <VueStripePaymentElement />
 
           <div v-if="errorMessage" class="error">
             {{ errorMessage }}
@@ -305,10 +305,10 @@ const handleSubmit = async () => {
             {{ processing ? 'Processing...' : 'Pay $20.00' }}
           </button>
         </form>
-      </StripeElements>
+      </VueStripeElements>
 
       <div v-else>Loading...</div>
-    </StripeProvider>
+    </VueStripeProvider>
   </div>
 </template>
 ```

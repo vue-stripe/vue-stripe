@@ -56,7 +56,7 @@ A composable that wraps `stripe.redirectToCheckout()` with built-in state manage
 ```
 
 ::: tip Usage Context
-This composable must be called within a component that is a descendant of `StripeProvider`. It does not require `StripeElements`.
+This composable must be called within a component that is a descendant of `VueStripeProvider`. It does not require `VueStripeElements`.
 :::
 
 ## Usage
@@ -260,7 +260,7 @@ const handleCheckout = async () => {
 ```vue
 <script setup>
 import { ref, onMounted } from 'vue'
-import { StripeProvider, useStripeCheckout } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, useStripeCheckout } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const selectedPlan = ref('')
@@ -274,9 +274,9 @@ const plans = [
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider :publishable-key="publishableKey">
     <CheckoutHandler :plans="plans" />
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 

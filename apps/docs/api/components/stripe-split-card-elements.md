@@ -68,12 +68,12 @@ Split Card Elements give you granular control over card input layout:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
       <div class="card-form">
         <div class="field">
           <label>Card Number</label>
-          <StripeCardNumberElement
+          <VueStripeCardNumberElement
             :options="elementStyle"
             @change="onNumberChange"
           />
@@ -82,7 +82,7 @@ Split Card Elements give you granular control over card input layout:
         <div class="row">
           <div class="field">
             <label>Expiration</label>
-            <StripeCardExpiryElement
+            <VueStripeCardExpiryElement
               :options="elementStyle"
               @change="onExpiryChange"
             />
@@ -90,7 +90,7 @@ Split Card Elements give you granular control over card input layout:
 
           <div class="field">
             <label>CVC</label>
-            <StripeCardCvcElement
+            <VueStripeCardCvcElement
               :options="elementStyle"
               @change="onCvcChange"
             />
@@ -99,8 +99,8 @@ Split Card Elements give you granular control over card input layout:
 
         <button :disabled="!allComplete">Pay</button>
       </div>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup>
@@ -237,9 +237,9 @@ const clearAll = () => {
 </script>
 
 <template>
-  <StripeCardNumberElement ref="numberRef" />
-  <StripeCardExpiryElement ref="expiryRef" />
-  <StripeCardCvcElement ref="cvcRef" />
+  <VueStripeCardNumberElement ref="numberRef" />
+  <VueStripeCardExpiryElement ref="expiryRef" />
+  <VueStripeCardCvcElement ref="cvcRef" />
 </template>
 ```
 
@@ -256,9 +256,9 @@ const clearAll = () => {
 ```vue
 <template>
   <div class="horizontal-card-form">
-    <StripeCardNumberElement class="number-field" />
-    <StripeCardExpiryElement class="expiry-field" />
-    <StripeCardCvcElement class="cvc-field" />
+    <VueStripeCardNumberElement class="number-field" />
+    <VueStripeCardExpiryElement class="expiry-field" />
+    <VueStripeCardCvcElement class="cvc-field" />
   </div>
 </template>
 
@@ -305,19 +305,19 @@ const onCvcChange = (event) => {
 <template>
   <div class="field">
     <label>Card Number</label>
-    <StripeCardNumberElement @change="onNumberChange" />
+    <VueStripeCardNumberElement @change="onNumberChange" />
     <span v-if="numberError" class="error">{{ numberError }}</span>
   </div>
 
   <div class="field">
     <label>Expiration</label>
-    <StripeCardExpiryElement @change="onExpiryChange" />
+    <VueStripeCardExpiryElement @change="onExpiryChange" />
     <span v-if="expiryError" class="error">{{ expiryError }}</span>
   </div>
 
   <div class="field">
     <label>CVC</label>
-    <StripeCardCvcElement @change="onCvcChange" />
+    <VueStripeCardCvcElement @change="onCvcChange" />
     <span v-if="cvcError" class="error">{{ cvcError }}</span>
   </div>
 </template>
@@ -348,7 +348,7 @@ const onNumberChange = (event) => {
 
 <template>
   <div class="card-number-field">
-    <StripeCardNumberElement @change="onNumberChange" />
+    <VueStripeCardNumberElement @change="onNumberChange" />
     <img v-if="brandIcon" :src="brandIcon" class="brand-icon" />
   </div>
 </template>

@@ -1,9 +1,9 @@
-# StripeExpressCheckoutElement
+# VueStripeExpressCheckoutElement
 
 Displays wallet payment buttons like Apple Pay, Google Pay, and Link for one-click checkout.
 
 ::: tip Standalone Element
-Unlike `StripeLinkAuthenticationElement`, Express Checkout **can process payments independently**. It handles the full payment flow through the wallet's native interface.
+Unlike `VueStripeLinkAuthenticationElement`, Express Checkout **can process payments independently**. It handles the full payment flow through the wallet's native interface.
 :::
 
 ::: warning Requires clientSecret
@@ -82,16 +82,16 @@ Express Checkout buttons only appear when wallets are available on the customer'
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripeExpressCheckoutElement
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripeExpressCheckoutElement
         :options="options"
         @ready="onReady"
         @click="onClick"
         @confirm="onConfirm"
       />
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup>
@@ -234,7 +234,7 @@ interface StripeExpressCheckoutElementConfirmEvent {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `element` | `Ref<StripeExpressCheckoutElement \| null>` | The Stripe element instance |
+| `element` | `Ref<VueStripeExpressCheckoutElement \| null>` | The Stripe element instance |
 | `loading` | `Ref<boolean>` | Whether the element is loading |
 | `error` | `Ref<string \| null>` | Error message if creation failed |
 
@@ -243,21 +243,21 @@ interface StripeExpressCheckoutElementConfirmEvent {
 ### Loading Slot
 
 ```vue
-<StripeExpressCheckoutElement>
+<VueStripeExpressCheckoutElement>
   <template #loading>
     <div class="skeleton">Loading wallet buttons...</div>
   </template>
-</StripeExpressCheckoutElement>
+</VueStripeExpressCheckoutElement>
 ```
 
 ### Error Slot
 
 ```vue
-<StripeExpressCheckoutElement>
+<VueStripeExpressCheckoutElement>
   <template #error="{ error }">
     <div class="error">{{ error }}</div>
   </template>
-</StripeExpressCheckoutElement>
+</VueStripeExpressCheckoutElement>
 ```
 
 ## Examples
@@ -349,7 +349,7 @@ const onShippingRateChange = (event) => {
 </script>
 
 <template>
-  <StripeExpressCheckoutElement
+  <VueStripeExpressCheckoutElement
     @shippingaddresschange="onShippingAddressChange"
     @shippingratechange="onShippingRateChange"
   />
@@ -383,12 +383,12 @@ Place Express Checkout above PaymentElement as a fast-path option:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <!-- Fast checkout option -->
       <div class="express-section">
         <h3>Express Checkout</h3>
-        <StripeExpressCheckoutElement
+        <VueStripeExpressCheckoutElement
           @click="e => e.resolve({})"
           @confirm="onExpressConfirm"
         />
@@ -398,11 +398,11 @@ Place Express Checkout above PaymentElement as a fast-path option:
 
       <!-- Traditional payment fallback -->
       <div class="card-section">
-        <StripePaymentElement @change="onChange" />
+        <VueStripePaymentElement @change="onChange" />
         <button @click="handleSubmit">Pay</button>
       </div>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -429,7 +429,7 @@ const onReady = (event) => {
 
 <template>
   <div>
-    <StripeExpressCheckoutElement @ready="onReady" />
+    <VueStripeExpressCheckoutElement @ready="onReady" />
 
     <div v-if="!hasWallets" class="no-wallets-message">
       <p>No wallet payment methods available on this device.</p>

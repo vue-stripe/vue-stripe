@@ -21,36 +21,36 @@ You can use the [Stripe Dashboard](https://dashboard.stripe.com/test/payments) t
 
 ## Step 1: Set Up the Provider
 
-Every payment form starts with `StripeProvider`. This component loads Stripe.js and makes it available to all child components.
+Every payment form starts with `VueStripeProvider`. This component loads Stripe.js and makes it available to all child components.
 
 ```vue
 <script setup>
-import { StripeProvider } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider :publishable-key="publishableKey">
     <p>Stripe is loading...</p>
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
 **What's happening:**
-- `StripeProvider` loads Stripe.js asynchronously
+- `VueStripeProvider` loads Stripe.js asynchronously
 - While loading, it shows a loading state
 - Once ready, it renders the default slot content
 - The Stripe instance is now available to all descendants
 
 ## Step 2: Add the Elements Container
 
-`StripeElements` creates a Stripe Elements instance. This requires a `clientSecret` from a PaymentIntent.
+`VueStripeElements` creates a Stripe Elements instance. This requires a `clientSecret` from a PaymentIntent.
 
 ```vue{2,10-12}
 <script setup>
 import { ref } from 'vue'
-import { StripeProvider, StripeElements } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('') // We'll fetch this from our backend
@@ -68,28 +68,28 @@ onMounted(async () => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements v-if="clientSecret" :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
       <p>Elements loaded!</p>
-    </StripeElements>
+    </VueStripeElements>
     <p v-else>Loading payment form...</p>
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
 **What's happening:**
 - We fetch a `clientSecret` from our backend
-- `StripeElements` only renders once we have the secret
+- `VueStripeElements` only renders once we have the secret
 - It creates an Elements instance configured for this payment
 
 ## Step 3: Add the Payment Element
 
-`StripePaymentElement` renders Stripe's all-in-one payment UI:
+`VueStripePaymentElement` renders Stripe's all-in-one payment UI:
 
 ```vue{3,19}
 <script setup>
 import { ref, onMounted } from 'vue'
-import { StripeProvider, StripeElements, StripePaymentElement } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('')
@@ -105,13 +105,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements v-if="clientSecret" :client-secret="clientSecret">
-      <StripePaymentElement />
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
+      <VueStripePaymentElement />
       <button>Pay $10.00</button>
-    </StripeElements>
+    </VueStripeElements>
     <p v-else>Loading...</p>
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -167,10 +167,10 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements v-if="clientSecret" :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
       <form @submit.prevent="handleSubmit">
-        <StripePaymentElement />
+        <VueStripePaymentElement />
 
         <div v-if="errorMessage" class="error">
           {{ errorMessage }}
@@ -180,9 +180,9 @@ const handleSubmit = async () => {
           {{ loading ? 'Processing...' : 'Pay $10.00' }}
         </button>
       </form>
-    </StripeElements>
+    </VueStripeElements>
     <p v-else>Loading payment form...</p>
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -247,10 +247,10 @@ const handleSubmit = async () => {
   <div class="payment-form">
     <h2>Complete Your Payment</h2>
 
-    <StripeProvider :publishable-key="publishableKey">
-      <StripeElements v-if="clientSecret" :client-secret="clientSecret">
+    <VueStripeProvider :publishable-key="publishableKey">
+      <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
         <form @submit.prevent="handleSubmit">
-          <StripePaymentElement />
+          <VueStripePaymentElement />
 
           <div v-if="errorMessage" class="error">
             {{ errorMessage }}
@@ -260,13 +260,13 @@ const handleSubmit = async () => {
             {{ loading ? 'Processing...' : 'Pay $10.00' }}
           </button>
         </form>
-      </StripeElements>
+      </VueStripeElements>
 
       <template v-else>
         <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
         <p v-else>Loading payment form...</p>
       </template>
-    </StripeProvider>
+    </VueStripeProvider>
   </div>
 </template>
 
@@ -318,5 +318,5 @@ Use any future expiry date and any 3-digit CVC.
 
 Now that you have a working payment form, let's understand how the pieces work together:
 
-- [Understanding the Architecture](/guide/architecture) - Learn about StripeProvider, StripeElements, and the data flow
+- [Understanding the Architecture](/guide/architecture) - Learn about StripeProvider, VueStripeElements, and the data flow
 - [Choosing Your Approach](/guide/approaches) - Decide between Payment Element, Card Element, or Checkout

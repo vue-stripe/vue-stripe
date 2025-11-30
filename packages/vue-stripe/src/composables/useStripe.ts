@@ -1,22 +1,22 @@
 import { inject, readonly } from 'vue-demi'
 import type { UseStripeReturn } from '../types'
 import { stripeInjectionKey } from '../utils/injection-keys'
-import { StripeProviderError } from '../utils/errors'
+import { VueStripeProviderError } from '../utils/errors'
 
 /**
  * Composable to access the Stripe instance
- * Must be used within a StripeProvider component
- * 
+ * Must be used within a VueStripeProvider component
+ *
  * @example
  * ```vue
  * <script setup>
  * import { useStripe } from '@vue-stripe/vue-stripe'
- * 
+ *
  * const { stripe, loading, error } = useStripe()
- * 
+ *
  * const handlePayment = async () => {
  *   if (!stripe.value) return
- *   
+ *
  *   const result = await stripe.value.confirmPayment({
  *     elements,
  *     confirmParams: {
@@ -31,8 +31,8 @@ export function useStripe(): UseStripeReturn {
   const stripeInstance = inject(stripeInjectionKey)
 
   if (!stripeInstance) {
-    throw new StripeProviderError(
-      'useStripe must be called within a StripeProvider component'
+    throw new VueStripeProviderError(
+      'useStripe must be called within a VueStripeProvider component'
     )
   }
 

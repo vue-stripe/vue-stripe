@@ -36,20 +36,20 @@ const onChange = (event) => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements>
-      <StripeAddressElement
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
+      <VueStripeAddressElement
         :options="addressOptions"
         @change="onChange"
       />
       <button>Continue</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
 ::: tip No clientSecret Required
-Unlike Payment Element, Address Element works without a `clientSecret`. It only needs to be wrapped in `StripeProvider` and `StripeElements` to function.
+Unlike Payment Element, Address Element works without a `clientSecret`. It only needs to be wrapped in `VueStripeProvider` and `VueStripeElements` to function.
 :::
 
 ## Shipping vs Billing Mode
@@ -73,7 +73,7 @@ const options = computed(() => ({
     <button @click="mode = 'billing'">Billing</button>
   </div>
   <!-- Key forces re-render when mode changes -->
-  <StripeAddressElement :key="mode" :options="options" />
+  <VueStripeAddressElement :key="mode" :options="options" />
 </template>
 ```
 
@@ -106,7 +106,7 @@ const options = {
 </script>
 
 <template>
-  <StripeAddressElement :options="options" />
+  <VueStripeAddressElement :options="options" />
 </template>
 ```
 
@@ -128,7 +128,7 @@ const options = {
 </script>
 
 <template>
-  <StripeAddressElement :options="options" />
+  <VueStripeAddressElement :options="options" />
 </template>
 ```
 
@@ -145,7 +145,7 @@ const options = {
 </script>
 
 <template>
-  <StripeAddressElement :options="options" />
+  <VueStripeAddressElement :options="options" />
 </template>
 ```
 
@@ -162,7 +162,7 @@ const options = {
 </script>
 
 <template>
-  <StripeAddressElement :options="options" />
+  <VueStripeAddressElement :options="options" />
 </template>
 ```
 
@@ -186,7 +186,7 @@ const handleChange = (event) => {
 </script>
 
 <template>
-  <StripeAddressElement @change="handleChange" />
+  <VueStripeAddressElement @change="handleChange" />
 
   <div v-if="address">
     <p>{{ address.name }}</p>
@@ -217,7 +217,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <StripeAddressElement ref="addressRef" />
+  <VueStripeAddressElement ref="addressRef" />
   <button @click="handleSubmit">Continue</button>
 </template>
 ```
@@ -253,12 +253,12 @@ const handleContinue = async () => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
       <!-- Step 1: Address -->
       <div v-if="step === 'address'">
         <h3>Shipping Address</h3>
-        <StripeAddressElement
+        <VueStripeAddressElement
           ref="addressRef"
           :options="{ mode: 'shipping' }"
         />
@@ -268,12 +268,12 @@ const handleContinue = async () => {
       <!-- Step 2: Payment -->
       <div v-if="step === 'payment'">
         <h3>Payment</h3>
-        <StripePaymentElement />
+        <VueStripePaymentElement />
         <button @click="step = 'address'">Back</button>
         <button>Pay Now</button>
       </div>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 

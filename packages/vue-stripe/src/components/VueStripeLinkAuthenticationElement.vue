@@ -6,7 +6,7 @@ import type {
   StripeLinkAuthenticationElementChangeEvent
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
-import { StripeElementsError } from '../utils/errors'
+import { VueStripeElementsError } from '../utils/errors'
 
 interface Props {
   options?: StripeLinkAuthenticationElementOptions
@@ -24,8 +24,8 @@ const emit = defineEmits<Emits>()
 const elementsContext = inject(stripeElementsInjectionKey)
 
 if (!elementsContext) {
-  throw new StripeElementsError(
-    'StripeLinkAuthenticationElement must be used within StripeElements'
+  throw new VueStripeElementsError(
+    'VueStripeLinkAuthenticationElement must be used within VueStripeElements'
   )
 }
 

@@ -2,15 +2,15 @@
 import { provide, ref, inject, watch, onMounted } from 'vue-demi'
 import type { StripeElements } from '@stripe/stripe-js'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
-import { StripeProviderError } from '../utils/errors'
+import { VueStripeProviderError } from '../utils/errors'
 
 // Use a looser type for options since Stripe has multiple option shapes
  
 type ElementsOptions = Record<string, any>
 
 interface Props {
-  clientSecret?: string
-  options?: ElementsOptions
+  clientSecret?: string | undefined
+  options?: ElementsOptions | undefined
 }
 
 const props = defineProps<Props>()
@@ -18,8 +18,8 @@ const props = defineProps<Props>()
 const stripeInstance = inject(stripeInjectionKey)
 
 if (!stripeInstance) {
-  throw new StripeProviderError(
-    'StripeElements must be used within StripeProvider'
+  throw new VueStripeProviderError(
+    'VueStripeElements must be used within VueStripeProvider'
   )
 }
 

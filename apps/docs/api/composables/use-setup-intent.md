@@ -70,7 +70,7 @@ SetupIntent saves the card without charging. PaymentIntent charges immediately.
 ```
 
 ::: tip Usage Context
-This composable must be called within a component that is a descendant of `StripeProvider`. If used within `StripeElements`, the elements instance is automatically injected.
+This composable must be called within a component that is a descendant of `VueStripeProvider`. If used within `VueStripeElements`, the elements instance is automatically injected.
 :::
 
 ## Usage
@@ -278,17 +278,17 @@ const errorMessage = ref('')
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="setupSecret">
-      <StripePaymentElement @change="e => isComplete = e.complete" />
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="setupSecret">
+      <VueStripePaymentElement @change="e => isComplete = e.complete" />
       <SetupFormButton
         :client-secret="setupSecret"
         :disabled="!isComplete"
         @success="setupStatus = 'success'"
         @error="msg => { setupStatus = 'error'; errorMessage = msg }"
       />
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 
   <div v-if="setupStatus === 'success'" class="success">
     Card saved for future use!

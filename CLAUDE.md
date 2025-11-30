@@ -91,17 +91,17 @@ tools/
 ### Library Architecture (`packages/vue-stripe/src/`)
 
 **Provider Pattern:**
-- `StripeProvider.vue`: Root component that loads Stripe.js and provides Stripe instance via Vue's provide/inject
-- `StripeElements.vue`: Creates Stripe Elements instance and provides it to child components
+- `VueStripeProvider.vue`: Root component that loads Stripe.js and provides Stripe instance via Vue's provide/inject
+- `VueStripeElements.vue`: Creates Stripe Elements instance and provides it to child components
 - Uses `stripeInjectionKey` and `stripeElementsInjectionKey` for type-safe injection
 
 **Component Hierarchy:**
 ```
-StripeProvider (loads Stripe.js)
-  └─ StripeElements (creates Elements instance)
-      ├─ StripePaymentElement
-      ├─ StripeCardElement
-      ├─ StripeExpressCheckoutElement
+VueStripeProvider (loads Stripe.js)
+  └─ VueStripeElements (creates Elements instance)
+      ├─ VueStripePaymentElement
+      ├─ VueStripeCardElement
+      ├─ VueStripeExpressCheckoutElement
       └─ Other element components
 ```
 
@@ -110,22 +110,22 @@ StripeProvider (loads Stripe.js)
 1. **Injection Keys** (`utils/injection-keys.ts`):
    - Type-safe provide/inject using InjectionKey
    - `stripeInjectionKey`: Provides Stripe instance
-   - `stripeElementsInjectionKey`: Provides StripeElements instance
+   - `stripeElementsInjectionKey`: Provides VueStripeElements instance
 
 2. **Composables** (`composables/`):
-   - `useStripe()`: Access Stripe instance (must be within StripeProvider)
-   - `useStripeElements()`: Access Elements instance (must be within StripeElements)
+   - `useStripe()`: Access Stripe instance (must be within VueStripeProvider)
+   - `useStripeElements()`: Access Elements instance (must be within VueStripeElements)
    - `usePaymentIntent()`: Payment confirmation helpers
    - `useSetupIntent()`: Setup intent confirmation helpers
    - `useStripeCheckout()`: Checkout session helpers
-   - All composables throw `StripeProviderError` if used outside proper context
+   - All composables throw `VueStripeProviderError` if used outside proper context
 
 3. **Components** (`components/`):
    - Each Stripe element has a corresponding Vue component
    - Components emit `ready` and `change` events
    - Components use element factory pattern for element creation
-   - Modern elements: StripePaymentElement, StripeExpressCheckoutElement, StripeLinkAuthenticationElement, StripeAddressElement
-   - Legacy elements: StripeCardElement, StripeCardNumberElement, StripeCardExpiryElement, StripeCardCvcElement
+   - Modern elements: StripePaymentElement, VueStripeExpressCheckoutElement, VueStripeLinkAuthenticationElement, VueStripeAddressElement
+   - Legacy elements: VueStripeCardElement, VueStripeCardNumberElement, VueStripeCardExpiryElement, VueStripeCardCvcElement
    - Checkout: StripeCheckout for embedded checkout sessions
 
 4. **Element Factory** (`utils/element-factory.ts`):
@@ -133,7 +133,7 @@ StripeProvider (loads Stripe.js)
    - Handles element lifecycle and event binding
 
 5. **Plugin** (`plugin.ts`):
-   - `createVueStripe()`: Alternative to StripeProvider component for app-wide Stripe configuration
+   - `createVueStripe()`: Alternative to VueStripeProvider component for app-wide Stripe configuration
    - Provides global stripe config and lazy-loaded stripe instance via `app.provide()`
    - Useful for SSR scenarios or when you want app-level configuration
 
@@ -155,7 +155,7 @@ StripeProvider (loads Stripe.js)
 **Type Exports** (`src/types/index.ts`):
 - Re-exports all Stripe.js types for convenience
 - Adds Vue-specific interfaces: `VueStripeOptions`, `VueStripeElement`
-- Component props: `StripeProviderProps`, `StripeElementsProps`
+- Component props: `VueStripeProviderProps`, `VueStripeElementsProps`
 - Composable returns: `UseStripeReturn`, `UseElementsReturn`, etc.
 
 ### Testing
@@ -180,7 +180,7 @@ StripeProvider (loads Stripe.js)
   ```typescript
   const stripeInstance = inject(stripeInjectionKey)
   if (!stripeInstance) {
-    throw new StripeProviderError('useStripe must be called within StripeProvider')
+    throw new VueStripeProviderError('useStripe must be called within VueStripeProvider')
   }
   ```
 

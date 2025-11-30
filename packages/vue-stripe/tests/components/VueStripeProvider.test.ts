@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, inject } from 'vue-demi'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { stripeInjectionKey } from '../../src/utils/injection-keys'
 import { flushPromises } from '../setup'
 
-describe('StripeProvider', () => {
+describe('VueStripeProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it('should render loading state initially', () => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
@@ -26,7 +26,7 @@ describe('StripeProvider', () => {
   })
 
   it('should render default content after successful load', async () => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
@@ -47,7 +47,7 @@ describe('StripeProvider', () => {
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockRejectedValueOnce(new Error('Network error'))
 
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_invalid'
       },
@@ -67,7 +67,7 @@ describe('StripeProvider', () => {
   it('should pass correct options to loadStripe', async () => {
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123',
         stripeAccount: 'acct_123',
@@ -88,7 +88,7 @@ describe('StripeProvider', () => {
   // === New Tests ===
 
   it('should emit load event with Stripe instance', async () => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       }
@@ -105,7 +105,7 @@ describe('StripeProvider', () => {
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockRejectedValueOnce(new Error('Network error'))
 
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_invalid'
       }
@@ -128,7 +128,7 @@ describe('StripeProvider', () => {
       }
     }
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: { publishableKey: 'pk_test_123' },
       slots: {
         default: () => h(ChildComponent)
@@ -146,7 +146,7 @@ describe('StripeProvider', () => {
   it('should accept stripeKey prop for backwards compatibility', async () => {
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
 
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         stripeKey: 'pk_test_legacy'
       },
@@ -165,7 +165,7 @@ describe('StripeProvider', () => {
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockRejectedValueOnce(new Error('Custom error message'))
 
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_invalid'
       },
@@ -182,7 +182,7 @@ describe('StripeProvider', () => {
 
   it('should throw error when no publishableKey or stripeKey provided', () => {
     expect(() => {
-      mount(StripeProvider, {
+      mount(VueStripeProvider, {
         props: {}
       })
     }).toThrow('publishableKey or stripeKey is required')

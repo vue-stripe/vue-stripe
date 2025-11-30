@@ -2,7 +2,7 @@ import { inject, ref, readonly } from 'vue-demi'
 import type { ConfirmPaymentData, StripeElements } from '@stripe/stripe-js'
 import type { UsePaymentIntentReturn } from '../types'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
-import { StripeProviderError } from '../utils/errors'
+import { VueStripeProviderError } from '../utils/errors'
 
 /**
  * Options for confirming a payment
@@ -49,8 +49,8 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
   const elementsInstance = inject(stripeElementsInjectionKey)
 
   if (!stripeInstance) {
-    throw new StripeProviderError(
-      'usePaymentIntent must be called within a StripeProvider component'
+    throw new VueStripeProviderError(
+      'usePaymentIntent must be called within a VueStripeProvider component'
     )
   }
 

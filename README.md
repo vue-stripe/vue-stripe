@@ -45,19 +45,19 @@ npm install @vue-stripe/vue-stripe @stripe/stripe-js
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements>
-      <StripePaymentElement @ready="onReady" />
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
+      <VueStripePaymentElement @ready="onReady" />
       <button @click="processPayment">Pay Now</button>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 
 <script setup lang="ts">
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement,
   usePaymentIntent
 } from '@vue-stripe/vue-stripe'
 

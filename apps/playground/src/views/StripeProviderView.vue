@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, inject } from 'vue'
-import { StripeProvider } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 import type { Stripe } from '@stripe/stripe-js'
 
 const stripeConfig = inject<{
@@ -141,7 +141,7 @@ const showInvalidKey = ref(false)
 
       <!-- Normal scenario with valid key -->
       <div v-if="testScenario === 'normal' && stripeConfig?.publishableKey" class="demo-container">
-        <StripeProvider
+        <VueStripeProvider
           :publishable-key="stripeConfig.publishableKey"
           @load="onLoad"
           @error="onError"
@@ -152,12 +152,12 @@ const showInvalidKey = ref(false)
             <p>The Stripe.js library has been loaded and is ready to use.</p>
             <p class="hint">Child components can now use useStripe() to access the Stripe instance.</p>
           </div>
-        </StripeProvider>
+        </VueStripeProvider>
       </div>
 
       <!-- Custom loading slot -->
       <div v-else-if="testScenario === 'custom-loading' && stripeConfig?.publishableKey" class="demo-container">
-        <StripeProvider
+        <VueStripeProvider
           :publishable-key="stripeConfig.publishableKey"
           @load="onLoad"
           @error="onError"
@@ -173,12 +173,12 @@ const showInvalidKey = ref(false)
             <span class="success-icon">✅</span>
             <strong>Stripe Ready (Custom Loading Used)</strong>
           </div>
-        </StripeProvider>
+        </VueStripeProvider>
       </div>
 
       <!-- Custom error slot with invalid key -->
       <div v-else-if="testScenario === 'custom-error'" class="demo-container">
-        <StripeProvider
+        <VueStripeProvider
           publishable-key="pk_test_invalid_key_12345"
           @load="onLoad"
           @error="onError"
@@ -197,12 +197,12 @@ const showInvalidKey = ref(false)
           <div class="success-content">
             <strong>This won't show - key is invalid</strong>
           </div>
-        </StripeProvider>
+        </VueStripeProvider>
       </div>
 
       <!-- Invalid key (default error) -->
       <div v-else-if="testScenario === 'invalid-key'" class="demo-container">
-        <StripeProvider
+        <VueStripeProvider
           publishable-key="pk_test_invalid_key_12345"
           @load="onLoad"
           @error="onError"
@@ -210,7 +210,7 @@ const showInvalidKey = ref(false)
           <div class="success-content">
             <strong>This won't show - key is invalid</strong>
           </div>
-        </StripeProvider>
+        </VueStripeProvider>
       </div>
 
       <!-- No key configured -->
@@ -260,7 +260,7 @@ const showInvalidKey = ref(false)
 &lt;/template&gt;
 
 &lt;script setup&gt;
-import { StripeProvider, StripeElements, StripePaymentElement } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 
 const onStripeLoaded = (stripe) => {
   console.log('Stripe ready!', stripe)

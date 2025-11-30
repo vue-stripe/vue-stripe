@@ -74,25 +74,25 @@ export default defineConfig({
         {
           text: 'Provider Components',
           items: [
-            { text: 'StripeProvider', link: '/api/components/stripe-provider' },
-            { text: 'StripeElements', link: '/api/components/stripe-elements' },
+            { text: 'VueStripeProvider', link: '/api/components/stripe-provider' },
+            { text: 'VueStripeElements', link: '/api/components/stripe-elements' },
           ]
         },
         {
           text: 'Element Components',
           items: [
-            { text: 'StripePaymentElement', link: '/api/components/stripe-payment-element' },
-            { text: 'StripeExpressCheckoutElement', link: '/api/components/stripe-express-checkout-element' },
-            { text: 'StripeCardElement', link: '/api/components/stripe-card-element' },
+            { text: 'VueStripePaymentElement', link: '/api/components/stripe-payment-element' },
+            { text: 'VueStripeExpressCheckoutElement', link: '/api/components/stripe-express-checkout-element' },
+            { text: 'VueStripeCardElement', link: '/api/components/stripe-card-element' },
             { text: 'Split Card Elements', link: '/api/components/stripe-split-card-elements' },
-            { text: 'StripeAddressElement', link: '/api/components/stripe-address-element' },
-            { text: 'StripeLinkAuthenticationElement', link: '/api/components/stripe-link-authentication-element' },
+            { text: 'VueStripeAddressElement', link: '/api/components/stripe-address-element' },
+            { text: 'VueStripeLinkAuthenticationElement', link: '/api/components/stripe-link-authentication-element' },
           ]
         },
         {
           text: 'Checkout',
           items: [
-            { text: 'StripeCheckout', link: '/api/components/stripe-checkout' },
+            { text: 'VueStripeCheckout', link: '/api/components/stripe-checkout' },
           ]
         },
         {

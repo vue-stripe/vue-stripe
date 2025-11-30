@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, inject, computed, watch } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeLinkAuthenticationElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeLinkAuthenticationElement
 } from '@vue-stripe/vue-stripe'
 import type { StripeLinkAuthenticationElementChangeEvent } from '@stripe/stripe-js'
 
 // Ref to the link auth element component
-const linkAuthRef = ref<InstanceType<typeof StripeLinkAuthenticationElement> | null>(null)
+const linkAuthRef = ref<InstanceType<typeof VueStripeLinkAuthenticationElement> | null>(null)
 
 const stripeConfig = inject<{
   publishableKey: string
@@ -194,12 +194,12 @@ const handleClear = () => {
       </div>
 
       <div class="demo-container">
-        <StripeProvider :publishable-key="publishableKey">
-          <StripeElements :client-secret="clientSecret">
+        <VueStripeProvider :publishable-key="publishableKey">
+          <VueStripeElements :client-secret="clientSecret">
             <!-- Email / Link Authentication -->
             <div class="link-auth-wrapper">
               <label class="field-label">Email</label>
-              <StripeLinkAuthenticationElement
+              <VueStripeLinkAuthenticationElement
                 ref="linkAuthRef"
                 :key="elementKey"
                 :options="elementOptions"
@@ -214,8 +214,8 @@ const handleClear = () => {
               <button class="btn btn-secondary" @click="handleBlur">Blur</button>
               <button class="btn btn-secondary" @click="handleClear">Clear</button>
             </div>
-          </StripeElements>
-        </StripeProvider>
+          </VueStripeElements>
+        </VueStripeProvider>
       </div>
 
       <!-- Collected Data Display -->

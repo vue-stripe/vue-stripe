@@ -61,7 +61,7 @@ A composable that simplifies payment confirmation with built-in state management
 ```
 
 ::: tip Usage Context
-This composable must be called within a component that is a descendant of both `StripeProvider` and optionally `StripeElements`. The elements instance is automatically injected if available.
+This composable must be called within a component that is a descendant of both `VueStripeProvider` and optionally `VueStripeElements`. The elements instance is automatically injected if available.
 :::
 
 ## Usage
@@ -325,17 +325,17 @@ const errorMessage = ref('')
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements :client-secret="clientSecret">
-      <StripePaymentElement @change="e => isComplete = e.complete" />
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement @change="e => isComplete = e.complete" />
       <PaymentFormButton
         :client-secret="clientSecret"
         :disabled="!isComplete"
         @success="paymentStatus = 'success'"
         @error="msg => { paymentStatus = 'error'; errorMessage = msg }"
       />
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 
   <div v-if="paymentStatus === 'success'" class="success">
     Payment successful!

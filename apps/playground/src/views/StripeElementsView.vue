@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, defineComponent, h, computed } from 'vue'
-import { StripeProvider, StripeElements, useStripeElements } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements, useStripeElements } from '@vue-stripe/vue-stripe'
 import type { StripeElements as StripeElementsType } from '@stripe/stripe-js'
 
 const stripeConfig = inject<{
@@ -248,8 +248,8 @@ const darkAppearance = {
 
       <!-- Basic scenario -->
       <div v-else-if="testScenario === 'basic'" class="demo-container">
-        <StripeProvider :publishable-key="stripeConfig.publishableKey">
-          <StripeElements :client-secret="cleanClientSecret">
+        <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
+          <VueStripeElements :client-secret="cleanClientSecret">
             <template #loading>
               <div class="custom-loading">
                 <div class="spinner"></div>
@@ -270,14 +270,14 @@ const darkAppearance = {
               <p>The Elements instance is now available to child components.</p>
               <component :is="ElementsConsumer" :client-secret="cleanClientSecret" />
             </div>
-          </StripeElements>
-        </StripeProvider>
+          </VueStripeElements>
+        </VueStripeProvider>
       </div>
 
       <!-- With options -->
       <div v-else-if="testScenario === 'with-options'" class="demo-container">
-        <StripeProvider :publishable-key="stripeConfig.publishableKey">
-          <StripeElements
+        <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
+          <VueStripeElements
             :client-secret="cleanClientSecret"
             :options="{ locale: 'en' }"
           >
@@ -294,14 +294,14 @@ const darkAppearance = {
               <p>Initialized with <code>locale: 'en'</code></p>
               <component :is="ElementsConsumer" :client-secret="cleanClientSecret" />
             </div>
-          </StripeElements>
-        </StripeProvider>
+          </VueStripeElements>
+        </VueStripeProvider>
       </div>
 
       <!-- Custom appearance -->
       <div v-else-if="testScenario === 'appearance'" class="demo-container">
-        <StripeProvider :publishable-key="stripeConfig.publishableKey">
-          <StripeElements
+        <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
+          <VueStripeElements
             :client-secret="cleanClientSecret"
             :options="{ appearance: appearanceOptions }"
           >
@@ -312,14 +312,14 @@ const darkAppearance = {
               <pre class="code-inline">{{ JSON.stringify(appearanceOptions, null, 2) }}</pre>
               <component :is="ElementsConsumer" :client-secret="cleanClientSecret" />
             </div>
-          </StripeElements>
-        </StripeProvider>
+          </VueStripeElements>
+        </VueStripeProvider>
       </div>
 
       <!-- Dark theme -->
       <div v-else-if="testScenario === 'dark-theme'" class="demo-container dark">
-        <StripeProvider :publishable-key="stripeConfig.publishableKey">
-          <StripeElements
+        <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
+          <VueStripeElements
             :client-secret="cleanClientSecret"
             :options="{ appearance: darkAppearance }"
           >
@@ -329,8 +329,8 @@ const darkAppearance = {
               <p>Using <code>theme: 'night'</code> with custom primary color.</p>
               <component :is="ElementsConsumer" :client-secret="cleanClientSecret" />
             </div>
-          </StripeElements>
-        </StripeProvider>
+          </VueStripeElements>
+        </VueStripeProvider>
       </div>
     </div>
 
@@ -368,7 +368,7 @@ const darkAppearance = {
 &lt;/template&gt;
 
 &lt;script setup&gt;
-import { StripeProvider, StripeElements, StripePaymentElement } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = 'pi_xxx_secret_xxx' // From your backend
@@ -407,7 +407,7 @@ const clientSecret = 'pi_xxx_secret_xxx' // From your backend
       <pre class="code-block"><code>&lt;script setup&gt;
 import { useStripeElements } from '@vue-stripe/vue-stripe'
 
-// Must be used within StripeElements
+// Must be used within VueStripeElements
 const { elements, loading, error } = useStripeElements()
 
 // Access the Elements instance

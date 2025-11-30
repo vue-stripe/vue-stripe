@@ -6,7 +6,7 @@ The Card Element provides card-specific payment collection. Use it when you only
 
 | Component | Use Case |
 |-----------|----------|
-| `StripeCardElement` | Single input for card number, expiry, and CVC |
+| `VueStripeCardElement` | Single input for card number, expiry, and CVC |
 | Split elements | Separate inputs for custom layouts |
 
 ## Single Card Element
@@ -51,14 +51,14 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
       <form @submit.prevent="handleSubmit">
-        <StripeCardElement />
+        <VueStripeCardElement />
         <button type="submit">Pay</button>
       </form>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -82,26 +82,26 @@ import {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
       <div class="card-form">
         <div class="field">
           <label>Card number</label>
-          <StripeCardNumberElement />
+          <VueStripeCardNumberElement />
         </div>
         <div class="row">
           <div class="field">
             <label>Expiry</label>
-            <StripeCardExpiryElement />
+            <VueStripeCardExpiryElement />
           </div>
           <div class="field">
             <label>CVC</label>
-            <StripeCardCvcElement />
+            <VueStripeCardCvcElement />
           </div>
         </div>
       </div>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -207,12 +207,12 @@ const cardStyles = {
       Payment successful!
     </div>
 
-    <StripeProvider v-else :publishable-key="publishableKey">
-      <StripeElements>
+    <VueStripeProvider v-else :publishable-key="publishableKey">
+      <VueStripeElements>
         <form @submit.prevent="handleSubmit">
           <div class="card-field">
             <label>Card details</label>
-            <StripeCardElement
+            <VueStripeCardElement
               :options="{ style: cardStyles, hidePostalCode: true }"
               @change="handleChange"
             />
@@ -229,8 +229,8 @@ const cardStyles = {
             {{ processing ? 'Processing...' : 'Pay' }}
           </button>
         </form>
-      </StripeElements>
-    </StripeProvider>
+      </VueStripeElements>
+    </VueStripeProvider>
   </div>
 </template>
 

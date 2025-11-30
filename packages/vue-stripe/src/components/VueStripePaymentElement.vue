@@ -6,7 +6,7 @@ import type {
   StripePaymentElementChangeEvent
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
-import { StripeElementsError } from '../utils/errors'
+import { VueStripeElementsError } from '../utils/errors'
 
 // Extended interface for Payment Element with loader events - uses standalone interface
 // since TypeScript has issues extending the complex Stripe type
@@ -40,8 +40,8 @@ const error = ref<string | null>(null)
 const elementsInstance = inject(stripeElementsInjectionKey)
 
 if (!elementsInstance) {
-  throw new StripeElementsError(
-    'StripePaymentElement must be used within StripeElements'
+  throw new VueStripeElementsError(
+    'VueStripePaymentElement must be used within VueStripeElements'
   )
 }
 

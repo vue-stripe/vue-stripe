@@ -27,7 +27,7 @@ We recommend following these pages in order:
 
 Each component and composable has detailed API documentation:
 
-- [Components](/api/components) - StripeProvider, StripeElements, element components
+- [Components](/api/components) - StripeProvider, VueStripeElements, element components
 - [Composables](/api/composables) - useStripe, useStripeElements, usePaymentIntent
 
 ## Quick Links

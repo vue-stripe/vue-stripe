@@ -1,14 +1,14 @@
 import { inject, readonly } from 'vue-demi'
 import type { UseStripeElementsReturn } from '../types'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
-import { StripeElementsError } from '../utils/errors'
+import { VueStripeElementsError } from '../utils/errors'
 
 export function useStripeElements(): UseStripeElementsReturn {
   const elementsContext = inject(stripeElementsInjectionKey)
 
   if (!elementsContext) {
-    throw new StripeElementsError(
-      'Elements context not found. Make sure to wrap your component with StripeElements.'
+    throw new VueStripeElementsError(
+      'Elements context not found. Make sure to wrap your component with VueStripeElements.'
     )
   }
 

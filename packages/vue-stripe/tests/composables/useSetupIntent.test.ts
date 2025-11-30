@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue-demi'
 import { useSetupIntent } from '../../src/composables/useSetupIntent'
-import StripeProvider from '../../src/components/StripeProvider.vue'
-import StripeElements from '../../src/components/StripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
+import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import { flushPromises } from '../setup'
 
 // Test component that uses useSetupIntent
@@ -22,12 +22,12 @@ describe('useSetupIntent', () => {
 
   // Helper to mount with full provider hierarchy
   const mountWithProviders = async (component = TestComponent) => {
-    const wrapper = mount(StripeProvider, {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(StripeElements, {
+        default: () => h(VueStripeElements, {
           clientSecret: 'seti_test_secret_123'
         }, {
           default: () => h(component)
@@ -39,10 +39,10 @@ describe('useSetupIntent', () => {
     return wrapper
   }
 
-  it('should throw error when used outside StripeProvider', () => {
+  it('should throw error when used outside VueStripeProvider', () => {
     expect(() => {
       mount(TestComponent)
-    }).toThrow('useSetupIntent must be called within a StripeProvider component')
+    }).toThrow('useSetupIntent must be called within a VueStripeProvider component')
   })
 
   it('should return confirmSetup function and state refs', async () => {
@@ -58,8 +58,8 @@ describe('useSetupIntent', () => {
     expect(error.value).toBe(null)
   })
 
-  it('should work with StripeProvider only (without StripeElements)', async () => {
-    const wrapper = mount(StripeProvider, {
+  it('should work with VueStripeProvider only (without VueStripeElements)', async () => {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
@@ -278,7 +278,7 @@ describe('useSetupIntent', () => {
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce(null)
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },

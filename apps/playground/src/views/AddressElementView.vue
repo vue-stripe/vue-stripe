@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, inject, computed, watch } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeAddressElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeAddressElement
 } from '@vue-stripe/vue-stripe'
 import type { StripeAddressElementChangeEvent } from '@stripe/stripe-js'
 
 // Ref to the address element component
-const addressElementRef = ref<InstanceType<typeof StripeAddressElement> | null>(null)
+const addressElementRef = ref<InstanceType<typeof VueStripeAddressElement> | null>(null)
 
 const stripeConfig = inject<{
   publishableKey: string
@@ -260,10 +260,10 @@ const handleClear = () => {
       </p>
 
       <div class="demo-container">
-        <StripeProvider :publishable-key="publishableKey">
-          <StripeElements>
+        <VueStripeProvider :publishable-key="publishableKey">
+          <VueStripeElements>
             <div class="address-wrapper">
-              <StripeAddressElement
+              <VueStripeAddressElement
                 ref="addressElementRef"
                 :key="elementKey"
                 :options="elementOptions"
@@ -298,8 +298,8 @@ const handleClear = () => {
                 Clear
               </button>
             </div>
-          </StripeElements>
-        </StripeProvider>
+          </VueStripeElements>
+        </VueStripeProvider>
       </div>
 
       <!-- Collected Data Display -->

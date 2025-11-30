@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, ref, h } from 'vue-demi'
 import { useStripe } from '../../src/composables/useStripe'
-import StripeProvider from '../../src/components/StripeProvider.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises } from '../setup'
 
 // Simple component that uses useStripe
@@ -19,14 +19,14 @@ describe('useStripe', () => {
     vi.clearAllMocks()
   })
 
-  it('should throw error when used outside StripeProvider', () => {
+  it('should throw error when used outside VueStripeProvider', () => {
     expect(() => {
       mount(TestComponent)
-    }).toThrow('useStripe must be called within a StripeProvider component')
+    }).toThrow('useStripe must be called within a VueStripeProvider component')
   })
 
-  it('should return stripe context when used inside StripeProvider', async () => {
-    const wrapper = mount(StripeProvider, {
+  it('should return stripe context when used inside VueStripeProvider', async () => {
+    const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
@@ -61,7 +61,7 @@ describe('useStripe', () => {
       template: '<div>Loading...</div>'
     })
 
-    mount(StripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_invalid'
       },

@@ -1,9 +1,9 @@
-# StripeCheckout
+# VueStripeCheckout
 
 A button component that redirects users to Stripe's hosted checkout page for completing payments.
 
 ::: tip Simple Integration
-StripeCheckout requires only a `StripeProvider` wrapper - no `StripeElements` or `clientSecret` needed. It's the simplest way to accept payments with Stripe.
+StripeCheckout requires only a `VueStripeProvider` wrapper - no `VueStripeElements` or `clientSecret` needed. It's the simplest way to accept payments with Stripe.
 :::
 
 ## What is Stripe Checkout?
@@ -60,19 +60,19 @@ Stripe Checkout provides a hosted, pre-built payment page:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeCheckout
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeCheckout
       :session-id="sessionId"
       button-text="Pay $49.99"
       @click="onCheckoutClick"
       @error="onCheckoutError"
     />
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { StripeProvider, StripeCheckout } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeCheckout } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const sessionId = ref('')
@@ -102,19 +102,19 @@ const onCheckoutError = (error) => {
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeCheckout
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeCheckout
       :price-id="priceId"
       mode="payment"
       :success-url="successUrl"
       :cancel-url="cancelUrl"
       button-text="Subscribe Now"
     />
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 
 <script setup>
-import { StripeProvider, StripeCheckout } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeCheckout } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const priceId = 'price_xxx'
@@ -170,11 +170,11 @@ interface CheckoutError extends Error {
 Customize the button content:
 
 ```vue
-<StripeCheckout :session-id="sessionId">
+<VueStripeCheckout :session-id="sessionId">
   <span class="custom-checkout">
     <IconCart /> Complete Purchase
   </span>
-</StripeCheckout>
+</VueStripeCheckout>
 ```
 
 ### Loading Slot
@@ -182,11 +182,11 @@ Customize the button content:
 Customize the loading state:
 
 ```vue
-<StripeCheckout :session-id="sessionId">
+<VueStripeCheckout :session-id="sessionId">
   <template #loading>
     <Spinner /> Please wait...
   </template>
-</StripeCheckout>
+</VueStripeCheckout>
 ```
 
 ## Examples
@@ -195,8 +195,8 @@ Customize the loading state:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeCheckout
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeCheckout
       :session-id="sessionId"
       button-class="my-checkout-button"
     >
@@ -204,8 +204,8 @@ Customize the loading state:
         <CreditCardIcon />
         <span>Pay $99.00</span>
       </span>
-    </StripeCheckout>
-  </StripeProvider>
+    </VueStripeCheckout>
+  </VueStripeProvider>
 </template>
 
 <style scoped>
@@ -231,12 +231,12 @@ Customize the loading state:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider :publishable-key="publishableKey">
     <div class="pricing-card">
       <h3>Pro Plan</h3>
       <p class="price">$29/month</p>
 
-      <StripeCheckout
+      <VueStripeCheckout
         :price-id="proPriceId"
         mode="subscription"
         :success-url="successUrl"
@@ -245,7 +245,7 @@ Customize the loading state:
         button-text="Start Pro Plan"
       />
     </div>
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -253,9 +253,9 @@ Customize the loading state:
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider :publishable-key="publishableKey">
     <div class="checkout-container">
-      <StripeCheckout
+      <VueStripeCheckout
         :session-id="sessionId"
         :disabled="!sessionId"
         @error="handleError"
@@ -265,7 +265,7 @@ Customize the loading state:
         {{ error }}
       </div>
     </div>
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 
 <script setup>
@@ -289,12 +289,12 @@ const handleError = (err) => {
 
 ```vue
 <template>
-  <StripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider :publishable-key="publishableKey">
     <div v-if="loading">
       Creating checkout session...
     </div>
 
-    <StripeCheckout
+    <VueStripeCheckout
       v-else-if="sessionId"
       :session-id="sessionId"
       button-text="Complete Purchase"
@@ -303,7 +303,7 @@ const handleError = (err) => {
     <div v-else class="error">
       Failed to create checkout session
     </div>
-  </StripeProvider>
+  </VueStripeProvider>
 </template>
 ```
 
@@ -347,7 +347,7 @@ stripe checkout sessions create \
 ## TypeScript
 
 ```ts
-import { StripeProvider, StripeCheckout } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeCheckout } from '@vue-stripe/vue-stripe'
 import type { RedirectToCheckoutOptions } from '@stripe/stripe-js'
 
 // Props typing

@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, inject, computed, watch, defineComponent, h } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement,
   usePaymentIntent,
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
 
-// Child component for payment submission (needs to be inside StripeElements)
+// Child component for payment submission (needs to be inside VueStripeElements)
 const PaymentForm = defineComponent({
   name: 'PaymentForm',
   props: {
@@ -309,13 +309,13 @@ const onLoaderStop = () => {
         </div>
 
         <div :class="['payment-element-wrapper', `theme-${selectedTheme}`]">
-          <StripeProvider :publishable-key="publishableKey">
-            <StripeElements
+          <VueStripeProvider :publishable-key="publishableKey">
+            <VueStripeElements
               :key="elementKey"
               :client-secret="clientSecret"
               :options="{ appearance }"
             >
-              <StripePaymentElement
+              <VueStripePaymentElement
                 :options="elementOptions"
                 @ready="onReady"
                 @change="onChange"
@@ -332,8 +332,8 @@ const onLoaderStop = () => {
                 @payment-success="paymentStatus = 'succeeded'"
                 @payment-error="(msg) => paymentError = msg"
               />
-            </StripeElements>
-          </StripeProvider>
+            </VueStripeElements>
+          </VueStripeProvider>
         </div>
 
         <!-- Status display -->

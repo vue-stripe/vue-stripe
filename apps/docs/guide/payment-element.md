@@ -43,23 +43,23 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <StripeProvider :publishable-key="publishableKey">
-    <StripeElements v-if="clientSecret" :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
       <form @submit.prevent="handleSubmit">
-        <StripePaymentElement />
+        <VueStripePaymentElement />
         <button type="submit">Pay</button>
       </form>
-    </StripeElements>
-  </StripeProvider>
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
 ```
 
 ## Customizing Appearance
 
-Use Stripe's Appearance API via `StripeElements`:
+Use Stripe's Appearance API via `VueStripeElements`:
 
 ```vue
-<StripeElements
+<VueStripeElements
   :client-secret="clientSecret"
   :options="{
     appearance: {
@@ -85,14 +85,14 @@ Use Stripe's Appearance API via `StripeElements`:
     }
   }"
 >
-  <StripePaymentElement />
-</StripeElements>
+  <VueStripePaymentElement />
+</VueStripeElements>
 ```
 
 ## Pre-filling Customer Data
 
 ```vue
-<StripePaymentElement
+<VueStripePaymentElement
   :options="{
     defaultValues: {
       billingDetails: {
@@ -235,14 +235,14 @@ const handleSubmit = async () => {
   <div class="payment-form">
     <div v-if="loading">Loading payment form...</div>
 
-    <StripeProvider v-else :publishable-key="publishableKey">
-      <StripeElements
+    <VueStripeProvider v-else :publishable-key="publishableKey">
+      <VueStripeElements
         v-if="clientSecret"
         :client-secret="clientSecret"
         :options="{ appearance: { theme: 'stripe' } }"
       >
         <form @submit.prevent="handleSubmit">
-          <StripePaymentElement @change="handleChange" />
+          <VueStripePaymentElement @change="handleChange" />
 
           <div v-if="errorMessage" class="error">
             {{ errorMessage }}
@@ -255,12 +255,12 @@ const handleSubmit = async () => {
             {{ processing ? 'Processing...' : 'Pay $20.00' }}
           </button>
         </form>
-      </StripeElements>
+      </VueStripeElements>
 
       <div v-else-if="errorMessage" class="error">
         {{ errorMessage }}
       </div>
-    </StripeProvider>
+    </VueStripeProvider>
   </div>
 </template>
 

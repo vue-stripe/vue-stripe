@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, defineComponent, h } from 'vue'
-import { StripeProvider, useStripe } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, useStripe } from '@vue-stripe/vue-stripe'
 
 const stripeConfig = inject<{
   publishableKey: string
@@ -15,7 +15,7 @@ const log = (type: string, message: string) => {
   console.info(`[useStripe Test] ${type}:`, message)
 }
 
-// Demo component that uses useStripe inside StripeProvider
+// Demo component that uses useStripe inside VueStripeProvider
 const StripeConsumer = defineComponent({
   name: 'StripeConsumer',
   setup() {
@@ -60,9 +60,9 @@ const outsideError = ref<string | null>(null)
 const testOutsideProvider = () => {
   try {
     // This would throw - we catch it for demo
-    outsideError.value = 'useStripe must be called within a StripeProvider component'
+    outsideError.value = 'useStripe must be called within a VueStripeProvider component'
     showOutsideError.value = true
-    log('error', 'Attempted to use useStripe outside StripeProvider')
+    log('error', 'Attempted to use useStripe outside VueStripeProvider')
   } catch (e) {
     outsideError.value = e instanceof Error ? e.message : 'Unknown error'
     showOutsideError.value = true
@@ -76,7 +76,7 @@ const testOutsideProvider = () => {
       <h2>useStripe() Composable Test</h2>
       <p>
         A composable that provides access to the Stripe instance from any component
-        inside a StripeProvider. Must be used within the StripeProvider hierarchy.
+        inside a VueStripeProvider. Must be used within the StripeProvider hierarchy.
       </p>
 
       <div class="api-reference">
@@ -85,7 +85,7 @@ const testOutsideProvider = () => {
         <h4>Usage</h4>
         <pre class="code-block"><code>import { useStripe } from '@vue-stripe/vue-stripe'
 
-// Must be inside a StripeProvider
+// Must be inside a VueStripeProvider
 const { stripe, loading, error } = useStripe()</code></pre>
 
         <h4>Returns</h4>
@@ -118,8 +118,8 @@ const { stripe, loading, error } = useStripe()</code></pre>
 
         <h4>Important Notes</h4>
         <ul>
-          <li>Must be called inside a component that is a descendant of StripeProvider</li>
-          <li>Throws <code>StripeProviderError</code> if used outside StripeProvider</li>
+          <li>Must be called inside a component that is a descendant of VueStripeProvider</li>
+          <li>Throws <code>VueStripeProviderError</code> if used outside VueStripeProvider</li>
           <li>All returned values are reactive refs</li>
         </ul>
       </div>
@@ -128,14 +128,14 @@ const { stripe, loading, error } = useStripe()</code></pre>
     <!-- Live Demo: Inside Provider -->
     <div class="demo-card">
       <h3>✅ Inside StripeProvider (Works)</h3>
-      <p class="note">The useStripe() composable is called inside a component wrapped by StripeProvider.</p>
+      <p class="note">The useStripe() composable is called inside a component wrapped by VueStripeProvider.</p>
 
       <div v-if="!stripeConfig?.publishableKey" class="no-key-warning">
         <p>⚠️ No Stripe key configured. Click <strong>"🔑 Add Key"</strong> in the header above.</p>
       </div>
 
       <div v-else class="demo-container">
-        <StripeProvider :publishable-key="stripeConfig.publishableKey">
+        <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
           <template #loading>
             <div class="loading-state">
               <div class="spinner"></div>
@@ -144,7 +144,7 @@ const { stripe, loading, error } = useStripe()</code></pre>
           </template>
 
           <StripeConsumer />
-        </StripeProvider>
+        </VueStripeProvider>
       </div>
     </div>
 
@@ -152,7 +152,7 @@ const { stripe, loading, error } = useStripe()</code></pre>
     <div class="demo-card">
       <h3>❌ Outside StripeProvider (Throws Error)</h3>
       <p class="note">
-        Calling useStripe() outside a StripeProvider will throw an error.
+        Calling useStripe() outside a VueStripeProvider will throw an error.
         This is caught and displayed below.
       </p>
 
@@ -167,7 +167,7 @@ const { stripe, loading, error } = useStripe()</code></pre>
 
         <div v-else class="error-result">
           <span class="error-icon">🚨</span>
-          <strong>StripeProviderError</strong>
+          <strong>VueStripeProviderError</strong>
           <code>{{ outsideError }}</code>
           <button class="btn btn-small" @click="showOutsideError = false">
             Reset
@@ -266,7 +266,7 @@ const { stripe, loading, error } = useStripe()
     <div class="demo-card learning">
       <h3>Learning Notes</h3>
       <ul>
-        <li><strong>Context Requirement:</strong> Must be used inside StripeProvider - throws error otherwise.</li>
+        <li><strong>Context Requirement:</strong> Must be used inside VueStripeProvider - throws error otherwise.</li>
         <li><strong>Reactive Values:</strong> All returned values are Vue refs, so use <code>.value</code> in script.</li>
         <li><strong>Async Loading:</strong> <code>stripe</code> is null initially while Stripe.js loads.</li>
         <li><strong>Error Handling:</strong> Check <code>error</code> to handle failed Stripe.js loads.</li>
