@@ -4,7 +4,7 @@
 [![npm bundle size](https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square)](https://bundlephobia.com/package/@vue-stripe/vue-stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Vue.js library for Stripe Checkout and Elements. Vue 3.x with TypeScript-first development and modern Composition API.
+Vue.js library for Stripe Checkout and Elements. Built for Vue 3.x with TypeScript-first development and a modern Composition API.
 
 > This package is part of the [Vue Stripe monorepo](../../README.md). For contributing guidelines and development setup, see the root README.
 
@@ -51,7 +51,7 @@ const processPayment = async () => {
 | Component | Description |
 |-----------|-------------|
 | `VueStripeProvider` | Root component that loads Stripe.js and provides context |
-| `VueStripeElements` | Creates Elements instance and provides it to child components |
+| `VueStripeElements` | Creates an Elements instance and provides it to child components |
 
 ### Payment Components
 
@@ -59,13 +59,13 @@ const processPayment = async () => {
 |-----------|-------------|
 | `VueStripePaymentElement` | Modern payment element supporting 40+ payment methods |
 | `VueStripeExpressCheckoutElement` | Wallet payments (Apple Pay, Google Pay, etc.) |
-| `VueStripeLinkAuthenticationElement` | Link authentication |
+| `VueStripeLinkAuthenticationElement` | Link authentication element |
 | `VueStripeAddressElement` | Address collection with Google Maps autocomplete |
 | `VueStripeCheckout` | Embedded Stripe Checkout |
 
 ### VueStripeAddressElement
 
-Collect shipping or billing addresses with built-in Google Maps autocomplete:
+Collect shipping or billing addresses with Google Maps autocomplete:
 
 ```vue
 <template>
@@ -94,9 +94,9 @@ const validateAddress = async () => {
 
 ### VueStripeLinkAuthenticationElement
 
-Enable Stripe Link for faster checkout by collecting and authenticating customer email.
+Enable Stripe Link for faster checkout by collecting and authenticating the customer's email.
 
-> **Pairing Note:** This element collects email only and **must be paired with `VueStripePaymentElement`** for a complete checkout flow. It cannot process payments on its own.
+> **Note:** This element collects email only and **must be paired with `VueStripePaymentElement`** for a complete checkout flow. It cannot process payments on its own.
 
 ```vue
 <template>
@@ -144,9 +144,9 @@ const onPaymentChange = (event) => {
 | Component | Description |
 |-----------|-------------|
 | `VueStripeCardElement` | Single card input field |
-| `VueStripeCardNumberElement` | Card number only |
-| `VueStripeCardExpiryElement` | Expiry date only |
-| `VueStripeCardCvcElement` | CVC only |
+| `VueStripeCardNumberElement` | Card number input |
+| `VueStripeCardExpiryElement` | Expiry date input |
+| `VueStripeCardCvcElement` | CVC input |
 
 ## Composables
 
@@ -172,11 +172,10 @@ import type {
 
 ## Documentation
 
-- [Installation Guide](https://vue-stripe.github.io/vue-stripe/guide/installation)
-- [Quick Start](https://vue-stripe.github.io/vue-stripe/guide/quick-start)
-- [API Reference](https://vue-stripe.github.io/vue-stripe/api/)
-- [Examples](https://vue-stripe.github.io/vue-stripe/examples/)
+- [Website](https://vuestripe.com)
+- [Guides](https://vuestripe.com/guide/introduction)
+- [API Reference](https://vuestripe.com/api/)
 
 ## License
 
-[MIT](LICENSE) License © 2025 Vue Stripe Contributors
+[MIT](LICENSE) License © 2017-2025 Vue Stripe Contributors

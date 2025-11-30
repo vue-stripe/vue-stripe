@@ -1,6 +1,11 @@
 <p align="center">
   <img src="./.github/assets/vue-stripe-logo-variant-1.png" alt="Vue Stripe Logo" width="250"/>
-  <h1 align="center">Vue Stripe</h1>
+  <h1 align="center">
+    Vue Stripe
+    <div style="height: 10px;"></div>
+    <a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="./.github/assets/stripe_partner_badge_verified_blurple.png" alt="Stripe Partner" height="30"/></a>
+  
+  </h1>
 </p>
 
 <p align="center">
@@ -19,8 +24,8 @@
 
 <p align="center">
   <a href="https://vuestripe.com">Website</a> |
-  <a href="https://vue-stripe.github.io/vue-stripe/">Documentation</a> |
-  <a href="https://vue-stripe.github.io/vue-stripe/examples/">Examples</a>
+  <a href="https://vuestripe.com/guides/">Guides</a> |
+  <a href="https://vuestripe.com/api/">API</a>
 </p>
 
 ---
@@ -29,17 +34,17 @@
 
 ## Announcement
 
-Thank you for your patience! This is an early release of the new Vue Stripe. As with any early release, you may encounter some bugs. If you find any issues or have suggestions, please feel free to [create an issue](https://github.com/vue-stripe/vue-stripe/issues) or [submit a PR](https://github.com/vue-stripe/vue-stripe/pulls). Your contributions are greatly appreciated!
+Thank you for your patience! This is an early release of the new Vue Stripe. As with any early release, you may encounter bugs. If you find any issues or have suggestions, please [create an issue](https://github.com/vue-stripe/vue-stripe/issues) or [submit a pull request](https://github.com/vue-stripe/vue-stripe/pulls). Your contributions are greatly appreciated!
 
 ## Features
 
-- **Vue 3** - Built for Vue 3.x
-- **TypeScript First** - Full TypeScript support with comprehensive types
-- **Modern Elements** - Payment Element supporting 40+ payment methods
-- **Composition API** - Vue 3 Composition API
-- **Customizable** - Full support for Stripe's Appearance API
-- **Well Tested** - Comprehensive test suite
-- **SSR Ready** - Support for Nuxt 3 and server-side rendering
+- **Vue 3** — Built for Vue 3.x
+- **TypeScript First** — Full TypeScript support with comprehensive types
+- **Modern Elements** — Payment Element supporting 40+ payment methods
+- **Composition API** — Vue 3 Composition API
+- **Customizable** — Full support for Stripe's Appearance API
+- **Well Tested** — Comprehensive test suite
+- **SSR Ready** — Support for Nuxt 3 and server-side rendering
 
 ## Quick Start
 
@@ -77,10 +82,9 @@ const processPayment = async () => {
 
 ## Documentation
 
-- [Installation Guide](https://vue-stripe.github.io/vue-stripe/guide/installation)
-- [Quick Start](https://vue-stripe.github.io/vue-stripe/guide/quick-start)
-- [API Reference](https://vue-stripe.github.io/vue-stripe/api/)
-- [Examples](https://vue-stripe.github.io/vue-stripe/examples/)
+- [Website](https://vuestripe.com)
+- [Guides](https://vuestripe.com/guide/introduction)
+- [API Reference](https://vuestripe.com/api/)
 
 ## Monorepo Structure
 
@@ -110,7 +114,7 @@ vue-stripe/
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - pnpm 8+
 
 ### Getting Started
@@ -173,15 +177,9 @@ Support this project with your organization. Your logo will show up here with a 
 <a href="https://opencollective.com/vue-stripe-checkout/organization/8/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/8/avatar.svg"></a>
 <a href="https://opencollective.com/vue-stripe-checkout/organization/9/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/9/avatar.svg"></a>
 
-## Special Thanks
-
-[<img src="https://i.imgur.com/Ttv4fMw.png" width="200px">](https://mightyminds.org)
-[<img src="https://i.imgur.com/x0SERyj.png" width="200px">](https://mycure.md)
-[<img src="https://i.imgur.com/4jF5M4A.png">](http://myteamops.com)
-
 ## License
 
-[MIT](LICENSE) License © 2025 Vue Stripe Contributors
+[MIT](LICENSE) License © 2017-2025 Vue Stripe Contributors
 
 ---
 
