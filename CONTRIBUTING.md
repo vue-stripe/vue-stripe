@@ -1,77 +1,181 @@
-# Request for contributions
+# Contributing to Vue Stripe
 
-Please contribute to this repository if any of the following is true:
-- You have expertise in community development, communication, or education
-- You want open source communities to be more collaborative and inclusive
-- You want to help lower the burden to first time contributors
+Thank you for your interest in contributing to Vue Stripe! This document provides guidelines and instructions for contributing.
 
-# How to contribute
+## Code of Conduct
 
-Prerequisites:
+Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to help us maintain a welcoming community.
 
-- Familiarity with [pull requests](https://help.github.com/articles/using-pull-requests) and [issues](https://guides.github.com/features/issues/).
-- Knowledge of [Markdown](https://help.github.com/articles/markdown-basics/) for editing `.md` documents.
+## Getting Started
 
-In particular, this community seeks the following types of contributions:
+### Prerequisites
 
-- **Ideas**: participate in an issue thread or start your own to have your voice
-heard.
-- **Resources**: submit a pull request to add to RESOURCES.md with links to related content.
-- **Outline sections**: help us ensure that this repository is comprehensive. if
-there is a topic that is overlooked, please add it, even if it is just a stub
-in the form of a header and single sentence. Initially, most things fall into
-this category.
-- **Writing**: contribute your expertise in an area by helping us expand the included
-content.
-- **Copy editing**: fix typos, clarify language, and generally improve the quality
-of the content.
-- **Formatting**: help keep content easy to read with consistent formatting.
+- Node.js 18+
+- pnpm 8+
 
-# Conduct
+### Setup
 
-We are committed to providing a friendly, safe and welcoming environment for
-all, regardless of gender, sexual orientation, disability, ethnicity, religion,
-or similar personal characteristic.
+1. Fork the repository
+2. Clone your fork:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/vue-stripe.git
+   cd vue-stripe
+   ```
+3. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+4. Create a branch for your changes:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-On IRC, please avoid using overtly sexual nicknames or other nicknames that
-might detract from a friendly, safe and welcoming environment for all.
+## Monorepo Structure
 
-Please be kind and courteous. There's no need to be mean or rude.
-Respect that people have differences of opinion and that every design or
-implementation choice carries a trade-off and numerous costs. There is seldom
-a right answer, merely an optimal answer given a set of values and
-circumstances.
+This project uses pnpm workspaces and Turborepo:
 
-Please keep unstructured critique to a minimum. If you have solid ideas you
-want to experiment with, make a fork and see how it works.
+```
+vue-stripe/
+├── packages/
+│   └── vue-stripe/        # Main library (@vue-stripe/vue-stripe)
+├── apps/
+│   ├── docs/              # VitePress documentation
+│   └── playground/        # Development playground
+└── tools/
+    ├── eslint-config/     # Shared ESLint config
+    └── typescript-config/ # Shared TypeScript config
+```
 
-We will exclude you from interaction if you insult, demean or harass anyone.
-That is not welcome behaviour. We interpret the term "harassment" as
-including the definition in the
-[Citizen Code of Conduct](http://citizencodeofconduct.org/);
-if you have any lack of clarity about what might be included in that concept,
-please read their definition. In particular, we don't tolerate behavior that
-excludes people in socially marginalized groups.
+## Development Workflow
 
-Private harassment is also unacceptable. No matter who you are, if you feel
-you have been or are being harassed or made uncomfortable by a community
-member, please contact one of the channel ops or any of the
-[CONTRIBUTING.md](https://github.com/jden/CONTRIBUTING.md) core team
-immediately. Whether you're a regular contributor or a newcomer, we care about
-making this community a safe place for you and we've got your back.
+### Running the Development Environment
 
-Likewise any spamming, trolling, flaming, baiting or other attention-stealing
-behaviour is not welcome.
+```bash
+# Start all apps (docs + playground)
+pnpm dev
 
-# Communication
+# Start playground only (for testing components)
+pnpm playground:dev
 
-There is an IRC channel on irc.freenode.net, channel `#CONTRIBUTING.md`. You're
-welcome to drop in and ask questions, discuss bugs and such. The channel is
-not currently logged.
+# Start documentation site only
+pnpm docs:dev
+```
 
-GitHub issues are the primary way for communicating about specific proposed
-changes to this project.
+### Building
 
-In both contexts, please follow the conduct guidelines above. Language issues
-are often contentious and we'd like to keep discussion brief, civil and focused
-on what we're actually doing, not wandering off into too much imaginary stuff.
+```bash
+# Build all packages
+pnpm build
+
+# Build main library only
+pnpm vue-stripe:build
+
+# Watch mode for library development
+pnpm build:watch
+```
+
+### Testing
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Test main library only
+pnpm vue-stripe:test
+```
+
+### Code Quality
+
+```bash
+# Lint all packages
+pnpm lint
+
+# Fix linting issues
+pnpm lint:fix
+
+# Type check all packages
+pnpm typecheck
+```
+
+## How to Contribute
+
+### Reporting Bugs
+
+1. Search existing [issues](https://github.com/vue-stripe/vue-stripe/issues) to avoid duplicates
+2. Create a new issue with:
+   - Clear, descriptive title
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Environment details (Vue version, browser, etc.)
+   - Minimal reproduction if possible
+
+### Suggesting Features
+
+1. Check existing issues and discussions for similar suggestions
+2. Create a new issue with:
+   - Clear description of the feature
+   - Use case and motivation
+   - Proposed API or implementation (if applicable)
+
+### Submitting Pull Requests
+
+1. Ensure your PR addresses an existing issue or create one first
+2. Follow the coding standards (run `pnpm lint`)
+3. Write/update tests for your changes
+4. Update documentation if needed
+5. Create a changeset for version tracking:
+   ```bash
+   pnpm changeset
+   ```
+6. Ensure all checks pass:
+   ```bash
+   pnpm lint && pnpm typecheck && pnpm test
+   ```
+7. Submit your PR with:
+   - Clear title and description
+   - Reference to related issue(s)
+   - Screenshots/videos for UI changes
+
+## Coding Standards
+
+### General Guidelines
+
+- Write TypeScript with strict typing
+- Use Composition API for Vue components
+- Follow existing code patterns and conventions
+- Keep components focused and single-purpose
+- Write meaningful commit messages
+
+### Component Guidelines
+
+- Import from `vue-demi` for Vue compatibility
+- Use provide/inject with typed injection keys
+- Emit `ready` and `change` events consistently
+- Handle loading and error states appropriately
+
+### Documentation
+
+- Update relevant docs when changing APIs
+- Include code examples for new features
+- Keep examples simple and focused
+
+## Changesets
+
+We use [Changesets](https://github.com/changesets/changesets) for version management:
+
+```bash
+# Create a changeset after making changes
+pnpm changeset
+
+# Follow the prompts to describe your changes
+```
+
+## Questions?
+
+- Open a [GitHub Discussion](https://github.com/vue-stripe/vue-stripe/discussions)
+- Check the [Documentation](https://vue-stripe.github.io/vue-stripe/)
+
+Thank you for contributing!

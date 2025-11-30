@@ -49,9 +49,9 @@ VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```vue
 <script setup>
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -111,9 +111,9 @@ Create `components/StripeWrapper.client.vue` (the `.client` suffix ensures it on
 ```vue
 <script setup lang="ts">
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const config = useRuntimeConfig()
@@ -205,9 +205,9 @@ VUE_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```vue
 <script setup>
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
@@ -317,9 +317,9 @@ class PaymentController extends Controller
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement,
   usePaymentIntent
 } from '@vue-stripe/vue-stripe'
 

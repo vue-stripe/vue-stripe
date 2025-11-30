@@ -47,9 +47,9 @@ features:
 
 <script setup>
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement,
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'

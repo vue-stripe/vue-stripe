@@ -13,8 +13,8 @@
 </p>
 
 <p align="center">
-  <strong>Universal Vue.js library for Stripe Checkout and Elements</strong><br/>
-  Supporting both Vue 2.6+ and Vue 3.x with TypeScript-first development
+  <strong>Vue.js library for Stripe Checkout and Elements</strong><br/>
+  Vue 3.x with TypeScript-first development
 </p>
 
 <p align="center">
@@ -27,15 +27,19 @@
 
 > [Vue Stripe](https://vuestripe.com) is an official [Stripe partner](https://stripe.com/partners/vue-stripe)
 
+## Announcement
+
+Thank you for your patience! This is an early release of the new Vue Stripe. As with any early release, you may encounter some bugs. If you find any issues or have suggestions, please feel free to [create an issue](https://github.com/vue-stripe/vue-stripe/issues) or [submit a PR](https://github.com/vue-stripe/vue-stripe/pulls). Your contributions are greatly appreciated!
+
 ## Features
 
-- **Universal Vue Support** - Works with Vue 2.6+ and Vue 3.x via `vue-demi`
+- **Vue 3** - Built for Vue 3.x
 - **TypeScript First** - Full TypeScript support with comprehensive types
 - **Modern Elements** - Payment Element supporting 40+ payment methods
-- **Composition API** - Vue 3 Composition API with Vue 2 compatibility
+- **Composition API** - Vue 3 Composition API
 - **Customizable** - Full support for Stripe's Appearance API
 - **Well Tested** - Comprehensive test suite
-- **SSR Ready** - Support for Nuxt 2/3 and server-side rendering
+- **SSR Ready** - Support for Nuxt 3 and server-side rendering
 
 ## Quick Start
 
@@ -138,20 +142,6 @@ pnpm test
 pnpm lint
 ```
 
-### Testing Vue 2 vs Vue 3
-
-The library uses `vue-demi` for compatibility. Test both versions:
-
-```bash
-# Switch to Vue 2 for testing
-npx vue-demi-switch 2 vue2
-pnpm test
-
-# Switch back to Vue 3
-npx vue-demi-switch 3
-pnpm test
-```
-
 ## Contributors
 
 ### Code Contributors
@@ -191,7 +181,7 @@ Support this project with your organization. Your logo will show up here with a 
 
 ## License
 
-[MIT](LICENSE) License © 2024 Vue Stripe Contributors
+[MIT](LICENSE) License © 2025 Vue Stripe Contributors
 
 ---
 

@@ -154,7 +154,7 @@ gtag('config', '${GA_MEASUREMENT_ID}');`],
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2024 Vue Stripe Contributors'
+      copyright: 'Copyright © 2025 Vue Stripe Contributors'
     },
 
     search: {

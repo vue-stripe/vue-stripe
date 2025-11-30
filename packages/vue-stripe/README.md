@@ -4,7 +4,7 @@
 [![npm bundle size](https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square)](https://bundlephobia.com/package/@vue-stripe/vue-stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Universal Vue.js library for Stripe Checkout and Elements. Supports both Vue 2.6+ and Vue 3.x with TypeScript-first development and modern Composition API.
+Vue.js library for Stripe Checkout and Elements. Vue 3.x with TypeScript-first development and modern Composition API.
 
 > This package is part of the [Vue Stripe monorepo](../../README.md). For contributing guidelines and development setup, see the root README.
 
@@ -12,12 +12,6 @@ Universal Vue.js library for Stripe Checkout and Elements. Supports both Vue 2.6
 
 ```bash
 npm install @vue-stripe/vue-stripe @stripe/stripe-js
-```
-
-For Vue 2 projects, also install the Composition API plugin:
-
-```bash
-npm install @vue/composition-api
 ```
 
 ## Basic Usage
@@ -185,4 +179,4 @@ import type {
 
 ## License
 
-[MIT](LICENSE) License © 2024 Vue Stripe Contributors
+[MIT](LICENSE) License © 2025 Vue Stripe Contributors
