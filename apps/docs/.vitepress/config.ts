@@ -11,12 +11,44 @@ export default defineConfig({
   base: '/',
 
   head: [
-    // Google Analytics
+    // Google Analytics with Enhanced Measurement
     ['script', { async: '', src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}` }],
     ['script', {}, `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', '${GA_MEASUREMENT_ID}');`],
+
+// Enhanced GA4 Configuration
+gtag('config', '${GA_MEASUREMENT_ID}', {
+  // Enhanced measurement settings
+  send_page_view: true,
+  allow_google_signals: true,
+  allow_ad_personalization_signals: false,
+
+  // Custom parameters
+  custom_map: {
+    'dimension1': 'page_type',
+    'dimension2': 'component_name',
+    'dimension3': 'user_journey_stage',
+    'dimension4': 'scroll_depth',
+    'dimension5': 'engagement_time'
+  },
+
+  // Enhanced link attribution
+  link_attribution: true,
+
+  // Content grouping
+  content_group: 'documentation',
+
+  // Cookie settings
+  cookie_flags: 'SameSite=None;Secure'
+});
+
+// Enable debug mode in development
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  gtag('config', '${GA_MEASUREMENT_ID}', {
+    debug_mode: true
+  });
+}`],
 
     // Favicon
     ['link', { rel: 'icon', href: '/favicon.ico' }],
