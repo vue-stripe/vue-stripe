@@ -33,15 +33,11 @@ gtag('config', '${GA_MEASUREMENT_ID}');`],
     ['meta', { property: 'og:title', content: 'Vue Stripe' }],
     ['meta', { property: 'og:description', content: 'Stripe Checkout & Elements for Vue.js' }],
     ['meta', { property: 'og:url', content: 'https://vuestripe.com/' }],
-    ['meta', { property: 'og:image', content: 'https://vuestripe.com/og-image.png' }],
-    ['meta', { property: 'og:image:width', content: '1200' }],
-    ['meta', { property: 'og:image:height', content: '630' }],
 
     // Twitter Card
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'twitter:title', content: 'Vue Stripe' }],
     ['meta', { name: 'twitter:description', content: 'Stripe Checkout & Elements for Vue.js' }],
-    ['meta', { name: 'twitter:image', content: 'https://vuestripe.com/og-image.png' }],
   ],
 
   sitemap: {
@@ -197,6 +193,24 @@ gtag('config', '${GA_MEASUREMENT_ID}');`],
 
   // Ignore dead links while building docs
   ignoreDeadLinks: true,
+
+  // Add fallback OG image for pages without dynamic images
+  transformHead({ pageData }) {
+    // Pages that don't have dynamic OG images generated (not in sidebar)
+    const pagesWithoutDynamicOG = ['index.md', '404.md', 'guide/index.md']
+    const head = []
+
+    if (pagesWithoutDynamicOG.some(page => pageData.relativePath === page || pageData.relativePath === '')) {
+      head.push(
+        ['meta', { property: 'og:image', content: 'https://vuestripe.com/og-image.png' }],
+        ['meta', { property: 'og:image:width', content: '1200' }],
+        ['meta', { property: 'og:image:height', content: '630' }],
+        ['meta', { name: 'twitter:image', content: 'https://vuestripe.com/og-image.png' }]
+      )
+    }
+
+    return head
+  },
 
   // Generate OG images at build time
   async buildEnd(siteConfig) {
