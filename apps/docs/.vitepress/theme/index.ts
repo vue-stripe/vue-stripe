@@ -3,6 +3,7 @@ import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import './styles/vars.css'
 import StripeBadge from './components/StripeBadge.vue'
+import CopyForLLM from './components/CopyForLLM.vue'
 
 // Analytics composables
 import { useScrollTracking } from './composables/useScrollTracking'
@@ -36,6 +37,8 @@ export default {
     return h(DefaultTheme.Layout, null, {
       // Stripe Partner Badge below hero actions on home page
       'home-hero-info-after': () => h(StripeBadge),
+      // Copy for LLMs button near the title on doc pages
+      'doc-before': () => h(CopyForLLM),
       // Analytics tracking (invisible component)
       'layout-top': () => h(AnalyticsWrapper),
       // Carbon Ads placeholder - will be injected when you have the actual code
