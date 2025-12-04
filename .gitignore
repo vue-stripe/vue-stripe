@@ -24,6 +24,7 @@ build/
 # IDE and editor files
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~
@@ -114,6 +115,8 @@ coverage/
 test-results/
 playwright-report/
 playwright/.cache/
+.playwright-mcp
 
 .claude
 CLAUDE.md
+docs
