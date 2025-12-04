@@ -174,7 +174,7 @@ describe('useStripeCheckout', () => {
     expect(loading.value).toBe(false)
   })
 
-  it('should throw error if Stripe is not initialized', async () => {
+  it('should throw error if Stripe is not initialized and no URL provided', async () => {
     // Capture the composable during the loading phase when stripe is not yet initialized
     let capturedComposable: ReturnType<typeof useStripeCheckout> | null = null
 
@@ -186,7 +186,7 @@ describe('useStripeCheckout', () => {
       template: '<div>Capture</div>'
     })
 
-    // Create a mock where loadStripe returns null
+    // Create a mock where loadStripe returns null (no redirectToCheckout method)
     mockLoadStripe.mockResolvedValue(null)
 
     mount(VueStripeProvider, {
@@ -201,10 +201,47 @@ describe('useStripeCheckout', () => {
 
     expect(capturedComposable).not.toBeNull()
 
-    // Should throw when trying to redirect while stripe is null
+    // Should throw when trying to use legacy redirectToCheckout while stripe is null
+    // The error message should mention that redirectToCheckout is not available (v8.x behavior)
     await expect(capturedComposable!.redirectToCheckout({
       sessionId: 'cs_test_123'
-    })).rejects.toThrow('Stripe not initialized')
+    })).rejects.toThrow('redirectToCheckout is not available')
+  })
+
+  it('should redirect using URL (v8.x compatible)', async () => {
+    // Mock window.location.replace
+    const originalReplace = window.location.replace
+    const mockReplace = vi.fn()
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, replace: mockReplace },
+      writable: true
+    })
+
+    const wrapper = await mountWithProvider()
+
+    const testComponent = wrapper.findComponent(TestComponent)
+    const { redirectToCheckout } = testComponent.vm.checkoutComposable
+
+    await redirectToCheckout({
+      url: 'https://checkout.stripe.com/pay/cs_test_123'
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith('https://checkout.stripe.com/pay/cs_test_123')
+
+    // Restore
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, replace: originalReplace },
+      writable: true
+    })
+  })
+
+  it('should have redirectToUrl helper for v8.x', async () => {
+    const wrapper = await mountWithProvider()
+
+    const testComponent = wrapper.findComponent(TestComponent)
+    const { redirectToUrl } = testComponent.vm.checkoutComposable
+
+    expect(typeof redirectToUrl).toBe('function')
   })
 
   it('should return readonly refs', async () => {
