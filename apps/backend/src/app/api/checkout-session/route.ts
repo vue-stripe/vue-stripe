@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3001'
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}))
+    const stripe = getStripe()
 
     const session = await stripe.checkout.sessions.create({
       line_items: body.lineItems || [
