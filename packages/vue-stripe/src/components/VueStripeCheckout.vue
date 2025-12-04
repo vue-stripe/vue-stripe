@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue-demi'
-import type { RedirectToCheckoutOptions } from '@stripe/stripe-js'
+import { ref, useSlots, computed } from 'vue-demi'
 import { useStripe } from '../composables/useStripe'
 import { VueStripeProviderError } from '../utils/errors'
 
 interface Props {
+  /**
+   * Checkout Session ID (starts with cs_).
+   * When provided, redirects to the session's checkout page.
+   */
   sessionId?: string
+  /**
+   * Checkout Session URL from Stripe API.
+   * For @stripe/stripe-js v8.x compatibility where redirectToCheckout is removed.
+   * When provided, this takes precedence over sessionId.
+   */
+  sessionUrl?: string
+  /**
+   * Price ID for client-side session creation (legacy, requires redirectToCheckout).
+   * @deprecated Use sessionUrl with server-side session creation for v8.x compatibility.
+   */
   priceId?: string
   mode?: 'payment' | 'subscription'
   successUrl?: string
@@ -13,7 +26,6 @@ interface Props {
   customerEmail?: string
   clientReferenceId?: string
   submitType?: 'auto' | 'book' | 'donate' | 'pay'
-  options?: Partial<RedirectToCheckoutOptions>
   buttonText?: string
   loadingText?: string
   disabled?: boolean
@@ -21,9 +33,10 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'click'): void
+  (e: 'checkout'): void
   (e: 'success'): void
   (e: 'error', error: Error): void
+  (e: 'before-redirect', data: { url: string }): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -38,55 +51,107 @@ const emit = defineEmits<Emits>()
 
 const { stripe } = useStripe()
 const loading = ref(false)
+const slots = useSlots()
 
-const redirectToCheckout = async () => {
-  if (!stripe.value) {
-    const error = new VueStripeProviderError('Stripe not initialized')
-    emit('error', error)
-    return
-  }
+// Check if user provided custom default slot content
+const hasCustomSlot = computed(() => !!slots.default)
 
-  if (!props.sessionId && !props.priceId) {
-    const error = new VueStripeProviderError('Either sessionId or priceId is required')
-    emit('error', error)
-    return
-  }
-  
+/**
+ * Check if redirectToCheckout is available (stripe-js v7.x)
+ */
+const hasRedirectToCheckout = (): boolean => {
+  return stripe.value !== null &&
+    typeof (stripe.value as any).redirectToCheckout === 'function'
+}
+
+/**
+ * Handle checkout - supports both v7.x (redirectToCheckout) and v8.x (URL redirect)
+ */
+const handleSubmit = async () => {
+  loading.value = true
+  emit('checkout')
+
   try {
-    loading.value = true
-    emit('click')
+    // Option 1: Direct URL redirect (v8.x compatible, recommended)
+    if (props.sessionUrl) {
+      emit('before-redirect', { url: props.sessionUrl })
+      window.location.replace(props.sessionUrl)
+      emit('success')
+      return
+    }
 
-    let result: { error?: { message?: string } }
-
+    // Option 2: Session-based checkout with redirectToCheckout (v7.x)
     if (props.sessionId) {
-      // Session-based checkout
-      result = await stripe.value.redirectToCheckout({
-        sessionId: props.sessionId,
-        ...props.options
+      // Check if redirectToCheckout is available
+      if (!hasRedirectToCheckout()) {
+        throw new VueStripeProviderError(
+          'redirectToCheckout is not available. This method was removed in @stripe/stripe-js v8.x. ' +
+          'Use sessionUrl prop with the checkout session URL instead.'
+        )
+      }
+
+      if (!stripe.value) {
+        throw new VueStripeProviderError('Stripe not initialized')
+      }
+
+      const result = await (stripe.value as any).redirectToCheckout({
+        sessionId: props.sessionId
       })
-    } else {
-      // Price-based checkout
-      result = await stripe.value.redirectToCheckout({
+
+      if (result.error) {
+        throw new VueStripeProviderError(result.error.message || 'Redirect to checkout failed')
+      }
+
+      emit('success')
+      return
+    }
+
+    // Option 3: Price-based checkout (v7.x only, deprecated)
+    if (props.priceId) {
+      if (!hasRedirectToCheckout()) {
+        throw new VueStripeProviderError(
+          'Price-based checkout using redirectToCheckout is not available in @stripe/stripe-js v8.x. ' +
+          'Create a Checkout Session on your server and use sessionUrl prop instead.'
+        )
+      }
+
+      if (!stripe.value) {
+        throw new VueStripeProviderError('Stripe not initialized')
+      }
+
+      console.warn(
+        '[Vue Stripe] Price-based checkout is deprecated in v8.x. ' +
+        'Create a Checkout Session on your server and use sessionUrl prop instead.'
+      )
+
+      const result = await (stripe.value as any).redirectToCheckout({
         lineItems: [
           {
-            price: props.priceId!,
+            price: props.priceId,
             quantity: 1
           }
         ],
-        mode: props.mode!,
+        mode: props.mode,
         successUrl: props.successUrl || window.location.origin + '/success',
         cancelUrl: props.cancelUrl || window.location.origin + '/cancel',
         customerEmail: props.customerEmail,
         clientReferenceId: props.clientReferenceId,
         submitType: props.submitType
-      } as RedirectToCheckoutOptions)
+      })
+
+      if (result.error) {
+        throw new VueStripeProviderError(result.error.message || 'Redirect to checkout failed')
+      }
+
+      emit('success')
+      return
     }
 
-    if (result.error) {
-      throw new VueStripeProviderError(result.error.message || 'Redirect to checkout failed')
-    }
-    
-    emit('success')
+    // No valid checkout option provided
+    throw new VueStripeProviderError(
+      'Either sessionUrl, sessionId, or priceId is required. ' +
+      'For @stripe/stripe-js v8.x, use sessionUrl.'
+    )
   } catch (err) {
     const error = err instanceof Error ? err : new Error('Checkout failed')
     emit('error', error)
@@ -95,28 +160,47 @@ const redirectToCheckout = async () => {
     loading.value = false
   }
 }
+
+// Expose checkout method for custom button implementations
+defineExpose({ checkout: handleSubmit, loading })
 </script>
 
 <template>
-  <button 
+  <!-- Custom slot: wrap with click handler so user doesn't need scoped slot syntax -->
+  <span
+    v-if="hasCustomSlot"
+    @click="handleSubmit"
+    class="vue-stripe-checkout-wrapper"
+  >
+    <slot
+      :checkout="handleSubmit"
+      :loading="loading"
+      :disabled="disabled"
+    />
+  </span>
+
+  <!-- Default button when no slot content provided -->
+  <button
+    v-else
     :disabled="loading || disabled"
     :class="buttonClass"
-    @click="redirectToCheckout"
+    @click="handleSubmit"
   >
-    <slot v-if="!loading">
+    <template v-if="!loading">
       {{ buttonText }}
-    </slot>
-    <slot
-      v-else
-      name="loading"
-    >
+    </template>
+    <template v-else>
       <span class="vue-stripe-loading-spinner" />
       {{ loadingText }}
-    </slot>
+    </template>
   </button>
 </template>
 
 <style scoped>
+.vue-stripe-checkout-wrapper {
+  display: contents;
+}
+
 .vue-stripe-checkout-button {
   background-color: #635bff;
   color: white;
