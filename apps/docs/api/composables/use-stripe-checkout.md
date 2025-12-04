@@ -2,45 +2,46 @@
 
 A composable for programmatically redirecting users to Stripe's hosted checkout page.
 
+::: warning @stripe/stripe-js v8.x Compatibility
+In `@stripe/stripe-js` v8.x, the `redirectToCheckout` method was removed. Use `redirectToUrl()` or `redirectToCheckout({ url })` with the Checkout Session URL from your backend instead.
+:::
+
 ## What is useStripeCheckout?
 
-A composable that wraps `stripe.redirectToCheckout()` with built-in state management:
+A composable for Stripe Checkout with built-in state management:
 
 | Capability | Description |
 |------------|-------------|
-| **Checkout Redirect** | Wraps `stripe.redirectToCheckout()` with error handling |
+| **URL Redirect** | Redirect using session URL (v8.x compatible) |
+| **Legacy Redirect** | Wraps `stripe.redirectToCheckout()` (v7.x only) |
 | **Loading State** | Tracks whether redirect is in progress |
 | **Error State** | Captures and exposes checkout errors |
-| **Flexible Options** | Supports session-based and price-based checkout |
 
 ## How It Works
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Component calls useStripeCheckout()                        │
-│  Returns { redirectToCheckout, loading, error }             │
+│  Returns { redirectToCheckout, redirectToUrl, loading, error }
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  User triggers checkout, calls redirectToCheckout()         │
+│  User triggers checkout                                     │
 │                                                             │
-│  await redirectToCheckout({                                 │
-│    sessionId: 'cs_test_xxx'                                 │
-│  })                                                         │
+│  // v8.x: URL-based (recommended)                           │
+│  redirectToUrl('https://checkout.stripe.com/...')           │
 │  // OR                                                      │
-│  await redirectToCheckout({                                 │
-│    lineItems: [{ price: 'price_xxx', quantity: 1 }],        │
-│    mode: 'payment',                                         │
-│    successUrl: '...',                                       │
-│    cancelUrl: '...'                                         │
-│  })                                                         │
+│  await redirectToCheckout({ url: 'https://checkout...' })   │
+│                                                             │
+│  // v7.x: Session ID-based (legacy)                         │
+│  await redirectToCheckout({ sessionId: 'cs_test_xxx' })     │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Composable sets loading.value = true                       │
-│  Calls stripe.redirectToCheckout()                          │
+│  Redirects via window.location.replace() or redirectToCheckout
 └─────────────────────────────────────────────────────────────┘
                               │
               ┌───────────────┴───────────────┐
@@ -60,6 +61,39 @@ This composable must be called within a component that is a descendant of `VueSt
 :::
 
 ## Usage
+
+### v8.x (Recommended)
+
+```vue
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useStripeCheckout } from '@vue-stripe/vue-stripe'
+
+const { redirectToUrl, loading, error } = useStripeCheckout()
+const sessionUrl = ref('')
+
+onMounted(async () => {
+  const response = await fetch('/api/create-checkout-session', {
+    method: 'POST',
+    body: JSON.stringify({ priceId: 'price_xxx' })
+  })
+  const data = await response.json()
+  sessionUrl.value = data.url // Backend returns session URL
+})
+
+const handleCheckout = () => {
+  redirectToUrl(sessionUrl.value)
+}
+</script>
+
+<template>
+  <button @click="handleCheckout" :disabled="loading || !sessionUrl">
+    {{ loading ? 'Redirecting...' : 'Checkout' }}
+  </button>
+</template>
+```
+
+### v7.x (Legacy)
 
 ```vue
 <script setup>
@@ -83,7 +117,8 @@ const handleCheckout = async () => {
 
 ```ts
 interface UseStripeCheckoutReturn {
-  redirectToCheckout: (options: RedirectToCheckoutOptions) => Promise<void>
+  redirectToCheckout: (options: CheckoutRedirectOptions | LegacyCheckoutOptions) => Promise<void>
+  redirectToUrl: (url: string) => void
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
@@ -91,56 +126,85 @@ interface UseStripeCheckoutReturn {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `redirectToCheckout` | `Function` | Async function to redirect to Stripe Checkout |
+| `redirectToUrl` | `(url: string) => void` | Redirect using session URL **(v8.x, recommended)** |
+| `redirectToCheckout` | `Function` | Redirect with options (supports both v7.x and v8.x) |
 | `loading` | `Readonly<Ref<boolean>>` | Whether redirect is in progress |
 | `error` | `Readonly<Ref<string \| null>>` | Error message from the last redirect attempt |
 
 ## redirectToCheckout Options
 
-The composable accepts the standard Stripe `RedirectToCheckoutOptions`:
-
-### Session-Based Options
+### URL-Based Options (v8.x Compatible)
 
 ```ts
-interface SessionOptions {
-  /** Checkout Session ID from your backend (required) */
-  sessionId: string
+interface CheckoutRedirectOptions {
+  /** Checkout Session URL from your backend */
+  url: string
 }
 ```
 
-### Price-Based Options
+### Session-Based Options (v7.x Only)
 
 ```ts
-interface PriceOptions {
+interface LegacyCheckoutOptions {
+  /** Checkout Session ID from your backend */
+  sessionId?: string
+
   /** Line items to purchase */
-  lineItems: Array<{
+  lineItems?: Array<{
     price: string
     quantity: number
   }>
 
   /** Checkout mode */
-  mode: 'payment' | 'subscription' | 'setup'
+  mode?: 'payment' | 'subscription' | 'setup'
 
   /** Redirect URL after successful payment */
-  successUrl: string
+  successUrl?: string
 
   /** Redirect URL when user cancels */
-  cancelUrl: string
-
-  /** Pre-fill customer email (optional) */
-  customerEmail?: string
-
-  /** Your reference ID (optional) */
-  clientReferenceId?: string
-
-  /** Button text on checkout page (optional) */
-  submitType?: 'auto' | 'book' | 'donate' | 'pay'
+  cancelUrl?: string
 }
 ```
 
+::: warning v7.x Only
+`sessionId`, `lineItems`, and other legacy options require `stripe.redirectToCheckout()` which was removed in `@stripe/stripe-js` v8.x. Use `url` or `redirectToUrl()` for v8.x compatibility.
+:::
+
 ## Examples
 
-### Session-Based Checkout
+### URL-Based Checkout (v8.x)
+
+```vue
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useStripeCheckout } from '@vue-stripe/vue-stripe'
+
+const { redirectToUrl, loading, error } = useStripeCheckout()
+const sessionUrl = ref('')
+
+onMounted(async () => {
+  const response = await fetch('/api/create-checkout-session', {
+    method: 'POST',
+    body: JSON.stringify({ priceId: 'price_xxx' })
+  })
+  const data = await response.json()
+  sessionUrl.value = data.url // Backend returns session URL
+})
+
+const handleCheckout = () => {
+  redirectToUrl(sessionUrl.value)
+}
+</script>
+
+<template>
+  <button @click="handleCheckout" :disabled="loading || !sessionUrl">
+    {{ loading ? 'Redirecting...' : 'Checkout' }}
+  </button>
+  <p v-if="error" class="error">{{ error }}</p>
+</template>
+```
+
+### Session-Based Checkout (v7.x)
 
 ```vue
 <script setup>
@@ -175,37 +239,6 @@ const handleCheckout = async () => {
     {{ loading ? 'Redirecting...' : 'Checkout' }}
   </button>
   <p v-if="error" class="error">{{ error }}</p>
-</template>
-```
-
-### Price-Based Checkout
-
-```vue
-<script setup>
-import { useStripeCheckout } from '@vue-stripe/vue-stripe'
-
-const { redirectToCheckout, loading, error } = useStripeCheckout()
-
-const handleSubscribe = async () => {
-  try {
-    await redirectToCheckout({
-      lineItems: [
-        { price: 'price_monthly_pro', quantity: 1 }
-      ],
-      mode: 'subscription',
-      successUrl: 'https://example.com/welcome',
-      cancelUrl: 'https://example.com/pricing'
-    })
-  } catch (err) {
-    console.error('Subscription checkout failed:', err.message)
-  }
-}
-</script>
-
-<template>
-  <button @click="handleSubscribe" :disabled="loading">
-    {{ loading ? 'Starting...' : 'Subscribe Now' }}
-  </button>
 </template>
 ```
 
@@ -436,7 +469,11 @@ app.post('/create-checkout-session', async (req, res) => {
     cancel_url: 'https://example.com/cancel'
   })
 
-  res.json({ sessionId: session.id })
+  // v8.x: Return URL (recommended)
+  res.json({ url: session.url })
+
+  // v7.x: Return session ID (legacy)
+  // res.json({ sessionId: session.id })
 })
 ```
 
