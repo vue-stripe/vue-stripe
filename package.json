@@ -17,6 +17,7 @@
     "docs:dev": "turbo run docs:dev",
     "docs:build": "turbo run docs:build",
     "playground:dev": "turbo run dev --filter=@vue-stripe/playground",
+    "backend:dev": "turbo run dev --filter=@vue-stripe/backend",
     "vue-stripe:build": "turbo run build --filter=@vue-stripe/vue-stripe",
     "vue-stripe:test": "turbo run test --filter=@vue-stripe/vue-stripe",
     "changeset": "changeset",

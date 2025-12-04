@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Vue Stripe Light Theme */
+    --background: 0 0% 100%;
+    --foreground: 240 5% 26%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 5% 26%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 5% 26%;
+
+    /* Stripe Purple as primary */
+    --primary: 243 100% 68%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Vue Stripe Yellow as secondary */
+    --secondary: 45 98% 69%;
+    --secondary-foreground: 240 5% 26%;
+
+    --muted: 210 20% 98%;
+    --muted-foreground: 240 4% 46%;
+
+    /* Vue Green as accent */
+    --accent: 160 47% 49%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 243 100% 68%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Vue Stripe Dark Theme */
+    --background: 240 6% 12%;
+    --foreground: 60 9% 98%;
+
+    --card: 240 5% 14%;
+    --card-foreground: 60 9% 98%;
+
+    --popover: 240 5% 14%;
+    --popover-foreground: 60 9% 98%;
+
+    /* Stripe Purple stays as primary in dark */
+    --primary: 243 100% 68%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Vue Stripe Yellow - brighter in dark mode */
+    --secondary: 45 98% 69%;
+    --secondary-foreground: 240 5% 10%;
+
+    --muted: 240 4% 16%;
+    --muted-foreground: 60 5% 64%;
+
+    /* Vue Green as accent */
+    --accent: 160 47% 49%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 4% 22%;
+    --input: 240 4% 22%;
+    --ring: 45 98% 69%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
