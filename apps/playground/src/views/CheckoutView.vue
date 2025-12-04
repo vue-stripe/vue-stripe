@@ -14,10 +14,11 @@ const stripeConfig = inject<{
 
 const publishableKey = computed(() => stripeConfig?.publishableKey || '')
 
-// Session-based checkout
+// Session-based checkout (v7.x with sessionId, or v8.x with sessionUrl)
 const sessionId = ref('')
+const sessionUrl = ref('')
 
-// Price-based checkout
+// Price-based checkout (v7.x only, deprecated in v8.x)
 const priceId = ref('')
 const mode = ref<'payment' | 'subscription'>('payment')
 
@@ -36,8 +37,8 @@ const checkoutResult = ref<'success' | 'cancel' | null>(null)
 const checkoutError = ref<string | null>(null)
 const isRedirecting = ref(false)
 
-// Mode toggle
-const checkoutMode = ref<'session' | 'price'>('session')
+// Mode toggle: 'url' for v8.x compatible, 'session' for v7.x sessionId, 'price' for v7.x priceId
+const checkoutMode = ref<'url' | 'session' | 'price'>('url')
 
 // Check for result param on mount
 onMounted(() => {
@@ -81,11 +82,19 @@ const onCheckoutError = (error: Error) => {
 
 // Computed: Is form valid?
 const isFormValid = computed(() => {
+  if (checkoutMode.value === 'url') {
+    return sessionUrl.value.startsWith('https://checkout.stripe.com/')
+  }
   if (checkoutMode.value === 'session') {
     return sessionId.value.startsWith('cs_')
   }
   return priceId.value.startsWith('price_')
 })
+
+// Handle before-redirect event (v8.x)
+const onBeforeRedirect = (data: { url: string }) => {
+  logEvent('before-redirect', `Redirecting to: ${data.url.substring(0, 50)}...`)
+}
 
 // Clear result
 const clearResult = () => {
@@ -133,25 +142,67 @@ const clearResult = () => {
         <div class="mode-selector">
           <div class="mode-tabs">
             <button
+              :class="['mode-tab', { active: checkoutMode === 'url' }]"
+              @click="checkoutMode = 'url'"
+            >
+              URL-Based (v8.x)
+            </button>
+            <button
               :class="['mode-tab', { active: checkoutMode === 'session' }]"
               @click="checkoutMode = 'session'"
             >
-              Session-Based
+              Session ID (v7.x)
             </button>
             <button
               :class="['mode-tab', { active: checkoutMode === 'price' }]"
               @click="checkoutMode = 'price'"
             >
-              Price-Based
+              Price-Based (v7.x)
             </button>
           </div>
         </div>
 
-        <!-- Session-Based Checkout -->
-        <div v-if="checkoutMode === 'session'" class="form-section mt-4">
-          <h4>Session-Based Checkout</h4>
+        <!-- URL-Based Checkout (v8.x compatible) -->
+        <div v-if="checkoutMode === 'url'" class="form-section mt-4">
+          <h4>URL-Based Checkout <span class="badge badge-success">v8.x Compatible</span></h4>
           <p class="text-secondary text-sm">
-            Use a pre-created Checkout Session from your backend.
+            Use the Checkout Session URL from your backend. This is the recommended approach
+            for @stripe/stripe-js v8.x where <code>redirectToCheckout</code> is removed.
+          </p>
+
+          <div class="form-group mt-4">
+            <label class="form-label">Session URL</label>
+            <input
+              v-model="sessionUrl"
+              type="text"
+              placeholder="https://checkout.stripe.com/c/pay/..."
+              class="form-input form-input-mono"
+              :class="{ 'is-valid': sessionUrl.startsWith('https://checkout.stripe.com/') }"
+            />
+          </div>
+
+          <div class="instructions mt-4">
+            <h5>How to get a Session URL:</h5>
+            <ol>
+              <li>Create a Checkout Session using Stripe CLI:
+                <pre class="code-block">stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{ successUrl }}" --cancel-url "{{ cancelUrl }}"</pre>
+              </li>
+              <li>Copy the <code>url</code> from the response (starts with <code>https://checkout.stripe.com/</code>)</li>
+            </ol>
+          </div>
+
+          <div class="alert alert-info mt-4">
+            <strong>v8.x Migration:</strong> In @stripe/stripe-js v8.x, <code>redirectToCheckout</code> was removed.
+            Your server should return the session URL directly, which is then used for a simple <code>window.location.replace()</code> redirect.
+          </div>
+        </div>
+
+        <!-- Session ID Checkout (v7.x) -->
+        <div v-if="checkoutMode === 'session'" class="form-section mt-4">
+          <h4>Session ID Checkout <span class="badge badge-warning">v7.x Only</span></h4>
+          <p class="text-secondary text-sm">
+            Use a pre-created Checkout Session ID. This uses <code>redirectToCheckout</code> which
+            is deprecated in v8.x.
           </p>
 
           <div class="form-group mt-4">
@@ -174,13 +225,19 @@ const clearResult = () => {
               <li>Copy the <code>id</code> from the response (starts with <code>cs_</code>)</li>
             </ol>
           </div>
+
+          <div class="alert alert-warning mt-4">
+            <strong>Deprecated:</strong> This method uses <code>redirectToCheckout</code> which is removed in @stripe/stripe-js v8.x.
+            Use URL-Based checkout for v8.x compatibility.
+          </div>
         </div>
 
-        <!-- Price-Based Checkout -->
+        <!-- Price-Based Checkout (v7.x only) -->
         <div v-if="checkoutMode === 'price'" class="form-section mt-4">
-          <h4>Price-Based Checkout</h4>
+          <h4>Price-Based Checkout <span class="badge badge-warning">v7.x Only</span></h4>
           <p class="text-secondary text-sm">
-            Create a checkout session dynamically using a Price ID.
+            Create a checkout session dynamically using a Price ID. This uses <code>redirectToCheckout</code>
+            which is deprecated in v8.x.
           </p>
 
           <div class="form-group mt-4">
@@ -237,10 +294,25 @@ const clearResult = () => {
         <div class="checkout-button-wrapper mt-5">
           <br>
           <VueStripeProvider :publishable-key="publishableKey">
+            <!-- URL-Based (v8.x compatible) -->
             <VueStripeCheckout
-              v-if="checkoutMode === 'session'"
+              v-if="checkoutMode === 'url'"
+              :session-url="sessionUrl"
+              button-text="Checkout with URL (v8.x)"
+              loading-text="Redirecting..."
+              :disabled="!isFormValid"
+              button-class="checkout-button"
+              @click="onCheckoutClick"
+              @success="onCheckoutSuccess"
+              @error="onCheckoutError"
+              @before-redirect="onBeforeRedirect"
+            />
+
+            <!-- Session ID (v7.x) -->
+            <VueStripeCheckout
+              v-else-if="checkoutMode === 'session'"
               :session-id="sessionId"
-              button-text="Checkout with Session"
+              button-text="Checkout with Session ID (v7.x)"
               loading-text="Redirecting..."
               :disabled="!isFormValid"
               button-class="checkout-button"
@@ -249,13 +321,14 @@ const clearResult = () => {
               @error="onCheckoutError"
             />
 
+            <!-- Price-Based (v7.x) -->
             <VueStripeCheckout
               v-else
               :price-id="priceId"
               :mode="mode"
               :success-url="successUrl"
               :cancel-url="cancelUrl"
-              button-text="Checkout with Price"
+              button-text="Checkout with Price (v7.x)"
               loading-text="Redirecting..."
               :disabled="!isFormValid"
               button-class="checkout-button"
@@ -628,6 +701,27 @@ const clearResult = () => {
 
 .btn-secondary:hover:not(.active) {
   background: var(--color-bg-secondary);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  margin-left: var(--space-2);
+  vertical-align: middle;
+}
+
+.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
 }
 
 @media (max-width: 768px) {

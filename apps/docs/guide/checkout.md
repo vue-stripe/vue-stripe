@@ -2,6 +2,10 @@
 
 Redirect users to Stripe's hosted checkout page for a quick, secure payment experience without building custom payment UI.
 
+::: warning @stripe/stripe-js v8.x Compatibility
+In `@stripe/stripe-js` v8.x, the `redirectToCheckout` method was removed. Your backend should return the session URL directly, which is then used for `window.location.replace()`. See the [v8.x migration guide](/api/components/stripe-checkout#v8-x-migration) for details.
+:::
+
 ## Why Use Checkout?
 
 | Feature | Benefit |
@@ -33,19 +37,19 @@ Choose Checkout when you want the fastest integration with minimal code.
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  1. Your backend creates a Checkout Session                 │
-│     POST /v1/checkout/sessions → { id: 'cs_xxx' }           │
+│     POST /v1/checkout/sessions → { url: 'https://...' }     │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  2. Frontend receives session ID                            │
+│  2. Frontend receives session URL                           │
 │     Pass to StripeCheckout component or useStripeCheckout   │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  3. User clicks checkout button                             │
-│     redirectToCheckout({ sessionId: 'cs_xxx' })             │
+│     window.location.replace(sessionUrl)                     │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -102,7 +106,8 @@ app.post('/create-checkout-session', async (req, res) => {
     cancel_url: 'https://example.com/cancel'
   })
 
-  res.json({ sessionId: session.id })
+  // v8.x: Return URL (recommended)
+  res.json({ url: session.url })
 })
 ```
 
@@ -112,12 +117,12 @@ app.post('/create-checkout-session', async (req, res) => {
 <script setup>
 import { ref, onMounted } from 'vue'
 import {
-  StripeProvider,
-  StripeCheckout
+  VueStripeProvider,
+  VueStripeCheckout
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const sessionId = ref('')
+const sessionUrl = ref('')
 const loading = ref(true)
 
 // Fetch session on mount
@@ -128,7 +133,7 @@ onMounted(async () => {
     body: JSON.stringify({ priceId: 'price_xxx' })
   })
   const data = await response.json()
-  sessionId.value = data.sessionId
+  sessionUrl.value = data.url
   loading.value = false
 })
 </script>
@@ -138,7 +143,7 @@ onMounted(async () => {
 
   <VueStripeProvider v-else :publishable-key="publishableKey">
     <VueStripeCheckout
-      :session-id="sessionId"
+      :session-url="sessionUrl"
       button-text="Pay $49.99"
       @error="(err) => console.error(err.message)"
     />
@@ -154,7 +159,7 @@ For more control, use `useStripeCheckout` instead of the component:
 <script setup>
 import { ref, onMounted } from 'vue'
 import {
-  StripeProvider,
+  VueStripeProvider,
   useStripeCheckout
 } from '@vue-stripe/vue-stripe'
 
@@ -174,22 +179,18 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 import { ref } from 'vue'
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 
-const { redirectToCheckout, loading, error } = useStripeCheckout()
+const { redirectToUrl, loading, error } = useStripeCheckout()
 
 const handleCheckout = async () => {
-  // Create session
+  // Create session on backend
   const response = await fetch('/api/create-checkout-session', {
     method: 'POST',
     body: JSON.stringify({ product: 'pro_plan' })
   })
-  const { sessionId } = await response.json()
+  const { url } = await response.json()
 
-  // Redirect to checkout
-  try {
-    await redirectToCheckout({ sessionId })
-  } catch (err) {
-    console.error('Checkout failed:', err.message)
-  }
+  // Redirect to checkout (v8.x compatible)
+  redirectToUrl(url)
 }
 </script>
 
@@ -229,7 +230,7 @@ const session = await stripe.checkout.sessions.create({
       <p>$29/month</p>
 
       <VueStripeCheckout
-        :session-id="proSessionId"
+        :session-url="proSessionUrl"
         button-text="Subscribe to Pro"
       />
     </div>
@@ -237,9 +238,23 @@ const session = await stripe.checkout.sessions.create({
 </template>
 ```
 
-## Session-Based vs Price-Based
+## URL-Based vs Session-Based vs Price-Based
 
-### Session-Based (Recommended)
+### URL-Based (Recommended for v8.x)
+
+Create session on backend, pass session URL to frontend:
+
+```vue
+<VueStripeCheckout :session-url="sessionUrl" />
+```
+
+**Pros:**
+- Works with `@stripe/stripe-js` v8.x
+- Full control over session options
+- Most secure (server-side session creation)
+- Supports all Checkout features
+
+### Session-Based (v7.x Legacy)
 
 Create session on backend, pass session ID to frontend:
 
@@ -250,9 +265,11 @@ Create session on backend, pass session ID to frontend:
 **Pros:**
 - Full control over session options
 - More secure (server-side)
-- Supports all Checkout features
 
-### Price-Based (Simple)
+**Cons:**
+- Requires `@stripe/stripe-js` v7.x (uses deprecated `redirectToCheckout`)
+
+### Price-Based (v7.x Legacy, Deprecated)
 
 Create session client-side with just a Price ID:
 
@@ -270,6 +287,7 @@ Create session client-side with just a Price ID:
 - Quick prototyping
 
 **Cons:**
+- Requires `@stripe/stripe-js` v7.x
 - Limited options
 - Less secure
 - Not recommended for production
@@ -349,15 +367,14 @@ const session = await stripe.checkout.sessions.create({
 
 ### Button Styling
 
+Use `button-class` to style the default button:
+
 ```vue
 <VueStripeCheckout
-  :session-id="sessionId"
+  :session-url="sessionUrl"
   button-class="my-checkout-button"
->
-  <span class="button-content">
-    <CreditCardIcon /> Complete Purchase
-  </span>
-</VueStripeCheckout>
+  button-text="Complete Purchase"
+/>
 
 <style>
 .my-checkout-button {
@@ -368,6 +385,20 @@ const session = await stripe.checkout.sessions.create({
 }
 </style>
 ```
+
+Or replace the button entirely with your own:
+
+```vue
+<VueStripeCheckout :session-url="sessionUrl">
+  <button class="my-custom-button">
+    <CreditCardIcon /> Complete Purchase
+  </button>
+</VueStripeCheckout>
+```
+
+::: tip Automatic Click Handling
+When you pass custom content, clicking it automatically triggers checkout. No need to wire up click handlers manually.
+:::
 
 ## Error Handling
 

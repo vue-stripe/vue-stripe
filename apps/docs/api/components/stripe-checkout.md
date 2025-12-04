@@ -6,6 +6,10 @@ A button component that redirects users to Stripe's hosted checkout page for com
 StripeCheckout requires only a `VueStripeProvider` wrapper - no `VueStripeElements` or `clientSecret` needed. It's the simplest way to accept payments with Stripe.
 :::
 
+::: warning @stripe/stripe-js v8.x Compatibility
+In `@stripe/stripe-js` v8.x, the `redirectToCheckout` method was removed. Use the `sessionUrl` prop with the Checkout Session URL from your backend instead of `sessionId`. See [v8.x Migration](#v8-x-migration) below.
+:::
+
 ## What is Stripe Checkout?
 
 Stripe Checkout provides a hosted, pre-built payment page:
@@ -22,19 +26,20 @@ Stripe Checkout provides a hosted, pre-built payment page:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  1. Create Checkout Session on your backend                 │
-│     Returns: session_id (cs_...)                            │
+│     Returns: { url: 'https://checkout.stripe.com/...' }     │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  2. StripeCheckout component renders a button               │
-│     Pass: sessionId OR priceId + mode                       │
+│     Pass: sessionUrl (v8.x) or sessionId (v7.x legacy)      │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  3. User clicks the checkout button                         │
-│     StripeCheckout calls redirectToCheckout()               │
+│     v8.x: window.location.replace(sessionUrl)               │
+│     v7.x: stripe.redirectToCheckout({ sessionId })          │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -56,15 +61,15 @@ Stripe Checkout provides a hosted, pre-built payment page:
 
 ## Usage
 
-### Session-Based Checkout (Recommended)
+### URL-Based Checkout (Recommended for v8.x)
 
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeCheckout
-      :session-id="sessionId"
+      :session-url="sessionUrl"
       button-text="Pay $49.99"
-      @click="onCheckoutClick"
+      @checkout="onCheckoutClick"
       @error="onCheckoutError"
     />
   </VueStripeProvider>
@@ -75,7 +80,7 @@ import { ref, onMounted } from 'vue'
 import { VueStripeProvider, VueStripeCheckout } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const sessionId = ref('')
+const sessionUrl = ref('')
 
 onMounted(async () => {
   // Create Checkout Session on your server
@@ -85,7 +90,7 @@ onMounted(async () => {
     body: JSON.stringify({ priceId: 'price_xxx' })
   })
   const data = await response.json()
-  sessionId.value = data.sessionId
+  sessionUrl.value = data.url // Backend returns session URL
 })
 
 const onCheckoutClick = () => {
@@ -127,8 +132,9 @@ const cancelUrl = 'https://example.com/cancel'
 
 | Prop | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
-| `sessionId` | `string` | No* | - | Checkout Session ID (starts with `cs_`) |
-| `priceId` | `string` | No* | - | Price ID for client-side session creation |
+| `sessionUrl` | `string` | No* | - | Checkout Session URL from Stripe API **(v8.x compatible, recommended)** |
+| `sessionId` | `string` | No* | - | Checkout Session ID (starts with `cs_`) - v7.x only |
+| `priceId` | `string` | No* | - | Price ID for client-side session creation - v7.x only, deprecated |
 | `mode` | `'payment' \| 'subscription'` | No | `'payment'` | Checkout mode (only with `priceId`) |
 | `successUrl` | `string` | No | `window.location.origin + '/success'` | Redirect URL after successful payment |
 | `cancelUrl` | `string` | No | `window.location.origin + '/cancel'` | Redirect URL when user cancels |
@@ -139,17 +145,17 @@ const cancelUrl = 'https://example.com/cancel'
 | `loadingText` | `string` | No | `'Redirecting...'` | Text shown during redirect |
 | `disabled` | `boolean` | No | `false` | Disable the checkout button |
 | `buttonClass` | `string` | No | `'vue-stripe-checkout-button'` | Custom CSS class for the button |
-| `options` | `Partial<RedirectToCheckoutOptions>` | No | - | Additional Stripe options |
 
-*Either `sessionId` or `priceId` is required.
+*One of `sessionUrl`, `sessionId`, or `priceId` is required. For v8.x compatibility, use `sessionUrl`.
 
 ## Events
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@click` | - | Emitted when checkout button is clicked |
+| `@checkout` | - | Emitted when checkout is initiated (button clicked or `checkout()` called) |
 | `@success` | - | Emitted when redirect initiates successfully |
 | `@error` | `Error` | Emitted when checkout fails |
+| `@before-redirect` | `{ url: string }` | Emitted before redirecting (only with `sessionUrl`) |
 
 ### Error Event
 
@@ -157,37 +163,86 @@ const cancelUrl = 'https://example.com/cancel'
 interface CheckoutError extends Error {
   message: string
   // Common error messages:
-  // - "sessionId or priceId is required"
+  // - "Either sessionUrl, sessionId, or priceId is required"
   // - "Stripe not initialized"
+  // - "redirectToCheckout is not available" (v8.x)
   // - "Session expired"
 }
 ```
+
+## Exposed Methods
+
+The component exposes a `checkout` method via template ref for programmatic control:
+
+```vue
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeCheckout
+      ref="checkoutRef"
+      :session-url="sessionUrl"
+    />
+    <button @click="triggerCheckout">Custom Trigger</button>
+  </VueStripeProvider>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const checkoutRef = ref()
+
+const triggerCheckout = () => {
+  checkoutRef.value.checkout()
+}
+</script>
+```
+
+| Method | Description |
+|--------|-------------|
+| `checkout()` | Programmatically trigger the checkout redirect |
+
+| Exposed State | Type | Description |
+|---------------|------|-------------|
+| `loading` | `Ref<boolean>` | Whether checkout is in progress |
 
 ## Slots
 
 ### Default Slot
 
-Customize the button content:
+Replace the entire button with your own implementation. The component automatically handles click events, so you don't need to wire up checkout manually:
 
 ```vue
-<VueStripeCheckout :session-id="sessionId">
-  <span class="custom-checkout">
-    <IconCart /> Complete Purchase
-  </span>
+<!-- Simple: Your button automatically triggers checkout on click -->
+<VueStripeCheckout :session-url="sessionUrl">
+  <button class="my-custom-button">Pay Now</button>
 </VueStripeCheckout>
 ```
 
-### Loading Slot
-
-Customize the loading state:
+For more control, use scoped slot props:
 
 ```vue
-<VueStripeCheckout :session-id="sessionId">
-  <template #loading>
-    <Spinner /> Please wait...
+<!-- Advanced: Access loading/disabled state via scoped slot -->
+<VueStripeCheckout :session-url="sessionUrl">
+  <template #default="{ checkout, loading, disabled }">
+    <MyCustomButton
+      :loading="loading"
+      :disabled="disabled"
+      @click="checkout"
+    >
+      {{ loading ? 'Processing...' : 'Pay Now' }}
+    </MyCustomButton>
   </template>
 </VueStripeCheckout>
 ```
+
+| Slot Prop | Type | Description |
+|-----------|------|-------------|
+| `checkout` | `() => Promise<void>` | Function to trigger checkout |
+| `loading` | `boolean` | Whether checkout is in progress |
+| `disabled` | `boolean` | Whether checkout is disabled |
+
+::: tip Automatic Click Handling
+When you pass custom content without using scoped slot syntax, clicking anywhere inside the slot content will trigger checkout. For fine-grained control over which element triggers checkout, use the scoped slot with the `checkout` function.
+:::
 
 ## Examples
 
@@ -370,15 +425,16 @@ const handleError = (error: Error) => {
 }
 ```
 
-## Session-Based vs Price-Based
+## URL-Based vs Session-Based vs Price-Based
 
-| Aspect | Session-Based | Price-Based |
-|--------|---------------|-------------|
-| **Setup** | Requires backend | Frontend only |
-| **Flexibility** | Full control over session options | Limited to basic options |
-| **Security** | More secure (server-side) | Less secure (client-side) |
-| **Use Case** | Production apps | Prototypes, simple products |
-| **Recommended** | Yes | For testing only |
+| Aspect | URL-Based (v8.x) | Session-Based (v7.x) | Price-Based (v7.x) |
+|--------|------------------|----------------------|-------------------|
+| **Setup** | Requires backend | Requires backend | Frontend only |
+| **Flexibility** | Full control | Full control | Limited options |
+| **Security** | Most secure | Secure | Less secure |
+| **Use Case** | Production apps | Legacy v7.x apps | Prototypes only |
+| **Recommended** | ✅ Yes | For v7.x only | ❌ No |
+| **v8.x Compatible** | ✅ Yes | ❌ No | ❌ No |
 
 ## Checkout vs Payment Element
 
@@ -392,6 +448,56 @@ const handleError = (error: Error) => {
 
 Choose **Checkout** when you want the fastest integration with minimal code.
 Choose **Payment Element** when you need full UI customization.
+
+## v8.x Migration
+
+In `@stripe/stripe-js` v8.x, the `redirectToCheckout` method was removed. Here's how to migrate:
+
+### Before (v7.x)
+
+```vue
+<!-- Using session ID with redirectToCheckout -->
+<VueStripeCheckout :session-id="sessionId" />
+```
+
+```js
+// Backend returns session ID
+res.json({ sessionId: session.id })
+```
+
+### After (v8.x)
+
+```vue
+<!-- Using session URL with direct redirect -->
+<VueStripeCheckout :session-url="sessionUrl" />
+```
+
+```js
+// Backend returns session URL
+res.json({ url: session.url })
+```
+
+### Version Compatibility
+
+| Prop | @stripe/stripe-js v7.x | @stripe/stripe-js v8.x |
+|------|------------------------|------------------------|
+| `sessionUrl` | ✅ Works | ✅ Works (recommended) |
+| `sessionId` | ✅ Works | ❌ Error |
+| `priceId` | ✅ Works (deprecated) | ❌ Error |
+
+### Backend Changes
+
+Update your backend to return the session URL:
+
+```js
+const session = await stripe.checkout.sessions.create({
+  // ... options
+})
+
+// v7.x: res.json({ sessionId: session.id })
+// v8.x:
+res.json({ url: session.url })
+```
 
 ## See Also
 

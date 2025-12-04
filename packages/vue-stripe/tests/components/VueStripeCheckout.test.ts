@@ -76,7 +76,7 @@ describe('VueStripeCheckout', () => {
     expect(button.attributes('disabled')).toBeDefined()
   })
 
-  it('should emit error when sessionId and priceId are missing', async () => {
+  it('should emit error when sessionUrl, sessionId, and priceId are missing', async () => {
     const wrapper = await mountWithProvider({})
 
     const checkoutComponent = wrapper.findComponent(VueStripeCheckout)
@@ -87,10 +87,10 @@ describe('VueStripeCheckout', () => {
 
     expect(checkoutComponent.emitted('error')).toBeTruthy()
     const errorEvent = checkoutComponent.emitted('error')![0][0] as Error
-    expect(errorEvent.message).toContain('sessionId or priceId is required')
+    expect(errorEvent.message).toContain('Either sessionUrl, sessionId, or priceId is required')
   })
 
-  it('should emit click event when button is clicked', async () => {
+  it('should emit checkout event when button is clicked', async () => {
     const wrapper = await mountWithProvider({ sessionId: 'cs_test_123' })
 
     const checkoutComponent = wrapper.findComponent(VueStripeCheckout)
@@ -99,7 +99,7 @@ describe('VueStripeCheckout', () => {
     await button.trigger('click')
     await flushPromises()
 
-    expect(checkoutComponent.emitted('click')).toBeTruthy()
+    expect(checkoutComponent.emitted('checkout')).toBeTruthy()
   })
 
   it('should call redirectToCheckout with sessionId', async () => {
@@ -204,14 +204,17 @@ describe('VueStripeCheckout', () => {
     expect(wrapper.find('button').exists()).toBe(false)
   })
 
-  it('should render custom slot content', async () => {
+  it('should render custom slot content with scoped slot props', async () => {
     const wrapper = await mountWithProvider(
       { sessionId: 'cs_test_123' },
-      { default: () => h('span', { class: 'custom-content' }, 'Custom Button Text') }
+      {
+        default: ({ checkout, loading }: { checkout: () => void; loading: boolean }) =>
+          h('button', { class: 'custom-button', onClick: checkout }, loading ? 'Loading...' : 'Custom Pay')
+      }
     )
 
-    expect(wrapper.find('.custom-content').exists()).toBe(true)
-    expect(wrapper.text()).toContain('Custom Button Text')
+    expect(wrapper.find('.custom-button').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Custom Pay')
   })
 
   it('should include customerEmail when provided', async () => {
