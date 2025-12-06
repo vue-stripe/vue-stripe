@@ -76,6 +76,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     hostname: 'https://vuestripe.com'
   },
 
+  lastUpdated: true,
+
   themeConfig: {
     logo: { src: '/vue-stripe-logo-variant-1-small.png', alt: 'Vue Stripe' },
 
