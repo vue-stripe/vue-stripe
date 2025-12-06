@@ -20,45 +20,15 @@ Payment Element is Stripe's modern, unified payment interface that:
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Customer lands on checkout page                            │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  PaymentElement renders inside StripeElements               │
-│  (Receives Elements instance + clientSecret from context)   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Stripe determines available payment methods based on:      │
-│  - PaymentIntent currency and amount                        │
-│  - Customer's location and device                           │
-│  - Your Dashboard payment method settings                   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Customer fills payment details                             │
-│  (Emits @change with { complete, value } on each input)    │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  On submit: Call stripe.confirmPayment()                    │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  SUCCESS                │     │  REQUIRES ACTION            │
-│                         │     │                             │
-│  PaymentIntent status:  │     │  Redirect to 3D Secure,     │
-│  "succeeded"            │     │  bank auth, or other flow   │
-│                         │     │  then return to return_url  │
-└─────────────────────────┘     └─────────────────────────────┘
+```mermaid
+flowchart TD
+    A["Customer lands on checkout page"] --> B["PaymentElement renders inside StripeElements<br/>(Receives Elements instance + clientSecret from context)"]
+    B --> C["Stripe determines available payment methods based on:<br/>• PaymentIntent currency and amount<br/>• Customer's location and device<br/>• Your Dashboard payment method settings"]
+    C --> D["Customer fills payment details<br/>(Emits @change with { complete, value } on each input)"]
+    D --> E["On submit: Call stripe.confirmPayment()"]
+    E --> F{Result?}
+    F -->|Success| G["<b>SUCCESS</b><br/>PaymentIntent status: 'succeeded'"]
+    F -->|Requires Action| H["<b>REQUIRES ACTION</b><br/>Redirect to 3D Secure, bank auth,<br/>or other flow then return to return_url"]
 ```
 
 ## Usage

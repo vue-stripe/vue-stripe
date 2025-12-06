@@ -23,40 +23,14 @@ Stripe Checkout provides a hosted, pre-built payment page:
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  1. Create Checkout Session on your backend                 │
-│     Returns: { url: 'https://checkout.stripe.com/...' }     │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  2. StripeCheckout component renders a button               │
-│     Pass: sessionUrl (v8.x) or sessionId (v7.x legacy)      │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  3. User clicks the checkout button                         │
-│     v8.x: window.location.replace(sessionUrl)               │
-│     v7.x: stripe.redirectToCheckout({ sessionId })          │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  4. User redirected to Stripe's hosted checkout page        │
-│     - Stripe handles payment UI                             │
-│     - Stripe handles 3D Secure                              │
-│     - Stripe handles payment method selection               │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  Payment Successful     │     │  Payment Cancelled          │
-│                         │     │                             │
-│  → successUrl           │     │  → cancelUrl                │
-└─────────────────────────┘     └─────────────────────────────┘
+```mermaid
+flowchart TD
+    A["1. Create Checkout Session on your backend<br/>Returns: { url: 'https://checkout.stripe.com/...' }"] --> B["2. StripeCheckout component renders a button<br/>Pass: sessionUrl (v8.x) or sessionId (v7.x legacy)"]
+    B --> C["3. User clicks the checkout button<br/>v8.x: window.location.replace(sessionUrl)<br/>v7.x: stripe.redirectToCheckout({ sessionId })"]
+    C --> D["4. User redirected to Stripe's hosted checkout page<br/>• Stripe handles payment UI<br/>• Stripe handles 3D Secure<br/>• Stripe handles payment method selection"]
+    D --> E{Result?}
+    E -->|Success| F["<b>Payment Successful</b><br/>→ successUrl"]
+    E -->|Cancelled| G["<b>Payment Cancelled</b><br/>→ cancelUrl"]
 ```
 
 ## Usage

@@ -15,24 +15,14 @@ Stripe Link is a one-click checkout solution that saves customer payment informa
 
 ## How It Works
 
-```
-Customer enters email
-        │
-        ▼
-Stripe checks for Link account
-        │
-   ┌────┴────┐
-   ▼         ▼
-Has Link    No Link
-account     account
-   │         │
-   ▼         ▼
-OTP sent    Continue
-to phone    normally
-   │         │
-   ▼         ▼
-Payment     Enter card
-auto-fills! manually
+```mermaid
+flowchart TD
+    A["Customer enters email"] --> B["Stripe checks for Link account"]
+    B --> C{Has Link account?}
+    C -->|Yes| D["OTP sent to phone"]
+    C -->|No| E["Continue normally"]
+    D --> F["Payment auto-fills!"]
+    E --> G["Enter card manually"]
 ```
 
 ## Basic Usage

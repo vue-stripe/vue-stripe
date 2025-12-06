@@ -30,31 +30,11 @@ Use **StripeProvider** when you need runtime configuration or Stripe Connect.
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  1. App Initialization                                       │
-│     app.use(createVueStripe({ publishableKey: '...' }))     │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  2. Plugin provides global config via inject                 │
-│     'vue-stripe-config' → { publishableKey, ... }           │
-│     'vue-stripe-global' → { stripe: Promise<Stripe> }       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  3. Component accesses stripe (lazy loading)                 │
-│     const { stripe } = inject('vue-stripe-global')          │
-│     const stripeInstance = await stripe                      │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  4. First access triggers loadStripe()                       │
-│     Subsequent accesses return cached instance              │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["1. App Initialization<br/>app.use(createVueStripe({ publishableKey: '...' }))"] --> B["2. Plugin provides global config via inject<br/>'vue-stripe-config' → { publishableKey, ... }<br/>'vue-stripe-global' → { stripe: Promise#lt;Stripe#gt; }"]
+    B --> C["3. Component accesses stripe (lazy loading)<br/>const { stripe } = inject('vue-stripe-global')<br/>const stripeInstance = await stripe"]
+    C --> D["4. First access triggers loadStripe()<br/>Subsequent accesses return cached instance"]
 ```
 
 ## Installation

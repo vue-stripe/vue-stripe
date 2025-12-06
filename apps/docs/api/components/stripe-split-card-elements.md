@@ -24,38 +24,15 @@ Split Card Elements give you granular control over card input layout:
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  All three elements mount inside StripeElements             │
-│  (Share the same Elements instance and context)             │
-└─────────────────────────────────────────────────────────────┘
-                              │
-        ┌─────────────────────┼─────────────────────┐
-        ▼                     ▼                     ▼
-┌───────────────┐     ┌───────────────┐     ┌───────────────┐
-│ CardNumber    │     │ CardExpiry    │     │ CardCvc       │
-│               │     │               │     │               │
-│ 4242 4242 ... │     │ MM / YY       │     │ CVC           │
-│               │     │               │     │               │
-│ Detects brand │     │ Auto-formats  │     │ 3 or 4 digits │
-│ Shows icon    │     │ Validates     │     │ based on brand│
-└───────────────┘     └───────────────┘     └───────────────┘
-        │                     │                     │
-        ▼                     ▼                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Each element emits @change independently                   │
-│  Track all three completion states for submit button        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  On submit: Reference the CardNumber element                │
-│  stripe.createPaymentMethod({                               │
-│    type: 'card',                                            │
-│    card: cardNumberElement  ← Just the number element!      │
-│  })                                                         │
-│  Stripe automatically collects expiry and CVC from siblings │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["All three elements mount inside StripeElements<br/>(Share the same Elements instance and context)"] --> B["CardNumber<br/>4242 4242...<br/>Detects brand, Shows icon"]
+    A --> C["CardExpiry<br/>MM / YY<br/>Auto-formats, Validates"]
+    A --> D["CardCvc<br/>CVC<br/>3 or 4 digits based on brand"]
+    B --> E["Each element emits @change independently<br/>Track all three completion states for submit button"]
+    C --> E
+    D --> E
+    E --> F["On submit: Reference the CardNumber element<br/>stripe.createPaymentMethod({<br/>  type: 'card',<br/>  card: cardNumberElement ← Just the number element!<br/>})<br/>Stripe automatically collects expiry and CVC from siblings"]
 ```
 
 ## Components

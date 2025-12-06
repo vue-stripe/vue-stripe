@@ -15,39 +15,15 @@ StripeElements is the bridge between StripeProvider and individual Stripe elemen
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  StripeElements mounts inside StripeProvider                │
-│  (Receives Stripe instance from parent context)             │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Waits for Stripe instance to be available                  │
-│  (Shows #loading slot while waiting)                        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Calls stripe.elements({ clientSecret, appearance, ... })   │
-│  Creates Elements instance with configuration               │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  SUCCESS                │     │  FAILURE                    │
-│                         │     │                             │
-│  1. Store Elements ref  │     │  1. Store error message     │
-│  2. provide() to tree   │     │  2. Show #error slot        │
-│  3. Render #default     │     │                             │
-└─────────────────────────┘     └─────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Child element components (PaymentElement, CardElement,     │
-│  etc.) inject Elements and mount their specific elements    │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["StripeElements mounts inside StripeProvider<br/>(Receives Stripe instance from parent context)"] --> B["Waits for Stripe instance to be available<br/>(Shows #loading slot while waiting)"]
+    B --> C["Calls stripe.elements({ clientSecret, appearance, ... })<br/>Creates Elements instance with configuration"]
+    C --> D{Result?}
+    D -->|Success| E["<b>SUCCESS</b><br/>1. Store Elements ref<br/>2. provide() to tree<br/>3. Render #default"]
+    D -->|Failure| F["<b>FAILURE</b><br/>1. Store error message<br/>2. Show #error slot"]
+    E --> G["Child element components (PaymentElement,<br/>CardElement, etc.) inject Elements and<br/>mount their specific elements"]
+    F --> G
 ```
 
 ## Usage

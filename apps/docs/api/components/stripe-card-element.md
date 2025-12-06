@@ -20,47 +20,14 @@ Card Element is the classic Stripe card input that provides:
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  CardElement mounts inside StripeElements                   │
-│  (Does NOT require clientSecret - more flexible than        │
-│   PaymentElement)                                           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Renders a single input field with embedded Stripe iframe   │
-│  Emits @ready when mounted                                  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Customer types card details                                │
-│  - Card number (auto-formats, detects brand)                │
-│  - MM/YY expiry (auto-formats)                              │
-│  - CVC (3 or 4 digits based on brand)                       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Emits @change on each keystroke                            │
-│  { complete, empty, error, brand, value }                   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  On submit: Two approaches available                        │
-└─────────────────────────────────────────────────────────────┘
-              │                               │
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  With PaymentIntent     │     │  Create Payment Method Only │
-│                         │     │                             │
-│  stripe.confirmCard-    │     │  stripe.createPayment-      │
-│  Payment(clientSecret,  │     │  Method({ type: 'card',     │
-│  { payment_method: {    │     │    card: cardElement })     │
-│    card: cardElement}}) │     │  → Returns PaymentMethod ID │
-└─────────────────────────┘     └─────────────────────────────┘
+```mermaid
+flowchart TD
+    A["CardElement mounts inside StripeElements<br/>(Does NOT require clientSecret - more flexible than PaymentElement)"] --> B["Renders a single input field with embedded Stripe iframe<br/>Emits @ready when mounted"]
+    B --> C["Customer types card details<br/>• Card number (auto-formats, detects brand)<br/>• MM/YY expiry (auto-formats)<br/>• CVC (3 or 4 digits based on brand)"]
+    C --> D["Emits @change on each keystroke<br/>{ complete, empty, error, brand, value }"]
+    D --> E["On submit: Two approaches available"]
+    E --> F["<b>With PaymentIntent</b><br/>stripe.confirmCardPayment(clientSecret,<br/>{ payment_method: { card: cardElement }})"]
+    E --> G["<b>Create Payment Method Only</b><br/>stripe.createPaymentMethod({ type: 'card',<br/>card: cardElement })<br/>→ Returns PaymentMethod ID"]
 ```
 
 ## Usage

@@ -34,49 +34,23 @@ Choose Checkout when you want the fastest integration with minimal code.
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  1. Your backend creates a Checkout Session                 │
-│     POST /v1/checkout/sessions → { url: 'https://...' }     │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  2. Frontend receives session URL                           │
-│     Pass to StripeCheckout component or useStripeCheckout   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  3. User clicks checkout button                             │
-│     window.location.replace(sessionUrl)                     │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  4. User redirected to Stripe's checkout page               │
-│     - Enters payment details                                │
-│     - Handles 3D Secure if needed                           │
-│     - Submits payment                                       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  Payment Successful     │     │  Payment Cancelled          │
-│                         │     │                             │
-│  → Redirect to          │     │  → Redirect to              │
-│    success_url          │     │    cancel_url               │
-└─────────────────────────┘     └─────────────────────────────┘
+```mermaid
+flowchart TD
+    A["<b>1. Backend creates Checkout Session</b><br/>POST /v1/checkout/sessions → { url: 'https://...' }"] --> B["<b>2. Frontend receives session URL</b><br/>Pass to StripeCheckout component or useStripeCheckout"]
+    B --> C["<b>3. User clicks checkout button</b><br/>window.location.replace(sessionUrl)"]
+    C --> D["<b>4. User redirected to Stripe's checkout page</b><br/>• Enters payment details<br/>• Handles 3D Secure if needed<br/>• Submits payment"]
+    D --> E{Result?}
+    E -->|Success| F["<b>Payment Successful</b><br/>→ Redirect to success_url"]
+    E -->|Cancelled| G["<b>Payment Cancelled</b><br/>→ Redirect to cancel_url"]
 ```
 
 ## Required Components
 
 Checkout only needs `VueStripeProvider` - no `VueStripeElements` required:
 
-```
-StripeProvider
-  └─ StripeCheckout (button that redirects)
+```mermaid
+flowchart TD
+    A["VueStripeProvider"] --> B["VueStripeCheckout<br/>(button that redirects)"]
 ```
 
 | Component | Role |

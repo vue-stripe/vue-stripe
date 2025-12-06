@@ -33,47 +33,17 @@ Express Checkout buttons only appear when wallets are available on the customer'
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  ExpressCheckoutElement mounts and emits @ready             │
-│  { availablePaymentMethods: { applePay, googlePay, link } } │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  Wallets Available      │     │  No Wallets Available       │
-│                         │     │                             │
-│  Shows wallet buttons   │     │  Element appears empty      │
-│  (Apple Pay, etc.)      │     │  (use PaymentElement below) │
-└─────────────────────────┘     └─────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Customer clicks a wallet button                            │
-│  Emits @click with { expressPaymentType, resolve }          │
-└─────────────────────────────────────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  CRITICAL: Must call event.resolve() to show payment sheet  │
-│  Pass line items, shipping options if needed                │
-└─────────────────────────────────────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Native wallet UI appears (Apple Pay sheet, Google Pay, etc)│
-│  Customer authenticates (Face ID, fingerprint, etc.)        │
-└─────────────────────────────────────────────────────────────┘
-              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  Customer Confirms      │     │  Customer Cancels           │
-│                         │     │                             │
-│  Emits @confirm         │     │  Emits @cancel              │
-│  Call confirmPayment()  │     │  Show PaymentElement option │
-└─────────────────────────┘     └─────────────────────────────┘
+```mermaid
+flowchart TD
+    A["ExpressCheckoutElement mounts and emits @ready<br/>{ availablePaymentMethods: { applePay, googlePay, link } }"] --> B{Wallets Available?}
+    B -->|Yes| C["Shows wallet buttons<br/>(Apple Pay, etc.)"]
+    B -->|No| D["Element appears empty<br/>(use PaymentElement below)"]
+    C --> E["Customer clicks a wallet button<br/>Emits @click with { expressPaymentType, resolve }"]
+    E --> F["<b>CRITICAL:</b> Must call event.resolve()<br/>to show payment sheet<br/>Pass line items, shipping options if needed"]
+    F --> G["Native wallet UI appears<br/>(Apple Pay sheet, Google Pay, etc.)<br/>Customer authenticates (Face ID, fingerprint, etc.)"]
+    G --> H{Customer Action?}
+    H -->|Confirms| I["<b>Customer Confirms</b><br/>Emits @confirm<br/>Call confirmPayment()"]
+    H -->|Cancels| J["<b>Customer Cancels</b><br/>Emits @cancel<br/>Show PaymentElement option"]
 ```
 
 ## Usage

@@ -16,42 +16,13 @@ A composable that provides access to the Stripe Elements instance from any child
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Component calls useStripeElements()                        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Composable checks for StripeElements context               │
-│  (Uses Vue's inject with stripeElementsInjectionKey)        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  Context Found          │     │  No Context Found           │
-│                         │     │                             │
-│  Returns { elements,    │     │  Throws Error:              │
-│  loading, error }       │     │  "useStripeElements must be │
-│                         │     │   called within             │
-│                         │     │   StripeElements"           │
-└─────────────────────────┘     └─────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Component uses elements.value for element access           │
-│                                                             │
-│  // Get specific elements                                   │
-│  const card = elements.value?.getElement('card')            │
-│  const payment = elements.value?.getElement('payment')      │
-│                                                             │
-│  // Submit payment                                          │
-│  await stripe.value.confirmPayment({                        │
-│    elements: elements.value,                                │
-│    confirmParams: { return_url: '...' }                     │
-│  })                                                         │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["Component calls useStripeElements()"] --> B["Composable checks for StripeElements context<br/>(Uses Vue's inject with stripeElementsInjectionKey)"]
+    B --> C{Context Found?}
+    C -->|Yes| D["<b>Context Found</b><br/>Returns { elements, loading, error }"]
+    C -->|No| E["<b>No Context Found</b><br/>Throws Error:<br/>'useStripeElements must be<br/>called within StripeElements'"]
+    D --> F["Component uses elements.value for element access<br/><br/>// Get specific elements<br/>const card = elements.value?.getElement('card')<br/>const payment = elements.value?.getElement('payment')<br/><br/>// Submit payment<br/>await stripe.value.confirmPayment({<br/>  elements: elements.value,<br/>  confirmParams: { return_url: '...' }<br/>})"]
 ```
 
 ## Usage

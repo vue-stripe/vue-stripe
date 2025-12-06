@@ -16,35 +16,13 @@ A composable that provides access to the Stripe.js instance from any child compo
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Component calls useStripe()                                │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Composable checks for StripeProvider context               │
-│  (Uses Vue's inject with stripeInjectionKey)                │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  Context Found          │     │  No Context Found           │
-│                         │     │                             │
-│  Returns { stripe,      │     │  Throws Error:              │
-│  loading, error }       │     │  "useStripe must be called  │
-│                         │     │   within StripeProvider"    │
-└─────────────────────────┘     └─────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Component uses stripe.value for API calls                  │
-│                                                             │
-│  if (stripe.value) {                                        │
-│    await stripe.value.confirmPayment({ ... })               │
-│  }                                                          │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["Component calls useStripe()"] --> B["Composable checks for StripeProvider context<br/>(Uses Vue's inject with stripeInjectionKey)"]
+    B --> C{Context Found?}
+    C -->|Yes| D["<b>Context Found</b><br/>Returns { stripe, loading, error }"]
+    C -->|No| E["<b>No Context Found</b><br/>Throws Error:<br/>'useStripe must be called<br/>within StripeProvider'"]
+    D --> F["Component uses stripe.value for API calls<br/><br/>if (stripe.value) {<br/>  await stripe.value.confirmPayment({ ... })<br/>}"]
 ```
 
 ## Usage

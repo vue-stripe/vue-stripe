@@ -212,30 +212,28 @@ Best for: Using pre-built element components
 
 ## Data Flow Diagram
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   StripeProvider                     │
-│  ┌─────────────────────────────────────────────┐    │
-│  │  provides: stripe, loading, error            │    │
-│  └─────────────────────────────────────────────┘    │
-│                        │                             │
-│                        ▼                             │
-│  ┌─────────────────────────────────────────────┐    │
-│  │              StripeElements                  │    │
-│  │  injects: stripe                             │    │
-│  │  provides: elements, loading, error          │    │
-│  └─────────────────────────────────────────────┘    │
-│                        │                             │
-│          ┌─────────────┼─────────────┐              │
-│          ▼             ▼             ▼              │
-│   ┌───────────┐ ┌───────────┐ ┌───────────┐        │
-│   │ Payment   │ │   Card    │ │  Express  │        │
-│   │ Element   │ │  Element  │ │ Checkout  │        │
-│   │           │ │           │ │           │        │
-│   │ injects:  │ │ injects:  │ │ injects:  │        │
-│   │ elements  │ │ elements  │ │ elements  │        │
-│   └───────────┘ └───────────┘ └───────────┘        │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Provider["VueStripeProvider"]
+        P1["<b>provides:</b><br/>stripe, loading, error"]
+    end
+
+    subgraph Elements["VueStripeElements"]
+        E1["<b>injects:</b> stripe"]
+        E2["<b>provides:</b><br/>elements, loading, error"]
+        E1 --> E2
+    end
+
+    subgraph Components["Element Components"]
+        PE["<b>PaymentElement</b><br/>injects: elements"]
+        CE["<b>CardElement</b><br/>injects: elements"]
+        EC["<b>ExpressCheckout</b><br/>injects: elements"]
+    end
+
+    P1 --> E1
+    E2 --> PE
+    E2 --> CE
+    E2 --> EC
 ```
 
 ## Common Mistakes

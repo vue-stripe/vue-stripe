@@ -16,48 +16,15 @@ A composable that simplifies payment confirmation with built-in state management
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Component calls usePaymentIntent()                         │
-│  Returns { confirmPayment, loading, error }                 │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  User clicks Pay button, triggers confirmPayment()          │
-│                                                             │
-│  await confirmPayment({                                     │
-│    clientSecret: 'pi_xxx_secret_xxx',                       │
-│    confirmParams: { return_url: '...' },                    │
-│    redirect: 'if_required'                                  │
-│  })                                                         │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Composable sets loading.value = true                       │
-│  Calls stripe.confirmPayment() with injected elements       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  SUCCESS                │     │  ERROR                      │
-│                         │     │                             │
-│  loading = false        │     │  loading = false            │
-│  Returns {              │     │  error.value = message      │
-│    paymentIntent: {     │     │  Returns {                  │
-│      status: 'succeeded'│     │    error: { message, code } │
-│    }                    │     │  }                          │
-│  }                      │     │                             │
-└─────────────────────────┘     └─────────────────────────────┘
-              │                               │
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  Show success message   │     │  Display error to user      │
-│  or redirect to         │     │  Allow retry                │
-│  confirmation page      │     │                             │
-└─────────────────────────┘     └─────────────────────────────┘
+```mermaid
+flowchart TD
+    A["Component calls usePaymentIntent()<br/>Returns { confirmPayment, loading, error }"] --> B["User clicks Pay button, triggers confirmPayment()<br/><br/>await confirmPayment({<br/>  clientSecret: 'pi_xxx_secret_xxx',<br/>  confirmParams: { return_url: '...' },<br/>  redirect: 'if_required'<br/>})"]
+    B --> C["Composable sets loading.value = true<br/>Calls stripe.confirmPayment() with injected elements"]
+    C --> D{Result?}
+    D -->|Success| E["<b>SUCCESS</b><br/>loading = false<br/>Returns {<br/>  paymentIntent: { status: 'succeeded' }<br/>}"]
+    D -->|Error| F["<b>ERROR</b><br/>loading = false<br/>error.value = message<br/>Returns { error: { message, code } }"]
+    E --> G["Show success message<br/>or redirect to confirmation page"]
+    F --> H["Display error to user<br/>Allow retry"]
 ```
 
 ::: tip Usage Context

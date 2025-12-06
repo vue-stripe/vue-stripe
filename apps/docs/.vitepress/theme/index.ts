@@ -1,6 +1,8 @@
-import { h, defineComponent } from 'vue'
+import { h, defineComponent, nextTick, watch } from 'vue'
 import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
+import { useData } from 'vitepress'
+import { createMermaidRenderer } from 'vitepress-mermaid-renderer'
 import './styles/vars.css'
 import StripeBadge from './components/StripeBadge.vue'
 import CopyForLLM from './components/CopyForLLM.vue'
@@ -34,6 +36,24 @@ const AnalyticsWrapper = defineComponent({
 export default {
   extends: DefaultTheme,
   Layout: () => {
+    const { isDark } = useData()
+
+    // Initialize Mermaid renderer with theme support
+    const initMermaid = () => {
+      createMermaidRenderer({
+        theme: isDark.value ? 'dark' : 'default',
+      })
+    }
+
+    // Initial Mermaid setup
+    nextTick(() => initMermaid())
+
+    // Re-render Mermaid charts on theme change
+    watch(
+      () => isDark.value,
+      () => initMermaid()
+    )
+
     return h(DefaultTheme.Layout, null, {
       // Stripe Partner Badge below hero actions on home page
       'home-hero-info-after': () => h(StripeBadge),

@@ -29,50 +29,26 @@ Use SetupIntent when you're not ready to charge yet.
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  1. Your backend creates a SetupIntent                      │
-│     POST /v1/setup_intents → { client_secret }              │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  2. Frontend loads StripeElements with client_secret        │
-│     User enters card details in StripePaymentElement        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  3. User clicks "Save Card"                                 │
-│     elements.submit() → confirmSetup()                      │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  3D Secure Required     │     │  No 3DS Required            │
-│                         │     │                             │
-│  User completes auth    │     │  Card saved immediately     │
-│  in modal/redirect      │     │                             │
-└─────────────────────────┘     └─────────────────────────────┘
-              │                               │
-              └───────────────┬───────────────┘
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  4. SetupIntent succeeds                                    │
-│     Returns payment_method ID for future charges            │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["1. Your backend creates a SetupIntent<br/>POST /v1/setup_intents → { client_secret }"] --> B["2. Frontend loads StripeElements with client_secret<br/>User enters card details in StripePaymentElement"]
+    B --> C["3. User clicks 'Save Card'<br/>elements.submit() → confirmSetup()"]
+    C --> D{3D Secure Required?}
+    D -->|Yes| E["<b>3D Secure Required</b><br/>User completes auth<br/>in modal/redirect"]
+    D -->|No| F["<b>No 3DS Required</b><br/>Card saved immediately"]
+    E --> G["4. SetupIntent succeeds<br/>Returns payment_method ID for future charges"]
+    F --> G
 ```
 
 ## Required Components
 
 SetupIntent works with the same components as PaymentIntent, but uses a different composable:
 
-```
-StripeProvider
-  └─ StripeElements (with SetupIntent clientSecret)
-      └─ StripePaymentElement (collects card details)
-          └─ useSetupIntent() (confirms and saves the card)
+```mermaid
+flowchart TD
+    A["VueStripeProvider"] --> B["VueStripeElements<br/>(with SetupIntent clientSecret)"]
+    B --> C["VueStripePaymentElement<br/>(collects card details)"]
+    C --> D["useSetupIntent()<br/>(confirms and saves the card)"]
 ```
 
 | Component | Role |
@@ -225,20 +201,9 @@ const handleSave = async () => {
 
 Saving a card requires two steps:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Step 1: elements.submit()                                  │
-│  - Validates the payment form                               │
-│  - Returns error if form is incomplete or invalid           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Step 2: confirmSetup()                                     │
-│  - Sends card details to Stripe                             │
-│  - Handles 3D Secure if needed                              │
-│  - Returns saved payment method ID                          │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["<b>Step 1: elements.submit()</b><br/>• Validates the payment form<br/>• Returns error if form is incomplete or invalid"] --> B["<b>Step 2: confirmSetup()</b><br/>• Sends card details to Stripe<br/>• Handles 3D Secure if needed<br/>• Returns saved payment method ID"]
 ```
 
 ::: warning Don't Skip Step 1

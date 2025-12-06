@@ -20,49 +20,16 @@ Address Element provides a complete, validated address collection form:
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  AddressElement mounts inside StripeElements                │
-│  (No clientSecret required - works standalone)              │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Renders address form based on mode (shipping/billing)      │
-│  - Name field                                               │
-│  - Address line 1 (with autocomplete suggestions)           │
-│  - Address line 2                                           │
-│  - City, State/Province, Postal Code                        │
-│  - Country selector                                         │
-│  - Phone (if configured)                                    │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  User starts typing address                                 │
-│  Google Maps suggests matching addresses                    │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  User selects           │     │  User types manually        │
-│  suggestion             │     │                             │
-│                         │     │  Form validates each field  │
-│  Auto-fills all fields  │     │  as they complete it        │
-└─────────────────────────┘     └─────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Emits @change with { complete, isNewAddress, value }       │
-│  complete: true when all required fields are valid          │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  On submit: Call getValue() to get validated address        │
-│  const { complete, value } = await addressRef.getValue()    │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["AddressElement mounts inside StripeElements<br/>(No clientSecret required - works standalone)"] --> B["Renders address form based on mode (shipping/billing)<br/>• Name field<br/>• Address line 1 (with autocomplete)<br/>• Address line 2<br/>• City, State/Province, Postal Code<br/>• Country selector<br/>• Phone (if configured)"]
+    B --> C["User starts typing address<br/>Google Maps suggests matching addresses"]
+    C --> D{User Action?}
+    D -->|Selects Suggestion| E["Auto-fills all fields"]
+    D -->|Types Manually| F["Form validates each field<br/>as they complete it"]
+    E --> G["Emits @change with { complete, isNewAddress, value }<br/>complete: true when all required fields are valid"]
+    F --> G
+    G --> H["On submit: Call getValue() to get validated address<br/>const { complete, value } = await addressRef.getValue()"]
 ```
 
 ## Usage

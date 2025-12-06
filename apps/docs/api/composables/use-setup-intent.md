@@ -27,46 +27,15 @@ SetupIntent saves the card without charging. PaymentIntent charges immediately.
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Component calls useSetupIntent()                           │
-│  Returns { confirmSetup, loading, error }                   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  User clicks Save button, triggers confirmSetup()           │
-│                                                             │
-│  await confirmSetup({                                       │
-│    clientSecret: 'seti_xxx_secret_xxx',                     │
-│    return_url: '...'                                        │
-│  })                                                         │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Composable sets loading.value = true                       │
-│  Calls stripe.confirmCardSetup() with injected elements     │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  SUCCESS                │     │  ERROR                      │
-│                         │     │                             │
-│  loading = false        │     │  loading = false            │
-│  Returns {              │     │  error.value = message      │
-│    setupIntent: {       │     │  Returns {                  │
-│      status: 'succeeded'│     │    error: { message, code } │
-│    }                    │     │  }                          │
-│  }                      │     │                             │
-└─────────────────────────┘     └─────────────────────────────┘
-              │                               │
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  Card saved!            │     │  Display error to user      │
-│  Ready for future use   │     │  Allow retry                │
-└─────────────────────────┘     └─────────────────────────────┘
+```mermaid
+flowchart TD
+    A["Component calls useSetupIntent()<br/>Returns { confirmSetup, loading, error }"] --> B["User clicks Save button, triggers confirmSetup()<br/><br/>await confirmSetup({<br/>  clientSecret: 'seti_xxx_secret_xxx',<br/>  return_url: '...'<br/>})"]
+    B --> C["Composable sets loading.value = true<br/>Calls stripe.confirmCardSetup() with injected elements"]
+    C --> D{Result?}
+    D -->|Success| E["<b>SUCCESS</b><br/>loading = false<br/>Returns {<br/>  setupIntent: { status: 'succeeded' }<br/>}"]
+    D -->|Error| F["<b>ERROR</b><br/>loading = false<br/>error.value = message<br/>Returns { error: { message, code } }"]
+    E --> G["Card saved!<br/>Ready for future use"]
+    F --> H["Display error to user<br/>Allow retry"]
 ```
 
 ::: tip Usage Context

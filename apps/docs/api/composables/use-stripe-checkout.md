@@ -19,41 +19,13 @@ A composable for Stripe Checkout with built-in state management:
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Component calls useStripeCheckout()                        │
-│  Returns { redirectToCheckout, redirectToUrl, loading, error }
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  User triggers checkout                                     │
-│                                                             │
-│  // v8.x: URL-based (recommended)                           │
-│  redirectToUrl('https://checkout.stripe.com/...')           │
-│  // OR                                                      │
-│  await redirectToCheckout({ url: 'https://checkout...' })   │
-│                                                             │
-│  // v7.x: Session ID-based (legacy)                         │
-│  await redirectToCheckout({ sessionId: 'cs_test_xxx' })     │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Composable sets loading.value = true                       │
-│  Redirects via window.location.replace() or redirectToCheckout
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  SUCCESS                │     │  ERROR                      │
-│                         │     │                             │
-│  User redirected to     │     │  loading = false            │
-│  Stripe Checkout        │     │  error.value = message      │
-│                         │     │  Throws StripeProviderError │
-│  (page navigates away)  │     │                             │
-└─────────────────────────┘     └─────────────────────────────┘
+```mermaid
+flowchart TD
+    A["Component calls useStripeCheckout()<br/>Returns { redirectToCheckout, redirectToUrl, loading, error }"] --> B["User triggers checkout<br/><br/>// v8.x: URL-based (recommended)<br/>redirectToUrl('https://checkout.stripe.com/...')<br/>// OR<br/>await redirectToCheckout({ url: 'https://checkout...' })<br/><br/>// v7.x: Session ID-based (legacy)<br/>await redirectToCheckout({ sessionId: 'cs_test_xxx' })"]
+    B --> C["Composable sets loading.value = true<br/>Redirects via window.location.replace() or redirectToCheckout"]
+    C --> D{Result?}
+    D -->|Success| E["<b>SUCCESS</b><br/>User redirected to<br/>Stripe Checkout<br/>(page navigates away)"]
+    D -->|Error| F["<b>ERROR</b><br/>loading = false<br/>error.value = message<br/>Throws StripeProviderError"]
 ```
 
 ::: tip Usage Context

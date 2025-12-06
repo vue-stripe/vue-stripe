@@ -84,25 +84,12 @@ const onPaymentChange = (event) => {
 
 ## How Link Authentication Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Customer enters email                                       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Stripe checks: Does this email have a Link account?        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  YES - Link Account     │     │  NO - New Customer          │
-│                         │     │                             │
-│  1. OTP sent to phone   │     │  Continue to PaymentElement │
-│  2. User enters code    │     │  Enter card details manually│
-│  3. Payment auto-fills! │     │                             │
-└─────────────────────────┘     └─────────────────────────────┘
+```mermaid
+flowchart TD
+    A["Customer enters email"] --> B["Stripe checks: Does this email have a Link account?"]
+    B --> C{Link Account?}
+    C -->|Yes| D["<b>YES - Link Account</b><br/>1. OTP sent to phone<br/>2. User enters code<br/>3. Payment auto-fills!"]
+    C -->|No| E["<b>NO - New Customer</b><br/>Continue to PaymentElement<br/>Enter card details manually"]
 ```
 
 ## Props

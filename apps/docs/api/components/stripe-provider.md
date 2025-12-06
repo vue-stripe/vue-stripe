@@ -15,33 +15,14 @@ StripeProvider is the foundation of any Vue Stripe integration. It handles:
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  StripeProvider mounts with publishableKey                  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Calls loadStripe() from @stripe/stripe-js                  │
-│  (Shows #loading slot while waiting)                        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────────┐
-│  SUCCESS                │     │  FAILURE                    │
-│                         │     │                             │
-│  1. Store Stripe in ref │     │  1. Store error message     │
-│  2. provide() to tree   │     │  2. Emit @error event       │
-│  3. Emit @load event    │     │  3. Show #error slot        │
-│  4. Render #default     │     │                             │
-└─────────────────────────┘     └─────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Child components access Stripe via useStripe() composable  │
-│  or inject stripeInjectionKey directly                      │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["StripeProvider mounts with publishableKey"] --> B["Calls loadStripe() from @stripe/stripe-js<br/>(Shows #loading slot while waiting)"]
+    B --> C{Result?}
+    C -->|Success| D["<b>SUCCESS</b><br/>1. Store Stripe in ref<br/>2. provide() to tree<br/>3. Emit @load event<br/>4. Render #default"]
+    C -->|Failure| E["<b>FAILURE</b><br/>1. Store error message<br/>2. Emit @error event<br/>3. Show #error slot"]
+    D --> F["Child components access Stripe via<br/>useStripe() composable or inject<br/>stripeInjectionKey directly"]
+    E --> F
 ```
 
 ## Usage
