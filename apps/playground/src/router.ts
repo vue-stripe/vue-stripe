@@ -11,6 +11,11 @@ import LinkAuthenticationView from './views/LinkAuthenticationView.vue'
 import ExpressCheckoutView from './views/ExpressCheckoutView.vue'
 import SetupIntentView from './views/SetupIntentView.vue'
 import CheckoutView from './views/CheckoutView.vue'
+// European Regional Elements (v5.2.0)
+import IbanElementView from './views/IbanElementView.vue'
+import IdealBankElementView from './views/IdealBankElementView.vue'
+import P24BankElementView from './views/P24BankElementView.vue'
+import EpsBankElementView from './views/EpsBankElementView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -74,8 +79,28 @@ const router = createRouter({
       path: '/stripe-checkout',
       name: 'StripeCheckout',
       component: CheckoutView
+    },
+    // European Regional Elements (v5.2.0)
+    {
+      path: '/stripe-iban-element',
+      name: 'IbanElement',
+      component: IbanElementView
+    },
+    {
+      path: '/stripe-ideal-bank-element',
+      name: 'IdealBankElement',
+      component: IdealBankElementView
+    },
+    {
+      path: '/stripe-p24-bank-element',
+      name: 'P24BankElement',
+      component: P24BankElementView
+    },
+    {
+      path: '/stripe-eps-bank-element',
+      name: 'EpsBankElement',
+      component: EpsBankElementView
     }
-    // Routes will be added as we test each component
   ]
 })
 

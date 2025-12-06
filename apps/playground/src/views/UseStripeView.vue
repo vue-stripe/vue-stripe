@@ -9,12 +9,6 @@ import {
   Alert,
   AlertDescription,
   Button,
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
 } from '@/components/ui'
 
 const stripeConfig = inject<{
@@ -89,64 +83,18 @@ const testOutsideProvider = () => {
   <div class="max-w-[900px] mx-auto flex flex-col gap-6">
     <Card>
       <CardHeader>
-        <CardTitle>useStripe() Composable Test</CardTitle>
+        <CardTitle>useStripe() Composable</CardTitle>
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
           A composable that provides access to the Stripe instance from any component
           inside a VueStripeProvider. Must be used within the StripeProvider hierarchy.
         </p>
-
-        <div class="bg-secondary rounded-lg p-5 space-y-4">
-          <h3 class="font-semibold">API Reference</h3>
-
-          <div>
-            <h4 class="font-medium mb-2">Usage</h4>
-            <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-sm overflow-x-auto"><code>import { useStripe } from '@vue-stripe/vue-stripe'
-
-// Must be inside a VueStripeProvider
-const { stripe, loading, error } = useStripe()</code></pre>
-          </div>
-
-          <div>
-            <h4 class="font-medium mb-2">Returns</h4>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell><code>stripe</code></TableCell>
-                  <TableCell><code>Ref&lt;Stripe | null&gt;</code></TableCell>
-                  <TableCell>The Stripe.js instance (null while loading)</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><code>loading</code></TableCell>
-                  <TableCell><code>Ref&lt;boolean&gt;</code></TableCell>
-                  <TableCell>True while Stripe.js is loading</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><code>error</code></TableCell>
-                  <TableCell><code>Ref&lt;string | null&gt;</code></TableCell>
-                  <TableCell>Error message if loading failed</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-
-          <div>
-            <h4 class="font-medium mb-2">Important Notes</h4>
-            <ul class="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-              <li>Must be called inside a component that is a descendant of VueStripeProvider</li>
-              <li>Throws <code>VueStripeProviderError</code> if used outside VueStripeProvider</li>
-              <li>All returned values are reactive refs</li>
-            </ul>
-          </div>
-        </div>
+        <p class="text-sm">
+          <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
+            View full documentation →
+          </a>
+        </p>
       </CardContent>
     </Card>
 
@@ -233,98 +181,6 @@ const { stripe, loading, error } = useStripe()</code></pre>
             <span class="text-muted-foreground">{{ event.message }}</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
-
-    <!-- Code Examples -->
-    <Card>
-      <CardHeader>
-        <CardTitle class="text-lg">Code Examples</CardTitle>
-      </CardHeader>
-      <CardContent class="space-y-5">
-        <div>
-          <h4 class="font-medium mb-2">Basic Usage</h4>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-sm overflow-x-auto"><code>&lt;script setup&gt;
-import { useStripe } from '@vue-stripe/vue-stripe'
-
-// Access Stripe instance from parent StripeProvider
-const { stripe, loading, error } = useStripe()
-
-// Use in a payment handler
-const handlePayment = async () => {
-  if (!stripe.value) return
-
-  const result = await stripe.value.confirmPayment({
-    elements,
-    confirmParams: {
-      return_url: 'https://example.com/success'
-    }
-  })
-
-  if (result.error) {
-    console.error(result.error.message)
-  }
-}
-&lt;/script&gt;</code></pre>
-        </div>
-
-        <div>
-          <h4 class="font-medium mb-2">Watching for Stripe Ready</h4>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-sm overflow-x-auto"><code>&lt;script setup&gt;
-import { watch } from 'vue'
-import { useStripe } from '@vue-stripe/vue-stripe'
-
-const { stripe, loading } = useStripe()
-
-// React when Stripe becomes available
-watch(stripe, (stripeInstance) => {
-  if (stripeInstance) {
-    console.log('Stripe is ready!')
-    // Initialize your payment form
-  }
-})
-
-// Or watch loading state
-watch(loading, (isLoading) => {
-  if (!isLoading) {
-    console.log('Loading complete')
-  }
-})
-&lt;/script&gt;</code></pre>
-        </div>
-
-        <div>
-          <h4 class="font-medium mb-2">Conditional Rendering</h4>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-sm overflow-x-auto"><code>&lt;template&gt;
-  &lt;div v-if="loading"&gt;Loading Stripe...&lt;/div&gt;
-  &lt;div v-else-if="error"&gt;Error: {{ error }}&lt;/div&gt;
-  &lt;div v-else&gt;
-    &lt;!-- Stripe is ready, show payment form --&gt;
-    &lt;PaymentForm /&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
-
-&lt;script setup&gt;
-import { useStripe } from '@vue-stripe/vue-stripe'
-const { stripe, loading, error } = useStripe()
-&lt;/script&gt;</code></pre>
-        </div>
-      </CardContent>
-    </Card>
-
-    <!-- Learning Notes -->
-    <Card class="bg-gradient-to-br from-info/10 to-info/5 border-l-4 border-info">
-      <CardHeader>
-        <CardTitle class="text-lg text-info">Learning Notes</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul class="space-y-2 text-muted-foreground">
-          <li><strong>Context Requirement:</strong> Must be used inside VueStripeProvider - throws error otherwise.</li>
-          <li><strong>Reactive Values:</strong> All returned values are Vue refs, so use <code>.value</code> in script.</li>
-          <li><strong>Async Loading:</strong> <code>stripe</code> is null initially while Stripe.js loads.</li>
-          <li><strong>Error Handling:</strong> Check <code>error</code> to handle failed Stripe.js loads.</li>
-          <li><strong>Use Cases:</strong> Building custom payment forms, accessing Stripe methods directly.</li>
-        </ul>
       </CardContent>
     </Card>
   </div>

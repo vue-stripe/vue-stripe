@@ -13,6 +13,8 @@ import {
   Link2,
   CheckSquare,
   Layers,
+  Landmark,
+  Euro,
 } from 'lucide-vue-next'
 import {
   Button,
@@ -123,6 +125,11 @@ const navGroups = computed(() => {
     'SetupIntent': KeyRound,
     'LinkAuthentication': Link2,
     'AddressElement': MapPin,
+    // European Regional Elements (v5.2.0)
+    'IbanElement': Landmark,
+    'IdealBankElement': Landmark,
+    'P24BankElement': Landmark,
+    'EpsBankElement': Landmark,
   }
 
   // Group routes
@@ -135,11 +142,18 @@ const navGroups = computed(() => {
       label: 'Stripe Elements',
       items: [] as { name: string; path: string; icon: any }[]
     },
+    european: {
+      label: 'European Elements',
+      items: [] as { name: string; path: string; icon: any }[]
+    },
     checkout: {
       label: 'Checkout',
       items: [] as { name: string; path: string; icon: any }[]
     }
   }
+
+  // European element route names
+  const europeanElements = ['IbanElement', 'IdealBankElement', 'P24BankElement', 'EpsBankElement']
 
   routes.forEach(route => {
     const name = String(route.name)
@@ -150,6 +164,8 @@ const navGroups = computed(() => {
       groups.core.items.push(item)
     } else if (name.includes('Checkout')) {
       groups.checkout.items.push(item)
+    } else if (europeanElements.includes(name)) {
+      groups.european.items.push(item)
     } else {
       groups.elements.items.push(item)
     }
