@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref, provide, computed, reactive, watch } from 'vue'
-import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { ref, provide, computed, reactive, watch, onMounted } from 'vue'
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 import { useDark, useToggle } from '@vueuse/core'
+import { useHead } from '@unhead/vue'
+import { inject } from '@vercel/analytics'
 import {
   Moon,
   Sun,
@@ -13,6 +15,8 @@ import {
   Link2,
   CheckSquare,
   Layers,
+  Landmark,
+  Euro,
 } from 'lucide-vue-next'
 import {
   Button,
@@ -48,11 +52,73 @@ import {
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
 
+// Vercel Analytics - only inject in browser
+onMounted(() => {
+  inject()
+})
+
+// SEO head management
+const route = useRoute()
+useHead({
+  title: computed(() => (route.meta?.title as string) || 'Vue Stripe Playground'),
+  meta: [
+    {
+      name: 'description',
+      content: computed(() => (route.meta?.description as string) || 'Interactive playground for testing Vue Stripe components and integrations')
+    },
+    // Open Graph
+    {
+      property: 'og:title',
+      content: computed(() => (route.meta?.title as string) || 'Vue Stripe Playground')
+    },
+    {
+      property: 'og:description',
+      content: computed(() => (route.meta?.description as string) || 'Interactive playground for testing Vue Stripe components and integrations')
+    },
+    {
+      property: 'og:type',
+      content: 'website'
+    },
+    // Twitter Card
+    {
+      name: 'twitter:card',
+      content: 'summary_large_image'
+    },
+    {
+      name: 'twitter:title',
+      content: computed(() => (route.meta?.title as string) || 'Vue Stripe Playground')
+    },
+    {
+      name: 'twitter:description',
+      content: computed(() => (route.meta?.description as string) || 'Interactive playground for testing Vue Stripe components and integrations')
+    }
+  ],
+  link: [
+    {
+      rel: 'canonical',
+      href: computed(() => `https://playground.vuestripe.com${route.path}`)
+    }
+  ]
+})
+
 // Storage key for localStorage
 const STORAGE_KEY = 'vue-stripe-playground-config'
 
+// Check if we're in a browser environment (SSR-safe)
+const isBrowser = typeof window !== 'undefined'
+
 // Load config from localStorage
 const loadConfig = () => {
+  if (!isBrowser) {
+    // Return default config during SSR
+    return {
+      publishableKey: '',
+      clientSecret: '',
+      setupSecret: '',
+      sessionId: ''
+    }
+  }
+
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
@@ -73,6 +139,8 @@ const loadConfig = () => {
 
 // Save config to localStorage
 const saveConfig = (config: typeof stripeConfig) => {
+  if (!isBrowser) return
+
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
   } catch (e) {
@@ -82,6 +150,8 @@ const saveConfig = (config: typeof stripeConfig) => {
 
 // Clear config from localStorage
 const clearConfig = () => {
+  if (!isBrowser) return
+
   try {
     localStorage.removeItem(STORAGE_KEY)
   } catch (e) {
@@ -123,6 +193,11 @@ const navGroups = computed(() => {
     'SetupIntent': KeyRound,
     'LinkAuthentication': Link2,
     'AddressElement': MapPin,
+    // European Regional Elements (v5.2.0)
+    'IbanElement': Landmark,
+    'IdealBankElement': Landmark,
+    'P24BankElement': Landmark,
+    'EpsBankElement': Landmark,
   }
 
   // Group routes
@@ -135,11 +210,18 @@ const navGroups = computed(() => {
       label: 'Stripe Elements',
       items: [] as { name: string; path: string; icon: any }[]
     },
+    european: {
+      label: 'European Elements',
+      items: [] as { name: string; path: string; icon: any }[]
+    },
     checkout: {
       label: 'Checkout',
       items: [] as { name: string; path: string; icon: any }[]
     }
   }
+
+  // European element route names
+  const europeanElements = ['IbanElement', 'IdealBankElement', 'P24BankElement', 'EpsBankElement']
 
   routes.forEach(route => {
     const name = String(route.name)
@@ -150,6 +232,8 @@ const navGroups = computed(() => {
       groups.core.items.push(item)
     } else if (name.includes('Checkout')) {
       groups.checkout.items.push(item)
+    } else if (europeanElements.includes(name)) {
+      groups.european.items.push(item)
     } else {
       groups.elements.items.push(item)
     }

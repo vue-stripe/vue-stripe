@@ -25,6 +25,8 @@
   <a href="https://vuestripe.com">Website</a> |
   <a href="https://vuestripe.com/guide/introduction">Guides</a> |
   <a href="https://vuestripe.com/api/">API</a>
+  <a href="https://playground.vuestripe.com">Playground</a>
+  <a href="https://backend.vuestripe.com">Backend</a>
 </p>
 
 ---
@@ -175,6 +177,15 @@ const onPaymentChange = (event) => {
 | `VueStripeCardExpiryElement` | Expiry date input |
 | `VueStripeCardCvcElement` | CVC input |
 
+### European Regional Elements
+
+| Component | Description |
+|-----------|-------------|
+| `VueStripeIbanElement` | IBAN input for SEPA payments |
+| `VueStripeIdealBankElement` | iDEAL bank selector (Netherlands) |
+| `VueStripeP24BankElement` | Przelewy24 bank selector (Poland) |
+| `VueStripeEpsBankElement` | EPS bank selector (Austria) |
+
 ## Composables
 
 | Composable | Description |
@@ -199,9 +210,11 @@ import type {
 
 ## Documentation
 
-- [Website](https://vuestripe.com)
-- [Guides](https://vuestripe.com/guide/introduction)
-- [API Reference](https://vuestripe.com/api/)
+- [Website](https://vuestripe.com) - Official website for Vue Stripe
+- [Guides](https://vuestripe.com/guide/introduction) - Guides for using Vue Stripe
+- [API Reference](https://vuestripe.com/api/) - API reference for Vue Stripe components and composables
+- [Playground](https://playground.vuestripe.com) - Interactive playground for testing Vue Stripe components and integrations
+- [Backend](https://backend.vuestripe.com) - Backend for the playground
 
 ## License
 

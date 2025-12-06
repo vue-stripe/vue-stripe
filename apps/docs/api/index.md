@@ -5,19 +5,25 @@ Complete API documentation for Vue Stripe components and composables.
 ## Components
 
 ### Provider Components
-- [StripeProvider](/api/components/stripe-provider) - Root component that loads Stripe.js
-- [StripeElements](/api/components/stripe-elements) - Creates Stripe Elements instance
+- [VueStripeProvider](/api/components/stripe-provider) - Root component that loads Stripe.js
+- [VueStripeElements](/api/components/stripe-elements) - Creates Stripe Elements instance
 
 ### Element Components
-- [StripePaymentElement](/api/components/stripe-payment-element) - All-in-one payment UI (recommended)
-- [StripeExpressCheckoutElement](/api/components/stripe-express-checkout-element) - Apple Pay, Google Pay, Link
-- [StripeCardElement](/api/components/stripe-card-element) - Single card input
+- [VueStripePaymentElement](/api/components/stripe-payment-element) - All-in-one payment UI (recommended)
+- [VueStripeExpressCheckoutElement](/api/components/stripe-express-checkout-element) - Apple Pay, Google Pay, Link
+- [VueStripeCardElement](/api/components/stripe-card-element) - Single card input
 - [Split Card Elements](/api/components/stripe-split-card-elements) - Number + Expiry + CVC
-- [StripeAddressElement](/api/components/stripe-address-element) - Address collection
-- [StripeLinkAuthenticationElement](/api/components/stripe-link-authentication-element) - Link authentication
+- [VueStripeAddressElement](/api/components/stripe-address-element) - Address collection
+- [VueStripeLinkAuthenticationElement](/api/components/stripe-link-authentication-element) - Link authentication
+
+### European Payment Elements
+- [VueStripeIbanElement](/api/components/stripe-iban-element) - IBAN collection for SEPA payments
+- [VueStripeIdealBankElement](/api/components/stripe-ideal-bank-element) - iDEAL bank selector (Netherlands)
+- [VueStripeP24BankElement](/api/components/stripe-p24-bank-element) - Przelewy24 bank selector (Poland)
+- [VueStripeEpsBankElement](/api/components/stripe-eps-bank-element) - EPS bank selector (Austria)
 
 ### Checkout
-- [StripeCheckout](/api/components/stripe-checkout) - Embedded Stripe Checkout
+- [VueStripeCheckout](/api/components/stripe-checkout) - Embedded Stripe Checkout
 
 ## Composables
 

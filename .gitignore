@@ -7,8 +7,8 @@ node_modules/
 dist/
 build/
 .next/
-.vitepress/dist/
-.vitepress/cache/
+**/.vitepress/dist/
+**/.vitepress/cache/
 
 # Cache directories
 .turbo/

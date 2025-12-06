@@ -4,12 +4,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite-ssg build",
+    "build:spa": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist"
   },
   "dependencies": {
     "@stripe/stripe-js": "^7.5.0",
+    "@unhead/vue": "^2.0.19",
+    "@vercel/analytics": "^1.6.1",
     "@vue-stripe/vue-stripe": "workspace:*",
     "@vueuse/core": "^14.1.0",
     "class-variance-authority": "^0.7.1",
@@ -19,6 +22,7 @@
     "reka-ui": "^2.6.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "vite-ssg": "^28.2.2",
     "vue": "^3.5.22",
     "vue-router": "^4.5.1"
   },

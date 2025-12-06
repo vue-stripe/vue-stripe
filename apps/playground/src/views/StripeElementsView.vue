@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, defineComponent, h, computed } from 'vue'
 import { VueStripeProvider, VueStripeElements, useStripeElements } from '@vue-stripe/vue-stripe'
-import type { StripeElements as StripeElementsType } from '@stripe/stripe-js'
 import {
   Card,
   CardHeader,
@@ -12,12 +11,6 @@ import {
   Button,
   Input,
   Label,
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -41,7 +34,6 @@ const testScenario = ref<'basic' | 'with-options' | 'appearance' | 'dark-theme'>
 
 // Mock client secret (in real app, this comes from your backend)
 const clientSecret = ref<string>('')
-const showClientSecretInput = ref(true)
 
 // Validate client secret format
 const clientSecretStatus = computed(() => {
@@ -123,63 +115,18 @@ const darkAppearance = {
   <div class="max-w-[900px] mx-auto flex flex-col gap-6">
     <Card>
       <CardHeader>
-        <CardTitle>StripeElements Component Test</CardTitle>
+        <CardTitle>StripeElements Component</CardTitle>
       </CardHeader>
       <CardContent>
-        <p class="text-muted-foreground mb-6">
+        <p class="text-muted-foreground mb-4">
           Creates a Stripe Elements instance and provides it to child element components.
           Must be used within a StripeProvider.
         </p>
-
-        <div class="border-t pt-6 space-y-4">
-          <h3 class="font-semibold">API Reference</h3>
-          <div>
-            <h4 class="text-sm font-medium mb-2">Props</h4>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Prop</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Required</TableHead>
-                  <TableHead>Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell><code class="text-sm bg-muted px-1 rounded">clientSecret</code></TableCell>
-                  <TableCell>string</TableCell>
-                  <TableCell>No*</TableCell>
-                  <TableCell>Client secret from PaymentIntent or SetupIntent</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><code class="text-sm bg-muted px-1 rounded">options</code></TableCell>
-                  <TableCell>object</TableCell>
-                  <TableCell>No</TableCell>
-                  <TableCell>Elements configuration (appearance, fonts, locale)</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-            <p class="text-sm text-muted-foreground mt-2">* Required for Payment Element. Optional for Card Element.</p>
-          </div>
-
-          <div>
-            <h4 class="text-sm font-medium mb-2">Slots</h4>
-            <ul class="list-disc list-inside text-sm text-muted-foreground space-y-1">
-              <li><code class="bg-muted px-1 rounded">#default</code> - Content shown when Elements is ready</li>
-              <li><code class="bg-muted px-1 rounded">#loading</code> - Custom loading indicator</li>
-              <li><code class="bg-muted px-1 rounded">#error="{ error }"</code> - Custom error display</li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="text-sm font-medium mb-2">Provides (via useStripeElements)</h4>
-            <ul class="list-disc list-inside text-sm text-muted-foreground space-y-1">
-              <li><code class="bg-muted px-1 rounded">elements</code> - Ref&lt;StripeElements | null&gt;</li>
-              <li><code class="bg-muted px-1 rounded">loading</code> - Ref&lt;boolean&gt;</li>
-              <li><code class="bg-muted px-1 rounded">error</code> - Ref&lt;string | null&gt;</li>
-            </ul>
-          </div>
-        </div>
+        <p class="text-sm">
+          <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
+            View full documentation →
+          </a>
+        </p>
       </CardContent>
     </Card>
 
@@ -213,25 +160,6 @@ const darkAppearance = {
           For Payment Element, you need a clientSecret from a PaymentIntent.
           For Card Element, clientSecret is not required on StripeElements.
         </p>
-
-        <div class="bg-info/10 border border-info/20 rounded-lg p-5 mb-5">
-          <h4 class="mt-0 mb-4 text-base text-info font-medium">How to get a Client Secret:</h4>
-          <ol class="m-0 pl-5 text-sm list-decimal space-y-3">
-            <li>
-              <strong>Stripe Dashboard (easiest):</strong>
-              <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="text-primary hover:underline">Dashboard → Payments</a>
-              → Click <strong>+ Create</strong> → Set amount → Create → Copy the <code class="bg-muted px-1 rounded">client_secret</code> from the response
-            </li>
-            <li>
-              <strong>Stripe CLI:</strong>
-              <code class="block mt-1 bg-slate-900 text-green-400 px-2 py-1 rounded text-xs font-mono">stripe payment_intents create --amount=1000 --currency=usd</code>
-            </li>
-            <li>
-              <strong>Your Backend API:</strong>
-              Create a PaymentIntent via <code class="bg-muted px-1 rounded">stripe.paymentIntents.create()</code> and return the <code class="bg-muted px-1 rounded">client_secret</code>
-            </li>
-          </ol>
-        </div>
 
         <div class="flex gap-3">
           <Input
@@ -384,97 +312,6 @@ const darkAppearance = {
             <span class="event-data">{{ event.message }}</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
-
-    <!-- Code Examples -->
-    <Card>
-      <CardHeader>
-        <CardTitle class="text-lg">Code Examples</CardTitle>
-      </CardHeader>
-      <CardContent class="space-y-4">
-        <div>
-          <h4 class="text-sm font-medium mb-2">Basic Usage</h4>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm"><code>&lt;template&gt;
-  &lt;StripeProvider :publishable-key="publishableKey"&gt;
-    &lt;StripeElements :client-secret="clientSecret"&gt;
-      &lt;StripePaymentElement /&gt;
-    &lt;/StripeElements&gt;
-  &lt;/StripeProvider&gt;
-&lt;/template&gt;
-
-&lt;script setup&gt;
-import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = 'pi_xxx_secret_xxx' // From your backend
-&lt;/script&gt;</code></pre>
-        </div>
-
-        <div>
-          <h4 class="text-sm font-medium mb-2">With Appearance Customization</h4>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm"><code>&lt;StripeElements
-  :client-secret="clientSecret"
-  :options="{
-    appearance: {
-      theme: 'stripe',
-      variables: {
-        colorPrimary: '#0570de',
-        borderRadius: '8px'
-      },
-      rules: {
-        '.Input': {
-          border: '1px solid #e6e6e6'
-        }
-      }
-    }
-  }"
-&gt;
-  &lt;StripePaymentElement /&gt;
-&lt;/StripeElements&gt;</code></pre>
-        </div>
-
-        <div>
-          <h4 class="text-sm font-medium mb-2">Card Element (No clientSecret)</h4>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm"><code>&lt;!-- Card Element doesn't require clientSecret on StripeElements --&gt;
-&lt;StripeProvider :publishable-key="publishableKey"&gt;
-  &lt;StripeElements&gt;
-    &lt;StripeCardElement /&gt;
-  &lt;/StripeElements&gt;
-&lt;/StripeProvider&gt;</code></pre>
-        </div>
-
-        <div>
-          <h4 class="text-sm font-medium mb-2">Using useStripeElements</h4>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm"><code>&lt;script setup&gt;
-import { useStripeElements } from '@vue-stripe/vue-stripe'
-
-// Must be used within VueStripeElements
-const { elements, loading, error } = useStripeElements()
-
-// Access the Elements instance
-if (elements.value) {
-  // Create individual elements, get element by type, etc.
-  const paymentElement = elements.value.getElement('payment')
-}
-&lt;/script&gt;</code></pre>
-        </div>
-      </CardContent>
-    </Card>
-
-    <!-- Learning Notes -->
-    <Card class="bg-gradient-to-br from-info/10 to-info/5 border-l-4 border-info">
-      <CardHeader>
-        <CardTitle class="text-lg text-info">Learning Notes</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul class="list-disc list-inside space-y-2 text-sm">
-          <li><strong>Hierarchy:</strong> StripeElements must be used within StripeProvider.</li>
-          <li><strong>clientSecret:</strong> Required for PaymentElement, optional for CardElement.</li>
-          <li><strong>Appearance API:</strong> Customize all Elements with themes, variables, and rules.</li>
-          <li><strong>Provide/Inject:</strong> Child components access the Elements instance via useStripeElements().</li>
-          <li><strong>Reactivity:</strong> When clientSecret changes, Elements is recreated automatically.</li>
-        </ul>
       </CardContent>
     </Card>
   </div>

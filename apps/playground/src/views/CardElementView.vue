@@ -12,12 +12,6 @@ import {
   Button,
   Input,
   Label,
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -146,15 +140,6 @@ const clearCard = () => {
   log('action', 'Called clear()')
 }
 
-// Test card numbers
-const testCards = [
-  { number: '4242 4242 4242 4242', brand: 'Visa', description: 'Successful payment' },
-  { number: '4000 0000 0000 3220', brand: 'Visa', description: '3D Secure 2 authentication' },
-  { number: '4000 0000 0000 9995', brand: 'Visa', description: 'Declined (insufficient funds)' },
-  { number: '5555 5555 5555 4444', brand: 'Mastercard', description: 'Successful payment' },
-  { number: '3782 822463 10005', brand: 'Amex', description: 'Successful payment' }
-]
-
 // Get active client secret (from header config or local input)
 const activeClientSecret = computed(() => {
   return localClientSecret.value.trim() || stripeConfig?.clientSecret || ''
@@ -249,82 +234,18 @@ const resetPaymentState = () => {
   <div class="max-w-[900px] mx-auto flex flex-col gap-6">
     <Card>
       <CardHeader>
-        <CardTitle>StripeCardElement Component Test</CardTitle>
+        <CardTitle>StripeCardElement Component</CardTitle>
       </CardHeader>
       <CardContent>
-        <p class="text-muted-foreground mb-6">
+        <p class="text-muted-foreground mb-4">
           A single unified card input for collecting card number, expiry, CVC, and postal code.
           This is the classic Stripe card input - simpler than PaymentElement but card-only.
         </p>
-
-        <div class="border-t pt-6 space-y-4">
-          <h3 class="font-semibold">API Reference</h3>
-
-          <div>
-            <h4 class="text-sm font-medium mb-2">Props</h4>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Prop</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell><code class="text-sm bg-muted px-1 rounded">options</code></TableCell>
-                  <TableCell>StripeCardElementOptions</TableCell>
-                  <TableCell>Style and configuration options</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-
-          <div>
-            <h4 class="text-sm font-medium mb-2">Events</h4>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Event</TableHead>
-                  <TableHead>Payload</TableHead>
-                  <TableHead>Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell><code class="text-sm bg-muted px-1 rounded">@ready</code></TableCell>
-                  <TableCell>StripeCardElement</TableCell>
-                  <TableCell>Fired when element is mounted</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><code class="text-sm bg-muted px-1 rounded">@change</code></TableCell>
-                  <TableCell>StripeCardElementChangeEvent</TableCell>
-                  <TableCell>Fired on input change</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><code class="text-sm bg-muted px-1 rounded">@focus</code></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>Fired when element gains focus</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><code class="text-sm bg-muted px-1 rounded">@blur</code></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>Fired when element loses focus</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-
-          <div>
-            <h4 class="text-sm font-medium mb-2">Exposed Methods (via ref)</h4>
-            <ul class="list-disc list-inside text-sm text-muted-foreground space-y-1">
-              <li><code class="bg-muted px-1 rounded">focus()</code> - Focus the card input</li>
-              <li><code class="bg-muted px-1 rounded">blur()</code> - Blur the card input</li>
-              <li><code class="bg-muted px-1 rounded">clear()</code> - Clear the card input</li>
-              <li><code class="bg-muted px-1 rounded">element</code> - Access the underlying Stripe element</li>
-            </ul>
-          </div>
-        </div>
+        <p class="text-sm">
+          <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
+            View full documentation →
+          </a>
+        </p>
       </CardContent>
     </Card>
 
@@ -435,16 +356,6 @@ const resetPaymentState = () => {
                       :class="{ 'border-success': localClientSecret.includes('_secret_') }"
                     />
                   </div>
-
-                  <div class="border-t mt-4 pt-3">
-                    <h5 class="text-sm font-medium mb-2">How to get a Client Secret:</h5>
-                    <ol class="list-decimal list-inside text-sm text-muted-foreground space-y-1">
-                      <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Payments</a></li>
-                      <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
-                      <li>Enter an amount (e.g., $10.00)</li>
-                      <li>Copy the <code class="bg-muted px-1 rounded">client_secret</code> from the response</li>
-                    </ol>
-                  </div>
                 </div>
 
                 <!-- Payment Mode: Ready to Pay -->
@@ -499,32 +410,6 @@ const resetPaymentState = () => {
       </CardContent>
     </Card>
 
-    <!-- Test Cards -->
-    <Card>
-      <CardHeader>
-        <CardTitle class="text-lg">Test Card Numbers</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p class="text-muted-foreground text-sm mb-4">Use these test card numbers with any future expiry date and any 3-digit CVC.</p>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Card Number</TableHead>
-              <TableHead>Brand</TableHead>
-              <TableHead>Description</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="card in testCards" :key="card.number">
-              <TableCell><code class="text-sm bg-muted px-1 rounded">{{ card.number }}</code></TableCell>
-              <TableCell>{{ card.brand }}</TableCell>
-              <TableCell>{{ card.description }}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-
     <!-- Event Log -->
     <Card>
       <CardHeader>
@@ -545,59 +430,6 @@ const resetPaymentState = () => {
             <span class="event-data">{{ event.message }}</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
-
-    <!-- Code Examples -->
-    <Card>
-      <CardHeader>
-        <CardTitle class="text-lg">Code Examples</CardTitle>
-      </CardHeader>
-      <CardContent class="space-y-4">
-        <div>
-          <h4 class="text-sm font-medium mb-2">Basic Usage</h4>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm"><code>&lt;template&gt;
-  &lt;StripeProvider :publishable-key="publishableKey"&gt;
-    &lt;StripeElements&gt;
-      &lt;StripeCardElement
-        @ready="onReady"
-        @change="onChange"
-      /&gt;
-    &lt;/StripeElements&gt;
-  &lt;/StripeProvider&gt;
-&lt;/template&gt;</code></pre>
-        </div>
-
-        <div>
-          <h4 class="text-sm font-medium mb-2">With Custom Styling</h4>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm"><code>&lt;StripeCardElement
-  :options="{
-    style: {
-      base: {
-        fontSize: '16px',
-        color: '#424770'
-      }
-    },
-    hidePostalCode: true
-  }"
-/&gt;</code></pre>
-        </div>
-      </CardContent>
-    </Card>
-
-    <!-- Learning Notes -->
-    <Card class="bg-gradient-to-br from-info/10 to-info/5 border-l-4 border-info">
-      <CardHeader>
-        <CardTitle class="text-lg text-info">Learning Notes</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul class="list-disc list-inside space-y-2 text-sm">
-          <li><strong>No clientSecret needed:</strong> CardElement works without a clientSecret on StripeElements.</li>
-          <li><strong>Events:</strong> Use @change to track card state (complete, empty, brand, error).</li>
-          <li><strong>Styling:</strong> Use the style option with base/invalid/complete states.</li>
-          <li><strong>Postal Code:</strong> Set <code class="bg-info/20 px-1 rounded">hidePostalCode: true</code> to hide it.</li>
-          <li><strong>Programmatic Access:</strong> Use ref to call focus(), blur(), clear() methods.</li>
-        </ul>
       </CardContent>
     </Card>
   </div>

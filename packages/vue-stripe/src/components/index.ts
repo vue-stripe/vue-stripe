@@ -16,5 +16,11 @@ export { default as VueStripeCardCvcElement } from './VueStripeCardCvcElement.vu
 export { default as VueStripeLinkAuthenticationElement } from './VueStripeLinkAuthenticationElement.vue'
 export { default as VueStripeAddressElement } from './VueStripeAddressElement.vue'
 
+// European Regional Elements (v5.2.0)
+export { default as VueStripeIbanElement } from './VueStripeIbanElement.vue'
+export { default as VueStripeIdealBankElement } from './VueStripeIdealBankElement.vue'
+export { default as VueStripeP24BankElement } from './VueStripeP24BankElement.vue'
+export { default as VueStripeEpsBankElement } from './VueStripeEpsBankElement.vue'
+
 // Checkout
 export { default as VueStripeCheckout } from './VueStripeCheckout.vue'

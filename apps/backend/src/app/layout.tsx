@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 import { Sidebar } from '@/components/sidebar'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -44,6 +45,7 @@ export default function RootLayout({
             <main className="flex-1 overflow-y-auto p-6">{children}</main>
           </div>
         </div>
+        <Analytics />
       </body>
     </html>
   )
