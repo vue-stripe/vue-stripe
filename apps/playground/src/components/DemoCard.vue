@@ -1,76 +1,55 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+import { cn } from '@/lib/utils'
+
+const props = defineProps<{
   title?: string
   description?: string
   variant?: 'default' | 'learning' | 'warning' | 'dark'
 }>()
+
+const cardClasses = computed(() => {
+  const base = 'rounded-xl p-6 shadow-lg'
+
+  const variants = {
+    default: 'bg-card text-card-foreground',
+    learning: 'bg-gradient-to-br from-info/10 to-info/5 border-l-4 border-info',
+    warning: 'bg-warning/10 border-l-4 border-warning',
+    dark: 'bg-slate-900 text-slate-100',
+  }
+
+  return cn(base, variants[props.variant || 'default'])
+})
+
+const titleClasses = computed(() => {
+  const variants = {
+    default: 'text-foreground',
+    learning: 'text-info',
+    warning: 'text-warning-foreground',
+    dark: 'text-slate-100',
+  }
+  return cn('text-xl font-semibold', variants[props.variant || 'default'])
+})
+
+const descriptionClasses = computed(() => {
+  const variants = {
+    default: 'text-muted-foreground',
+    learning: 'text-muted-foreground',
+    warning: 'text-muted-foreground',
+    dark: 'text-slate-400',
+  }
+  return cn('text-sm leading-relaxed', variants[props.variant || 'default'])
+})
 </script>
 
 <template>
-  <div :class="['demo-card', variant && `demo-card--${variant}`]">
-    <header v-if="title || $slots.header" class="demo-card-header">
+  <div :class="cardClasses">
+    <header v-if="title || $slots.header" class="mb-5">
       <slot name="header">
-        <h2 v-if="title" class="demo-card-title">{{ title }}</h2>
-        <p v-if="description" class="demo-card-description">{{ description }}</p>
+        <h2 v-if="title" :class="titleClasses" class="mb-2">{{ title }}</h2>
+        <p v-if="description" :class="descriptionClasses">{{ description }}</p>
       </slot>
     </header>
     <slot />
   </div>
 </template>
-
-<style scoped>
-.demo-card {
-  background: var(--color-bg);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
-  box-shadow: var(--shadow-lg);
-}
-
-.demo-card-header {
-  margin-bottom: var(--space-5);
-}
-
-.demo-card-title {
-  margin: 0 0 var(--space-2) 0;
-  font-size: var(--text-xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.demo-card-description {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
-  line-height: 1.6;
-}
-
-/* Learning variant */
-.demo-card--learning {
-  background: linear-gradient(135deg, var(--color-info-light) 0%, #f0f7fa 100%);
-  border-left: 4px solid var(--color-info);
-}
-
-.demo-card--learning .demo-card-title {
-  color: var(--color-info);
-}
-
-/* Warning variant */
-.demo-card--warning {
-  background: var(--color-warning-light);
-  border-left: 4px solid var(--color-warning);
-}
-
-/* Dark variant */
-.demo-card--dark {
-  background: var(--color-bg-dark);
-  color: #f8f9fa;
-}
-
-.demo-card--dark .demo-card-title {
-  color: #f8f9fa;
-}
-
-.demo-card--dark .demo-card-description {
-  color: #aaa;
-}
-</style>

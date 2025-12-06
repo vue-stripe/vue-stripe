@@ -2,6 +2,26 @@
 import { ref, inject, computed, defineComponent, h } from 'vue'
 import { VueStripeProvider, VueStripeElements, VueStripeCardElement, useStripe } from '@vue-stripe/vue-stripe'
 import type { StripeCardElement as StripeCardElementType, StripeCardElementChangeEvent } from '@stripe/stripe-js'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui'
 
 // Mark VueStripeElements as used (it's used in template)
 void VueStripeElements
@@ -191,11 +211,11 @@ const PaymentButton = defineComponent({
       }
     }
 
-    return () => h('button', {
-      class: 'btn btn-success',
+    return () => h(Button, {
+      variant: 'success',
       disabled: !props.cardComplete || processing.value || !props.clientSecret,
       onClick: handlePayment
-    }, processing.value ? 'Processing...' : 'Confirm Payment')
+    }, () => processing.value ? 'Processing...' : 'Confirm Payment')
   }
 })
 
@@ -226,302 +246,317 @@ const resetPaymentState = () => {
 </script>
 
 <template>
-  <div class="test-page">
-    <div class="card">
-      <h2 class="card-title">StripeCardElement Component Test</h2>
-      <p class="text-secondary">
-        A single unified card input for collecting card number, expiry, CVC, and postal code.
-        This is the classic Stripe card input - simpler than PaymentElement but card-only.
-      </p>
+  <div class="max-w-[900px] mx-auto flex flex-col gap-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>StripeCardElement Component Test</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-muted-foreground mb-6">
+          A single unified card input for collecting card number, expiry, CVC, and postal code.
+          This is the classic Stripe card input - simpler than PaymentElement but card-only.
+        </p>
 
-      <div class="api-section">
-        <h3>API Reference</h3>
+        <div class="border-t pt-6 space-y-4">
+          <h3 class="font-semibold">API Reference</h3>
 
-        <h4>Props</h4>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Prop</th>
-              <th>Type</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>options</code></td>
-              <td>StripeCardElementOptions</td>
-              <td>Style and configuration options</td>
-            </tr>
-          </tbody>
-        </table>
+          <div>
+            <h4 class="text-sm font-medium mb-2">Props</h4>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Prop</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell><code class="text-sm bg-muted px-1 rounded">options</code></TableCell>
+                  <TableCell>StripeCardElementOptions</TableCell>
+                  <TableCell>Style and configuration options</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
 
-        <h4>Events</h4>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Event</th>
-              <th>Payload</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>@ready</code></td>
-              <td>StripeCardElement</td>
-              <td>Fired when element is mounted</td>
-            </tr>
-            <tr>
-              <td><code>@change</code></td>
-              <td>StripeCardElementChangeEvent</td>
-              <td>Fired on input change (includes complete, empty, brand, error)</td>
-            </tr>
-            <tr>
-              <td><code>@focus</code></td>
-              <td>-</td>
-              <td>Fired when element gains focus</td>
-            </tr>
-            <tr>
-              <td><code>@blur</code></td>
-              <td>-</td>
-              <td>Fired when element loses focus</td>
-            </tr>
-            <tr>
-              <td><code>@escape</code></td>
-              <td>-</td>
-              <td>Fired when escape key is pressed</td>
-            </tr>
-          </tbody>
-        </table>
+          <div>
+            <h4 class="text-sm font-medium mb-2">Events</h4>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Event</TableHead>
+                  <TableHead>Payload</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell><code class="text-sm bg-muted px-1 rounded">@ready</code></TableCell>
+                  <TableCell>StripeCardElement</TableCell>
+                  <TableCell>Fired when element is mounted</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code class="text-sm bg-muted px-1 rounded">@change</code></TableCell>
+                  <TableCell>StripeCardElementChangeEvent</TableCell>
+                  <TableCell>Fired on input change</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code class="text-sm bg-muted px-1 rounded">@focus</code></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>Fired when element gains focus</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code class="text-sm bg-muted px-1 rounded">@blur</code></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>Fired when element loses focus</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
 
-        <h4>Exposed Methods (via ref)</h4>
-        <ul class="method-list">
-          <li><code>focus()</code> - Focus the card input</li>
-          <li><code>blur()</code> - Blur the card input</li>
-          <li><code>clear()</code> - Clear the card input</li>
-          <li><code>element</code> - Access the underlying Stripe element</li>
-        </ul>
-      </div>
-    </div>
+          <div>
+            <h4 class="text-sm font-medium mb-2">Exposed Methods (via ref)</h4>
+            <ul class="list-disc list-inside text-sm text-muted-foreground space-y-1">
+              <li><code class="bg-muted px-1 rounded">focus()</code> - Focus the card input</li>
+              <li><code class="bg-muted px-1 rounded">blur()</code> - Blur the card input</li>
+              <li><code class="bg-muted px-1 rounded">clear()</code> - Clear the card input</li>
+              <li><code class="bg-muted px-1 rounded">element</code> - Access the underlying Stripe element</li>
+            </ul>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
 
     <!-- Style Options -->
-    <div class="card">
-      <h3>Style Options</h3>
-      <div class="btn-group">
-        <button
-          :class="['btn btn-secondary', { active: styleOption === 'default' }]"
-          @click="styleOption = 'default'"
-        >
-          Default
-        </button>
-        <button
-          :class="['btn btn-secondary', { active: styleOption === 'minimal' }]"
-          @click="styleOption = 'minimal'"
-        >
-          Minimal (no postal)
-        </button>
-        <button
-          :class="['btn btn-secondary', { active: styleOption === 'custom' }]"
-          @click="styleOption = 'custom'"
-        >
-          Custom Styled
-        </button>
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Style Options</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="space-y-3">
+          <Label class="text-xs uppercase tracking-wide text-muted-foreground">Card Style</Label>
+          <Tabs v-model="styleOption" class="w-full">
+            <TabsList class="grid w-full grid-cols-3">
+              <TabsTrigger value="default">Default</TabsTrigger>
+              <TabsTrigger value="minimal">Minimal</TabsTrigger>
+              <TabsTrigger value="custom">Custom</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </CardContent>
+    </Card>
 
     <!-- Live Demo -->
-    <div class="card">
-      <h3>Live Demo</h3>
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Live Demo</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Alert v-if="!stripeConfig?.publishableKey" variant="warning">
+          <AlertDescription>
+            No Stripe key configured. Click <strong>"Add Key"</strong> in the header above.
+          </AlertDescription>
+        </Alert>
 
-      <div v-if="!stripeConfig?.publishableKey" class="alert alert-warning">
-        <p>No Stripe key configured. Click <strong>"Add Key"</strong> in the header above.</p>
-      </div>
-
-      <div v-else class="demo-container">
-        <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
-          <VueStripeElements>
-            <template #loading>
-              <div class="loading-state">
-                <div class="spinner"></div>
-                <p>Initializing Stripe Elements...</p>
-              </div>
-            </template>
-
-            <div class="card-form">
-              <label class="form-label">Card Details</label>
-              <VueStripeCardElement
-                ref="cardElementRef"
-                :options="styleOptions"
-                @ready="handleReady"
-                @change="handleChange"
-                @focus="handleFocus"
-                @blur="handleBlur"
-                @escape="handleEscape"
-              />
-
-              <!-- Card State Display -->
-              <div class="card-state">
-                <div class="state-item">
-                  <span class="state-label">Complete:</span>
-                  <span :class="['state-value', cardState.complete ? 'success' : '']">
-                    {{ cardState.complete ? '✅ Yes' : '❌ No' }}
-                  </span>
+        <div v-else class="bg-secondary rounded-lg p-6">
+          <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
+            <VueStripeElements>
+              <template #loading>
+                <div class="text-center py-8">
+                  <div class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+                  <p class="text-muted-foreground">Initializing Stripe Elements...</p>
                 </div>
-                <div class="state-item">
-                  <span class="state-label">Empty:</span>
-                  <span class="state-value">{{ cardState.empty ? 'Yes' : 'No' }}</span>
-                </div>
-                <div class="state-item">
-                  <span class="state-label">Brand:</span>
-                  <span class="state-value brand">{{ cardState.brand || '-' }}</span>
-                </div>
-                <div v-if="cardState.error" class="state-item error">
-                  <span class="state-label">Error:</span>
-                  <span class="state-value">{{ cardState.error }}</span>
-                </div>
-              </div>
+              </template>
 
-              <!-- Action Buttons -->
-              <div class="btn-group mt-4">
-                <button class="btn btn-sm btn-secondary" @click="focusCard">Focus</button>
-                <button class="btn btn-sm btn-secondary" @click="clearCard">Clear</button>
-                <button
-                  :class="['btn btn-sm', showPaymentSection ? 'btn-primary active' : 'btn-secondary']"
-                  @click="showPaymentSection = !showPaymentSection"
-                >
-                  {{ showPaymentSection ? 'Hide Payment' : 'Test Payment' }}
-                </button>
-              </div>
-
-              <!-- Payment Mode: Client Secret Form -->
-              <div v-if="showSecretForm" class="secret-form mt-4">
-                <h4>Enter Client Secret</h4>
-                <p class="text-secondary text-sm">
-                  To test payment confirmation, you need a <code>client_secret</code> from a PaymentIntent.
-                </p>
-
-                <div class="form-group">
-                  <label class="form-label">Client Secret</label>
-                  <input
-                    v-model="localClientSecret"
-                    type="text"
-                    placeholder="pi_xxx_secret_xxx"
-                    class="form-input form-input-mono"
-                    :class="{ 'is-valid': localClientSecret.includes('_secret_') }"
+              <div class="bg-card rounded-lg p-6 shadow-sm">
+                <Label class="mb-2 block">Card Details</Label>
+                <div class="stripe-element-wrapper">
+                  <VueStripeCardElement
+                    ref="cardElementRef"
+                    :options="styleOptions"
+                    @ready="handleReady"
+                    @change="handleChange"
+                    @focus="handleFocus"
+                    @blur="handleBlur"
+                    @escape="handleEscape"
                   />
                 </div>
 
-                <div class="instructions">
-                  <h5>How to get a Client Secret:</h5>
-                  <ol>
-                    <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="link">Stripe Dashboard → Payments</a></li>
-                    <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
-                    <li>Enter an amount (e.g., $10.00)</li>
-                    <li>Copy the <code>client_secret</code> from the response</li>
-                  </ol>
-                  <p class="text-muted text-sm mt-2">
-                    The client secret looks like: <code>pi_xxx_secret_xxx</code>
+                <!-- Card State Display -->
+                <div class="flex flex-wrap gap-4 mt-4 p-3 bg-secondary rounded-md text-sm">
+                  <div class="flex gap-2">
+                    <span class="text-muted-foreground">Complete:</span>
+                    <span :class="cardState.complete ? 'text-success' : ''">
+                      {{ cardState.complete ? '✅ Yes' : '❌ No' }}
+                    </span>
+                  </div>
+                  <div class="flex gap-2">
+                    <span class="text-muted-foreground">Empty:</span>
+                    <span>{{ cardState.empty ? 'Yes' : 'No' }}</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <span class="text-muted-foreground">Brand:</span>
+                    <span class="capitalize">{{ cardState.brand || '-' }}</span>
+                  </div>
+                  <div v-if="cardState.error" class="w-full text-destructive mt-2">
+                    <span class="text-muted-foreground">Error:</span>
+                    <span>{{ cardState.error }}</span>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-2 mt-4">
+                  <Button variant="secondary" size="sm" @click="focusCard">Focus</Button>
+                  <Button variant="secondary" size="sm" @click="clearCard">Clear</Button>
+                  <Button
+                    :variant="showPaymentSection ? 'default' : 'secondary'"
+                    size="sm"
+                    @click="showPaymentSection = !showPaymentSection"
+                  >
+                    {{ showPaymentSection ? 'Hide Payment' : 'Test Payment' }}
+                  </Button>
+                </div>
+
+                <!-- Payment Mode: Client Secret Form -->
+                <div v-if="showSecretForm" class="bg-secondary rounded-lg p-5 mt-4">
+                  <h4 class="font-medium mb-3">Enter Client Secret</h4>
+                  <p class="text-muted-foreground text-sm mb-4">
+                    To test payment confirmation, you need a <code class="bg-muted px-1 rounded">client_secret</code> from a PaymentIntent.
+                  </p>
+
+                  <div class="space-y-2">
+                    <Label>Client Secret</Label>
+                    <Input
+                      v-model="localClientSecret"
+                      type="text"
+                      placeholder="pi_xxx_secret_xxx"
+                      class="font-mono text-sm"
+                      :class="{ 'border-success': localClientSecret.includes('_secret_') }"
+                    />
+                  </div>
+
+                  <div class="border-t mt-4 pt-3">
+                    <h5 class="text-sm font-medium mb-2">How to get a Client Secret:</h5>
+                    <ol class="list-decimal list-inside text-sm text-muted-foreground space-y-1">
+                      <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Payments</a></li>
+                      <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
+                      <li>Enter an amount (e.g., $10.00)</li>
+                      <li>Copy the <code class="bg-muted px-1 rounded">client_secret</code> from the response</li>
+                    </ol>
+                  </div>
+                </div>
+
+                <!-- Payment Mode: Ready to Pay -->
+                <div v-else-if="showPaymentSection && activeClientSecret" class="mt-4">
+                  <div class="flex items-center gap-3 p-3 bg-info/10 border border-info/30 rounded-md">
+                    <span class="text-sm text-info font-medium">Client Secret:</span>
+                    <code class="text-xs bg-background px-2 py-0.5 rounded font-mono">
+                      {{ activeClientSecret.slice(0, 15) }}...{{ activeClientSecret.slice(-8) }}
+                    </code>
+                    <Button variant="ghost" size="sm" class="ml-auto" @click="localClientSecret = ''">
+                      Clear
+                    </Button>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2 mt-3">
+                    <PaymentButton
+                      v-if="cardElementRef?.element"
+                      :client-secret="activeClientSecret"
+                      :card-complete="cardState.complete"
+                      :card-element="cardElementRef.element"
+                      @payment-success="handlePaymentSuccess"
+                      @payment-error="handlePaymentError"
+                      @payment-processing="handlePaymentProcessing"
+                    />
+                    <Button
+                      v-if="paymentStatus !== 'idle'"
+                      variant="secondary"
+                      size="sm"
+                      @click="resetPaymentState"
+                    >
+                      Reset
+                    </Button>
+                  </div>
+
+                  <!-- Payment Status -->
+                  <Alert
+                    v-if="paymentMessage"
+                    :variant="paymentStatus === 'succeeded' ? 'success' : paymentStatus === 'error' ? 'destructive' : 'warning'"
+                    class="mt-3"
+                  >
+                    <AlertDescription>{{ paymentMessage }}</AlertDescription>
+                  </Alert>
+
+                  <p class="text-muted-foreground text-sm mt-3">
+                    Use test card <code class="bg-muted px-1 rounded">4242 4242 4242 4242</code> with any future date and CVC
                   </p>
                 </div>
               </div>
-
-              <!-- Payment Mode: Ready to Pay -->
-              <div v-else-if="showPaymentSection && activeClientSecret" class="payment-ready mt-4">
-                <div class="secret-status">
-                  <span class="secret-label">Client Secret:</span>
-                  <code class="secret-value">{{ activeClientSecret.slice(0, 15) }}...{{ activeClientSecret.slice(-8) }}</code>
-                  <button class="btn btn-sm btn-ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
-                    Clear
-                  </button>
-                </div>
-
-                <div class="btn-group mt-3">
-                  <PaymentButton
-                    v-if="cardElementRef?.element"
-                    :client-secret="activeClientSecret"
-                    :card-complete="cardState.complete"
-                    :card-element="cardElementRef.element"
-                    @payment-success="handlePaymentSuccess"
-                    @payment-error="handlePaymentError"
-                    @payment-processing="handlePaymentProcessing"
-                  />
-                  <button
-                    v-if="paymentStatus !== 'idle'"
-                    class="btn btn-sm btn-secondary"
-                    @click="resetPaymentState"
-                  >
-                    Reset
-                  </button>
-                </div>
-
-                <!-- Payment Status -->
-                <div
-                  v-if="paymentMessage"
-                  :class="['alert mt-3', {
-                    'alert-warning': paymentStatus === 'processing',
-                    'alert-success': paymentStatus === 'succeeded',
-                    'alert-danger': paymentStatus === 'error'
-                  }]"
-                >
-                  {{ paymentMessage }}
-                </div>
-
-                <p class="text-muted text-sm mt-3">
-                  Use test card <code>4242 4242 4242 4242</code> with any future date and CVC
-                </p>
-              </div>
-            </div>
-          </VueStripeElements>
-        </VueStripeProvider>
-      </div>
-    </div>
+            </VueStripeElements>
+          </VueStripeProvider>
+        </div>
+      </CardContent>
+    </Card>
 
     <!-- Test Cards -->
-    <div class="card">
-      <h3>Test Card Numbers</h3>
-      <p class="text-secondary text-sm mb-4">Use these test card numbers with any future expiry date and any 3-digit CVC.</p>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Card Number</th>
-            <th>Brand</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="card in testCards" :key="card.number">
-            <td><code>{{ card.number }}</code></td>
-            <td>{{ card.brand }}</td>
-            <td>{{ card.description }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Test Card Numbers</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-muted-foreground text-sm mb-4">Use these test card numbers with any future expiry date and any 3-digit CVC.</p>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Card Number</TableHead>
+              <TableHead>Brand</TableHead>
+              <TableHead>Description</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-for="card in testCards" :key="card.number">
+              <TableCell><code class="text-sm bg-muted px-1 rounded">{{ card.number }}</code></TableCell>
+              <TableCell>{{ card.brand }}</TableCell>
+              <TableCell>{{ card.description }}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
 
     <!-- Event Log -->
-    <div class="card">
-      <h3>Event Log</h3>
-      <div class="event-log">
-        <div v-if="events.length === 0" class="event-empty">
-          No events yet. Interact with the card input to see events.
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Event Log</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="event-log">
+          <div v-if="events.length === 0" class="text-slate-400 text-center py-4">
+            No events yet. Interact with the card input to see events.
+          </div>
+          <div
+            v-for="(event, index) in events"
+            :key="index"
+            class="event-entry"
+          >
+            <span class="event-time">{{ event.time }}</span>
+            <span :class="['event-type', event.type]">{{ event.type }}</span>
+            <span class="event-data">{{ event.message }}</span>
+          </div>
         </div>
-        <div
-          v-for="(event, index) in events"
-          :key="index"
-          class="event-entry"
-        >
-          <span class="event-time">{{ event.time }}</span>
-          <span :class="['event-type', event.type]">{{ event.type }}</span>
-          <span class="event-message">{{ event.message }}</span>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
 
     <!-- Code Examples -->
-    <div class="card">
-      <h3>Code Examples</h3>
-
-      <h4>Basic Usage</h4>
-      <pre class="code-block"><code>&lt;template&gt;
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Code Examples</CardTitle>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <div>
+          <h4 class="text-sm font-medium mb-2">Basic Usage</h4>
+          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm"><code>&lt;template&gt;
   &lt;StripeProvider :publishable-key="publishableKey"&gt;
     &lt;StripeElements&gt;
       &lt;StripeCardElement
@@ -530,265 +565,40 @@ const resetPaymentState = () => {
       /&gt;
     &lt;/StripeElements&gt;
   &lt;/StripeProvider&gt;
-&lt;/template&gt;
+&lt;/template&gt;</code></pre>
+        </div>
 
-&lt;script setup&gt;
-import { VueStripeProvider, VueStripeElements, VueStripeCardElement } from '@vue-stripe/vue-stripe'
-
-const onReady = (element) => console.log('Card ready!')
-const onChange = (event) => {
-  if (event.complete) {
-    console.log('Card details complete')
-  }
-}
-&lt;/script&gt;</code></pre>
-
-      <h4>With Custom Styling</h4>
-      <pre class="code-block"><code>&lt;StripeCardElement
+        <div>
+          <h4 class="text-sm font-medium mb-2">With Custom Styling</h4>
+          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm"><code>&lt;StripeCardElement
   :options="{
     style: {
       base: {
         fontSize: '16px',
-        color: '#424770',
-        '::placeholder': { color: '#aab7c4' }
-      },
-      invalid: {
-        color: '#9e2146'
+        color: '#424770'
       }
     },
     hidePostalCode: true
   }"
 /&gt;</code></pre>
-
-      <h4>Creating a Payment Method</h4>
-      <pre class="code-block"><code>&lt;script setup&gt;
-import { ref } from 'vue'
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
-
-const cardRef = ref()
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
-
-const handleSubmit = async () => {
-  const cardElement = cardRef.value.element
-
-  const { paymentMethod, error } = await stripe.value.createPaymentMethod({
-    type: 'card',
-    card: cardElement
-  })
-
-  if (error) {
-    console.error(error.message)
-  } else {
-    console.log('PaymentMethod:', paymentMethod.id)
-    // Send paymentMethod.id to your server
-  }
-}
-&lt;/script&gt;</code></pre>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
 
     <!-- Learning Notes -->
-    <div class="card card-info">
-      <h3>Learning Notes</h3>
-      <ul>
-        <li><strong>No clientSecret needed:</strong> CardElement works without a clientSecret on StripeElements.</li>
-        <li><strong>Events:</strong> Use @change to track card state (complete, empty, brand, error).</li>
-        <li><strong>Styling:</strong> Use the style option with base/invalid/complete states.</li>
-        <li><strong>Postal Code:</strong> Set <code>hidePostalCode: true</code> to hide it.</li>
-        <li><strong>Programmatic Access:</strong> Use ref to call focus(), blur(), clear() methods.</li>
-        <li><strong>Payment Flow:</strong> Use <code>stripe.createPaymentMethod()</code> or <code>stripe.createToken()</code> with the card element.</li>
-      </ul>
-    </div>
+    <Card class="bg-gradient-to-br from-info/10 to-info/5 border-l-4 border-info">
+      <CardHeader>
+        <CardTitle class="text-lg text-info">Learning Notes</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul class="list-disc list-inside space-y-2 text-sm">
+          <li><strong>No clientSecret needed:</strong> CardElement works without a clientSecret on StripeElements.</li>
+          <li><strong>Events:</strong> Use @change to track card state (complete, empty, brand, error).</li>
+          <li><strong>Styling:</strong> Use the style option with base/invalid/complete states.</li>
+          <li><strong>Postal Code:</strong> Set <code class="bg-info/20 px-1 rounded">hidePostalCode: true</code> to hide it.</li>
+          <li><strong>Programmatic Access:</strong> Use ref to call focus(), blur(), clear() methods.</li>
+        </ul>
+      </CardContent>
+    </Card>
   </div>
 </template>
-
-<style scoped>
-/* View uses .test-page from design-system.css for consistent 900px width */
-
-.card-title {
-  margin: 0 0 var(--space-3) 0;
-  font-size: var(--text-xl);
-}
-
-.api-section {
-  margin-top: var(--space-6);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border-light);
-}
-
-.api-section h3 {
-  margin: 0 0 var(--space-4) 0;
-}
-
-.api-section h4 {
-  margin: var(--space-5) 0 var(--space-3) 0;
-  color: var(--color-text);
-}
-
-.method-list {
-  margin: var(--space-3) 0 0 0;
-  padding-left: var(--space-5);
-}
-
-.method-list li {
-  margin-bottom: var(--space-2);
-  line-height: 1.6;
-}
-
-.demo-container {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-}
-
-.loading-state {
-  text-align: center;
-  padding: var(--space-8) var(--space-6);
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 3px solid var(--color-border-light);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto var(--space-4);
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.card-form {
-  background: white;
-  padding: var(--space-6);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.card-state {
-  display: flex;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  margin-top: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-}
-
-.state-item {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.state-item.error {
-  flex-basis: 100%;
-  color: var(--color-danger);
-  margin-top: var(--space-2);
-}
-
-.state-label {
-  color: var(--color-text-muted);
-}
-
-.state-value {
-  font-weight: 500;
-}
-
-.state-value.success {
-  color: var(--color-success);
-}
-
-.state-value.brand {
-  text-transform: capitalize;
-}
-
-.secret-form {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-}
-
-.secret-form h4 {
-  margin: 0 0 var(--space-3) 0;
-  color: var(--color-text);
-}
-
-.instructions {
-  margin-top: var(--space-4);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border-light);
-}
-
-.instructions h5 {
-  margin: 0 0 var(--space-2) 0;
-  color: var(--color-text);
-  font-size: var(--text-sm);
-}
-
-.instructions ol {
-  margin: 0;
-  padding-left: var(--space-5);
-  color: var(--color-text-muted);
-}
-
-.instructions li {
-  margin-bottom: var(--space-2);
-  line-height: 1.6;
-}
-
-.secret-status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-info-light);
-  border: 1px solid var(--color-info);
-  border-radius: var(--radius-md);
-}
-
-.secret-status .secret-label {
-  font-size: var(--text-sm);
-  color: var(--color-info-dark);
-  font-weight: 500;
-}
-
-.secret-status .secret-value {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  background: white;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-sm);
-  color: var(--color-info-dark);
-}
-
-.secret-status .btn-ghost {
-  margin-left: auto;
-}
-
-.payment-ready h4 {
-  margin: 0 0 var(--space-3) 0;
-}
-
-.card-info {
-  background: linear-gradient(135deg, var(--color-info-light) 0%, #f0f7fa 100%);
-  border-left: 4px solid var(--color-info);
-}
-
-.card-info h3 {
-  color: var(--color-info-dark);
-  margin-bottom: var(--space-4);
-}
-
-.card-info ul {
-  margin: 0;
-  padding-left: var(--space-5);
-}
-
-.card-info li {
-  margin-bottom: var(--space-3);
-  line-height: 1.7;
-}
-</style>

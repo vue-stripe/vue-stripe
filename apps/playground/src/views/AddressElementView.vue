@@ -6,6 +6,20 @@ import {
   VueStripeAddressElement
 } from '@vue-stripe/vue-stripe'
 import type { StripeAddressElementChangeEvent } from '@stripe/stripe-js'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Alert,
+  AlertDescription,
+  Button,
+  Label,
+  Badge,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui'
 
 // Ref to the address element component
 const addressElementRef = ref<InstanceType<typeof VueStripeAddressElement> | null>(null)
@@ -177,607 +191,203 @@ const handleClear = () => {
 </script>
 
 <template>
-  <div class="test-page">
-    <div class="card">
-      <h2 class="card-title">StripeAddressElement</h2>
-      <p class="text-secondary">
-        Stripe's Address Element collects shipping or billing addresses with built-in
-        autocomplete powered by Google Maps. Works without a clientSecret.
-      </p>
-
-      <!-- Warning if no publishable key -->
-      <div v-if="!publishableKey" class="alert alert-warning mt-4">
-        Add your Stripe publishable key using the header button to test this component.
-      </div>
-
-      <!-- Configuration Controls -->
-      <div v-else class="config-section mt-4">
-        <h4>Configuration</h4>
-
-        <div class="control-grid">
-          <div class="control-group">
-            <label>Mode</label>
-            <div class="btn-group btn-group-sm">
-              <button
-                :class="['btn btn-secondary', { active: addressMode === 'shipping' }]"
-                @click="addressMode = 'shipping'"
-              >
-                Shipping
-              </button>
-              <button
-                :class="['btn btn-secondary', { active: addressMode === 'billing' }]"
-                @click="addressMode = 'billing'"
-              >
-                Billing
-              </button>
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label>Autocomplete</label>
-            <div class="btn-group btn-group-sm">
-              <button
-                :class="['btn btn-secondary', { active: autocompleteEnabled }]"
-                @click="autocompleteEnabled = true"
-              >
-                Enabled
-              </button>
-              <button
-                :class="['btn btn-secondary', { active: !autocompleteEnabled }]"
-                @click="autocompleteEnabled = false"
-              >
-                Disabled
-              </button>
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label>Pre-fill</label>
-            <div class="btn-group btn-group-sm">
-              <button
-                :class="['btn btn-secondary', { active: !useDefaultValues }]"
-                @click="useDefaultValues = false"
-              >
-                Empty
-              </button>
-              <button
-                :class="['btn btn-secondary', { active: useDefaultValues }]"
-                @click="useDefaultValues = true"
-              >
-                With Data
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Live Demo -->
-    <div v-if="publishableKey" class="card">
-      <h3>Live Demo</h3>
-      <p class="text-secondary text-sm mb-4">
-        Try the address autocomplete. Start typing an address to see suggestions.
-      </p>
-
-      <div class="demo-container">
-        <VueStripeProvider :publishable-key="publishableKey">
-          <VueStripeElements>
-            <div class="address-wrapper">
-              <VueStripeAddressElement
-                ref="addressElementRef"
-                :key="elementKey"
-                :options="elementOptions"
-                @ready="onReady"
-                @change="onChange"
-                @focus="onFocus"
-                @blur="onBlur"
-                @escape="onEscape"
-                @load-error="onLoadError"
-              />
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="action-buttons mt-4">
-              <button
-                class="btn btn-primary"
-                :disabled="isGettingValue"
-                @click="handleGetValue"
-              >
-                {{ isGettingValue ? 'Getting...' : 'Get Value' }}
-              </button>
-              <button
-                class="btn btn-secondary"
-                @click="handleFocus"
-              >
-                Focus
-              </button>
-              <button
-                class="btn btn-secondary"
-                @click="handleClear"
-              >
-                Clear
-              </button>
-            </div>
-          </VueStripeElements>
-        </VueStripeProvider>
-      </div>
-
-      <!-- Collected Data Display -->
-      <div class="collected-data mt-4">
-        <h4>Collected Address Data</h4>
-        <div class="data-status">
-          <span :class="['status-badge', addressData.complete ? 'complete' : 'incomplete']">
-            {{ addressData.complete ? '✅ Complete' : '⏳ Incomplete' }}
-          </span>
-          <span v-if="addressData.isNewAddress" class="status-badge new">
-            New Address
-          </span>
-        </div>
-
-        <div v-if="addressData.value" class="address-preview">
-          <div class="preview-row" v-if="addressData.value.name">
-            <span class="preview-label">Name:</span>
-            <span class="preview-value">{{ addressData.value.name }}</span>
-          </div>
-          <div class="preview-row" v-if="addressData.value.phone">
-            <span class="preview-label">Phone:</span>
-            <span class="preview-value">{{ addressData.value.phone }}</span>
-          </div>
-          <div class="preview-row">
-            <span class="preview-label">Address:</span>
-            <span class="preview-value">
-              {{ addressData.value.address.line1 }}
-              <span v-if="addressData.value.address.line2">, {{ addressData.value.address.line2 }}</span>
-            </span>
-          </div>
-          <div class="preview-row">
-            <span class="preview-label">City/State:</span>
-            <span class="preview-value">
-              {{ addressData.value.address.city }}, {{ addressData.value.address.state }} {{ addressData.value.address.postal_code }}
-            </span>
-          </div>
-          <div class="preview-row">
-            <span class="preview-label">Country:</span>
-            <span class="preview-value">{{ addressData.value.address.country }}</span>
-          </div>
-        </div>
-
-        <div v-else class="no-data">
-          Fill in the address form to see collected data here.
-        </div>
-      </div>
-
-      <!-- getValue() Result -->
-      <div class="getvalue-section mt-4">
-        <h4>getValue() Result</h4>
-        <p class="text-secondary text-sm mb-3">
-          Click "Get Value" above to programmatically retrieve the current address data.
-          This is useful for validation before form submission.
+  <div class="max-w-[900px] mx-auto flex flex-col gap-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>StripeAddressElement</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-muted-foreground mb-4">
+          Stripe's Address Element collects shipping or billing addresses with built-in
+          autocomplete powered by Google Maps. Works without a clientSecret.
+        </p>
+        <p class="text-sm mb-4">
+          <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
+            View full documentation →
+          </a>
         </p>
 
-        <div v-if="getValueError" class="alert alert-error">
-          {{ getValueError }}
+        <!-- Warning if no publishable key -->
+        <Alert v-if="!publishableKey" variant="warning">
+          <AlertDescription>
+            Add your Stripe publishable key using the header button to test this component.
+          </AlertDescription>
+        </Alert>
+
+        <!-- Configuration Controls -->
+        <div v-else class="mt-4">
+          <h4 class="font-semibold mb-3">Configuration</h4>
+
+          <div class="grid gap-6 p-4 bg-secondary rounded-lg" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="space-y-3">
+              <Label class="text-xs uppercase tracking-wide text-muted-foreground">Mode</Label>
+              <Tabs v-model="addressMode" class="w-full">
+                <TabsList class="grid w-full grid-cols-2">
+                  <TabsTrigger value="shipping">Shipping</TabsTrigger>
+                  <TabsTrigger value="billing">Billing</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            <div class="space-y-3">
+              <Label class="text-xs uppercase tracking-wide text-muted-foreground">Autocomplete</Label>
+              <Tabs :model-value="autocompleteEnabled ? 'enabled' : 'disabled'" @update:model-value="autocompleteEnabled = $event === 'enabled'" class="w-full">
+                <TabsList class="grid w-full grid-cols-2">
+                  <TabsTrigger value="enabled">Enabled</TabsTrigger>
+                  <TabsTrigger value="disabled">Disabled</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            <div class="space-y-3">
+              <Label class="text-xs uppercase tracking-wide text-muted-foreground">Pre-fill</Label>
+              <Tabs :model-value="useDefaultValues ? 'prefill' : 'empty'" @update:model-value="useDefaultValues = $event === 'prefill'" class="w-full">
+                <TabsList class="grid w-full grid-cols-2">
+                  <TabsTrigger value="empty">Empty</TabsTrigger>
+                  <TabsTrigger value="prefill">With Data</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Live Demo -->
+    <Card v-if="publishableKey">
+      <CardHeader>
+        <CardTitle class="text-lg">Live Demo</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-muted-foreground text-sm mb-4">
+          Try the address autocomplete. Start typing an address to see suggestions.
+        </p>
+
+        <div class="bg-secondary rounded-lg p-6">
+          <VueStripeProvider :publishable-key="publishableKey">
+            <VueStripeElements>
+              <div class="bg-card rounded-md p-4 border">
+                <VueStripeAddressElement
+                  ref="addressElementRef"
+                  :key="elementKey"
+                  :options="elementOptions"
+                  @ready="onReady"
+                  @change="onChange"
+                  @focus="onFocus"
+                  @blur="onBlur"
+                  @escape="onEscape"
+                  @load-error="onLoadError"
+                />
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex gap-3 mt-4 flex-wrap">
+                <Button
+                  :disabled="isGettingValue"
+                  @click="handleGetValue"
+                >
+                  {{ isGettingValue ? 'Getting...' : 'Get Value' }}
+                </Button>
+                <Button variant="secondary" @click="handleFocus">Focus</Button>
+                <Button variant="secondary" @click="handleClear">Clear</Button>
+              </div>
+            </VueStripeElements>
+          </VueStripeProvider>
         </div>
 
-        <div v-else-if="getValueResult" class="getvalue-result">
-          <div class="data-status">
-            <span :class="['status-badge', getValueResult.complete ? 'complete' : 'incomplete']">
-              {{ getValueResult.complete ? '✅ Valid' : '❌ Incomplete' }}
-            </span>
-            <span v-if="getValueResult.isNewAddress" class="status-badge new">
-              New Address
-            </span>
+        <!-- Collected Data Display -->
+        <div class="bg-secondary rounded-lg p-4 mt-4">
+          <h4 class="font-semibold text-sm mb-3">Collected Address Data</h4>
+          <div class="flex gap-2 mb-3">
+            <Badge :variant="addressData.complete ? 'success' : 'warning'">
+              {{ addressData.complete ? '✅ Complete' : '⏳ Incomplete' }}
+            </Badge>
+            <Badge v-if="addressData.isNewAddress" variant="info">New Address</Badge>
           </div>
 
-          <div class="result-json">
-            <pre>{{ JSON.stringify(getValueResult, null, 2) }}</pre>
+          <div v-if="addressData.value" class="bg-card rounded-md p-3 border text-sm space-y-2">
+            <div v-if="addressData.value.name" class="flex gap-2 py-1 border-b">
+              <span class="text-muted-foreground min-w-[80px]">Name:</span>
+              <span class="font-medium">{{ addressData.value.name }}</span>
+            </div>
+            <div v-if="addressData.value.phone" class="flex gap-2 py-1 border-b">
+              <span class="text-muted-foreground min-w-[80px]">Phone:</span>
+              <span class="font-medium">{{ addressData.value.phone }}</span>
+            </div>
+            <div class="flex gap-2 py-1 border-b">
+              <span class="text-muted-foreground min-w-[80px]">Address:</span>
+              <span class="font-medium">
+                {{ addressData.value.address.line1 }}
+                <span v-if="addressData.value.address.line2">, {{ addressData.value.address.line2 }}</span>
+              </span>
+            </div>
+            <div class="flex gap-2 py-1 border-b">
+              <span class="text-muted-foreground min-w-[80px]">City/State:</span>
+              <span class="font-medium">
+                {{ addressData.value.address.city }}, {{ addressData.value.address.state }} {{ addressData.value.address.postal_code }}
+              </span>
+            </div>
+            <div class="flex gap-2 py-1">
+              <span class="text-muted-foreground min-w-[80px]">Country:</span>
+              <span class="font-medium">{{ addressData.value.address.country }}</span>
+            </div>
+          </div>
+
+          <div v-else class="text-center text-muted-foreground text-sm py-4">
+            Fill in the address form to see collected data here.
           </div>
         </div>
 
-        <div v-else class="no-data">
-          Click "Get Value" to retrieve the current address data.
+        <!-- getValue() Result -->
+        <div class="bg-secondary rounded-lg p-4 mt-4">
+          <h4 class="font-semibold text-sm mb-2">getValue() Result</h4>
+          <p class="text-muted-foreground text-sm mb-3">
+            Click "Get Value" above to programmatically retrieve the current address data.
+            This is useful for validation before form submission.
+          </p>
+
+          <Alert v-if="getValueError" variant="destructive">
+            <AlertDescription>{{ getValueError }}</AlertDescription>
+          </Alert>
+
+          <div v-else-if="getValueResult" class="bg-card rounded-md p-3 border">
+            <div class="flex gap-2 mb-3">
+              <Badge :variant="getValueResult.complete ? 'success' : 'destructive'">
+                {{ getValueResult.complete ? '✅ Valid' : '❌ Incomplete' }}
+              </Badge>
+              <Badge v-if="getValueResult.isNewAddress" variant="info">New Address</Badge>
+            </div>
+
+            <div class="bg-secondary rounded-md p-3 overflow-x-auto">
+              <pre class="text-xs">{{ JSON.stringify(getValueResult, null, 2) }}</pre>
+            </div>
+          </div>
+
+          <div v-else class="text-center text-muted-foreground text-sm py-4">
+            Click "Get Value" to retrieve the current address data.
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
 
     <!-- Event Log -->
-    <div class="card">
-      <h3>Event Log</h3>
-      <div class="event-log">
-        <div v-if="eventLog.length === 0" class="event-empty">
-          Interact with the Address Element to see events...
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Event Log</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="event-log">
+          <div v-if="eventLog.length === 0" class="text-muted-foreground italic">
+            Interact with the Address Element to see events...
+          </div>
+          <div v-for="(entry, index) in eventLog" :key="index" class="flex gap-3 py-1 text-sm">
+            <span class="text-muted-foreground">{{ entry.time }}</span>
+            <span class="font-medium text-primary">{{ entry.event }}</span>
+            <span v-if="entry.data" class="text-muted-foreground">{{ entry.data }}</span>
+          </div>
         </div>
-        <div v-for="(entry, index) in eventLog" :key="index" class="event-entry">
-          <span class="event-time">{{ entry.time }}</span>
-          <span class="event-name">{{ entry.event }}</span>
-          <span v-if="entry.data" class="event-data">{{ entry.data }}</span>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
 
-    <!-- API Reference -->
-    <div class="card">
-      <h3>API Reference</h3>
-
-      <h4>Props</h4>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Prop</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>options</code></td>
-            <td>StripeAddressElementOptions</td>
-            <td>Configuration for the address element</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h4>Events</h4>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Payload</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>@ready</code></td>
-            <td>-</td>
-            <td>Fired when the element is mounted</td>
-          </tr>
-          <tr>
-            <td><code>@change</code></td>
-            <td>StripeAddressElementChangeEvent</td>
-            <td>Fired when address data changes (includes complete, value)</td>
-          </tr>
-          <tr>
-            <td><code>@focus</code></td>
-            <td>-</td>
-            <td>Fired when element gains focus</td>
-          </tr>
-          <tr>
-            <td><code>@blur</code></td>
-            <td>-</td>
-            <td>Fired when element loses focus</td>
-          </tr>
-          <tr>
-            <td><code>@escape</code></td>
-            <td>-</td>
-            <td>Fired when escape key is pressed</td>
-          </tr>
-          <tr>
-            <td><code>@load-error</code></td>
-            <td>{ elementType, error }</td>
-            <td>Fired if the element fails to load</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h4>Exposed Methods (via ref)</h4>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Method</th>
-            <th>Returns</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>getValue()</code></td>
-            <td>Promise&lt;{ complete, isNewAddress, value }&gt;</td>
-            <td>Get current address data programmatically</td>
-          </tr>
-          <tr>
-            <td><code>focus()</code></td>
-            <td>void</td>
-            <td>Focus the first input in the address form</td>
-          </tr>
-          <tr>
-            <td><code>clear()</code></td>
-            <td>void</td>
-            <td>Clear all address form fields</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h4>Key Options</h4>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Option</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>mode</code></td>
-            <td>'shipping' | 'billing'</td>
-            <td>Address collection mode (affects labels)</td>
-          </tr>
-          <tr>
-            <td><code>autocomplete</code></td>
-            <td>{ mode: 'automatic' | 'disabled' }</td>
-            <td>Enable/disable Google Maps autocomplete</td>
-          </tr>
-          <tr>
-            <td><code>defaultValues</code></td>
-            <td>{ name, address, phone }</td>
-            <td>Pre-fill values for the form</td>
-          </tr>
-          <tr>
-            <td><code>fields</code></td>
-            <td>{ phone: 'always' | 'never' | 'auto' }</td>
-            <td>Control which fields are shown</td>
-          </tr>
-          <tr>
-            <td><code>validation</code></td>
-            <td>{ phone: { required: 'always' | 'never' } }</td>
-            <td>Field validation requirements</td>
-          </tr>
-          <tr>
-            <td><code>allowedCountries</code></td>
-            <td>string[]</td>
-            <td>Limit country selection (e.g., ['US', 'CA'])</td>
-          </tr>
-          <tr>
-            <td><code>blockPoBox</code></td>
-            <td>boolean</td>
-            <td>Prevent P.O. Box addresses</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Info Card -->
-    <div class="card card-info">
-      <h3>About Address Element</h3>
-
-      <h4>Key Features</h4>
-      <ul>
-        <li><strong>Google Maps Autocomplete</strong> - Built-in address suggestions</li>
-        <li><strong>No clientSecret Required</strong> - Works with just StripeElements</li>
-        <li><strong>Phone Number Support</strong> - Optional phone field with country-aware formatting</li>
-        <li><strong>International</strong> - Supports addresses from all countries</li>
-        <li><strong>Validation</strong> - Built-in address validation</li>
-      </ul>
-
-      <h4>Use Cases</h4>
-      <ul>
-        <li>Collecting shipping addresses for orders</li>
-        <li>Collecting billing addresses for payments</li>
-        <li>Pre-filling address from customer profiles</li>
-        <li>Address verification before checkout</li>
-      </ul>
-
-      <h4>Integration with Payment</h4>
-      <div class="alert alert-info mt-3">
-        <strong>Tip:</strong> The collected address can be passed to <code>confirmPayment()</code>
-        via <code>confirmParams.shipping</code> or used with <code>StripePaymentElement</code>'s
-        <code>defaultValues.billingDetails</code> option.
-      </div>
-    </div>
   </div>
 </template>
-
-<style scoped>
-/* View uses .test-page from design-system.css for consistent 900px width */
-
-.card-title {
-  margin: 0 0 var(--space-3) 0;
-  font-size: var(--text-xl);
-}
-
-.config-section h4 {
-  margin: 0 0 var(--space-3) 0;
-  font-size: var(--text-base);
-  color: var(--color-text);
-}
-
-.control-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-4);
-  padding: var(--space-4);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-}
-
-.control-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.control-group label {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.btn-group-sm .btn {
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-xs);
-}
-
-.demo-container {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-}
-
-.address-wrapper {
-  background: white;
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-  border: 1px solid var(--color-border-light);
-}
-
-.collected-data {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-}
-
-.collected-data h4 {
-  margin: 0 0 var(--space-3) 0;
-  font-size: var(--text-sm);
-  color: var(--color-text);
-}
-
-.data-status {
-  display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-  font-weight: 500;
-}
-
-.status-badge.complete {
-  background: var(--color-success-light);
-  color: var(--color-success-dark);
-}
-
-.status-badge.incomplete {
-  background: var(--color-warning-light);
-  color: var(--color-warning-dark);
-}
-
-.status-badge.new {
-  background: var(--color-info-light);
-  color: var(--color-info-dark);
-}
-
-.address-preview {
-  background: white;
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  border: 1px solid var(--color-border-light);
-}
-
-.preview-row {
-  display: flex;
-  gap: var(--space-2);
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--color-border-light);
-  font-size: var(--text-sm);
-}
-
-.preview-row:last-child {
-  border-bottom: none;
-}
-
-.preview-label {
-  color: var(--color-text-muted);
-  min-width: 80px;
-  flex-shrink: 0;
-}
-
-.preview-value {
-  color: var(--color-text);
-  font-weight: 500;
-}
-
-.no-data {
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  padding: var(--space-4);
-}
-
-.action-buttons {
-  display: flex;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
-
-.getvalue-section {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-}
-
-.getvalue-section h4 {
-  margin: 0 0 var(--space-2) 0;
-  font-size: var(--text-sm);
-  color: var(--color-text);
-}
-
-.getvalue-result {
-  background: white;
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  border: 1px solid var(--color-border-light);
-}
-
-.result-json {
-  margin-top: var(--space-3);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  overflow-x: auto;
-}
-
-.result-json pre {
-  margin: 0;
-  font-size: var(--text-xs);
-  line-height: 1.5;
-  color: var(--color-text);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.card-info {
-  background: linear-gradient(135deg, var(--color-info-light) 0%, #f0f7fa 100%);
-  border-left: 4px solid var(--color-info);
-}
-
-.card-info h3 {
-  color: var(--color-info-dark);
-  margin-bottom: var(--space-4);
-}
-
-.card-info h4 {
-  margin: var(--space-5) 0 var(--space-2) 0;
-  color: var(--color-text);
-  font-size: var(--text-base);
-}
-
-.card-info ul {
-  margin: 0;
-  padding-left: var(--space-5);
-  color: var(--color-text-muted);
-}
-
-.card-info li {
-  margin-bottom: var(--space-2);
-  line-height: 1.5;
-}
-
-.card-info .alert {
-  font-size: var(--text-sm);
-}
-
-@media (max-width: 768px) {
-  .control-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

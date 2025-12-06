@@ -1,5 +1,16 @@
 <script setup lang="ts">
 import { inject } from 'vue'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  Button,
+  Badge,
+} from '@/components/ui'
 
 const stripeConfig = inject<{
   publishableKey: string
@@ -75,198 +86,85 @@ const getStatusIcon = (status: string) => {
 </script>
 
 <template>
-  <div class="test-page">
-    <div class="card">
-      <h2 class="card-title">Vue Stripe Component Testing</h2>
-      <p class="text-secondary">
-        This playground helps you test each Vue Stripe component and composable one by one.
-        Work through the phases below, testing each item before moving to the next.
-      </p>
-
-      <div v-if="!hasKey" class="alert alert-warning mt-4">
-        <h4 class="alert-title">Add Your Stripe Key</h4>
-        <p>Click the <strong>"Add Key"</strong> button in the header above to enter your Stripe test publishable key.</p>
-        <p class="text-sm mt-2">
-          Get your test key from:
-          <a href="https://dashboard.stripe.com/test/apikeys" target="_blank" class="link">Stripe Dashboard → API Keys</a>
+  <div class="max-w-[900px] mx-auto flex flex-col gap-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Vue Stripe Component Testing</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-muted-foreground mb-4">
+          This playground helps you test each Vue Stripe component and composable one by one.
+          Work through the phases below, testing each item before moving to the next.
         </p>
-      </div>
 
-      <div v-else class="alert alert-success mt-4">
-        <h4 class="alert-title">Ready to Test</h4>
-        <p>Your Stripe key is configured. Start with Phase 1 below!</p>
-      </div>
-    </div>
+        <Alert v-if="!hasKey" variant="warning">
+          <AlertTitle>Add Your Stripe Key</AlertTitle>
+          <AlertDescription>
+            <p>Click the <strong>"Add Key"</strong> button in the header above to enter your Stripe test publishable key.</p>
+            <p class="text-sm mt-2">
+              Get your test key from:
+              <a href="https://dashboard.stripe.com/test/apikeys" target="_blank" class="text-primary hover:underline font-medium">Stripe Dashboard → API Keys</a>
+            </p>
+          </AlertDescription>
+        </Alert>
 
-    <div class="phases">
-      <div
-        v-for="phase in testingPhases"
-        :key="phase.name"
-        class="card phase-card"
-      >
-        <h3 class="phase-title">{{ phase.name }}</h3>
-        <p class="phase-desc">{{ phase.description }}</p>
+        <Alert v-else variant="success">
+          <AlertTitle>Ready to Test</AlertTitle>
+          <AlertDescription>
+            Your Stripe key is configured. Start with Phase 1 below!
+          </AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
 
-        <ul class="checklist">
-          <li
-            v-for="item in phase.items"
-            :key="item.name"
-            :class="['checklist-item', item.status]"
-          >
-            <span class="status-icon">{{ getStatusIcon(item.status) }}</span>
-            <div class="item-info">
-              <strong>{{ item.name }}</strong>
-              <span class="item-desc">{{ item.description }}</span>
-            </div>
-            <router-link
-              v-if="item.status !== 'pending'"
-              :to="item.route"
-              class="btn btn-sm btn-primary"
+    <div class="flex flex-col gap-4">
+      <Card v-for="phase in testingPhases" :key="phase.name">
+        <CardHeader>
+          <CardTitle class="text-lg">{{ phase.name }}</CardTitle>
+          <p class="text-sm text-muted-foreground">{{ phase.description }}</p>
+        </CardHeader>
+        <CardContent>
+          <ul class="space-y-2">
+            <li
+              v-for="item in phase.items"
+              :key="item.name"
+              class="flex items-center gap-3 p-3 rounded-md"
+              :class="{
+                'bg-success/10': item.status === 'done',
+                'bg-warning/10': item.status === 'in-progress',
+                'bg-secondary': item.status === 'pending'
+              }"
             >
-              Test →
-            </router-link>
-            <span v-else class="badge badge-secondary">Coming soon</span>
-          </li>
-        </ul>
-      </div>
+              <span class="text-xl flex-shrink-0">{{ getStatusIcon(item.status) }}</span>
+              <div class="flex-1 min-w-0">
+                <strong class="block text-foreground">{{ item.name }}</strong>
+                <span class="text-sm text-muted-foreground leading-tight">{{ item.description }}</span>
+              </div>
+              <router-link
+                v-if="item.status !== 'pending'"
+                :to="item.route"
+              >
+                <Button size="sm">Test →</Button>
+              </router-link>
+              <Badge v-else variant="secondary">Coming soon</Badge>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
 
-    <div class="card">
-      <h3 class="card-title">Resources</h3>
-      <ul class="resource-list">
-        <li><a href="https://stripe.com/docs/stripe-js" target="_blank" class="link">Stripe.js Documentation</a></li>
-        <li><a href="https://stripe.com/docs/testing" target="_blank" class="link">Test Card Numbers</a></li>
-        <li><a href="https://dashboard.stripe.com/test/apikeys" target="_blank" class="link">Get Test API Keys</a></li>
-      </ul>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Resources</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul class="space-y-2">
+          <li><a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline font-medium">Vue Stripe Documentation</a></li>
+          <li><a href="https://stripe.com/docs/stripe-js" target="_blank" class="text-primary hover:underline font-medium">Stripe.js Documentation</a></li>
+          <li><a href="https://stripe.com/docs/testing" target="_blank" class="text-primary hover:underline font-medium">Test Card Numbers</a></li>
+          <li><a href="https://dashboard.stripe.com/test/apikeys" target="_blank" class="text-primary hover:underline font-medium">Get Test API Keys</a></li>
+        </ul>
+      </CardContent>
+    </Card>
   </div>
 </template>
-
-<style scoped>
-/* View uses .test-page from design-system.css for consistent 900px width */
-
-.card-title {
-  margin: 0 0 var(--space-3) 0;
-  font-size: var(--text-xl);
-  color: var(--color-text);
-}
-
-.alert-title {
-  margin: 0 0 var(--space-2) 0;
-  font-size: var(--text-base);
-  font-weight: 600;
-}
-
-.phases {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.phase-card {
-  margin-bottom: 0;
-}
-
-.phase-title {
-  margin: 0 0 var(--space-2) 0;
-  color: var(--color-text);
-  font-size: var(--text-lg);
-}
-
-.phase-desc {
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  margin: 0 0 var(--space-4) 0;
-  line-height: 1.5;
-}
-
-.checklist {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.checklist-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-2);
-}
-
-.checklist-item:last-child {
-  margin-bottom: 0;
-}
-
-.checklist-item.done {
-  background: var(--color-success-light);
-}
-
-.checklist-item.in-progress {
-  background: var(--color-warning-light);
-}
-
-.status-icon {
-  font-size: var(--text-xl);
-  flex-shrink: 0;
-}
-
-.item-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.item-info strong {
-  display: block;
-  color: var(--color-text);
-  margin-bottom: 2px;
-}
-
-.item-desc {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  line-height: 1.4;
-}
-
-.resource-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.resource-list li {
-  margin-bottom: var(--space-3);
-}
-
-.resource-list li:last-child {
-  margin-bottom: 0;
-}
-
-.link {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.link:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-  .checklist-item {
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-
-  .item-info {
-    flex-basis: calc(100% - 40px);
-  }
-
-  .checklist-item .btn,
-  .checklist-item .badge {
-    margin-left: auto;
-  }
-}
-</style>

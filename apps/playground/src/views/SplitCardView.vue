@@ -9,6 +9,17 @@ import {
   useStripe
 } from '@vue-stripe/vue-stripe'
 import type { StripeCardNumberElement as StripeCardNumberElementType } from '@stripe/stripe-js'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+} from '@/components/ui'
 
 // Mark VueStripeElements as used (it's used in template)
 void VueStripeElements
@@ -201,11 +212,12 @@ const PaymentButton = defineComponent({
       }
     }
 
-    return () => h('button', {
-      class: 'btn btn-success',
+    return () => h(Button, {
+      variant: 'default',
+      class: 'bg-green-600 hover:bg-green-700',
       disabled: !props.cardComplete || processing.value || !props.clientSecret,
       onClick: handlePayment
-    }, processing.value ? 'Processing...' : 'Confirm Payment')
+    }, () => processing.value ? 'Processing...' : 'Confirm Payment')
   }
 })
 
@@ -236,396 +248,227 @@ const resetPaymentState = () => {
 </script>
 
 <template>
-  <div class="test-page">
-    <div class="card">
-      <h2 class="card-title">Split Card Elements</h2>
-      <p class="text-secondary">
-        Three separate inputs for card number, expiry, and CVC.
-        Provides more control over layout and styling than the unified CardElement.
-      </p>
+  <div class="max-w-[900px] mx-auto flex flex-col gap-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Split Card Elements</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-muted-foreground mb-4">
+          Three separate inputs for card number, expiry, and CVC.
+          Provides more control over layout and styling than the unified CardElement.
+        </p>
+        <p class="text-sm mb-4">
+          <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
+            View full documentation →
+          </a>
+        </p>
 
-      <div v-if="!publishableKey" class="alert alert-warning mt-4">
-        Add your Stripe publishable key using the header button to test this component.
-      </div>
+        <Alert v-if="!publishableKey" variant="warning">
+          <AlertDescription>
+            Add your Stripe publishable key using the header button to test this component.
+          </AlertDescription>
+        </Alert>
 
-      <VueStripeProvider v-else :publishable-key="publishableKey">
-        <VueStripeElements>
-          <div class="split-card-form mt-4">
-            <!-- Card Number -->
-            <div class="form-group">
-              <label class="form-label">
-                Card Number
-                <span class="brand-indicator">{{ brandIcon }}</span>
-              </label>
-              <VueStripeCardNumberElement
-                ref="cardNumberRef"
-                :options="elementStyle"
-                @ready="onCardNumberReady"
-                @change="onCardNumberChange"
-                @focus="onCardNumberFocus"
-              />
-              <div v-if="cardNumberError" class="field-error">{{ cardNumberError }}</div>
-              <div v-else-if="cardNumberComplete" class="field-success">Valid card number</div>
-            </div>
-
-            <!-- Expiry and CVC Row -->
-            <div class="form-row">
-              <div class="form-group half">
-                <label class="form-label">Expiration</label>
-                <VueStripeCardExpiryElement
-                  ref="cardExpiryRef"
+        <VueStripeProvider v-else :publishable-key="publishableKey">
+          <VueStripeElements>
+            <div class="bg-secondary rounded-lg p-6 mt-4">
+              <!-- Card Number -->
+              <div class="mb-4">
+                <Label class="flex justify-between items-center mb-2">
+                  <span>Card Number</span>
+                  <span class="text-xs text-muted-foreground">{{ brandIcon }}</span>
+                </Label>
+                <VueStripeCardNumberElement
+                  ref="cardNumberRef"
                   :options="elementStyle"
-                  @ready="onCardExpiryReady"
-                  @change="onCardExpiryChange"
-                  @focus="onCardExpiryFocus"
+                  @ready="onCardNumberReady"
+                  @change="onCardNumberChange"
+                  @focus="onCardNumberFocus"
                 />
-                <div v-if="cardExpiryError" class="field-error">{{ cardExpiryError }}</div>
-                <div v-else-if="cardExpiryComplete" class="field-success">Valid</div>
+                <div v-if="cardNumberError" class="text-destructive text-xs mt-1">{{ cardNumberError }}</div>
+                <div v-else-if="cardNumberComplete" class="text-green-600 text-xs mt-1">Valid card number</div>
               </div>
 
-              <div class="form-group half">
-                <label class="form-label">CVC</label>
-                <VueStripeCardCvcElement
-                  ref="cardCvcRef"
-                  :options="elementStyle"
-                  @ready="onCardCvcReady"
-                  @change="onCardCvcChange"
-                  @focus="onCardCvcFocus"
-                />
-                <div v-if="cardCvcError" class="field-error">{{ cardCvcError }}</div>
-                <div v-else-if="cardCvcComplete" class="field-success">Valid</div>
-              </div>
-            </div>
+              <!-- Expiry and CVC Row -->
+              <div class="flex gap-4">
+                <div class="flex-1">
+                  <Label class="mb-2">Expiration</Label>
+                  <VueStripeCardExpiryElement
+                    ref="cardExpiryRef"
+                    :options="elementStyle"
+                    @ready="onCardExpiryReady"
+                    @change="onCardExpiryChange"
+                    @focus="onCardExpiryFocus"
+                  />
+                  <div v-if="cardExpiryError" class="text-destructive text-xs mt-1">{{ cardExpiryError }}</div>
+                  <div v-else-if="cardExpiryComplete" class="text-green-600 text-xs mt-1">Valid</div>
+                </div>
 
-            <!-- Status -->
-            <div class="status-bar">
-              <span :class="['status-item', { complete: cardNumberComplete }]">
-                Number {{ cardNumberComplete ? '✓' : '○' }}
-              </span>
-              <span :class="['status-item', { complete: cardExpiryComplete }]">
-                Expiry {{ cardExpiryComplete ? '✓' : '○' }}
-              </span>
-              <span :class="['status-item', { complete: cardCvcComplete }]">
-                CVC {{ cardCvcComplete ? '✓' : '○' }}
-              </span>
-            </div>
-
-            <!-- Actions -->
-            <div class="btn-group mt-4">
-              <button class="btn btn-sm btn-secondary" @click="focusCardNumber">
-                Focus Number
-              </button>
-              <button class="btn btn-sm btn-secondary" @click="clearAll">
-                Clear All
-              </button>
-              <button
-                :class="['btn btn-sm', showPaymentSection ? 'btn-primary active' : 'btn-secondary']"
-                @click="showPaymentSection = !showPaymentSection"
-              >
-                {{ showPaymentSection ? 'Hide Payment' : 'Test Payment' }}
-              </button>
-            </div>
-
-            <!-- Payment Mode: Client Secret Form -->
-            <div v-if="showSecretForm" class="secret-form mt-4">
-              <h4>Enter Client Secret</h4>
-              <p class="text-secondary text-sm">
-                To test payment confirmation, you need a <code>client_secret</code> from a PaymentIntent.
-              </p>
-
-              <div class="form-group">
-                <label class="form-label">Client Secret</label>
-                <input
-                  v-model="localClientSecret"
-                  type="text"
-                  placeholder="pi_xxx_secret_xxx"
-                  class="form-input form-input-mono"
-                  :class="{ 'is-valid': localClientSecret.includes('_secret_') }"
-                />
+                <div class="flex-1">
+                  <Label class="mb-2">CVC</Label>
+                  <VueStripeCardCvcElement
+                    ref="cardCvcRef"
+                    :options="elementStyle"
+                    @ready="onCardCvcReady"
+                    @change="onCardCvcChange"
+                    @focus="onCardCvcFocus"
+                  />
+                  <div v-if="cardCvcError" class="text-destructive text-xs mt-1">{{ cardCvcError }}</div>
+                  <div v-else-if="cardCvcComplete" class="text-green-600 text-xs mt-1">Valid</div>
+                </div>
               </div>
 
-              <div class="instructions">
-                <h5>How to get a Client Secret:</h5>
-                <ol>
-                  <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="link">Stripe Dashboard → Payments</a></li>
-                  <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
-                  <li>Enter an amount (e.g., $10.00)</li>
-                  <li>Copy the <code>client_secret</code> from the response</li>
-                </ol>
-                <p class="text-muted text-sm mt-2">
-                  The client secret looks like: <code>pi_xxx_secret_xxx</code>
+              <!-- Status -->
+              <div class="flex gap-4 justify-center bg-card rounded-md p-3 mt-4">
+                <span :class="['text-sm', cardNumberComplete ? 'text-green-600 font-medium' : 'text-muted-foreground']">
+                  Number {{ cardNumberComplete ? '✓' : '○' }}
+                </span>
+                <span :class="['text-sm', cardExpiryComplete ? 'text-green-600 font-medium' : 'text-muted-foreground']">
+                  Expiry {{ cardExpiryComplete ? '✓' : '○' }}
+                </span>
+                <span :class="['text-sm', cardCvcComplete ? 'text-green-600 font-medium' : 'text-muted-foreground']">
+                  CVC {{ cardCvcComplete ? '✓' : '○' }}
+                </span>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex gap-2 mt-4 flex-wrap">
+                <Button size="sm" variant="secondary" @click="focusCardNumber">
+                  Focus Number
+                </Button>
+                <Button size="sm" variant="secondary" @click="clearAll">
+                  Clear All
+                </Button>
+                <Button
+                  size="sm"
+                  :variant="showPaymentSection ? 'default' : 'secondary'"
+                  @click="showPaymentSection = !showPaymentSection"
+                >
+                  {{ showPaymentSection ? 'Hide Payment' : 'Test Payment' }}
+                </Button>
+              </div>
+
+              <!-- Payment Mode: Client Secret Form -->
+              <div v-if="showSecretForm" class="bg-card rounded-lg p-5 mt-4">
+                <h4 class="font-semibold mb-3">Enter Client Secret</h4>
+                <p class="text-muted-foreground text-sm mb-4">
+                  To test payment confirmation, you need a <code>client_secret</code> from a PaymentIntent.
+                </p>
+
+                <div class="mb-4">
+                  <Label class="mb-2">Client Secret</Label>
+                  <Input
+                    v-model="localClientSecret"
+                    type="text"
+                    placeholder="pi_xxx_secret_xxx"
+                    class="font-mono"
+                  />
+                </div>
+
+                <div class="border-t pt-4 mt-4">
+                  <h5 class="font-medium text-sm mb-2">How to get a Client Secret:</h5>
+                  <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
+                    <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Payments</a></li>
+                    <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
+                    <li>Enter an amount (e.g., $10.00)</li>
+                    <li>Copy the <code>client_secret</code> from the response</li>
+                  </ol>
+                  <p class="text-muted-foreground text-sm mt-2">
+                    The client secret looks like: <code>pi_xxx_secret_xxx</code>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Payment Mode: Ready to Pay -->
+              <div v-else-if="showPaymentSection && activeClientSecret" class="mt-4">
+                <div class="flex items-center gap-3 p-3 bg-info/10 border border-info rounded-md flex-wrap">
+                  <span class="text-sm font-medium text-info">Client Secret:</span>
+                  <code class="font-mono text-xs bg-card px-2 py-0.5 rounded flex-1 min-w-0 truncate">{{ activeClientSecret.slice(0, 15) }}...{{ activeClientSecret.slice(-8) }}</code>
+                  <Button size="sm" variant="ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
+                    Clear
+                  </Button>
+                </div>
+
+                <div class="flex gap-2 mt-3">
+                  <PaymentButton
+                    v-if="cardNumberRef?.element"
+                    :client-secret="activeClientSecret"
+                    :card-complete="allComplete"
+                    :card-number-element="cardNumberRef.element"
+                    @payment-success="handlePaymentSuccess"
+                    @payment-error="handlePaymentError"
+                    @payment-processing="handlePaymentProcessing"
+                  />
+                  <Button
+                    v-if="paymentStatus !== 'idle'"
+                    size="sm"
+                    variant="secondary"
+                    @click="resetPaymentState"
+                  >
+                    Reset
+                  </Button>
+                </div>
+
+                <!-- Payment Status -->
+                <Alert
+                  v-if="paymentMessage"
+                  :variant="paymentStatus === 'succeeded' ? 'success' : paymentStatus === 'error' ? 'destructive' : 'warning'"
+                  class="mt-3"
+                >
+                  <AlertDescription>{{ paymentMessage }}</AlertDescription>
+                </Alert>
+
+                <p class="text-muted-foreground text-sm mt-3">
+                  Use test card <code>4242 4242 4242 4242</code> with any future date and CVC.
+                  <br><small>For split elements, Stripe collects data from all three fields when you pass the cardNumber element.</small>
                 </p>
               </div>
             </div>
-
-            <!-- Payment Mode: Ready to Pay -->
-            <div v-else-if="showPaymentSection && activeClientSecret" class="payment-ready mt-4">
-              <div class="secret-status">
-                <span class="secret-label">Client Secret:</span>
-                <code class="secret-value">{{ activeClientSecret.slice(0, 15) }}...{{ activeClientSecret.slice(-8) }}</code>
-                <button class="btn btn-sm btn-ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
-                  Clear
-                </button>
-              </div>
-
-              <div class="btn-group mt-3">
-                <PaymentButton
-                  v-if="cardNumberRef?.element"
-                  :client-secret="activeClientSecret"
-                  :card-complete="allComplete"
-                  :card-number-element="cardNumberRef.element"
-                  @payment-success="handlePaymentSuccess"
-                  @payment-error="handlePaymentError"
-                  @payment-processing="handlePaymentProcessing"
-                />
-                <button
-                  v-if="paymentStatus !== 'idle'"
-                  class="btn btn-sm btn-secondary"
-                  @click="resetPaymentState"
-                >
-                  Reset
-                </button>
-              </div>
-
-              <!-- Payment Status -->
-              <div
-                v-if="paymentMessage"
-                :class="['alert mt-3', {
-                  'alert-warning': paymentStatus === 'processing',
-                  'alert-success': paymentStatus === 'succeeded',
-                  'alert-danger': paymentStatus === 'error'
-                }]"
-              >
-                {{ paymentMessage }}
-              </div>
-
-              <p class="text-muted text-sm mt-3">
-                Use test card <code>4242 4242 4242 4242</code> with any future date and CVC.
-                <br><small>For split elements, Stripe collects data from all three fields when you pass the cardNumber element.</small>
-              </p>
-            </div>
-          </div>
-        </VueStripeElements>
-      </VueStripeProvider>
-    </div>
+          </VueStripeElements>
+        </VueStripeProvider>
+      </CardContent>
+    </Card>
 
     <!-- Event Log -->
-    <div class="card">
-      <h3>Event Log</h3>
-      <div class="event-log">
-        <div v-if="eventLog.length === 0" class="event-empty">
-          Interact with the card fields to see events...
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Event Log</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="event-log">
+          <div v-if="eventLog.length === 0" class="text-muted-foreground italic">
+            Interact with the card fields to see events...
+          </div>
+          <div v-for="(entry, index) in eventLog" :key="index" class="flex gap-3 py-1 text-sm">
+            <span class="text-muted-foreground">{{ entry.time }}</span>
+            <span class="font-medium text-primary">{{ entry.event }}</span>
+            <span v-if="entry.data" class="text-muted-foreground">{{ entry.data }}</span>
+          </div>
         </div>
-        <div v-for="(entry, index) in eventLog" :key="index" class="event-entry">
-          <span class="event-time">{{ entry.time }}</span>
-          <span class="event-name">{{ entry.event }}</span>
-          <span v-if="entry.data" class="event-data">{{ entry.data }}</span>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
 
-    <!-- Info -->
-    <div class="card card-info">
-      <h3>About Split Card Elements</h3>
-      <ul>
-        <li><strong>VueStripeCardNumberElement</strong> - Card number with brand detection</li>
-        <li><strong>VueStripeCardExpiryElement</strong> - MM/YY expiration date</li>
-        <li><strong>VueStripeCardCvcElement</strong> - 3 or 4 digit security code</li>
-      </ul>
-      <h4>When to use Split Elements:</h4>
-      <ul>
-        <li>Custom form layouts (horizontal, multi-column)</li>
-        <li>Different styling per field</li>
-        <li>Custom validation UI per field</li>
-        <li>Accessibility requirements with separate labels</li>
-      </ul>
-      <h4>Test Cards:</h4>
-      <ul>
-        <li><code>4242 4242 4242 4242</code> - Visa</li>
-        <li><code>5555 5555 5555 4444</code> - Mastercard</li>
-        <li><code>3782 822463 10005</code> - American Express</li>
-      </ul>
-    </div>
   </div>
 </template>
 
 <style scoped>
-/* View uses .test-page from design-system.css for consistent width */
-
-.card-title {
-  margin: 0 0 var(--space-3) 0;
-  font-size: var(--text-xl);
-}
-
-.split-card-form {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-}
-
-.form-row {
-  display: flex;
-  gap: var(--space-4);
-}
-
-.form-group.half {
-  flex: 1;
-}
-
-.form-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-2);
-}
-
-.brand-indicator {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-}
-
-.field-error {
-  color: var(--color-danger);
-  font-size: var(--text-xs);
-  margin-top: var(--space-1);
-}
-
-.field-success {
-  color: var(--color-success);
-  font-size: var(--text-xs);
-  margin-top: var(--space-1);
-}
-
-.status-bar {
-  display: flex;
-  gap: var(--space-4);
-  padding: var(--space-3);
-  background: white;
-  border-radius: var(--radius-md);
-  justify-content: center;
-  margin-top: var(--space-4);
-}
-
-.status-item {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  transition: color var(--transition-fast);
-}
-
-.status-item.complete {
-  color: var(--color-success);
-  font-weight: 500;
-}
-
-.secret-form {
-  background: white;
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-}
-
-.secret-form h4 {
-  margin: 0 0 var(--space-3) 0;
-  color: var(--color-text);
-}
-
-.instructions {
-  margin-top: var(--space-4);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border-light);
-}
-
-.instructions h5 {
-  margin: 0 0 var(--space-2) 0;
-  color: var(--color-text);
-  font-size: var(--text-sm);
-}
-
-.instructions ol {
-  margin: 0;
-  padding-left: var(--space-5);
-  color: var(--color-text-muted);
-}
-
-.instructions li {
-  margin-bottom: var(--space-2);
-  line-height: 1.6;
-}
-
-.secret-status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-info-light);
-  border: 1px solid var(--color-info);
-  border-radius: var(--radius-md);
-}
-
-.secret-status .secret-label {
-  font-size: var(--text-sm);
-  color: var(--color-info-dark);
-  font-weight: 500;
-}
-
-.secret-status .secret-value {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  background: white;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-sm);
-  color: var(--color-info-dark);
-}
-
-.secret-status .btn-ghost {
-  margin-left: auto;
-}
-
-.card-info {
-  background: linear-gradient(135deg, var(--color-info-light) 0%, #f0f7fa 100%);
-  border-left: 4px solid var(--color-info);
-}
-
-.card-info h3 {
-  color: var(--color-info-dark);
-  margin-bottom: var(--space-4);
-}
-
-.card-info h4 {
-  margin: var(--space-4) 0 var(--space-2) 0;
-  color: var(--color-text);
-  font-size: var(--text-base);
-}
-
-.card-info ul {
-  margin: 0;
-  padding-left: var(--space-5);
-  color: var(--color-text-muted);
-}
-
-.card-info li {
-  margin-bottom: var(--space-2);
-  line-height: 1.5;
-}
-
 /* Override default element styles */
 :deep(.vue-stripe-cardNumber-element-mount),
 :deep(.vue-stripe-cardExpiry-element-mount),
 :deep(.vue-stripe-cardCvc-element-mount) {
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: white;
-  transition: all var(--transition-fast);
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.375rem;
+  background: hsl(var(--card));
+  transition: all 0.15s ease;
 }
 
 :deep(.vue-stripe-cardNumber-element-mount:focus-within),
 :deep(.vue-stripe-cardExpiry-element-mount:focus-within),
 :deep(.vue-stripe-cardCvc-element-mount:focus-within) {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
 }
 
 :deep(.vue-stripe-cardNumber-element-error),
@@ -641,14 +484,8 @@ const resetPaymentState = () => {
 }
 
 @media (max-width: 768px) {
-  .form-row {
+  .flex.gap-4 {
     flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  .status-bar {
-    flex-wrap: wrap;
-    gap: var(--space-2);
   }
 }
 </style>

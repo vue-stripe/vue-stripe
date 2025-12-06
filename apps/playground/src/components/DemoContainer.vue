@@ -1,30 +1,26 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+import { cn } from '@/lib/utils'
+
+const props = defineProps<{
   variant?: 'default' | 'dark' | 'error'
 }>()
+
+const containerClasses = computed(() => {
+  const base = 'rounded-lg p-6 min-h-[120px]'
+
+  const variants = {
+    default: 'bg-secondary',
+    dark: 'bg-slate-900 text-slate-100',
+    error: 'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900',
+  }
+
+  return cn(base, variants[props.variant || 'default'])
+})
 </script>
 
 <template>
-  <div :class="['demo-box', variant && `demo-box--${variant}`]">
+  <div :class="containerClasses">
     <slot />
   </div>
 </template>
-
-<style scoped>
-.demo-box {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  min-height: 120px;
-}
-
-.demo-box--dark {
-  background: var(--color-bg-dark);
-  color: #f8f9fa;
-}
-
-.demo-box--error {
-  background: #fff5f5;
-  border: 1px solid #fecaca;
-}
-</style>

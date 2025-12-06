@@ -1,6 +1,52 @@
 <script setup lang="ts">
 import { ref, provide, computed, reactive, watch } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { useDark, useToggle } from '@vueuse/core'
+import {
+  Moon,
+  Sun,
+  Settings,
+  CreditCard,
+  Wallet,
+  KeyRound,
+  MapPin,
+  Link2,
+  CheckSquare,
+  Layers,
+} from 'lucide-vue-next'
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  Input,
+  Label,
+  Alert,
+  AlertDescription,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+  Separator,
+  TooltipProvider,
+} from '@/components/ui'
+
+// Dark mode
+const isDark = useDark()
+const toggleDark = useToggle(isDark)
 
 // Storage key for localStorage
 const STORAGE_KEY = 'vue-stripe-playground-config'
@@ -54,7 +100,6 @@ watch(stripeConfig, (newConfig) => {
 // Provide config to all child components
 provide('stripeConfig', stripeConfig)
 
-const isMenuOpen = ref(false)
 const showConfigModal = ref(false)
 const router = useRouter()
 
@@ -62,8 +107,56 @@ const router = useRouter()
 const tempPublishableKey = ref(stripeConfig.publishableKey)
 const tempClientSecret = ref(stripeConfig.clientSecret)
 
-// Get current routes for navigation
-const routes = computed(() => router.getRoutes().filter(r => r.name !== 'home'))
+// Navigation items grouped by category
+const navGroups = computed(() => {
+  const routes = router.getRoutes().filter(r => r.name !== 'home')
+
+  // Define icons for each route
+  const routeIcons: Record<string, any> = {
+    'StripeProvider': Layers,
+    'StripeElements': Layers,
+    'CardElement': CreditCard,
+    'SplitCard': CreditCard,
+    'PaymentElement': Wallet,
+    'Checkout': CheckSquare,
+    'ExpressCheckout': Wallet,
+    'SetupIntent': KeyRound,
+    'LinkAuthentication': Link2,
+    'AddressElement': MapPin,
+  }
+
+  // Group routes
+  const groups = {
+    core: {
+      label: 'Core Components',
+      items: [] as { name: string; path: string; icon: any }[]
+    },
+    elements: {
+      label: 'Stripe Elements',
+      items: [] as { name: string; path: string; icon: any }[]
+    },
+    checkout: {
+      label: 'Checkout',
+      items: [] as { name: string; path: string; icon: any }[]
+    }
+  }
+
+  routes.forEach(route => {
+    const name = String(route.name)
+    const icon = routeIcons[name] || CreditCard
+    const item = { name, path: route.path, icon }
+
+    if (name.includes('Provider') || name.includes('Elements') && !name.includes('Element')) {
+      groups.core.items.push(item)
+    } else if (name.includes('Checkout')) {
+      groups.checkout.items.push(item)
+    } else {
+      groups.elements.items.push(item)
+    }
+  })
+
+  return Object.values(groups).filter(g => g.items.length > 0)
+})
 
 const hasKey = computed(() => {
   return !!stripeConfig.publishableKey &&
@@ -94,315 +187,179 @@ const resetConfig = () => {
 </script>
 
 <template>
-  <div id="app">
-    <header class="header">
-      <!-- Navbar with brand -->
-      <div class="navbar">
-        <RouterLink to="/" class="navbar-brand">
-          <span class="navbar-logo">💳</span>
-          <div class="navbar-brand-text">
-            <span class="navbar-title">Vue Stripe</span>
-            <span class="navbar-subtitle">Component Testing Playground</span>
+  <TooltipProvider>
+    <SidebarProvider>
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" as-child>
+                <RouterLink to="/" class="flex items-center gap-3">
+                  <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg">
+                    💳
+                  </div>
+                  <div class="grid flex-1 text-left text-sm leading-tight">
+                    <span class="truncate font-semibold">Vue Stripe</span>
+                    <span class="truncate text-xs text-muted-foreground">Playground</span>
+                  </div>
+                </RouterLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <!-- Navigation Groups -->
+          <SidebarGroup v-for="group in navGroups" :key="group.label">
+            <SidebarGroupLabel>{{ group.label }}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem v-for="item in group.items" :key="item.path">
+                  <SidebarMenuButton as-child>
+                    <RouterLink
+                      :to="item.path"
+                      class="flex items-center gap-2"
+                      active-class="bg-sidebar-accent text-sidebar-accent-foreground"
+                    >
+                      <component :is="item.icon" class="size-4" />
+                      <span>{{ item.name }}</span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter>
+          <SidebarMenu>
+            <!-- Stripe Key Status -->
+            <SidebarMenuItem>
+              <SidebarMenuButton @click="openConfigModal" class="w-full">
+                <div
+                  class="size-2 rounded-full"
+                  :class="hasKey ? 'bg-green-500' : 'bg-orange-500'"
+                />
+                <span v-if="hasKey" class="truncate text-xs">
+                  {{ stripeConfig.publishableKey.slice(0, 8) }}...
+                </span>
+                <span v-else class="text-xs">Configure Key</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <!-- Dark Mode Toggle -->
+            <SidebarMenuItem>
+              <SidebarMenuButton @click="toggleDark()">
+                <Sun v-if="isDark" class="size-4" />
+                <Moon v-else class="size-4" />
+                <span>{{ isDark ? 'Light Mode' : 'Dark Mode' }}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+
+        <SidebarRail />
+      </Sidebar>
+
+      <SidebarInset>
+        <!-- Header with trigger -->
+        <header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger class="-ml-1" />
+          <Separator orientation="vertical" class="mr-2 h-4" />
+          <div class="flex-1">
+            <h1 class="text-lg font-semibold">Vue Stripe Playground</h1>
           </div>
-        </RouterLink>
+          <Button v-if="!hasKey" variant="outline" size="sm" @click="openConfigModal">
+            <Settings class="mr-2 h-4 w-4" />
+            Add Stripe Key
+          </Button>
+        </header>
 
-        <button class="navbar-toggle" @click="isMenuOpen = !isMenuOpen" v-if="routes.length > 0">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-6">
+          <RouterView />
+        </main>
 
-      <!-- Navigation Tabs -->
-      <nav class="nav-tabs" :class="{ 'nav-open': isMenuOpen }" v-if="routes.length > 0">
-        <RouterLink
-          v-for="route in routes"
-          :key="route.path"
-          :to="route.path"
-          class="nav-tab"
-          @click="isMenuOpen = false"
-        >
-          {{ route.name }}
-        </RouterLink>
-      </nav>
+        <!-- Footer -->
+        <footer class="border-t px-4 py-3 text-center text-sm text-muted-foreground">
+          Vue Stripe Playground
+        </footer>
+      </SidebarInset>
+    </SidebarProvider>
+  </TooltipProvider>
 
-      <!-- Status Bar for Config -->
-      <div class="status-bar" :class="hasKey ? 'status-bar-success' : 'status-bar-warning'">
-        <span v-if="hasKey" class="status-bar-content">
-          <span class="status-dot"></span>
-          <code>{{ stripeConfig.publishableKey.slice(0, 12) }}...{{ stripeConfig.publishableKey.slice(-4) }}</code>
-        </span>
-        <span v-else class="status-bar-content">
-          <span class="status-dot"></span>
-          No Stripe key configured
-        </span>
-        <button class="btn btn-sm btn-ghost" @click="openConfigModal">
-          {{ hasKey ? 'Change' : 'Add Key' }}
-        </button>
-      </div>
-    </header>
+  <!-- Config Modal -->
+  <Dialog v-model:open="showConfigModal">
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Stripe Configuration</DialogTitle>
+        <DialogDescription>
+          Enter your Stripe test keys. These are stored in your browser's localStorage and never sent anywhere.
+        </DialogDescription>
+      </DialogHeader>
 
-    <main class="main">
-      <div class="container">
-        <RouterView />
-      </div>
-    </main>
-
-    <footer class="footer">
-      <p>Vue Stripe Playground</p>
-    </footer>
-
-    <!-- Config Modal -->
-    <Teleport to="body">
-      <div v-if="showConfigModal" class="modal-backdrop" @click.self="showConfigModal = false">
-        <div class="modal">
-          <div class="modal-header">
-            <h2>Stripe Configuration</h2>
-            <button class="modal-close" @click="showConfigModal = false">&times;</button>
-          </div>
-
-          <div class="modal-body">
-            <p class="text-secondary text-sm mb-6">
-              Enter your Stripe test keys. These are stored in your browser's localStorage and never sent anywhere.
-            </p>
-
-            <div class="form-group">
-              <label class="form-label">
-                Publishable Key <span class="text-danger">*</span>
-              </label>
-              <input
-                v-model="tempPublishableKey"
-                type="text"
-                placeholder="pk_test_..."
-                class="form-input form-input-mono"
-                :class="{ 'is-valid': tempPublishableKey.startsWith('pk_test_') }"
-              />
-              <p class="form-hint">
-                Get this from <a href="https://dashboard.stripe.com/test/apikeys" target="_blank">Stripe Dashboard → API Keys</a>
-              </p>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                Client Secret <span class="text-muted">(optional)</span>
-              </label>
-              <input
-                v-model="tempClientSecret"
-                type="text"
-                placeholder="pi_xxx_secret_xxx"
-                class="form-input form-input-mono"
-              />
-              <p class="form-hint">
-                Needed for Payment Element. Create a PaymentIntent via CLI or API.
-              </p>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button class="btn btn-secondary" @click="showConfigModal = false">
-              Cancel
-            </button>
-            <button v-if="hasKey" class="btn btn-danger" @click="resetConfig">
-              Reset All
-            </button>
-            <button
-              class="btn btn-primary"
-              @click="saveConfigModal"
-              :disabled="!tempPublishableKey.startsWith('pk_')"
+      <div class="space-y-4 py-4">
+        <div class="space-y-2">
+          <Label for="publishableKey">
+            Publishable Key <span class="text-destructive">*</span>
+          </Label>
+          <Input
+            id="publishableKey"
+            v-model="tempPublishableKey"
+            type="text"
+            placeholder="pk_test_..."
+            class="font-mono text-sm"
+            :class="{ 'border-success': tempPublishableKey.startsWith('pk_test_') }"
+          />
+          <p class="text-sm text-muted-foreground">
+            Get this from
+            <a
+              href="https://dashboard.stripe.com/test/apikeys"
+              target="_blank"
+              class="text-primary hover:underline"
             >
-              Save & Reload
-            </button>
-          </div>
+              Stripe Dashboard → API Keys
+            </a>
+          </p>
+        </div>
 
-          <div class="alert alert-warning mt-4">
-            <strong>Security:</strong> Only use test keys (pk_test_...) here. Never enter live keys.
-          </div>
+        <div class="space-y-2">
+          <Label for="clientSecret">
+            Client Secret <span class="text-muted-foreground">(optional)</span>
+          </Label>
+          <Input
+            id="clientSecret"
+            v-model="tempClientSecret"
+            type="text"
+            placeholder="pi_xxx_secret_xxx"
+            class="font-mono text-sm"
+          />
+          <p class="text-sm text-muted-foreground">
+            Needed for Payment Element. Create a PaymentIntent via CLI or API.
+          </p>
         </div>
       </div>
-    </Teleport>
-  </div>
+
+      <DialogFooter class="flex-col sm:flex-row gap-2">
+        <Button variant="outline" @click="showConfigModal = false">
+          Cancel
+        </Button>
+        <Button v-if="hasKey" variant="destructive" @click="resetConfig">
+          Reset All
+        </Button>
+        <Button
+          @click="saveConfigModal"
+          :disabled="!tempPublishableKey.startsWith('pk_')"
+        >
+          Save & Reload
+        </Button>
+      </DialogFooter>
+
+      <Alert variant="warning" class="mt-4">
+        <AlertDescription>
+          <strong>Security:</strong> Only use test keys (pk_test_...) here. Never enter live keys.
+        </AlertDescription>
+      </Alert>
+    </DialogContent>
+  </Dialog>
 </template>
-
-<style scoped>
-#app {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  flex-direction: column;
-}
-
-/* Header Layout */
-.header {
-  color: white;
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  max-width: var(--container-max);
-  margin: 0 auto;
-  width: 100%;
-}
-
-/* Navbar customization for app header */
-.navbar {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.navbar-brand-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.navbar-title {
-  font-size: var(--text-lg);
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.navbar-subtitle {
-  font-size: var(--text-xs);
-  opacity: 0.85;
-}
-
-.navbar-logo {
-  font-size: var(--text-2xl);
-}
-
-/* Status bar code styling */
-.status-bar code {
-  background: rgba(0, 0, 0, 0.15);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-}
-
-.status-bar .btn-ghost {
-  color: white;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.status-bar .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* Main */
-.main {
-  flex: 1;
-  padding: var(--space-8) var(--space-4);
-}
-
-.container {
-  max-width: var(--container-max);
-  margin: 0 auto;
-}
-
-/* Footer */
-.footer {
-  text-align: center;
-  padding: var(--space-4);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: var(--text-sm);
-}
-
-.footer p {
-  margin: 0;
-}
-
-/* Modal */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: var(--space-4);
-}
-
-.modal {
-  background: white;
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 480px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-5) var(--space-6);
-  border-bottom: 1px solid var(--color-border-light);
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: var(--text-lg);
-  color: var(--color-text);
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: var(--text-2xl);
-  color: var(--color-text-muted);
-  cursor: pointer;
-  line-height: 1;
-  padding: 0;
-}
-
-.modal-close:hover {
-  color: var(--color-text);
-}
-
-.modal-body {
-  padding: var(--space-6);
-}
-
-.modal-footer {
-  display: flex;
-  gap: var(--space-3);
-  justify-content: flex-end;
-  padding: var(--space-4) var(--space-6);
-  border-top: 1px solid var(--color-border-light);
-  background: var(--color-bg-secondary);
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .navbar-toggle {
-    display: flex;
-  }
-
-  .nav-tabs {
-    display: none;
-    flex-direction: column;
-  }
-
-  .nav-tabs.nav-open {
-    display: flex;
-  }
-
-  .main {
-    padding: var(--space-4);
-  }
-
-  .status-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
-  }
-
-  .modal-footer {
-    flex-direction: column;
-  }
-
-  .modal-footer .btn {
-    width: 100%;
-  }
-}
-</style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject, computed, watch, defineComponent, h } from 'vue'
+import { ref, inject, computed, defineComponent, h } from 'vue'
 import {
   VueStripeProvider,
   VueStripeElements,
@@ -8,6 +8,18 @@ import {
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+  Badge,
+} from '@/components/ui'
 
 // Child component for setup submission (needs to be inside VueStripeElements)
 const SetupForm = defineComponent({
@@ -55,19 +67,20 @@ const SetupForm = defineComponent({
       }
     }
 
-    return () => h('div', { class: 'setup-form-actions' }, [
-      h('div', { class: 'composable-state mb-3' }, [
-        h('span', { class: 'state-label' }, 'useSetupIntent state:'),
-        h('span', { class: `state-value ${loading.value ? 'loading' : ''}` },
+    return () => h('div', { class: 'mt-5' }, [
+      h('div', { class: 'flex items-center gap-2 p-2 bg-secondary rounded-sm text-sm mb-3' }, [
+        h('span', { class: 'text-muted-foreground' }, 'useSetupIntent state:'),
+        h('span', { class: loading.value ? 'text-yellow-600 font-medium' : 'text-green-600 font-medium' },
           loading.value ? 'Processing...' : 'Ready'),
-        error.value ? h('span', { class: 'state-error' }, error.value) : null
+        error.value ? h('span', { class: 'text-destructive ml-auto' }, error.value) : null
       ]),
-      h('button', {
-        class: 'btn btn-primary btn-lg',
+      h(Button, {
+        class: 'w-full',
+        size: 'lg',
         disabled: !props.setupComplete || loading.value,
         onClick: handleSubmit
-      }, loading.value ? 'Saving Card...' : 'Save Card'),
-      h('p', { class: 'text-muted text-sm mt-3 text-center' }, [
+      }, () => loading.value ? 'Saving Card...' : 'Save Card'),
+      h('p', { class: 'text-muted-foreground text-sm mt-3 text-center' }, [
         'Use test card ',
         h('code', '4242 4242 4242 4242'),
         ' with any future date and CVC'
@@ -153,426 +166,159 @@ const resetForm = () => {
 </script>
 
 <template>
-  <div class="test-page">
-    <div class="card">
-      <h2 class="card-title">useSetupIntent</h2>
-      <p class="text-secondary">
-        Save a payment method for future use without charging the customer.
-        This is used for subscriptions, saved cards, and pay-later flows.
-      </p>
+  <div class="max-w-[900px] mx-auto flex flex-col gap-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>useSetupIntent</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-muted-foreground mb-4">
+          Save a payment method for future use without charging the customer.
+          This is used for subscriptions, saved cards, and pay-later flows.
+        </p>
+        <p class="text-sm mb-4">
+          <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
+            View full documentation →
+          </a>
+        </p>
 
-      <!-- Warning if no publishable key -->
-      <div v-if="!publishableKey" class="alert alert-warning mt-4">
-        Add your Stripe publishable key using the header button to test this composable.
-      </div>
+        <!-- Warning if no publishable key -->
+        <Alert v-if="!publishableKey" variant="warning">
+          <AlertDescription>
+            Add your Stripe publishable key using the header button to test this composable.
+          </AlertDescription>
+        </Alert>
 
-      <!-- Setup Secret Form -->
-      <div v-else-if="showSecretForm" class="secret-form mt-4">
-        <h4>Enter Setup Secret</h4>
-        <p class="text-secondary text-sm">A SetupIntent is required to save a payment method.</p>
+        <!-- Setup Secret Form -->
+        <div v-else-if="showSecretForm" class="bg-secondary rounded-lg p-5 mt-4">
+          <h4 class="font-semibold mb-2">Enter Setup Secret</h4>
+          <p class="text-muted-foreground text-sm mb-4">A SetupIntent is required to save a payment method.</p>
 
-        <div class="form-group mt-4">
-          <label class="form-label">Setup Secret</label>
-          <input
-            v-model="localSetupSecret"
-            type="text"
-            placeholder="seti_xxx_secret_xxx"
-            class="form-input form-input-mono"
-            :class="{ 'is-valid': localSetupSecret.includes('_secret_') }"
-          />
-        </div>
+          <div class="mb-4">
+            <Label class="mb-2">Setup Secret</Label>
+            <Input
+              v-model="localSetupSecret"
+              type="text"
+              placeholder="seti_xxx_secret_xxx"
+              class="font-mono"
+            />
+          </div>
 
-        <div class="instructions mt-4">
-          <h5>How to get a Setup Secret:</h5>
-          <ol>
-            <li>Create a SetupIntent via the Stripe API or Dashboard</li>
-            <li>
-              <strong>Quick method with cURL:</strong>
-              <pre class="code-block">curl https://api.stripe.com/v1/setup_intents \
+          <div class="bg-card rounded-md border p-4 mt-4">
+            <h5 class="font-medium text-sm mb-2">How to get a Setup Secret:</h5>
+            <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
+              <li>Create a SetupIntent via the Stripe API or Dashboard</li>
+              <li>
+                <strong>Quick method with cURL:</strong>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">curl https://api.stripe.com/v1/setup_intents \
   -u sk_test_YOUR_SECRET_KEY: \
   -d "payment_method_types[]"=card</pre>
-            </li>
-            <li>Copy the <code>client_secret</code> from the response</li>
-          </ol>
-          <p class="text-muted text-sm mt-2">
-            The setup secret looks like: <code>seti_xxx_secret_xxx</code>
-          </p>
-        </div>
-      </div>
-
-      <!-- Setup Element -->
-      <div v-else class="setup-form mt-4">
-        <!-- Success State -->
-        <div v-if="setupStatus === 'succeeded'" class="success-state">
-          <div class="alert alert-success">
-            <h4>Card Saved Successfully!</h4>
-            <p>The payment method has been attached and can be used for future payments.</p>
+              </li>
+              <li>Copy the <code>client_secret</code> from the response</li>
+            </ol>
+            <p class="text-muted-foreground text-sm mt-2">
+              The setup secret looks like: <code>seti_xxx_secret_xxx</code>
+            </p>
           </div>
-
-          <div class="setup-details mt-4">
-            <h5>SetupIntent Details</h5>
-            <div class="detail-row">
-              <span class="detail-label">ID:</span>
-              <code class="detail-value">{{ savedSetupIntent?.id }}</code>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Status:</span>
-              <span class="badge badge-success">{{ savedSetupIntent?.status }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Payment Method:</span>
-              <code class="detail-value">{{ savedSetupIntent?.payment_method }}</code>
-            </div>
-          </div>
-
-          <button class="btn btn-secondary mt-4" @click="resetForm">
-            Save Another Card
-          </button>
         </div>
 
-        <!-- Form State -->
-        <template v-else>
-          <!-- Show current secret and allow clearing -->
-          <div class="secret-status">
-            <span class="secret-label">Setup Secret:</span>
-            <code class="secret-value">{{ setupSecret.slice(0, 15) }}...{{ setupSecret.slice(-8) }}</code>
-            <button class="btn btn-sm btn-ghost" @click="localSetupSecret = ''" title="Clear and enter new secret">
-              Clear
-            </button>
+        <!-- Setup Element -->
+        <div v-else class="mt-4">
+          <!-- Success State -->
+          <div v-if="setupStatus === 'succeeded'">
+            <Alert variant="success">
+              <AlertDescription>
+                <h4 class="font-semibold mb-2">Card Saved Successfully!</h4>
+                <p>The payment method has been attached and can be used for future payments.</p>
+              </AlertDescription>
+            </Alert>
+
+            <div class="bg-secondary rounded-md p-4 mt-4">
+              <h5 class="text-sm text-muted-foreground uppercase tracking-wide mb-3">SetupIntent Details</h5>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 py-2 border-b">
+                  <span class="text-muted-foreground text-sm min-w-[120px]">ID:</span>
+                  <code class="text-sm">{{ savedSetupIntent?.id }}</code>
+                </div>
+                <div class="flex items-center gap-3 py-2 border-b">
+                  <span class="text-muted-foreground text-sm min-w-[120px]">Status:</span>
+                  <Badge variant="success">{{ savedSetupIntent?.status }}</Badge>
+                </div>
+                <div class="flex items-center gap-3 py-2">
+                  <span class="text-muted-foreground text-sm min-w-[120px]">Payment Method:</span>
+                  <code class="text-sm">{{ savedSetupIntent?.payment_method }}</code>
+                </div>
+              </div>
+            </div>
+
+            <Button variant="secondary" class="mt-4" @click="resetForm">
+              Save Another Card
+            </Button>
           </div>
 
-          <div class="setup-element-wrapper">
-            <VueStripeProvider :publishable-key="publishableKey">
-              <VueStripeElements
-                :key="elementKey"
-                :client-secret="setupSecret"
-                :options="{ appearance: { theme: 'stripe' } }"
-              >
-                <VueStripePaymentElement
-                  @ready="onReady"
-                  @change="onChange"
-                  @focus="onFocus"
-                  @blur="onBlur"
-                />
+          <!-- Form State -->
+          <template v-else>
+            <!-- Show current secret and allow clearing -->
+            <div class="flex items-center gap-3 p-3 bg-info/10 border border-info rounded-md flex-wrap">
+              <span class="text-sm font-medium text-info">Setup Secret:</span>
+              <code class="font-mono text-xs bg-card px-2 py-0.5 rounded flex-1 min-w-0 truncate">{{ setupSecret.slice(0, 15) }}...{{ setupSecret.slice(-8) }}</code>
+              <Button size="sm" variant="ghost" @click="localSetupSecret = ''" title="Clear and enter new secret">
+                Clear
+              </Button>
+            </div>
 
-                <!-- Setup Form Child Component -->
-                <SetupForm
+            <div class="p-5 rounded-lg mt-4 bg-card border">
+              <VueStripeProvider :publishable-key="publishableKey">
+                <VueStripeElements
+                  :key="elementKey"
                   :client-secret="setupSecret"
-                  :setup-complete="setupComplete"
-                  @setup-success="handleSetupSuccess"
-                  @setup-error="handleSetupError"
-                />
-              </VueStripeElements>
-            </VueStripeProvider>
-          </div>
+                  :options="{ appearance: { theme: 'stripe' } }"
+                >
+                  <VueStripePaymentElement
+                    @ready="onReady"
+                    @change="onChange"
+                    @focus="onFocus"
+                    @blur="onBlur"
+                  />
 
-          <!-- Error display -->
-          <div v-if="setupError" class="alert alert-danger mt-4">
-            {{ setupError }}
-          </div>
-        </template>
-      </div>
-    </div>
+                  <!-- Setup Form Child Component -->
+                  <SetupForm
+                    :client-secret="setupSecret"
+                    :setup-complete="setupComplete"
+                    @setup-success="handleSetupSuccess"
+                    @setup-error="handleSetupError"
+                  />
+                </VueStripeElements>
+              </VueStripeProvider>
+            </div>
+
+            <!-- Error display -->
+            <Alert v-if="setupError" variant="destructive" class="mt-4">
+              <AlertDescription>{{ setupError }}</AlertDescription>
+            </Alert>
+          </template>
+        </div>
+      </CardContent>
+    </Card>
 
     <!-- Event Log -->
-    <div class="card">
-      <h3>Event Log</h3>
-      <div class="event-log">
-        <div v-if="eventLog.length === 0" class="event-empty">
-          Interact with the element to see events...
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Event Log</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="event-log">
+          <div v-if="eventLog.length === 0" class="text-muted-foreground italic">
+            Interact with the element to see events...
+          </div>
+          <div v-for="(entry, index) in eventLog" :key="index" class="flex gap-3 py-1 text-sm">
+            <span class="text-muted-foreground">{{ entry.time }}</span>
+            <span class="font-medium text-primary">{{ entry.event }}</span>
+            <span v-if="entry.data" class="text-muted-foreground">{{ entry.data }}</span>
+          </div>
         </div>
-        <div v-for="(entry, index) in eventLog" :key="index" class="event-entry">
-          <span class="event-time">{{ entry.time }}</span>
-          <span class="event-name">{{ entry.event }}</span>
-          <span v-if="entry.data" class="event-data">{{ entry.data }}</span>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
 
-    <!-- Info -->
-    <div class="card card-info">
-      <h3>About useSetupIntent</h3>
-
-      <h4>What is a SetupIntent?</h4>
-      <p>
-        A SetupIntent is used to collect payment method details without charging the customer.
-        Use it when you want to save a card for future payments.
-      </p>
-
-      <h4>Common Use Cases</h4>
-      <ul>
-        <li><strong>Subscriptions</strong> - Save card before starting a subscription</li>
-        <li><strong>Saved cards</strong> - Let customers add cards to their account</li>
-        <li><strong>Free trials</strong> - Collect card for after trial ends</li>
-        <li><strong>Pay later</strong> - Authorize now, charge later</li>
-      </ul>
-
-      <h4>The Composable</h4>
-      <pre class="code-block">const { confirmSetup, loading, error } = useSetupIntent()
-
-// Save the card
-const result = await confirmSetup({
-  clientSecret: 'seti_xxx_secret_xxx',
-  confirmParams: {
-    return_url: 'https://yoursite.com/account'
-  },
-  redirect: 'if_required'
-})
-
-if (result.setupIntent?.status === 'succeeded') {
-  // Card saved! Use result.setupIntent.payment_method
-}</pre>
-
-      <h4>Test Cards</h4>
-      <ul>
-        <li><code>4242 4242 4242 4242</code> - Succeeds</li>
-        <li><code>4000 0000 0000 0002</code> - Declined</li>
-        <li><code>4000 0025 0000 3155</code> - Requires 3D Secure</li>
-      </ul>
-    </div>
   </div>
 </template>
-
-<style scoped>
-.card-title {
-  margin: 0 0 var(--space-3) 0;
-  font-size: var(--text-xl);
-}
-
-.secret-form {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-}
-
-.secret-form h4 {
-  margin: 0 0 var(--space-2) 0;
-  color: var(--color-text);
-}
-
-.instructions {
-  background: white;
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-}
-
-.instructions h5 {
-  margin: 0 0 var(--space-2) 0;
-  color: var(--color-text);
-  font-size: var(--text-sm);
-}
-
-.instructions ol {
-  margin: 0;
-  padding-left: var(--space-5);
-  color: var(--color-text-muted);
-}
-
-.instructions li {
-  margin-bottom: var(--space-2);
-  line-height: 1.6;
-  font-size: var(--text-sm);
-}
-
-.code-block {
-  background: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-sm);
-  padding: var(--space-3);
-  font-size: var(--text-xs);
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-.secret-status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-info-light);
-  border: 1px solid var(--color-info);
-  border-radius: var(--radius-md);
-  flex-wrap: wrap;
-}
-
-.secret-status .secret-label {
-  color: var(--color-info-dark);
-  font-weight: 500;
-  font-size: var(--text-sm);
-}
-
-.secret-status .secret-value {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.setup-element-wrapper {
-  padding: var(--space-5);
-  border-radius: var(--radius-lg);
-  margin-top: var(--space-4);
-  background: white;
-  border: 1px solid var(--color-border-light);
-}
-
-.setup-form-actions {
-  margin-top: var(--space-5);
-}
-
-.composable-state {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-}
-
-.state-label {
-  color: var(--color-text-muted);
-}
-
-.state-value {
-  font-weight: 500;
-  color: var(--color-success);
-}
-
-.state-value.loading {
-  color: var(--color-warning);
-}
-
-.state-error {
-  color: var(--color-danger);
-  margin-left: auto;
-}
-
-.btn-lg {
-  width: 100%;
-  padding: var(--space-4) var(--space-5);
-  font-size: var(--text-base);
-}
-
-/* Success State */
-.success-state .alert h4 {
-  margin: 0 0 var(--space-2) 0;
-  color: var(--color-success-dark);
-}
-
-.success-state .alert p {
-  margin: 0;
-  font-size: var(--text-sm);
-}
-
-.setup-details {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-}
-
-.setup-details h5 {
-  margin: 0 0 var(--space-3) 0;
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.detail-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--color-border-light);
-}
-
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-.detail-label {
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  min-width: 120px;
-}
-
-.detail-value {
-  font-size: var(--text-sm);
-}
-
-.badge {
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.badge-success {
-  background: var(--color-success-light);
-  color: var(--color-success-dark);
-}
-
-/* Info Card */
-.card-info {
-  background: linear-gradient(135deg, var(--color-info-light) 0%, #f0f7fa 100%);
-  border-left: 4px solid var(--color-info);
-}
-
-.card-info h3 {
-  color: var(--color-info-dark);
-  margin-bottom: var(--space-4);
-}
-
-.card-info h4 {
-  margin: var(--space-5) 0 var(--space-2) 0;
-  color: var(--color-text);
-  font-size: var(--text-base);
-}
-
-.card-info p {
-  color: var(--color-text-muted);
-  line-height: 1.6;
-}
-
-.card-info ul {
-  margin: 0;
-  padding-left: var(--space-5);
-  color: var(--color-text-muted);
-}
-
-.card-info li {
-  margin-bottom: var(--space-2);
-  line-height: 1.5;
-}
-
-@media (max-width: 768px) {
-  .secret-status {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
-  }
-
-  .secret-status .btn {
-    align-self: flex-end;
-  }
-
-  .detail-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-1);
-  }
-
-  .detail-label {
-    min-width: auto;
-  }
-}
-</style>

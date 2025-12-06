@@ -11,11 +11,23 @@
   "dependencies": {
     "@stripe/stripe-js": "^7.5.0",
     "@vue-stripe/vue-stripe": "workspace:*",
+    "@vueuse/core": "^14.1.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-vue-next": "^0.556.0",
+    "radix-vue": "^1.9.17",
+    "reka-ui": "^2.6.1",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
     "vue": "^3.5.22",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
     "@vitejs/plugin-vue": "^6.0.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5.9.3",
     "vite": "^7.1.11",
     "vue-tsc": "^3.0.3"

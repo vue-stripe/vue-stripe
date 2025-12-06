@@ -5,6 +5,21 @@ import {
   VueStripeProvider,
   VueStripeCheckout
 } from '@vue-stripe/vue-stripe'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+  Badge,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui'
 
 const route = useRoute()
 
@@ -105,633 +120,316 @@ const clearResult = () => {
 </script>
 
 <template>
-  <div class="test-page">
+  <div class="max-w-[900px] mx-auto flex flex-col gap-6">
     <!-- Checkout Result Banner -->
-    <div v-if="checkoutResult === 'success'" class="result-banner result-success">
-      <div class="result-icon">✓</div>
-      <div class="result-content">
-        <h3>Payment Successful!</h3>
-        <p>Your checkout was completed successfully.</p>
+    <div
+      v-if="checkoutResult === 'success'"
+      class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-gradient-to-r from-green-100 to-green-50 border border-success"
+    >
+      <div class="w-12 h-12 rounded-full bg-success text-white flex items-center justify-center text-2xl font-bold flex-shrink-0">
+        ✓
       </div>
-      <button class="btn btn-sm" @click="clearResult">Dismiss</button>
+      <div class="flex-1">
+        <h3 class="text-lg font-semibold text-green-800 mb-1">Payment Successful!</h3>
+        <p class="text-sm text-green-700">Your checkout was completed successfully.</p>
+      </div>
+      <Button size="sm" variant="secondary" @click="clearResult">Dismiss</Button>
     </div>
 
-    <div v-if="checkoutResult === 'cancel'" class="result-banner result-cancel">
-      <div class="result-icon">✕</div>
-      <div class="result-content">
-        <h3>Payment Cancelled</h3>
-        <p>You cancelled the checkout process.</p>
+    <div
+      v-if="checkoutResult === 'cancel'"
+      class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-gradient-to-r from-yellow-100 to-yellow-50 border border-warning"
+    >
+      <div class="w-12 h-12 rounded-full bg-warning text-yellow-800 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+        ✕
       </div>
-      <button class="btn btn-sm" @click="clearResult">Dismiss</button>
+      <div class="flex-1">
+        <h3 class="text-lg font-semibold text-yellow-800 mb-1">Payment Cancelled</h3>
+        <p class="text-sm text-yellow-700">You cancelled the checkout process.</p>
+      </div>
+      <Button size="sm" variant="secondary" @click="clearResult">Dismiss</Button>
     </div>
 
-    <div class="card">
-      <h2 class="card-title">StripeCheckout</h2>
-      <p class="text-secondary">
-        StripeCheckout provides a simple button that redirects users to Stripe's hosted checkout page.
-        It supports both session-based and price-based checkout flows.
-      </p>
+    <Card>
+      <CardHeader>
+        <CardTitle>StripeCheckout</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-muted-foreground mb-4">
+          StripeCheckout provides a simple button that redirects users to Stripe's hosted checkout page.
+          It supports both session-based and price-based checkout flows.
+        </p>
+        <p class="text-sm mb-4">
+          <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
+            View full documentation →
+          </a>
+        </p>
 
-      <!-- Warning if no publishable key -->
-      <div v-if="!publishableKey" class="alert alert-warning mt-4">
-        Add your Stripe publishable key using the header button to test this component.
-      </div>
+        <!-- Warning if no publishable key -->
+        <Alert v-if="!publishableKey" variant="warning">
+          <AlertDescription>
+            Add your Stripe publishable key using the header button to test this component.
+          </AlertDescription>
+        </Alert>
 
-      <div v-else class="checkout-form mt-4">
-        <!-- Mode Selector -->
-        <div class="mode-selector">
-          <div class="mode-tabs">
-            <button
-              :class="['mode-tab', { active: checkoutMode === 'url' }]"
-              @click="checkoutMode = 'url'"
-            >
-              URL-Based (v8.x)
-            </button>
-            <button
-              :class="['mode-tab', { active: checkoutMode === 'session' }]"
-              @click="checkoutMode = 'session'"
-            >
-              Session ID (v7.x)
-            </button>
-            <button
-              :class="['mode-tab', { active: checkoutMode === 'price' }]"
-              @click="checkoutMode = 'price'"
-            >
-              Price-Based (v7.x)
-            </button>
-          </div>
-        </div>
-
-        <!-- URL-Based Checkout (v8.x compatible) -->
-        <div v-if="checkoutMode === 'url'" class="form-section mt-4">
-          <h4>URL-Based Checkout <span class="badge badge-success">v8.x Compatible</span></h4>
-          <p class="text-secondary text-sm">
-            Use the Checkout Session URL from your backend. This is the recommended approach
-            for @stripe/stripe-js v8.x where <code>redirectToCheckout</code> is removed.
-          </p>
-
-          <div class="form-group mt-4">
-            <label class="form-label">Session URL</label>
-            <input
-              v-model="sessionUrl"
-              type="text"
-              placeholder="https://checkout.stripe.com/c/pay/..."
-              class="form-input form-input-mono"
-              :class="{ 'is-valid': sessionUrl.startsWith('https://checkout.stripe.com/') }"
-            />
+        <div v-else class="mt-4">
+          <!-- Mode Selector -->
+          <div class="space-y-2">
+            <Label class="text-xs uppercase tracking-wide text-muted-foreground">Checkout Mode</Label>
+            <Tabs v-model="checkoutMode" class="w-full">
+              <TabsList class="grid w-full grid-cols-3">
+                <TabsTrigger value="url">URL-Based (v8.x)</TabsTrigger>
+                <TabsTrigger value="session">Session ID (v7.x)</TabsTrigger>
+                <TabsTrigger value="price">Price-Based (v7.x)</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
-          <div class="instructions mt-4">
-            <h5>How to get a Session URL:</h5>
-            <ol>
-              <li>Create a Checkout Session using Stripe CLI:
-                <pre class="code-block">stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{ successUrl }}" --cancel-url "{{ cancelUrl }}"</pre>
-              </li>
-              <li>Copy the <code>url</code> from the response (starts with <code>https://checkout.stripe.com/</code>)</li>
-            </ol>
+          <!-- URL-Based Checkout (v8.x compatible) -->
+          <div v-if="checkoutMode === 'url'" class="bg-secondary border rounded-lg p-5 mt-4">
+            <h4 class="font-semibold mb-2">
+              URL-Based Checkout
+              <Badge variant="success" class="ml-2">v8.x Compatible</Badge>
+            </h4>
+            <p class="text-muted-foreground text-sm">
+              Use the Checkout Session URL from your backend. This is the recommended approach
+              for @stripe/stripe-js v8.x where <code>redirectToCheckout</code> is removed.
+            </p>
+
+            <div class="mt-4">
+              <Label class="mb-2">Session URL</Label>
+              <Input
+                v-model="sessionUrl"
+                type="text"
+                placeholder="https://checkout.stripe.com/c/pay/..."
+                class="font-mono"
+                :class="{ 'border-success': sessionUrl.startsWith('https://checkout.stripe.com/') }"
+              />
+            </div>
+
+            <div class="bg-card rounded-md border p-4 mt-4">
+              <h5 class="font-medium text-sm mb-2">How to get a Session URL:</h5>
+              <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
+                <li>
+                  Create a Checkout Session using Stripe CLI:
+                  <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{ successUrl }}" --cancel-url "{{ cancelUrl }}"</pre>
+                </li>
+                <li>Copy the <code>url</code> from the response (starts with <code>https://checkout.stripe.com/</code>)</li>
+              </ol>
+            </div>
+
+            <Alert variant="info" class="mt-4">
+              <AlertDescription class="text-sm">
+                <strong>v8.x Migration:</strong> In @stripe/stripe-js v8.x, <code>redirectToCheckout</code> was removed.
+                Your server should return the session URL directly, which is then used for a simple <code>window.location.replace()</code> redirect.
+              </AlertDescription>
+            </Alert>
           </div>
 
-          <div class="alert alert-info mt-4">
-            <strong>v8.x Migration:</strong> In @stripe/stripe-js v8.x, <code>redirectToCheckout</code> was removed.
-            Your server should return the session URL directly, which is then used for a simple <code>window.location.replace()</code> redirect.
-          </div>
-        </div>
+          <!-- Session ID Checkout (v7.x) -->
+          <div v-if="checkoutMode === 'session'" class="bg-secondary border rounded-lg p-5 mt-4">
+            <h4 class="font-semibold mb-2">
+              Session ID Checkout
+              <Badge variant="warning" class="ml-2">v7.x Only</Badge>
+            </h4>
+            <p class="text-muted-foreground text-sm">
+              Use a pre-created Checkout Session ID. This uses <code>redirectToCheckout</code> which
+              is deprecated in v8.x.
+            </p>
 
-        <!-- Session ID Checkout (v7.x) -->
-        <div v-if="checkoutMode === 'session'" class="form-section mt-4">
-          <h4>Session ID Checkout <span class="badge badge-warning">v7.x Only</span></h4>
-          <p class="text-secondary text-sm">
-            Use a pre-created Checkout Session ID. This uses <code>redirectToCheckout</code> which
-            is deprecated in v8.x.
-          </p>
+            <div class="mt-4">
+              <Label class="mb-2">Session ID</Label>
+              <Input
+                v-model="sessionId"
+                type="text"
+                placeholder="cs_test_..."
+                class="font-mono"
+                :class="{ 'border-success': sessionId.startsWith('cs_') }"
+              />
+            </div>
 
-          <div class="form-group mt-4">
-            <label class="form-label">Session ID</label>
-            <input
-              v-model="sessionId"
-              type="text"
-              placeholder="cs_test_..."
-              class="form-input form-input-mono"
-              :class="{ 'is-valid': sessionId.startsWith('cs_') }"
-            />
-          </div>
+            <div class="bg-card rounded-md border p-4 mt-4">
+              <h5 class="font-medium text-sm mb-2">How to get a Session ID:</h5>
+              <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
+                <li>
+                  Create a Checkout Session using Stripe CLI:
+                  <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{ successUrl }}" --cancel-url "{{ cancelUrl }}"</pre>
+                </li>
+                <li>Copy the <code>id</code> from the response (starts with <code>cs_</code>)</li>
+              </ol>
+            </div>
 
-          <div class="instructions mt-4">
-            <h5>How to get a Session ID:</h5>
-            <ol>
-              <li>Create a Checkout Session using Stripe CLI:
-                <pre class="code-block">stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{ successUrl }}" --cancel-url "{{ cancelUrl }}"</pre>
-              </li>
-              <li>Copy the <code>id</code> from the response (starts with <code>cs_</code>)</li>
-            </ol>
-          </div>
-
-          <div class="alert alert-warning mt-4">
-            <strong>Deprecated:</strong> This method uses <code>redirectToCheckout</code> which is removed in @stripe/stripe-js v8.x.
-            Use URL-Based checkout for v8.x compatibility.
-          </div>
-        </div>
-
-        <!-- Price-Based Checkout (v7.x only) -->
-        <div v-if="checkoutMode === 'price'" class="form-section mt-4">
-          <h4>Price-Based Checkout <span class="badge badge-warning">v7.x Only</span></h4>
-          <p class="text-secondary text-sm">
-            Create a checkout session dynamically using a Price ID. This uses <code>redirectToCheckout</code>
-            which is deprecated in v8.x.
-          </p>
-
-          <div class="form-group mt-4">
-            <label class="form-label">Price ID</label>
-            <input
-              v-model="priceId"
-              type="text"
-              placeholder="price_..."
-              class="form-input form-input-mono"
-              :class="{ 'is-valid': priceId.startsWith('price_') }"
-            />
+            <Alert variant="warning" class="mt-4">
+              <AlertDescription class="text-sm">
+                <strong>Deprecated:</strong> This method uses <code>redirectToCheckout</code> which is removed in @stripe/stripe-js v8.x.
+                Use URL-Based checkout for v8.x compatibility.
+              </AlertDescription>
+            </Alert>
           </div>
 
-          <div class="form-group mt-3">
-            <label class="form-label">Mode</label>
-            <div class="btn-group btn-group-sm">
-              <button
-                :class="['btn btn-secondary', { active: mode === 'payment' }]"
-                @click="mode = 'payment'"
-              >
-                Payment
-              </button>
-              <button
-                :class="['btn btn-secondary', { active: mode === 'subscription' }]"
-                @click="mode = 'subscription'"
-              >
-                Subscription
-              </button>
+          <!-- Price-Based Checkout (v7.x only) -->
+          <div v-if="checkoutMode === 'price'" class="bg-secondary border rounded-lg p-5 mt-4">
+            <h4 class="font-semibold mb-2">
+              Price-Based Checkout
+              <Badge variant="warning" class="ml-2">v7.x Only</Badge>
+            </h4>
+            <p class="text-muted-foreground text-sm">
+              Create a checkout session dynamically using a Price ID. This uses <code>redirectToCheckout</code>
+              which is deprecated in v8.x.
+            </p>
+
+            <div class="mt-4">
+              <Label class="mb-2">Price ID</Label>
+              <Input
+                v-model="priceId"
+                type="text"
+                placeholder="price_..."
+                class="font-mono"
+                :class="{ 'border-success': priceId.startsWith('price_') }"
+              />
+            </div>
+
+            <div class="mt-3 space-y-2">
+              <Label class="text-xs uppercase tracking-wide text-muted-foreground">Mode</Label>
+              <Tabs v-model="mode" class="w-full">
+                <TabsList class="grid w-full grid-cols-2">
+                  <TabsTrigger value="payment">Payment</TabsTrigger>
+                  <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            <div class="bg-card rounded-md p-3 mt-3 space-y-2 text-sm">
+              <div class="flex items-center gap-2">
+                <span class="text-muted-foreground min-w-[90px]">Success URL:</span>
+                <code class="text-xs bg-secondary px-2 py-0.5 rounded text-primary break-all">{{ successUrl }}</code>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-muted-foreground min-w-[90px]">Cancel URL:</span>
+                <code class="text-xs bg-secondary px-2 py-0.5 rounded text-primary break-all">{{ cancelUrl }}</code>
+              </div>
+            </div>
+
+            <div class="bg-card rounded-md border p-4 mt-4">
+              <h5 class="font-medium text-sm mb-2">How to get a Price ID:</h5>
+              <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
+                <li>Go to <a href="https://dashboard.stripe.com/test/products" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Products</a></li>
+                <li>Create or select a product</li>
+                <li>Copy the Price ID (starts with <code>price_</code>)</li>
+              </ol>
             </div>
           </div>
 
-          <div class="url-info mt-3">
-            <div class="url-display">
-              <span class="url-label">Success URL:</span>
-              <code>{{ successUrl }}</code>
-            </div>
-            <div class="url-display">
-              <span class="url-label">Cancel URL:</span>
-              <code>{{ cancelUrl }}</code>
-            </div>
+          <!-- Checkout Button -->
+          <div class="text-center mt-5">
+            <VueStripeProvider :publishable-key="publishableKey">
+              <!-- URL-Based (v8.x compatible) -->
+              <VueStripeCheckout
+                v-if="checkoutMode === 'url'"
+                :session-url="sessionUrl"
+                button-text="Checkout with URL (v8.x)"
+                loading-text="Redirecting..."
+                :disabled="!isFormValid"
+                button-class="checkout-button"
+                @click="onCheckoutClick"
+                @success="onCheckoutSuccess"
+                @error="onCheckoutError"
+                @before-redirect="onBeforeRedirect"
+              />
+
+              <!-- Session ID (v7.x) -->
+              <VueStripeCheckout
+                v-else-if="checkoutMode === 'session'"
+                :session-id="sessionId"
+                button-text="Checkout with Session ID (v7.x)"
+                loading-text="Redirecting..."
+                :disabled="!isFormValid"
+                button-class="checkout-button"
+                @click="onCheckoutClick"
+                @success="onCheckoutSuccess"
+                @error="onCheckoutError"
+              />
+
+              <!-- Price-Based (v7.x) -->
+              <VueStripeCheckout
+                v-else
+                :price-id="priceId"
+                :mode="mode"
+                :success-url="successUrl"
+                :cancel-url="cancelUrl"
+                button-text="Checkout with Price (v7.x)"
+                loading-text="Redirecting..."
+                :disabled="!isFormValid"
+                button-class="checkout-button"
+                @click="onCheckoutClick"
+                @success="onCheckoutSuccess"
+                @error="onCheckoutError"
+              />
+            </VueStripeProvider>
           </div>
 
-          <div class="instructions mt-4">
-            <h5>How to get a Price ID:</h5>
-            <ol>
-              <li>Go to <a href="https://dashboard.stripe.com/test/products" target="_blank" class="link">Stripe Dashboard → Products</a></li>
-              <li>Create or select a product</li>
-              <li>Copy the Price ID (starts with <code>price_</code>)</li>
-            </ol>
-          </div>
+          <!-- Status display -->
+          <Alert v-if="checkoutError" variant="destructive" class="mt-4">
+            <AlertDescription class="flex items-center justify-between">
+              {{ checkoutError }}
+              <Button size="sm" variant="ghost" @click="checkoutError = null">Dismiss</Button>
+            </AlertDescription>
+          </Alert>
         </div>
-
-        <!-- Checkout Button -->
-        <div class="checkout-button-wrapper mt-5">
-          <br>
-          <VueStripeProvider :publishable-key="publishableKey">
-            <!-- URL-Based (v8.x compatible) -->
-            <VueStripeCheckout
-              v-if="checkoutMode === 'url'"
-              :session-url="sessionUrl"
-              button-text="Checkout with URL (v8.x)"
-              loading-text="Redirecting..."
-              :disabled="!isFormValid"
-              button-class="checkout-button"
-              @click="onCheckoutClick"
-              @success="onCheckoutSuccess"
-              @error="onCheckoutError"
-              @before-redirect="onBeforeRedirect"
-            />
-
-            <!-- Session ID (v7.x) -->
-            <VueStripeCheckout
-              v-else-if="checkoutMode === 'session'"
-              :session-id="sessionId"
-              button-text="Checkout with Session ID (v7.x)"
-              loading-text="Redirecting..."
-              :disabled="!isFormValid"
-              button-class="checkout-button"
-              @click="onCheckoutClick"
-              @success="onCheckoutSuccess"
-              @error="onCheckoutError"
-            />
-
-            <!-- Price-Based (v7.x) -->
-            <VueStripeCheckout
-              v-else
-              :price-id="priceId"
-              :mode="mode"
-              :success-url="successUrl"
-              :cancel-url="cancelUrl"
-              button-text="Checkout with Price (v7.x)"
-              loading-text="Redirecting..."
-              :disabled="!isFormValid"
-              button-class="checkout-button"
-              @click="onCheckoutClick"
-              @success="onCheckoutSuccess"
-              @error="onCheckoutError"
-            />
-          </VueStripeProvider>
-        </div>
-
-        <!-- Status display -->
-        <div v-if="checkoutError" class="alert alert-danger mt-4">
-          {{ checkoutError }}
-          <button class="btn btn-sm btn-ghost ml-2" @click="checkoutError = null">Dismiss</button>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
 
     <!-- Event Log -->
-    <div class="card">
-      <h3>Event Log</h3>
-      <div class="event-log">
-        <div v-if="eventLog.length === 0" class="event-empty">
-          Interact with the Checkout button to see events...
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Event Log</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="event-log">
+          <div v-if="eventLog.length === 0" class="text-muted-foreground italic">
+            Interact with the Checkout button to see events...
+          </div>
+          <div v-for="(entry, index) in eventLog" :key="index" class="flex gap-3 py-1 text-sm">
+            <span class="text-muted-foreground">{{ entry.time }}</span>
+            <span class="font-medium text-primary">{{ entry.event }}</span>
+            <span v-if="entry.data" class="text-muted-foreground">{{ entry.data }}</span>
+          </div>
         </div>
-        <div v-for="(entry, index) in eventLog" :key="index" class="event-entry">
-          <span class="event-time">{{ entry.time }}</span>
-          <span class="event-name">{{ entry.event }}</span>
-          <span v-if="entry.data" class="event-data">{{ entry.data }}</span>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
 
-    <!-- Info -->
-    <div class="card card-info">
-      <h3>About Stripe Checkout</h3>
-
-      <h4>Session-Based vs Price-Based</h4>
-      <ul>
-        <li><strong>Session-Based</strong>: Create a Checkout Session on your server first. More control over options.</li>
-        <li><strong>Price-Based</strong>: Create session dynamically using a Price ID. Simpler but limited options.</li>
-      </ul>
-
-      <h4>When to Use Checkout</h4>
-      <ul>
-        <li>Quick integration without building custom UI</li>
-        <li>Stripe-hosted, PCI-compliant payment page</li>
-        <li>Automatic handling of 3D Secure and payment methods</li>
-        <li>Built-in support for subscriptions and coupons</li>
-      </ul>
-
-      <h4>Checkout vs Payment Element</h4>
-      <div class="alert alert-info mt-3">
-        <strong>Checkout</strong> redirects to Stripe's hosted page.<br/>
-        <strong>Payment Element</strong> embeds payment UI in your app.<br/>
-        Choose Checkout for simplicity, Payment Element for control.
-      </div>
-    </div>
   </div>
 </template>
 
 <style scoped>
-.card-title {
-  margin: 0 0 var(--space-3) 0;
-  font-size: var(--text-xl);
-}
-
-/* Result Banner */
-.result-banner {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--space-4);
-}
-
-.result-success {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  border: 1px solid #28a745;
-}
-
-.result-cancel {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
-  border: 1px solid #ffc107;
-}
-
-.result-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.result-success .result-icon {
-  background: #28a745;
-  color: white;
-}
-
-.result-cancel .result-icon {
-  background: #ffc107;
-  color: #856404;
-}
-
-.result-content {
-  flex: 1;
-}
-
-.result-content h3 {
-  margin: 0 0 var(--space-1) 0;
-  font-size: var(--text-lg);
-}
-
-.result-success .result-content h3 {
-  color: #155724;
-}
-
-.result-cancel .result-content h3 {
-  color: #856404;
-}
-
-.result-content p {
-  margin: 0;
-  font-size: var(--text-sm);
-}
-
-.result-success .result-content p {
-  color: #155724;
-}
-
-.result-cancel .result-content p {
-  color: #856404;
-}
-
-.result-banner .btn {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: var(--text-sm);
-}
-
-.result-banner .btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-/* URL Display */
-.url-info {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-sm);
-  padding: var(--space-3);
-}
-
-.url-display {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  margin-bottom: var(--space-2);
-}
-
-.url-display:last-child {
-  margin-bottom: 0;
-}
-
-.url-label {
-  color: var(--color-text-muted);
-  min-width: 90px;
-}
-
-.url-display code {
-  background: white;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  color: var(--color-primary);
-  word-break: break-all;
-}
-
-.mode-selector {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  padding: var(--space-2);
-}
-
-.mode-tabs {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.mode-tab {
-  flex: 1;
-  padding: var(--space-3) var(--space-4);
-  border: none;
-  background: transparent;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  transition: all var(--transition-base);
-}
-
-.mode-tab:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.mode-tab.active {
-  background: white;
-  color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
-}
-
-.form-section {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-}
-
-.form-section h4 {
-  margin: 0 0 var(--space-2) 0;
-  color: var(--color-text);
-}
-
-.instructions {
-  background: white;
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-}
-
-.instructions h5 {
-  margin: 0 0 var(--space-2) 0;
-  color: var(--color-text);
-  font-size: var(--text-sm);
-}
-
-.instructions ol {
-  margin: 0;
-  padding-left: var(--space-5);
-  color: var(--color-text-muted);
-}
-
-.instructions li {
-  margin-bottom: var(--space-2);
-  line-height: 1.6;
-  font-size: var(--text-sm);
-}
-
-.code-block {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-sm);
-  padding: var(--space-3);
-  font-size: var(--text-xs);
-  overflow-x: auto;
-  margin: var(--space-2) 0;
-}
-
-.checkout-button-wrapper {
-  text-align: center;
-}
-
-.checkout-button-wrapper :deep(.checkout-button) {
+.checkout-button {
   width: 100%;
   max-width: 400px;
-  padding: var(--space-4) var(--space-5);
-  font-size: var(--text-base);
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
   background-color: #635bff;
   color: white;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 0.375rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all 0.2s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: 0.5rem;
 }
 
-.checkout-button-wrapper :deep(.checkout-button:hover:not(:disabled)) {
+.checkout-button:hover:not(:disabled) {
   background-color: #5a52e8;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(99, 91, 255, 0.3);
 }
 
-.checkout-button-wrapper :deep(.checkout-button:disabled) {
+.checkout-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-}
-
-.card-info {
-  background: linear-gradient(135deg, var(--color-info-light) 0%, #f0f7fa 100%);
-  border-left: 4px solid var(--color-info);
-}
-
-.card-info h3 {
-  color: var(--color-info-dark);
-  margin-bottom: var(--space-4);
-}
-
-.card-info h4 {
-  margin: var(--space-5) 0 var(--space-2) 0;
-  color: var(--color-text);
-  font-size: var(--text-base);
-}
-
-.card-info ul {
-  margin: 0;
-  padding-left: var(--space-5);
-  color: var(--color-text-muted);
-}
-
-.card-info li {
-  margin-bottom: var(--space-2);
-  line-height: 1.5;
-}
-
-.card-info .alert {
-  font-size: var(--text-sm);
-}
-
-/* Button Group */
-.btn-group {
-  display: inline-flex;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.btn-group .btn {
-  border-radius: 0;
-  border: 1px solid var(--color-border);
-  margin-left: -1px;
-}
-
-.btn-group .btn:first-child {
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-  margin-left: 0;
-}
-
-.btn-group .btn:last-child {
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-.btn-group .btn.active {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-  z-index: 1;
-}
-
-.btn-secondary {
-  background: white;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  padding: var(--space-2) var(--space-4);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.btn-secondary:hover:not(.active) {
-  background: var(--color-bg-secondary);
-}
-
-/* Badges */
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: var(--text-xs);
-  font-weight: 500;
-  margin-left: var(--space-2);
-  vertical-align: middle;
-}
-
-.badge-success {
-  background: #d4edda;
-  color: #155724;
-}
-
-.badge-warning {
-  background: #fff3cd;
-  color: #856404;
-}
-
-@media (max-width: 768px) {
-  .mode-tabs {
-    flex-direction: column;
-  }
-
-  .result-banner {
-    flex-direction: column;
-    text-align: center;
-  }
 }
 </style>
