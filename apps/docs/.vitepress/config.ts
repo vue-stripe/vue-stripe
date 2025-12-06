@@ -121,6 +121,15 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           ]
         },
         {
+          text: 'European Elements',
+          items: [
+            { text: 'IBAN Element', link: '/guide/iban-element' },
+            { text: 'iDEAL Bank Element', link: '/guide/ideal-bank-element' },
+            { text: 'P24 Bank Element', link: '/guide/p24-bank-element' },
+            { text: 'EPS Bank Element', link: '/guide/eps-bank-element' },
+          ]
+        },
+        {
           text: 'Advanced',
           items: [
             { text: 'Saving Payment Methods', link: '/guide/setup-intent' },
@@ -151,6 +160,15 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Split Card Elements', link: '/api/components/stripe-split-card-elements' },
             { text: 'VueStripeAddressElement', link: '/api/components/stripe-address-element' },
             { text: 'VueStripeLinkAuthenticationElement', link: '/api/components/stripe-link-authentication-element' },
+          ]
+        },
+        {
+          text: 'European Elements',
+          items: [
+            { text: 'VueStripeIbanElement', link: '/api/components/stripe-iban-element' },
+            { text: 'VueStripeIdealBankElement', link: '/api/components/stripe-ideal-bank-element' },
+            { text: 'VueStripeP24BankElement', link: '/api/components/stripe-p24-bank-element' },
+            { text: 'VueStripeEpsBankElement', link: '/api/components/stripe-eps-bank-element' },
           ]
         },
         {
