@@ -26,6 +26,8 @@
   <a href="https://vuestripe.com">Website</a> |
   <a href="https://vuestripe.com/guides/">Guides</a> |
   <a href="https://vuestripe.com/api/">API</a>
+  <a href="https://playground.vuestripe.com">Playground</a>
+  <a href="https://backend.vuestripe.com">Backend</a>
 </p>
 
 ---
@@ -82,10 +84,11 @@ const processPayment = async () => {
 
 ## Documentation
 
-- [Website](https://vuestripe.com)
-- [Guides](https://vuestripe.com/guide/introduction)
-- [API Reference](https://vuestripe.com/api/)
-- [Backend Data Generator](https://backend.vuestripe.com) - Generate test client secrets and payment intents
+- [Website](https://vuestripe.com) - Official website for Vue Stripe
+- [Guides](https://vuestripe.com/guide/introduction) - Guides for using Vue Stripe
+- [API Reference](https://vuestripe.com/api/) - API reference for Vue Stripe components and composables
+- [Playground](https://playground.vuestripe.com) - Interactive playground for testing Vue Stripe components and integrations
+- [Backend](https://backend.vuestripe.com) - Backend for the playground
 
 ## Monorepo Structure
 
