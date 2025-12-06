@@ -8,6 +8,7 @@ dist/
 build/
 .next/
 .vitepress/dist/
+.vitepress/cache/
 
 # Cache directories
 .turbo/
@@ -119,4 +120,4 @@ playwright/.cache/
 
 .claude
 CLAUDE.md
-docs
+/docs
