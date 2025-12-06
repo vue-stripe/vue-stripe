@@ -85,6 +85,7 @@ const processPayment = async () => {
 - [Website](https://vuestripe.com)
 - [Guides](https://vuestripe.com/guide/introduction)
 - [API Reference](https://vuestripe.com/api/)
+- [Backend Data Generator](https://backend.vuestripe.com) - Generate test client secrets and payment intents
 
 ## Monorepo Structure
 
@@ -97,6 +98,7 @@ vue-stripe/
 ├── apps/
 │   ├── docs/              # VitePress documentation site
 │   └── playground/        # Development playground
+│   └── backend/           # Backend for the playground
 └── tools/
     ├── eslint-config/     # Shared ESLint configuration
     └── typescript-config/ # Shared TypeScript configuration
@@ -109,6 +111,7 @@ vue-stripe/
 | [@vue-stripe/vue-stripe](./packages/vue-stripe) | Main library package |
 | [@vue-stripe/docs](./apps/docs) | VitePress documentation |
 | [@vue-stripe/playground](./apps/playground) | Development playground |
+| [@vue-stripe/backend](./apps/backend) | Backend for the playground |
 
 ## Development
 

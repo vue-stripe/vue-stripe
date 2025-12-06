@@ -175,6 +175,15 @@ const onPaymentChange = (event) => {
 | `VueStripeCardExpiryElement` | Expiry date input |
 | `VueStripeCardCvcElement` | CVC input |
 
+### European Regional Elements
+
+| Component | Description |
+|-----------|-------------|
+| `VueStripeIbanElement` | IBAN input for SEPA payments |
+| `VueStripeIdealBankElement` | iDEAL bank selector (Netherlands) |
+| `VueStripeP24BankElement` | Przelewy24 bank selector (Poland) |
+| `VueStripeEpsBankElement` | EPS bank selector (Austria) |
+
 ## Composables
 
 | Composable | Description |
@@ -202,6 +211,7 @@ import type {
 - [Website](https://vuestripe.com)
 - [Guides](https://vuestripe.com/guide/introduction)
 - [API Reference](https://vuestripe.com/api/)
+- [Backend Data Generator](https://backend.vuestripe.com) - Generate test client secrets and payment intents
 
 ## License
 
