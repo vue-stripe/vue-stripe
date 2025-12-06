@@ -12,5 +12,16 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+  },
+  // SSG options
+  ssgOptions: {
+    script: 'async',
+    formatting: 'minify',
+    crittersOptions: {
+      reduceInlineStyles: false
+    },
+    onFinished() {
+      console.log('SSG build complete!')
+    }
   }
 })
