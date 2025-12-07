@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { provide, ref, inject, watch, onMounted } from 'vue-demi'
+import { provide, ref, inject, watch, onMounted, nextTick } from 'vue-demi'
 import type { StripeElements } from '@stripe/stripe-js'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 
 // Use a looser type for additional options since Stripe has multiple option shapes
 type ElementsOptions = Record<string, any>
+
+interface Emits {
+  (e: 'ready', elements: StripeElements): void
+  (e: 'error', error: string): void
+}
+
+const emit = defineEmits<Emits>()
 
 /**
  * Mode for Payment Element - determines the type of intent
@@ -138,11 +145,17 @@ const createElements = () => {
     // Use type assertion since Stripe has complex overloads
     elements.value = (stripeInstance.stripe.value as any).elements(elementsOptions)
     loading.value = false
+
+    // Emit ready event after Vue updates the DOM
+    nextTick(() => {
+      emit('ready', elements.value!)
+    })
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to create elements'
     error.value = errorMessage
     loading.value = false
     console.error('[Vue Stripe] Elements creation error:', errorMessage)
+    emit('error', errorMessage)
   }
 }
 
