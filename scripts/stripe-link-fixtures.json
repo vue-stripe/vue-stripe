@@ -1,0 +1,342 @@
+{
+  "_meta": {
+    "template_version": 0,
+    "description": "Vue Stripe Link Authentication test data - Customers with various payment method states for testing Link authentication flow"
+  },
+  "fixtures": [
+    {
+      "name": "customer_link_valid",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Margo Hayes",
+        "email": "margo.link.valid@example.com",
+        "description": "Link customer with valid payment method",
+        "metadata": {
+          "test": "true",
+          "test_scenario": "link_valid",
+          "payment_status": "valid",
+          "use_case": "link-authentication"
+        }
+      }
+    },
+    {
+      "name": "customer_link_expired",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Tommy Caldwell",
+        "email": "tommy.link.expired@example.com",
+        "description": "Link customer with expired card",
+        "metadata": {
+          "test": "true",
+          "test_scenario": "link_expired",
+          "payment_status": "expired",
+          "use_case": "link-authentication"
+        }
+      }
+    },
+    {
+      "name": "customer_link_declined",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Beth Rodden",
+        "email": "beth.link.declined@example.com",
+        "description": "Link customer with card that will be declined",
+        "metadata": {
+          "test": "true",
+          "test_scenario": "link_declined",
+          "payment_status": "declined",
+          "use_case": "link-authentication"
+        }
+      }
+    },
+    {
+      "name": "customer_link_insufficient",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Ashima Shiraishi",
+        "email": "ashima.link.insufficient@example.com",
+        "description": "Link customer with insufficient funds card",
+        "metadata": {
+          "test": "true",
+          "test_scenario": "link_insufficient",
+          "payment_status": "insufficient_funds",
+          "use_case": "link-authentication"
+        }
+      }
+    },
+    {
+      "name": "customer_link_cvc_fail",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Janja Garnbret",
+        "email": "janja.link.cvc@example.com",
+        "description": "Link customer with card that fails CVC check",
+        "metadata": {
+          "test": "true",
+          "test_scenario": "link_cvc_fail",
+          "payment_status": "cvc_check_fail",
+          "use_case": "link-authentication"
+        }
+      }
+    },
+    {
+      "name": "customer_link_3ds_required",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Brooke Raboutou",
+        "email": "brooke.link.3ds@example.com",
+        "description": "Link customer with card requiring 3D Secure authentication",
+        "metadata": {
+          "test": "true",
+          "test_scenario": "link_3ds_required",
+          "payment_status": "requires_authentication",
+          "use_case": "link-authentication"
+        }
+      }
+    },
+    {
+      "name": "customer_link_no_payment",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Sasha DiGiulian",
+        "email": "sasha.link.none@example.com",
+        "description": "Link customer with no saved payment methods",
+        "metadata": {
+          "test": "true",
+          "test_scenario": "link_no_payment",
+          "payment_status": "no_payment_method",
+          "use_case": "link-authentication"
+        }
+      }
+    },
+    {
+      "name": "pm_valid_visa",
+      "path": "/v1/payment_methods",
+      "method": "post",
+      "params": {
+        "type": "card",
+        "card": {
+          "token": "tok_visa"
+        },
+        "billing_details": {
+          "name": "Margo Hayes",
+          "email": "margo.link.valid@example.com"
+        },
+        "metadata": {
+          "test": "true",
+          "scenario": "valid_card"
+        }
+      }
+    },
+    {
+      "name": "pm_expired_card",
+      "path": "/v1/payment_methods",
+      "method": "post",
+      "params": {
+        "type": "card",
+        "card": {
+          "token": "tok_chargeDeclinedExpiredCard"
+        },
+        "billing_details": {
+          "name": "Tommy Caldwell",
+          "email": "tommy.link.expired@example.com"
+        },
+        "metadata": {
+          "test": "true",
+          "scenario": "expired_card"
+        }
+      }
+    },
+    {
+      "name": "pm_declined_card",
+      "path": "/v1/payment_methods",
+      "method": "post",
+      "params": {
+        "type": "card",
+        "card": {
+          "token": "tok_chargeDeclined"
+        },
+        "billing_details": {
+          "name": "Beth Rodden",
+          "email": "beth.link.declined@example.com"
+        },
+        "metadata": {
+          "test": "true",
+          "scenario": "generic_decline"
+        }
+      }
+    },
+    {
+      "name": "pm_insufficient_funds",
+      "path": "/v1/payment_methods",
+      "method": "post",
+      "params": {
+        "type": "card",
+        "card": {
+          "token": "tok_chargeDeclinedInsufficientFunds"
+        },
+        "billing_details": {
+          "name": "Ashima Shiraishi",
+          "email": "ashima.link.insufficient@example.com"
+        },
+        "metadata": {
+          "test": "true",
+          "scenario": "insufficient_funds"
+        }
+      }
+    },
+    {
+      "name": "pm_cvc_fail",
+      "path": "/v1/payment_methods",
+      "method": "post",
+      "params": {
+        "type": "card",
+        "card": {
+          "token": "tok_cvcCheckFail"
+        },
+        "billing_details": {
+          "name": "Janja Garnbret",
+          "email": "janja.link.cvc@example.com"
+        },
+        "metadata": {
+          "test": "true",
+          "scenario": "cvc_check_fail"
+        }
+      }
+    },
+    {
+      "name": "pm_3ds_required",
+      "path": "/v1/payment_methods",
+      "method": "post",
+      "params": {
+        "type": "card",
+        "card": {
+          "token": "tok_threeDSecure2Required"
+        },
+        "billing_details": {
+          "name": "Brooke Raboutou",
+          "email": "brooke.link.3ds@example.com"
+        },
+        "metadata": {
+          "test": "true",
+          "scenario": "3ds_required"
+        }
+      }
+    },
+    {
+      "name": "attach_valid_visa",
+      "path": "/v1/payment_methods/${pm_valid_visa:id}/attach",
+      "method": "post",
+      "params": {
+        "customer": "${customer_link_valid:id}"
+      }
+    },
+    {
+      "name": "attach_expired_card",
+      "path": "/v1/payment_methods/${pm_expired_card:id}/attach",
+      "method": "post",
+      "params": {
+        "customer": "${customer_link_expired:id}"
+      }
+    },
+    {
+      "name": "attach_declined_card",
+      "path": "/v1/payment_methods/${pm_declined_card:id}/attach",
+      "method": "post",
+      "params": {
+        "customer": "${customer_link_declined:id}"
+      }
+    },
+    {
+      "name": "attach_insufficient_funds",
+      "path": "/v1/payment_methods/${pm_insufficient_funds:id}/attach",
+      "method": "post",
+      "params": {
+        "customer": "${customer_link_insufficient:id}"
+      }
+    },
+    {
+      "name": "attach_cvc_fail",
+      "path": "/v1/payment_methods/${pm_cvc_fail:id}/attach",
+      "method": "post",
+      "params": {
+        "customer": "${customer_link_cvc_fail:id}"
+      }
+    },
+    {
+      "name": "attach_3ds_required",
+      "path": "/v1/payment_methods/${pm_3ds_required:id}/attach",
+      "method": "post",
+      "params": {
+        "customer": "${customer_link_3ds_required:id}"
+      }
+    },
+    {
+      "name": "set_default_valid",
+      "path": "/v1/customers/${customer_link_valid:id}",
+      "method": "post",
+      "params": {
+        "invoice_settings": {
+          "default_payment_method": "${pm_valid_visa:id}"
+        }
+      }
+    },
+    {
+      "name": "set_default_expired",
+      "path": "/v1/customers/${customer_link_expired:id}",
+      "method": "post",
+      "params": {
+        "invoice_settings": {
+          "default_payment_method": "${pm_expired_card:id}"
+        }
+      }
+    },
+    {
+      "name": "set_default_declined",
+      "path": "/v1/customers/${customer_link_declined:id}",
+      "method": "post",
+      "params": {
+        "invoice_settings": {
+          "default_payment_method": "${pm_declined_card:id}"
+        }
+      }
+    },
+    {
+      "name": "set_default_insufficient",
+      "path": "/v1/customers/${customer_link_insufficient:id}",
+      "method": "post",
+      "params": {
+        "invoice_settings": {
+          "default_payment_method": "${pm_insufficient_funds:id}"
+        }
+      }
+    },
+    {
+      "name": "set_default_cvc_fail",
+      "path": "/v1/customers/${customer_link_cvc_fail:id}",
+      "method": "post",
+      "params": {
+        "invoice_settings": {
+          "default_payment_method": "${pm_cvc_fail:id}"
+        }
+      }
+    },
+    {
+      "name": "set_default_3ds",
+      "path": "/v1/customers/${customer_link_3ds_required:id}",
+      "method": "post",
+      "params": {
+        "invoice_settings": {
+          "default_payment_method": "${pm_3ds_required:id}"
+        }
+      }
+    }
+  ]
+}

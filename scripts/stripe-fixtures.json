@@ -1,0 +1,363 @@
+{
+  "_meta": {
+    "template_version": 0,
+    "description": "Vue Stripe playground seed data - Bouldering/Rock Climbing themed products, prices, and customers"
+  },
+  "fixtures": [
+    {
+      "name": "product_membership_basic",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "prod_vuestripe_sender",
+        "name": "Sender Pass",
+        "description": "Perfect for casual climbers. Unlimited gym access during off-peak hours, locker rental, and access to beginner routes.",
+        "metadata": {
+          "tier": "basic",
+          "features": "Off-peak access, Locker rental, V0-V3 routes, Community events"
+        }
+      }
+    },
+    {
+      "name": "product_membership_pro",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "prod_vuestripe_crusher",
+        "name": "Crusher Pass",
+        "description": "For dedicated climbers pushing their grade. 24/7 gym access, gear rentals, monthly technique clinics, and training board access.",
+        "metadata": {
+          "tier": "pro",
+          "features": "24/7 access, Gear rentals, Training boards, Monthly clinics, Guest passes"
+        }
+      }
+    },
+    {
+      "name": "product_membership_elite",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "prod_vuestripe_projector",
+        "name": "Pro Climber Pass",
+        "description": "Elite membership for serious climbers. Personal coaching, competition training, nutrition planning, and access to all partner gyms.",
+        "metadata": {
+          "tier": "elite",
+          "features": "Personal coach, Competition prep, Nutrition plan, Partner gym access, Priority route setting requests"
+        }
+      }
+    },
+    {
+      "name": "product_coaching_session",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "prod_vuestripe_coaching",
+        "name": "Private Coaching Session",
+        "description": "One-on-one session with a professional climbing coach. Video analysis, technique correction, and personalized training plan.",
+        "metadata": {
+          "type": "one-time",
+          "duration": "90 minutes",
+          "includes": "Video analysis, Technique assessment, Custom training plan, Follow-up notes"
+        }
+      }
+    },
+    {
+      "name": "product_day_passes",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "prod_vuestripe_daypasses",
+        "name": "Day Pass Credits",
+        "description": "Flexible day passes for drop-in climbing. Buy credits and use them anytime. Perfect for irregular schedules or visiting climbers.",
+        "metadata": {
+          "type": "metered",
+          "unit": "day pass"
+        }
+      }
+    },
+    {
+      "name": "product_lifetime_membership",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "prod_vuestripe_lifetime",
+        "name": "Lifetime Founding Member",
+        "description": "One-time payment for lifetime unlimited access. Includes all future gym expansions, exclusive founding member events, and legacy benefits.",
+        "metadata": {
+          "type": "one-time",
+          "access": "lifetime",
+          "includes": "Unlimited access forever, Founding member wall plaque, Annual member jacket, VIP events"
+        }
+      }
+    },
+    {
+      "name": "product_starter_kit",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "prod_vuestripe_starterkit",
+        "name": "Climber Starter Kit",
+        "description": "Everything a new climber needs. Quality climbing shoes, chalk bag with chalk ball, finger tape, and a technique guidebook.",
+        "metadata": {
+          "type": "one-time",
+          "category": "gear",
+          "includes": "Climbing shoes, Chalk bag, Chalk ball, Finger tape, Guidebook"
+        }
+      }
+    },
+    {
+      "name": "product_team_tee",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "prod_vuestripe_teamtee",
+        "name": "Gym Team T-Shirt",
+        "description": "Official climbing gym team shirt. Moisture-wicking fabric, relaxed fit for full range of motion. Available in all sizes.",
+        "metadata": {
+          "type": "one-time",
+          "category": "apparel",
+          "material": "Organic cotton blend"
+        }
+      }
+    },
+    {
+      "name": "price_sender_monthly",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_membership_basic:id}",
+        "currency": "usd",
+        "unit_amount": 4900,
+        "recurring": {
+          "interval": "month"
+        },
+        "lookup_key": "sender_monthly",
+        "metadata": {
+          "plan": "sender",
+          "interval": "monthly"
+        }
+      }
+    },
+    {
+      "name": "price_sender_yearly",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_membership_basic:id}",
+        "currency": "usd",
+        "unit_amount": 49000,
+        "recurring": {
+          "interval": "year"
+        },
+        "lookup_key": "sender_yearly",
+        "metadata": {
+          "plan": "sender",
+          "interval": "yearly",
+          "savings": "2 months free"
+        }
+      }
+    },
+    {
+      "name": "price_crusher_monthly",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_membership_pro:id}",
+        "currency": "usd",
+        "unit_amount": 8900,
+        "recurring": {
+          "interval": "month"
+        },
+        "lookup_key": "crusher_monthly",
+        "metadata": {
+          "plan": "crusher",
+          "interval": "monthly"
+        }
+      }
+    },
+    {
+      "name": "price_crusher_yearly",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_membership_pro:id}",
+        "currency": "usd",
+        "unit_amount": 89000,
+        "recurring": {
+          "interval": "year"
+        },
+        "lookup_key": "crusher_yearly",
+        "metadata": {
+          "plan": "crusher",
+          "interval": "yearly",
+          "savings": "2 months free"
+        }
+      }
+    },
+    {
+      "name": "price_projector_monthly",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_membership_elite:id}",
+        "currency": "usd",
+        "unit_amount": 14900,
+        "recurring": {
+          "interval": "month"
+        },
+        "lookup_key": "projector_monthly",
+        "metadata": {
+          "plan": "projector",
+          "interval": "monthly"
+        }
+      }
+    },
+    {
+      "name": "price_projector_yearly",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_membership_elite:id}",
+        "currency": "usd",
+        "unit_amount": 149000,
+        "recurring": {
+          "interval": "year"
+        },
+        "lookup_key": "projector_yearly",
+        "metadata": {
+          "plan": "projector",
+          "interval": "yearly",
+          "savings": "2 months free"
+        }
+      }
+    },
+    {
+      "name": "price_coaching",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_coaching_session:id}",
+        "currency": "usd",
+        "unit_amount": 12500,
+        "lookup_key": "coaching_session",
+        "metadata": {
+          "type": "one-time"
+        }
+      }
+    },
+    {
+      "name": "price_day_passes",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_day_passes:id}",
+        "currency": "usd",
+        "recurring": {
+          "interval": "month",
+          "usage_type": "metered",
+          "aggregate_usage": "sum"
+        },
+        "billing_scheme": "per_unit",
+        "unit_amount": 2500,
+        "lookup_key": "day_pass_credits",
+        "metadata": {
+          "type": "metered",
+          "unit": "$25 per day pass"
+        }
+      }
+    },
+    {
+      "name": "price_lifetime",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_lifetime_membership:id}",
+        "currency": "usd",
+        "unit_amount": 299900,
+        "lookup_key": "lifetime_founding",
+        "metadata": {
+          "type": "one-time",
+          "access": "lifetime"
+        }
+      }
+    },
+    {
+      "name": "price_starter_kit",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_starter_kit:id}",
+        "currency": "usd",
+        "unit_amount": 14900,
+        "lookup_key": "starter_kit",
+        "metadata": {
+          "type": "one-time",
+          "category": "gear"
+        }
+      }
+    },
+    {
+      "name": "price_team_tee",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_team_tee:id}",
+        "currency": "usd",
+        "unit_amount": 3500,
+        "lookup_key": "team_tee",
+        "metadata": {
+          "type": "one-time",
+          "category": "apparel"
+        }
+      }
+    },
+    {
+      "name": "customer_weekend_boulderer",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Alex Honnold",
+        "email": "alex@example.com",
+        "description": "Weekend boulderer, working on V6 projects",
+        "metadata": {
+          "test": "true",
+          "climbing_style": "boulderer",
+          "current_grade": "V5",
+          "use_case": "subscriptions"
+        }
+      }
+    },
+    {
+      "name": "customer_trad_climber",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Lynn Hill",
+        "email": "lynn@example.com",
+        "description": "Trad climber transitioning to indoor bouldering",
+        "metadata": {
+          "test": "true",
+          "climbing_style": "trad",
+          "current_grade": "V4",
+          "use_case": "one-time-payments"
+        }
+      }
+    },
+    {
+      "name": "customer_comp_climber",
+      "path": "/v1/customers",
+      "method": "post",
+      "params": {
+        "name": "Adam Ondra",
+        "email": "adam@example.com",
+        "description": "Competition climber, trains 5 days a week",
+        "metadata": {
+          "test": "true",
+          "climbing_style": "competition",
+          "current_grade": "V12",
+          "use_case": "checkout"
+        }
+      }
+    }
+  ]
+}
