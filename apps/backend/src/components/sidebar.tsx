@@ -10,6 +10,7 @@ import {
   Wallet,
   ExternalLink,
   Landmark,
+  Package,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
@@ -32,6 +33,15 @@ const generators = [
     href: '/checkout-session',
     icon: ShoppingCart,
     description: 'Hosted checkout',
+  },
+]
+
+const catalog = [
+  {
+    name: 'Products',
+    href: '/products',
+    icon: Package,
+    description: 'View seeded products',
   },
 ]
 
@@ -97,6 +107,33 @@ export function Sidebar() {
           Generators
         </p>
         {generators.map((item) => {
+          const isActive = pathname === item.href
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                isActive
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              <div>
+                <p className="font-medium">{item.name}</p>
+                {!isActive && (
+                  <p className="text-xs opacity-70">{item.description}</p>
+                )}
+              </div>
+            </Link>
+          )
+        })}
+
+        <p className="mb-2 mt-4 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Catalog
+        </p>
+        {catalog.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link
