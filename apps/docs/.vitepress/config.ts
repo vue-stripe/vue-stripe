@@ -81,6 +81,12 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
   themeConfig: {
     logo: { src: '/vue-stripe-logo-variant-1-small.png', alt: 'Vue Stripe' },
 
+    // Environment config for live demos (passed to components via useData())
+    stripeConfig: {
+      publishableKey: process.env['VITE_STRIPE_PUBLISHABLE_KEY'] || '',
+      apiUrl: process.env['VITE_API_URL'] || 'https://backend.vuestripe.com',
+    },
+
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
       { text: 'API', link: '/api/' },

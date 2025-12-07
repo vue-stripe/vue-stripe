@@ -10,9 +10,9 @@ import {
 import ProductSelector from './ProductSelector.vue'
 import PaymentStatus from './PaymentStatus.vue'
 import { useBackendApi, type Product, type SubscriptionResult } from '../../composables/useBackendApi'
+import { useStripeConfig } from '../../composables/useStripeConfig'
 
-// Get publishable key from env
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ''
+const { publishableKey } = useStripeConfig()
 
 const { createSubscription, formatPrice, loading, error } = useBackendApi()
 

@@ -11,8 +11,9 @@ import {
 import ProductSelector from './ProductSelector.vue'
 import PaymentStatus from './PaymentStatus.vue'
 import { useBackendApi, type Product } from '../../composables/useBackendApi'
+import { useStripeConfig } from '../../composables/useStripeConfig'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ''
+const { publishableKey } = useStripeConfig()
 const { createPaymentIntent, formatPrice, loading, error } = useBackendApi()
 
 // Step management: Product → Payment → Complete

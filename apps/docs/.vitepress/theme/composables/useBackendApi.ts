@@ -1,4 +1,5 @@
 import { ref, readonly } from 'vue'
+import { useStripeConfig } from './useStripeConfig'
 
 // Types
 export interface ProductPrice {
@@ -44,7 +45,7 @@ export interface SetupIntentResult {
 }
 
 export function useBackendApi() {
-  const apiUrl = import.meta.env.VITE_API_URL || 'https://backend.vuestripe.com'
+  const { apiUrl } = useStripeConfig()
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -56,7 +57,7 @@ export function useBackendApi() {
     error.value = null
 
     try {
-      const response = await fetch(`${apiUrl}/api/products`)
+      const response = await fetch(`${apiUrl.value}/api/products`)
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
@@ -87,7 +88,7 @@ export function useBackendApi() {
     error.value = null
 
     try {
-      const response = await fetch(`${apiUrl}/api/payment-intent`, {
+      const response = await fetch(`${apiUrl.value}/api/payment-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(options),
@@ -119,7 +120,7 @@ export function useBackendApi() {
     error.value = null
 
     try {
-      const response = await fetch(`${apiUrl}/api/ideal-intent`, {
+      const response = await fetch(`${apiUrl.value}/api/ideal-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(options),
@@ -159,7 +160,7 @@ export function useBackendApi() {
     error.value = null
 
     try {
-      const response = await fetch(`${apiUrl}/api/checkout-session`, {
+      const response = await fetch(`${apiUrl.value}/api/checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(options),
@@ -193,7 +194,7 @@ export function useBackendApi() {
     error.value = null
 
     try {
-      const response = await fetch(`${apiUrl}/api/subscription`, {
+      const response = await fetch(`${apiUrl.value}/api/subscription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(options),
@@ -225,7 +226,7 @@ export function useBackendApi() {
     error.value = null
 
     try {
-      const response = await fetch(`${apiUrl}/api/setup-intent`, {
+      const response = await fetch(`${apiUrl.value}/api/setup-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(options),
