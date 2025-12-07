@@ -1,8 +1,22 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig, loadEnv } from 'vitepress'
 import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
 
+// Load environment variables from .env files
+const envFromFile = loadEnv('', process.cwd())
+
+// Helper to get env var (prefers shell env vars over .env file, for GitHub Actions)
+const getEnv = (key: string): string => {
+  // Shell environment variables (set in GitHub Actions via `env:` in workflow)
+  // are available directly on process.env
+  const shellEnv = process.env[key]
+  if (shellEnv) return shellEnv
+
+  // Fall back to .env file values (for local development)
+  return (envFromFile as Record<string, string>)[key] || ''
+}
+
 // Google Analytics Measurement ID - Set via VITE_GA_MEASUREMENT_ID environment variable
-const GA_MEASUREMENT_ID = process.env['VITE_GA_MEASUREMENT_ID'] || ''
+const GA_MEASUREMENT_ID = getEnv('VITE_GA_MEASUREMENT_ID')
 
 export default defineConfig({
   title: 'Vue Stripe',
@@ -83,8 +97,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
 
     // Environment config for live demos (passed to components via useData())
     stripeConfig: {
-      publishableKey: process.env['VITE_STRIPE_PUBLISHABLE_KEY'] || '',
-      apiUrl: process.env['VITE_API_URL'] || 'https://backend.vuestripe.com',
+      publishableKey: getEnv('VITE_STRIPE_PUBLISHABLE_KEY'),
+      apiUrl: getEnv('VITE_API_URL') || 'https://backend.vuestripe.com',
     },
 
     nav: [
@@ -271,9 +285,9 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     },
     // Explicitly define environment variables to ensure they're inlined during SSG build
     define: {
-      'import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY': JSON.stringify(process.env['VITE_STRIPE_PUBLISHABLE_KEY'] || ''),
-      'import.meta.env.VITE_API_URL': JSON.stringify(process.env['VITE_API_URL'] || 'https://backend.vuestripe.com'),
-      'import.meta.env.VITE_GA_MEASUREMENT_ID': JSON.stringify(process.env['VITE_GA_MEASUREMENT_ID'] || ''),
+      'import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY': JSON.stringify(getEnv('VITE_STRIPE_PUBLISHABLE_KEY')),
+      'import.meta.env.VITE_API_URL': JSON.stringify(getEnv('VITE_API_URL') || 'https://backend.vuestripe.com'),
+      'import.meta.env.VITE_GA_MEASUREMENT_ID': JSON.stringify(getEnv('VITE_GA_MEASUREMENT_ID')),
     }
   },
 
