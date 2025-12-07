@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
 
 // Google Analytics Measurement ID - Set via VITE_GA_MEASUREMENT_ID environment variable
-const GA_MEASUREMENT_ID = process.env.VITE_GA_MEASUREMENT_ID || ''
+const GA_MEASUREMENT_ID = process.env['VITE_GA_MEASUREMENT_ID'] || ''
 
 export default defineConfig({
   title: 'Vue Stripe',
@@ -262,6 +262,12 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
       fs: {
         allow: ['../..']
       }
+    },
+    // Explicitly define environment variables to ensure they're inlined during SSG build
+    define: {
+      'import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY': JSON.stringify(process.env['VITE_STRIPE_PUBLISHABLE_KEY'] || ''),
+      'import.meta.env.VITE_API_URL': JSON.stringify(process.env['VITE_API_URL'] || 'https://backend.vuestripe.com'),
+      'import.meta.env.VITE_GA_MEASUREMENT_ID': JSON.stringify(process.env['VITE_GA_MEASUREMENT_ID'] || ''),
     }
   },
 
