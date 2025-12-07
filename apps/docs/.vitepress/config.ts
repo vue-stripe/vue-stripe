@@ -4,6 +4,13 @@ import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-i
 // Load environment variables from .env files
 const envFromFile = loadEnv('', process.cwd())
 
+// Debug: Log environment variable sources
+console.log('[VitePress Config] Debug - Environment Variables:')
+console.log('  process.env.VITE_STRIPE_PUBLISHABLE_KEY:', process.env.VITE_STRIPE_PUBLISHABLE_KEY ? '***SET***' : '(empty)')
+console.log('  process.env.VITE_GA_MEASUREMENT_ID:', process.env.VITE_GA_MEASUREMENT_ID || '(empty)')
+console.log('  process.env.VITE_API_URL:', process.env.VITE_API_URL || '(empty)')
+console.log('  loadEnv keys:', Object.keys(envFromFile))
+
 // Helper to get env var (prefers shell env vars over .env file, for GitHub Actions)
 const getEnv = (key: string): string => {
   // Shell environment variables (set in GitHub Actions via `env:` in workflow)
@@ -17,6 +24,11 @@ const getEnv = (key: string): string => {
 
 // Google Analytics Measurement ID - Set via VITE_GA_MEASUREMENT_ID environment variable
 const GA_MEASUREMENT_ID = getEnv('VITE_GA_MEASUREMENT_ID')
+
+// Debug: Log resolved values
+console.log('[VitePress Config] Resolved values:')
+console.log('  GA_MEASUREMENT_ID:', GA_MEASUREMENT_ID || '(empty)')
+console.log('  STRIPE_KEY:', getEnv('VITE_STRIPE_PUBLISHABLE_KEY') ? '***SET***' : '(empty)')
 
 export default defineConfig({
   title: 'Vue Stripe',
