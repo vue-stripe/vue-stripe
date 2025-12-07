@@ -45,7 +45,7 @@ jobs:
         run: pnpm docs:build
         env:
           VITE_GA_MEASUREMENT_ID: G-E68G4EJM6M
-          VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+          VITE_STRIPE_PUBLISHABLE_KEY: pk_test_51OIHqMIx2Vb66eaKneiRI89KWckP2FB7c75OLUZGezoXDiCHlIXMh6dBkTyWRe8oz77CO6B0udvWS6yWWdDaiwS800oW2Na8mk
           VITE_API_URL: https://backend.vuestripe.com
 
       - name: Setup Pages
