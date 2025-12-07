@@ -84,6 +84,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
       { text: 'API', link: '/api/' },
+      { text: 'Live Demo', link: '/live-demo/' },
       {
         text: 'Links',
         items: [
@@ -191,6 +192,32 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           text: 'Plugin',
           items: [
             { text: 'createVueStripe', link: '/api/plugin' },
+          ]
+        },
+      ],
+      '/live-demo/': [
+        {
+          text: 'Live Demo',
+          items: [
+            { text: 'Overview', link: '/live-demo/' },
+          ]
+        },
+        {
+          text: 'One-Time Payments',
+          items: [
+            { text: 'Stripe Checkout', link: '/live-demo/checkout-redirect' },
+            { text: 'Payment Element', link: '/live-demo/payment-element' },
+            { text: 'Card Element', link: '/live-demo/card-element' },
+            { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },
+            { text: 'Link Authentication', link: '/live-demo/link-authentication' },
+            { text: 'iDEAL (Netherlands)', link: '/live-demo/ideal-payment' },
+          ]
+        },
+        {
+          text: 'Subscriptions',
+          items: [
+            { text: 'Stripe Checkout', link: '/live-demo/subscription-checkout' },
+            { text: 'Embedded Elements', link: '/live-demo/subscription-embedded' },
           ]
         },
       ],

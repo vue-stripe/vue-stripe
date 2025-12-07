@@ -7,6 +7,20 @@ import './styles/vars.css'
 import StripeBadge from './components/StripeBadge.vue'
 import CopyForLLM from './components/CopyForLLM.vue'
 
+// Example components for interactive documentation
+import ProductSelector from './components/examples/ProductSelector.vue'
+import PaymentIntentGenerator from './components/examples/PaymentIntentGenerator.vue'
+import ClientSecretInput from './components/examples/ClientSecretInput.vue'
+import PaymentStatus from './components/examples/PaymentStatus.vue'
+import PaymentElementExample from './components/examples/PaymentElementExample.vue'
+import IdealPaymentExample from './components/examples/IdealPaymentExample.vue'
+import SubscriptionCheckoutExample from './components/examples/SubscriptionCheckoutExample.vue'
+import SubscriptionEmbeddedExample from './components/examples/SubscriptionEmbeddedExample.vue'
+import CheckoutRedirectExample from './components/examples/CheckoutRedirectExample.vue'
+import CardElementExample from './components/examples/CardElementExample.vue'
+import SplitCardElementExample from './components/examples/SplitCardElementExample.vue'
+import LinkAuthenticationExample from './components/examples/LinkAuthenticationExample.vue'
+
 // Analytics composables
 import { useScrollTracking } from './composables/useScrollTracking'
 import { useSearchTracking } from './composables/useSearchTracking'
@@ -66,7 +80,18 @@ export default {
     })
   },
   enhanceApp({ app, router, siteData }) {
-    // Register global components for documentation examples if needed
-    // app.component('DemoContainer', DemoContainer)
+    // Register example components globally for use in markdown
+    app.component('ProductSelector', ProductSelector)
+    app.component('PaymentIntentGenerator', PaymentIntentGenerator)
+    app.component('ClientSecretInput', ClientSecretInput)
+    app.component('PaymentStatus', PaymentStatus)
+    app.component('PaymentElementExample', PaymentElementExample)
+    app.component('IdealPaymentExample', IdealPaymentExample)
+    app.component('SubscriptionCheckoutExample', SubscriptionCheckoutExample)
+    app.component('SubscriptionEmbeddedExample', SubscriptionEmbeddedExample)
+    app.component('CheckoutRedirectExample', CheckoutRedirectExample)
+    app.component('CardElementExample', CardElementExample)
+    app.component('SplitCardElementExample', SplitCardElementExample)
+    app.component('LinkAuthenticationExample', LinkAuthenticationExample)
   }
 } satisfies Theme
