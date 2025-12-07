@@ -45,7 +45,7 @@
     "docs:build": {
       "dependsOn": ["^build"],
       "outputs": [".vitepress/dist/**"],
-      "env": ["VITE_GA_MEASUREMENT_ID"]
+      "env": ["VITE_GA_MEASUREMENT_ID", "VITE_STRIPE_PUBLISHABLE_KEY", "VITE_API_URL"]
     },
     "clean": {
       "cache": false
