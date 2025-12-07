@@ -1,28 +1,17 @@
-import { useData } from 'vitepress'
 import { computed } from 'vue'
 
-interface StripeConfig {
-  publishableKey: string
-  apiUrl: string
-}
-
 /**
- * Access Stripe configuration from VitePress themeConfig
- * This is more reliable than import.meta.env for SSG builds
+ * Access Stripe configuration from build-time injected environment variables
+ * Uses Vite's define feature which replaces import.meta.env.* at build time
  */
 export function useStripeConfig() {
-  const { theme } = useData()
-
-  const config = computed<StripeConfig>(() => {
-    const stripeConfig = (theme.value as any)?.stripeConfig
-    return {
-      publishableKey: stripeConfig?.publishableKey || '',
-      apiUrl: stripeConfig?.apiUrl || 'https://backend.vuestripe.com',
-    }
-  })
+  // These values are replaced at build time via vite.define in config.ts
+  // This is more reliable than themeConfig for SSG builds
+  const publishableKey = computed(() => import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '')
+  const apiUrl = computed(() => import.meta.env.VITE_API_URL || 'https://backend.vuestripe.com')
 
   return {
-    publishableKey: computed(() => config.value.publishableKey),
-    apiUrl: computed(() => config.value.apiUrl),
+    publishableKey,
+    apiUrl,
   }
 }
