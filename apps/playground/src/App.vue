@@ -17,6 +17,7 @@ import {
   Layers,
   Landmark,
   Euro,
+  Table2,
 } from 'lucide-vue-next'
 import {
   Button,
@@ -198,6 +199,8 @@ const navGroups = computed(() => {
     'IdealBankElement': Landmark,
     'P24BankElement': Landmark,
     'EpsBankElement': Landmark,
+    // Pricing Table (v5.3.0)
+    'PricingTable': Table2,
   }
 
   // Group routes
@@ -230,7 +233,7 @@ const navGroups = computed(() => {
 
     if (name.includes('Provider') || name.includes('Elements') && !name.includes('Element')) {
       groups.core.items.push(item)
-    } else if (name.includes('Checkout')) {
+    } else if (name.includes('Checkout') || name === 'PricingTable') {
       groups.checkout.items.push(item)
     } else if (europeanElements.includes(name)) {
       groups.european.items.push(item)

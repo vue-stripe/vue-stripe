@@ -122,6 +122,33 @@ export interface VueStripeElementsProps {
   options?: StripeElementsOptions | undefined
 }
 
+/**
+ * Props for VueStripePricingTable component.
+ * Used to embed a Stripe pricing table for subscription products.
+ */
+export interface VueStripePricingTableProps {
+  /**
+   * The ID of the pricing table to display.
+   * Found in Stripe Dashboard under Product Catalog > Pricing tables.
+   */
+  pricingTableId: string
+  /**
+   * Pre-fill the customer's email address in checkout.
+   * Useful when you already know the customer's email.
+   */
+  customerEmail?: string
+  /**
+   * Client secret from a Customer Session API response.
+   * Use this to allow existing customers to access their saved payment methods.
+   */
+  customerSessionClientSecret?: string
+  /**
+   * A reference ID for the checkout session.
+   * Useful for reconciling checkout sessions with your internal systems.
+   */
+  clientReferenceId?: string
+}
+
 // Event interfaces for Vue components
 export interface VueStripeElementEvents {
   ready: (element: StripeElement) => void

@@ -149,6 +149,12 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           ]
         },
         {
+          text: 'Subscriptions',
+          items: [
+            { text: 'Pricing Table', link: '/guide/pricing-table' },
+          ]
+        },
+        {
           text: 'Advanced',
           items: [
             { text: 'Saving Payment Methods', link: '/guide/setup-intent' },
@@ -191,9 +197,10 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           ]
         },
         {
-          text: 'Checkout',
+          text: 'Checkout & Subscriptions',
           items: [
             { text: 'VueStripeCheckout', link: '/api/components/stripe-checkout' },
+            { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' },
           ]
         },
         {

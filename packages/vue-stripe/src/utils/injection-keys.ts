@@ -13,5 +13,13 @@ export interface StripeElementsInstance {
   error: Ref<string | null>;
 }
 
+export interface VueStripeConfig {
+  publishableKey: string;
+  stripeAccount?: string | undefined;
+  apiVersion?: string | undefined;
+  locale?: string | undefined;
+}
+
 export const stripeInjectionKey: InjectionKey<StripeInstance> = Symbol('stripe');
 export const stripeElementsInjectionKey: InjectionKey<StripeElementsInstance> = Symbol('stripe-elements');
+export const stripeConfigInjectionKey: InjectionKey<VueStripeConfig> = Symbol('vue-stripe-config');

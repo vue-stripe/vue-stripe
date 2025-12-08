@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide, ref, onMounted } from 'vue-demi'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
-import { stripeInjectionKey } from '../utils/injection-keys'
+import { stripeInjectionKey, stripeConfigInjectionKey, type VueStripeConfig } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 import { STRIPE_PARTNER_DETAILS } from '../utils/constants'
 
@@ -35,7 +35,7 @@ if (!key) {
   throw new VueStripeProviderError('publishableKey or stripeKey is required')
 }
 
-const config: Record<string, string | undefined> = {
+const config: VueStripeConfig = {
   publishableKey: key,
   stripeAccount: props.stripeAccount || props.options?.stripeAccount,
   apiVersion: props.apiVersion || props.options?.apiVersion,
@@ -82,7 +82,7 @@ onMounted(() => {
 })
 
 // Provide configuration for child components
-provide('vue-stripe-config', config)
+provide(stripeConfigInjectionKey, config)
 provide(stripeInjectionKey, {
   stripe,
   loading,
