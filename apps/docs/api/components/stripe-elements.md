@@ -39,9 +39,9 @@ flowchart TD
 
 <script setup>
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY

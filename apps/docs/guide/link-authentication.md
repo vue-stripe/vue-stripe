@@ -35,10 +35,10 @@ Link Authentication Element **must be paired with PaymentElement**. It only hand
 <script setup>
 import { ref, computed } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeLinkAuthenticationElement,
-  StripePaymentElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeLinkAuthenticationElement,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -129,12 +129,10 @@ Here's a full example with payment processing:
 <script setup>
 import { ref, computed } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeLinkAuthenticationElement,
-  StripePaymentElement,
-  useStripe,
-  useStripeElements
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeLinkAuthenticationElement,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY

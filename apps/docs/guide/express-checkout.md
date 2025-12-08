@@ -7,20 +7,27 @@ The Express Checkout Element displays one-click payment buttons for Apple Pay, G
 ```vue
 <script setup>
 import { ref } from 'vue'
+import type { Stripe } from '@stripe/stripe-js'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeExpressCheckoutElement,
-  useStripe
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeExpressCheckoutElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('pi_..._secret_...')
 
-const handleConfirm = async (event) => {
-  const { stripe } = useStripe()
+// Capture Stripe instance from component event
+const stripeInstance = ref<Stripe | null>(null)
 
-  const { error } = await stripe.value.confirmPayment({
+const onStripeLoad = (stripe: Stripe) => {
+  stripeInstance.value = stripe
+}
+
+const handleConfirm = async (event) => {
+  if (!stripeInstance.value) return
+
+  const { error } = await stripeInstance.value.confirmPayment({
     elements: event.elements,
     confirmParams: {
       return_url: `${window.location.origin}/complete`
@@ -34,7 +41,7 @@ const handleConfirm = async (event) => {
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
     <VueStripeElements :client-secret="clientSecret">
       <VueStripeExpressCheckoutElement @confirm="handleConfirm" />
     </VueStripeElements>
@@ -199,13 +206,12 @@ const handleExpressReady = ({ availablePaymentMethods }) => {
 ```vue
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import type { Stripe, StripeElements } from '@stripe/stripe-js'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeExpressCheckoutElement,
-  StripePaymentElement,
-  useStripe,
-  useStripeElements
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeExpressCheckoutElement,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -213,6 +219,18 @@ const clientSecret = ref('')
 const hasExpressCheckout = ref(false)
 const processing = ref(false)
 const errorMessage = ref('')
+
+// Capture instances from component events
+const stripeInstance = ref<Stripe | null>(null)
+const elementsInstance = ref<StripeElements | null>(null)
+
+const onStripeLoad = (stripe: Stripe) => {
+  stripeInstance.value = stripe
+}
+
+const onElementsReady = (elements: StripeElements) => {
+  elementsInstance.value = elements
+}
 
 onMounted(async () => {
   const response = await fetch('/api/create-payment-intent', {
@@ -241,9 +259,9 @@ const handleClick = ({ resolve }) => {
 }
 
 const handleExpressConfirm = async (event) => {
-  const { stripe } = useStripe()
+  if (!stripeInstance.value) return
 
-  const { error } = await stripe.value.confirmPayment({
+  const { error } = await stripeInstance.value.confirmPayment({
     elements: event.elements,
     confirmParams: {
       return_url: `${window.location.origin}/complete`
@@ -256,15 +274,12 @@ const handleExpressConfirm = async (event) => {
 }
 
 const handleSubmit = async () => {
-  const { stripe } = useStripe()
-  const { elements } = useStripeElements()
-
-  if (!stripe.value || !elements.value) return
+  if (!stripeInstance.value || !elementsInstance.value) return
 
   processing.value = true
 
-  const { error } = await stripe.value.confirmPayment({
-    elements: elements.value,
+  const { error } = await stripeInstance.value.confirmPayment({
+    elements: elementsInstance.value,
     confirmParams: {
       return_url: `${window.location.origin}/complete`
     }
@@ -279,8 +294,12 @@ const handleSubmit = async () => {
 
 <template>
   <div class="checkout">
-    <VueStripeProvider :publishable-key="publishableKey">
-      <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
+    <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
+      <VueStripeElements
+        v-if="clientSecret"
+        :client-secret="clientSecret"
+        @ready="onElementsReady"
+      >
         <!-- Express Checkout -->
         <VueStripeExpressCheckoutElement
           @ready="handleExpressReady"

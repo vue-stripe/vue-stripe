@@ -50,9 +50,9 @@ flowchart TD
 
 <script setup>
 import {
-  StripeProvider,
-  StripeElements,
-  StripeAddressElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeAddressElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -352,10 +352,10 @@ const handleSubmit = async () => {
 <script setup>
 import { ref } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeAddressElement,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeAddressElement,
+  VueStripePaymentElement,
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
@@ -419,7 +419,7 @@ const handlePayment = async (clientSecret) => {
 
 ```ts
 import { ref } from 'vue'
-import { StripeAddressElement } from '@vue-stripe/vue-stripe'
+import { VueStripeAddressElement } from '@vue-stripe/vue-stripe'
 import type {
   StripeAddressElement as StripeAddressElementType,
   StripeAddressElementChangeEvent,
@@ -444,7 +444,7 @@ const handleChange = (event: StripeAddressElementChangeEvent) => {
 }
 
 // Template ref with getValue()
-const addressRef = ref<InstanceType<typeof StripeAddressElement>>()
+const addressRef = ref<InstanceType<typeof VueStripeAddressElement>>()
 
 const validateAddress = async () => {
   const result = await addressRef.value?.getValue()

@@ -275,9 +275,9 @@ const handlePay = async (clientSecret: string) => {
 <script setup>
 import { ref } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement,
   usePaymentIntent
 } from '@vue-stripe/vue-stripe'
 

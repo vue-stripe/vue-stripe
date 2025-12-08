@@ -51,10 +51,9 @@ flowchart TD
 
 <script setup>
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
-  usePaymentIntent
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 import { ref } from 'vue'
 
@@ -306,10 +305,9 @@ const options = {
 <script setup>
 import { ref } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
-  usePaymentIntent
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = 'pk_test_...'
@@ -318,7 +316,7 @@ const clientSecret = 'pi_xxx_secret_xxx'
 const isComplete = ref(false)
 const status = ref('')
 
-// This component must be inside StripeProvider
+// This component must be inside VueStripeProvider
 // Using a child component for the form is recommended
 </script>
 
@@ -414,7 +412,7 @@ const appearance = {
 
 ```ts
 import { ref } from 'vue'
-import { StripePaymentElement } from '@vue-stripe/vue-stripe'
+import { VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 import type {
   StripePaymentElement as StripePaymentElementType,
   StripePaymentElementChangeEvent,
@@ -442,7 +440,7 @@ const handleChange = (event: StripePaymentElementChangeEvent) => {
 }
 
 // Template ref
-const paymentRef = ref<InstanceType<typeof StripePaymentElement>>()
+const paymentRef = ref<InstanceType<typeof VueStripePaymentElement>>()
 ```
 
 ## Test Cards

@@ -88,10 +88,9 @@ app.post('/create-setup-intent', async (req, res) => {
 <script setup>
 import { ref, onMounted } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
-  useSetupIntent
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY

@@ -48,9 +48,9 @@ flowchart TD
 
 <script setup>
 import {
-  StripeProvider,
-  StripeElements,
-  StripeCardElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeCardElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -278,17 +278,13 @@ const handleChange = (event) => {
 ### Complete Payment Form
 
 ```vue
+<!-- This example shows the payment logic - in real usage,
+     useStripe/useStripeElements must be called in a child component -->
 <script setup>
 import { ref } from 'vue'
-import {
-  StripeProvider,
-  StripeElements,
-  StripeCardElement,
-  useStripe,
-  useStripeElements
-} from '@vue-stripe/vue-stripe'
+import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
 
-// In a child component inside StripeElements:
+// In a child component inside VueStripeElements:
 const { stripe } = useStripe()
 const { elements } = useStripeElements()
 
@@ -357,7 +353,7 @@ const handleSubmit = async (clientSecret) => {
 
 ```ts
 import { ref } from 'vue'
-import { StripeCardElement } from '@vue-stripe/vue-stripe'
+import { VueStripeCardElement } from '@vue-stripe/vue-stripe'
 import type {
   StripeCardElement as StripeCardElementType,
   StripeCardElementChangeEvent,
@@ -385,7 +381,7 @@ const handleChange = (event: StripeCardElementChangeEvent) => {
 }
 
 // Template ref
-const cardRef = ref<InstanceType<typeof StripeCardElement>>()
+const cardRef = ref<InstanceType<typeof VueStripeCardElement>>()
 ```
 
 ## Test Cards

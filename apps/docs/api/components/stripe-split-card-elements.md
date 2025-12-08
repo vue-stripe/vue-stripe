@@ -83,11 +83,11 @@ flowchart TD
 <script setup>
 import { ref, computed } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeCardNumberElement,
-  StripeCardExpiryElement,
-  StripeCardCvcElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeCardNumberElement,
+  VueStripeCardExpiryElement,
+  VueStripeCardCvcElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -379,9 +379,9 @@ const handleSubmit = async (clientSecret) => {
 ```ts
 import { ref } from 'vue'
 import {
-  StripeCardNumberElement,
-  StripeCardExpiryElement,
-  StripeCardCvcElement
+  VueStripeCardNumberElement,
+  VueStripeCardExpiryElement,
+  VueStripeCardCvcElement
 } from '@vue-stripe/vue-stripe'
 import type {
   StripeCardNumberElement as StripeCardNumberElementType,
@@ -404,9 +404,9 @@ const handleNumberChange = (event: StripeCardNumberElementChangeEvent) => {
 }
 
 // Template refs
-const numberRef = ref<InstanceType<typeof StripeCardNumberElement>>()
-const expiryRef = ref<InstanceType<typeof StripeCardExpiryElement>>()
-const cvcRef = ref<InstanceType<typeof StripeCardCvcElement>>()
+const numberRef = ref<InstanceType<typeof VueStripeCardNumberElement>>()
+const expiryRef = ref<InstanceType<typeof VueStripeCardExpiryElement>>()
+const cvcRef = ref<InstanceType<typeof VueStripeCardCvcElement>>()
 ```
 
 ## Test Cards

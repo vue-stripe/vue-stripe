@@ -55,10 +55,10 @@ StripeLinkAuthenticationElement requires a `clientSecret` from a PaymentIntent o
 <script setup>
 import { ref, computed } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeLinkAuthenticationElement,
-  StripePaymentElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeLinkAuthenticationElement,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -321,9 +321,9 @@ If you just want to test the element's email collection without payment:
 <script setup>
 import { ref } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeLinkAuthenticationElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeLinkAuthenticationElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -369,7 +369,7 @@ const handleChange = (event) => {
 
 ```ts
 import { ref } from 'vue'
-import { StripeLinkAuthenticationElement } from '@vue-stripe/vue-stripe'
+import { VueStripeLinkAuthenticationElement } from '@vue-stripe/vue-stripe'
 import type {
   StripeLinkAuthenticationElement as StripeLinkAuthenticationElementType,
   StripeLinkAuthenticationElementChangeEvent,
@@ -394,7 +394,7 @@ const handleChange = (event: StripeLinkAuthenticationElementChangeEvent) => {
 }
 
 // Template ref
-const linkAuthRef = ref<InstanceType<typeof StripeLinkAuthenticationElement>>()
+const linkAuthRef = ref<InstanceType<typeof VueStripeLinkAuthenticationElement>>()
 
 const focusEmail = () => {
   linkAuthRef.value?.focus()

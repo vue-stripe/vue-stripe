@@ -233,9 +233,9 @@ const handleSave = async (clientSecret: string) => {
 <script setup>
 import { ref } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = 'pk_test_...'
@@ -318,9 +318,9 @@ Common pattern for saving a card before starting a subscription:
 <script setup>
 import { ref } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement,
   useSetupIntent
 } from '@vue-stripe/vue-stripe'
 

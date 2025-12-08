@@ -67,9 +67,9 @@ flowchart TD
 <script setup>
 import { ref } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeExpressCheckoutElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeExpressCheckoutElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -413,7 +413,7 @@ const onReady = (event) => {
 
 ```ts
 import { ref } from 'vue'
-import { StripeExpressCheckoutElement } from '@vue-stripe/vue-stripe'
+import { VueStripeExpressCheckoutElement } from '@vue-stripe/vue-stripe'
 import type {
   StripeExpressCheckoutElement as StripeExpressCheckoutElementType,
   StripeExpressCheckoutElementOptions,
@@ -452,7 +452,7 @@ const handleConfirm = (event: StripeExpressCheckoutElementConfirmEvent) => {
 }
 
 // Template ref
-const expressCheckoutRef = ref<InstanceType<typeof StripeExpressCheckoutElement>>()
+const expressCheckoutRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement>>()
 ```
 
 ## Comparison with PaymentElement

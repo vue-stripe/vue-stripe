@@ -16,6 +16,8 @@ import IbanElementView from './views/IbanElementView.vue'
 import IdealBankElementView from './views/IdealBankElementView.vue'
 import P24BankElementView from './views/P24BankElementView.vue'
 import EpsBankElementView from './views/EpsBankElementView.vue'
+import DocsExampleView from './views/DocsExampleView.vue'
+import DocsVerificationView from './views/DocsVerificationView.vue'
 
 // Route metadata for SEO
 export interface RouteMeta {
@@ -168,6 +170,24 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'EPS Bank Element - Vue Stripe',
       description: 'Accept EPS payments popular in Austria'
+    }
+  },
+  {
+    path: '/docs-example',
+    name: 'DocsExample',
+    component: DocsExampleView,
+    meta: {
+      title: 'Docs Example Test - Vue Stripe',
+      description: 'Testing the documentation example pattern'
+    }
+  },
+  {
+    path: '/docs-verification',
+    name: 'DocsVerification',
+    component: DocsVerificationView,
+    meta: {
+      title: 'Documentation Verification - Vue Stripe',
+      description: 'Verify all documentation code examples work correctly'
     }
   }
 ]

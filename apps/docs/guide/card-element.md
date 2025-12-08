@@ -16,43 +16,53 @@ The simplest way to collect card details:
 ```vue
 <script setup>
 import { ref } from 'vue'
+import type { Stripe, StripeElements } from '@stripe/stripe-js'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeCardElement,
-  useStripe,
-  useStripeElements
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeCardElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('pi_..._secret_...')
 
+// Capture instances from component events
+const stripeInstance = ref<Stripe | null>(null)
+const elementsInstance = ref<StripeElements | null>(null)
+
+const onStripeLoad = (stripe: Stripe) => {
+  stripeInstance.value = stripe
+}
+
+const onElementsReady = (elements: StripeElements) => {
+  elementsInstance.value = elements
+}
+
 const handleSubmit = async () => {
-  const { stripe } = useStripe()
-  const { elements } = useStripeElements()
+  if (!stripeInstance.value || !elementsInstance.value) return
 
-  const cardElement = elements.value?.getElement('card')
+  const cardElement = elementsInstance.value.getElement('card')
 
-  const { error, paymentIntent } = await stripe.value.confirmCardPayment(
+  const { error, paymentIntent } = await stripeInstance.value.confirmCardPayment(
     clientSecret.value,
     {
       payment_method: {
-        card: cardElement
+        card: cardElement!
       }
     }
   )
 
   if (error) {
     console.error(error.message)
-  } else if (paymentIntent.status === 'succeeded') {
+  } else if (paymentIntent?.status === 'succeeded') {
     console.log('Payment succeeded!')
   }
 }
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
+  <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
+    <VueStripeElements @ready="onElementsReady">
       <form @submit.prevent="handleSubmit">
         <VueStripeCardElement />
         <button type="submit">Pay</button>
@@ -73,12 +83,14 @@ For custom layouts, use separate elements for each field:
 ```vue
 <script setup>
 import {
-  StripeProvider,
-  StripeElements,
-  StripeCardNumberElement,
-  StripeCardExpiryElement,
-  StripeCardCvcElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeCardNumberElement,
+  VueStripeCardExpiryElement,
+  VueStripeCardCvcElement
 } from '@vue-stripe/vue-stripe'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </script>
 
 <template>
@@ -107,17 +119,28 @@ import {
 
 ### Confirming with Split Elements
 
-When using split elements, reference the card number element:
+When using split elements, reference the card number element. Use the `@load` and `@ready` events to capture the Stripe and Elements instances:
 
 ```js
+// Capture instances from component events
+const stripeInstance = ref(null)
+const elementsInstance = ref(null)
+
+const onStripeLoad = (stripe) => {
+  stripeInstance.value = stripe
+}
+
+const onElementsReady = (elements) => {
+  elementsInstance.value = elements
+}
+
 const handleSubmit = async () => {
-  const { stripe } = useStripe()
-  const { elements } = useStripeElements()
+  if (!stripeInstance.value || !elementsInstance.value) return
 
   // Get the card number element (expiry and CVC are linked automatically)
-  const cardNumberElement = elements.value?.getElement('cardNumber')
+  const cardNumberElement = elementsInstance.value.getElement('cardNumber')
 
-  const { error, paymentIntent } = await stripe.value.confirmCardPayment(
+  const { error, paymentIntent } = await stripeInstance.value.confirmCardPayment(
     clientSecret.value,
     {
       payment_method: {
@@ -133,12 +156,11 @@ const handleSubmit = async () => {
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Stripe, StripeElements } from '@stripe/stripe-js'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeCardElement,
-  useStripe,
-  useStripeElements
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeCardElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -149,23 +171,32 @@ const cardComplete = ref(false)
 const errorMessage = ref('')
 const success = ref(false)
 
+// Capture instances from component events
+const stripeInstance = ref<Stripe | null>(null)
+const elementsInstance = ref<StripeElements | null>(null)
+
+const onStripeLoad = (stripe: Stripe) => {
+  stripeInstance.value = stripe
+}
+
+const onElementsReady = (elements: StripeElements) => {
+  elementsInstance.value = elements
+}
+
 const handleChange = (event: { complete: boolean; error?: { message: string } }) => {
   cardComplete.value = event.complete
   errorMessage.value = event.error?.message || ''
 }
 
 const handleSubmit = async () => {
-  const { stripe } = useStripe()
-  const { elements } = useStripeElements()
-
-  if (!stripe.value || !elements.value) return
+  if (!stripeInstance.value || !elementsInstance.value) return
 
   processing.value = true
   errorMessage.value = ''
 
-  const cardElement = elements.value.getElement('card')
+  const cardElement = elementsInstance.value.getElement('card')
 
-  const { error, paymentIntent } = await stripe.value.confirmCardPayment(
+  const { error, paymentIntent } = await stripeInstance.value.confirmCardPayment(
     clientSecret,
     {
       payment_method: {
@@ -207,8 +238,8 @@ const cardStyles = {
       Payment successful!
     </div>
 
-    <VueStripeProvider v-else :publishable-key="publishableKey">
-      <VueStripeElements>
+    <VueStripeProvider v-else :publishable-key="publishableKey" @load="onStripeLoad">
+      <VueStripeElements @ready="onElementsReady">
         <form @submit.prevent="handleSubmit">
           <div class="card-field">
             <label>Card details</label>

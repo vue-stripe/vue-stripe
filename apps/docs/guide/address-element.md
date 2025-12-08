@@ -16,9 +16,9 @@ The Address Element provides a complete address collection form with built-in au
 ```vue
 <script setup>
 import {
-  StripeProvider,
-  StripeElements,
-  StripeAddressElement
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeAddressElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -230,12 +230,10 @@ A common pattern is collecting address before payment:
 <script setup>
 import { ref } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeAddressElement,
-  StripePaymentElement,
-  useStripe,
-  useStripeElements
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeAddressElement,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY

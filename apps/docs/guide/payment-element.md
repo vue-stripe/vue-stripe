@@ -7,16 +7,27 @@ The Payment Element is Stripe's recommended way to collect payments. It dynamica
 ```vue
 <script setup>
 import { ref, onMounted } from 'vue'
+import type { Stripe, StripeElements } from '@stripe/stripe-js'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
-  useStripe,
-  useStripeElements
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('')
+
+// Capture instances from component events
+const stripeInstance = ref<Stripe | null>(null)
+const elementsInstance = ref<StripeElements | null>(null)
+
+const onStripeLoad = (stripe: Stripe) => {
+  stripeInstance.value = stripe
+}
+
+const onElementsReady = (elements: StripeElements) => {
+  elementsInstance.value = elements
+}
 
 onMounted(async () => {
   // Fetch from your backend
@@ -26,11 +37,10 @@ onMounted(async () => {
 })
 
 const handleSubmit = async () => {
-  const { stripe } = useStripe()
-  const { elements } = useStripeElements()
+  if (!stripeInstance.value || !elementsInstance.value) return
 
-  const { error } = await stripe.value.confirmPayment({
-    elements: elements.value,
+  const { error } = await stripeInstance.value.confirmPayment({
+    elements: elementsInstance.value,
     confirmParams: {
       return_url: `${window.location.origin}/complete`
     }
@@ -43,8 +53,12 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
+  <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
+    <VueStripeElements
+      v-if="clientSecret"
+      :client-secret="clientSecret"
+      @ready="onElementsReady"
+    >
       <form @submit.prevent="handleSubmit">
         <VueStripePaymentElement />
         <button type="submit">Pay</button>
@@ -168,12 +182,11 @@ Common payment methods:
 ```vue
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import type { Stripe, StripeElements } from '@stripe/stripe-js'
 import {
-  StripeProvider,
-  StripeElements,
-  StripePaymentElement,
-  useStripe,
-  useStripeElements
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -182,6 +195,18 @@ const loading = ref(true)
 const processing = ref(false)
 const errorMessage = ref('')
 const isComplete = ref(false)
+
+// Capture instances from component events
+const stripeInstance = ref<Stripe | null>(null)
+const elementsInstance = ref<StripeElements | null>(null)
+
+const onStripeLoad = (stripe: Stripe) => {
+  stripeInstance.value = stripe
+}
+
+const onElementsReady = (elements: StripeElements) => {
+  elementsInstance.value = elements
+}
 
 onMounted(async () => {
   try {
@@ -205,16 +230,13 @@ const handleChange = (event: { complete: boolean }) => {
 }
 
 const handleSubmit = async () => {
-  const { stripe } = useStripe()
-  const { elements } = useStripeElements()
-
-  if (!stripe.value || !elements.value) return
+  if (!stripeInstance.value || !elementsInstance.value) return
 
   processing.value = true
   errorMessage.value = ''
 
-  const { error } = await stripe.value.confirmPayment({
-    elements: elements.value,
+  const { error } = await stripeInstance.value.confirmPayment({
+    elements: elementsInstance.value,
     confirmParams: {
       return_url: `${window.location.origin}/payment-complete`
     }
@@ -235,11 +257,12 @@ const handleSubmit = async () => {
   <div class="payment-form">
     <div v-if="loading">Loading payment form...</div>
 
-    <VueStripeProvider v-else :publishable-key="publishableKey">
+    <VueStripeProvider v-else :publishable-key="publishableKey" @load="onStripeLoad">
       <VueStripeElements
         v-if="clientSecret"
         :client-secret="clientSecret"
         :options="{ appearance: { theme: 'stripe' } }"
+        @ready="onElementsReady"
       >
         <form @submit.prevent="handleSubmit">
           <VueStripePaymentElement @change="handleChange" />
