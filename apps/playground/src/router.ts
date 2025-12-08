@@ -11,6 +11,8 @@ import LinkAuthenticationView from './views/LinkAuthenticationView.vue'
 import ExpressCheckoutView from './views/ExpressCheckoutView.vue'
 import SetupIntentView from './views/SetupIntentView.vue'
 import CheckoutView from './views/CheckoutView.vue'
+// Pricing Table (v5.3.0)
+import PricingTableView from './views/PricingTableView.vue'
 // European Regional Elements (v5.2.0)
 import IbanElementView from './views/IbanElementView.vue'
 import IdealBankElementView from './views/IdealBankElementView.vue'
@@ -133,6 +135,16 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Stripe Checkout - Vue Stripe',
       description: 'Embed Stripe Checkout directly in your Vue application'
+    }
+  },
+  // Pricing Table (v5.3.0)
+  {
+    path: '/stripe-pricing-table',
+    name: 'PricingTable',
+    component: PricingTableView,
+    meta: {
+      title: 'Pricing Table - Vue Stripe',
+      description: 'Embed subscription pricing tables from Stripe Dashboard'
     }
   },
   // European Regional Elements (v5.2.0)

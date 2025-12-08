@@ -54,7 +54,7 @@ const loading = ref(false)
 const slots = useSlots()
 
 // Check if user provided custom default slot content
-const hasCustomSlot = computed(() => !!slots.default)
+const hasCustomSlot = computed(() => !!slots['default'])
 
 /**
  * Check if redirectToCheckout is available (stripe-js v7.x)

@@ -24,3 +24,6 @@ export { default as VueStripeEpsBankElement } from './VueStripeEpsBankElement.vu
 
 // Checkout
 export { default as VueStripeCheckout } from './VueStripeCheckout.vue'
+
+// Pricing Table (v5.3.0)
+export { default as VueStripePricingTable } from './VueStripePricingTable.vue'
