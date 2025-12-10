@@ -19,7 +19,7 @@
 <style scoped>
 .stripe-badge-link {
   display: inline-block;
-  margin-top: 24px;
+  margin-bottom: 16px;
   transition: opacity 0.2s ease;
 }
 

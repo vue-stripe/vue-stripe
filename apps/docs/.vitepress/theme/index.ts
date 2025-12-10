@@ -69,8 +69,8 @@ export default {
     )
 
     return h(DefaultTheme.Layout, null, {
-      // Stripe Partner Badge below hero actions on home page
-      'home-hero-info-after': () => h(StripeBadge),
+      // Stripe Partner Badge above hero title on home page
+      'home-hero-info-before': () => h(StripeBadge),
       // Copy for LLMs button near the title on doc pages
       'doc-before': () => h(CopyForLLM),
       // Analytics tracking (invisible component)
