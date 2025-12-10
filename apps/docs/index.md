@@ -38,37 +38,76 @@ features:
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="clientSecret">
-      <VueStripePaymentElement />
-      <button @click="handleSubmit">Pay</button>
+    <VueStripeElements :client-secret="clientSecret" @ready="elementsReady = true">
+      <VueStripePaymentElement @ready="paymentReady = true" />
+      <PayButton :disabled="!canConfirm" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 
 <script setup>
+import { ref, computed } from 'vue'
 import {
   VueStripeProvider,
   VueStripeElements,
-  VueStripePaymentElement,
-  useStripe,
-  useStripeElements
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
+import PayButton from './PayButton.vue'
 
 const publishableKey = 'pk_test_...'
-const clientSecret = 'pi_..._secret_...'
+const clientSecret = ref(null)
+const elementsReady = ref(false)
+const paymentReady = ref(false)
 
-const handleSubmit = async () => {
-  const { stripe } = useStripe()
-  const { elements } = useStripeElements()
+const canConfirm = computed(() => elementsReady.value && paymentReady.value)
 
-  const result = await stripe.value.confirmPayment({
-    elements: elements.value,
-    confirmParams: {
-      return_url: 'https://example.com/complete'
-    }
+// Create PaymentIntent on your server, then set clientSecret
+async function createPaymentIntent(productId) {
+  const response = await fetch('/api/create-payment-intent', {
+    method: 'POST',
+    body: JSON.stringify({ productId })
   })
+  const data = await response.json()
+  clientSecret.value = data.clientSecret
 }
 </script>
 ```
+
+```vue
+<!-- PayButton.vue - Must be inside VueStripeElements -->
+<script setup>
+import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+
+// Call composables at setup scope, not inside functions
+const { stripe } = useStripe()
+const { elements } = useStripeElements()
+
+async function confirmPayment() {
+  const { error, paymentIntent } = await stripe.value.confirmPayment({
+    elements: elements.value,
+    confirmParams: { return_url: window.location.href },
+    redirect: 'if_required'
+  })
+
+  if (error) {
+    console.error(error.message)
+  } else if (paymentIntent.status === 'succeeded') {
+    console.log('Payment successful!')
+  }
+}
+</script>
+
+<template>
+  <button @click="confirmPayment">Pay</button>
+</template>
+```
+
+## See In Action
+
+<PaymentElementExample />
+
+::: tip
+This is a live demo using Stripe's test mode. Use card number `4242 4242 4242 4242` with any future date and CVC.
+:::
 
 </div>
