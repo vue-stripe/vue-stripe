@@ -6,6 +6,7 @@ import { createMermaidRenderer } from 'vitepress-mermaid-renderer'
 import './styles/vars.css'
 import StripeBadge from './components/StripeBadge.vue'
 import CopyForLLM from './components/CopyForLLM.vue'
+import GitHubStarsCTA from './components/GitHubStarsCTA.vue'
 
 // Example components for interactive documentation
 import ProductSelector from './components/examples/ProductSelector.vue'
@@ -75,6 +76,8 @@ export default {
       'doc-before': () => h(CopyForLLM),
       // Analytics tracking (invisible component)
       'layout-top': () => h(AnalyticsWrapper),
+      // GitHub stars CTA after hero actions
+      'home-hero-actions-after': () => h(GitHubStarsCTA),
       // Carbon Ads placeholder - will be injected when you have the actual code
       // 'aside-ads-before': () => h('div', { id: 'carbon-ads-container' })
     })

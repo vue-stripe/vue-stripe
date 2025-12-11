@@ -12,9 +12,6 @@ hero:
     - theme: brand
       text: Get Started
       link: /guide/introduction
-    - theme: alt
-      text: View on GitHub
-      link: https://github.com/vue-stripe/vue-stripe
 
 features:
   - icon: 🔄

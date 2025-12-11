@@ -145,6 +145,34 @@
 }
 
 /**
+ * Hero actions layout - make CTA buttons side-by-side
+ */
+.VPHero .main .actions {
+  display: inline-flex !important;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Make hero buttons larger */
+.VPHero .main .actions .VPButton {
+  padding: 0 24px;
+  height: 48px;
+  border-radius: 24px;
+  font-size: 16px;
+  line-height: 48px;
+}
+
+/* Target the slot content container that follows actions - align with actions */
+.VPHero .main .actions + div {
+  display: inline-flex !important;
+  margin-top: 0 !important;
+  position: relative;
+  top: 2.5px;
+}
+
+/**
  * Dark mode: Yellow accent for links, purple buttons
  */
 .dark {
@@ -164,3 +192,5 @@
   --vp-button-brand-active-text: #fff;
   --vp-button-brand-active-bg: #5046e5;
 }
+
+
