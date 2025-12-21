@@ -8,11 +8,11 @@
   ],
   "commit": false,
   "fixed": [],
-  "linked": [["@vue-stripe/*"]],
+  "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@vue-stripe/playground", "@vue-stripe/docs"],
+  "ignore": ["@vue-stripe/playground", "@vue-stripe/docs", "@vue-stripe/backend"],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "onlyUpdatePeerDependentsWhenOutOfRange": true
   }
