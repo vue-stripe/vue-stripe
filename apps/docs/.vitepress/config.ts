@@ -194,6 +194,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Split Card Elements', link: '/api/components/stripe-split-card-elements' },
             { text: 'VueStripeAddressElement', link: '/api/components/stripe-address-element' },
             { text: 'VueStripeLinkAuthenticationElement', link: '/api/components/stripe-link-authentication-element' },
+            { text: 'VueStripePaymentMethodMessagingElement', link: '/api/components/stripe-payment-method-messaging-element' },
           ]
         },
         {

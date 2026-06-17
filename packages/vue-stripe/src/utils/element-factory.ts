@@ -13,6 +13,7 @@ export type StripeElementType =
   | 'address'
   | 'expressCheckout'
   | 'linkAuthentication'
+  | 'paymentMethodMessaging'
 
 export interface ElementFactoryOptions {
   elementType: StripeElementType
