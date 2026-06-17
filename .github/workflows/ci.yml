@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, type-check, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter @vue-stripe/vue-stripe lint
+
+      - name: Type-check
+        run: pnpm --filter @vue-stripe/vue-stripe type-check
+
+      - name: Test (coverage thresholds + doc-contract)
+        run: pnpm --filter @vue-stripe/vue-stripe test:coverage
+
+      - name: Build package
+        run: pnpm --filter @vue-stripe/vue-stripe build
+
+      - name: Build docs (VitePress)
+        run: pnpm --filter @vue-stripe/docs build
