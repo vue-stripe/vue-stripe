@@ -131,7 +131,7 @@ interface StripeAddressElementOptions {
 | `@focus` | - | Emitted when any field gains focus |
 | `@blur` | - | Emitted when any field loses focus |
 | `@escape` | - | Emitted when the escape key is pressed |
-| `@load-error` | `{ elementType: 'address', error: string }` | Emitted if the element fails to load |
+| `@loadError` | `{ elementType: 'address', error: string }` | Emitted if the element fails to load (templates may also bind `@load-error`) |
 
 ### Change Event
 
@@ -202,7 +202,7 @@ const clearAddress = () => addressRef.value?.clear()
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `element` | `Ref<VueStripeAddressElement \| null>` | The Stripe address element instance |
+| `element` | `Ref<StripeAddressElement \| null>` | The Stripe address element instance |
 
 ## Examples
 

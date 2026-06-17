@@ -11,16 +11,15 @@ import { fileURLToPath } from 'node:url'
  * guards against the docs drift catalogued in milestone "v5.4 Documentation
  * Accuracy" (e.g. missing @escape rows, undocumented @loaderror).
  *
- * SCAFFOLD MODE: with STRICT=false (default) mismatches are reported via
- * console.warn and the suite stays green. After the milestone #4 doc fixes
- * land, set DOCS_CONTRACT_STRICT=1 (or flip STRICT below) to turn mismatches
- * into hard failures and wire it into CI.
+ * ENFORCING MODE: the milestone #4 doc-accuracy fixes have landed, so this now
+ * fails on any event documented/emitted mismatch by default. Set
+ * DOCS_CONTRACT_STRICT=0 to temporarily downgrade mismatches to warnings.
  *
  * TODO (follow-ups): extend the contract to props (defineProps), exposed
  * members (defineExpose) and composable return shapes.
  */
 
-const STRICT = process.env.DOCS_CONTRACT_STRICT === '1'
+const STRICT = process.env.DOCS_CONTRACT_STRICT !== '0'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const COMPONENTS_DIR = resolve(here, '../src/components')

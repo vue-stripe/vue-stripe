@@ -8,7 +8,7 @@ A composable that simplifies saving payment methods with built-in state manageme
 
 | Capability | Description |
 |------------|-------------|
-| **Setup Confirmation** | Wraps `stripe.confirmCardSetup()` with error handling |
+| **Setup Confirmation** | Wraps `stripe.confirmSetup()` (after `elements.submit()`) with error handling |
 | **Loading State** | Tracks whether setup confirmation is in progress |
 | **Error State** | Captures and exposes setup errors |
 | **Auto Elements Injection** | Automatically uses Elements from context |
@@ -29,8 +29,8 @@ SetupIntent saves the card without charging. PaymentIntent charges immediately.
 
 ```mermaid
 flowchart TD
-    A["Component calls useSetupIntent()<br/>Returns { confirmSetup, loading, error }"] --> B["User clicks Save button, triggers confirmSetup()<br/><br/>await confirmSetup({<br/>  clientSecret: 'seti_xxx_secret_xxx',<br/>  return_url: '...'<br/>})"]
-    B --> C["Composable sets loading.value = true<br/>Calls stripe.confirmCardSetup() with injected elements"]
+    A["Component calls useSetupIntent()<br/>Returns { confirmSetup, loading, error }"] --> B["User clicks Save button, triggers confirmSetup()<br/><br/>await confirmSetup({<br/>  clientSecret: 'seti_xxx_secret_xxx',<br/>  confirmParams: { return_url: '...' }<br/>})"]
+    B --> C["Composable sets loading.value = true<br/>Calls elements.submit() (unless skipSubmit)<br/>then stripe.confirmSetup() with injected elements"]
     C --> D{Result?}
     D -->|Success| E["<b>SUCCESS</b><br/>loading = false<br/>Returns {<br/>  setupIntent: { status: 'succeeded' }<br/>}"]
     D -->|Error| F["<b>ERROR</b><br/>loading = false<br/>error.value = message<br/>Returns { error: { message, code } }"]
@@ -53,7 +53,9 @@ const { confirmSetup, loading, error } = useSetupIntent()
 const handleSaveCard = async (clientSecret: string) => {
   const result = await confirmSetup({
     clientSecret,
-    return_url: window.location.href
+    confirmParams: {
+      return_url: window.location.href
+    }
   })
 
   if (result.error) {
@@ -69,11 +71,18 @@ const handleSaveCard = async (clientSecret: string) => {
 
 ```ts
 interface UseSetupIntentReturn {
-  confirmSetup: (options: ConfirmSetupOptions) => Promise<ConfirmSetupResult>
+  // Resolves with Stripe's confirmSetup result (passed through unchanged)
+  confirmSetup: (options: ConfirmSetupOptions) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
 ```
+
+::: tip Result type
+`confirmSetup` resolves to `Promise<any>` — it passes through Stripe's
+`confirmSetup()` result unchanged. The `ConfirmSetupResult` shape shown below is
+illustrative only; it is not an importable or declared type in this package.
+:::
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -88,37 +97,49 @@ interface ConfirmSetupOptions {
   /** Client secret from the SetupIntent (required) */
   clientSecret: string
 
-  /** URL to redirect after successful setup */
-  return_url?: string
+  /** Parameters passed through to stripe.confirmSetup() */
+  confirmParams?: {
+    /** URL to redirect after successful setup */
+    return_url?: string
 
-  /** Payment method to use */
-  payment_method?: string
-
-  /** Payment method data */
-  payment_method_data?: {
-    billing_details?: {
-      name?: string
-      email?: string
-      phone?: string
-      address?: {
-        line1?: string
-        line2?: string
-        city?: string
-        state?: string
-        postal_code?: string
-        country?: string
+    /** Payment method data */
+    payment_method_data?: {
+      billing_details?: {
+        name?: string
+        email?: string
+        phone?: string
+        address?: {
+          line1?: string
+          line2?: string
+          city?: string
+          state?: string
+          postal_code?: string
+          country?: string
+        }
       }
     }
   }
 
+  /** Redirect behavior (default: 'if_required') */
+  redirect?: 'if_required' | 'always'
+
   /** Override injected elements (optional) */
   elements?: StripeElements
+
+  /** Skip elements.submit() validation (not recommended, default: false) */
+  skipSubmit?: boolean
 }
 ```
 
 ## confirmSetup Result
 
+The promise resolves with whatever `stripe.confirmSetup()` returns. The shape
+below is illustrative — `ConfirmSetupResult` is not a declared or importable
+type. For accurate typing, use `SetupIntent` and `StripeError` from
+`@stripe/stripe-js`.
+
 ```ts
+// Illustrative shape (not an importable type)
 interface ConfirmSetupResult {
   setupIntent?: {
     id: string
@@ -152,7 +173,9 @@ const savedCard = ref(false)
 const handleSave = async () => {
   const result = await confirmSetup({
     clientSecret: 'seti_xxx_secret_xxx',
-    return_url: `${window.location.origin}/account/cards`
+    confirmParams: {
+      return_url: `${window.location.origin}/account/cards`
+    }
   })
 
   if (result.error) {
@@ -185,7 +208,10 @@ const { confirmSetup, loading, error } = useSetupIntent()
 const handleSave = async (clientSecret: string) => {
   const result = await confirmSetup({
     clientSecret,
-    return_url: window.location.href // Required but won't redirect for basic cards
+    confirmParams: {
+      return_url: window.location.href // Used only if a redirect is required
+    },
+    redirect: 'if_required' // default: stays inline unless Stripe requires a redirect
   })
 
   if (result.setupIntent?.status === 'succeeded') {
@@ -211,11 +237,13 @@ const customerEmail = ref('')
 const handleSave = async (clientSecret: string) => {
   const result = await confirmSetup({
     clientSecret,
-    return_url: window.location.href,
-    payment_method_data: {
-      billing_details: {
-        name: customerName.value,
-        email: customerEmail.value
+    confirmParams: {
+      return_url: window.location.href,
+      payment_method_data: {
+        billing_details: {
+          name: customerName.value,
+          email: customerEmail.value
+        }
       }
     }
   })
@@ -288,7 +316,9 @@ const { confirmSetup, loading } = useSetupIntent()
 const handleSubmit = async () => {
   const result = await confirmSetup({
     clientSecret: props.clientSecret,
-    return_url: window.location.href
+    confirmParams: {
+      return_url: window.location.href
+    }
   })
 
   if (result.error) {
@@ -338,7 +368,7 @@ onMounted(async () => {
   setupSecret.value = data.client_secret
 })
 
-// SetupForm component (inside StripeElements)
+// SetupForm component (inside VueStripeElements)
 const SetupForm = {
   setup() {
     const { confirmSetup, loading, error } = useSetupIntent()
@@ -346,7 +376,9 @@ const SetupForm = {
     const handleSave = async () => {
       const result = await confirmSetup({
         clientSecret: setupSecret.value,
-        return_url: `${window.location.origin}/subscribe?step=confirm`
+        confirmParams: {
+          return_url: `${window.location.origin}/subscribe?step=confirm`
+        }
       })
 
       if (result.setupIntent?.status === 'succeeded') {
@@ -376,11 +408,15 @@ const { confirmSetup, loading, error } = useSetupIntent()
 const handleSetup = async (clientSecret: string) => {
   const result = await confirmSetup({
     clientSecret,
-    return_url: window.location.href
+    confirmParams: {
+      return_url: window.location.href
+    }
   })
 
-  // result.setupIntent is typed as SetupIntent | undefined
-  // result.error is typed as StripeError | undefined
+  // result is typed as `any` (Stripe's confirmSetup result, passed through).
+  // Narrow it yourself using SetupIntent / StripeError from @stripe/stripe-js:
+  // result.setupIntent as SetupIntent | undefined
+  // result.error as StripeError | undefined
 
   if (result.setupIntent) {
     const { id, status, payment_method } = result.setupIntent
@@ -405,7 +441,9 @@ const { confirmSetup, error } = useSetupIntent()
 const handleSave = async (clientSecret: string) => {
   const result = await confirmSetup({
     clientSecret,
-    return_url: window.location.href
+    confirmParams: {
+      return_url: window.location.href
+    }
   })
 
   if (result.error) {
@@ -450,7 +488,7 @@ const handleSave = async (clientSecret: string) => {
 
 | Requirement | Details |
 |-------------|---------|
-| **StripeProvider** | Must be used within StripeProvider context |
+| **VueStripeProvider** | Must be used within `VueStripeProvider` context |
 | **SetupIntent** | Need a SetupIntent client_secret from your backend |
 | **StripeElements** | Optional - elements auto-injected if available |
 

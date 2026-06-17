@@ -44,6 +44,18 @@ flowchart TD
 | `VueStripeElements` | Creates Elements instance |
 | `VueStripeEpsBankElement` | Renders the Austrian bank dropdown |
 
+## Events
+
+`VueStripeEpsBankElement` emits the following events:
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `@ready` | `StripeEpsBankElement` | Fires when the element has mounted and is ready. Receives the underlying Stripe element instance. |
+| `@change` | `StripeEpsBankElementChangeEvent` | Fires when the selected bank changes. Includes `complete`, `value`, and `error`. |
+| `@focus` | — | Fires when the element gains focus. |
+| `@blur` | — | Fires when the element loses focus. |
+| `@escape` | — | Fires when the user presses the <kbd>Escape</kbd> key while the element is focused. |
+
 ## Basic Implementation
 
 ### Step 1: Set Up the Component
@@ -65,6 +77,9 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
       <VueStripeEpsBankElement
         @ready="onReady"
         @change="onChange"
+        @focus="onFocus"
+        @blur="onBlur"
+        @escape="onEscape"
       />
     </VueStripeElements>
   </VueStripeProvider>
@@ -84,6 +99,22 @@ const onChange = (event) => {
   isComplete.value = event.complete
   selectedBank.value = event.value || ''
   console.log('Selected bank:', selectedBank.value)
+}
+
+const onReady = (element) => {
+  console.log('EPS bank element ready', element)
+}
+
+const onFocus = () => {
+  console.log('EPS bank element focused')
+}
+
+const onBlur = () => {
+  console.log('EPS bank element blurred')
+}
+
+const onEscape = () => {
+  console.log('Escape pressed')
 }
 </script>
 ```

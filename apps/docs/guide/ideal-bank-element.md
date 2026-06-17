@@ -65,6 +65,9 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
       <VueStripeIdealBankElement
         @ready="onReady"
         @change="onChange"
+        @focus="onFocus"
+        @blur="onBlur"
+        @escape="onEscape"
       />
     </VueStripeElements>
   </VueStripeProvider>
@@ -92,6 +95,50 @@ const onChange = (event) => {
 - The `@change` event fires when a bank is selected
 - `event.value` contains the bank code (e.g., `'abn_amro'`, `'ing'`)
 - `event.complete` is true when a bank is selected
+
+## Events
+
+`VueStripeIdealBankElement` emits the following events:
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `@ready` | `StripeIdealBankElement` | Fires when the element has mounted and is ready. The payload is the underlying Stripe element instance. |
+| `@change` | `StripeIdealBankElementChangeEvent` | Fires when the selected bank changes. Contains `complete`, `value`, `empty`, and `error`. |
+| `@focus` | `void` | Fires when the element gains focus. |
+| `@blur` | `void` | Fires when the element loses focus. |
+| `@escape` | `void` | Fires when the user presses the Escape key while the element is focused. |
+
+```vue
+<template>
+  <VueStripeIdealBankElement
+    @ready="onReady"
+    @change="onChange"
+    @focus="onFocus"
+    @blur="onBlur"
+    @escape="onEscape"
+  />
+</template>
+
+<script setup lang="ts">
+import type { StripeIdealBankElement } from '@stripe/stripe-js'
+
+const onReady = (element: StripeIdealBankElement) => {
+  console.log('iDEAL bank element ready', element)
+}
+
+const onFocus = () => {
+  console.log('Element focused')
+}
+
+const onBlur = () => {
+  console.log('Element blurred')
+}
+
+const onEscape = () => {
+  console.log('Escape key pressed')
+}
+</script>
+```
 
 ## Supported Dutch Banks
 

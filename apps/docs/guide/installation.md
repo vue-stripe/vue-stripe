@@ -18,6 +18,10 @@ yarn add @vue-stripe/vue-stripe @stripe/stripe-js
 ```
 :::
 
+::: tip Requirements
+Vue Stripe requires `@stripe/stripe-js` `^7.5.0 || ^8.5.3` and Vue 2.6+/2.7+ or Vue 3.
+:::
+
 ## Get Your API Keys
 
 1. Go to your [Stripe Dashboard](https://dashboard.stripe.com/apikeys)
@@ -362,10 +366,10 @@ Since VitePress renders at build time, use dynamic imports:
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 
 const StripeProvider = defineAsyncComponent(() =>
-  import('@vue-stripe/vue-stripe').then(m => m.StripeProvider)
+  import('@vue-stripe/vue-stripe').then(m => m.VueStripeProvider)
 )
 const StripeElements = defineAsyncComponent(() =>
-  import('@vue-stripe/vue-stripe').then(m => m.StripeElements)
+  import('@vue-stripe/vue-stripe').then(m => m.VueStripeElements)
 )
 
 const isClient = ref(false)
@@ -387,7 +391,7 @@ onMounted(() => {
 
 ## Plugin Registration (Optional)
 
-For simpler imports, register Vue Stripe as a global plugin:
+You can register Vue Stripe as a plugin to provide app-wide configuration:
 
 ```js
 // main.js or main.ts
@@ -404,12 +408,25 @@ app.use(createVueStripe({
 app.mount('#app')
 ```
 
-Then use without importing in components:
+::: warning The plugin only provides config — it does NOT register components or load Stripe
+Registering the plugin does **not** make components globally available, and it does **not** supply the Stripe instance to elements or composables. You must still import each component, and you must still wrap elements/composables in a `<VueStripeProvider :publishable-key="...">` for Stripe to load.
+
+The plugin currently only powers config-only components such as `<VueStripePricingTable>`, which read their configuration from the provided plugin config. A full plugin-level global provider is a future enhancement tracked in [issue #424](https://github.com/vue-stripe/vue-stripe/issues/424).
+:::
 
 ```vue
+<script setup>
+// Components must still be imported
+import {
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripePaymentElement
+} from '@vue-stripe/vue-stripe'
+</script>
+
 <template>
-  <!-- Components available globally -->
-  <VueStripeProvider>
+  <!-- VueStripeProvider is still REQUIRED for elements and composables -->
+  <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeElements :client-secret="clientSecret">
       <VueStripePaymentElement />
     </VueStripeElements>
@@ -447,8 +464,8 @@ const onError = (error) => {
     <template #loading>
       <p>Loading Stripe...</p>
     </template>
-    <template #error="{ message }">
-      <p>Error: {{ message }}</p>
+    <template #error="{ error }">
+      <p>Error: {{ error }}</p>
     </template>
     <p>✅ Stripe is ready!</p>
   </VueStripeProvider>

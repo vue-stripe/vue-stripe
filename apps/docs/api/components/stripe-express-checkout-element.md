@@ -142,8 +142,9 @@ interface StripeExpressCheckoutElementOptions {
 | `@click` | `StripeExpressCheckoutElementClickEvent` | Emitted when a wallet button is clicked |
 | `@confirm` | `StripeExpressCheckoutElementConfirmEvent` | Emitted when payment is authorized |
 | `@cancel` | - | Emitted when customer cancels payment sheet |
-| `@shippingaddresschange` | `{ address, name }` | Emitted when shipping address changes |
-| `@shippingratechange` | `{ shippingRate }` | Emitted when shipping rate changes |
+| `@shippingaddresschange` | `StripeExpressCheckoutElementShippingAddressChangeEvent` | Emitted when shipping address changes. Call `event.resolve()` with updated line items/shipping rates, or `event.reject()` if the address is unsupported |
+| `@shippingratechange` | `StripeExpressCheckoutElementShippingRateChangeEvent` | Emitted when shipping rate changes. Call `event.resolve()` with updated line items, or `event.reject()` if the rate is unsupported |
+| `@loaderror` | `{ elementType: 'expressCheckout', error: StripeError }` | Emitted when the element fails to load |
 
 ### Ready Event
 
@@ -204,7 +205,7 @@ interface StripeExpressCheckoutElementConfirmEvent {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `element` | `Ref<VueStripeExpressCheckoutElement \| null>` | The Stripe element instance |
+| `element` | `Ref<StripeExpressCheckoutElement \| null>` | The Stripe element instance |
 | `loading` | `Ref<boolean>` | Whether the element is loading |
 | `error` | `Ref<string \| null>` | Error message if creation failed |
 
@@ -305,16 +306,31 @@ const options = {
 }
 
 const onShippingAddressChange = (event) => {
-  const { address, name } = event
-  console.log('Shipping to:', name, address)
+  // event.address / event.name describe the customer's selected address
+  console.log('Shipping to:', event.name, event.address)
 
-  // Calculate shipping rates based on address
-  // Then call event.resolve() with available rates
+  // Recalculate shipping rates based on the address, then either:
+  event.resolve({
+    shippingRates: [
+      { id: 'standard', displayName: 'Standard Shipping', amount: 500 },
+      { id: 'express', displayName: 'Express Shipping', amount: 1500 }
+    ]
+  })
+  // ...or reject if the address is unsupported:
+  // event.reject()
 }
 
 const onShippingRateChange = (event) => {
-  const { shippingRate } = event
-  console.log('Selected shipping:', shippingRate.displayName)
+  // event.shippingRate is the rate the customer selected
+  console.log('Selected shipping:', event.shippingRate.displayName)
+
+  // Update line items for the new rate, then resolve (or reject if unsupported)
+  event.resolve({
+    lineItems: [
+      { name: 'Subtotal', amount: 1999 },
+      { name: 'Shipping', amount: event.shippingRate.amount }
+    ]
+  })
 }
 </script>
 
@@ -419,7 +435,10 @@ import type {
   StripeExpressCheckoutElementOptions,
   StripeExpressCheckoutElementReadyEvent,
   StripeExpressCheckoutElementClickEvent,
-  StripeExpressCheckoutElementConfirmEvent
+  StripeExpressCheckoutElementConfirmEvent,
+  StripeExpressCheckoutElementShippingAddressChangeEvent,
+  StripeExpressCheckoutElementShippingRateChangeEvent,
+  StripeError
 } from '@stripe/stripe-js'
 
 // Options
@@ -451,8 +470,28 @@ const handleConfirm = (event: StripeExpressCheckoutElementConfirmEvent) => {
   console.log('Payment type:', event.expressPaymentType)
 }
 
+const handleShippingAddressChange = (
+  event: StripeExpressCheckoutElementShippingAddressChangeEvent
+) => {
+  // event.resolve({ shippingRates, lineItems }) or event.reject()
+  event.resolve({})
+}
+
+const handleShippingRateChange = (
+  event: StripeExpressCheckoutElementShippingRateChangeEvent
+) => {
+  // event.resolve({ lineItems }) or event.reject()
+  event.resolve({})
+}
+
+const handleLoadError = (
+  event: { elementType: 'expressCheckout'; error: StripeError }
+) => {
+  console.error('Express checkout failed to load:', event.error.message)
+}
+
 // Template ref
-const expressCheckoutRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement>>()
+const expressCheckoutRef = ref<StripeExpressCheckoutElementType | null>(null)
 ```
 
 ## Comparison with PaymentElement

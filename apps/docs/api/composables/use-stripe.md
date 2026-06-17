@@ -21,7 +21,7 @@ flowchart TD
     A["Component calls useStripe()"] --> B["Composable checks for StripeProvider context<br/>(Uses Vue's inject with stripeInjectionKey)"]
     B --> C{Context Found?}
     C -->|Yes| D["<b>Context Found</b><br/>Returns { stripe, loading, error }"]
-    C -->|No| E["<b>No Context Found</b><br/>Throws Error:<br/>'useStripe must be called<br/>within StripeProvider'"]
+    C -->|No| E["<b>No Context Found</b><br/>Throws Error:<br/>'useStripe must be called within<br/>a VueStripeProvider component'"]
     D --> F["Component uses stripe.value for API calls<br/><br/>if (stripe.value) {<br/>  await stripe.value.confirmPayment({ ... })<br/>}"]
 ```
 
@@ -31,7 +31,7 @@ flowchart TD
 <script setup>
 import { useStripe } from '@vue-stripe/vue-stripe'
 
-// Must be called inside a component that's within StripeProvider
+// Must be called inside a component that's within VueStripeProvider
 const { stripe, loading, error } = useStripe()
 </script>
 ```
@@ -43,6 +43,7 @@ const { stripe, loading, error } = useStripe()
 | `stripe` | `Readonly<Ref<Stripe \| null>>` | The Stripe instance |
 | `loading` | `Readonly<Ref<boolean>>` | True while Stripe.js is loading |
 | `error` | `Readonly<Ref<string \| null>>` | Error message if loading failed |
+| `initialize` | `() => Promise<void>` | No-op kept for API consistency; initialization is handled by the provider. |
 
 All return values are **readonly refs** - you can read their `.value` but cannot modify them.
 
@@ -166,7 +167,7 @@ onMounted(async () => {
 ```vue
 <!-- ❌ Wrong - useStripe() called outside StripeProvider -->
 <script setup>
-const { stripe } = useStripe() // Throws: "useStripe must be called within StripeProvider"
+const { stripe } = useStripe() // Throws: "useStripe must be called within a VueStripeProvider component"
 </script>
 
 <template>
