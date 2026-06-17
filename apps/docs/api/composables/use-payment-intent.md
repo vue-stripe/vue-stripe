@@ -62,7 +62,8 @@ const handleSubmit = async (clientSecret: string) => {
 
 ```ts
 interface UsePaymentIntentReturn {
-  confirmPayment: (options: ConfirmPaymentOptions) => Promise<ConfirmPaymentResult>
+  // Resolves to Stripe's native confirmPayment result (typed `any`)
+  confirmPayment: (options: ConfirmPaymentOptions) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
@@ -77,12 +78,18 @@ interface UsePaymentIntentReturn {
 ## confirmPayment Options
 
 ```ts
+import type { ConfirmPaymentData, StripeElements } from '@stripe/stripe-js'
+
 interface ConfirmPaymentOptions {
   /** Client secret from the PaymentIntent (required) */
   clientSecret: string
 
-  /** Additional confirmation parameters */
-  confirmParams?: {
+  /**
+   * Additional confirmation parameters.
+   * Typed as `ConfirmPaymentData` from `@stripe/stripe-js`.
+   * The fields shown below are a subset of the full type.
+   */
+  confirmParams?: ConfirmPaymentData /* {
     return_url?: string
     payment_method?: string
     payment_method_data?: {
@@ -111,19 +118,50 @@ interface ConfirmPaymentOptions {
         country?: string
       }
     }
-  }
+  } */
 
   /** Redirect behavior */
   redirect?: 'if_required' | 'always'
 
   /** Override injected elements (optional) */
   elements?: StripeElements
+
+  /**
+   * Skip the automatic `elements.submit()` validation call before
+   * `stripe.confirmPayment()` (not recommended). Defaults to `false`.
+   */
+  skipSubmit?: boolean
 }
 ```
 
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `clientSecret` | `string` | — | Client secret from the PaymentIntent (required) |
+| `confirmParams` | `ConfirmPaymentData` | `{}` | Confirmation parameters from `@stripe/stripe-js` (shown fields are a subset) |
+| `redirect` | `'if_required' \| 'always'` | `'if_required'` | Redirect behavior |
+| `elements` | `StripeElements` | injected | Override the injected Elements instance |
+| `skipSubmit` | `boolean` | `false` | Skip the automatic `elements.submit()` validation call before confirmation |
+
+::: tip Automatic form submission
+Before calling `stripe.confirmPayment()`, this composable automatically calls
+`elements.submit()` to trigger form validation and collect wallet data
+(Apple Pay, Google Pay). This is required by Stripe.
+
+If `elements.submit()` reports a validation error, `confirmPayment` short-circuits:
+`error.value` is set (to the validation message or `'Form validation failed'`) and
+the result resolves to `{ error: submitError }` — `stripe.confirmPayment()` is never
+called. Pass `skipSubmit: true` to skip this step (not recommended).
+:::
+
 ## confirmPayment Result
 
+`confirmPayment` resolves to Stripe's native `stripe.confirmPayment()` result and is
+typed as `any`. The `ConfirmPaymentResult` interface below is **illustrative only** —
+it is **not** an importable type from this package. It documents the shape you can
+expect at runtime.
+
 ```ts
+// Illustrative shape — not importable
 interface ConfirmPaymentResult {
   paymentIntent?: {
     id: string

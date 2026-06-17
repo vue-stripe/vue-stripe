@@ -112,8 +112,11 @@ interface StripeLinkAuthenticationElementOptions {
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | `VueStripeLinkAuthenticationElement` | Emitted when the element is mounted and ready |
+| `@ready` | `StripeLinkAuthenticationElement` | Emitted when the element is mounted and ready |
 | `@change` | `StripeLinkAuthenticationElementChangeEvent` | Emitted when the email value changes |
+| `@focus` | `void` | Emitted when the element gains focus |
+| `@blur` | `void` | Emitted when the element loses focus |
+| `@escape` | `void` | Emitted when the user presses the Escape key |
 
 ### Change Event
 
@@ -165,7 +168,29 @@ const clearEmail = () => linkAuthRef.value?.clear()
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `element` | `Ref<VueStripeLinkAuthenticationElement \| null>` | The Stripe element instance |
+| `element` | `Ref<StripeLinkAuthenticationElement \| null>` | The Stripe element instance |
+| `loading` | `Ref<boolean>` | `true` until the element has finished mounting (becomes `false` on `ready`) |
+| `error` | `Ref<string \| null>` | Error message if the element fails to create or mount, otherwise `null` |
+
+## Slots
+
+| Slot | Slot Props | Description |
+|------|------------|-------------|
+| `error` | `{ error: string }` | Rendered when `error` is set. Override to customize the error display. |
+| `loading` | — | Rendered while `loading` is `true`. Override to customize the loading indicator. |
+
+```vue
+<template>
+  <VueStripeLinkAuthenticationElement>
+    <template #loading>
+      <span>Loading email field…</span>
+    </template>
+    <template #error="{ error }">
+      <p class="my-error">{{ error }}</p>
+    </template>
+  </VueStripeLinkAuthenticationElement>
+</template>
+```
 
 ## Examples
 
@@ -198,10 +223,10 @@ This example shows the recommended pattern for integrating Link Authentication:
 <script setup>
 import { ref, computed, defineComponent, h } from 'vue'
 import {
-  StripeProvider,
-  StripeElements,
-  StripeLinkAuthenticationElement,
-  StripePaymentElement,
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeLinkAuthenticationElement,
+  VueStripePaymentElement,
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'

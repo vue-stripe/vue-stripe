@@ -110,8 +110,8 @@ const cancelUrl = 'https://example.com/cancel'
 | `sessionId` | `string` | No* | - | Checkout Session ID (starts with `cs_`) - v7.x only |
 | `priceId` | `string` | No* | - | Price ID for client-side session creation - v7.x only, deprecated |
 | `mode` | `'payment' \| 'subscription'` | No | `'payment'` | Checkout mode (only with `priceId`) |
-| `successUrl` | `string` | No | `window.location.origin + '/success'` | Redirect URL after successful payment |
-| `cancelUrl` | `string` | No | `window.location.origin + '/cancel'` | Redirect URL when user cancels |
+| `successUrl` | `string` | No | - | Redirect URL after successful payment (only used with the deprecated `priceId` path; falls back to `window.location.origin + '/success'` there) |
+| `cancelUrl` | `string` | No | - | Redirect URL when user cancels (only used with the deprecated `priceId` path; falls back to `window.location.origin + '/cancel'` there) |
 | `customerEmail` | `string` | No | - | Pre-fill customer's email |
 | `clientReferenceId` | `string` | No | - | Reference ID for your application |
 | `submitType` | `'auto' \| 'book' \| 'donate' \| 'pay'` | No | `'auto'` | Button text on Stripe's checkout page |
@@ -136,11 +136,12 @@ const cancelUrl = 'https://example.com/cancel'
 ```ts
 interface CheckoutError extends Error {
   message: string
-  // Common error messages:
+  // Common error messages emitted by the component:
   // - "Either sessionUrl, sessionId, or priceId is required"
   // - "Stripe not initialized"
   // - "redirectToCheckout is not available" (v8.x)
-  // - "Session expired"
+  // Any other messages (e.g. an expired or invalid session) come
+  // from Stripe via result.error.message.
 }
 ```
 
@@ -305,10 +306,12 @@ const error = ref(null)
 const handleError = (err) => {
   error.value = err.message
 
-  // Handle specific error types
-  if (err.message.includes('Session expired')) {
-    // Refresh the session
-    refreshSession()
+  // Handle specific error types. Messages like "redirectToCheckout is not
+  // available" come from the component; an expired/invalid session message
+  // comes from Stripe via result.error.message.
+  if (err.message.includes('redirectToCheckout is not available')) {
+    // Fall back to a server-created session URL (v8.x)
+    createSessionUrl()
   }
 }
 </script>

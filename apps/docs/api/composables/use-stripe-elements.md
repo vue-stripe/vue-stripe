@@ -10,6 +10,7 @@ A composable that provides access to the Stripe Elements instance from any child
 |------------|-------------|
 | **Elements Instance Access** | Get the StripeElements instance for element retrieval |
 | **Element Retrieval** | Access individual elements via `getElement()` method |
+| **Form Submission** | Trigger validation and wallet collection via `submit()` |
 | **Loading State** | Know when Elements is still initializing |
 | **Error State** | Detect if Elements creation failed |
 | **Payment Submission** | Pass elements to `confirmPayment()` for checkout |
@@ -20,9 +21,9 @@ A composable that provides access to the Stripe Elements instance from any child
 flowchart TD
     A["Component calls useStripeElements()"] --> B["Composable checks for StripeElements context<br/>(Uses Vue's inject with stripeElementsInjectionKey)"]
     B --> C{Context Found?}
-    C -->|Yes| D["<b>Context Found</b><br/>Returns { elements, loading, error }"]
-    C -->|No| E["<b>No Context Found</b><br/>Throws Error:<br/>'useStripeElements must be<br/>called within StripeElements'"]
-    D --> F["Component uses elements.value for element access<br/><br/>// Get specific elements<br/>const card = elements.value?.getElement('card')<br/>const payment = elements.value?.getElement('payment')<br/><br/>// Submit payment<br/>await stripe.value.confirmPayment({<br/>  elements: elements.value,<br/>  confirmParams: { return_url: '...' }<br/>})"]
+    C -->|Yes| D["<b>Context Found</b><br/>Returns { elements, submit, loading, error }"]
+    C -->|No| E["<b>No Context Found</b><br/>Throws VueStripeElementsError:<br/>'Elements context not found. Make sure to<br/>wrap your component with VueStripeElements.'"]
+    D --> F["Component uses elements.value for element access<br/><br/>// Get specific elements<br/>const card = elements.value?.getElement('card')<br/>const payment = elements.value?.getElement('payment')<br/><br/>// Trigger validation / wallet collection<br/>const { error } = await submit()<br/><br/>// Submit payment<br/>await stripe.value.confirmPayment({<br/>  elements: elements.value,<br/>  confirmParams: { return_url: '...' }<br/>})"]
 ```
 
 ## Usage
@@ -32,7 +33,7 @@ flowchart TD
 import { useStripeElements } from '@vue-stripe/vue-stripe'
 
 // Must be called inside a component that's within StripeElements
-const { elements, loading, error } = useStripeElements()
+const { elements, submit, loading, error } = useStripeElements()
 </script>
 ```
 
@@ -40,11 +41,12 @@ const { elements, loading, error } = useStripeElements()
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `elements` | `Readonly<Ref<VueStripeElements \| null>>` | The Elements instance |
+| `elements` | `Readonly<Ref<StripeElements \| null>>` | The Elements instance |
+| `submit` | `() => Promise<ElementsSubmitResult>` | Triggers form validation and collects data required for wallets (Apple Pay, Google Pay). Call before `confirmPayment`/`confirmSetup` |
 | `loading` | `Readonly<Ref<boolean>>` | True while Elements is initializing |
 | `error` | `Readonly<Ref<string \| null>>` | Error message if initialization failed |
 
-All return values are **readonly refs**.
+The `elements`, `loading` and `error` return values are **readonly refs**; `submit` is a function.
 
 ## Examples
 
@@ -116,6 +118,40 @@ const pay = async () => {
 </script>
 ```
 
+### Submitting for Validation
+
+Call `submit()` to trigger form validation and collect data required for wallets (Apple Pay, Google Pay) before confirming payment. It resolves to an `ElementsSubmitResult` (`{ error }` on failure, or `{ selectedPaymentMethod }` on success):
+
+```vue
+<script setup>
+import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+
+const { stripe } = useStripe()
+const { elements, submit } = useStripeElements()
+
+const pay = async (clientSecret) => {
+  // Trigger form validation and wallet collection
+  const { error: submitError } = await submit()
+  if (submitError) {
+    console.error(submitError.message)
+    return
+  }
+
+  const { error } = await stripe.value.confirmPayment({
+    elements: elements.value,
+    clientSecret,
+    confirmParams: { return_url: window.location.href }
+  })
+
+  if (error) {
+    console.error(error.message)
+  }
+}
+</script>
+```
+
+> `usePaymentIntent` and `useSetupIntent` call `submit()` automatically unless `skipSubmit` is `true`.
+
 ### Getting Element Data
 
 Retrieve data from elements for validation:
@@ -143,12 +179,12 @@ const checkElements = () => {
 
 ## Error Handling
 
-`useStripeElements()` throws if called outside of `VueStripeElements`:
+`useStripeElements()` throws a `VueStripeElementsError` with the message `'Elements context not found. Make sure to wrap your component with VueStripeElements.'` if called outside of `VueStripeElements`:
 
 ```vue
 <!-- ❌ Wrong - outside StripeElements -->
 <script setup>
-const { elements } = useStripeElements() // Throws error
+const { elements } = useStripeElements() // Throws VueStripeElementsError
 </script>
 
 <template>
@@ -203,7 +239,16 @@ import type {
   StripePaymentElement
 } from '@stripe/stripe-js'
 
-const { elements, loading, error } = useStripeElements()
+const { elements, submit, loading, error } = useStripeElements()
+// elements: Readonly<Ref<StripeElements | null>>
+// submit:   () => Promise<ElementsSubmitResult>
+
+// Trigger validation / wallet collection.
+// submit() resolves to { error } on failure or { selectedPaymentMethod } on success.
+const validate = async () => {
+  const { error: submitError } = await submit()
+  return submitError
+}
 
 // Get typed elements
 const getCardElement = (): StripeCardElement | null => {

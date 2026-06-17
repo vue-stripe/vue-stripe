@@ -53,14 +53,23 @@ const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `clientSecret` | `string` | No* | Client secret from PaymentIntent or SetupIntent |
-| `options` | `object` | No | Elements configuration options |
+| `clientSecret` | `string` | No* | Client secret from PaymentIntent or SetupIntent. When provided, Elements uses the intent-based flow |
+| `mode` | `'payment' \| 'setup' \| 'subscription'` | No | Mode for deferred intent creation (without `clientSecret`). Required when `clientSecret` is not provided |
+| `currency` | `string` | No | Currency code (e.g. `'usd'`, `'eur'`) for deferred intent creation. Required when using `mode` without `clientSecret` |
+| `amount` | `number` | No | Amount in the smallest currency unit (e.g. cents for USD). Required for `'payment'` and `'subscription'` modes |
+| `setupFutureUsage` | `'off_session' \| 'on_session'` | No | Indicates intent to save the payment method for future use |
+| `captureMethod` | `'automatic' \| 'automatic_async' \| 'manual'` | No | Controls when to capture funds from the customer's account |
+| `paymentMethodTypes` | `string[]` | No | List of payment method types to display. Omit to use Dashboard payment method settings |
+| `options` | `object` | No | Additional options passed to `stripe.elements()` |
 
-\* Required for Payment Element and some other elements. Optional for Card Element.
+\* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation.
 
 ### Options Object
 
+The `options` prop accepts the full `StripeElementsOptions` type from `@stripe/stripe-js`. The interface below is an illustrative subset of that upstream type, showing the most commonly used fields:
+
 ```ts
+// Illustrative subset of @stripe/stripe-js StripeElementsOptions
 interface StripeElementsOptions {
   appearance?: {
     theme?: 'stripe' | 'night' | 'flat' | 'none'
@@ -78,6 +87,40 @@ interface StripeElementsOptions {
   locale?: string
   loader?: 'auto' | 'always' | 'never'
 }
+```
+
+## Events
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `@ready` | `StripeElements` | Emitted after the Elements instance is created. The payload is the `StripeElements` instance |
+| `@error` | `string` | Emitted when Elements creation fails. The payload is the error message |
+
+```vue
+<template>
+  <VueStripeElements
+    :client-secret="clientSecret"
+    @ready="onReady"
+    @error="onError"
+  >
+    <VueStripePaymentElement />
+  </VueStripeElements>
+</template>
+
+<script setup lang="ts">
+import type { StripeElements } from '@stripe/stripe-js'
+import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+
+const clientSecret = 'pi_xxx_secret_xxx'
+
+function onReady(elements: StripeElements) {
+  console.log('Elements ready', elements)
+}
+
+function onError(error: string) {
+  console.error('Elements failed to initialize:', error)
+}
+</script>
 ```
 
 ## Slots
@@ -126,7 +169,7 @@ StripeElements uses Vue's `provide` to make these values available to descendant
 
 | Key | Type | Description |
 |-----|------|-------------|
-| `elements` | `Ref<VueStripeElements \| null>` | The Elements instance |
+| `elements` | `Ref<StripeElements \| null>` | The Elements instance |
 | `loading` | `Ref<boolean>` | Whether Elements is loading |
 | `error` | `Ref<string \| null>` | Error message if initialization failed |
 

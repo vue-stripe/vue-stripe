@@ -216,6 +216,10 @@ const handleCheckout = async () => {
 
 ### Multiple Products
 
+::: warning v7.x Only
+The `lineItems`/`mode`/`successUrl`/`cancelUrl` options below rely on `stripe.redirectToCheckout()`, which was removed in `@stripe/stripe-js` v8.x. On v8.x this call throws. Create a Checkout Session on your server and use `redirectToUrl()` or `redirectToCheckout({ url })` instead.
+:::
+
 ```vue
 <script setup>
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
@@ -242,25 +246,11 @@ const handleCheckout = async () => {
 </script>
 ```
 
-### With Customer Email Pre-fill
-
-```vue
-<script setup>
-import { useStripeCheckout } from '@vue-stripe/vue-stripe'
-
-const { redirectToCheckout } = useStripeCheckout()
-const userEmail = 'customer@example.com' // From your auth system
-
-const handleCheckout = async () => {
-  await redirectToCheckout({
-    sessionId: 'cs_test_xxx',
-    customerEmail: userEmail
-  })
-}
-</script>
-```
-
 ### Complete Integration Example
+
+::: warning v7.x Only
+The commented-out price-based (`lineItems`) option below relies on `stripe.redirectToCheckout()`, which was removed in `@stripe/stripe-js` v8.x and throws there. Prefer the backend session flow with `redirectToUrl()` or `redirectToCheckout({ url })`.
+:::
 
 ```vue
 <script setup>
@@ -337,19 +327,25 @@ const handleSelectPlan = async (priceId: string) => {
 
 ```ts
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
-import type { RedirectToCheckoutOptions } from '@stripe/stripe-js'
+import type { CheckoutRedirectOptions, LegacyCheckoutOptions } from '@vue-stripe/vue-stripe'
 
-const { redirectToCheckout, loading, error } = useStripeCheckout()
+const { redirectToCheckout, redirectToUrl, loading, error } = useStripeCheckout()
 
-// Session-based (recommended)
-const sessionCheckout = async (sessionId: string) => {
-  const options: RedirectToCheckoutOptions = { sessionId }
+// URL-based (v8.x compatible, recommended)
+const urlCheckout = async (url: string) => {
+  const options: CheckoutRedirectOptions = { url }
   await redirectToCheckout(options)
 }
 
-// Price-based
+// Session-based (v7.x only)
+const sessionCheckout = async (sessionId: string) => {
+  const options: LegacyCheckoutOptions = { sessionId }
+  await redirectToCheckout(options)
+}
+
+// Price-based (v7.x only)
 const priceCheckout = async (priceId: string) => {
-  const options: RedirectToCheckoutOptions = {
+  const options: LegacyCheckoutOptions = {
     lineItems: [{ price: priceId, quantity: 1 }],
     mode: 'payment',
     successUrl: 'https://example.com/success',
@@ -378,12 +374,12 @@ const handleCheckout = async () => {
     // If successful, user is redirected (this line won't execute)
   } catch (err) {
     // User stays on page
-    if (err.message.includes('Session expired')) {
-      // Refresh the session
-      await refreshCheckoutSession()
-    } else if (err.message.includes('Stripe not initialized')) {
-      // Stripe hasn't loaded yet
+    if (err.message.includes('Stripe not initialized')) {
+      // Fixed string thrown by the composable when Stripe hasn't loaded
       console.error('Please wait for Stripe to load')
+    } else if (err.message.includes('expired')) {
+      // Wording comes from Stripe's result.error.message — match loosely
+      await refreshCheckoutSession()
     } else {
       console.error('Checkout error:', err.message)
     }
@@ -394,12 +390,14 @@ const handleCheckout = async () => {
 
 ## Common Errors
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `Stripe not initialized` | Stripe hasn't loaded | Wait for StripeProvider to load |
-| `Session expired` | Session too old | Create a new session |
-| `Invalid session` | Wrong session ID | Check session ID format |
-| `Redirect failed` | Network or Stripe error | Show retry option |
+`Stripe not initialized` is a fixed string thrown by the composable. The remaining messages come from Stripe's `result.error.message` (forwarded verbatim into `error.value`), so the exact wording is determined by Stripe, not Vue Stripe. The phrases below are illustrative examples of Stripe-returned errors.
+
+| Error (source) | Cause | Solution |
+|----------------|-------|----------|
+| `Stripe not initialized` (Vue Stripe) | Stripe hasn't loaded | Wait for StripeProvider to load |
+| Session expired (Stripe `result.error.message`) | Session too old | Create a new session |
+| Invalid session (Stripe `result.error.message`) | Wrong session ID | Check session ID format |
+| Redirect failed (Stripe `result.error.message`) | Network or Stripe error | Show retry option |
 
 ## useStripeCheckout vs StripeCheckout Component
 

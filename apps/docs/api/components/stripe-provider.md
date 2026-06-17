@@ -68,8 +68,11 @@ const onError = (error) => {
 
 ### Options Object
 
+The `options` prop accepts the following shape. This is illustrative only — `StripeProviderOptions` is not an exported type:
+
 ```ts
-interface StripeProviderOptions {
+// Illustrative shape (not an exported type)
+{
   stripeAccount?: string
   apiVersion?: string
   locale?: string
@@ -127,15 +130,17 @@ Rendered when Stripe.js fails to load:
 
 ## Provides
 
-StripeProvider uses Vue's `provide` to make these values available to descendants:
+StripeProvider uses Vue's `provide` to expose a single object under the `stripeInjectionKey` symbol. That object groups the Stripe state together:
 
-| Key | Type | Description |
-|-----|------|-------------|
+| Property | Type | Description |
+|----------|------|-------------|
 | `stripe` | `Ref<Stripe \| null>` | The Stripe instance |
 | `loading` | `Ref<boolean>` | Whether Stripe is loading |
 | `error` | `Ref<string \| null>` | Error message if loading failed |
 
-Access these values using the [useStripe](/api/composables/use-stripe) composable.
+Access this object using the [useStripe](/api/composables/use-stripe) composable, which injects `stripeInjectionKey` and returns `{ stripe, loading, error }`.
+
+StripeProvider also provides the resolved configuration (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`) as a separate object under the `stripeConfigInjectionKey` symbol, used internally by descendant components.
 
 ## Examples
 
@@ -201,16 +206,17 @@ StripeProvider handles these error cases:
 | Error | Cause | Solution |
 |-------|-------|----------|
 | Missing key | No `publishableKey` or `stripeKey` provided | Provide a valid key |
-| Invalid key | Key doesn't start with `pk_` | Check your API keys in Stripe Dashboard |
 | Network error | Failed to load Stripe.js from CDN | Check network, use `@error` to show retry option |
+
+An invalid publishable key is not validated up front; it surfaces as a load failure through the `@error` event.
 
 ```vue
 <script setup>
 const handleError = (error) => {
   if (error.message.includes('network')) {
     // Show retry button
-  } else if (error.message.includes('Invalid')) {
-    // Configuration error - log to monitoring
+  } else {
+    // Load failed (e.g. invalid key) - log to monitoring
   }
 }
 </script>
