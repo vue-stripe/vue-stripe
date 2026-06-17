@@ -7,6 +7,7 @@ import './styles/vars.css'
 import StripeBadge from './components/StripeBadge.vue'
 import CopyForLLM from './components/CopyForLLM.vue'
 import GitHubStarsCTA from './components/GitHubStarsCTA.vue'
+import StripeCoverage from './components/StripeCoverage.vue'
 
 // Example components for interactive documentation
 import ProductSelector from './components/examples/ProductSelector.vue'
@@ -96,5 +97,6 @@ export default {
     app.component('CardElementExample', CardElementExample)
     app.component('SplitCardElementExample', SplitCardElementExample)
     app.component('LinkAuthenticationExample', LinkAuthenticationExample)
+    app.component('StripeCoverage', StripeCoverage)
   }
 } satisfies Theme
