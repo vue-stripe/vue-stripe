@@ -1,5 +1,13 @@
 import { defineConfig, loadEnv } from 'vitepress'
 import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
+import { coverage } from './theme/data/stripe-coverage'
+
+// Build the "Coverage xx/xx" nav label from the single coverage data source,
+// so the toolbar count stays in sync with the /coverage page automatically.
+const coverageItems = coverage.flatMap((c) => c.items)
+const coveredCount = coverageItems.filter((i) => i.status === 'covered').length
+const trackableCount = coverageItems.filter((i) => i.status !== 'deprecated').length
+const coverageNavLabel = `Coverage ${coveredCount}/${trackableCount}`
 
 // Load environment variables from .env files (for local dev)
 const envFromFile = loadEnv('', process.cwd())
@@ -103,6 +111,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
       { text: 'Guide', link: '/guide/introduction' },
       { text: 'API', link: '/api/' },
       { text: 'Live Demo', link: '/live-demo/' },
+      { text: coverageNavLabel, link: '/coverage' },
       {
         text: 'Links',
         items: [
