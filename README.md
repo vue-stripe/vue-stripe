@@ -38,6 +38,14 @@
 
 Thank you for your patience! This is an early release of the new Vue Stripe. As with any early release, you may encounter bugs. If you find any issues or have suggestions, please [create an issue](https://github.com/vue-stripe/vue-stripe/issues) or [submit a pull request](https://github.com/vue-stripe/vue-stripe/pulls). Your contributions are greatly appreciated!
 
+### A note on AI-assisted maintenance
+
+I've decided to start using AI to help me maintain Vue Stripe, and I want to be upfront with you about it. **Rest assured that everything is still kept under heavy scrutiny** — every change is reviewed, tested, and verified by me before it ships.
+
+To be honest about the reality of it: I maintain this project largely on my own, and only in whatever extra time I can find. That time is limited, and I'm often not able to give it my full 100%. With just one person, it's genuinely hard to find the time to provide the quality and pace of work the project deserves without some extra help. Bringing AI in as an assistant lets me move faster and cover more ground — more tests, better docs, quicker fixes — while I stay in the loop as the human who reviews and approves everything.
+
+Thank you for understanding, and for continuing to support Vue Stripe. 🙏
+
 ## Features
 
 - **Vue 3** — Built for Vue 3.x
