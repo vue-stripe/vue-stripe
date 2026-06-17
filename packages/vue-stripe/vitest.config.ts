@@ -17,6 +17,27 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./tests/setup.ts'],
-    include: ['tests/**/*.test.ts']
+    include: ['tests/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['src/**/*.{ts,vue}'],
+      exclude: [
+        'src/index.ts',
+        'src/**/index.ts',
+        'src/shims-vue.d.ts',
+        'src/types/**',
+        'src/utils/constants.ts'
+      ],
+      // Ratchet thresholds: set just below current levels so the suite passes
+      // today while preventing regressions. Raise as coverage improves.
+      thresholds: {
+        statements: 85,
+        branches: 72,
+        functions: 60,
+        lines: 85
+      }
+    }
   }
 })
