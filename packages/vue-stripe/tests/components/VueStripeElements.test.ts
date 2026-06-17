@@ -151,6 +151,43 @@ describe('VueStripeElements', () => {
     })
   })
 
+  it('should pass appearance, fonts, and locale props to elements options', async () => {
+    const mockElements = vi.fn(() => ({
+      create: vi.fn(() => ({
+        mount: vi.fn(),
+        destroy: vi.fn(),
+        on: vi.fn()
+      }))
+    }))
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: mockElements,
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const appearance = { theme: 'night', variables: { colorPrimary: '#635bff' } }
+    const fonts = [{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]
+
+    mountWithProvider({
+      clientSecret: 'pi_123_secret_456',
+      appearance,
+      fonts,
+      locale: 'fr'
+    })
+
+    await flushPromises()
+
+    expect(mockElements).toHaveBeenCalledWith({
+      clientSecret: 'pi_123_secret_456',
+      appearance,
+      fonts,
+      locale: 'fr'
+    })
+  })
+
   it('should provide elements context to child components', async () => {
     let injectedContext: ReturnType<typeof inject<any>> = null
 

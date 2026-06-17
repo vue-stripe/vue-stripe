@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, defineComponent, h, computed } from 'vue'
-import { VueStripeProvider, VueStripeElements, useStripeElements } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements, VueStripeCardElement, useStripeElements } from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -108,6 +108,19 @@ const darkAppearance = {
   variables: {
     colorPrimary: '#7c3aed'
   }
+}
+
+// Custom fonts demo (first-class `fonts` prop, #389)
+const customFonts = [
+  { cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }
+]
+
+// Tracks the themed Card element mounting successfully (proves first-class
+// appearance/fonts/locale props flow through to a real Stripe element).
+const appearanceCardReady = ref(false)
+const onAppearanceCardReady = () => {
+  appearanceCardReady.value = true
+  log('ready', 'Card element mounted with first-class appearance/fonts/locale props')
 }
 </script>
 
@@ -254,35 +267,46 @@ const darkAppearance = {
           </VueStripeProvider>
         </div>
 
-        <!-- Custom appearance -->
+        <!-- Custom appearance (first-class appearance/fonts/locale props, #389) -->
         <div v-else-if="testScenario === 'appearance'" class="bg-secondary rounded-lg p-6">
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
             <VueStripeElements
-              :client-secret="cleanClientSecret"
-              :options="{ appearance: appearanceOptions }"
+              :appearance="appearanceOptions"
+              :fonts="customFonts"
+              locale="en"
             >
-              <div class="text-center py-8 bg-card rounded-lg shadow-sm">
+              <div class="text-center py-8 bg-card rounded-lg shadow-sm" data-test="appearance-scenario">
                 <span class="text-4xl mb-4 block">🎨</span>
-                <strong class="block text-lg mb-2">Custom Appearance</strong>
-                <p class="text-muted-foreground">Using the Stripe Appearance API for styling.</p>
+                <strong class="block text-lg mb-2">Custom Appearance (first-class props)</strong>
+                <p class="text-muted-foreground">
+                  Bound directly via <code class="bg-muted px-1 rounded">:appearance</code>,
+                  <code class="bg-muted px-1 rounded">:fonts</code> and
+                  <code class="bg-muted px-1 rounded">locale</code> props — no <code class="bg-muted px-1 rounded">:options</code> nesting.
+                </p>
+                <div class="max-w-md mx-auto mt-4 text-left">
+                  <VueStripeCardElement data-test="appearance-card" @ready="onAppearanceCardReady" />
+                </div>
+                <p
+                  v-if="appearanceCardReady"
+                  data-test="appearance-ready"
+                  class="mt-3 p-3 rounded-md text-sm bg-success/10 text-success"
+                >
+                  ✅ Themed Card element mounted with first-class props
+                </p>
                 <pre class="bg-secondary p-3 rounded-md text-xs text-left overflow-x-auto mt-3">{{ JSON.stringify(appearanceOptions, null, 2) }}</pre>
-                <component :is="ElementsConsumer" :client-secret="cleanClientSecret" />
               </div>
             </VueStripeElements>
           </VueStripeProvider>
         </div>
 
-        <!-- Dark theme -->
+        <!-- Dark theme (first-class appearance prop, #389) -->
         <div v-else-if="testScenario === 'dark-theme'" class="bg-slate-900 text-slate-100 rounded-lg p-6">
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
-            <VueStripeElements
-              :client-secret="cleanClientSecret"
-              :options="{ appearance: darkAppearance }"
-            >
+            <VueStripeElements :appearance="darkAppearance">
               <div class="text-center py-8 bg-slate-800 rounded-lg shadow-sm">
                 <span class="text-4xl mb-4 block">🌙</span>
-                <strong class="block text-lg mb-2">Dark Theme</strong>
-                <p class="text-slate-400">Using <code class="bg-slate-700 px-1 rounded">theme: 'night'</code> with custom primary color.</p>
+                <strong class="block text-lg mb-2">Dark Theme (first-class prop)</strong>
+                <p class="text-slate-400">Bound via <code class="bg-slate-700 px-1 rounded">:appearance="{ theme: 'night' }"</code>.</p>
                 <component :is="ElementsConsumer" :client-secret="cleanClientSecret" />
               </div>
             </VueStripeElements>
