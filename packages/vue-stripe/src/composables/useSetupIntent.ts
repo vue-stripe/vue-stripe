@@ -1,41 +1,9 @@
 import { inject, ref, readonly } from 'vue-demi'
-import type { StripeElements } from '@stripe/stripe-js'
-import type { UseSetupIntentReturn } from '../types'
+import type { UseSetupIntentReturn, ConfirmSetupOptions } from '../types'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 
-/**
- * Options for confirming a setup
- */
-export interface ConfirmSetupOptions {
-  /** Client secret from the SetupIntent */
-  clientSecret: string
-  /** Additional confirmation parameters */
-  confirmParams?: {
-    return_url?: string
-    payment_method_data?: {
-      billing_details?: {
-        name?: string
-        email?: string
-        phone?: string
-        address?: {
-          line1?: string
-          line2?: string
-          city?: string
-          state?: string
-          postal_code?: string
-          country?: string
-        }
-      }
-    }
-  }
-  /** Whether to redirect (defaults to 'if_required') */
-  redirect?: 'if_required' | 'always'
-  /** Optional elements override (uses injected elements if not provided) */
-  elements?: StripeElements
-  /** Skip elements.submit() validation (not recommended, defaults to false) */
-  skipSubmit?: boolean
-}
+// `ConfirmSetupOptions` is defined once in ../types and re-exported there.
 
 /**
  * Composable for handling setup intents
