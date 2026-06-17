@@ -122,6 +122,7 @@ interface StripeElementStyle {
 | `@change` | `StripeIdealBankElementChangeEvent` | Emitted when bank selection changes |
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |
+| `@escape` | - | Emitted when the user presses the Escape key |
 
 ### Change Event
 
@@ -163,6 +164,18 @@ Rendered while the element is initializing:
 <VueStripeIdealBankElement>
   <template #loading>
     <div class="skeleton-loader">Loading banks...</div>
+  </template>
+</VueStripeIdealBankElement>
+```
+
+### Error Slot
+
+Rendered when an error occurs. Receives the current error message via the scoped `error` string:
+
+```vue
+<VueStripeIdealBankElement>
+  <template #error="{ error }">
+    <div class="error-message">{{ error }}</div>
   </template>
 </VueStripeIdealBankElement>
 ```

@@ -122,6 +122,7 @@ interface StripeElementStyle {
 | `@change` | `StripeEpsBankElementChangeEvent` | Emitted when bank selection changes |
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |
+| `@escape` | - | Emitted when the user presses the Escape key |
 
 ### Change Event
 
@@ -168,6 +169,11 @@ interface StripeEpsBankElementChangeEvent {
 
 ## Slots
 
+| Slot | Props | Description |
+|------|-------|-------------|
+| `loading` | - | Rendered while the element is initializing |
+| `error` | `{ error: string }` | Rendered when an error occurs; receives the current error message |
+
 ### Loading Slot
 
 Rendered while the element is initializing:
@@ -176,6 +182,18 @@ Rendered while the element is initializing:
 <VueStripeEpsBankElement>
   <template #loading>
     <div class="skeleton-loader">Loading banks...</div>
+  </template>
+</VueStripeEpsBankElement>
+```
+
+### Error Slot
+
+Rendered when an error occurs. The slot is scoped and receives the current `error` string:
+
+```vue
+<VueStripeEpsBankElement>
+  <template #error="{ error }">
+    <div class="error-message">{{ error }}</div>
   </template>
 </VueStripeEpsBankElement>
 ```

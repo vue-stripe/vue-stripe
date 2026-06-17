@@ -3,7 +3,8 @@ import { ref, inject, onMounted, onUnmounted, watch } from 'vue-demi'
 import type {
   StripePaymentElement as StripePaymentElementType,
   StripePaymentElementOptions,
-  StripePaymentElementChangeEvent
+  StripePaymentElementChangeEvent,
+  StripeError
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeElementsError } from '../utils/errors'
@@ -11,8 +12,8 @@ import { VueStripeElementsError } from '../utils/errors'
 // Extended interface for Payment Element with loader events - uses standalone interface
 // since TypeScript has issues extending the complex Stripe type
 interface StripePaymentElementWithLoaderEvents {
-   
   on(eventType: string, handler: (...args: any[]) => void): void
+  off(eventType: string, handler?: (...args: any[]) => void): void
 }
 
 interface Props {
@@ -27,6 +28,7 @@ interface Emits {
   (e: 'escape'): void
   (e: 'loaderstart'): void
   (e: 'loaderstop'): void
+  (e: 'loaderror', event: { elementType: 'payment'; error: StripeError }): void
 }
 
 const props = defineProps<Props>()
@@ -44,6 +46,19 @@ if (!elementsInstance) {
     'VueStripePaymentElement must be used within VueStripeElements'
   )
 }
+
+// Named handlers so listeners can be detached with .off() on teardown.
+const handleReady = () => {
+  loading.value = false
+  emit('ready', paymentElement.value!)
+}
+const handleChange = (event: StripePaymentElementChangeEvent) => emit('change', event)
+const handleFocus = () => emit('focus')
+const handleBlur = () => emit('blur')
+const handleEscape = () => emit('escape')
+const handleLoaderStart = () => emit('loaderstart')
+const handleLoaderStop = () => emit('loaderstop')
+const handleLoaderError = (event: { elementType: 'payment'; error: StripeError }) => emit('loaderror', event)
 
 const createPaymentElement = () => {
   if (!elementsInstance.elements.value) {
@@ -65,36 +80,17 @@ const createPaymentElement = () => {
     // Create payment element
     paymentElement.value = elementsInstance.elements.value.create('payment', props.options)
 
-    // Set up event listeners
-    paymentElement.value.on('ready', () => {
-      loading.value = false
-      emit('ready', paymentElement.value!)
-    })
-
-    paymentElement.value.on('change', (event) => {
-      emit('change', event)
-    })
-
-    paymentElement.value.on('focus', () => {
-      emit('focus')
-    })
-
-    paymentElement.value.on('blur', () => {
-      emit('blur')
-    })
-
-    paymentElement.value.on('escape', () => {
-      emit('escape')
-    })
+    // Set up event listeners (named handlers, removed in onUnmounted)
+    paymentElement.value.on('ready', handleReady)
+    paymentElement.value.on('change', handleChange)
+    paymentElement.value.on('focus', handleFocus)
+    paymentElement.value.on('blur', handleBlur)
+    paymentElement.value.on('escape', handleEscape)
 
     const paymentElementWithLoader = paymentElement.value as unknown as StripePaymentElementWithLoaderEvents
-    paymentElementWithLoader.on('loaderstart', () => {
-      emit('loaderstart')
-    })
-
-    paymentElementWithLoader.on('loaderstop', () => {
-      emit('loaderstop')
-    })
+    paymentElementWithLoader.on('loaderstart', handleLoaderStart)
+    paymentElementWithLoader.on('loaderstop', handleLoaderStop)
+    paymentElementWithLoader.on('loaderror', handleLoaderError)
 
     // Mount the element
     paymentElement.value.mount(elementRef.value)
@@ -136,7 +132,19 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (paymentElement.value) {
+    paymentElement.value.off('ready', handleReady)
+    paymentElement.value.off('change', handleChange)
+    paymentElement.value.off('focus', handleFocus)
+    paymentElement.value.off('blur', handleBlur)
+    paymentElement.value.off('escape', handleEscape)
+
+    const paymentElementWithLoader = paymentElement.value as unknown as StripePaymentElementWithLoaderEvents
+    paymentElementWithLoader.off('loaderstart', handleLoaderStart)
+    paymentElementWithLoader.off('loaderstop', handleLoaderStop)
+    paymentElementWithLoader.off('loaderror', handleLoaderError)
+
     paymentElement.value.destroy()
+    paymentElement.value = null
   }
 })
 

@@ -129,7 +129,7 @@ interface StripeElementStyle {
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | `VueStripeCardElement` | Emitted when the element is fully rendered |
+| `@ready` | `StripeCardElement` | Emitted when the element is fully rendered |
 | `@change` | `StripeCardElementChangeEvent` | Emitted when the element value changes |
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |

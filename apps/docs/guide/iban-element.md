@@ -70,6 +70,9 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
       <VueStripeIbanElement
         @ready="onReady"
         @change="onChange"
+        @focus="onFocus"
+        @blur="onBlur"
+        @escape="onEscape"
       />
     </VueStripeElements>
   </VueStripeProvider>
@@ -83,7 +86,7 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 ### Step 2: Handle Events
 
-```vue{8-17}
+```vue{8-27}
 <script setup>
 import { ref } from 'vue'
 
@@ -100,6 +103,18 @@ const onChange = (event) => {
   bankName.value = event.bankName || ''
   country.value = event.country || ''
 }
+
+const onFocus = () => {
+  console.log('IBAN element focused')
+}
+
+const onBlur = () => {
+  console.log('IBAN element blurred')
+}
+
+const onEscape = () => {
+  console.log('Escape key pressed in IBAN element')
+}
 </script>
 ```
 
@@ -107,6 +122,18 @@ const onChange = (event) => {
 - The `@change` event includes `bankName` when a valid IBAN is detected
 - The `country` is automatically extracted from the IBAN prefix
 - Use `complete` to enable/disable the submit button
+
+## Events
+
+`VueStripeIbanElement` emits the following events:
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `@ready` | `StripeIbanElement` | Fired when the element finishes mounting and is ready for input |
+| `@change` | `StripeIbanElementChangeEvent` | Fired on every change (includes `complete`, `empty`, `error`, `country`, `bankName`) |
+| `@focus` | — | Fired when the element gains focus |
+| `@blur` | — | Fired when the element loses focus |
+| `@escape` | — | Fired when the user presses the Escape key inside the element |
 
 ## Confirming SEPA Payments
 

@@ -156,13 +156,14 @@ interface StripePaymentElementOptions {
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | `VueStripePaymentElement` | Emitted when the element is fully rendered |
+| `@ready` | `StripePaymentElement` | Emitted when the element is fully rendered |
 | `@change` | `StripePaymentElementChangeEvent` | Emitted when the element value changes |
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |
 | `@escape` | - | Emitted when the escape key is pressed |
 | `@loaderstart` | - | Emitted when the element starts loading |
 | `@loaderstop` | - | Emitted when the element finishes loading |
+| `@loaderror` | `{ elementType: 'payment'; error: StripeError }` | Emitted when the element fails to load |
 
 ### Change Event
 
@@ -208,7 +209,7 @@ Rendered when there's an error during element creation:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `element` | `Ref<VueStripePaymentElement \| null>` | The Stripe payment element instance |
+| `element` | `Ref<StripePaymentElement \| null>` | The Stripe payment element instance |
 | `loading` | `Ref<boolean>` | Whether the element is loading |
 | `error` | `Ref<string \| null>` | Current error message |
 

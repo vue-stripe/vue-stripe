@@ -36,6 +36,23 @@ if (!elementsInstance) {
   )
 }
 
+// Named handlers so listeners can be detached with .off() on teardown.
+const handleReady = () => {
+  loading.value = false
+  emit('ready', epsBankElement.value!)
+}
+const handleChange = (event: StripeEpsBankElementChangeEvent) => {
+  if (event.error) {
+    error.value = event.error.message
+  } else {
+    error.value = null
+  }
+  emit('change', event)
+}
+const handleFocus = () => emit('focus')
+const handleBlur = () => emit('blur')
+const handleEscape = () => emit('escape')
+
 const createEpsBankElement = () => {
   if (!elementsInstance.elements.value) {
     error.value = 'Elements instance not available'
@@ -56,33 +73,12 @@ const createEpsBankElement = () => {
     // Create EPS bank element (options are required for epsBank)
     epsBankElement.value = elementsInstance.elements.value.create('epsBank', props.options || {})
 
-    // Set up event listeners
-    epsBankElement.value.on('ready', () => {
-      loading.value = false
-      emit('ready', epsBankElement.value!)
-    })
-
-    epsBankElement.value.on('change', (event) => {
-      // Update error state from Stripe
-      if (event.error) {
-        error.value = event.error.message
-      } else {
-        error.value = null
-      }
-      emit('change', event)
-    })
-
-    epsBankElement.value.on('focus', () => {
-      emit('focus')
-    })
-
-    epsBankElement.value.on('blur', () => {
-      emit('blur')
-    })
-
-    epsBankElement.value.on('escape', () => {
-      emit('escape')
-    })
+    // Set up event listeners (named handlers, removed in onUnmounted)
+    epsBankElement.value.on('ready', handleReady)
+    epsBankElement.value.on('change', handleChange)
+    epsBankElement.value.on('focus', handleFocus)
+    epsBankElement.value.on('blur', handleBlur)
+    epsBankElement.value.on('escape', handleEscape)
 
     // Mount the element
     epsBankElement.value.mount(elementRef.value)
@@ -124,7 +120,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (epsBankElement.value) {
+    epsBankElement.value.off('ready', handleReady)
+    epsBankElement.value.off('change', handleChange)
+    epsBankElement.value.off('focus', handleFocus)
+    epsBankElement.value.off('blur', handleBlur)
+    epsBankElement.value.off('escape', handleEscape)
     epsBankElement.value.destroy()
+    epsBankElement.value = null
   }
 })
 

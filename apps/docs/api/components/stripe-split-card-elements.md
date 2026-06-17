@@ -193,9 +193,9 @@ interface CardCvcChangeEvent {
 }
 ```
 
-## Exposed Methods
+## Exposed
 
-Access via template ref on each component:
+Access via template ref on each component. Every component exposes the same values and methods.
 
 ```vue
 <script setup>
@@ -219,6 +219,16 @@ const clearAll = () => {
   <VueStripeCardCvcElement ref="cvcRef" />
 </template>
 ```
+
+### Exposed Values
+
+| Value | Type | Description |
+|-------|------|-------------|
+| `element` | `Ref<StripeCardNumberElement \| StripeCardExpiryElement \| StripeCardCvcElement \| null>` | The underlying Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` while the element is being created and mounted |
+| `error` | `Ref<string \| null>` | Current error message, or `null` when there is no error |
+
+### Exposed Methods
 
 | Method | Description |
 |--------|-------------|

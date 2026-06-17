@@ -460,8 +460,10 @@ describe('Split Card Elements', () => {
       await flushPromises()
       wrapper.unmount()
 
-      // All elements should be destroyed
+      // All elements should be destroyed, with listeners detached first (#376)
       mockElements.forEach(element => {
+        expect(element.off).toHaveBeenCalledWith('ready', expect.any(Function))
+        expect(element.off).toHaveBeenCalledWith('change', expect.any(Function))
         expect(element.destroy).toHaveBeenCalled()
       })
     })

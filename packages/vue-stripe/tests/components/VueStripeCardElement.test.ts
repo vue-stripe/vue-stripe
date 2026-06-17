@@ -412,6 +412,26 @@ describe('VueStripeCardElement', () => {
     expect(mockElement.destroy).toHaveBeenCalled()
   })
 
+  it('detaches listeners with .off() before destroy on unmount (#376)', async () => {
+    const mockElement = createMockElement()
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+    wrapper.unmount()
+
+    // Every registered event is removed before destroy (named-handler cleanup).
+    for (const event of ['ready', 'change', 'focus', 'blur', 'escape']) {
+      expect(mockElement.off).toHaveBeenCalledWith(event, expect.any(Function))
+    }
+    expect(mockElement.destroy).toHaveBeenCalled()
+  })
+
   it('should expose element methods via defineExpose', async () => {
     const mockElement = createMockElement()
     const mockCreate = vi.fn(() => mockElement)

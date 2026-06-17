@@ -36,6 +36,23 @@ if (!elementsInstance) {
   )
 }
 
+// Named handlers so listeners can be detached with .off() on teardown.
+const handleReady = () => {
+  loading.value = false
+  emit('ready', idealBankElement.value!)
+}
+const handleChange = (event: StripeIdealBankElementChangeEvent) => {
+  if (event.error) {
+    error.value = event.error.message
+  } else {
+    error.value = null
+  }
+  emit('change', event)
+}
+const handleFocus = () => emit('focus')
+const handleBlur = () => emit('blur')
+const handleEscape = () => emit('escape')
+
 const createIdealBankElement = () => {
   if (!elementsInstance.elements.value) {
     error.value = 'Elements instance not available'
@@ -56,33 +73,12 @@ const createIdealBankElement = () => {
     // Create iDEAL bank element
     idealBankElement.value = elementsInstance.elements.value.create('idealBank', props.options)
 
-    // Set up event listeners
-    idealBankElement.value.on('ready', () => {
-      loading.value = false
-      emit('ready', idealBankElement.value!)
-    })
-
-    idealBankElement.value.on('change', (event) => {
-      // Update error state from Stripe
-      if (event.error) {
-        error.value = event.error.message
-      } else {
-        error.value = null
-      }
-      emit('change', event)
-    })
-
-    idealBankElement.value.on('focus', () => {
-      emit('focus')
-    })
-
-    idealBankElement.value.on('blur', () => {
-      emit('blur')
-    })
-
-    idealBankElement.value.on('escape', () => {
-      emit('escape')
-    })
+    // Set up event listeners (named handlers, removed in onUnmounted)
+    idealBankElement.value.on('ready', handleReady)
+    idealBankElement.value.on('change', handleChange)
+    idealBankElement.value.on('focus', handleFocus)
+    idealBankElement.value.on('blur', handleBlur)
+    idealBankElement.value.on('escape', handleEscape)
 
     // Mount the element
     idealBankElement.value.mount(elementRef.value)
@@ -124,7 +120,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (idealBankElement.value) {
+    idealBankElement.value.off('ready', handleReady)
+    idealBankElement.value.off('change', handleChange)
+    idealBankElement.value.off('focus', handleFocus)
+    idealBankElement.value.off('blur', handleBlur)
+    idealBankElement.value.off('escape', handleEscape)
     idealBankElement.value.destroy()
+    idealBankElement.value = null
   }
 })
 

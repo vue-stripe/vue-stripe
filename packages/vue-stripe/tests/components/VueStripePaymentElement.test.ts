@@ -387,6 +387,42 @@ describe('VueStripePaymentElement', () => {
     expect(paymentComponent.emitted('loaderstop')).toBeTruthy()
   })
 
+  it('should emit loaderror event with the failure payload (#406)', async () => {
+    let loaderErrorCallback: Function | null = null
+    const mockElement = {
+      ...createMockElement(),
+      on: vi.fn((event: string, callback: Function) => {
+        if (event === 'loaderror') {
+          loaderErrorCallback = callback
+        }
+      })
+    }
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => mockElement)
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+
+    const errorEvent = { elementType: 'payment', error: { message: 'load failed' } }
+    if (loaderErrorCallback) {
+      loaderErrorCallback(errorEvent)
+    }
+
+    await nextTick()
+
+    const paymentComponent = wrapper.findComponent(VueStripePaymentElement)
+    const emitted = paymentComponent.emitted('loaderror')
+    expect(emitted).toBeTruthy()
+    expect(emitted![0][0]).toEqual(errorEvent)
+  })
+
   it('should update options when props change', async () => {
     const mockElement = createMockElement()
     const mockCreate = vi.fn(() => mockElement)

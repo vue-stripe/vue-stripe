@@ -48,6 +48,27 @@ describe('VueStripeAddressElement', () => {
     expect(addressComponent.exists()).toBe(true)
   })
 
+  it('emits loadError instead of throwing when element creation fails (#407a)', async () => {
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => {
+          throw new Error('create boom')
+        })
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+
+    const addressComponent = wrapper.findComponent(VueStripeAddressElement)
+    const emitted = addressComponent.emitted('loadError')
+    expect(emitted).toBeTruthy()
+    expect(emitted![0][0]).toMatchObject({ elementType: 'address', error: 'create boom' })
+  })
+
   it('should mount Stripe address element on the DOM', async () => {
     const mockElement = createMockElement()
     const mockCreate = vi.fn(() => mockElement)

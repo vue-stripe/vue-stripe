@@ -36,6 +36,23 @@ if (!elementsInstance) {
   )
 }
 
+// Named handlers so listeners can be detached with .off() on teardown.
+const handleReady = () => {
+  loading.value = false
+  emit('ready', ibanElement.value!)
+}
+const handleChange = (event: StripeIbanElementChangeEvent) => {
+  if (event.error) {
+    error.value = event.error.message
+  } else {
+    error.value = null
+  }
+  emit('change', event)
+}
+const handleFocus = () => emit('focus')
+const handleBlur = () => emit('blur')
+const handleEscape = () => emit('escape')
+
 const createIbanElement = () => {
   if (!elementsInstance.elements.value) {
     error.value = 'Elements instance not available'
@@ -62,33 +79,12 @@ const createIbanElement = () => {
     // Create IBAN element
     ibanElement.value = elementsInstance.elements.value.create('iban', defaultOptions)
 
-    // Set up event listeners
-    ibanElement.value.on('ready', () => {
-      loading.value = false
-      emit('ready', ibanElement.value!)
-    })
-
-    ibanElement.value.on('change', (event) => {
-      // Update error state from Stripe
-      if (event.error) {
-        error.value = event.error.message
-      } else {
-        error.value = null
-      }
-      emit('change', event)
-    })
-
-    ibanElement.value.on('focus', () => {
-      emit('focus')
-    })
-
-    ibanElement.value.on('blur', () => {
-      emit('blur')
-    })
-
-    ibanElement.value.on('escape', () => {
-      emit('escape')
-    })
+    // Set up event listeners (named handlers, removed in onUnmounted)
+    ibanElement.value.on('ready', handleReady)
+    ibanElement.value.on('change', handleChange)
+    ibanElement.value.on('focus', handleFocus)
+    ibanElement.value.on('blur', handleBlur)
+    ibanElement.value.on('escape', handleEscape)
 
     // Mount the element
     ibanElement.value.mount(elementRef.value)
@@ -130,7 +126,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (ibanElement.value) {
+    ibanElement.value.off('ready', handleReady)
+    ibanElement.value.off('change', handleChange)
+    ibanElement.value.off('focus', handleFocus)
+    ibanElement.value.off('blur', handleBlur)
+    ibanElement.value.off('escape', handleEscape)
     ibanElement.value.destroy()
+    ibanElement.value = null
   }
 })
 

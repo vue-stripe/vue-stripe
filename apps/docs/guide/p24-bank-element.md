@@ -65,6 +65,9 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
       <VueStripeP24BankElement
         @ready="onReady"
         @change="onChange"
+        @focus="onFocus"
+        @blur="onBlur"
+        @escape="onEscape"
       />
     </VueStripeElements>
   </VueStripeProvider>
@@ -73,20 +76,51 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 ### Step 2: Handle Bank Selection
 
-```vue{7-12}
-<script setup>
+```vue{7-29}
+<script setup lang="ts">
 import { ref } from 'vue'
+import type { StripeP24BankElement, StripeP24BankElementChangeEvent } from '@stripe/stripe-js'
 
 const selectedBank = ref('')
 const isComplete = ref(false)
 
-const onChange = (event) => {
+// Emitted when the element finishes mounting; payload is the StripeP24BankElement
+const onReady = (element: StripeP24BankElement) => {
+  console.log('P24 bank element ready', element)
+}
+
+const onChange = (event: StripeP24BankElementChangeEvent) => {
   isComplete.value = event.complete
   selectedBank.value = event.value || ''
   console.log('Selected bank:', selectedBank.value)
 }
+
+// Emitted when the element gains focus
+const onFocus = () => {
+  console.log('P24 bank element focused')
+}
+
+// Emitted when the element loses focus
+const onBlur = () => {
+  console.log('P24 bank element blurred')
+}
+
+// Emitted when the Escape key is pressed within the element
+const onEscape = () => {
+  console.log('Escape pressed')
+}
 </script>
 ```
+
+## Events
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `@ready` | `StripeP24BankElement` | Fired when the element has finished mounting and is ready. |
+| `@change` | `StripeP24BankElementChangeEvent` | Fired when the selected bank changes. Contains `complete` and `value`. |
+| `@focus` | — | Fired when the element gains focus. |
+| `@blur` | — | Fired when the element loses focus. |
+| `@escape` | — | Fired when the Escape key is pressed within the element. |
 
 ## Supported Polish Banks
 

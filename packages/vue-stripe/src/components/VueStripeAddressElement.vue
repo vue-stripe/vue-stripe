@@ -69,15 +69,21 @@ export default defineComponent({
     const mountElement = () => {
       if (!elementsInstance.elements.value || !addressRef.value) return
 
-      elementRef.value = elementsInstance.elements.value.create('address', props.options) as AddressElementWithEvents
-      elementRef.value.mount(addressRef.value)
+      try {
+        elementRef.value = elementsInstance.elements.value.create('address', props.options) as AddressElementWithEvents
+        elementRef.value.mount(addressRef.value)
 
-      elementRef.value.on('ready', handleReady)
-      elementRef.value.on('change', handleChange)
-      elementRef.value.on('blur', handleBlur)
-      elementRef.value.on('focus', handleFocus)
-      elementRef.value.on('escape', handleEscape)
-      elementRef.value.on('loaderror', handleLoadError)
+        elementRef.value.on('ready', handleReady)
+        elementRef.value.on('change', handleChange)
+        elementRef.value.on('blur', handleBlur)
+        elementRef.value.on('focus', handleFocus)
+        elementRef.value.on('escape', handleEscape)
+        elementRef.value.on('loaderror', handleLoadError)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to create address element'
+        console.error('[Vue Stripe] Address element creation error:', message)
+        emit('loadError', { elementType: 'address', error: message })
+      }
     }
 
     const updateElement = () => {

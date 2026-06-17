@@ -91,20 +91,26 @@ Redirect customers to Stripe's hosted payment page. No payment UI to build.
 <script setup>
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 
-const { redirectToCheckout } = useStripeCheckout()
+const { redirectToUrl, loading, error } = useStripeCheckout()
 
 const handleBuy = async () => {
-  await redirectToCheckout({
-    lineItems: [{ price: 'price_xxx', quantity: 1 }],
-    mode: 'payment',
-    successUrl: 'https://example.com/success',
-    cancelUrl: 'https://example.com/cancel'
+  // Create a Checkout Session on your server (@stripe/stripe-js v8.x)
+  const response = await fetch('/api/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ priceId: 'price_xxx' })
   })
+  const { url } = await response.json()
+
+  // Redirect to the hosted Checkout page
+  redirectToUrl(url)
+  // Or: await redirectToCheckout({ url })
 }
 </script>
 
 <template>
-  <button @click="handleBuy">Buy Now</button>
+  <button :disabled="loading" @click="handleBuy">Buy Now</button>
+  <p v-if="error">{{ error }}</p>
 </template>
 ```
 
