@@ -193,4 +193,18 @@
   --vp-button-brand-active-bg: #5046e5;
 }
 
+/* Full-width layout for the Stripe.js coverage page (pageClass: coverage-page).
+   Lifts VitePress's prose-width cap so the coverage grid uses the normal page
+   width instead of the narrow ~688px article column. !important is needed to
+   beat VitePress's equal-specificity :not(.has-sidebar) rules. */
+.coverage-page .VPDoc .container {
+  max-width: 1152px !important;
+}
+.coverage-page .VPDoc .content {
+  max-width: 100% !important;
+}
+.coverage-page .VPDoc .content-container {
+  max-width: 100% !important;
+}
+
 
