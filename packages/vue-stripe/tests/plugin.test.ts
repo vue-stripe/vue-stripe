@@ -2,13 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createApp, defineComponent, h, inject } from 'vue-demi'
 import { createVueStripe } from '../src/plugin'
 import type { VueStripeOptions } from '../src/types'
+import { makeMockStripe } from './setup'
 
-// Mock loadStripe
-const mockStripe = {
-  elements: vi.fn(),
-  confirmPayment: vi.fn(),
-  registerAppInfo: vi.fn()
-}
+// Mock loadStripe with the canonical factory (mock-prefixed so it can be
+// referenced inside the hoisted vi.mock factory).
+const mockStripe = makeMockStripe()
 
 vi.mock('@stripe/stripe-js', () => ({
   loadStripe: vi.fn(() => Promise.resolve(mockStripe))
