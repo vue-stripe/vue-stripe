@@ -7,7 +7,8 @@ import type {
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementReadyEvent,
   StripeExpressCheckoutElementShippingAddressChangeEvent,
-  StripeExpressCheckoutElementShippingRateChangeEvent
+  StripeExpressCheckoutElementShippingRateChangeEvent,
+  StripeError
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeElementsError } from '../utils/errors'
@@ -26,6 +27,7 @@ interface Emits {
   // hand-rolled data-only interfaces).
   (e: 'shippingaddresschange', event: StripeExpressCheckoutElementShippingAddressChangeEvent): void
   (e: 'shippingratechange', event: StripeExpressCheckoutElementShippingRateChangeEvent): void
+  (e: 'loaderror', event: { elementType: 'expressCheckout'; error: StripeError }): void
 }
 
 const props = defineProps<Props>()
@@ -88,6 +90,10 @@ const createExpressCheckoutElement = () => {
 
     expressCheckoutElement.value.on('shippingratechange', (event) => {
       emit('shippingratechange', event)
+    })
+
+    expressCheckoutElement.value.on('loaderror', (event) => {
+      emit('loaderror', event)
     })
 
     // Mount the element

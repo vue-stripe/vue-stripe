@@ -304,6 +304,42 @@ describe('VueStripeExpressCheckoutElement', () => {
     expect(payload.resolve).toBe(resolve)
   })
 
+  it('should emit loaderror event with the failure payload (#406)', async () => {
+    let loaderErrorCallback: Function | null = null
+    const mockElement = {
+      ...createMockElement(),
+      on: vi.fn((event: string, callback: Function) => {
+        if (event === 'loaderror') {
+          loaderErrorCallback = callback
+        }
+      })
+    }
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => mockElement)
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+
+    const errorEvent = { elementType: 'expressCheckout', error: { message: 'load failed' } }
+    if (loaderErrorCallback) {
+      loaderErrorCallback(errorEvent)
+    }
+
+    await nextTick()
+
+    const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
+    const emitted = expressCheckoutComponent.emitted('loaderror')
+    expect(emitted).toBeTruthy()
+    expect(emitted![0][0]).toEqual(errorEvent)
+  })
+
   it('should emit cancel event when user cancels payment', async () => {
     let cancelCallback: Function | null = null
     const mockElement = {

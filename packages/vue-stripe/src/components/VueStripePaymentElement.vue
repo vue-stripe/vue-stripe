@@ -3,7 +3,8 @@ import { ref, inject, onMounted, onUnmounted, watch } from 'vue-demi'
 import type {
   StripePaymentElement as StripePaymentElementType,
   StripePaymentElementOptions,
-  StripePaymentElementChangeEvent
+  StripePaymentElementChangeEvent,
+  StripeError
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeElementsError } from '../utils/errors'
@@ -27,6 +28,7 @@ interface Emits {
   (e: 'escape'): void
   (e: 'loaderstart'): void
   (e: 'loaderstop'): void
+  (e: 'loaderror', event: { elementType: 'payment'; error: StripeError }): void
 }
 
 const props = defineProps<Props>()
@@ -94,6 +96,10 @@ const createPaymentElement = () => {
 
     paymentElementWithLoader.on('loaderstop', () => {
       emit('loaderstop')
+    })
+
+    paymentElementWithLoader.on('loaderror', (event) => {
+      emit('loaderror', event)
     })
 
     // Mount the element
