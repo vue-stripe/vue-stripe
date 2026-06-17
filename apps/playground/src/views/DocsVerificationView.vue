@@ -5,7 +5,7 @@
  * This component tests code examples directly from the documentation
  * to ensure they work correctly when users copy them.
  */
-import { ref } from 'vue'
+import { ref, computed, inject } from 'vue'
 import type { Stripe, StripeElements } from '@stripe/stripe-js'
 import {
   VueStripeProvider,
@@ -16,7 +16,10 @@ import {
   VueStripeExpressCheckoutElement
 } from '@vue-stripe/vue-stripe'
 
-const publishableKey = 'pk_test_51OIHqMIx2Vb66eaKneiRI89KWckP2FB7c75OLUZGezoXDiCHlIXMh6dBkTyWRe8oz77CO6B0udvWS6yWWdDaiwS800oW2Na8mk'
+// Publishable key comes from the shared playground config (set via the header
+// "Add Key" dialog / localStorage) — never hardcode a key in source.
+const stripeConfig = inject<{ publishableKey: string }>('stripeConfig')
+const publishableKey = computed(() => stripeConfig?.publishableKey ?? '')
 
 // Available test examples
 const examples = [
@@ -140,6 +143,11 @@ const addressOptions = {
   <div class="docs-verification">
     <h2>📚 Documentation Code Verification</h2>
     <p class="subtitle">Testing exact code examples from the documentation</p>
+
+    <!-- No key configured -->
+    <div v-if="!publishableKey" class="secret-input">
+      No Stripe publishable key configured. Click <strong>"Add Key"</strong> in the header to add a test key.
+    </div>
 
     <!-- Example Selector -->
     <div class="example-selector">
