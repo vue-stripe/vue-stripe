@@ -5,7 +5,9 @@ import type {
   StripeExpressCheckoutElementOptions,
   StripeExpressCheckoutElementClickEvent,
   StripeExpressCheckoutElementConfirmEvent,
-  StripeExpressCheckoutElementReadyEvent
+  StripeExpressCheckoutElementReadyEvent,
+  StripeExpressCheckoutElementShippingAddressChangeEvent,
+  StripeExpressCheckoutElementShippingRateChangeEvent
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeElementsError } from '../utils/errors'
@@ -14,33 +16,16 @@ interface Props {
   options?: StripeExpressCheckoutElementOptions
 }
 
-interface ShippingAddressChangeEvent {
-  address: {
-    city?: string
-    country: string
-    line1?: string
-    line2?: string
-    postal_code?: string
-    state?: string
-  }
-  name?: string
-}
-
-interface ShippingRateChangeEvent {
-  shippingRate: {
-    id: string
-    amount: number
-    displayName: string
-  }
-}
-
 interface Emits {
   (e: 'ready', event: StripeExpressCheckoutElementReadyEvent): void
   (e: 'click', event: StripeExpressCheckoutElementClickEvent): void
   (e: 'confirm', event: StripeExpressCheckoutElementConfirmEvent): void
   (e: 'cancel'): void
-  (e: 'shippingaddresschange', event: ShippingAddressChangeEvent): void
-  (e: 'shippingratechange', event: ShippingRateChangeEvent): void
+  // Use Stripe's official event types so consumers receive the resolve()/reject()
+  // callbacks required to update shipping options/rates (previously dropped by
+  // hand-rolled data-only interfaces).
+  (e: 'shippingaddresschange', event: StripeExpressCheckoutElementShippingAddressChangeEvent): void
+  (e: 'shippingratechange', event: StripeExpressCheckoutElementShippingRateChangeEvent): void
 }
 
 const props = defineProps<Props>()
