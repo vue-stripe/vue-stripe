@@ -107,4 +107,10 @@ async function confirmPayment() {
 This is a live demo using Stripe's test mode. Use card number `4242 4242 4242 4242` with any future date and CVC.
 :::
 
+## Stripe.js Coverage
+
+How much of Stripe.js does Vue Stripe wrap? This tracker compares our components and composables against Stripe.js elements, checkout flows, and payment methods — so you can see at a glance what ships today. Anything not yet wrapped is still reachable through the raw `stripe` / `elements` instance, and the list grows as new features land.
+
+<StripeCoverage />
+
 </div>
