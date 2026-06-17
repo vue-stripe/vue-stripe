@@ -36,6 +36,23 @@ if (!elementsInstance) {
   )
 }
 
+// Named handlers so listeners can be detached with .off() on teardown.
+const handleReady = () => {
+  loading.value = false
+  emit('ready', cardElement.value!)
+}
+const handleChange = (event: StripeCardElementChangeEvent) => {
+  if (event.error) {
+    error.value = event.error.message
+  } else {
+    error.value = null
+  }
+  emit('change', event)
+}
+const handleFocus = () => emit('focus')
+const handleBlur = () => emit('blur')
+const handleEscape = () => emit('escape')
+
 const createCardElement = () => {
   if (!elementsInstance.elements.value) {
     error.value = 'Elements instance not available'
@@ -56,33 +73,12 @@ const createCardElement = () => {
     // Create card element
     cardElement.value = elementsInstance.elements.value.create('card', props.options)
 
-    // Set up event listeners
-    cardElement.value.on('ready', () => {
-      loading.value = false
-      emit('ready', cardElement.value!)
-    })
-
-    cardElement.value.on('change', (event) => {
-      // Update error state from Stripe
-      if (event.error) {
-        error.value = event.error.message
-      } else {
-        error.value = null
-      }
-      emit('change', event)
-    })
-
-    cardElement.value.on('focus', () => {
-      emit('focus')
-    })
-
-    cardElement.value.on('blur', () => {
-      emit('blur')
-    })
-
-    cardElement.value.on('escape', () => {
-      emit('escape')
-    })
+    // Set up event listeners (named handlers, removed in onUnmounted)
+    cardElement.value.on('ready', handleReady)
+    cardElement.value.on('change', handleChange)
+    cardElement.value.on('focus', handleFocus)
+    cardElement.value.on('blur', handleBlur)
+    cardElement.value.on('escape', handleEscape)
 
     // Mount the element
     cardElement.value.mount(elementRef.value)
@@ -124,7 +120,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (cardElement.value) {
+    cardElement.value.off('ready', handleReady)
+    cardElement.value.off('change', handleChange)
+    cardElement.value.off('focus', handleFocus)
+    cardElement.value.off('blur', handleBlur)
+    cardElement.value.off('escape', handleEscape)
     cardElement.value.destroy()
+    cardElement.value = null
   }
 })
 

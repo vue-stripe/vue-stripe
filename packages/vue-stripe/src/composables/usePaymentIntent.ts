@@ -1,24 +1,9 @@
 import { inject, ref, readonly } from 'vue-demi'
-import type { ConfirmPaymentData, StripeElements } from '@stripe/stripe-js'
-import type { UsePaymentIntentReturn } from '../types'
+import type { UsePaymentIntentReturn, ConfirmPaymentOptions } from '../types'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 
-/**
- * Options for confirming a payment
- */
-export interface ConfirmPaymentOptions {
-  /** Client secret from the PaymentIntent */
-  clientSecret: string
-  /** Additional confirmation parameters */
-  confirmParams?: ConfirmPaymentData
-  /** Whether to redirect (defaults to 'if_required') */
-  redirect?: 'if_required' | 'always'
-  /** Optional elements override (uses injected elements if not provided) */
-  elements?: StripeElements
-  /** Skip elements.submit() validation (not recommended, defaults to false) */
-  skipSubmit?: boolean
-}
+// `ConfirmPaymentOptions` is defined once in ../types and re-exported there.
 
 /**
  * Composable for handling payment intents

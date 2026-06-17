@@ -11,6 +11,8 @@ export type {
   UseStripeElementsReturn,
   UsePaymentIntentReturn,
   UseSetupIntentReturn,
+  ConfirmPaymentOptions,
+  ConfirmSetupOptions,
   PaymentElementType,
   ExpressCheckoutType,
   VueStripeError,
@@ -44,6 +46,13 @@ export type {
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementClickEvent
 } from './types'
+
+// Export checkout composable types (defined alongside useStripeCheckout)
+export type {
+  UseStripeCheckoutReturn,
+  CheckoutRedirectOptions,
+  LegacyCheckoutOptions
+} from './composables/useStripeCheckout'
 
 // Export all components
 export * from './components'

@@ -56,6 +56,25 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
         )
       }
 
+      // Named handlers so listeners can be detached with .off() on teardown.
+      const handleReady = () => {
+        loading.value = false
+        emit('ready', element.value!)
+      }
+      const handleChange = (event: unknown) => {
+        const changeEvent = event as StripeElementChangeEvent
+        // Update error state from Stripe
+        if (changeEvent.error) {
+          error.value = changeEvent.error.message
+        } else {
+          error.value = null
+        }
+        emit('change', changeEvent)
+      }
+      const handleFocus = () => emit('focus')
+      const handleBlur = () => emit('blur')
+      const handleEscape = () => emit('escape')
+
       const createElement = () => {
         if (!elementsInstance.elements.value) {
           error.value = 'Elements instance not available'
@@ -78,34 +97,12 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
           const createdElement = (elementsInstance.elements.value as any).create(elementType, props.options) as StripeElementLike
           element.value = createdElement
 
-          // Set up event listeners
-          createdElement.on('ready', () => {
-            loading.value = false
-            emit('ready', element.value!)
-          })
-
-          createdElement.on('change', (event: unknown) => {
-            const changeEvent = event as StripeElementChangeEvent
-            // Update error state from Stripe
-            if (changeEvent.error) {
-              error.value = changeEvent.error.message
-            } else {
-              error.value = null
-            }
-            emit('change', changeEvent)
-          })
-
-          createdElement.on('focus', () => {
-            emit('focus')
-          })
-
-          createdElement.on('blur', () => {
-            emit('blur')
-          })
-
-          createdElement.on('escape', () => {
-            emit('escape')
-          })
+          // Set up event listeners (named handlers, removed in onUnmounted)
+          createdElement.on('ready', handleReady)
+          createdElement.on('change', handleChange)
+          createdElement.on('focus', handleFocus)
+          createdElement.on('blur', handleBlur)
+          createdElement.on('escape', handleEscape)
 
           // Mount the element
           createdElement.mount(elementRef.value)
@@ -147,7 +144,13 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
 
       onUnmounted(() => {
         if (element.value) {
+          element.value.off?.('ready', handleReady)
+          element.value.off?.('change', handleChange)
+          element.value.off?.('focus', handleFocus)
+          element.value.off?.('blur', handleBlur)
+          element.value.off?.('escape', handleEscape)
           element.value.destroy()
+          element.value = null
         }
       })
 

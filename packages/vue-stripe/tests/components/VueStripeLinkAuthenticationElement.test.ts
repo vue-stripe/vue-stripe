@@ -112,9 +112,87 @@ describe('VueStripeLinkAuthenticationElement', () => {
 
     await mountWithProviders()
 
-    // Check that event listeners were set up
+    // Check that event listeners were set up (incl. focus/blur/escape — #381)
     expect(mockElement.on).toHaveBeenCalledWith('ready', expect.any(Function))
     expect(mockElement.on).toHaveBeenCalledWith('change', expect.any(Function))
+    expect(mockElement.on).toHaveBeenCalledWith('focus', expect.any(Function))
+    expect(mockElement.on).toHaveBeenCalledWith('blur', expect.any(Function))
+    expect(mockElement.on).toHaveBeenCalledWith('escape', expect.any(Function))
+  })
+
+  it('emits focus, blur and escape events (#381)', async () => {
+    const handlers: Record<string, Function> = {}
+    const mockElement = {
+      ...createMockElement(),
+      on: vi.fn((event: string, callback: Function) => {
+        handlers[event] = callback
+      })
+    }
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+    handlers['focus']?.()
+    handlers['blur']?.()
+    handlers['escape']?.()
+    await nextTick()
+
+    const linkAuth = wrapper.findComponent(VueStripeLinkAuthenticationElement)
+    expect(linkAuth.emitted('focus')).toBeTruthy()
+    expect(linkAuth.emitted('blur')).toBeTruthy()
+    expect(linkAuth.emitted('escape')).toBeTruthy()
+  })
+
+  it('exposes loading state that flips to false on ready (#381)', async () => {
+    let readyCallback: Function | null = null
+    const mockElement = {
+      ...createMockElement(),
+      on: vi.fn((event: string, callback: Function) => {
+        if (event === 'ready') readyCallback = callback
+      })
+    }
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+    const linkAuth = wrapper.findComponent(VueStripeLinkAuthenticationElement)
+
+    expect((linkAuth.vm as unknown as { loading: boolean }).loading).toBe(true)
+    readyCallback?.()
+    await nextTick()
+    expect((linkAuth.vm as unknown as { loading: boolean }).loading).toBe(false)
+  })
+
+  it('sets error state and renders the error slot when creation fails (#381)', async () => {
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => {
+          throw new Error('link create boom')
+        })
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+    const linkAuth = wrapper.findComponent(VueStripeLinkAuthenticationElement)
+
+    expect((linkAuth.vm as unknown as { error: string | null }).error).toBe('link create boom')
+    expect(wrapper.find('.vue-stripe-link-auth-error').exists()).toBe(true)
   })
 
   it('should emit ready event when element is ready', async () => {
