@@ -194,12 +194,44 @@ export interface ConfirmPaymentOptions {
 
 export interface UsePaymentIntentReturn {
   confirmPayment: (options: ConfirmPaymentOptions) => Promise<any>
+  /** Retrieve a PaymentIntent's current status from its client secret. */
+  retrievePaymentIntent: (clientSecret: string) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
 
 export interface UseSetupIntentReturn {
   confirmSetup: (options: ConfirmSetupOptions) => Promise<any>
+  /** Retrieve a SetupIntent's current status from its client secret. */
+  retrieveSetupIntent: (clientSecret: string) => Promise<any>
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+}
+
+/**
+ * Options for creating a PaymentMethod. Mirrors Stripe's `createPaymentMethod`
+ * params: either `{ elements }` (Payment Element flow) or
+ * `{ type, card, billing_details, ... }` (manual flow). When neither `elements`
+ * nor `type` is provided, the injected Elements instance is used automatically.
+ */
+export type CreatePaymentMethodOptions = Record<string, unknown> & {
+  elements?: StripeElements
+  type?: string
+}
+
+export interface UseCreatePaymentMethodReturn {
+  createPaymentMethod: (options?: CreatePaymentMethodOptions) => Promise<any>
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+}
+
+export interface HandleNextActionOptions {
+  /** Client secret of the PaymentIntent or SetupIntent requiring an action. */
+  clientSecret: string
+}
+
+export interface UseHandleNextActionReturn {
+  handleNextAction: (options: HandleNextActionOptions) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }

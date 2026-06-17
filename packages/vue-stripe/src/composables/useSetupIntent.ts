@@ -90,8 +90,17 @@ export function useSetupIntent(): UseSetupIntentReturn {
     }
   }
 
+  const retrieveSetupIntent = async (clientSecret: string) => {
+    if (!stripeInstance.stripe.value) {
+      error.value = 'Stripe not initialized'
+      return { error: { message: 'Stripe not initialized' } }
+    }
+    return (stripeInstance.stripe.value as any).retrieveSetupIntent(clientSecret)
+  }
+
   return {
     confirmSetup,
+    retrieveSetupIntent,
     loading: readonly(loading),
     error: readonly(error)
   }

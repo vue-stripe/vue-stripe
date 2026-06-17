@@ -20,6 +20,8 @@ import P24BankElementView from './views/P24BankElementView.vue'
 import EpsBankElementView from './views/EpsBankElementView.vue'
 import DocsExampleView from './views/DocsExampleView.vue'
 import DocsVerificationView from './views/DocsVerificationView.vue'
+// Convenience composables (v5.5 - #390)
+import ConvenienceComposablesView from './views/ConvenienceComposablesView.vue'
 
 // Route metadata for SEO
 export interface RouteMeta {
@@ -200,6 +202,15 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Documentation Verification - Vue Stripe',
       description: 'Verify all documentation code examples work correctly'
+    }
+  },
+  {
+    path: '/convenience-composables',
+    name: 'ConvenienceComposables',
+    component: ConvenienceComposablesView,
+    meta: {
+      title: 'Convenience Composables - Vue Stripe',
+      description: 'useCreatePaymentMethod, useHandleNextAction and retrieve helpers'
     }
   }
 ]
