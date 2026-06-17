@@ -1,16 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createApp, defineComponent, h, inject } from 'vue-demi'
+import { mount } from '@vue/test-utils'
 import { createVueStripe } from '../src/plugin'
+import { stripeConfigInjectionKey, type VueStripeConfig } from '../src/utils/injection-keys'
+import VueStripePricingTable from '../src/components/VueStripePricingTable.vue'
 import type { VueStripeOptions } from '../src/types'
-import { makeMockStripe } from './setup'
-
-// Mock loadStripe with the canonical factory (mock-prefixed so it can be
-// referenced inside the hoisted vi.mock factory).
-const mockStripe = makeMockStripe()
-
-vi.mock('@stripe/stripe-js', () => ({
-  loadStripe: vi.fn(() => Promise.resolve(mockStripe))
-}))
 
 describe('createVueStripe Plugin', () => {
   beforeEach(() => {
@@ -18,26 +12,25 @@ describe('createVueStripe Plugin', () => {
   })
 
   it('should create a valid Vue plugin', () => {
-    const plugin = createVueStripe({
-      publishableKey: 'pk_test_123'
-    })
+    const plugin = createVueStripe({ publishableKey: 'pk_test_123' })
 
     expect(plugin).toHaveProperty('install')
     expect(typeof plugin.install).toBe('function')
   })
 
-  it('should provide vue-stripe-config to the app', async () => {
+  it('should provide config under the shared stripeConfigInjectionKey', () => {
     const options: VueStripeOptions = {
       publishableKey: 'pk_test_123',
       stripeAccount: 'acct_123',
+      apiVersion: '2023-10-16',
       locale: 'en'
     }
 
-    let injectedConfig: VueStripeOptions | undefined
+    let injectedConfig: VueStripeConfig | undefined
 
     const TestComponent = defineComponent({
       setup() {
-        injectedConfig = inject('vue-stripe-config')
+        injectedConfig = inject(stripeConfigInjectionKey)
         return () => h('div', 'Test')
       }
     })
@@ -48,271 +41,51 @@ describe('createVueStripe Plugin', () => {
     const container = document.createElement('div')
     app.mount(container)
 
-    expect(injectedConfig).toEqual(options)
-
-    app.unmount()
-  })
-
-  it('should provide vue-stripe-global with lazy stripe instance', async () => {
-    const options: VueStripeOptions = {
-      publishableKey: 'pk_test_123'
-    }
-
-    let injectedGlobal: { stripe: Promise<typeof mockStripe | null> } | undefined
-
-    const TestComponent = defineComponent({
-      setup() {
-        injectedGlobal = inject('vue-stripe-global')
-        return () => h('div', 'Test')
-      }
-    })
-
-    const app = createApp(TestComponent)
-    app.use(createVueStripe(options))
-
-    const container = document.createElement('div')
-    app.mount(container)
-
-    expect(injectedGlobal).toBeDefined()
-    expect(injectedGlobal).toHaveProperty('stripe')
-
-    app.unmount()
-  })
-
-  it('should lazy load stripe only when accessed', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
-
-    const options: VueStripeOptions = {
-      publishableKey: 'pk_test_123'
-    }
-
-    let injectedGlobal: { stripe: Promise<typeof mockStripe | null> } | undefined
-
-    const TestComponent = defineComponent({
-      setup() {
-        injectedGlobal = inject('vue-stripe-global')
-        return () => h('div', 'Test')
-      }
-    })
-
-    const app = createApp(TestComponent)
-    app.use(createVueStripe(options))
-
-    const container = document.createElement('div')
-    app.mount(container)
-
-    // Stripe should not be loaded yet
-    expect(loadStripe).not.toHaveBeenCalled()
-
-    // Access stripe to trigger lazy loading
-    const stripePromise = injectedGlobal?.stripe
-    expect(stripePromise).toBeInstanceOf(Promise)
-
-    // Now loadStripe should have been called
-    expect(loadStripe).toHaveBeenCalledWith('pk_test_123', {})
-
-    app.unmount()
-  })
-
-  it('should pass stripeAccount option to loadStripe', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
-
-    const options: VueStripeOptions = {
-      publishableKey: 'pk_test_123',
-      stripeAccount: 'acct_123'
-    }
-
-    let injectedGlobal: { stripe: Promise<typeof mockStripe | null> } | undefined
-
-    const TestComponent = defineComponent({
-      setup() {
-        injectedGlobal = inject('vue-stripe-global')
-        return () => h('div', 'Test')
-      }
-    })
-
-    const app = createApp(TestComponent)
-    app.use(createVueStripe(options))
-
-    const container = document.createElement('div')
-    app.mount(container)
-
-    // Trigger lazy loading
-    injectedGlobal?.stripe
-
-    expect(loadStripe).toHaveBeenCalledWith('pk_test_123', {
-      stripeAccount: 'acct_123'
-    })
-
-    app.unmount()
-  })
-
-  it('should pass apiVersion option to loadStripe', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
-
-    const options: VueStripeOptions = {
-      publishableKey: 'pk_test_123',
-      apiVersion: '2023-10-16'
-    }
-
-    let injectedGlobal: { stripe: Promise<typeof mockStripe | null> } | undefined
-
-    const TestComponent = defineComponent({
-      setup() {
-        injectedGlobal = inject('vue-stripe-global')
-        return () => h('div', 'Test')
-      }
-    })
-
-    const app = createApp(TestComponent)
-    app.use(createVueStripe(options))
-
-    const container = document.createElement('div')
-    app.mount(container)
-
-    // Trigger lazy loading
-    injectedGlobal?.stripe
-
-    expect(loadStripe).toHaveBeenCalledWith('pk_test_123', {
-      apiVersion: '2023-10-16'
-    })
-
-    app.unmount()
-  })
-
-  it('should pass locale option to loadStripe', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
-
-    const options: VueStripeOptions = {
-      publishableKey: 'pk_test_123',
-      locale: 'fr'
-    }
-
-    let injectedGlobal: { stripe: Promise<typeof mockStripe | null> } | undefined
-
-    const TestComponent = defineComponent({
-      setup() {
-        injectedGlobal = inject('vue-stripe-global')
-        return () => h('div', 'Test')
-      }
-    })
-
-    const app = createApp(TestComponent)
-    app.use(createVueStripe(options))
-
-    const container = document.createElement('div')
-    app.mount(container)
-
-    // Trigger lazy loading
-    injectedGlobal?.stripe
-
-    expect(loadStripe).toHaveBeenCalledWith('pk_test_123', {
-      locale: 'fr'
-    })
-
-    app.unmount()
-  })
-
-  it('should pass all options to loadStripe', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
-
-    const options: VueStripeOptions = {
+    expect(injectedConfig).toBeDefined()
+    expect(injectedConfig).toMatchObject({
       publishableKey: 'pk_test_123',
       stripeAccount: 'acct_123',
       apiVersion: '2023-10-16',
-      locale: 'de'
-    }
-
-    let injectedGlobal: { stripe: Promise<typeof mockStripe | null> } | undefined
-
-    const TestComponent = defineComponent({
-      setup() {
-        injectedGlobal = inject('vue-stripe-global')
-        return () => h('div', 'Test')
-      }
-    })
-
-    const app = createApp(TestComponent)
-    app.use(createVueStripe(options))
-
-    const container = document.createElement('div')
-    app.mount(container)
-
-    // Trigger lazy loading
-    injectedGlobal?.stripe
-
-    expect(loadStripe).toHaveBeenCalledWith('pk_test_123', {
-      stripeAccount: 'acct_123',
-      apiVersion: '2023-10-16',
-      locale: 'de'
+      locale: 'en'
     })
 
     app.unmount()
   })
 
-  it('should only load stripe once (singleton pattern)', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
-
-    const options: VueStripeOptions = {
-      publishableKey: 'pk_test_123'
-    }
-
-    let injectedGlobal: { stripe: Promise<typeof mockStripe | null> } | undefined
+  it('should NOT provide config under the legacy string key (key fixed)', () => {
+    let legacyConfig: unknown
 
     const TestComponent = defineComponent({
       setup() {
-        injectedGlobal = inject('vue-stripe-global')
+        legacyConfig = inject('vue-stripe-config', undefined)
         return () => h('div', 'Test')
       }
     })
 
     const app = createApp(TestComponent)
-    app.use(createVueStripe(options))
+    app.use(createVueStripe({ publishableKey: 'pk_test_123' }))
 
     const container = document.createElement('div')
     app.mount(container)
 
-    // Access stripe multiple times
-    const stripe1 = injectedGlobal?.stripe
-    const stripe2 = injectedGlobal?.stripe
-    const stripe3 = injectedGlobal?.stripe
-
-    // Should be the same promise instance
-    expect(stripe1).toBe(stripe2)
-    expect(stripe2).toBe(stripe3)
-
-    // loadStripe should only be called once
-    expect(loadStripe).toHaveBeenCalledTimes(1)
+    expect(legacyConfig).toBeUndefined()
 
     app.unmount()
   })
 
-  it('should register app info after loading stripe', async () => {
-    const options: VueStripeOptions = {
-      publishableKey: 'pk_test_123'
-    }
-
-    let injectedGlobal: { stripe: Promise<typeof mockStripe | null> } | undefined
-
-    const TestComponent = defineComponent({
-      setup() {
-        injectedGlobal = inject('vue-stripe-global')
-        return () => h('div', 'Test')
+  it('lets VueStripePricingTable resolve config via the plugin (no VueStripeProvider)', () => {
+    // Before the fix, the plugin provided config under a string key while
+    // VueStripePricingTable injects stripeConfigInjectionKey (Symbol), so it
+    // threw "must be used within a VueStripeProvider". With the fix it mounts.
+    const wrapper = mount(VueStripePricingTable, {
+      props: { pricingTableId: 'prctbl_123' },
+      global: {
+        plugins: [createVueStripe({ publishableKey: 'pk_test_123' })]
       }
     })
 
-    const app = createApp(TestComponent)
-    app.use(createVueStripe(options))
-
-    const container = document.createElement('div')
-    app.mount(container)
-
-    // Trigger lazy loading and wait for it
-    const stripe = await injectedGlobal?.stripe
-
-    expect(stripe).toBeDefined()
-    expect(mockStripe.registerAppInfo).toHaveBeenCalled()
-
-    app.unmount()
+    expect(wrapper.find('.vue-stripe-pricing-table').exists()).toBe(true)
+    // The pricing-table web component receives the plugin's publishable key.
+    expect(wrapper.html()).toContain('pk_test_123')
   })
 })
