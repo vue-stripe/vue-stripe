@@ -254,7 +254,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2017-2025 Vue Stripe Contributors'
+      copyright: 'Copyright © 2017-2026 Vue Stripe Contributors'
     },
 
     search: {

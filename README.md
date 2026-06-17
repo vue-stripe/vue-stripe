@@ -193,7 +193,7 @@ Support this project with your organization. Your logo will show up here with a 
 
 ## License
 
-[MIT](LICENSE) License © 2017-2025 Vue Stripe Contributors
+[MIT](LICENSE) License © 2017-2026 Vue Stripe Contributors
 
 ---
 
