@@ -46,6 +46,18 @@ if (!elementsInstance) {
   )
 }
 
+// Named handlers so listeners can be detached with .off() on teardown.
+const handleReady = (event: StripeExpressCheckoutElementReadyEvent) => {
+  loading.value = false
+  emit('ready', event)
+}
+const handleClick = (event: StripeExpressCheckoutElementClickEvent) => emit('click', event)
+const handleConfirm = (event: StripeExpressCheckoutElementConfirmEvent) => emit('confirm', event)
+const handleCancel = () => emit('cancel')
+const handleShippingAddressChange = (event: StripeExpressCheckoutElementShippingAddressChangeEvent) => emit('shippingaddresschange', event)
+const handleShippingRateChange = (event: StripeExpressCheckoutElementShippingRateChangeEvent) => emit('shippingratechange', event)
+const handleLoaderError = (event: { elementType: 'expressCheckout'; error: StripeError }) => emit('loaderror', event)
+
 const createExpressCheckoutElement = () => {
   if (!elementsInstance.elements.value) {
     error.value = 'Elements instance not available'
@@ -66,35 +78,14 @@ const createExpressCheckoutElement = () => {
     // Create express checkout element
     expressCheckoutElement.value = elementsInstance.elements.value.create('expressCheckout', props.options)
 
-    // Set up event listeners
-    expressCheckoutElement.value.on('ready', (event) => {
-      loading.value = false
-      emit('ready', event)
-    })
-
-    expressCheckoutElement.value.on('click', (event) => {
-      emit('click', event)
-    })
-
-    expressCheckoutElement.value.on('confirm', (event) => {
-      emit('confirm', event)
-    })
-
-    expressCheckoutElement.value.on('cancel', () => {
-      emit('cancel')
-    })
-
-    expressCheckoutElement.value.on('shippingaddresschange', (event) => {
-      emit('shippingaddresschange', event)
-    })
-
-    expressCheckoutElement.value.on('shippingratechange', (event) => {
-      emit('shippingratechange', event)
-    })
-
-    expressCheckoutElement.value.on('loaderror', (event) => {
-      emit('loaderror', event)
-    })
+    // Set up event listeners (named handlers, removed in onUnmounted)
+    expressCheckoutElement.value.on('ready', handleReady)
+    expressCheckoutElement.value.on('click', handleClick)
+    expressCheckoutElement.value.on('confirm', handleConfirm)
+    expressCheckoutElement.value.on('cancel', handleCancel)
+    expressCheckoutElement.value.on('shippingaddresschange', handleShippingAddressChange)
+    expressCheckoutElement.value.on('shippingratechange', handleShippingRateChange)
+    expressCheckoutElement.value.on('loaderror', handleLoaderError)
 
     // Mount the element
     expressCheckoutElement.value.mount(elementRef.value)
@@ -136,7 +127,15 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (expressCheckoutElement.value) {
+    expressCheckoutElement.value.off('ready', handleReady)
+    expressCheckoutElement.value.off('click', handleClick)
+    expressCheckoutElement.value.off('confirm', handleConfirm)
+    expressCheckoutElement.value.off('cancel', handleCancel)
+    expressCheckoutElement.value.off('shippingaddresschange', handleShippingAddressChange)
+    expressCheckoutElement.value.off('shippingratechange', handleShippingRateChange)
+    expressCheckoutElement.value.off('loaderror', handleLoaderError)
     expressCheckoutElement.value.destroy()
+    expressCheckoutElement.value = null
   }
 })
 

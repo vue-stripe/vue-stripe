@@ -36,6 +36,23 @@ if (!elementsInstance) {
   )
 }
 
+// Named handlers so listeners can be detached with .off() on teardown.
+const handleReady = () => {
+  loading.value = false
+  emit('ready', p24BankElement.value!)
+}
+const handleChange = (event: StripeP24BankElementChangeEvent) => {
+  if (event.error) {
+    error.value = event.error.message
+  } else {
+    error.value = null
+  }
+  emit('change', event)
+}
+const handleFocus = () => emit('focus')
+const handleBlur = () => emit('blur')
+const handleEscape = () => emit('escape')
+
 const createP24BankElement = () => {
   if (!elementsInstance.elements.value) {
     error.value = 'Elements instance not available'
@@ -56,33 +73,12 @@ const createP24BankElement = () => {
     // Create P24 bank element (options are required for p24Bank)
     p24BankElement.value = elementsInstance.elements.value.create('p24Bank', props.options || {})
 
-    // Set up event listeners
-    p24BankElement.value.on('ready', () => {
-      loading.value = false
-      emit('ready', p24BankElement.value!)
-    })
-
-    p24BankElement.value.on('change', (event) => {
-      // Update error state from Stripe
-      if (event.error) {
-        error.value = event.error.message
-      } else {
-        error.value = null
-      }
-      emit('change', event)
-    })
-
-    p24BankElement.value.on('focus', () => {
-      emit('focus')
-    })
-
-    p24BankElement.value.on('blur', () => {
-      emit('blur')
-    })
-
-    p24BankElement.value.on('escape', () => {
-      emit('escape')
-    })
+    // Set up event listeners (named handlers, removed in onUnmounted)
+    p24BankElement.value.on('ready', handleReady)
+    p24BankElement.value.on('change', handleChange)
+    p24BankElement.value.on('focus', handleFocus)
+    p24BankElement.value.on('blur', handleBlur)
+    p24BankElement.value.on('escape', handleEscape)
 
     // Mount the element
     p24BankElement.value.mount(elementRef.value)
@@ -124,7 +120,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (p24BankElement.value) {
+    p24BankElement.value.off('ready', handleReady)
+    p24BankElement.value.off('change', handleChange)
+    p24BankElement.value.off('focus', handleFocus)
+    p24BankElement.value.off('blur', handleBlur)
+    p24BankElement.value.off('escape', handleEscape)
     p24BankElement.value.destroy()
+    p24BankElement.value = null
   }
 })
 
