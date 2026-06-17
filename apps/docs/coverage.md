@@ -1,6 +1,8 @@
 ---
 title: Stripe.js Coverage
 description: How much of Stripe.js Vue Stripe wraps — elements, checkout flows, and payment/setup methods.
+aside: false
+pageClass: coverage-page
 ---
 
 # Stripe.js Coverage
