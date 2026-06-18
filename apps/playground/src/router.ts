@@ -20,8 +20,10 @@ import P24BankElementView from './views/P24BankElementView.vue'
 import EpsBankElementView from './views/EpsBankElementView.vue'
 import DocsExampleView from './views/DocsExampleView.vue'
 import DocsVerificationView from './views/DocsVerificationView.vue'
-// New Elements (v5.5 - #378/#382/#383)
-import NewElementsView from './views/NewElementsView.vue'
+// Payment Method Messaging element (v5.5 - #378)
+import PaymentMethodMessagingView from './views/PaymentMethodMessagingView.vue'
+// Convenience composables (v5.5 - #390)
+import ConvenienceComposablesView from './views/ConvenienceComposablesView.vue'
 
 // Route metadata for SEO
 export interface RouteMeta {
@@ -205,12 +207,21 @@ export const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/new-elements',
-    name: 'NewElements',
-    component: NewElementsView,
+    path: '/payment-method-messaging',
+    name: 'PaymentMethodMessaging',
+    component: PaymentMethodMessagingView,
     meta: {
-      title: 'New Elements - Vue Stripe',
-      description: 'Payment Method Messaging, Currency Selector and Tax ID elements'
+      title: 'Payment Method Messaging - Vue Stripe',
+      description: 'Display Buy Now, Pay Later (BNPL) promotional messaging for Affirm, Klarna and Afterpay/Clearpay'
+    }
+  },
+  {
+    path: '/convenience-composables',
+    name: 'ConvenienceComposables',
+    component: ConvenienceComposablesView,
+    meta: {
+      title: 'Convenience Composables - Vue Stripe',
+      description: 'useCreatePaymentMethod, useHandleNextAction and retrieve helpers'
     }
   }
 ]

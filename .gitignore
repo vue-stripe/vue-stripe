@@ -105,10 +105,6 @@ jspm_packages/
 tmp/
 temp/
 
-# Changeset files (only keep if you want to track them)
-.changeset/*.md
-!.changeset/config.json
-
 # Vitest
 coverage/
 

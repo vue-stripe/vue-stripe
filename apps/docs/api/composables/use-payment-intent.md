@@ -64,6 +64,8 @@ const handleSubmit = async (clientSecret: string) => {
 interface UsePaymentIntentReturn {
   // Resolves to Stripe's native confirmPayment result (typed `any`)
   confirmPayment: (options: ConfirmPaymentOptions) => Promise<any>
+  // Resolves to Stripe's native retrievePaymentIntent result
+  retrievePaymentIntent: (clientSecret: string) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
@@ -72,8 +74,24 @@ interface UsePaymentIntentReturn {
 | Property | Type | Description |
 |----------|------|-------------|
 | `confirmPayment` | `Function` | Async function to confirm a payment |
-| `loading` | `Readonly<Ref<boolean>>` | Whether a payment confirmation is in progress |
-| `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirmation attempt |
+| `retrievePaymentIntent` | `Function` | Async function to look up a PaymentIntent by its client secret |
+| `loading` | `Readonly<Ref<boolean>>` | Whether a confirm or retrieve is in progress |
+| `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirm or retrieve attempt |
+
+## retrievePaymentIntent
+
+Look up the current status of a PaymentIntent by its client secret — useful after a
+redirect-based flow (e.g. on your `return_url` page) to read the final outcome. It shares
+the same `loading`/`error` refs as `confirmPayment`.
+
+```ts
+const { retrievePaymentIntent } = usePaymentIntent()
+
+const { paymentIntent } = await retrievePaymentIntent('pi_xxx_secret_xxx')
+if (paymentIntent?.status === 'succeeded') {
+  // payment complete
+}
+```
 
 ## confirmPayment Options
 

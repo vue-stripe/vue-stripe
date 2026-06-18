@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, inject } from 'vue'
 import type { Stripe, StripeElements } from '@stripe/stripe-js'
 import {
   VueStripeProvider,
@@ -7,8 +7,10 @@ import {
   VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
-// Using test key provided by user
-const publishableKey = 'pk_test_51OIHqMIx2Vb66eaKneiRI89KWckP2FB7c75OLUZGezoXDiCHlIXMh6dBkTyWRe8oz77CO6B0udvWS6yWWdDaiwS800oW2Na8mk'
+// Publishable key comes from the shared playground config (set via the header
+// "Add Key" dialog / localStorage) — never hardcode a key in source.
+const stripeConfig = inject<{ publishableKey: string }>('stripeConfig')
+const publishableKey = computed(() => stripeConfig?.publishableKey ?? '')
 const clientSecret = ref('')
 const clientSecretInput = ref('')
 const loading = ref(false)
@@ -69,48 +71,55 @@ const handleSubmit = async () => {
     <h2>Docs Example Test</h2>
     <p class="description">Testing the single-file event-based pattern from the documentation.</p>
 
-    <!-- Client Secret Input -->
-    <div v-if="!clientSecret" class="secret-form">
-      <label for="secret">Client Secret (from PaymentIntent):</label>
-      <input
-        id="secret"
-        v-model="clientSecretInput"
-        type="text"
-        placeholder="pi_xxx_secret_xxx"
-      />
-      <button @click="setClientSecret" :disabled="!clientSecretInput.trim()">
-        Set Client Secret
-      </button>
-      <p class="hint">
-        Create a PaymentIntent in <a href="https://dashboard.stripe.com/test/payments" target="_blank">Stripe Dashboard</a> and paste the client_secret here.
-      </p>
+    <!-- No key configured -->
+    <div v-if="!publishableKey" class="error">
+      No Stripe publishable key configured. Click <strong>"Add Key"</strong> in the header to add a test key.
     </div>
 
-    <!-- Payment Form -->
-    <VueStripeProvider v-else :publishable-key="publishableKey" @load="onStripeLoad">
-      <VueStripeElements
-        v-if="clientSecret"
-        :client-secret="clientSecret"
-        @ready="onElementsReady"
-      >
-        <form @submit.prevent="handleSubmit">
-          <VueStripePaymentElement />
+    <template v-else>
+      <!-- Client Secret Input -->
+      <div v-if="!clientSecret" class="secret-form">
+        <label for="secret">Client Secret (from PaymentIntent):</label>
+        <input
+          id="secret"
+          v-model="clientSecretInput"
+          type="text"
+          placeholder="pi_xxx_secret_xxx"
+        />
+        <button @click="setClientSecret" :disabled="!clientSecretInput.trim()">
+          Set Client Secret
+        </button>
+        <p class="hint">
+          Create a PaymentIntent in <a href="https://dashboard.stripe.com/test/payments" target="_blank">Stripe Dashboard</a> and paste the client_secret here.
+        </p>
+      </div>
 
-          <div v-if="errorMessage" class="error">
-            {{ errorMessage }}
-          </div>
+      <!-- Payment Form -->
+      <VueStripeProvider v-else :publishable-key="publishableKey" @load="onStripeLoad">
+        <VueStripeElements
+          v-if="clientSecret"
+          :client-secret="clientSecret"
+          @ready="onElementsReady"
+        >
+          <form @submit.prevent="handleSubmit">
+            <VueStripePaymentElement />
 
-          <button type="submit" :disabled="loading">
-            {{ loading ? 'Processing...' : 'Pay Now' }}
-          </button>
-        </form>
-      </VueStripeElements>
+            <div v-if="errorMessage" class="error">
+              {{ errorMessage }}
+            </div>
 
-      <template v-else>
-        <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
-        <p v-else>Loading payment form...</p>
-      </template>
-    </VueStripeProvider>
+            <button type="submit" :disabled="loading">
+              {{ loading ? 'Processing...' : 'Pay Now' }}
+            </button>
+          </form>
+        </VueStripeElements>
+
+        <template v-else>
+          <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
+          <p v-else>Loading payment form...</p>
+        </template>
+      </VueStripeProvider>
+    </template>
 
     <!-- Debug Info -->
     <div class="debug">

@@ -117,6 +117,19 @@ export interface VueStripeElementsProps {
    */
   paymentMethodTypes?: string[] | undefined
   /**
+   * Appearance API options to theme the Elements.
+   * @see https://docs.stripe.com/elements/appearance-api
+   */
+  appearance?: Record<string, unknown> | undefined
+  /**
+   * Custom fonts to load into the Elements iframe.
+   */
+  fonts?: Array<Record<string, unknown>> | undefined
+  /**
+   * Locale to display the Elements in (e.g. 'en', 'fr', 'auto').
+   */
+  locale?: string | undefined
+  /**
    * Additional options passed to stripe.elements().
    */
   options?: StripeElementsOptions | undefined
@@ -194,12 +207,49 @@ export interface ConfirmPaymentOptions {
 
 export interface UsePaymentIntentReturn {
   confirmPayment: (options: ConfirmPaymentOptions) => Promise<any>
+  /** Retrieve a PaymentIntent's current status from its client secret. */
+  retrievePaymentIntent: (clientSecret: string) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
 
 export interface UseSetupIntentReturn {
   confirmSetup: (options: ConfirmSetupOptions) => Promise<any>
+  /** Retrieve a SetupIntent's current status from its client secret. */
+  retrieveSetupIntent: (clientSecret: string) => Promise<any>
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+}
+
+/**
+ * Options for creating a PaymentMethod. Mirrors Stripe's `createPaymentMethod`
+ * params: either `{ elements }` (Payment Element flow) or
+ * `{ type, card, billing_details, ... }` (manual flow). When neither `elements`
+ * nor `type` is provided, the injected Elements instance is used automatically.
+ */
+export type CreatePaymentMethodOptions = Record<string, unknown> & {
+  elements?: StripeElements
+  type?: string
+  /**
+   * Skip the automatic `elements.submit()` call before createPaymentMethod
+   * (only relevant to the Payment Element flow). Defaults to false.
+   */
+  skipSubmit?: boolean
+}
+
+export interface UseCreatePaymentMethodReturn {
+  createPaymentMethod: (options?: CreatePaymentMethodOptions) => Promise<any>
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+}
+
+export interface HandleNextActionOptions {
+  /** Client secret of the PaymentIntent or SetupIntent requiring an action. */
+  clientSecret: string
+}
+
+export interface UseHandleNextActionReturn {
+  handleNextAction: (options: HandleNextActionOptions) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }

@@ -221,6 +221,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'usePaymentIntent', link: '/api/composables/use-payment-intent' },
             { text: 'useSetupIntent', link: '/api/composables/use-setup-intent' },
             { text: 'useStripeCheckout', link: '/api/composables/use-stripe-checkout' },
+            { text: 'useCreatePaymentMethod', link: '/api/composables/use-create-payment-method' },
+            { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' },
           ]
         },
         {

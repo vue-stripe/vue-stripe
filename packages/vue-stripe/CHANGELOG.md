@@ -1,5 +1,8 @@
 # @vue-stripe/vue-stripe
 
+> **Release notes for v5.4.0 and later are published on [GitHub Releases](https://github.com/vue-stripe/vue-stripe/releases).**
+> The entries below are kept for historical reference (through v5.3.0).
+
 ## 5.3.0
 
 ### Minor Changes
