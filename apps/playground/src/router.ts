@@ -20,6 +20,8 @@ import P24BankElementView from './views/P24BankElementView.vue'
 import EpsBankElementView from './views/EpsBankElementView.vue'
 import DocsExampleView from './views/DocsExampleView.vue'
 import DocsVerificationView from './views/DocsVerificationView.vue'
+// Payment Method Messaging element (v5.5 - #378)
+import PaymentMethodMessagingView from './views/PaymentMethodMessagingView.vue'
 // Convenience composables (v5.5 - #390)
 import ConvenienceComposablesView from './views/ConvenienceComposablesView.vue'
 
@@ -202,6 +204,15 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Documentation Verification - Vue Stripe',
       description: 'Verify all documentation code examples work correctly'
+    }
+  },
+  {
+    path: '/payment-method-messaging',
+    name: 'PaymentMethodMessaging',
+    component: PaymentMethodMessagingView,
+    meta: {
+      title: 'Payment Method Messaging - Vue Stripe',
+      description: 'Display Buy Now, Pay Later (BNPL) promotional messaging for Affirm, Klarna and Afterpay/Clearpay'
     }
   },
   {

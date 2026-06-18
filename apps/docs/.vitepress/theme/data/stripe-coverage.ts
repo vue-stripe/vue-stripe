@@ -80,7 +80,7 @@ export const coverage: CoverageCategory[] = [
   {
     group: 'Messaging Elements',
     items: [
-      { name: 'Payment Method Messaging', api: "create('paymentMethodMessaging')", status: 'planned', issue: 378 },
+      { name: 'Payment Method Messaging (BNPL)', api: "create('paymentMethodMessaging')", status: 'covered', artifact: 'VueStripePaymentMethodMessagingElement' },
       { name: 'Affirm Message', api: "create('affirmMessage')", status: 'accessible' },
       { name: 'Afterpay/Clearpay Message', api: "create('afterpayClearpayMessage')", status: 'accessible' }
     ]
@@ -88,8 +88,10 @@ export const coverage: CoverageCategory[] = [
   {
     group: 'Other Elements',
     items: [
-      { name: 'Currency Selector', api: "create('currencySelector')", status: 'planned', issue: 382 },
-      { name: 'Tax ID', api: "create('taxId')", status: 'planned', issue: 383 }
+      // Currency Selector and Tax ID are Custom Checkout elements (require
+      // stripe.initCheckout), not standard elements.create — blocked on #388.
+      { name: 'Currency Selector', api: 'checkout.createCurrencySelectorElement()', status: 'planned', issue: 382 },
+      { name: 'Tax ID', api: 'checkout.createTaxIdElement()', status: 'planned', issue: 383 }
     ]
   },
   {

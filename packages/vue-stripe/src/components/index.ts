@@ -22,6 +22,9 @@ export { default as VueStripeIdealBankElement } from './VueStripeIdealBankElemen
 export { default as VueStripeP24BankElement } from './VueStripeP24BankElement.vue'
 export { default as VueStripeEpsBankElement } from './VueStripeEpsBankElement.vue'
 
+// Messaging Element (v5.5.0)
+export { default as VueStripePaymentMethodMessagingElement } from './VueStripePaymentMethodMessagingElement.vue'
+
 // Checkout
 export { default as VueStripeCheckout } from './VueStripeCheckout.vue'
 
