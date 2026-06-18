@@ -78,6 +78,19 @@ interface Props {
    */
   paymentMethodTypes?: string[] | undefined
   /**
+   * Appearance API options to theme the Elements (variables, rules, theme, labels).
+   * @see https://docs.stripe.com/elements/appearance-api
+   */
+  appearance?: Record<string, unknown> | undefined
+  /**
+   * Custom fonts to load into the Elements iframe (CssFontSource | CustomFontSource).
+   */
+  fonts?: Array<Record<string, unknown>> | undefined
+  /**
+   * Locale to display the Elements in (e.g. 'en', 'fr', 'auto').
+   */
+  locale?: string | undefined
+  /**
    * Additional options passed to stripe.elements().
    * See Stripe documentation for all available options.
    */
@@ -142,6 +155,17 @@ const createElements = () => {
       elementsOptions['paymentMethodTypes'] = props.paymentMethodTypes
     }
 
+    // First-class appearance / fonts / locale props
+    if (props.appearance) {
+      elementsOptions['appearance'] = props.appearance
+    }
+    if (props.fonts) {
+      elementsOptions['fonts'] = props.fonts
+    }
+    if (props.locale) {
+      elementsOptions['locale'] = props.locale
+    }
+
     // Use type assertion since Stripe has complex overloads
     elements.value = (stripeInstance.stripe.value as any).elements(elementsOptions)
     loading.value = false
@@ -188,6 +212,22 @@ watch(
       createElements()
     }
   }
+)
+
+// Watch appearance / locale changes — apply via elements.update() so child
+// elements keep their state instead of being destroyed and re-created.
+// (fonts can only be set at creation time, so they are not updated here.)
+watch(
+  () => [props.appearance, props.locale],
+  () => {
+    if (elements.value) {
+      const updateOptions: Record<string, unknown> = {}
+      if (props.appearance) updateOptions['appearance'] = props.appearance
+      if (props.locale) updateOptions['locale'] = props.locale
+      ;(elements.value as { update: (options: Record<string, unknown>) => void }).update(updateOptions)
+    }
+  },
+  { deep: true }
 )
 
 onMounted(() => {

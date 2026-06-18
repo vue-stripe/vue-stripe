@@ -117,6 +117,19 @@ export interface VueStripeElementsProps {
    */
   paymentMethodTypes?: string[] | undefined
   /**
+   * Appearance API options to theme the Elements.
+   * @see https://docs.stripe.com/elements/appearance-api
+   */
+  appearance?: Record<string, unknown> | undefined
+  /**
+   * Custom fonts to load into the Elements iframe.
+   */
+  fonts?: Array<Record<string, unknown>> | undefined
+  /**
+   * Locale to display the Elements in (e.g. 'en', 'fr', 'auto').
+   */
+  locale?: string | undefined
+  /**
    * Additional options passed to stripe.elements().
    */
   options?: StripeElementsOptions | undefined

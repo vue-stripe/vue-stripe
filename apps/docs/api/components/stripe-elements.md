@@ -60,9 +60,22 @@ const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 | `setupFutureUsage` | `'off_session' \| 'on_session'` | No | Indicates intent to save the payment method for future use |
 | `captureMethod` | `'automatic' \| 'automatic_async' \| 'manual'` | No | Controls when to capture funds from the customer's account |
 | `paymentMethodTypes` | `string[]` | No | List of payment method types to display. Omit to use Dashboard payment method settings |
+| `appearance` | `object` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance` |
+| `fonts` | `object[]` | No | Custom fonts to load into the Elements iframe (`CssFontSource` / `CustomFontSource`). Convenience prop — equivalent to `options.fonts` |
+| `locale` | `string` | No | Locale to display Elements in (e.g. `'en'`, `'fr'`, `'auto'`). Convenience prop — equivalent to `options.locale` |
 | `options` | `object` | No | Additional options passed to `stripe.elements()` |
 
 \* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation.
+
+::: tip Convenience props vs. `options`
+`appearance`, `fonts`, and `locale` are first-class convenience props so you can bind them directly without nesting them inside `options`. If you set the same key in both `options` and a dedicated prop, the dedicated prop wins.
+
+```vue
+<!-- These two are equivalent -->
+<VueStripeElements :appearance="{ theme: 'night' }" />
+<VueStripeElements :options="{ appearance: { theme: 'night' } }" />
+```
+:::
 
 ### Options Object
 
