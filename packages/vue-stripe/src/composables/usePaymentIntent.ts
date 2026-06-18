@@ -90,8 +90,33 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
     }
   }
 
+  const retrievePaymentIntent = async (clientSecret: string) => {
+    if (!stripeInstance.stripe.value) {
+      error.value = 'Stripe not initialized'
+      return { error: { message: 'Stripe not initialized' } }
+    }
+
+    loading.value = true
+    error.value = null
+
+    try {
+      const result = await (stripeInstance.stripe.value as any).retrievePaymentIntent(clientSecret)
+      if (result.error) {
+        error.value = result.error.message || 'Failed to retrieve payment intent'
+      }
+      return result
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to retrieve payment intent'
+      error.value = errorMessage
+      return { error: { message: errorMessage } }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     confirmPayment,
+    retrievePaymentIntent,
     loading: readonly(loading),
     error: readonly(error)
   }
