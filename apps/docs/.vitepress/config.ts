@@ -247,6 +247,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Card Element', link: '/live-demo/card-element' },
             { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },
             { text: 'Link Authentication', link: '/live-demo/link-authentication' },
+            { text: 'Express Checkout', link: '/live-demo/express-checkout' },
             { text: 'Address Element', link: '/live-demo/address-element' },
           ]
         },
@@ -267,6 +268,9 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           text: 'Regional Payment Methods',
           items: [
             { text: 'iDEAL (Netherlands)', link: '/live-demo/ideal-payment' },
+            { text: 'SEPA Direct Debit', link: '/live-demo/iban-element' },
+            { text: 'Przelewy24 (Poland)', link: '/live-demo/p24-payment' },
+            { text: 'EPS (Austria)', link: '/live-demo/eps-payment' },
           ]
         },
         {
