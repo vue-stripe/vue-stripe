@@ -80,7 +80,7 @@ export const coverage: CoverageCategory[] = [
   {
     group: 'Messaging Elements',
     items: [
-      { name: 'Payment Method Messaging', api: "create('paymentMethodMessaging')", status: 'covered', artifact: 'VueStripePaymentMethodMessagingElement' },
+      { name: 'Payment Method Messaging (BNPL)', api: "create('paymentMethodMessaging')", status: 'covered', artifact: 'VueStripePaymentMethodMessagingElement' },
       { name: 'Affirm Message', api: "create('affirmMessage')", status: 'accessible' },
       { name: 'Afterpay/Clearpay Message', api: "create('afterpayClearpayMessage')", status: 'accessible' }
     ]
