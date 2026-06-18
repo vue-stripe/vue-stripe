@@ -126,15 +126,11 @@ pnpm typecheck
 2. Follow the coding standards (run `pnpm lint`)
 3. Write/update tests for your changes
 4. Update documentation if needed
-5. Create a changeset for version tracking:
-   ```bash
-   pnpm changeset
-   ```
-6. Ensure all checks pass:
+5. Ensure all checks pass:
    ```bash
    pnpm lint && pnpm typecheck && pnpm test
    ```
-7. Submit your PR with:
+6. Submit your PR with:
    - Clear title and description
    - Reference to related issue(s)
    - Screenshots/videos for UI changes
@@ -162,16 +158,9 @@ pnpm typecheck
 - Include code examples for new features
 - Keep examples simple and focused
 
-## Changesets
+## Releases
 
-We use [Changesets](https://github.com/changesets/changesets) for version management:
-
-```bash
-# Create a changeset after making changes
-pnpm changeset
-
-# Follow the prompts to describe your changes
-```
+Releases are cut manually by a maintainer — you do **not** need to bump versions or add changelog entries in your PR. After PRs are merged, a maintainer bumps `packages/vue-stripe/package.json`, tags `vX.Y.Z`, and pushes the tag; the `publish.yml` workflow then publishes to npm and creates a GitHub Release with notes generated from the merged PRs. Write clear PR titles — they become the release notes.
 
 ## Questions?
 

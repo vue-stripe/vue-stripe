@@ -20,17 +20,12 @@
     "backend:dev": "turbo run dev --filter=@vue-stripe/backend",
     "vue-stripe:build": "turbo run build --filter=@vue-stripe/vue-stripe",
     "vue-stripe:test": "turbo run test --filter=@vue-stripe/vue-stripe",
-    "changeset": "changeset",
-    "version-packages": "changeset version",
-    "release": "turbo run build && changeset publish",
     "stripe:seed": "bash scripts/seed-stripe.sh",
     "stripe:seed:clean": "bash scripts/seed-stripe.sh --clean",
     "stripe:seed:reset": "bash scripts/seed-stripe.sh --clean --force",
     "stripe:clean": "bash scripts/seed-stripe.sh --clean-only"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.5.1",
-    "@changesets/cli": "^2.29.5",
     "@turbo/gen": "^2.5.8",
     "@vue-stripe/eslint-config": "workspace:*",
     "@vue-stripe/typescript-config": "workspace:*",
