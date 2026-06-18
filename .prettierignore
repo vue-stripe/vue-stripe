@@ -24,9 +24,6 @@ node_modules
 # Turbo
 .turbo
 
-# Changesets
-.changeset
-
 # Firebase
 .firebase
 firebase-debug.log
