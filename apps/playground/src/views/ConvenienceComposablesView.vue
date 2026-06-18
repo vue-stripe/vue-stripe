@@ -4,6 +4,7 @@ import {
   VueStripeProvider,
   VueStripeElements,
   VueStripeCardElement,
+  VueStripePaymentElement,
   useCreatePaymentMethod,
   usePaymentIntent
 } from '@vue-stripe/vue-stripe'
@@ -53,6 +54,37 @@ const CreatePaymentMethodDemo = defineComponent({
   }
 })
 
+// --- Create Payment Method via the Payment Element (deferred, zero-arg) ---
+// Exercises the auto-inject path: createPaymentMethod() with no args, which
+// calls elements.submit() before stripe.createPaymentMethod({ elements }).
+const CreatePaymentMethodElementDemo = defineComponent({
+  name: 'CreatePaymentMethodElementDemo',
+  setup() {
+    const { createPaymentMethod, loading } = useCreatePaymentMethod()
+    const result = ref<string | null>(null)
+
+    const onCreate = async () => {
+      result.value = null
+      const res = await createPaymentMethod() // zero-arg → Payment Element flow
+      result.value = res?.paymentMethod
+        ? `✅ ${res.paymentMethod.id}`
+        : `❌ ${res?.error?.message || 'failed'}`
+    }
+
+    return () =>
+      h('div', { class: 'flex flex-col gap-4' }, [
+        h('div', { class: 'bg-card rounded-lg p-4 border' }, [
+          h(VueStripePaymentElement)
+        ]),
+        h(Button, { onClick: onCreate, disabled: loading.value, 'data-test': 'create-pm-element' },
+          () => (loading.value ? 'Creating…' : 'Create Payment Method')),
+        result.value
+          ? h('code', { class: 'block text-sm p-3 rounded bg-secondary', 'data-test': 'pm-element-result' }, result.value)
+          : null
+      ])
+  }
+})
+
 // --- Retrieve Payment Intent demo ---
 const RetrievePaymentIntentDemo = defineComponent({
   name: 'RetrievePaymentIntentDemo',
@@ -97,7 +129,10 @@ const RetrievePaymentIntentDemo = defineComponent({
         <p class="text-muted-foreground">
           <code>useCreatePaymentMethod()</code>, <code>useHandleNextAction()</code>, and the
           <code>retrievePaymentIntent()</code> / <code>retrieveSetupIntent()</code> helpers wrap the raw
-          Stripe instance for common one-off operations.
+          Stripe instance for common one-off operations. The interactive demos below cover
+          <code>createPaymentMethod()</code> and <code>retrievePaymentIntent()</code>;
+          <code>useHandleNextAction()</code> requires a PaymentIntent in <code>requires_action</code>
+          (e.g. 3D&nbsp;Secure) and is documented in the API reference.
         </p>
       </CardContent>
     </Card>
@@ -120,6 +155,24 @@ const RetrievePaymentIntentDemo = defineComponent({
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
             <VueStripeElements>
               <CreatePaymentMethodDemo />
+            </VueStripeElements>
+          </VueStripeProvider>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle class="text-lg">useCreatePaymentMethod() — Payment Element</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p class="text-muted-foreground mb-4 text-sm">
+            Deferred Payment Element flow. <code>createPaymentMethod()</code> is called with no
+            arguments, so it auto-injects the Elements instance and runs
+            <code>elements.submit()</code> first.
+          </p>
+          <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
+            <VueStripeElements mode="payment" currency="usd" :amount="1099">
+              <CreatePaymentMethodElementDemo />
             </VueStripeElements>
           </VueStripeProvider>
         </CardContent>

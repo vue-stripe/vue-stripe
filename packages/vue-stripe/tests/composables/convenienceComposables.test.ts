@@ -7,7 +7,7 @@ import { usePaymentIntent } from '../../src/composables/usePaymentIntent'
 import { useSetupIntent } from '../../src/composables/useSetupIntent'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
-import { flushPromises, makeMockStripe } from '../setup'
+import { flushPromises, makeMockStripe, makeMockElements } from '../setup'
 
 // Mount Provider > Elements > <component using `useComposable`> with a stripe
 // instance that includes the given method mocks; returns the composable's value.
@@ -58,10 +58,74 @@ describe('useCreatePaymentMethod', () => {
     expect(result.error.message).toBe('card declined')
     expect(api().error.value).toBe('card declined')
   })
+
+  it('calls elements.submit() before createPaymentMethod on the Payment Element flow', async () => {
+    const order: string[] = []
+    const submit = vi.fn(async () => { order.push('submit'); return { error: null } })
+    const elements = { ...makeMockElements(), submit }
+    const createPaymentMethod = vi.fn(async () => { order.push('create'); return { paymentMethod: { id: 'pm_123' } } })
+    const { api } = await mountWith(
+      { elements: vi.fn(() => elements), createPaymentMethod },
+      () => useCreatePaymentMethod()
+    )
+
+    await api().createPaymentMethod()
+    expect(submit).toHaveBeenCalledTimes(1)
+    expect(order).toEqual(['submit', 'create'])
+  })
+
+  it('returns the submit error without calling createPaymentMethod when validation fails', async () => {
+    const submit = vi.fn(() => Promise.resolve({ error: { message: 'incomplete' } }))
+    const elements = { ...makeMockElements(), submit }
+    const createPaymentMethod = vi.fn()
+    const { api } = await mountWith(
+      { elements: vi.fn(() => elements), createPaymentMethod },
+      () => useCreatePaymentMethod()
+    )
+
+    const result = await api().createPaymentMethod()
+    expect(result.error.message).toBe('incomplete')
+    expect(createPaymentMethod).not.toHaveBeenCalled()
+    expect(api().error.value).toBe('incomplete')
+  })
+
+  it('skips submit when skipSubmit is true and does not leak skipSubmit into Stripe params', async () => {
+    const submit = vi.fn(() => Promise.resolve({ error: null }))
+    const elements = { ...makeMockElements(), submit }
+    const createPaymentMethod = vi.fn(() => Promise.resolve({ paymentMethod: { id: 'pm_1' } }))
+    const { api } = await mountWith(
+      { elements: vi.fn(() => elements), createPaymentMethod },
+      () => useCreatePaymentMethod()
+    )
+
+    await api().createPaymentMethod({ skipSubmit: true })
+    expect(submit).not.toHaveBeenCalled()
+    expect(createPaymentMethod).toHaveBeenCalledTimes(1)
+    expect(createPaymentMethod.mock.calls[0][0]).not.toHaveProperty('skipSubmit')
+  })
+
+  it('does not call submit on the manual { type, card } flow', async () => {
+    const submit = vi.fn()
+    const elements = { ...makeMockElements(), submit }
+    const createPaymentMethod = vi.fn(() => Promise.resolve({ paymentMethod: { id: 'pm_1' } }))
+    const { api } = await mountWith(
+      { elements: vi.fn(() => elements), createPaymentMethod },
+      () => useCreatePaymentMethod()
+    )
+
+    await api().createPaymentMethod({ type: 'card', card: {} })
+    expect(submit).not.toHaveBeenCalled()
+    expect(createPaymentMethod).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('useHandleNextAction', () => {
   beforeEach(() => vi.clearAllMocks())
+
+  it('throws when used outside a provider', () => {
+    expect(() => mount(defineComponent({ setup() { useHandleNextAction(); return {} }, render: () => h('div') })))
+      .toThrow('useHandleNextAction must be called within a VueStripeProvider component')
+  })
 
   it('calls stripe.handleNextAction with the client secret', async () => {
     const handleNextAction = vi.fn(() => Promise.resolve({ paymentIntent: { status: 'succeeded' } }))
@@ -83,6 +147,28 @@ describe('usePaymentIntent.retrievePaymentIntent', () => {
     const result = await api().retrievePaymentIntent('pi_test_secret_123')
     expect(retrievePaymentIntent).toHaveBeenCalledWith('pi_test_secret_123')
     expect(result.paymentIntent.id).toBe('pi_1')
+    expect(api().loading.value).toBe(false)
+  })
+
+  it('clears a stale error from a prior failed confirm on successful retrieve', async () => {
+    const confirmPayment = vi.fn(() => Promise.resolve({ error: { message: 'previous failure' } }))
+    const retrievePaymentIntent = vi.fn(() => Promise.resolve({ paymentIntent: { id: 'pi_1', status: 'succeeded' } }))
+    const { api } = await mountWith({ confirmPayment, retrievePaymentIntent }, () => usePaymentIntent())
+
+    await api().confirmPayment({ clientSecret: 'pi_test_secret_123' })
+    expect(api().error.value).toBe('previous failure')
+
+    await api().retrievePaymentIntent('pi_test_secret_123')
+    expect(api().error.value).toBe(null)
+  })
+
+  it('surfaces a retrieve error on the error ref', async () => {
+    const retrievePaymentIntent = vi.fn(() => Promise.resolve({ error: { message: 'no such payment_intent' } }))
+    const { api } = await mountWith({ retrievePaymentIntent }, () => usePaymentIntent())
+
+    const result = await api().retrievePaymentIntent('pi_bad')
+    expect(result.error.message).toBe('no such payment_intent')
+    expect(api().error.value).toBe('no such payment_intent')
   })
 })
 
@@ -96,5 +182,15 @@ describe('useSetupIntent.retrieveSetupIntent', () => {
     const result = await api().retrieveSetupIntent('seti_test_secret_123')
     expect(retrieveSetupIntent).toHaveBeenCalledWith('seti_test_secret_123')
     expect(result.setupIntent.id).toBe('seti_1')
+    expect(api().loading.value).toBe(false)
+  })
+
+  it('surfaces a retrieve error on the error ref', async () => {
+    const retrieveSetupIntent = vi.fn(() => Promise.resolve({ error: { message: 'no such setup_intent' } }))
+    const { api } = await mountWith({ retrieveSetupIntent }, () => useSetupIntent())
+
+    const result = await api().retrieveSetupIntent('seti_bad')
+    expect(result.error.message).toBe('no such setup_intent')
+    expect(api().error.value).toBe('no such setup_intent')
   })
 })

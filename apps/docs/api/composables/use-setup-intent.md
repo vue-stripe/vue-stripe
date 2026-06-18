@@ -73,6 +73,8 @@ const handleSaveCard = async (clientSecret: string) => {
 interface UseSetupIntentReturn {
   // Resolves with Stripe's confirmSetup result (passed through unchanged)
   confirmSetup: (options: ConfirmSetupOptions) => Promise<any>
+  // Resolves with Stripe's retrieveSetupIntent result
+  retrieveSetupIntent: (clientSecret: string) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
@@ -87,8 +89,24 @@ illustrative only; it is not an importable or declared type in this package.
 | Property | Type | Description |
 |----------|------|-------------|
 | `confirmSetup` | `Function` | Async function to confirm a setup intent |
-| `loading` | `Readonly<Ref<boolean>>` | Whether setup confirmation is in progress |
-| `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirmation attempt |
+| `retrieveSetupIntent` | `Function` | Async function to look up a SetupIntent by its client secret |
+| `loading` | `Readonly<Ref<boolean>>` | Whether a confirm or retrieve is in progress |
+| `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirm or retrieve attempt |
+
+## retrieveSetupIntent
+
+Look up the current status of a SetupIntent by its client secret — useful after a
+redirect-based flow to read the final outcome. It shares the same `loading`/`error`
+refs as `confirmSetup`.
+
+```ts
+const { retrieveSetupIntent } = useSetupIntent()
+
+const { setupIntent } = await retrieveSetupIntent('seti_xxx_secret_xxx')
+if (setupIntent?.status === 'succeeded') {
+  // payment method saved
+}
+```
 
 ## confirmSetup Options
 

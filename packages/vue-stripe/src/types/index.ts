@@ -217,6 +217,11 @@ export interface UseSetupIntentReturn {
 export type CreatePaymentMethodOptions = Record<string, unknown> & {
   elements?: StripeElements
   type?: string
+  /**
+   * Skip the automatic `elements.submit()` call before createPaymentMethod
+   * (only relevant to the Payment Element flow). Defaults to false.
+   */
+  skipSubmit?: boolean
 }
 
 export interface UseCreatePaymentMethodReturn {

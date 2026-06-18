@@ -95,7 +95,23 @@ export function useSetupIntent(): UseSetupIntentReturn {
       error.value = 'Stripe not initialized'
       return { error: { message: 'Stripe not initialized' } }
     }
-    return (stripeInstance.stripe.value as any).retrieveSetupIntent(clientSecret)
+
+    loading.value = true
+    error.value = null
+
+    try {
+      const result = await (stripeInstance.stripe.value as any).retrieveSetupIntent(clientSecret)
+      if (result.error) {
+        error.value = result.error.message || 'Failed to retrieve setup intent'
+      }
+      return result
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to retrieve setup intent'
+      error.value = errorMessage
+      return { error: { message: errorMessage } }
+    } finally {
+      loading.value = false
+    }
   }
 
   return {

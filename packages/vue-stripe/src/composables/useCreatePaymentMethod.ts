@@ -47,11 +47,25 @@ export function useCreatePaymentMethod(): UseCreatePaymentMethodReturn {
     error.value = null
 
     try {
-      const params: CreatePaymentMethodOptions = { ...options }
+      // `skipSubmit` is a Vue-Stripe option, not a Stripe param — keep it out of `params`.
+      const { skipSubmit, ...rest } = options
+      const params: CreatePaymentMethodOptions = { ...rest }
       // Default to the injected Elements instance for the Payment Element flow.
       if (!params.elements && !params.type) {
         const elements = elementsInstance?.elements.value
         if (elements) params.elements = elements
+      }
+
+      // For the Payment Element (elements) flow, Stripe requires elements.submit()
+      // to resolve before createPaymentMethod pulls data from a deferred Elements
+      // instance. The manual `{ type, card }` flow must NOT submit.
+      // See: https://docs.stripe.com/js/elements/submit
+      if (params.elements && !skipSubmit) {
+        const { error: submitError } = await (params.elements as any).submit()
+        if (submitError) {
+          error.value = submitError.message || 'Form validation failed'
+          return { error: submitError }
+        }
       }
 
       const result = await (stripeInstance.stripe.value as any).createPaymentMethod(params)
