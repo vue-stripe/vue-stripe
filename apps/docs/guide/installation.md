@@ -44,8 +44,7 @@ The most common modern Vue setup.
 
 Create a `.env.local` file in your project root:
 
-```env
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bashVITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```
 
 #### 2. Basic Usage
@@ -92,8 +91,7 @@ Nuxt 3 requires special handling for client-side only components since Stripe.js
 
 Add to your `.env` file:
 
-```env
-NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bashNUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```
 
 Update `nuxt.config.ts` to expose the variable:
@@ -200,8 +198,7 @@ For projects using Vue CLI or Webpack-based setups.
 
 Create a `.env.local` file:
 
-```env
-VUE_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bashVUE_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```
 
 #### 2. Usage
@@ -236,8 +233,7 @@ Quasar works with both Vite and Webpack modes.
 
 Same as standard Vite setup. Add to `.env`:
 
-```env
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bashVITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```
 
 #### 2. Webpack Mode
@@ -284,8 +280,7 @@ For Laravel applications using Inertia.js with Vue.
 
 Add to your `.env`:
 
-```env
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bashVITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 STRIPE_SECRET_KEY=sk_test_your_key_here
 ```
 
