@@ -180,6 +180,70 @@ export function useBackendApi() {
     createRegionalIntent('p24-intent', options)
 
   /**
+   * Create an FPX payment intent (MYR only - Malaysia)
+   */
+  async function createFpxIntent(options: {
+    amount?: number
+    description?: string
+    metadata?: Record<string, string>
+  } = {}): Promise<PaymentIntentResult> {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await fetch(`${apiUrl.value}/api/fpx-intent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || `API Error: ${response.status}`)
+      }
+
+      return await response.json()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to create FPX intent'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Create a BECS Direct Debit payment intent (AUD only - Australia)
+   */
+  async function createBecsIntent(options: {
+    amount?: number
+    description?: string
+    metadata?: Record<string, string>
+  } = {}): Promise<PaymentIntentResult> {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await fetch(`${apiUrl.value}/api/becs-intent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || `API Error: ${response.status}`)
+      }
+
+      return await response.json()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to create BECS intent'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
    * Create a checkout session for Stripe hosted checkout
    */
   async function createCheckoutSession(options: {
@@ -310,6 +374,8 @@ export function useBackendApi() {
     createSepaIntent,
     createEpsIntent,
     createP24Intent,
+    createFpxIntent,
+    createBecsIntent,
     createCheckoutSession,
     createSubscription,
     createSetupIntent,

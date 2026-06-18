@@ -199,6 +199,9 @@ const navGroups = computed(() => {
     'IdealBankElement': Landmark,
     'P24BankElement': Landmark,
     'EpsBankElement': Landmark,
+    // APAC Regional Elements (v5.4.0)
+    'FpxBankElement': Landmark,
+    'AuBankAccountElement': Landmark,
     // Pricing Table (v5.3.0)
     'PricingTable': Table2,
   }
@@ -217,6 +220,10 @@ const navGroups = computed(() => {
       label: 'European Elements',
       items: [] as { name: string; path: string; icon: any }[]
     },
+    apac: {
+      label: 'APAC Elements',
+      items: [] as { name: string; path: string; icon: any }[]
+    },
     checkout: {
       label: 'Checkout',
       items: [] as { name: string; path: string; icon: any }[]
@@ -225,6 +232,8 @@ const navGroups = computed(() => {
 
   // European element route names
   const europeanElements = ['IbanElement', 'IdealBankElement', 'P24BankElement', 'EpsBankElement']
+  // APAC element route names
+  const apacElements = ['FpxBankElement', 'AuBankAccountElement']
 
   routes.forEach(route => {
     const name = String(route.name)
@@ -237,6 +246,8 @@ const navGroups = computed(() => {
       groups.checkout.items.push(item)
     } else if (europeanElements.includes(name)) {
       groups.european.items.push(item)
+    } else if (apacElements.includes(name)) {
+      groups.apac.items.push(item)
     } else {
       groups.elements.items.push(item)
     }

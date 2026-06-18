@@ -30,3 +30,7 @@ export { default as VueStripeCheckout } from './VueStripeCheckout.vue'
 
 // Pricing Table (v5.3.0)
 export { default as VueStripePricingTable } from './VueStripePricingTable.vue'
+
+// APAC Regional Elements (v5.4.0)
+export { default as VueStripeFpxBankElement } from './VueStripeFpxBankElement.vue'
+export { default as VueStripeAuBankAccountElement } from './VueStripeAuBankAccountElement.vue'
