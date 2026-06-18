@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { provide, ref, inject, watch, onMounted, nextTick, markRaw } from 'vue-demi'
-import type { StripeCheckout, StripeCheckoutSession } from '@stripe/stripe-js'
+import type {
+  StripeCheckout,
+  StripeCheckoutSession,
+  StripeCheckoutOptions,
+  StripeCheckoutElementsOptions
+} from '@stripe/stripe-js'
 import { stripeInjectionKey, stripeCheckoutInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 
@@ -62,19 +67,21 @@ const initCheckout = async () => {
     return
   }
 
+  const stripe = stripeInstance.stripe.value
+  if (!stripe) return
+
   started = true
 
   try {
     loading.value = true
     error.value = null
 
-    const options: Record<string, unknown> = { fetchClientSecret }
-    if (props.elementsOptions) options['elementsOptions'] = props.elementsOptions
+    const options: StripeCheckoutOptions = { fetchClientSecret }
+    if (props.elementsOptions) {
+      options.elementsOptions = props.elementsOptions as StripeCheckoutElementsOptions
+    }
 
-    // Type assertion: initCheckout is part of the GA Custom Checkout surface.
-    const instance = (await (stripeInstance.stripe.value as {
-      initCheckout: (o: Record<string, unknown>) => Promise<StripeCheckout>
-    }).initCheckout(options))
+    const instance = await stripe.initCheckout(options)
 
     // Don't let Vue proxy the external Stripe instance — keep it raw.
     checkout.value = markRaw(instance)
