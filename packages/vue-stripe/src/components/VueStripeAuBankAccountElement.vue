@@ -36,6 +36,24 @@ if (!elementsInstance) {
   )
 }
 
+// Named handlers so listeners can be detached with .off() on teardown.
+const handleReady = () => {
+  loading.value = false
+  emit('ready', auBankAccountElement.value!)
+}
+const handleChange = (event: StripeAuBankAccountElementChangeEvent) => {
+  // Update error state from Stripe
+  if (event.error) {
+    error.value = event.error.message
+  } else {
+    error.value = null
+  }
+  emit('change', event)
+}
+const handleFocus = () => emit('focus')
+const handleBlur = () => emit('blur')
+const handleEscape = () => emit('escape')
+
 const createAuBankAccountElement = () => {
   if (!elementsInstance.elements.value) {
     error.value = 'Elements instance not available'
@@ -56,33 +74,12 @@ const createAuBankAccountElement = () => {
     // Create AU Bank Account element
     auBankAccountElement.value = elementsInstance.elements.value.create('auBankAccount', props.options)
 
-    // Set up event listeners
-    auBankAccountElement.value.on('ready', () => {
-      loading.value = false
-      emit('ready', auBankAccountElement.value!)
-    })
-
-    auBankAccountElement.value.on('change', (event) => {
-      // Update error state from Stripe
-      if (event.error) {
-        error.value = event.error.message
-      } else {
-        error.value = null
-      }
-      emit('change', event)
-    })
-
-    auBankAccountElement.value.on('focus', () => {
-      emit('focus')
-    })
-
-    auBankAccountElement.value.on('blur', () => {
-      emit('blur')
-    })
-
-    auBankAccountElement.value.on('escape', () => {
-      emit('escape')
-    })
+    // Set up event listeners (named handlers, removed in onUnmounted)
+    auBankAccountElement.value.on('ready', handleReady)
+    auBankAccountElement.value.on('change', handleChange)
+    auBankAccountElement.value.on('focus', handleFocus)
+    auBankAccountElement.value.on('blur', handleBlur)
+    auBankAccountElement.value.on('escape', handleEscape)
 
     // Mount the element
     auBankAccountElement.value.mount(elementRef.value)
@@ -124,7 +121,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (auBankAccountElement.value) {
+    auBankAccountElement.value.off('ready', handleReady)
+    auBankAccountElement.value.off('change', handleChange)
+    auBankAccountElement.value.off('focus', handleFocus)
+    auBankAccountElement.value.off('blur', handleBlur)
+    auBankAccountElement.value.off('escape', handleEscape)
     auBankAccountElement.value.destroy()
+    auBankAccountElement.value = null
   }
 })
 

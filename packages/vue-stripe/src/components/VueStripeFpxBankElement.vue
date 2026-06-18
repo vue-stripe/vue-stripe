@@ -44,6 +44,24 @@ if (!elementsInstance) {
   )
 }
 
+// Named handlers so listeners can be detached with .off() on teardown.
+const handleReady = () => {
+  loading.value = false
+  emit('ready', fpxBankElement.value!)
+}
+const handleChange = (event: StripeFpxBankElementChangeEvent) => {
+  // Update error state from Stripe
+  if (event.error) {
+    error.value = event.error.message
+  } else {
+    error.value = null
+  }
+  emit('change', event)
+}
+const handleFocus = () => emit('focus')
+const handleBlur = () => emit('blur')
+const handleEscape = () => emit('escape')
+
 const createFpxBankElement = () => {
   if (!elementsInstance.elements.value) {
     error.value = 'Elements instance not available'
@@ -68,33 +86,12 @@ const createFpxBankElement = () => {
     }
     fpxBankElement.value = elementsInstance.elements.value.create('fpxBank', fpxOptions)
 
-    // Set up event listeners
-    fpxBankElement.value.on('ready', () => {
-      loading.value = false
-      emit('ready', fpxBankElement.value!)
-    })
-
-    fpxBankElement.value.on('change', (event) => {
-      // Update error state from Stripe
-      if (event.error) {
-        error.value = event.error.message
-      } else {
-        error.value = null
-      }
-      emit('change', event)
-    })
-
-    fpxBankElement.value.on('focus', () => {
-      emit('focus')
-    })
-
-    fpxBankElement.value.on('blur', () => {
-      emit('blur')
-    })
-
-    fpxBankElement.value.on('escape', () => {
-      emit('escape')
-    })
+    // Set up event listeners (named handlers, removed in onUnmounted)
+    fpxBankElement.value.on('ready', handleReady)
+    fpxBankElement.value.on('change', handleChange)
+    fpxBankElement.value.on('focus', handleFocus)
+    fpxBankElement.value.on('blur', handleBlur)
+    fpxBankElement.value.on('escape', handleEscape)
 
     // Mount the element
     fpxBankElement.value.mount(elementRef.value)
@@ -139,7 +136,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (fpxBankElement.value) {
+    fpxBankElement.value.off('ready', handleReady)
+    fpxBankElement.value.off('change', handleChange)
+    fpxBankElement.value.off('focus', handleFocus)
+    fpxBankElement.value.off('blur', handleBlur)
+    fpxBankElement.value.off('escape', handleEscape)
     fpxBankElement.value.destroy()
+    fpxBankElement.value = null
   }
 })
 
