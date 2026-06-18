@@ -247,6 +247,17 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Card Element', link: '/live-demo/card-element' },
             { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },
             { text: 'Link Authentication', link: '/live-demo/link-authentication' },
+          ]
+        },
+        {
+          text: 'Buy Now, Pay Later',
+          items: [
+            { text: 'Payment Method Messaging', link: '/live-demo/payment-method-messaging' },
+          ]
+        },
+        {
+          text: 'Regional Payment Methods',
+          items: [
             { text: 'iDEAL (Netherlands)', link: '/live-demo/ideal-payment' },
           ]
         },

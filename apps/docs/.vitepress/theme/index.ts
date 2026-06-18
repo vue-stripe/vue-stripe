@@ -22,6 +22,7 @@ import CheckoutRedirectExample from './components/examples/CheckoutRedirectExamp
 import CardElementExample from './components/examples/CardElementExample.vue'
 import SplitCardElementExample from './components/examples/SplitCardElementExample.vue'
 import LinkAuthenticationExample from './components/examples/LinkAuthenticationExample.vue'
+import PaymentMethodMessagingExample from './components/examples/PaymentMethodMessagingExample.vue'
 
 // Analytics composables
 import { useScrollTracking } from './composables/useScrollTracking'
@@ -97,6 +98,7 @@ export default {
     app.component('CardElementExample', CardElementExample)
     app.component('SplitCardElementExample', SplitCardElementExample)
     app.component('LinkAuthenticationExample', LinkAuthenticationExample)
+    app.component('PaymentMethodMessagingExample', PaymentMethodMessagingExample)
     app.component('StripeCoverage', StripeCoverage)
   }
 } satisfies Theme
