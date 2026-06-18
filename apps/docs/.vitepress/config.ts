@@ -210,6 +210,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           text: 'Checkout & Subscriptions',
           items: [
             { text: 'VueStripeCheckout', link: '/api/components/stripe-checkout' },
+            { text: 'VueStripeCheckoutProvider', link: '/api/components/stripe-checkout-provider' },
             { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' },
           ]
         },
@@ -221,6 +222,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'usePaymentIntent', link: '/api/composables/use-payment-intent' },
             { text: 'useSetupIntent', link: '/api/composables/use-setup-intent' },
             { text: 'useStripeCheckout', link: '/api/composables/use-stripe-checkout' },
+            { text: 'useCheckoutSession', link: '/api/composables/use-checkout-session' },
             { text: 'useCreatePaymentMethod', link: '/api/composables/use-create-payment-method' },
             { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' },
           ]

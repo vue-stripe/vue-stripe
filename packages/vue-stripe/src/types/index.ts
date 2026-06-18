@@ -8,7 +8,9 @@ import type {
   StripeElement,
   StripeElementChangeEvent,
   ConfirmPaymentData,
-  StripeConstructorOptions
+  StripeConstructorOptions,
+  StripeCheckout,
+  StripeCheckoutSession
 } from '@stripe/stripe-js'
 
 // Re-export commonly used Stripe.js types with their original names
@@ -39,7 +41,13 @@ export type {
   StripeAddressElementChangeEvent,
   StripeLinkAuthenticationElementChangeEvent,
   StripeExpressCheckoutElementConfirmEvent,
-  StripeExpressCheckoutElementClickEvent
+  StripeExpressCheckoutElementClickEvent,
+  // Custom Checkout types
+  StripeCheckout,
+  StripeCheckoutSession,
+  StripeCheckoutContact,
+  StripeCheckoutLineItem,
+  StripeCheckoutConfirmResult
 } from '@stripe/stripe-js'
 
 // Vue-specific plugin configuration
@@ -136,6 +144,26 @@ export interface VueStripeElementsProps {
 }
 
 /**
+ * Props for VueStripeCheckoutProvider (Custom Checkout, `ui_mode: 'custom'`).
+ */
+export interface VueStripeCheckoutProviderProps {
+  /**
+   * Client secret of a Checkout Session created with `ui_mode: 'custom'`.
+   * Provide this OR `fetchClientSecret`.
+   */
+  clientSecret?: string | undefined
+  /**
+   * Async function that resolves to the Checkout Session client secret.
+   * Takes precedence over `clientSecret`.
+   */
+  fetchClientSecret?: (() => Promise<string>) | undefined
+  /**
+   * Appearance / fonts options forwarded to the Checkout Elements.
+   */
+  elementsOptions?: Record<string, unknown> | undefined
+}
+
+/**
  * Props for VueStripePricingTable component.
  * Used to embed a Stripe pricing table for subscription products.
  */
@@ -219,6 +247,33 @@ export interface UseSetupIntentReturn {
   retrieveSetupIntent: (clientSecret: string) => Promise<any>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
+}
+
+/**
+ * Return value of `useCheckoutSession()`. Method signatures are taken directly
+ * from Stripe's `StripeCheckout` so they stay in sync with `@stripe/stripe-js`.
+ */
+export interface UseCheckoutSessionReturn {
+  /** The underlying StripeCheckout instance (null until initialized). */
+  checkout: Readonly<Ref<StripeCheckout | null>>
+  /** Reactive session snapshot, updated on every Stripe `change` event. */
+  session: Readonly<Ref<StripeCheckoutSession | null>>
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+  /** Imperative snapshot of the current session (prefer the reactive `session`). */
+  getSession: () => StripeCheckoutSession | null
+  confirm: StripeCheckout['confirm']
+  applyPromotionCode: StripeCheckout['applyPromotionCode']
+  removePromotionCode: StripeCheckout['removePromotionCode']
+  updateEmail: StripeCheckout['updateEmail']
+  updatePhoneNumber: StripeCheckout['updatePhoneNumber']
+  updateBillingAddress: StripeCheckout['updateBillingAddress']
+  updateShippingAddress: StripeCheckout['updateShippingAddress']
+  updateLineItemQuantity: StripeCheckout['updateLineItemQuantity']
+  updateShippingOption: StripeCheckout['updateShippingOption']
+  updateTaxIdInfo: StripeCheckout['updateTaxIdInfo']
+  runServerUpdate: StripeCheckout['runServerUpdate']
+  changeAppearance: StripeCheckout['changeAppearance']
 }
 
 /**

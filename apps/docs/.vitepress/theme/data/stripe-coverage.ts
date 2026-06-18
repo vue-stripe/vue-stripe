@@ -111,7 +111,7 @@ export const coverage: CoverageCategory[] = [
       { name: 'Checkout composable', api: 'redirect helpers', status: 'covered', artifact: 'useStripeCheckout' },
       { name: 'Pricing Table', api: '<stripe-pricing-table>', status: 'covered', artifact: 'VueStripePricingTable' },
       { name: 'Embedded Checkout', api: 'stripe.initEmbeddedCheckout()', status: 'planned', issue: 379 },
-      { name: 'Custom Checkout', api: 'stripe.initCheckout()', status: 'planned', issue: 388 }
+      { name: 'Custom Checkout', api: 'stripe.initCheckout()', status: 'covered', artifact: 'VueStripeCheckoutProvider' }
     ]
   },
   {

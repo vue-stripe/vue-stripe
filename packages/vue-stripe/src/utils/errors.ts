@@ -12,6 +12,13 @@ export class VueStripeElementsError extends Error {
   }
 }
 
+export class VueStripeCheckoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'VueStripeCheckoutError';
+  }
+}
+
 export class VueStripeLoadError extends Error {
   constructor(message: string) {
     super(message);
