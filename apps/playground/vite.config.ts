@@ -11,7 +11,9 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    // Don't auto-open a browser: it errors (spawn xdg-open ENOENT) on headless /
+    // SSH / CI machines and is intrusive under the monorepo's parallel `pnpm dev`.
+    open: false
   },
   // SSG options
   ssgOptions: {
