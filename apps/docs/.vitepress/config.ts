@@ -247,6 +247,14 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Card Element', link: '/live-demo/card-element' },
             { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },
             { text: 'Link Authentication', link: '/live-demo/link-authentication' },
+            { text: 'Address Element', link: '/live-demo/address-element' },
+          ]
+        },
+        {
+          text: 'Saving Cards',
+          items: [
+            { text: 'Save a Card (SetupIntent)', link: '/live-demo/setup-intent' },
+            { text: 'Create Payment Method', link: '/live-demo/create-payment-method' },
           ]
         },
         {

@@ -23,6 +23,9 @@ import CardElementExample from './components/examples/CardElementExample.vue'
 import SplitCardElementExample from './components/examples/SplitCardElementExample.vue'
 import LinkAuthenticationExample from './components/examples/LinkAuthenticationExample.vue'
 import PaymentMethodMessagingExample from './components/examples/PaymentMethodMessagingExample.vue'
+import AddressElementExample from './components/examples/AddressElementExample.vue'
+import CreatePaymentMethodExample from './components/examples/CreatePaymentMethodExample.vue'
+import SetupIntentExample from './components/examples/SetupIntentExample.vue'
 
 // Analytics composables
 import { useScrollTracking } from './composables/useScrollTracking'
@@ -99,6 +102,9 @@ export default {
     app.component('SplitCardElementExample', SplitCardElementExample)
     app.component('LinkAuthenticationExample', LinkAuthenticationExample)
     app.component('PaymentMethodMessagingExample', PaymentMethodMessagingExample)
+    app.component('AddressElementExample', AddressElementExample)
+    app.component('CreatePaymentMethodExample', CreatePaymentMethodExample)
+    app.component('SetupIntentExample', SetupIntentExample)
     app.component('StripeCoverage', StripeCoverage)
   }
 } satisfies Theme
