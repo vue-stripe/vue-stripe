@@ -1,6 +1,6 @@
 {
   "name": "@vue-stripe/vue-stripe",
-  "version": "5.5.0",
+  "version": "5.6.0",
   "description": "Vue Stripe elements and composables for Stripe.js",
   "author": "Joff Tiquez <jofftiquez@gmail.com>",
   "license": "MIT",
