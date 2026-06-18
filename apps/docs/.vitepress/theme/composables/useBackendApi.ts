@@ -141,6 +141,45 @@ export function useBackendApi() {
   }
 
   /**
+   * Create a regional PaymentIntent (SEPA Direct Debit / EPS / P24).
+   * All three backend routes share the iDEAL request/response shape.
+   */
+  async function createRegionalIntent(
+    path: 'sepa-debit-intent' | 'eps-intent' | 'p24-intent',
+    options: { amount?: number; currency?: string; metadata?: Record<string, string> } = {}
+  ): Promise<PaymentIntentResult> {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await fetch(`${apiUrl.value}/api/${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || `API Error: ${response.status}`)
+      }
+
+      return await response.json()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : `Failed to create ${path}`
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const createSepaIntent = (options: { amount?: number; metadata?: Record<string, string> } = {}) =>
+    createRegionalIntent('sepa-debit-intent', options)
+  const createEpsIntent = (options: { amount?: number; metadata?: Record<string, string> } = {}) =>
+    createRegionalIntent('eps-intent', options)
+  const createP24Intent = (options: { amount?: number; currency?: string; metadata?: Record<string, string> } = {}) =>
+    createRegionalIntent('p24-intent', options)
+
+  /**
    * Create a checkout session for Stripe hosted checkout
    */
   async function createCheckoutSession(options: {
@@ -268,6 +307,9 @@ export function useBackendApi() {
     getProducts,
     createPaymentIntent,
     createIdealIntent,
+    createSepaIntent,
+    createEpsIntent,
+    createP24Intent,
     createCheckoutSession,
     createSubscription,
     createSetupIntent,
