@@ -65,6 +65,19 @@ describe('useCheckoutSession', () => {
     expect(checkout.changeAppearance).toHaveBeenCalledWith({ theme: 'night' })
   })
 
+  it('forwards every session method to the underlying checkout instance', async () => {
+    const { api, checkout } = await mountWith()
+    const methods = [
+      'confirm', 'applyPromotionCode', 'removePromotionCode', 'updateEmail',
+      'updatePhoneNumber', 'updateBillingAddress', 'updateShippingAddress',
+      'updateLineItemQuantity', 'updateShippingOption', 'updateTaxIdInfo', 'runServerUpdate'
+    ] as const
+    for (const name of methods) {
+      await (api() as any)[name]('arg')
+      expect((checkout as any)[name]).toHaveBeenCalledTimes(1)
+    }
+  })
+
   it('getSession returns the current snapshot from the checkout', async () => {
     const checkout = makeMockCheckout()
     checkout.session = vi.fn(() => makeMockCheckoutSession({ id: 'cs_snapshot' }))
@@ -92,5 +105,7 @@ describe('useCheckoutSession', () => {
     const result = await api.updateEmail('x@y.com')
     expect(result.type).toBe('error')
     expect(result.error.message).toMatch(/not ready/i)
+    // sentinel conforms to Stripe's result-union shape ({ message, code })
+    expect(result.error.code).toBeNull()
   })
 })

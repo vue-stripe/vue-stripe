@@ -112,9 +112,21 @@ describe('VueStripeCheckoutProvider', () => {
 
     expect(wrapper.find('.custom-checkout-error').exists()).toBe(true)
     expect(wrapper.find('.custom-checkout-error').text()).toContain('bad session')
+    // and the @error event is emitted with the message
+    const emittedError = wrapper.findComponent(VueStripeCheckoutProvider).emitted('error')
+    expect(emittedError).toBeTruthy()
+    expect((emittedError as any[])[0][0]).toContain('bad session')
   })
 
-  it('shows an error when neither clientSecret nor fetchClientSecret is provided', async () => {
+  it('emits @ready with the checkout instance once initialized', async () => {
+    const checkout = makeMockCheckout()
+    const { wrapper } = await mountWith(checkout)
+    const emittedReady = wrapper.findComponent(VueStripeCheckoutProvider).emitted('ready')
+    expect(emittedReady).toBeTruthy()
+    expect((emittedReady as any[])[0][0]).toBe(checkout)
+  })
+
+  it('shows an error AND emits @error when neither clientSecret nor fetchClientSecret is provided', async () => {
     const stripe = makeMockStripe()
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce(stripe as any)
@@ -128,5 +140,8 @@ describe('VueStripeCheckoutProvider', () => {
 
     expect(stripe.initCheckout).not.toHaveBeenCalled()
     expect(wrapper.find('.vue-stripe-checkout-error').text()).toContain('clientSecret')
+    const emittedError = wrapper.findComponent(VueStripeCheckoutProvider).emitted('error')
+    expect(emittedError).toBeTruthy()
+    expect((emittedError as any[])[0][0]).toContain('clientSecret')
   })
 })

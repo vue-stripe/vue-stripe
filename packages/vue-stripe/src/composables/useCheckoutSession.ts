@@ -1,5 +1,5 @@
 import { inject, readonly } from 'vue-demi'
-import type { Appearance, StripeCheckoutSession } from '@stripe/stripe-js'
+import type { Appearance, StripeCheckout, StripeCheckoutSession } from '@stripe/stripe-js'
 import type { UseCheckoutSessionReturn } from '../types'
 import { stripeCheckoutInjectionKey } from '../utils/injection-keys'
 import { VueStripeCheckoutError } from '../utils/errors'
@@ -31,25 +31,32 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
     )
   }
 
-  // Wrap each Checkout method so it forwards to the live instance and fails
-  // gracefully (rather than throwing) if called before the session is ready.
-  const call = (name: string) => (...args: unknown[]) => {
-    const instance = ctx.checkout.value as unknown as
-      | Record<string, ((...a: unknown[]) => unknown) | undefined>
-      | null
-    const fn = instance?.[name]
-    if (typeof fn !== 'function') {
-      return Promise.resolve({
-        type: 'error',
-        error: { message: 'Checkout session is not ready yet' }
-      })
+  // Forward a StripeCheckout method by name. Generic over the key so an invalid
+  // name fails the build (instead of silently resolving to the not-ready result
+  // if `@stripe/stripe-js` ever renames a method). When called before the session
+  // exists it resolves a graceful sentinel matching Stripe's result-union shape
+  // ({ type: 'error', error: { message, code } }).
+  const call = <K extends keyof StripeCheckout>(name: K): StripeCheckout[K] => {
+    const wrapped = (...args: unknown[]) => {
+      const instance = ctx.checkout.value
+      const fn = instance?.[name]
+      if (typeof fn !== 'function') {
+        return Promise.resolve({
+          type: 'error',
+          error: { message: 'Checkout session is not ready yet', code: null }
+        })
+      }
+      return (fn as (...a: unknown[]) => unknown).apply(instance, args)
     }
-    return fn(...args)
+    return wrapped as StripeCheckout[K]
   }
 
   return {
-    checkout: readonly(ctx.checkout),
-    session: readonly(ctx.session),
+    // Cast bridges Vue's DeepReadonly<Ref<…>> to the interface's shallow
+    // Readonly<Ref<…>> (the session contains nested arrays). `satisfies` below
+    // still structurally verifies every method against StripeCheckout.
+    checkout: readonly(ctx.checkout) as UseCheckoutSessionReturn['checkout'],
+    session: readonly(ctx.session) as UseCheckoutSessionReturn['session'],
     loading: readonly(ctx.loading),
     error: readonly(ctx.error),
 
@@ -69,7 +76,12 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
     runServerUpdate: call('runServerUpdate'),
 
     /** Update the appearance of all Checkout Elements at runtime. */
-    changeAppearance: (appearance: Appearance): void =>
-      ctx.checkout.value?.changeAppearance(appearance)
-  } as UseCheckoutSessionReturn
+    changeAppearance: (appearance: Appearance): void => {
+      if (!ctx.checkout.value) {
+        console.warn('[Vue Stripe] changeAppearance called before the Checkout session is ready')
+        return
+      }
+      ctx.checkout.value.changeAppearance(appearance)
+    }
+  } satisfies UseCheckoutSessionReturn
 }

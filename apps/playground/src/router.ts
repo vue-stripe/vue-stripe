@@ -24,7 +24,7 @@ import DocsVerificationView from './views/DocsVerificationView.vue'
 import PaymentMethodMessagingView from './views/PaymentMethodMessagingView.vue'
 // Convenience composables (v5.5 - #390)
 import ConvenienceComposablesView from './views/ConvenienceComposablesView.vue'
-// Custom Checkout (v5.7 - #388)
+// Custom Checkout (#388)
 import CustomCheckoutView from './views/CustomCheckoutView.vue'
 
 // Route metadata for SEO

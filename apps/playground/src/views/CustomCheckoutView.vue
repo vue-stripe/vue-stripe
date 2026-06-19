@@ -48,14 +48,14 @@ const CheckoutDemo = defineComponent({
     const onConfirm = async () => {
       message.value = null
       const res: any = await confirm({ returnUrl: `${window.location.origin}/custom-checkout` })
-      message.value = res?.type === 'error' ? `❌ ${res.error.message}` : `✅ ${res.session?.status ?? 'confirmed'}`
+      message.value = res?.type === 'error' ? `❌ ${res.error.message}` : `✅ ${res.session?.status?.type ?? 'confirmed'}`
     }
 
     return () => h('div', { class: 'demo' }, [
       h('div', { class: 'state', 'data-test': 'session-state' }, [
         h('h4', 'Session'),
         h('ul', [
-          h('li', [h('strong', 'status: '), session.value?.status ?? '—']),
+          h('li', [h('strong', 'status: '), session.value?.status?.type ?? '—']),
           h('li', [h('strong', 'total: '), session.value?.total?.total?.amount ?? '—']),
           h('li', [h('strong', 'email: '), session.value?.email ?? '—']),
           h('li', [h('strong', 'canConfirm: '), String(session.value?.canConfirm ?? false)])

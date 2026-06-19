@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide, ref, inject, watch, onMounted, nextTick, markRaw } from 'vue-demi'
+import { provide, ref, inject, watch, onUnmounted, markRaw } from 'vue-demi'
 import type {
   StripeCheckout,
   StripeCheckoutSession,
@@ -24,7 +24,7 @@ interface Props {
    * Appearance / fonts options forwarded to the Checkout Elements
    * (`stripe.initCheckout({ elementsOptions })`).
    */
-  elementsOptions?: Record<string, unknown> | undefined
+  elementsOptions?: StripeCheckoutElementsOptions | undefined
 }
 
 const props = defineProps<Props>()
@@ -47,9 +47,11 @@ const session = ref<StripeCheckoutSession | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 
-// Guard so initCheckout() only runs once even though it is reachable from both
-// the stripe-ready watcher and onMounted.
+// Guard so initCheckout() only runs once.
 let started = false
+// Set on unmount: Stripe gives us no way to detach the `change` subscription,
+// so this lets the async handler (and an in-flight init) bail out after teardown.
+let unmounted = false
 
 const initCheckout = async () => {
   if (started || !stripeInstance.stripe.value) return
@@ -61,9 +63,11 @@ const initCheckout = async () => {
     (props.clientSecret ? () => Promise.resolve(props.clientSecret as string) : null)
 
   if (!fetchClientSecret) {
-    error.value =
+    const message =
       'VueStripeCheckoutProvider requires a `clientSecret` or `fetchClientSecret` prop'
+    error.value = message
     loading.value = false
+    emit('error', message)
     return
   }
 
@@ -78,22 +82,26 @@ const initCheckout = async () => {
 
     const options: StripeCheckoutOptions = { fetchClientSecret }
     if (props.elementsOptions) {
-      options.elementsOptions = props.elementsOptions as StripeCheckoutElementsOptions
+      options.elementsOptions = props.elementsOptions
     }
 
     const instance = await stripe.initCheckout(options)
 
-    // Don't let Vue proxy the external Stripe instance — keep it raw.
+    // The component may have unmounted while initCheckout() was in flight.
+    if (unmounted) return
+
+    // Don't let Vue proxy the external Stripe instances — keep them raw.
     checkout.value = markRaw(instance)
-    session.value = instance.session()
+    session.value = markRaw(instance.session())
 
     // Keep the reactive session in sync with Stripe's internal state.
     instance.on('change', (next) => {
-      session.value = next
+      if (unmounted) return
+      session.value = markRaw(next)
     })
 
     loading.value = false
-    nextTick(() => emit('ready', instance))
+    emit('ready', instance)
   } catch (err) {
     started = false
     const message = err instanceof Error ? err.message : 'Failed to initialize Checkout'
@@ -113,8 +121,13 @@ watch(
   { immediate: true }
 )
 
-onMounted(() => {
-  if (stripeInstance.stripe.value) initCheckout()
+onUnmounted(() => {
+  // Stripe exposes no off()/destroy() for the checkout instance, so on remount
+  // the best we can do is stop referencing it and let the change handler bail.
+  unmounted = true
+  checkout.value = null
+  session.value = null
+  started = false
 })
 
 // Provide the checkout context for child components / useCheckoutSession.

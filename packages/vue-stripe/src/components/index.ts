@@ -28,7 +28,7 @@ export { default as VueStripePaymentMethodMessagingElement } from './VueStripePa
 // Checkout
 export { default as VueStripeCheckout } from './VueStripeCheckout.vue'
 
-// Custom Checkout (ui_mode: 'custom') — v5.7.0
+// Custom Checkout (ui_mode: 'custom')
 export { default as VueStripeCheckoutProvider } from './VueStripeCheckoutProvider.vue'
 
 // Pricing Table (v5.3.0)

@@ -14,6 +14,7 @@ describe('public API exports', () => {
     expect(typeof VueStripe.loadStripe).toBe('function')
     expect(typeof VueStripe.VueStripeProviderError).toBe('function')
     expect(typeof VueStripe.VueStripeElementsError).toBe('function')
+    expect(typeof VueStripe.VueStripeCheckoutError).toBe('function')
   })
 
   it('exports composables (incl. aliases)', () => {
@@ -22,6 +23,11 @@ describe('public API exports', () => {
     expect(typeof VueStripe.useCheckout).toBe('function')
     expect(typeof VueStripe.useStripeElements).toBe('function')
     expect(typeof VueStripe.useElements).toBe('function')
+    expect(typeof VueStripe.useCheckoutSession).toBe('function')
+  })
+
+  it('exports the Custom Checkout provider component', () => {
+    expect(VueStripe.VueStripeCheckoutProvider).toBeTruthy()
   })
 
   it('exports the checkout + confirm option types (compile-time check)', () => {

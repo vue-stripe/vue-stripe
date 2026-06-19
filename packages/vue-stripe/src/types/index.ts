@@ -10,7 +10,8 @@ import type {
   ConfirmPaymentData,
   StripeConstructorOptions,
   StripeCheckout,
-  StripeCheckoutSession
+  StripeCheckoutSession,
+  StripeCheckoutElementsOptions
 } from '@stripe/stripe-js'
 
 // Re-export commonly used Stripe.js types with their original names
@@ -160,7 +161,7 @@ export interface VueStripeCheckoutProviderProps {
   /**
    * Appearance / fonts options forwarded to the Checkout Elements.
    */
-  elementsOptions?: Record<string, unknown> | undefined
+  elementsOptions?: StripeCheckoutElementsOptions | undefined
 }
 
 /**
