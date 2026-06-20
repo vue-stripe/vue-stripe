@@ -141,12 +141,12 @@ export function useBackendApi() {
   }
 
   /**
-   * Create a regional PaymentIntent (SEPA Direct Debit / EPS / P24).
-   * All three backend routes share the iDEAL request/response shape.
+   * Create a regional PaymentIntent (SEPA Direct Debit / EPS / P24 / FPX / BECS).
+   * All of these backend routes share the iDEAL request/response shape.
    */
   async function createRegionalIntent(
-    path: 'sepa-debit-intent' | 'eps-intent' | 'p24-intent',
-    options: { amount?: number; currency?: string; metadata?: Record<string, string> } = {}
+    path: 'sepa-debit-intent' | 'eps-intent' | 'p24-intent' | 'fpx-intent' | 'becs-intent',
+    options: { amount?: number; currency?: string; description?: string; metadata?: Record<string, string> } = {}
   ): Promise<PaymentIntentResult> {
     loading.value = true
     error.value = null
@@ -178,70 +178,12 @@ export function useBackendApi() {
     createRegionalIntent('eps-intent', options)
   const createP24Intent = (options: { amount?: number; currency?: string; metadata?: Record<string, string> } = {}) =>
     createRegionalIntent('p24-intent', options)
-
-  /**
-   * Create an FPX payment intent (MYR only - Malaysia)
-   */
-  async function createFpxIntent(options: {
-    amount?: number
-    description?: string
-    metadata?: Record<string, string>
-  } = {}): Promise<PaymentIntentResult> {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await fetch(`${apiUrl.value}/api/fpx-intent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(options),
-      })
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.error || `API Error: ${response.status}`)
-      }
-
-      return await response.json()
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to create FPX intent'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
-   * Create a BECS Direct Debit payment intent (AUD only - Australia)
-   */
-  async function createBecsIntent(options: {
-    amount?: number
-    description?: string
-    metadata?: Record<string, string>
-  } = {}): Promise<PaymentIntentResult> {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await fetch(`${apiUrl.value}/api/becs-intent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(options),
-      })
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.error || `API Error: ${response.status}`)
-      }
-
-      return await response.json()
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to create BECS intent'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
+  // FPX (MYR only - Malaysia)
+  const createFpxIntent = (options: { amount?: number; description?: string; metadata?: Record<string, string> } = {}) =>
+    createRegionalIntent('fpx-intent', options)
+  // BECS Direct Debit (AUD only - Australia)
+  const createBecsIntent = (options: { amount?: number; description?: string; metadata?: Record<string, string> } = {}) =>
+    createRegionalIntent('becs-intent', options)
 
   /**
    * Create a checkout session for Stripe hosted checkout

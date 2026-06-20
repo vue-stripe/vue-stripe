@@ -458,7 +458,7 @@ switch (event.type) {
 | `invalid_bsb` | BSB number is invalid | Verify BSB format (6 digits) |
 | `invalid_account_number` | Account number invalid | Check account number format |
 | `payment_intent_unexpected_state` | PaymentIntent not in expected state | Check PaymentIntent status |
-| `mandate_data_missing` | Missing mandate agreement | Include billing_details |
+| `mandate_data_missing` | The customer hasn't agreed to the BECS Direct Debit Request (DDR) service agreement | Collect the customer's mandate consent (show the DDR terms and pass `mandate_data` on confirmation) |
 
 ## See Also
 

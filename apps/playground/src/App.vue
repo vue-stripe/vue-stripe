@@ -199,7 +199,7 @@ const navGroups = computed(() => {
     'IdealBankElement': Landmark,
     'P24BankElement': Landmark,
     'EpsBankElement': Landmark,
-    // APAC Regional Elements (v5.4.0)
+    // APAC Regional Elements
     'FpxBankElement': Landmark,
     'AuBankAccountElement': Landmark,
     // Pricing Table (v5.3.0)

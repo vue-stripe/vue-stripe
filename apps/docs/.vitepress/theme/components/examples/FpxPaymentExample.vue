@@ -216,6 +216,10 @@ const ConfirmFpxButton = defineComponent({
           }
         )
         if (error) throw new Error(error.message)
+        // FPX always redirects the browser to `return_url`, so on the happy path
+        // this code doesn't run — the outcome is read back after the redirect.
+        // This only fires for non-redirect outcomes (e.g. an immediate failure
+        // that still resolves a paymentIntent).
         if (paymentIntent) emit('success')
       } catch (err) {
         emit('error', err instanceof Error ? err.message : 'Payment failed')

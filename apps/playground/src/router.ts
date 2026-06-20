@@ -18,7 +18,7 @@ import IbanElementView from './views/IbanElementView.vue'
 import IdealBankElementView from './views/IdealBankElementView.vue'
 import P24BankElementView from './views/P24BankElementView.vue'
 import EpsBankElementView from './views/EpsBankElementView.vue'
-// APAC Regional Elements (v5.4.0)
+// APAC Regional Elements
 import FpxBankElementView from './views/FpxBankElementView.vue'
 import AuBankAccountElementView from './views/AuBankAccountElementView.vue'
 import DocsExampleView from './views/DocsExampleView.vue'
@@ -191,7 +191,7 @@ export const routes: RouteRecordRaw[] = [
       description: 'Accept EPS payments popular in Austria'
     }
   },
-  // APAC Regional Elements (v5.4.0)
+  // APAC Regional Elements
   {
     path: '/stripe-fpx-bank-element',
     name: 'FpxBankElement',

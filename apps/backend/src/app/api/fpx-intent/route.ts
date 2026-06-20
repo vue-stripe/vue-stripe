@@ -6,8 +6,12 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}))
     const stripe = getStripe()
 
+    // Only accept a positive integer amount (in sen); otherwise fall back to the
+    // demo default rather than forwarding a negative/fractional value to Stripe.
+    const amount = Number.isInteger(body.amount) && body.amount > 0 ? body.amount : 1000
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: body.amount || 1000,
+      amount,
       currency: 'myr', // FPX only supports MYR (Malaysian Ringgit)
       payment_method_types: ['fpx'],
       ...(body.description && { description: body.description }),

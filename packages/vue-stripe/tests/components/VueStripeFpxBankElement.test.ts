@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h, nextTick } from 'vue-demi'
+import { h, nextTick, defineComponent, ref } from 'vue-demi'
 import VueStripeFpxBankElement from '../../src/components/VueStripeFpxBankElement.vue'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
@@ -265,14 +265,13 @@ describe('VueStripeFpxBankElement', () => {
     expect(wrapper.text()).toContain('Please select a bank.')
   })
 
-  it('should destroy element on unmount', async () => {
+  it('detaches listeners with .off() before destroy on unmount (#376)', async () => {
     const mockElement = createMockElement()
-    const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
-        create: mockCreate
+        create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
       confirmCardSetup: vi.fn(),
@@ -283,32 +282,92 @@ describe('VueStripeFpxBankElement', () => {
 
     wrapper.unmount()
 
+    // Every registered event is detached before destroy (named-handler cleanup).
+    for (const event of ['ready', 'change', 'focus', 'blur', 'escape']) {
+      expect(mockElement.off).toHaveBeenCalledWith(event, expect.any(Function))
+    }
     expect(mockElement.destroy).toHaveBeenCalled()
   })
 
-  it('should expose element methods via defineExpose', async () => {
+  it('re-merges options + accountHolderType into update() when props change', async () => {
     const mockElement = createMockElement()
-    const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
-        create: mockCreate
+        create: vi.fn(() => mockElement)
       })),
       confirmPayment: vi.fn(),
       confirmCardSetup: vi.fn(),
       registerAppInfo: vi.fn()
     } as any)
 
-    const wrapper = await mountWithProviders()
+    // Harness owns reactive props so we can mutate them after mount.
+    const Harness = defineComponent({
+      setup() {
+        return { accountHolderType: ref<'individual' | 'company'>('individual'), options: ref<Record<string, unknown>>({}) }
+      },
+      render() {
+        return h(VueStripeProvider, { publishableKey: 'pk_test_123' }, {
+          default: () => h(VueStripeElements, {}, {
+            default: () => h(VueStripeFpxBankElement, { accountHolderType: this.accountHolderType, options: this.options })
+          })
+        })
+      }
+    })
 
-    const fpxComponent = wrapper.findComponent(VueStripeFpxBankElement)
+    const wrapper = mount(Harness)
+    await flushPromises()
+    await wrapper.vm.$nextTick()
 
-    expect(fpxComponent.vm).toBeDefined()
+    // Flip both the options and the account holder type.
+    ;(wrapper.vm as any).accountHolderType = 'company'
+    ;(wrapper.vm as any).options = { setupFutureUsage: 'off_session' }
+    await wrapper.vm.$nextTick()
+    await flushPromises()
 
-    const vm = fpxComponent.vm as any
-    expect(typeof vm.focus === 'function' || vm.focus === undefined || vm.focus).toBeTruthy()
-    expect(typeof vm.blur === 'function' || vm.blur === undefined || vm.blur).toBeTruthy()
-    expect(typeof vm.clear === 'function' || vm.clear === undefined || vm.clear).toBeTruthy()
+    expect(mockElement.update).toHaveBeenCalledWith(
+      expect.objectContaining({ setupFutureUsage: 'off_session', accountHolderType: 'company' })
+    )
+  })
+
+  it('should expose element and methods via defineExpose', async () => {
+    const mockElement = createMockElement()
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => mockElement)
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    // Capture the component's exposeProxy via a template ref (defineExpose
+    // members aren't on the render proxy that findComponent().vm returns).
+    const exposed = ref<any>(null)
+    const Harness = defineComponent({
+      setup() { return { exposed } },
+      render() {
+        return h(VueStripeProvider, { publishableKey: 'pk_test_123' }, {
+          default: () => h(VueStripeElements, {}, {
+            default: () => h(VueStripeFpxBankElement, { ref: (el: any) => { exposed.value = el } })
+          })
+        })
+      }
+    })
+    mount(Harness)
+    await flushPromises()
+    await nextTick()
+
+    const api = exposed.value
+    expect(typeof api.focus).toBe('function')
+    expect(typeof api.blur).toBe('function')
+    expect(typeof api.clear).toBe('function')
+    expect(api.element).toBeTruthy()
+    expect(typeof api.element.mount).toBe('function')
+    expect(typeof api.loading).toBe('boolean')
+    expect(api.error).toBeNull()
   })
 })
