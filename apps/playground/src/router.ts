@@ -18,6 +18,9 @@ import IbanElementView from './views/IbanElementView.vue'
 import IdealBankElementView from './views/IdealBankElementView.vue'
 import P24BankElementView from './views/P24BankElementView.vue'
 import EpsBankElementView from './views/EpsBankElementView.vue'
+// APAC Regional Elements
+import FpxBankElementView from './views/FpxBankElementView.vue'
+import AuBankAccountElementView from './views/AuBankAccountElementView.vue'
 import DocsExampleView from './views/DocsExampleView.vue'
 import DocsVerificationView from './views/DocsVerificationView.vue'
 // Payment Method Messaging element (v5.5 - #378)
@@ -188,6 +191,25 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'EPS Bank Element - Vue Stripe',
       description: 'Accept EPS payments popular in Austria'
+    }
+  },
+  // APAC Regional Elements
+  {
+    path: '/stripe-fpx-bank-element',
+    name: 'FpxBankElement',
+    component: FpxBankElementView,
+    meta: {
+      title: 'FPX Bank Element - Vue Stripe',
+      description: 'Accept FPX payments popular in Malaysia'
+    }
+  },
+  {
+    path: '/stripe-au-bank-account-element',
+    name: 'AuBankAccountElement',
+    component: AuBankAccountElementView,
+    meta: {
+      title: 'AU Bank Account Element - Vue Stripe',
+      description: 'Accept BECS Direct Debit payments in Australia'
     }
   },
   {

@@ -65,8 +65,8 @@ export const coverage: CoverageCategory[] = [
       { name: 'iDEAL Bank', api: "create('idealBank')", status: 'covered', artifact: 'VueStripeIdealBankElement' },
       { name: 'P24 Bank', api: "create('p24Bank')", status: 'covered', artifact: 'VueStripeP24BankElement' },
       { name: 'EPS Bank', api: "create('epsBank')", status: 'covered', artifact: 'VueStripeEpsBankElement' },
-      { name: 'FPX Bank', api: "create('fpxBank')", status: 'accessible' },
-      { name: 'AU Bank Account', api: "create('auBankAccount')", status: 'accessible' }
+      { name: 'FPX Bank', api: "create('fpxBank')", status: 'covered', artifact: 'VueStripeFpxBankElement' },
+      { name: 'AU Bank Account', api: "create('auBankAccount')", status: 'covered', artifact: 'VueStripeAuBankAccountElement' }
     ]
   },
   {

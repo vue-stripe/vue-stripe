@@ -30,6 +30,8 @@ import IbanElementExample from './components/examples/IbanElementExample.vue'
 import P24ElementExample from './components/examples/P24ElementExample.vue'
 import EpsElementExample from './components/examples/EpsElementExample.vue'
 import ExpressCheckoutExample from './components/examples/ExpressCheckoutExample.vue'
+import FpxPaymentExample from './components/examples/FpxPaymentExample.vue'
+import AuBankAccountPaymentExample from './components/examples/AuBankAccountPaymentExample.vue'
 
 // Analytics composables
 import { useScrollTracking } from './composables/useScrollTracking'
@@ -114,5 +116,7 @@ export default {
     app.component('EpsElementExample', EpsElementExample)
     app.component('ExpressCheckoutExample', ExpressCheckoutExample)
     app.component('StripeCoverage', StripeCoverage)
+    app.component('FpxPaymentExample', FpxPaymentExample)
+    app.component('AuBankAccountPaymentExample', AuBankAccountPaymentExample)
   }
 } satisfies Theme

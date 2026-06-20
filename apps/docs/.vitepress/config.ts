@@ -158,6 +158,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           ]
         },
         {
+          text: 'APAC Elements',
+          items: [
+            { text: 'FPX Bank Element', link: '/guide/fpx-bank-element' },
+            { text: 'AU Bank Account Element', link: '/guide/au-bank-account-element' },
+          ]
+        },
+        {
           text: 'Subscriptions',
           items: [
             { text: 'Pricing Table', link: '/guide/pricing-table' },
@@ -204,6 +211,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'VueStripeIdealBankElement', link: '/api/components/stripe-ideal-bank-element' },
             { text: 'VueStripeP24BankElement', link: '/api/components/stripe-p24-bank-element' },
             { text: 'VueStripeEpsBankElement', link: '/api/components/stripe-eps-bank-element' },
+          ]
+        },
+        {
+          text: 'APAC Elements',
+          items: [
+            { text: 'VueStripeFpxBankElement', link: '/api/components/stripe-fpx-bank-element' },
+            { text: 'VueStripeAuBankAccountElement', link: '/api/components/stripe-au-bank-account-element' },
           ]
         },
         {
@@ -273,6 +287,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'SEPA Direct Debit', link: '/live-demo/iban-element' },
             { text: 'Przelewy24 (Poland)', link: '/live-demo/p24-payment' },
             { text: 'EPS (Austria)', link: '/live-demo/eps-payment' },
+          ]
+        },
+        {
+          text: 'APAC Payments',
+          items: [
+            { text: 'FPX (Malaysia)', link: '/live-demo/fpx-payment' },
+            { text: 'BECS Direct Debit (Australia)', link: '/live-demo/becs-payment' },
           ]
         },
         {

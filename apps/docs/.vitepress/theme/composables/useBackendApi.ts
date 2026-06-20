@@ -141,12 +141,12 @@ export function useBackendApi() {
   }
 
   /**
-   * Create a regional PaymentIntent (SEPA Direct Debit / EPS / P24).
-   * All three backend routes share the iDEAL request/response shape.
+   * Create a regional PaymentIntent (SEPA Direct Debit / EPS / P24 / FPX / BECS).
+   * All of these backend routes share the iDEAL request/response shape.
    */
   async function createRegionalIntent(
-    path: 'sepa-debit-intent' | 'eps-intent' | 'p24-intent',
-    options: { amount?: number; currency?: string; metadata?: Record<string, string> } = {}
+    path: 'sepa-debit-intent' | 'eps-intent' | 'p24-intent' | 'fpx-intent' | 'becs-intent',
+    options: { amount?: number; currency?: string; description?: string; metadata?: Record<string, string> } = {}
   ): Promise<PaymentIntentResult> {
     loading.value = true
     error.value = null
@@ -178,6 +178,12 @@ export function useBackendApi() {
     createRegionalIntent('eps-intent', options)
   const createP24Intent = (options: { amount?: number; currency?: string; metadata?: Record<string, string> } = {}) =>
     createRegionalIntent('p24-intent', options)
+  // FPX (MYR only - Malaysia)
+  const createFpxIntent = (options: { amount?: number; description?: string; metadata?: Record<string, string> } = {}) =>
+    createRegionalIntent('fpx-intent', options)
+  // BECS Direct Debit (AUD only - Australia)
+  const createBecsIntent = (options: { amount?: number; description?: string; metadata?: Record<string, string> } = {}) =>
+    createRegionalIntent('becs-intent', options)
 
   /**
    * Create a checkout session for Stripe hosted checkout
@@ -310,6 +316,8 @@ export function useBackendApi() {
     createSepaIntent,
     createEpsIntent,
     createP24Intent,
+    createFpxIntent,
+    createBecsIntent,
     createCheckoutSession,
     createSubscription,
     createSetupIntent,
