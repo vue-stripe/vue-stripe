@@ -12,6 +12,13 @@ export class VueStripeElementsError extends Error {
   }
 }
 
+export class VueStripeCheckoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'VueStripeCheckoutError';
+  }
+}
+
 export class VueStripeLoadError extends Error {
   constructor(message: string) {
     super(message);
@@ -19,12 +26,14 @@ export class VueStripeLoadError extends Error {
   }
 }
 
-export function createVueStripeError(type: 'provider' | 'elements' | 'load', message: string): Error {
+export function createVueStripeError(type: 'provider' | 'elements' | 'checkout' | 'load', message: string): Error {
   switch (type) {
     case 'provider':
       return new VueStripeProviderError(message);
     case 'elements':
       return new VueStripeElementsError(message);
+    case 'checkout':
+      return new VueStripeCheckoutError(message);
     case 'load':
       return new VueStripeLoadError(message);
     default:

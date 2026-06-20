@@ -5,3 +5,4 @@ export { useStripeCheckout, useStripeCheckout as useCheckout } from './useStripe
 export { useStripeElements, useStripeElements as useElements } from './useStripeElements'
 export { useCreatePaymentMethod } from './useCreatePaymentMethod'
 export { useHandleNextAction } from './useHandleNextAction'
+export { useCheckoutSession } from './useCheckoutSession'

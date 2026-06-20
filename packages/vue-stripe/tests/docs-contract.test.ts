@@ -43,6 +43,7 @@ const MAP: Array<{ component: string; doc: string; viaFactory?: boolean }> = [
   { component: 'VueStripeP24BankElement.vue', doc: 'stripe-p24-bank-element.md' },
   { component: 'VueStripeEpsBankElement.vue', doc: 'stripe-eps-bank-element.md' },
   { component: 'VueStripeCheckout.vue', doc: 'stripe-checkout.md' },
+  { component: 'VueStripeCheckoutProvider.vue', doc: 'stripe-checkout-provider.md' },
   { component: 'VueStripePricingTable.vue', doc: 'stripe-pricing-table.md' }
 ]
 

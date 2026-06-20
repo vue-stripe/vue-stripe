@@ -34,12 +34,68 @@ export interface MockStripeElements {
   fetchUpdates: MockFn
 }
 
+export interface MockStripeCheckout {
+  session: MockFn
+  on: MockFn
+  confirm: MockFn
+  applyPromotionCode: MockFn
+  removePromotionCode: MockFn
+  updateEmail: MockFn
+  updatePhoneNumber: MockFn
+  updateBillingAddress: MockFn
+  updateShippingAddress: MockFn
+  updateLineItemQuantity: MockFn
+  updateShippingOption: MockFn
+  updateTaxIdInfo: MockFn
+  runServerUpdate: MockFn
+  changeAppearance: MockFn
+}
+
 export interface MockStripe {
   elements: MockFn
   confirmPayment: MockFn
   confirmCardSetup: MockFn
   confirmSetup: MockFn
+  initCheckout: MockFn
   registerAppInfo: MockFn
+}
+
+// A default Custom Checkout session snapshot.
+export function makeMockCheckoutSession(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 'cs_test_123',
+    status: 'open',
+    canConfirm: true,
+    currency: 'usd',
+    email: null,
+    phoneNumber: null,
+    billingAddress: null,
+    shippingAddress: null,
+    lineItems: [],
+    total: { total: { minorUnitsAmount: 1099, amount: '$10.99' } },
+    ...overrides
+  }
+}
+
+export function makeMockCheckout(): MockStripeCheckout {
+  const okResult = (session = makeMockCheckoutSession()) =>
+    Promise.resolve({ type: 'success', session })
+  return {
+    session: vi.fn(() => makeMockCheckoutSession()),
+    on: vi.fn(),
+    confirm: vi.fn(() => okResult()),
+    applyPromotionCode: vi.fn(() => okResult()),
+    removePromotionCode: vi.fn(() => okResult()),
+    updateEmail: vi.fn(() => okResult()),
+    updatePhoneNumber: vi.fn(() => okResult()),
+    updateBillingAddress: vi.fn(() => okResult()),
+    updateShippingAddress: vi.fn(() => okResult()),
+    updateLineItemQuantity: vi.fn(() => okResult()),
+    updateShippingOption: vi.fn(() => okResult()),
+    updateTaxIdInfo: vi.fn(() => okResult()),
+    runServerUpdate: vi.fn(() => okResult()),
+    changeAppearance: vi.fn()
+  }
 }
 
 export function makeMockElement(): MockStripeElement {
@@ -94,6 +150,7 @@ export function makeMockStripe(): MockStripe {
     confirmSetup: vi.fn(() => Promise.resolve({
       setupIntent: { id: 'seti_test_123', status: 'succeeded' }
     })),
+    initCheckout: vi.fn(() => Promise.resolve(makeMockCheckout())),
     registerAppInfo: vi.fn()
   }
 }

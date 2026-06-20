@@ -24,6 +24,8 @@ import DocsVerificationView from './views/DocsVerificationView.vue'
 import PaymentMethodMessagingView from './views/PaymentMethodMessagingView.vue'
 // Convenience composables (v5.5 - #390)
 import ConvenienceComposablesView from './views/ConvenienceComposablesView.vue'
+// Custom Checkout (#388)
+import CustomCheckoutView from './views/CustomCheckoutView.vue'
 
 // Route metadata for SEO
 export interface RouteMeta {
@@ -222,6 +224,15 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Convenience Composables - Vue Stripe',
       description: 'useCreatePaymentMethod, useHandleNextAction and retrieve helpers'
+    }
+  },
+  {
+    path: '/custom-checkout',
+    name: 'CustomCheckout',
+    component: CustomCheckoutView,
+    meta: {
+      title: 'Custom Checkout - Vue Stripe',
+      description: 'Build a fully custom checkout with VueStripeCheckoutProvider and useCheckoutSession'
     }
   }
 ]
