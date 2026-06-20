@@ -83,8 +83,13 @@ const PayForm = defineComponent({
           }),
         ]),
         h('p', { class: 'hint' }, 'Test IBAN: AT61 1904 3002 3457 3201'),
-        h('button', { class: ['btn', { disabled: !canPay.value }], disabled: !canPay.value, onClick: pay },
-          confirming.value ? 'Processing…' : `Pay ${formatPrice(2000, 'eur')} with SEPA`),
+        h('button', {
+          disabled: !canPay.value,
+          onClick: pay,
+          // Inline style: this button is nested in an inner component, so the
+          // parent SFC's scoped `.btn` rule doesn't reach it.
+          style: { padding: '0.75rem 1.25rem', background: '#635bff', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.95rem', fontWeight: '600', cursor: canPay.value ? 'pointer' : 'not-allowed', opacity: canPay.value ? '1' : '0.6' },
+        }, confirming.value ? 'Processing…' : `Pay ${formatPrice(2000, 'eur')} with SEPA`),
       ])
   },
 })
