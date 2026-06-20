@@ -126,6 +126,36 @@ describe('VueStripeCheckoutProvider', () => {
     expect((emittedReady as any[])[0][0]).toBe(checkout)
   })
 
+  it('nulls the provided refs on unmount and ignores late change events', async () => {
+    let injected: any = null
+    const checkout = makeMockCheckout()
+    const Child = {
+      setup() {
+        injected = inject(stripeCheckoutInjectionKey)
+        return () => h('div')
+      }
+    }
+    const { wrapper } = await mountWith(checkout, { clientSecret: 'cs_test_123_secret' }, {
+      default: () => h(Child)
+    })
+
+    // Ready: refs populated, change handler registered.
+    expect(injected.checkout.value).toBe(checkout)
+    expect(injected.session.value).toBeTruthy()
+    const onCall = checkout.on.mock.calls.find((c: any[]) => c[0] === 'change')
+    const changeHandler = onCall![1]
+
+    wrapper.unmount()
+
+    // Teardown nulls the provided refs.
+    expect(injected.checkout.value).toBeNull()
+    expect(injected.session.value).toBeNull()
+
+    // A late `change` event after unmount is ignored (guarded by the unmounted flag).
+    changeHandler(makeMockCheckoutSession({ email: 'late@b.com' }))
+    expect(injected.session.value).toBeNull()
+  })
+
   it('shows an error AND emits @error when neither clientSecret nor fetchClientSecret is provided', async () => {
     const stripe = makeMockStripe()
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe

@@ -108,4 +108,26 @@ describe('useCheckoutSession', () => {
     // sentinel conforms to Stripe's result-union shape ({ message, code })
     expect(result.error.code).toBeNull()
   })
+
+  it('changeAppearance warns and no-ops when the session is not ready', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    let api: any
+    const Comp = defineComponent({ setup() { api = useCheckoutSession(); return {} }, render: () => h('div') })
+    const Host = defineComponent({
+      setup() {
+        provide(stripeCheckoutInjectionKey, {
+          checkout: ref(null),
+          session: ref(null),
+          loading: ref(true),
+          error: ref(null)
+        })
+        return () => h(Comp)
+      }
+    })
+    mount(Host)
+
+    expect(() => api.changeAppearance({ theme: 'night' })).not.toThrow()
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('changeAppearance'))
+    warn.mockRestore()
+  })
 })
