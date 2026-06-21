@@ -196,12 +196,11 @@ const navGroups = computed(() => {
     'AddressElement': MapPin,
     // European Regional Elements (v5.2.0)
     'IbanElement': Landmark,
-    'IdealBankElement': Landmark,
-    'P24BankElement': Landmark,
-    'EpsBankElement': Landmark,
     // APAC Regional Elements
-    'FpxBankElement': Landmark,
     'AuBankAccountElement': Landmark,
+    // Custom Checkout elements (#382 / #383)
+    'CurrencySelectorElement': Euro,
+    'TaxIdElement': CheckSquare,
     // Pricing Table (v5.3.0)
     'PricingTable': Table2,
   }
@@ -231,9 +230,11 @@ const navGroups = computed(() => {
   }
 
   // European element route names
-  const europeanElements = ['IbanElement', 'IdealBankElement', 'P24BankElement', 'EpsBankElement']
+  const europeanElements = ['IbanElement']
   // APAC element route names
-  const apacElements = ['FpxBankElement', 'AuBankAccountElement']
+  const apacElements = ['AuBankAccountElement']
+  // Custom Checkout element route names (#382 / #383)
+  const checkoutElements = ['CurrencySelectorElement', 'TaxIdElement']
 
   routes.forEach(route => {
     const name = String(route.name)
@@ -242,7 +243,7 @@ const navGroups = computed(() => {
 
     if (name.includes('Provider') || name.includes('Elements') && !name.includes('Element')) {
       groups.core.items.push(item)
-    } else if (name.includes('Checkout') || name === 'PricingTable') {
+    } else if (name.includes('Checkout') || name === 'PricingTable' || checkoutElements.includes(name)) {
       groups.checkout.items.push(item)
     } else if (europeanElements.includes(name)) {
       groups.european.items.push(item)

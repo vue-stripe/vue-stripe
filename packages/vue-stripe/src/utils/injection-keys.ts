@@ -1,5 +1,21 @@
 import type { InjectionKey, Ref } from 'vue-demi';
-import type { Stripe, StripeElements, StripeCheckout, StripeCheckoutSession } from '@stripe/stripe-js';
+import type {
+  Stripe,
+  StripeElements,
+  StripeCheckout,
+  StripeCheckoutSession,
+  StripeCheckoutLoadActionsResult
+} from '@stripe/stripe-js';
+
+/**
+ * The action methods returned by `checkout.loadActions()` (8.x Custom Checkout).
+ * In stripe-js 8.x the session methods (confirm, updateEmail, …) live here rather
+ * than directly on the StripeCheckout instance.
+ */
+export type StripeCheckoutActions = Extract<
+  StripeCheckoutLoadActionsResult,
+  { type: 'success' }
+>['actions'];
 
 export interface StripeInstance {
   stripe: Ref<Stripe | null>;
@@ -15,6 +31,8 @@ export interface StripeElementsInstance {
 
 export interface StripeCheckoutInstance {
   checkout: Ref<StripeCheckout | null>;
+  /** Session methods from checkout.loadActions() (null until loaded). */
+  actions: Ref<StripeCheckoutActions | null>;
   session: Ref<StripeCheckoutSession | null>;
   loading: Ref<boolean>;
   error: Ref<string | null>;

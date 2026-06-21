@@ -13,6 +13,7 @@ import type {
   StripeCheckoutSession,
   StripeCheckoutElementsOptions
 } from '@stripe/stripe-js'
+import type { StripeCheckoutActions } from '../utils/injection-keys'
 
 // Re-export commonly used Stripe.js types with their original names
 // Since our Vue components now use VueStripe* prefix, there's no conflict
@@ -48,8 +49,16 @@ export type {
   StripeCheckoutSession,
   StripeCheckoutContact,
   StripeCheckoutLineItem,
-  StripeCheckoutConfirmResult
+  StripeCheckoutConfirmResult,
+  // Custom Checkout element types (stripe-js 8.x)
+  StripeCurrencySelectorElement,
+  StripeTaxIdElement,
+  StripeTaxIdElementOptions,
+  StripeTaxIdElementChangeEvent
 } from '@stripe/stripe-js'
+
+// Session action methods returned by `checkout.loadActions()` (stripe-js 8.x).
+export type { StripeCheckoutActions } from '../utils/injection-keys'
 
 // Vue-specific plugin configuration
 export interface VueStripeOptions {
@@ -251,8 +260,10 @@ export interface UseSetupIntentReturn {
 }
 
 /**
- * Return value of `useCheckoutSession()`. Method signatures are taken directly
- * from Stripe's `StripeCheckout` so they stay in sync with `@stripe/stripe-js`.
+ * Return value of `useCheckoutSession()`. The session action methods are taken
+ * from the object returned by `checkout.loadActions()` (stripe-js 8.x), while
+ * `changeAppearance` remains on the `StripeCheckout` instance — both stay in
+ * sync with `@stripe/stripe-js`.
  */
 export interface UseCheckoutSessionReturn {
   /** The underlying StripeCheckout instance (null until initialized). */
@@ -263,17 +274,17 @@ export interface UseCheckoutSessionReturn {
   error: Readonly<Ref<string | null>>
   /** Imperative snapshot of the current session (prefer the reactive `session`). */
   getSession: () => StripeCheckoutSession | null
-  confirm: StripeCheckout['confirm']
-  applyPromotionCode: StripeCheckout['applyPromotionCode']
-  removePromotionCode: StripeCheckout['removePromotionCode']
-  updateEmail: StripeCheckout['updateEmail']
-  updatePhoneNumber: StripeCheckout['updatePhoneNumber']
-  updateBillingAddress: StripeCheckout['updateBillingAddress']
-  updateShippingAddress: StripeCheckout['updateShippingAddress']
-  updateLineItemQuantity: StripeCheckout['updateLineItemQuantity']
-  updateShippingOption: StripeCheckout['updateShippingOption']
-  updateTaxIdInfo: StripeCheckout['updateTaxIdInfo']
-  runServerUpdate: StripeCheckout['runServerUpdate']
+  confirm: StripeCheckoutActions['confirm']
+  applyPromotionCode: StripeCheckoutActions['applyPromotionCode']
+  removePromotionCode: StripeCheckoutActions['removePromotionCode']
+  updateEmail: StripeCheckoutActions['updateEmail']
+  updatePhoneNumber: StripeCheckoutActions['updatePhoneNumber']
+  updateBillingAddress: StripeCheckoutActions['updateBillingAddress']
+  updateShippingAddress: StripeCheckoutActions['updateShippingAddress']
+  updateLineItemQuantity: StripeCheckoutActions['updateLineItemQuantity']
+  updateShippingOption: StripeCheckoutActions['updateShippingOption']
+  updateTaxIdInfo: StripeCheckoutActions['updateTaxIdInfo']
+  runServerUpdate: StripeCheckoutActions['runServerUpdate']
   changeAppearance: StripeCheckout['changeAppearance']
 }
 

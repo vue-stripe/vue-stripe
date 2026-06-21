@@ -15,7 +15,6 @@ import PaymentIntentGenerator from './components/examples/PaymentIntentGenerator
 import ClientSecretInput from './components/examples/ClientSecretInput.vue'
 import PaymentStatus from './components/examples/PaymentStatus.vue'
 import PaymentElementExample from './components/examples/PaymentElementExample.vue'
-import IdealPaymentExample from './components/examples/IdealPaymentExample.vue'
 import SubscriptionCheckoutExample from './components/examples/SubscriptionCheckoutExample.vue'
 import SubscriptionEmbeddedExample from './components/examples/SubscriptionEmbeddedExample.vue'
 import CheckoutRedirectExample from './components/examples/CheckoutRedirectExample.vue'
@@ -27,10 +26,7 @@ import AddressElementExample from './components/examples/AddressElementExample.v
 import CreatePaymentMethodExample from './components/examples/CreatePaymentMethodExample.vue'
 import SetupIntentExample from './components/examples/SetupIntentExample.vue'
 import IbanElementExample from './components/examples/IbanElementExample.vue'
-import P24ElementExample from './components/examples/P24ElementExample.vue'
-import EpsElementExample from './components/examples/EpsElementExample.vue'
 import ExpressCheckoutExample from './components/examples/ExpressCheckoutExample.vue'
-import FpxPaymentExample from './components/examples/FpxPaymentExample.vue'
 import AuBankAccountPaymentExample from './components/examples/AuBankAccountPaymentExample.vue'
 
 // Analytics composables
@@ -100,7 +96,6 @@ export default {
     app.component('ClientSecretInput', ClientSecretInput)
     app.component('PaymentStatus', PaymentStatus)
     app.component('PaymentElementExample', PaymentElementExample)
-    app.component('IdealPaymentExample', IdealPaymentExample)
     app.component('SubscriptionCheckoutExample', SubscriptionCheckoutExample)
     app.component('SubscriptionEmbeddedExample', SubscriptionEmbeddedExample)
     app.component('CheckoutRedirectExample', CheckoutRedirectExample)
@@ -112,11 +107,8 @@ export default {
     app.component('CreatePaymentMethodExample', CreatePaymentMethodExample)
     app.component('SetupIntentExample', SetupIntentExample)
     app.component('IbanElementExample', IbanElementExample)
-    app.component('P24ElementExample', P24ElementExample)
-    app.component('EpsElementExample', EpsElementExample)
     app.component('ExpressCheckoutExample', ExpressCheckoutExample)
     app.component('StripeCoverage', StripeCoverage)
-    app.component('FpxPaymentExample', FpxPaymentExample)
     app.component('AuBankAccountPaymentExample', AuBankAccountPaymentExample)
   }
 } satisfies Theme

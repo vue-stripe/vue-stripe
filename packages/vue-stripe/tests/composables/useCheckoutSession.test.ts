@@ -40,32 +40,34 @@ describe('useCheckoutSession', () => {
 
   it('exposes the reactive session seeded from the checkout', async () => {
     const checkout = makeMockCheckout()
-    checkout.session = vi.fn(() => makeMockCheckoutSession({ email: 'seed@b.com' }))
+    // 8.x: the session is seeded from actions.getSession() loaded via loadActions().
+    checkout.actions.getSession = vi.fn(() => makeMockCheckoutSession({ email: 'seed@b.com' }))
     const { api } = await mountWith(checkout)
     expect(api().session.value.email).toBe('seed@b.com')
     expect(api().loading.value).toBe(false)
   })
 
-  it('forwards session methods to the checkout instance', async () => {
+  it('forwards session methods to the checkout actions', async () => {
     const { api, checkout } = await mountWith()
 
     await api().updateEmail('new@b.com')
-    expect(checkout.updateEmail).toHaveBeenCalledWith('new@b.com')
+    expect(checkout.actions.updateEmail).toHaveBeenCalledWith('new@b.com')
 
     await api().applyPromotionCode('PROMO10')
-    expect(checkout.applyPromotionCode).toHaveBeenCalledWith('PROMO10')
+    expect(checkout.actions.applyPromotionCode).toHaveBeenCalledWith('PROMO10')
 
     await api().updateLineItemQuantity({ lineItem: 'li_1', quantity: 3 })
-    expect(checkout.updateLineItemQuantity).toHaveBeenCalledWith({ lineItem: 'li_1', quantity: 3 })
+    expect(checkout.actions.updateLineItemQuantity).toHaveBeenCalledWith({ lineItem: 'li_1', quantity: 3 })
 
     await api().confirm({ returnUrl: 'https://example.com/done' })
-    expect(checkout.confirm).toHaveBeenCalledWith({ returnUrl: 'https://example.com/done' })
+    expect(checkout.actions.confirm).toHaveBeenCalledWith({ returnUrl: 'https://example.com/done' })
 
+    // changeAppearance remains on the checkout instance, not behind loadActions().
     api().changeAppearance({ theme: 'night' })
     expect(checkout.changeAppearance).toHaveBeenCalledWith({ theme: 'night' })
   })
 
-  it('forwards every session method to the underlying checkout instance', async () => {
+  it('forwards every session method to the underlying checkout actions', async () => {
     const { api, checkout } = await mountWith()
     const methods = [
       'confirm', 'applyPromotionCode', 'removePromotionCode', 'updateEmail',
@@ -74,25 +76,26 @@ describe('useCheckoutSession', () => {
     ] as const
     for (const name of methods) {
       await (api() as any)[name]('arg')
-      expect((checkout as any)[name]).toHaveBeenCalledTimes(1)
+      expect((checkout.actions as any)[name]).toHaveBeenCalledTimes(1)
     }
   })
 
-  it('getSession returns the current snapshot from the checkout', async () => {
+  it('getSession returns the current snapshot from the checkout actions', async () => {
     const checkout = makeMockCheckout()
-    checkout.session = vi.fn(() => makeMockCheckoutSession({ id: 'cs_snapshot' }))
+    checkout.actions.getSession = vi.fn(() => makeMockCheckoutSession({ id: 'cs_snapshot' }))
     const { api } = await mountWith(checkout)
     expect(api().getSession().id).toBe('cs_snapshot')
   })
 
-  it('returns a graceful error result if a method is called before the session is ready', async () => {
-    // Inject a context whose checkout ref is still null (session not yet created).
+  it('returns a graceful error result if a method is called before the actions are ready', async () => {
+    // Inject a context whose actions ref is still null (loadActions() not resolved).
     let api: any
     const Comp = defineComponent({ setup() { api = useCheckoutSession(); return {} }, render: () => h('div') })
     const Host = defineComponent({
       setup() {
         provide(stripeCheckoutInjectionKey, {
           checkout: ref(null),
+          actions: ref(null),
           session: ref(null),
           loading: ref(true),
           error: ref(null)
@@ -117,6 +120,7 @@ describe('useCheckoutSession', () => {
       setup() {
         provide(stripeCheckoutInjectionKey, {
           checkout: ref(null),
+          actions: ref(null),
           session: ref(null),
           loading: ref(true),
           error: ref(null)

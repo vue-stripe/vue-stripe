@@ -10,7 +10,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@stripe/stripe-js": "^7.5.0",
+    "@stripe/stripe-js": "^8.5.3",
     "@unhead/vue": "^2.0.19",
     "@vercel/analytics": "^1.6.1",
     "@vue-stripe/vue-stripe": "workspace:*",

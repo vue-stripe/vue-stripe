@@ -40,10 +40,10 @@ Test Vue Stripe components with real Stripe integrations. These live demos conne
     <p>Enable one-click checkout with Stripe Link.</p>
   </a>
 
-  <a href="/live-demo/ideal-payment" class="example-card">
+  <a href="/live-demo/iban-element" class="example-card">
     <div class="example-icon">🏦</div>
-    <h3>iDEAL Payment</h3>
-    <p>Accept iDEAL payments from customers in the Netherlands.</p>
+    <h3>SEPA Direct Debit</h3>
+    <p>Collect IBAN bank details and accept SEPA Direct Debit payments across Europe.</p>
   </a>
 </div>
 

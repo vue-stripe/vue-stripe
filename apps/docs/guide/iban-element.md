@@ -403,7 +403,5 @@ Use these test IBANs in test mode:
 
 ## Next Steps
 
-- [iDEAL Bank Element](/guide/ideal-bank-element) — Dutch bank payments
-- [P24 Bank Element](/guide/p24-bank-element) — Polish bank payments
-- [EPS Bank Element](/guide/eps-bank-element) — Austrian bank payments
+- [AU Bank Account Element](/guide/au-bank-account-element) — Australian BECS Direct Debit
 - [API Reference](/api/components/stripe-iban-element) — Full props, events, and options

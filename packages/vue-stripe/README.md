@@ -40,7 +40,7 @@ Thank you for your patience! This is an early release of the new Vue Stripe. As 
 ## Installation
 
 ```bash
-npm install @vue-stripe/vue-stripe @stripe/stripe-js
+npm install @vue-stripe/vue-stripe @stripe/stripe-js@^8.5.3
 ```
 
 ## Basic Usage
@@ -182,9 +182,14 @@ const onPaymentChange = (event) => {
 | Component | Description |
 |-----------|-------------|
 | `VueStripeIbanElement` | IBAN input for SEPA payments |
-| `VueStripeIdealBankElement` | iDEAL bank selector (Netherlands) |
-| `VueStripeP24BankElement` | Przelewy24 bank selector (Poland) |
-| `VueStripeEpsBankElement` | EPS bank selector (Austria) |
+
+### Custom Checkout Elements
+
+| Component | Description |
+|-----------|-------------|
+| `VueStripeCheckoutProvider` | Provides a Custom Checkout session to child elements |
+| `VueStripeCurrencySelectorElement` | Currency picker for Custom Checkout (Adaptive Pricing) |
+| `VueStripeTaxIdElement` | Tax ID collection for Custom Checkout |
 
 ## Composables
 

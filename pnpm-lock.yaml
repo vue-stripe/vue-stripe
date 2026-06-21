@@ -134,8 +134,8 @@ importers:
   apps/playground:
     dependencies:
       '@stripe/stripe-js':
-        specifier: ^7.5.0
-        version: 7.5.0
+        specifier: ^8.5.3
+        version: 8.11.0
       '@unhead/vue':
         specifier: ^2.0.19
         version: 2.0.19(vue@3.5.22(typescript@5.9.3))
@@ -214,8 +214,8 @@ importers:
         specifier: ^9.31.0
         version: 9.31.0
       '@stripe/stripe-js':
-        specifier: ^7.5.0
-        version: 7.5.0
+        specifier: ^8.5.3
+        version: 8.11.0
       '@vitejs/plugin-vue':
         specifier: ^6.0.1
         version: 6.0.1(vite@7.1.11(@types/node@24.9.1)(jiti@1.21.7)(terser@5.44.1)(yaml@2.8.0))(vue@3.5.22(typescript@5.9.3))
@@ -1753,8 +1753,8 @@ packages:
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
 
-  '@stripe/stripe-js@7.5.0':
-    resolution: {integrity: sha512-Cq3KKe+G1o7PSBMbmrgpT2JgBeyH2THHr3RdIX2MqF7AnBuspIMgtZ3ktcCgP7kZsTMvnmWymr7zZCT1zeWbMw==}
+  '@stripe/stripe-js@8.11.0':
+    resolution: {integrity: sha512-3fVF4z3efsgwgyj64nFK+6F4/vMw0mUXD2TBbOfftJtKVNx4JNv3CSfe1fY4DCtCk0JFp8/YPNcRkzgV0HJ8cg==}
     engines: {node: '>=12.16'}
 
   '@swc/helpers@0.5.15':
@@ -6592,7 +6592,7 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
-  '@stripe/stripe-js@7.5.0': {}
+  '@stripe/stripe-js@8.11.0': {}
 
   '@swc/helpers@0.5.15':
     dependencies:

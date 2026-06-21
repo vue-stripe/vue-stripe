@@ -18,12 +18,11 @@ Complete API documentation for Vue Stripe components and composables.
 
 ### European Payment Elements
 - [VueStripeIbanElement](/api/components/stripe-iban-element) - IBAN collection for SEPA payments
-- [VueStripeIdealBankElement](/api/components/stripe-ideal-bank-element) - iDEAL bank selector (Netherlands)
-- [VueStripeP24BankElement](/api/components/stripe-p24-bank-element) - Przelewy24 bank selector (Poland)
-- [VueStripeEpsBankElement](/api/components/stripe-eps-bank-element) - EPS bank selector (Austria)
 
 ### Checkout
 - [VueStripeCheckout](/api/components/stripe-checkout) - Embedded Stripe Checkout
+- [VueStripeCurrencySelectorElement](/api/components/stripe-currency-selector-element) - Currency picker for Custom Checkout
+- [VueStripeTaxIdElement](/api/components/stripe-tax-id-element) - Tax ID collection for Custom Checkout
 
 ## Composables
 
