@@ -6,6 +6,16 @@ The Tax ID Element collects and validates a customer's tax ID (for example EU VA
 The Tax ID Element is created from the Custom Checkout `checkout` instance, which only exists in `@stripe/stripe-js` 8.0.0+. Vue Stripe 6+ requires `@stripe/stripe-js@^8.5.3`.
 :::
 
+::: danger Requires a beta flag
+Stripe currently beta-gates the Tax ID Element. Initialize Stripe with the `custom_checkout_tax_id_1` beta via the `betas` prop on `VueStripeProvider`, otherwise `createTaxIdElement` is missing at runtime (`createTaxIdElement is not a function`):
+
+```vue
+<VueStripeProvider :publishable-key="publishableKey" :betas="['custom_checkout_tax_id_1']">
+```
+
+Your Stripe account must have access to the beta.
+:::
+
 ## Required Components
 
 | Component | Role |
@@ -45,7 +55,10 @@ const taxIdOptions = {
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider
+    :publishable-key="publishableKey"
+    :betas="['custom_checkout_tax_id_1']"
+  >
     <VueStripeCheckoutProvider :client-secret="clientSecret">
       <VueStripeTaxIdElement
         :options="taxIdOptions"

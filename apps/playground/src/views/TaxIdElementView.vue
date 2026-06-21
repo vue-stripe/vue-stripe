@@ -54,7 +54,13 @@ const onLoadError = (event: any) => { message.value = `❌ ${event?.error?.messa
         <button :disabled="!cleanSecret" @click="start">Start Checkout</button>
       </div>
 
-      <VueStripeProvider v-else :publishable-key="stripeConfig.publishableKey">
+      <!-- The Tax ID element is beta-gated: Stripe must be initialized with the
+           `custom_checkout_tax_id_1` beta flag for `createTaxIdElement` to exist. -->
+      <VueStripeProvider
+        v-else
+        :publishable-key="stripeConfig.publishableKey"
+        :betas="['custom_checkout_tax_id_1']"
+      >
         <VueStripeCheckoutProvider :client-secret="activeSecret">
           <template #loading><p>Initializing checkout…</p></template>
           <template #error="{ error }"><p class="err">{{ error }}</p></template>

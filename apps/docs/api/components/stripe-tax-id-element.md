@@ -10,11 +10,29 @@ Use VueStripeTaxIdElement to collect and validate a business tax ID during custo
 The Tax ID element is created from the `checkout` instance (`checkout.createTaxIdElement()`), which only exists in `@stripe/stripe-js` 8.0.0+. Vue Stripe 6+ requires `@stripe/stripe-js@^8.5.3`.
 :::
 
+::: danger Requires a beta flag
+The Tax ID element is currently beta-gated by Stripe. You **must** initialize Stripe with the `custom_checkout_tax_id_1` beta or `createTaxIdElement` will not exist at runtime (you'll see `createTaxIdElement is not a function`). Pass it via the [`betas`](/api/components/stripe-provider#props) prop on `VueStripeProvider`:
+
+```vue
+<VueStripeProvider
+  :publishable-key="publishableKey"
+  :betas="['custom_checkout_tax_id_1']"
+>
+  <!-- … -->
+</VueStripeProvider>
+```
+
+Add `'custom_checkout_tax_id_verification_1'` as well for real-time tax ID verification. Your Stripe account must have access to these betas.
+:::
+
 ## Usage
 
 ```vue
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
+  <VueStripeProvider
+    :publishable-key="publishableKey"
+    :betas="['custom_checkout_tax_id_1']"
+  >
     <VueStripeCheckoutProvider :client-secret="clientSecret">
       <VueStripeTaxIdElement
         :options="taxIdOptions"

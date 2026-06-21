@@ -82,6 +82,11 @@ export interface VueStripeProviderProps {
   stripeAccount?: string
   apiVersion?: string
   locale?: string
+  /**
+   * Opt into prerelease Stripe.js features (forwarded to `loadStripe`). Required
+   * by some elements — e.g. the Tax ID element needs `['custom_checkout_tax_id_1']`.
+   */
+  betas?: string[]
 }
 
 /**

@@ -63,8 +63,13 @@ const createCurrencySelectorElement = () => {
 
     // Reuse an existing element if the checkout already created one — Stripe
     // only allows a single Currency Selector element per checkout instance.
-    currencySelectorElement.value =
-      checkout.getCurrencySelectorElement() ?? checkout.createCurrencySelectorElement()
+    // `getCurrencySelectorElement` is declared in the 8.x types but may be absent
+    // from the live stripe-js runtime, so guard the call and fall back to create.
+    const existing =
+      typeof checkout.getCurrencySelectorElement === 'function'
+        ? checkout.getCurrencySelectorElement()
+        : null
+    currencySelectorElement.value = existing ?? checkout.createCurrencySelectorElement()
 
     // Set up event listeners (named handlers, removed in onUnmounted).
     currencySelectorElement.value.on('ready', handleReady)

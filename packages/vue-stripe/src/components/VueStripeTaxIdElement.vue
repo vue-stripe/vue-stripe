@@ -76,9 +76,12 @@ const createTaxIdElement = () => {
     loading.value = true
 
     // Reuse an existing element if the checkout already created one — Stripe
-    // only allows a single Tax ID element per checkout instance.
-    taxIdElement.value =
-      checkout.getTaxIdElement() ?? checkout.createTaxIdElement(props.options)
+    // only allows a single Tax ID element per checkout instance. `getTaxIdElement`
+    // is declared in the 8.x types but may be absent from the live stripe-js
+    // runtime, so guard the call and fall back to creating the element.
+    const existing =
+      typeof checkout.getTaxIdElement === 'function' ? checkout.getTaxIdElement() : null
+    taxIdElement.value = existing ?? checkout.createTaxIdElement(props.options)
 
     // Set up event listeners (named handlers, removed in onUnmounted).
     taxIdElement.value.on('ready', handleReady)

@@ -62,7 +62,8 @@ const onError = (error) => {
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect |
 | `apiVersion` | `string` | No | Override Stripe API version |
 | `locale` | `string` | No | Locale for Stripe.js (e.g., 'en', 'es', 'fr') |
-| `options` | `object` | No | Additional Stripe initialization options |
+| `betas` | `string[]` | No | Opt into prerelease Stripe.js features (forwarded to `loadStripe`). Required by some elements — e.g. the [Tax ID element](/api/components/stripe-tax-id-element) needs `['custom_checkout_tax_id_1']`. |
+| `options` | `object` | No | Additional Stripe initialization options (also accepts `betas`) |
 
 \* Either `publishableKey` or `stripeKey` is required.
 
