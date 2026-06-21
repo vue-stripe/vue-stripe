@@ -62,10 +62,10 @@ export const coverage: CoverageCategory[] = [
     group: 'Bank & Regional Elements',
     items: [
       { name: 'IBAN Element', api: "create('iban')", status: 'covered', artifact: 'VueStripeIbanElement' },
-      { name: 'iDEAL Bank', api: "create('idealBank')", status: 'covered', artifact: 'VueStripeIdealBankElement' },
-      { name: 'P24 Bank', api: "create('p24Bank')", status: 'covered', artifact: 'VueStripeP24BankElement' },
-      { name: 'EPS Bank', api: "create('epsBank')", status: 'covered', artifact: 'VueStripeEpsBankElement' },
-      { name: 'FPX Bank', api: "create('fpxBank')", status: 'covered', artifact: 'VueStripeFpxBankElement' },
+      { name: 'iDEAL Bank', api: "removed in stripe-js 8 — use Payment Element", status: 'deprecated' },
+      { name: 'P24 Bank', api: "removed in stripe-js 8 — use Payment Element", status: 'deprecated' },
+      { name: 'EPS Bank', api: "removed in stripe-js 8 — use Payment Element", status: 'deprecated' },
+      { name: 'FPX Bank', api: "removed in stripe-js 8 — use Payment Element", status: 'deprecated' },
       { name: 'AU Bank Account', api: "create('auBankAccount')", status: 'covered', artifact: 'VueStripeAuBankAccountElement' }
     ]
   },
@@ -90,8 +90,8 @@ export const coverage: CoverageCategory[] = [
     items: [
       // Currency Selector and Tax ID are Custom Checkout elements (require
       // stripe.initCheckout), not standard elements.create — blocked on #388.
-      { name: 'Currency Selector', api: 'checkout.createCurrencySelectorElement()', status: 'planned', issue: 382 },
-      { name: 'Tax ID', api: 'checkout.createTaxIdElement()', status: 'planned', issue: 383 }
+      { name: 'Currency Selector', api: 'checkout.createCurrencySelectorElement()', status: 'covered', artifact: 'VueStripeCurrencySelectorElement' },
+      { name: 'Tax ID', api: 'checkout.createTaxIdElement()', status: 'covered', artifact: 'VueStripeTaxIdElement' }
     ]
   },
   {

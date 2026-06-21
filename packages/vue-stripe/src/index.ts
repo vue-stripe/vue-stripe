@@ -56,7 +56,13 @@ export type {
   StripeCheckoutSession,
   StripeCheckoutContact,
   StripeCheckoutLineItem,
-  StripeCheckoutConfirmResult
+  StripeCheckoutConfirmResult,
+  StripeCheckoutActions,
+  // Custom Checkout element types (stripe-js 8.x)
+  StripeCurrencySelectorElement,
+  StripeTaxIdElement,
+  StripeTaxIdElementOptions,
+  StripeTaxIdElementChangeEvent
 } from './types'
 
 // Export checkout composable types (defined alongside useStripeCheckout)

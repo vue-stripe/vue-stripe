@@ -122,23 +122,20 @@ const europeanElements = [
     route: '/stripe-iban-element',
     icon: Landmark,
   },
+]
+
+const customCheckoutElements = [
   {
-    title: 'iDEAL Bank',
-    description: 'Dutch payment method',
-    route: '/stripe-ideal-bank-element',
-    icon: Landmark,
+    title: 'Currency Selector',
+    description: 'Custom Checkout currency picker',
+    route: '/stripe-currency-selector-element',
+    icon: ShoppingCart,
   },
   {
-    title: 'P24 Bank',
-    description: 'Polish payment method',
-    route: '/stripe-p24-bank-element',
-    icon: Landmark,
-  },
-  {
-    title: 'EPS Bank',
-    description: 'Austrian payment method',
-    route: '/stripe-eps-bank-element',
-    icon: Landmark,
+    title: 'Tax ID Element',
+    description: 'Custom Checkout tax ID collection',
+    route: '/stripe-tax-id-element',
+    icon: ShoppingCart,
   },
 ]
 </script>
@@ -272,6 +269,33 @@ const europeanElements = [
           <Card class="h-full transition-all hover:shadow-md hover:border-primary/50">
             <CardContent class="pt-6">
               <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <component :is="item.icon" class="h-5 w-5" />
+              </div>
+              <h3 class="font-semibold group-hover:text-primary transition-colors">
+                {{ item.title }}
+              </h3>
+              <p class="text-sm text-muted-foreground mt-1">
+                {{ item.description }}
+              </p>
+            </CardContent>
+          </Card>
+        </RouterLink>
+      </div>
+    </div>
+
+    <!-- Custom Checkout Elements -->
+    <div>
+      <h2 class="text-lg font-semibold mb-4">Custom Checkout Elements</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <RouterLink
+          v-for="item in customCheckoutElements"
+          :key="item.route"
+          :to="item.route"
+          class="group"
+        >
+          <Card class="h-full transition-all hover:shadow-md hover:border-primary/50">
+            <CardContent class="pt-6">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-3 bg-violet-500/10 text-violet-600 dark:text-violet-400">
                 <component :is="item.icon" class="h-5 w-5" />
               </div>
               <h3 class="font-semibold group-hover:text-primary transition-colors">

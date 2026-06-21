@@ -426,4 +426,4 @@ Use these test IBANs in test mode:
 - [VueStripeElements](/api/components/stripe-elements) - Parent container component
 - [useStripeElements](/api/composables/use-stripe-elements) - Access elements in child components
 - [IBAN Element Guide](/guide/iban-element) - Step-by-step implementation guide
-- [VueStripeIdealBankElement](/api/components/stripe-ideal-bank-element) - Dutch bank payments
+- [VueStripeAuBankAccountElement](/api/components/stripe-au-bank-account-element) - Australian BECS Direct Debit

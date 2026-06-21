@@ -17,10 +17,14 @@ export { default as VueStripeLinkAuthenticationElement } from './VueStripeLinkAu
 export { default as VueStripeAddressElement } from './VueStripeAddressElement.vue'
 
 // European Regional Elements (v5.2.0)
+// NOTE: the standalone iDEAL / P24 / EPS / FPX bank elements were removed in
+// @stripe/stripe-js 8.0.0 (and dropped here in v6.0.0). Collect those payment
+// methods via VueStripePaymentElement instead.
 export { default as VueStripeIbanElement } from './VueStripeIbanElement.vue'
-export { default as VueStripeIdealBankElement } from './VueStripeIdealBankElement.vue'
-export { default as VueStripeP24BankElement } from './VueStripeP24BankElement.vue'
-export { default as VueStripeEpsBankElement } from './VueStripeEpsBankElement.vue'
+
+// Custom Checkout Elements (stripe-js 8.x)
+export { default as VueStripeCurrencySelectorElement } from './VueStripeCurrencySelectorElement.vue'
+export { default as VueStripeTaxIdElement } from './VueStripeTaxIdElement.vue'
 
 // Messaging Element (v5.5.0)
 export { default as VueStripePaymentMethodMessagingElement } from './VueStripePaymentMethodMessagingElement.vue'
@@ -35,5 +39,4 @@ export { default as VueStripeCheckoutProvider } from './VueStripeCheckoutProvide
 export { default as VueStripePricingTable } from './VueStripePricingTable.vue'
 
 // APAC Regional Elements
-export { default as VueStripeFpxBankElement } from './VueStripeFpxBankElement.vue'
 export { default as VueStripeAuBankAccountElement } from './VueStripeAuBankAccountElement.vue'

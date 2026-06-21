@@ -33,19 +33,22 @@ describe('VueStripeCheckoutProvider', () => {
     ).toThrow('VueStripeCheckoutProvider must be used within VueStripeProvider')
   })
 
-  it('calls stripe.initCheckout, wrapping a raw clientSecret in fetchClientSecret', async () => {
+  it('calls stripe.initCheckout, passing a raw clientSecret directly', async () => {
     const { stripe } = await mountWith()
     expect(stripe.initCheckout).toHaveBeenCalledTimes(1)
     const arg = stripe.initCheckout.mock.calls[0][0]
-    expect(typeof arg.fetchClientSecret).toBe('function')
-    await expect(arg.fetchClientSecret()).resolves.toBe('cs_test_123_secret')
+    // 8.x initCheckout takes a clientSecret (string | Promise<string>), not fetchClientSecret.
+    expect(arg.fetchClientSecret).toBeUndefined()
+    await expect(Promise.resolve(arg.clientSecret)).resolves.toBe('cs_test_123_secret')
   })
 
-  it('prefers fetchClientSecret over clientSecret', async () => {
+  it('prefers fetchClientSecret over clientSecret, resolving it to clientSecret', async () => {
     const fetchClientSecret = vi.fn(() => Promise.resolve('cs_from_fn'))
     const { stripe } = await mountWith(makeMockCheckout(), { fetchClientSecret })
     const arg = stripe.initCheckout.mock.calls[0][0]
-    expect(arg.fetchClientSecret).toBe(fetchClientSecret)
+    expect(fetchClientSecret).toHaveBeenCalledTimes(1)
+    expect(arg.fetchClientSecret).toBeUndefined()
+    await expect(Promise.resolve(arg.clientSecret)).resolves.toBe('cs_from_fn')
   })
 
   it('forwards elementsOptions to initCheckout', async () => {
@@ -57,7 +60,8 @@ describe('VueStripeCheckoutProvider', () => {
   it('seeds the session and provides the checkout context to children', async () => {
     let injected: any = null
     const checkout = makeMockCheckout()
-    checkout.session = vi.fn(() => makeMockCheckoutSession({ email: 'a@b.com' }))
+    // 8.x: the session is seeded from actions.getSession() (loaded via loadActions()).
+    checkout.actions.getSession = vi.fn(() => makeMockCheckoutSession({ email: 'a@b.com' }))
 
     const Child = {
       setup() {
@@ -69,6 +73,7 @@ describe('VueStripeCheckoutProvider', () => {
 
     expect(injected).toBeTruthy()
     expect(injected.checkout.value).toBe(checkout)
+    expect(injected.actions.value).toBe(checkout.actions)
     expect(injected.session.value.email).toBe('a@b.com')
     expect(injected.loading.value).toBe(false)
   })

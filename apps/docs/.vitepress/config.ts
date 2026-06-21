@@ -152,16 +152,19 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           text: 'European Elements',
           items: [
             { text: 'IBAN Element', link: '/guide/iban-element' },
-            { text: 'iDEAL Bank Element', link: '/guide/ideal-bank-element' },
-            { text: 'P24 Bank Element', link: '/guide/p24-bank-element' },
-            { text: 'EPS Bank Element', link: '/guide/eps-bank-element' },
           ]
         },
         {
           text: 'APAC Elements',
           items: [
-            { text: 'FPX Bank Element', link: '/guide/fpx-bank-element' },
             { text: 'AU Bank Account Element', link: '/guide/au-bank-account-element' },
+          ]
+        },
+        {
+          text: 'Custom Checkout',
+          items: [
+            { text: 'Currency Selector Element', link: '/guide/currency-selector-element' },
+            { text: 'Tax ID Element', link: '/guide/tax-id-element' },
           ]
         },
         {
@@ -208,15 +211,11 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           text: 'European Elements',
           items: [
             { text: 'VueStripeIbanElement', link: '/api/components/stripe-iban-element' },
-            { text: 'VueStripeIdealBankElement', link: '/api/components/stripe-ideal-bank-element' },
-            { text: 'VueStripeP24BankElement', link: '/api/components/stripe-p24-bank-element' },
-            { text: 'VueStripeEpsBankElement', link: '/api/components/stripe-eps-bank-element' },
           ]
         },
         {
           text: 'APAC Elements',
           items: [
-            { text: 'VueStripeFpxBankElement', link: '/api/components/stripe-fpx-bank-element' },
             { text: 'VueStripeAuBankAccountElement', link: '/api/components/stripe-au-bank-account-element' },
           ]
         },
@@ -225,6 +224,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           items: [
             { text: 'VueStripeCheckout', link: '/api/components/stripe-checkout' },
             { text: 'VueStripeCheckoutProvider', link: '/api/components/stripe-checkout-provider' },
+            { text: 'VueStripeCurrencySelectorElement', link: '/api/components/stripe-currency-selector-element' },
+            { text: 'VueStripeTaxIdElement', link: '/api/components/stripe-tax-id-element' },
             { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' },
           ]
         },
@@ -283,16 +284,12 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
         {
           text: 'Regional Payment Methods',
           items: [
-            { text: 'iDEAL (Netherlands)', link: '/live-demo/ideal-payment' },
             { text: 'SEPA Direct Debit', link: '/live-demo/iban-element' },
-            { text: 'Przelewy24 (Poland)', link: '/live-demo/p24-payment' },
-            { text: 'EPS (Austria)', link: '/live-demo/eps-payment' },
           ]
         },
         {
           text: 'APAC Payments',
           items: [
-            { text: 'FPX (Malaysia)', link: '/live-demo/fpx-payment' },
             { text: 'BECS Direct Debit (Australia)', link: '/live-demo/becs-payment' },
           ]
         },

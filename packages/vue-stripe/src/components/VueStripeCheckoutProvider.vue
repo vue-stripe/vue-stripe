@@ -6,7 +6,7 @@ import type {
   StripeCheckoutOptions,
   StripeCheckoutElementsOptions
 } from '@stripe/stripe-js'
-import { stripeInjectionKey, stripeCheckoutInjectionKey } from '../utils/injection-keys'
+import { stripeInjectionKey, stripeCheckoutInjectionKey, type StripeCheckoutActions } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 
 interface Props {
@@ -43,6 +43,7 @@ if (!stripeInstance) {
 }
 
 const checkout = ref<StripeCheckout | null>(null)
+const actions = ref<StripeCheckoutActions | null>(null)
 const session = ref<StripeCheckoutSession | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -56,13 +57,15 @@ let unmounted = false
 const initCheckout = async () => {
   if (started || !stripeInstance.stripe.value) return
 
-  // Resolve the client-secret source. The GA API only accepts a
-  // `fetchClientSecret` function, so wrap a raw clientSecret when given.
-  const fetchClientSecret =
-    props.fetchClientSecret ??
-    (props.clientSecret ? () => Promise.resolve(props.clientSecret as string) : null)
+  // Resolve the client secret. In stripe-js 8.x `initCheckout` accepts the
+  // client secret directly (a string or a Promise<string>), so a
+  // `fetchClientSecret` prop is simply invoked to obtain that promise.
+  // `fetchClientSecret` takes precedence over a raw `clientSecret`.
+  const clientSecret: string | Promise<string> | null = props.fetchClientSecret
+    ? props.fetchClientSecret()
+    : props.clientSecret ?? null
 
-  if (!fetchClientSecret) {
+  if (!clientSecret) {
     const message =
       'VueStripeCheckoutProvider requires a `clientSecret` or `fetchClientSecret` prop'
     error.value = message
@@ -80,7 +83,7 @@ const initCheckout = async () => {
     loading.value = true
     error.value = null
 
-    const options: StripeCheckoutOptions = { fetchClientSecret }
+    const options: StripeCheckoutOptions = { clientSecret }
     if (props.elementsOptions) {
       options.elementsOptions = props.elementsOptions
     }
@@ -90,9 +93,23 @@ const initCheckout = async () => {
     // The component may have unmounted while initCheckout() was in flight.
     if (unmounted) return
 
-    // Don't let Vue proxy the external Stripe instances — keep them raw.
+    // Don't let Vue proxy the external Stripe instance — keep it raw.
     checkout.value = markRaw(instance)
-    session.value = markRaw(instance.session())
+
+    // 8.x: the session action methods (confirm, updateEmail, …) and the
+    // session snapshot are loaded asynchronously via loadActions() rather than
+    // living directly on the checkout instance.
+    const loaded = await instance.loadActions()
+
+    // The component may have unmounted while loadActions() was in flight.
+    if (unmounted) return
+
+    if (loaded.type === 'error') {
+      throw new Error(loaded.error.message)
+    }
+
+    actions.value = markRaw(loaded.actions)
+    session.value = markRaw(loaded.actions.getSession())
 
     // Keep the reactive session in sync with Stripe's internal state.
     instance.on('change', (next) => {
@@ -126,6 +143,7 @@ onUnmounted(() => {
   // the best we can do is stop referencing it and let the change handler bail.
   unmounted = true
   checkout.value = null
+  actions.value = null
   session.value = null
   started = false
 })
@@ -133,6 +151,7 @@ onUnmounted(() => {
 // Provide the checkout context for child components / useCheckoutSession.
 provide(stripeCheckoutInjectionKey, {
   checkout,
+  actions,
   session,
   loading,
   error

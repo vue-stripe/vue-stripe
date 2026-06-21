@@ -11,10 +11,17 @@ interface Props {
   stripeAccount?: string
   apiVersion?: string
   locale?: string
+  /**
+   * Opt into prerelease Stripe.js features (forwarded to `loadStripe`). Required
+   * by some elements — e.g. the Tax ID element needs
+   * `['custom_checkout_tax_id_1']`.
+   */
+  betas?: string[]
   options?: {
     stripeAccount?: string
     apiVersion?: string
     locale?: string
+    betas?: string[]
   }
 }
 
@@ -53,10 +60,12 @@ const initialize = async () => {
     const stripeAccount = props.stripeAccount || props.options?.stripeAccount
     const apiVersion = props.apiVersion || props.options?.apiVersion
     const locale = props.locale || props.options?.locale
+    const betas = props.betas || props.options?.betas
 
     if (stripeAccount) options.stripeAccount = stripeAccount
     if (apiVersion) options.apiVersion = apiVersion
     if (locale) options.locale = locale
+    if (betas && betas.length) options.betas = betas
 
     stripe.value = await loadStripe(key, options)
 

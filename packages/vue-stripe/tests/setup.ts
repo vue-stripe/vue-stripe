@@ -34,9 +34,9 @@ export interface MockStripeElements {
   fetchUpdates: MockFn
 }
 
-export interface MockStripeCheckout {
-  session: MockFn
-  on: MockFn
+// Session action methods returned by `checkout.loadActions()` (stripe-js 8.x).
+export interface MockStripeCheckoutActions {
+  getSession: MockFn
   confirm: MockFn
   applyPromotionCode: MockFn
   removePromotionCode: MockFn
@@ -48,7 +48,21 @@ export interface MockStripeCheckout {
   updateShippingOption: MockFn
   updateTaxIdInfo: MockFn
   runServerUpdate: MockFn
+}
+
+export interface MockStripeCheckout {
+  on: MockFn
+  loadActions: MockFn
   changeAppearance: MockFn
+  createCurrencySelectorElement: MockFn
+  getCurrencySelectorElement: MockFn
+  createTaxIdElement: MockFn
+  getTaxIdElement: MockFn
+  /**
+   * Test handle to the actions resolved by `loadActions()`. Not part of Stripe's
+   * real API — provided so tests can assert on the action spies directly.
+   */
+  actions: MockStripeCheckoutActions
 }
 
 export interface MockStripe {
@@ -80,9 +94,8 @@ export function makeMockCheckoutSession(overrides: Record<string, unknown> = {})
 export function makeMockCheckout(): MockStripeCheckout {
   const okResult = (session = makeMockCheckoutSession()) =>
     Promise.resolve({ type: 'success', session })
-  return {
-    session: vi.fn(() => makeMockCheckoutSession()),
-    on: vi.fn(),
+  const actions: MockStripeCheckoutActions = {
+    getSession: vi.fn(() => makeMockCheckoutSession()),
     confirm: vi.fn(() => okResult()),
     applyPromotionCode: vi.fn(() => okResult()),
     removePromotionCode: vi.fn(() => okResult()),
@@ -93,8 +106,19 @@ export function makeMockCheckout(): MockStripeCheckout {
     updateLineItemQuantity: vi.fn(() => okResult()),
     updateShippingOption: vi.fn(() => okResult()),
     updateTaxIdInfo: vi.fn(() => okResult()),
-    runServerUpdate: vi.fn(() => okResult()),
-    changeAppearance: vi.fn()
+    runServerUpdate: vi.fn(() => okResult())
+  }
+  return {
+    on: vi.fn(),
+    // 8.x: session methods are loaded asynchronously rather than living on the
+    // checkout instance directly.
+    loadActions: vi.fn(() => Promise.resolve({ type: 'success', actions })),
+    changeAppearance: vi.fn(),
+    createCurrencySelectorElement: vi.fn(() => makeMockElement()),
+    getCurrencySelectorElement: vi.fn(() => null),
+    createTaxIdElement: vi.fn(() => makeMockElement()),
+    getTaxIdElement: vi.fn(() => null),
+    actions
   }
 }
 

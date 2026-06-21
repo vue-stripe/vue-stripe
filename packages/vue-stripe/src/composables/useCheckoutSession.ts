@@ -1,7 +1,7 @@
 import { inject, readonly } from 'vue-demi'
-import type { Appearance, StripeCheckout, StripeCheckoutSession } from '@stripe/stripe-js'
+import type { Appearance, StripeCheckoutSession } from '@stripe/stripe-js'
 import type { UseCheckoutSessionReturn } from '../types'
-import { stripeCheckoutInjectionKey } from '../utils/injection-keys'
+import { stripeCheckoutInjectionKey, type StripeCheckoutActions } from '../utils/injection-keys'
 import { VueStripeCheckoutError } from '../utils/errors'
 
 /**
@@ -31,24 +31,26 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
     )
   }
 
-  // Forward a StripeCheckout method by name. Generic over the key so an invalid
-  // name fails the build (instead of silently resolving to the not-ready result
-  // if `@stripe/stripe-js` ever renames a method). When called before the session
-  // exists it resolves a graceful sentinel matching Stripe's result-union shape
-  // ({ type: 'error', error: { message, code } }).
-  const call = <K extends keyof StripeCheckout>(name: K): StripeCheckout[K] => {
+  // Forward a Checkout session action by name. In stripe-js 8.x the session
+  // methods live on the object returned by `checkout.loadActions()`, exposed
+  // here as `ctx.actions`. Generic over the key so an invalid name fails the
+  // build (instead of silently resolving to the not-ready result if
+  // `@stripe/stripe-js` ever renames a method). When called before the actions
+  // are loaded it resolves a graceful sentinel matching Stripe's result-union
+  // shape ({ type: 'error', error: { message, code } }).
+  const call = <K extends keyof StripeCheckoutActions>(name: K): StripeCheckoutActions[K] => {
     const wrapped = (...args: unknown[]) => {
-      const instance = ctx.checkout.value
-      const fn = instance?.[name]
+      const actions = ctx.actions.value
+      const fn = actions?.[name]
       if (typeof fn !== 'function') {
         return Promise.resolve({
           type: 'error',
           error: { message: 'Checkout session is not ready yet', code: null }
         })
       }
-      return (fn as (...a: unknown[]) => unknown).apply(instance, args)
+      return (fn as (...a: unknown[]) => unknown).apply(actions, args)
     }
-    return wrapped as StripeCheckout[K]
+    return wrapped as StripeCheckoutActions[K]
   }
 
   return {
@@ -61,7 +63,7 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
     error: readonly(ctx.error),
 
     /** Current session snapshot (imperative; prefer the reactive `session` ref). */
-    getSession: (): StripeCheckoutSession | null => ctx.checkout.value?.session() ?? null,
+    getSession: (): StripeCheckoutSession | null => ctx.actions.value?.getSession() ?? null,
 
     confirm: call('confirm'),
     applyPromotionCode: call('applyPromotionCode'),

@@ -39,11 +39,9 @@ const MAP: Array<{ component: string; doc: string; viaFactory?: boolean }> = [
   { component: 'VueStripeLinkAuthenticationElement.vue', doc: 'stripe-link-authentication-element.md' },
   { component: 'VueStripeAddressElement.vue', doc: 'stripe-address-element.md' },
   { component: 'VueStripeIbanElement.vue', doc: 'stripe-iban-element.md' },
-  { component: 'VueStripeIdealBankElement.vue', doc: 'stripe-ideal-bank-element.md' },
-  { component: 'VueStripeP24BankElement.vue', doc: 'stripe-p24-bank-element.md' },
-  { component: 'VueStripeEpsBankElement.vue', doc: 'stripe-eps-bank-element.md' },
-  { component: 'VueStripeFpxBankElement.vue', doc: 'stripe-fpx-bank-element.md' },
   { component: 'VueStripeAuBankAccountElement.vue', doc: 'stripe-au-bank-account-element.md' },
+  { component: 'VueStripeCurrencySelectorElement.vue', doc: 'stripe-currency-selector-element.md' },
+  { component: 'VueStripeTaxIdElement.vue', doc: 'stripe-tax-id-element.md' },
   { component: 'VueStripeCheckout.vue', doc: 'stripe-checkout.md' },
   { component: 'VueStripeCheckoutProvider.vue', doc: 'stripe-checkout-provider.md' },
   { component: 'VueStripePricingTable.vue', doc: 'stripe-pricing-table.md' }
