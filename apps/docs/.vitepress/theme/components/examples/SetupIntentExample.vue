@@ -131,12 +131,14 @@ const SaveCardForm = defineComponent({
 .step { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
 .stripe-container { width: 100%; padding: 1.5rem; background: var(--vp-c-bg-soft); border-radius: 8px; }
 .save-form { display: flex; flex-direction: column; gap: 1rem; }
-.pe-wrap { min-height: 180px; padding: 0.75rem; background: white; border: 1px solid var(--vp-c-divider); border-radius: 6px; }
-:root.dark .pe-wrap { background: #1a1a1a; }
-
-.btn { padding: 0.75rem 1.25rem; background: #635bff; color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-.btn:hover:not(:disabled) { opacity: 0.9; }
-.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+/* The Payment Element wrapper and Save button are rendered by the inner
+   SaveCardForm component, so this SFC's scoped styles only reach them via :deep().
+   (--vp-c-bg is white in light / near-black in dark, replacing the old
+   white + :root.dark override that couldn't reach the nested element.) */
+:deep(.pe-wrap) { min-height: 180px; padding: 0.75rem; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); border-radius: 6px; }
+:deep(.btn) { padding: 0.75rem 1.25rem; background: #635bff; color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+:deep(.btn:hover:not(:disabled)) { opacity: 0.9; }
+:deep(.btn:disabled) { opacity: 0.6; cursor: not-allowed; }
 .link-btn { background: none; border: none; color: var(--vp-c-brand-1); font-size: 0.85rem; cursor: pointer; padding: 0; }
 
 .error-box { width: 100%; padding: 0.75rem 1rem; background: var(--vp-c-danger-soft); border: 1px solid var(--vp-c-danger-1); border-radius: 6px; color: var(--vp-c-danger-1); font-size: 0.875rem; }

@@ -84,12 +84,14 @@ const Demo = defineComponent({
 
 .stripe-container { padding: 1.5rem; background: var(--vp-c-bg-soft); border-radius: 8px; }
 .cpm-demo { display: flex; flex-direction: column; gap: 1rem; }
-.card-wrap { padding: 0.75rem; background: white; border: 1px solid var(--vp-c-divider); border-radius: 6px; }
-:root.dark .card-wrap { background: #1a1a1a; }
-.btn { padding: 0.75rem 1.25rem; background: #635bff; color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-.btn:hover:not(.disabled) { opacity: 0.9; }
-.btn.disabled { opacity: 0.6; cursor: not-allowed; }
-.result { padding: 0.625rem 0.875rem; background: var(--vp-c-bg); border-radius: 6px; font-size: 0.8rem; color: var(--vp-c-danger-1); }
-.result.ok { color: var(--vp-c-green-darker); background: var(--vp-c-green-soft); }
-.err { margin: 0; color: var(--vp-c-danger-1); font-size: 0.85rem; }
+/* Every element below is rendered by the inner Demo component, so this SFC's
+   scoped styles only reach them via :deep(). (--vp-c-bg is white in light /
+   near-black in dark, replacing the old white + :root.dark override.) */
+:deep(.card-wrap) { padding: 0.75rem; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); border-radius: 6px; }
+:deep(.btn) { padding: 0.75rem 1.25rem; background: #635bff; color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+:deep(.btn:hover:not(.disabled)) { opacity: 0.9; }
+:deep(.btn.disabled) { opacity: 0.6; cursor: not-allowed; }
+:deep(.result) { padding: 0.625rem 0.875rem; background: var(--vp-c-bg); border-radius: 6px; font-size: 0.8rem; color: var(--vp-c-danger-1); }
+:deep(.result.ok) { color: var(--vp-c-green-darker); background: var(--vp-c-green-soft); }
+:deep(.err) { margin: 0; color: var(--vp-c-danger-1); font-size: 0.85rem; }
 </style>
