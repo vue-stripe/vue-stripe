@@ -13,7 +13,7 @@ import { useBackendApi, type Product } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
 
 const { publishableKey } = useStripeConfig()
-const { createPaymentIntent, formatPrice, loading, error } = useBackendApi()
+const { createIdealIntent, formatPrice, loading, error } = useBackendApi()
 
 // Step management: Product → Payment → Complete
 const step = ref<'select' | 'payment' | 'complete'>('select')
@@ -34,12 +34,11 @@ async function onProductSelected(product: Product) {
   confirmError.value = null
 
   try {
-    const result = await createPaymentIntent({
-      priceId: product.price.id,
-      amount: product.price.amount,
-      currency: product.price.currency,
-      paymentMethodTypes: ['ideal'],
-    })
+    // Use the dedicated iDEAL endpoint, which creates the PaymentIntent with
+    // payment_method_types: ['ideal'] + EUR (iDEAL is EUR-only). The generic
+    // /api/payment-intent route uses the account's automatic methods, which
+    // don't include iDEAL.
+    const result = await createIdealIntent({ amount: product.price.amount })
     clientSecret.value = result.clientSecret
     paymentIntentId.value = result.paymentIntentId
     step.value = 'payment'

@@ -71,6 +71,16 @@ function reset() {
     <template v-else>
       <PaymentStatus />
 
+      <div class="account-note">
+        <strong>⚠️ Requires a Malaysian Stripe account.</strong>
+        <p>
+          FPX (<code>fpx</code>) is only available to Stripe accounts based in Malaysia. This public
+          demo's account is in the US, so creating the PaymentIntent returns an
+          <em>"fpx is invalid… your account is in US"</em> error. The example below is kept as a
+          working code reference.
+        </p>
+      </div>
+
       <!-- Progress Steps -->
       <div class="progress-steps">
         <div class="progress-step" :class="{ active: step === 'select', completed: step !== 'select' }">
@@ -241,6 +251,9 @@ export default { components: { ConfirmFpxButton } }
 
 <style scoped>
 .fpx-payment-example { padding: 1.5rem; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); border-radius: 12px; }
+.account-note { margin-bottom: 1.25rem; padding: 0.875rem 1rem; background: var(--vp-c-yellow-soft); border: 1px solid var(--vp-c-yellow-1); border-radius: 8px; color: var(--vp-c-yellow-darker); }
+.account-note strong { display: block; margin-bottom: 0.25rem; }
+.account-note p { margin: 0; font-size: 0.85rem; }
 .warning-box { padding: 1rem; background: var(--vp-c-yellow-soft); border: 1px solid var(--vp-c-yellow-1); border-radius: 8px; color: var(--vp-c-yellow-darker); }
 .warning-box strong { display: block; margin-bottom: 0.5rem; }
 .warning-box p { margin: 0; font-size: 0.875rem; }

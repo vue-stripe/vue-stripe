@@ -11,12 +11,13 @@ export async function POST(request: Request) {
     // Determine line items: use existing priceId or create inline price_data
     let lineItems
     if (body.priceId) {
-      // Use existing price from Stripe
+      // Metered prices must NOT include `quantity` (Stripe rejects it).
+      const price = await stripe.prices.retrieve(body.priceId)
+      const isMetered = price.recurring?.usage_type === 'metered'
       lineItems = [
-        {
-          price: body.priceId,
-          quantity: body.quantity || 1,
-        },
+        isMetered
+          ? { price: body.priceId }
+          : { price: body.priceId, quantity: body.quantity || 1 },
       ]
     } else if (body.lineItems) {
       // Use provided line items

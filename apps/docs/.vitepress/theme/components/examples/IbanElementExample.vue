@@ -83,8 +83,11 @@ const PayForm = defineComponent({
           }),
         ]),
         h('p', { class: 'hint' }, 'Test IBAN: AT61 1904 3002 3457 3201'),
-        h('button', { class: ['btn', { disabled: !canPay.value }], disabled: !canPay.value, onClick: pay },
-          confirming.value ? 'Processing…' : `Pay ${formatPrice(2000, 'eur')} with SEPA`),
+        h('button', {
+          class: ['btn', { disabled: !canPay.value }],
+          disabled: !canPay.value,
+          onClick: pay,
+        }, confirming.value ? 'Processing…' : `Pay ${formatPrice(2000, 'eur')} with SEPA`),
       ])
   },
 })
@@ -143,12 +146,14 @@ const PayForm = defineComponent({
 .step { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
 .stripe-container { width: 100%; padding: 1.5rem; background: var(--vp-c-bg-soft); border-radius: 8px; }
 .pay-form { display: flex; flex-direction: column; gap: 0.75rem; }
-.text { padding: 0.625rem 0.75rem; background: white; border: 1px solid var(--vp-c-divider); border-radius: 6px; color: #1a1a1a; }
-.iban-wrap { padding: 0.75rem; background: white; border: 1px solid var(--vp-c-divider); border-radius: 6px; }
-.hint { margin: 0; font-size: 0.75rem; color: var(--vp-c-text-3); }
-.btn { padding: 0.75rem 1.25rem; background: #635bff; color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-.btn:hover:not(:disabled) { opacity: 0.9; }
-.btn:disabled, .btn.disabled { opacity: 0.6; cursor: not-allowed; }
+/* The pay form's inputs, hint and Pay button are rendered by the inner PayForm
+   component, so this SFC's scoped styles only reach them via :deep(). */
+:deep(.text) { padding: 0.625rem 0.75rem; background: white; border: 1px solid var(--vp-c-divider); border-radius: 6px; color: #1a1a1a; }
+:deep(.iban-wrap) { padding: 0.75rem; background: white; border: 1px solid var(--vp-c-divider); border-radius: 6px; }
+:deep(.hint) { margin: 0; font-size: 0.75rem; color: var(--vp-c-text-3); }
+:deep(.btn) { padding: 0.75rem 1.25rem; background: #635bff; color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+:deep(.btn:hover:not(:disabled)) { opacity: 0.9; }
+:deep(.btn:disabled), :deep(.btn.disabled) { opacity: 0.6; cursor: not-allowed; }
 .link-btn { background: none; border: none; color: var(--vp-c-brand-1); font-size: 0.85rem; cursor: pointer; padding: 0; }
 .error-box { width: 100%; padding: 0.75rem 1rem; background: var(--vp-c-danger-soft); border: 1px solid var(--vp-c-danger-1); border-radius: 6px; color: var(--vp-c-danger-1); font-size: 0.875rem; }
 .success { align-items: center; text-align: center; padding: 1.5rem; }

@@ -138,7 +138,10 @@ const ExpressForm = defineComponent({
 .summary .price { font-weight: 700; color: var(--vp-c-brand-1); }
 .stripe-container { width: 100%; padding: 1.5rem; background: var(--vp-c-bg-soft); border-radius: 8px; }
 .express-form { width: 100%; }
-.hint { margin: 0.75rem 0 0; font-size: 0.8rem; color: var(--vp-c-text-3); }
+/* .hint is rendered by the inner ExpressForm component; scope it through
+   .express-form so :deep() reaches it without leaking into ProductSelector's
+   own .hint (which also lives in this component's subtree). */
+.express-form :deep(.hint) { margin: 0.75rem 0 0; font-size: 0.8rem; color: var(--vp-c-text-3); }
 .loading-state { display: flex; align-items: center; gap: 0.5rem; color: var(--vp-c-text-2); }
 .link-btn { background: none; border: none; color: var(--vp-c-brand-1); font-size: 0.85rem; cursor: pointer; padding: 0; }
 .error-box { width: 100%; padding: 0.75rem 1rem; background: var(--vp-c-danger-soft); border: 1px solid var(--vp-c-danger-1); border-radius: 6px; color: var(--vp-c-danger-1); font-size: 0.875rem; }
