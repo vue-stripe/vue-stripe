@@ -116,3 +116,6 @@ playwright/.cache/
 
 .claude
 /docs
+
+# Launch video output (/brag)
+brag-output*/
