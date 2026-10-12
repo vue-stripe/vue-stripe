@@ -49,9 +49,21 @@ export function useStripeElements(): UseStripeElementsReturn {
     return elementsContext.elements.value.submit()
   }
 
+  /**
+   * Re-fetches the Elements' data from Stripe after the Intent or Checkout Session
+   * was updated on your server (e.g. the amount changed).
+   */
+  const fetchUpdates = async () => {
+    if (!elementsContext.elements.value) {
+      return { error: { message: 'Elements not initialized' } }
+    }
+    return elementsContext.elements.value.fetchUpdates()
+  }
+
   return {
     elements: readonly(elementsContext.elements),
     submit,
+    fetchUpdates,
     loading: readonly(elementsContext.loading),
     error: readonly(elementsContext.error)
   }

@@ -396,3 +396,42 @@ describe('VueStripeElements and Stripe.js 10 (Endive)', () => {
     expect(passed).not.toHaveProperty('paymentMethodTypes')
   })
 })
+
+describe('VueStripeElements and Stripe.js Dahlia elements.update()', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('surfaces a rejected elements.update() as error + emits error', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { makeMockStripe, makeMockElements } = await import('../setup')
+    const elementsInstance = makeMockElements()
+    elementsInstance.update.mockRejectedValueOnce(new Error('bad appearance'))
+    const stripe = makeMockStripe()
+    stripe.elements.mockReturnValue(elementsInstance)
+    const { loadStripe } = await import('@stripe/stripe-js')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+
+    const props = ref<Record<string, unknown>>({
+      clientSecret: 'pi_x_secret_y',
+      appearance: { theme: 'stripe' }
+    })
+    const wrapper = mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: { default: () => h(VueStripeElements, props.value) }
+    })
+    await flushPromises()
+    props.value = { clientSecret: 'pi_x_secret_y', appearance: { theme: 'night' } }
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.findComponent(VueStripeElements).emitted('error')?.[0]).toEqual([
+      'bad appearance'
+    ])
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/^\[Vue Stripe\]/),
+      'bad appearance'
+    )
+    errorSpy.mockRestore()
+  })
+})

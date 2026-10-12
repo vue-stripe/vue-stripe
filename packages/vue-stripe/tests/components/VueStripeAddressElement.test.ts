@@ -468,6 +468,21 @@ describe('VueStripeAddressElement', () => {
       expect(result).toEqual(mockGetValueResult)
     })
 
+    it('forwards getValue options such as { format: "localized" } (Dahlia)', async () => {
+      const mockElement = createMockElement()
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+      mockLoadStripe.mockResolvedValueOnce({
+        elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
+        registerAppInfo: vi.fn()
+      } as any)
+
+      const wrapper = await mountWithProviders()
+      const vm = wrapper.findComponent(VueStripeAddressElement).vm as any
+      await vm.getValue({ format: 'localized' })
+
+      expect(mockElement.getValue).toHaveBeenCalledWith({ format: 'localized' })
+    })
+
     it('should return address data from getValue', async () => {
       // Test that getValue returns the expected shape of data
       const mockGetValueResult = {

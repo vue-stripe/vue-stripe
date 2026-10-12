@@ -3,7 +3,8 @@ import { provide, ref, inject, watch, onMounted, nextTick } from 'vue-demi'
 import type {
   StripeElements,
   StripeElementsOptionsClientSecret,
-  StripeElementsOptionsMode
+  StripeElementsOptionsMode,
+  StripeElementsUpdateOptions
 } from '@stripe/stripe-js'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
@@ -226,8 +227,14 @@ watch(
       const updateOptions: Record<string, unknown> = {}
       if (props.appearance) updateOptions['appearance'] = props.appearance
       if (props.locale) updateOptions['locale'] = props.locale
-      ;(elements.value as { update: (options: Record<string, unknown>) => void }).update(
-        updateOptions
+      // elements.update() returns a Promise since Stripe.js Dahlia; surface rejections.
+      Promise.resolve(elements.value.update(updateOptions as StripeElementsUpdateOptions)).catch(
+        (err: unknown) => {
+          const message = err instanceof Error ? err.message : 'elements.update() failed'
+          error.value = message
+          console.error('[Vue Stripe] Elements update error:', message)
+          emit('error', message)
+        }
       )
     }
   },

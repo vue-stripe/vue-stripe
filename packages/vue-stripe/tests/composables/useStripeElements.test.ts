@@ -213,3 +213,63 @@ describe('useStripeElements', () => {
     expect(nestedContext!.elements).toBeDefined()
   })
 })
+
+describe('useStripeElements().fetchUpdates', () => {
+  it('forwards to elements.fetchUpdates() and returns its result', async () => {
+    const { makeMockStripe, makeMockElements } = await import('../setup')
+    const elementsInstance = makeMockElements()
+    elementsInstance.fetchUpdates.mockResolvedValueOnce({})
+    const stripe = makeMockStripe()
+    stripe.elements.mockReturnValue(elementsInstance)
+    const { loadStripe } = await import('@stripe/stripe-js')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+
+    let api!: ReturnType<typeof useStripeElements>
+    const Comp = defineComponent({
+      setup() {
+        api = useStripeElements()
+        return () => h('div')
+      }
+    })
+    mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: {
+        default: () =>
+          h(VueStripeElements, { clientSecret: 'pi_1_secret_2' }, { default: () => h(Comp) })
+      }
+    })
+    await flushPromises()
+
+    await expect(api.fetchUpdates()).resolves.toEqual({})
+    expect(elementsInstance.fetchUpdates).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns an error result before Elements exists', async () => {
+    const { provide, shallowRef, ref: vref } = await import('vue-demi')
+    const { stripeElementsInjectionKey } = await import('../../src/utils/injection-keys')
+    let api!: ReturnType<typeof useStripeElements>
+    mount(
+      defineComponent({
+        setup() {
+          provide(stripeElementsInjectionKey, {
+            elements: shallowRef(null),
+            loading: vref(true),
+            error: vref(null)
+          })
+          return () =>
+            h(
+              defineComponent({
+                setup() {
+                  api = useStripeElements()
+                  return () => h('div')
+                }
+              })
+            )
+        }
+      })
+    )
+    await expect(api.fetchUpdates()).resolves.toEqual({
+      error: { message: 'Elements not initialized' }
+    })
+  })
+})

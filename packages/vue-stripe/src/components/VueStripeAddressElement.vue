@@ -7,7 +7,8 @@ import { defineComponent, ref, onMounted, onBeforeUnmount, watch, inject } from 
 import type {
   StripeAddressElement as StripeAddressElementType,
   StripeAddressElementOptions,
-  StripeAddressElementChangeEvent
+  StripeAddressElementChangeEvent,
+  AddressElementGetValueOptions
 } from '@stripe/stripe-js'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeElementsError } from '../utils/errors'
@@ -16,7 +17,9 @@ import { VueStripeElementsError } from '../utils/errors'
 interface AddressElementWithEvents extends StripeAddressElementType {
   on(eventType: string, handler: (...args: never[]) => void): this
   off(eventType: string, handler?: (...args: never[]) => void): this
-  getValue(): Promise<Pick<StripeAddressElementChangeEvent, 'complete' | 'isNewAddress' | 'value'>>
+  getValue(
+    options?: AddressElementGetValueOptions
+  ): Promise<Pick<StripeAddressElementChangeEvent, 'complete' | 'isNewAddress' | 'value'>>
 }
 
 export default defineComponent({
@@ -109,11 +112,12 @@ export default defineComponent({
     }
 
     // Exposed methods
-    const getValue = async () => {
+    // Since Stripe.js Dahlia `state` is Latin by default; pass { format: 'localized' } for the old form.
+    const getValue = async (options?: AddressElementGetValueOptions) => {
       if (!elementRef.value) {
         throw new VueStripeElementsError('Address element not mounted')
       }
-      return elementRef.value.getValue()
+      return options ? elementRef.value.getValue(options) : elementRef.value.getValue()
     }
 
     const focus = () => {

@@ -226,6 +226,8 @@ export interface UseStripeElementsReturn {
    * Note: usePaymentIntent and useSetupIntent call this automatically unless skipSubmit is true.
    */
   submit: () => Promise<ElementsSubmitResult>
+  /** Re-fetch Elements data after the Intent / Checkout Session changed on the server. */
+  fetchUpdates: () => Promise<{ error?: { message: string; status?: string } }>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
