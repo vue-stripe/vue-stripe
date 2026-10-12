@@ -310,16 +310,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
         {
           text: 'Regional Payment Methods',
           items: [
-            { text: 'iDEAL (Netherlands)', link: '/live-demo/ideal-payment' },
             { text: 'SEPA Direct Debit', link: '/live-demo/iban-element' },
-            { text: 'Przelewy24 (Poland)', link: '/live-demo/p24-payment' },
-            { text: 'EPS (Austria)', link: '/live-demo/eps-payment' }
-          ]
-        },
-        {
-          text: 'APAC Payments',
-          items: [
-            { text: 'FPX (Malaysia)', link: '/live-demo/fpx-payment' },
             { text: 'BECS Direct Debit (Australia)', link: '/live-demo/becs-payment' }
           ]
         },

@@ -10,7 +10,8 @@
 //   accessible – no wrapper, but reachable via the raw stripe / elements instance
 //                (useStripe().stripe / useStripeElements().elements)
 //   planned    – on the roadmap (issue linked)
-//   deprecated – deprecated by Stripe; intentionally not wrapped
+//   deprecated – deprecated or removed by Stripe (use the Payment Element or the
+//                listed replacement); intentionally not wrapped
 
 export type CoverageStatus = 'covered' | 'accessible' | 'planned' | 'deprecated'
 
@@ -117,28 +118,9 @@ export const coverage: CoverageCategory[] = [
         artifact: 'VueStripeIbanElement'
       },
       {
-        name: 'iDEAL Bank',
-        api: "create('idealBank')",
-        status: 'covered',
-        artifact: 'VueStripeIdealBankElement'
-      },
-      {
-        name: 'P24 Bank',
-        api: "create('p24Bank')",
-        status: 'covered',
-        artifact: 'VueStripeP24BankElement'
-      },
-      {
-        name: 'EPS Bank',
-        api: "create('epsBank')",
-        status: 'covered',
-        artifact: 'VueStripeEpsBankElement'
-      },
-      {
-        name: 'FPX Bank',
-        api: "create('fpxBank')",
-        status: 'covered',
-        artifact: 'VueStripeFpxBankElement'
+        name: 'iDEAL / P24 / EPS / FPX bank elements',
+        api: "create('idealBank' | 'p24Bank' | 'epsBank' | 'fpxBank')",
+        status: 'deprecated'
       },
       {
         name: 'AU Bank Account',

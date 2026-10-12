@@ -7,10 +7,6 @@ import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import VueStripeCardElement from '../../src/components/VueStripeCardElement.vue'
 import VueStripeIbanElement from '../../src/components/VueStripeIbanElement.vue'
 import VueStripeAuBankAccountElement from '../../src/components/VueStripeAuBankAccountElement.vue'
-import VueStripeIdealBankElement from '../../src/components/VueStripeIdealBankElement.vue'
-import VueStripeP24BankElement from '../../src/components/VueStripeP24BankElement.vue'
-import VueStripeEpsBankElement from '../../src/components/VueStripeEpsBankElement.vue'
-import VueStripeFpxBankElement from '../../src/components/VueStripeFpxBankElement.vue'
 import VueStripeLinkAuthenticationElement from '../../src/components/VueStripeLinkAuthenticationElement.vue'
 import VueStripeAddressElement from '../../src/components/VueStripeAddressElement.vue'
 import VueStripePaymentElement from '../../src/components/VueStripePaymentElement.vue'
@@ -31,10 +27,6 @@ const ELEMENTS: Array<[string, Component, string]> = [
   ['VueStripeCardElement', VueStripeCardElement, 'card'],
   ['VueStripeIbanElement', VueStripeIbanElement, 'iban'],
   ['VueStripeAuBankAccountElement', VueStripeAuBankAccountElement, 'auBankAccount'],
-  ['VueStripeIdealBankElement', VueStripeIdealBankElement, 'idealBank'],
-  ['VueStripeP24BankElement', VueStripeP24BankElement, 'p24Bank'],
-  ['VueStripeEpsBankElement', VueStripeEpsBankElement, 'epsBank'],
-  ['VueStripeFpxBankElement', VueStripeFpxBankElement, 'fpxBank'],
   ['VueStripeLinkAuthenticationElement', VueStripeLinkAuthenticationElement, 'linkAuthentication'],
   ['VueStripeAddressElement', VueStripeAddressElement, 'address'],
   ['VueStripePaymentElement', VueStripePaymentElement, 'payment'],

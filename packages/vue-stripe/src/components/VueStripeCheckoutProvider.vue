@@ -1,36 +1,36 @@
 <script setup lang="ts">
-import { provide, ref, inject, watch, onUnmounted, markRaw } from 'vue-demi'
+import { provide, ref, shallowRef, inject, watch, onUnmounted, markRaw } from 'vue-demi'
 import type {
-  StripeCheckout,
-  StripeCheckoutSession,
-  StripeCheckoutOptions,
-  StripeCheckoutElementsOptions
+  StripeCheckoutElementsSdk,
+  StripeCheckoutElementsSdkOptions,
+  StripeCheckoutElementsOptions,
+  StripeCheckoutLoadActionsSuccess,
+  StripeCheckoutSession
 } from '@stripe/stripe-js'
 import { stripeInjectionKey, stripeCheckoutInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 
 interface Props {
   /**
-   * Client secret of a Checkout Session created with `ui_mode: 'custom'`.
-   * Provide this OR `fetchClientSecret`.
+   * Client secret of a Checkout Session created with `ui_mode: 'elements'`,
+   * or a Promise resolving to it (passed to Stripe untouched).
    */
-  clientSecret?: string | undefined
-  /**
-   * Async function that resolves to the Checkout Session client secret.
-   * Preferred for refreshable sessions; takes precedence over `clientSecret`.
-   */
+  clientSecret?: string | Promise<string> | undefined
+  /** Alternative to `clientSecret`: a function returning the client secret (v5 compatible). */
   fetchClientSecret?: (() => Promise<string>) | undefined
-  /**
-   * Appearance / fonts options forwarded to the Checkout Elements
-   * (`stripe.initCheckout({ elementsOptions })`).
-   */
+  /** Appearance, fonts, loader, saved payment methods and address sync for the Checkout elements. */
   elementsOptions?: StripeCheckoutElementsOptions | undefined
+  /** Adaptive Pricing (`{ allowed: boolean }`). */
+  adaptivePricing?: StripeCheckoutElementsSdkOptions['adaptivePricing'] | undefined
+  /** Prefill email, phone number and addresses. */
+  defaultValues?: StripeCheckoutElementsSdkOptions['defaultValues'] | undefined
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  ready: [checkout: StripeCheckout]
+  ready: [actions: StripeCheckoutLoadActionsSuccess]
+  change: [session: StripeCheckoutSession]
   error: [error: string]
 }>()
 
@@ -38,105 +38,93 @@ const stripeInstance = inject(stripeInjectionKey)
 
 if (!stripeInstance) {
   throw new VueStripeProviderError(
-    'VueStripeCheckoutProvider must be used within VueStripeProvider'
+    'VueStripeCheckoutElementsProvider must be used within VueStripeProvider'
   )
 }
 
-const checkout = ref<StripeCheckout | null>(null)
-const session = ref<StripeCheckoutSession | null>(null)
+// Stripe objects are never made deeply reactive.
+const checkout = shallowRef<StripeCheckoutElementsSdk | null>(null)
+const actions = shallowRef<StripeCheckoutLoadActionsSuccess | null>(null)
+const session = shallowRef<StripeCheckoutSession | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 
-// Guard so initCheckout() only runs once.
 let started = false
-// Set on unmount: Stripe gives us no way to detach the `change` subscription,
-// so this lets the async handler (and an in-flight init) bail out after teardown.
+// Stripe has no way to detach the `change` subscription; this lets late
+// callbacks (and an in-flight loadActions) bail out after teardown.
 let unmounted = false
 
-const initCheckout = async () => {
-  if (started || !stripeInstance.stripe.value) return
+const fail = (message: string) => {
+  error.value = message
+  loading.value = false
+  console.error('[Vue Stripe] Checkout init error:', message)
+  emit('error', message)
+}
 
-  // Resolve the client-secret source. The GA API only accepts a
-  // `fetchClientSecret` function, so wrap a raw clientSecret when given.
-  const fetchClientSecret =
-    props.fetchClientSecret ??
-    (props.clientSecret ? () => Promise.resolve(props.clientSecret as string) : null)
+const start = () => {
+  const stripe = stripeInstance.stripe.value
+  if (started || !stripe) return
 
-  if (!fetchClientSecret) {
-    const message =
-      'VueStripeCheckoutProvider requires a `clientSecret` or `fetchClientSecret` prop'
-    error.value = message
-    loading.value = false
-    emit('error', message)
+  const clientSecret = props.fetchClientSecret ? props.fetchClientSecret() : props.clientSecret
+  if (!clientSecret) {
+    fail(
+      'VueStripeCheckoutElementsProvider requires a `clientSecret` (string or Promise) or `fetchClientSecret` prop'
+    )
     return
   }
 
-  const stripe = stripeInstance.stripe.value
-  if (!stripe) return
-
   started = true
-
   try {
-    loading.value = true
-    error.value = null
+    const options: StripeCheckoutElementsSdkOptions = { clientSecret }
+    if (props.elementsOptions) options.elementsOptions = props.elementsOptions
+    if (props.adaptivePricing) options.adaptivePricing = props.adaptivePricing
+    if (props.defaultValues) options.defaultValues = props.defaultValues
 
-    const options: StripeCheckoutOptions = { fetchClientSecret }
-    if (props.elementsOptions) {
-      options.elementsOptions = props.elementsOptions
-    }
+    // Synchronous since Stripe.js Clover; children can mount elements right away.
+    const sdk = stripe.initCheckoutElementsSdk(options)
+    checkout.value = markRaw(sdk)
 
-    const instance = await stripe.initCheckout(options)
-
-    // The component may have unmounted while initCheckout() was in flight.
-    if (unmounted) return
-
-    // Don't let Vue proxy the external Stripe instances — keep them raw.
-    checkout.value = markRaw(instance)
-    session.value = markRaw(instance.session())
-
-    // Keep the reactive session in sync with Stripe's internal state.
-    instance.on('change', (next) => {
+    sdk.on('change', (next) => {
       if (unmounted) return
       session.value = markRaw(next)
+      emit('change', next)
     })
 
-    loading.value = false
-    emit('ready', instance)
+    void sdk.loadActions().then((result) => {
+      if (unmounted) return
+      if (result.type === 'error') {
+        fail(result.error.message)
+        return
+      }
+      actions.value = markRaw(result.actions)
+      session.value = markRaw(result.actions.getSession())
+      loading.value = false
+      emit('ready', result.actions)
+    })
   } catch (err) {
     started = false
-    const message = err instanceof Error ? err.message : 'Failed to initialize Checkout'
-    error.value = message
-    loading.value = false
-    console.error('[Vue Stripe] Checkout init error:', message)
-    emit('error', message)
+    checkout.value = null
+    fail(err instanceof Error ? err.message : 'Failed to initialize Checkout')
   }
 }
 
-// Initialize as soon as the Stripe instance is available.
 watch(
   () => stripeInstance.stripe.value,
   (s) => {
-    if (s) initCheckout()
+    if (s) start()
   },
   { immediate: true }
 )
 
 onUnmounted(() => {
-  // Stripe exposes no off()/destroy() for the checkout instance, so on remount
-  // the best we can do is stop referencing it and let the change handler bail.
   unmounted = true
   checkout.value = null
+  actions.value = null
   session.value = null
   started = false
 })
 
-// Provide the checkout context for child components / useCheckoutSession.
-provide(stripeCheckoutInjectionKey, {
-  checkout,
-  session,
-  loading,
-  error
-})
+provide(stripeCheckoutInjectionKey, { checkout, actions, session, loading, error })
 </script>
 
 <template>
@@ -147,13 +135,13 @@ provide(stripeCheckoutInjectionKey, {
       </div>
     </slot>
   </div>
-  <div v-else-if="loading" class="vue-stripe-checkout-loading">
+  <div v-else-if="!checkout" class="vue-stripe-checkout-loading">
     <slot name="loading">
       <div class="vue-stripe-loading-message">Initializing Checkout...</div>
     </slot>
   </div>
   <div v-else>
-    <slot :checkout="checkout" :session="session" />
+    <slot :checkout="checkout" :actions="actions" :session="session" :loading="loading" />
   </div>
 </template>
 

@@ -77,11 +77,6 @@ interface Props {
    */
   captureMethod?: CaptureMethod | undefined
   /**
-   * List of payment method types to display.
-   * Omit to use Dashboard payment method settings.
-   */
-  paymentMethodTypes?: string[] | undefined
-  /**
    * Appearance API options to theme the Elements (variables, rules, theme, labels).
    * @see https://docs.stripe.com/elements/appearance-api
    */
@@ -128,6 +123,10 @@ const createElements = () => {
     const elementsOptions: ElementsOptions = {
       ...props.options
     }
+    // Removed in Stripe.js Endive: Stripe rejects `paymentMethodTypes` as an
+    // integration error. Mode-based Elements: use options.allowedPaymentMethodTypes;
+    // clientSecret flow: set payment_method_types on the Intent or use Dashboard settings.
+    delete elementsOptions['paymentMethodTypes']
 
     // Intent-based flow: use clientSecret
     if (props.clientSecret) {
@@ -153,9 +152,6 @@ const createElements = () => {
     if (props.captureMethod) {
       elementsOptions['captureMethod'] = props.captureMethod
     }
-    if (props.paymentMethodTypes) {
-      elementsOptions['paymentMethodTypes'] = props.paymentMethodTypes
-    }
 
     // First-class appearance / fonts / locale props
     if (props.appearance) {
@@ -169,10 +165,11 @@ const createElements = () => {
     }
 
     // stripe.elements() is overloaded on the intent flow: clientSecret vs. deferred mode.
+    // The options are assembled from props, so their shape is checked by Stripe at runtime.
     const stripe = stripeInstance.stripe.value
     elements.value = props.clientSecret
       ? stripe.elements(elementsOptions as StripeElementsOptionsClientSecret)
-      : stripe.elements(elementsOptions as StripeElementsOptionsMode)
+      : stripe.elements(elementsOptions as unknown as StripeElementsOptionsMode)
     loading.value = false
 
     // Emit ready event after Vue updates the DOM

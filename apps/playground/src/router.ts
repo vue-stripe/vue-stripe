@@ -15,11 +15,7 @@ import CheckoutView from './views/CheckoutView.vue'
 import PricingTableView from './views/PricingTableView.vue'
 // European Regional Elements (v5.2.0)
 import IbanElementView from './views/IbanElementView.vue'
-import IdealBankElementView from './views/IdealBankElementView.vue'
-import P24BankElementView from './views/P24BankElementView.vue'
-import EpsBankElementView from './views/EpsBankElementView.vue'
 // APAC Regional Elements
-import FpxBankElementView from './views/FpxBankElementView.vue'
 import AuBankAccountElementView from './views/AuBankAccountElementView.vue'
 import DocsExampleView from './views/DocsExampleView.vue'
 import DocsVerificationView from './views/DocsVerificationView.vue'
@@ -170,43 +166,6 @@ export const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/stripe-ideal-bank-element',
-    name: 'IdealBankElement',
-    component: IdealBankElementView,
-    meta: {
-      title: 'iDEAL Bank Element - Vue Stripe',
-      description: 'Accept iDEAL payments popular in the Netherlands'
-    }
-  },
-  {
-    path: '/stripe-p24-bank-element',
-    name: 'P24BankElement',
-    component: P24BankElementView,
-    meta: {
-      title: 'P24 Bank Element - Vue Stripe',
-      description: 'Accept Przelewy24 payments popular in Poland'
-    }
-  },
-  {
-    path: '/stripe-eps-bank-element',
-    name: 'EpsBankElement',
-    component: EpsBankElementView,
-    meta: {
-      title: 'EPS Bank Element - Vue Stripe',
-      description: 'Accept EPS payments popular in Austria'
-    }
-  },
-  // APAC Regional Elements
-  {
-    path: '/stripe-fpx-bank-element',
-    name: 'FpxBankElement',
-    component: FpxBankElementView,
-    meta: {
-      title: 'FPX Bank Element - Vue Stripe',
-      description: 'Accept FPX payments popular in Malaysia'
-    }
-  },
-  {
     path: '/stripe-au-bank-account-element',
     name: 'AuBankAccountElement',
     component: AuBankAccountElementView,
@@ -259,7 +218,7 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Custom Checkout - Vue Stripe',
       description:
-        'Build a fully custom checkout with VueStripeCheckoutProvider and useCheckoutSession'
+        'Build a fully custom checkout with VueStripeCheckoutElementsProvider and useCheckoutSession'
     }
   }
 ]

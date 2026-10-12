@@ -15,7 +15,7 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@stripe/stripe-js": "^7.5.0",
+    "@stripe/stripe-js": "^10.0.0",
     "@unhead/vue": "^3.4.2",
     "@vercel/analytics": "^2.0.1",
     "@vue-stripe/vue-stripe": "workspace:*",

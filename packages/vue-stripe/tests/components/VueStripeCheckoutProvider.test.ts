@@ -1,197 +1,216 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h, inject } from 'vue-demi'
-import VueStripeCheckoutProvider from '../../src/components/VueStripeCheckoutProvider.vue'
+import { defineComponent, h, inject, ref, shallowRef } from 'vue-demi'
+import { loadStripe } from '@stripe/stripe-js'
+import VueStripeCheckoutElementsProvider from '../../src/components/VueStripeCheckoutProvider.vue'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { stripeCheckoutInjectionKey } from '../../src/utils/injection-keys'
-import { flushPromises, makeMockStripe, makeMockCheckout, makeMockCheckoutSession } from '../setup'
+import {
+  flushPromises,
+  makeMockStripe,
+  makeMockCheckout,
+  makeMockCheckoutActions,
+  makeMockCheckoutSession
+} from '../setup'
 
-// Mount Provider > CheckoutProvider with a stripe whose initCheckout resolves to
-// the given checkout mock; returns the wrapper.
+type Injected = NonNullable<ReturnType<typeof inject<typeof stripeCheckoutInjectionKey>>> | null
+
+// Mount Provider > CheckoutElementsProvider > Child; returns the injected context too.
 async function mountWith(
+  providerProps: Record<string, unknown> = { clientSecret: 'cs_test_123_secret_456' },
   checkout = makeMockCheckout(),
-  providerProps: Record<string, unknown> = { clientSecret: 'cs_test_123_secret' },
-  slots = {}
+  slots: Record<string, unknown> = {},
+  { flush = true } = {}
 ) {
-  const stripe = { ...makeMockStripe(), initCheckout: vi.fn(() => Promise.resolve(checkout)) }
-  const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-  mockLoadStripe.mockResolvedValueOnce(stripe as any)
+  const stripe = makeMockStripe()
+  stripe.initCheckoutElementsSdk.mockReturnValue(checkout)
+  vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
 
-  const wrapper = mount(VueStripeProvider, {
-    props: { publishableKey: 'pk_test_123' },
-    slots: {
-      default: () => h(VueStripeCheckoutProvider, providerProps, slots)
+  const injected = shallowRef<Injected>(null)
+  const show = ref(true)
+  const Child = defineComponent({
+    setup() {
+      injected.value = inject(stripeCheckoutInjectionKey, null)
+      return () => h('div', { class: 'checkout-child' }, 'child')
     }
   })
-  await flushPromises()
-  await wrapper.vm.$nextTick()
-  return { wrapper, stripe, checkout }
+  const Host = defineComponent({
+    setup() {
+      return () =>
+        h(
+          VueStripeProvider,
+          { publishableKey: 'pk_test_123' },
+          {
+            default: () =>
+              show.value
+                ? h(VueStripeCheckoutElementsProvider, providerProps, {
+                    default: () => h(Child),
+                    ...slots
+                  })
+                : null
+          }
+        )
+    }
+  })
+  const wrapper = mount(Host)
+  if (flush) {
+    await flushPromises()
+    await flushPromises()
+  }
+  const provider = () => wrapper.findComponent(VueStripeCheckoutElementsProvider)
+  return { wrapper, stripe, checkout, injected, show, provider }
 }
 
-describe('VueStripeCheckoutProvider', () => {
+describe('VueStripeCheckoutElementsProvider (Stripe.js 10 Checkout Elements SDK)', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('throws when used outside VueStripeProvider', () => {
-    expect(() => mount(VueStripeCheckoutProvider, { props: { clientSecret: 'cs_test' } })).toThrow(
-      'VueStripeCheckoutProvider must be used within VueStripeProvider'
-    )
+    expect(() =>
+      mount(VueStripeCheckoutElementsProvider, { props: { clientSecret: 'cs_test' } })
+    ).toThrow('must be used within VueStripeProvider')
   })
 
-  it('calls stripe.initCheckout, wrapping a raw clientSecret in fetchClientSecret', async () => {
-    const { stripe } = await mountWith()
-    expect(stripe.initCheckout).toHaveBeenCalledTimes(1)
-    const arg = stripe.initCheckout.mock.calls[0][0]
-    expect(typeof arg.fetchClientSecret).toBe('function')
-    await expect(arg.fetchClientSecret()).resolves.toBe('cs_test_123_secret')
+  it('calls initCheckoutElementsSdk synchronously with a clientSecret string', async () => {
+    const { stripe } = await mountWith({ clientSecret: 'cs_test_secret' })
+    expect(stripe.initCheckoutElementsSdk).toHaveBeenCalledTimes(1)
+    expect(stripe.initCheckoutElementsSdk).toHaveBeenCalledWith({ clientSecret: 'cs_test_secret' })
   })
 
-  it('prefers fetchClientSecret over clientSecret', async () => {
+  it('accepts a Promise<string> clientSecret and passes it through untouched', async () => {
+    const secret = Promise.resolve('cs_from_promise')
+    const { stripe } = await mountWith({ clientSecret: secret })
+    expect(stripe.initCheckoutElementsSdk.mock.calls[0]?.[0].clientSecret).toBe(secret)
+  })
+
+  it('wraps fetchClientSecret() into the clientSecret option', async () => {
     const fetchClientSecret = vi.fn(() => Promise.resolve('cs_from_fn'))
-    const { stripe } = await mountWith(makeMockCheckout(), { fetchClientSecret })
-    const arg = stripe.initCheckout.mock.calls[0][0]
-    expect(arg.fetchClientSecret).toBe(fetchClientSecret)
+    const { stripe } = await mountWith({ fetchClientSecret })
+    const call = stripe.initCheckoutElementsSdk.mock.calls[0]?.[0]
+    expect(fetchClientSecret).toHaveBeenCalledTimes(1)
+    expect(call.clientSecret).toBeInstanceOf(Promise)
+    await expect(call.clientSecret).resolves.toBe('cs_from_fn')
+    expect(call).not.toHaveProperty('fetchClientSecret')
   })
 
-  it('forwards elementsOptions to initCheckout', async () => {
-    const elementsOptions = { appearance: { theme: 'night' } }
-    const { stripe } = await mountWith(makeMockCheckout(), {
-      clientSecret: 'cs_test_123_secret',
-      elementsOptions
+  it('forwards elementsOptions, adaptivePricing and defaultValues', async () => {
+    const elementsOptions = {
+      appearance: { theme: 'night' },
+      savedPaymentMethod: { enableSave: 'auto' }
+    }
+    const adaptivePricing = { allowed: true }
+    const defaultValues = { email: 'jenny@example.com' }
+    const { stripe } = await mountWith({
+      clientSecret: 'cs_test_secret',
+      elementsOptions,
+      adaptivePricing,
+      defaultValues
     })
-    expect(stripe.initCheckout.mock.calls[0][0].elementsOptions).toEqual(elementsOptions)
-  })
-
-  it('seeds the session and provides the checkout context to children', async () => {
-    let injected: any = null
-    const checkout = makeMockCheckout()
-    checkout.session = vi.fn(() => makeMockCheckoutSession({ email: 'a@b.com' }))
-
-    const Child = {
-      setup() {
-        injected = inject(stripeCheckoutInjectionKey)
-        return () => h('div', 'child')
-      }
-    }
-    await mountWith(checkout, { clientSecret: 'cs_test_123_secret' }, { default: () => h(Child) })
-
-    expect(injected).toBeTruthy()
-    expect(injected.checkout.value).toBe(checkout)
-    expect(injected.session.value.email).toBe('a@b.com')
-    expect(injected.loading.value).toBe(false)
-  })
-
-  it('updates the reactive session when the checkout emits a change', async () => {
-    let injected: any = null
-    const checkout = makeMockCheckout()
-    const Child = {
-      setup() {
-        injected = inject(stripeCheckoutInjectionKey)
-        return () => h('div')
-      }
-    }
-    await mountWith(checkout, { clientSecret: 'cs_test_123_secret' }, { default: () => h(Child) })
-
-    // grab the change handler registered via checkout.on('change', handler)
-    const onCall = checkout.on.mock.calls.find((c: any[]) => c[0] === 'change')
-    expect(onCall).toBeTruthy()
-    const handler = onCall![1]
-    handler(makeMockCheckoutSession({ email: 'changed@b.com', canConfirm: false }))
-
-    expect(injected.session.value.email).toBe('changed@b.com')
-    expect(injected.session.value.canConfirm).toBe(false)
-  })
-
-  it('renders the error slot when initCheckout rejects', async () => {
-    const stripe = {
-      ...makeMockStripe(),
-      initCheckout: vi.fn(() => Promise.reject(new Error('bad session')))
-    }
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-    mockLoadStripe.mockResolvedValueOnce(stripe as any)
-
-    const wrapper = mount(VueStripeProvider, {
-      props: { publishableKey: 'pk_test_123' },
-      slots: {
-        default: () =>
-          h(
-            VueStripeCheckoutProvider,
-            { clientSecret: 'cs_test_123_secret' },
-            {
-              error: ({ error }: { error: string }) =>
-                h('div', { class: 'custom-checkout-error' }, error)
-            }
-          )
-      }
+    expect(stripe.initCheckoutElementsSdk).toHaveBeenCalledWith({
+      clientSecret: 'cs_test_secret',
+      elementsOptions,
+      adaptivePricing,
+      defaultValues
     })
-    await flushPromises()
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.find('.custom-checkout-error').exists()).toBe(true)
-    expect(wrapper.find('.custom-checkout-error').text()).toContain('bad session')
-    // and the @error event is emitted with the message
-    const emittedError = wrapper.findComponent(VueStripeCheckoutProvider).emitted('error')
-    expect(emittedError).toBeTruthy()
-    expect((emittedError as any[])[0][0]).toContain('bad session')
   })
 
-  it('emits @ready with the checkout instance once initialized', async () => {
+  it('renders the default slot immediately, before loadActions resolves', async () => {
     const checkout = makeMockCheckout()
-    const { wrapper } = await mountWith(checkout)
-    const emittedReady = wrapper.findComponent(VueStripeCheckoutProvider).emitted('ready')
-    expect(emittedReady).toBeTruthy()
-    expect((emittedReady as any[])[0][0]).toBe(checkout)
+    checkout.loadActions.mockReturnValue(new Promise(() => {})) // never resolves
+    const { wrapper, injected } = await mountWith(undefined, checkout)
+    expect(wrapper.find('.checkout-child').exists()).toBe(true)
+    expect(injected.value?.checkout.value).toBe(checkout)
+    expect(injected.value?.actions.value).toBe(null)
+    expect(injected.value?.loading.value).toBe(true)
   })
 
-  it('nulls the provided refs on unmount and ignores late change events', async () => {
-    let injected: any = null
+  it('provides actions + session after loadActions resolves and emits ready(actions)', async () => {
+    const actions = makeMockCheckoutActions()
+    actions.getSession.mockReturnValue(makeMockCheckoutSession({ email: 'a@b.com' }))
+    const { injected, provider } = await mountWith(undefined, makeMockCheckout(actions))
+    expect(injected.value?.actions.value).toBe(actions)
+    expect(injected.value?.session.value).toMatchObject({ email: 'a@b.com' })
+    expect(injected.value?.loading.value).toBe(false)
+    expect(provider().emitted('ready')?.[0]).toEqual([actions])
+  })
+
+  it('emits error and renders #error when loadActions resolves { type: "error" }', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const checkout = makeMockCheckout()
-    const Child = {
-      setup() {
-        injected = inject(stripeCheckoutInjectionKey)
-        return () => h('div')
-      }
-    }
-    const { wrapper } = await mountWith(
-      checkout,
-      { clientSecret: 'cs_test_123_secret' },
-      {
-        default: () => h(Child)
-      }
+    checkout.loadActions.mockResolvedValue({
+      type: 'error',
+      error: { message: 'Session expired', code: null }
+    })
+    const { wrapper, provider } = await mountWith(undefined, checkout, {
+      error: ({ error }: { error: string }) => h('div', { class: 'checkout-error' }, error)
+    })
+    expect(wrapper.find('.checkout-error').text()).toBe('Session expired')
+    expect(provider().emitted('error')?.[0]).toEqual(['Session expired'])
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/^\[Vue Stripe\]/),
+      'Session expired'
     )
-
-    // Ready: refs populated, change handler registered.
-    expect(injected.checkout.value).toBe(checkout)
-    expect(injected.session.value).toBeTruthy()
-    const onCall = checkout.on.mock.calls.find((c: any[]) => c[0] === 'change')
-    const changeHandler = onCall![1]
-
-    wrapper.unmount()
-
-    // Teardown nulls the provided refs.
-    expect(injected.checkout.value).toBeNull()
-    expect(injected.session.value).toBeNull()
-
-    // A late `change` event after unmount is ignored (guarded by the unmounted flag).
-    changeHandler(makeMockCheckoutSession({ email: 'late@b.com' }))
-    expect(injected.session.value).toBeNull()
+    errorSpy.mockRestore()
   })
 
-  it('shows an error AND emits @error when neither clientSecret nor fetchClientSecret is provided', async () => {
-    const stripe = makeMockStripe()
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
-    mockLoadStripe.mockResolvedValueOnce(stripe as any)
+  it('updates session and emits change on checkout "change" events', async () => {
+    const checkout = makeMockCheckout()
+    const { injected, provider } = await mountWith(undefined, checkout)
+    const onCall = checkout.on.mock.calls.find((c) => c[0] === 'change')
+    expect(onCall).toBeTruthy()
+    const next = makeMockCheckoutSession({ email: 'changed@b.com', canConfirm: false })
+    onCall?.[1](next)
+    expect(injected.value?.session.value).toMatchObject({
+      email: 'changed@b.com',
+      canConfirm: false
+    })
+    expect(provider().emitted('change')?.[0]).toEqual([next])
+  })
 
+  it('emits error when neither clientSecret nor fetchClientSecret is given', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { stripe, provider, wrapper } = await mountWith({})
+    expect(stripe.initCheckoutElementsSdk).not.toHaveBeenCalled()
+    expect(provider().emitted('error')?.[0]?.[0]).toContain('clientSecret')
+    expect(wrapper.text()).toContain('clientSecret')
+    errorSpy.mockRestore()
+  })
+
+  it('surfaces a synchronous initCheckoutElementsSdk throw as an error', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const stripe = makeMockStripe()
+    stripe.initCheckoutElementsSdk.mockImplementation(() => {
+      throw new Error('Invalid client secret')
+    })
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
     const wrapper = mount(VueStripeProvider, {
       props: { publishableKey: 'pk_test_123' },
-      slots: { default: () => h(VueStripeCheckoutProvider, {}) }
+      slots: { default: () => h(VueStripeCheckoutElementsProvider, { clientSecret: 'bad' }) }
     })
     await flushPromises()
-    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('Invalid client secret')
+    errorSpy.mockRestore()
+  })
 
-    expect(stripe.initCheckout).not.toHaveBeenCalled()
-    expect(wrapper.find('.vue-stripe-checkout-error').text()).toContain('clientSecret')
-    const emittedError = wrapper.findComponent(VueStripeCheckoutProvider).emitted('error')
-    expect(emittedError).toBeTruthy()
-    expect((emittedError as any[])[0][0]).toContain('clientSecret')
+  it('ignores change events and loadActions results after unmount', async () => {
+    let resolveActions!: (value: unknown) => void
+    const checkout = makeMockCheckout()
+    checkout.loadActions.mockReturnValue(new Promise((r) => (resolveActions = r)))
+    const { injected, show, provider } = await mountWith(undefined, checkout)
+    const captured = injected.value
+    const changeHandler = checkout.on.mock.calls.find((c) => c[0] === 'change')?.[1]
+    const providerWrapper = provider()
+
+    show.value = false
+    await flushPromises()
+
+    resolveActions({ type: 'success', actions: makeMockCheckoutActions() })
+    changeHandler?.(makeMockCheckoutSession({ email: 'late@b.com' }))
+    await flushPromises()
+
+    expect(captured?.checkout.value).toBe(null)
+    expect(captured?.actions.value).toBe(null)
+    expect(captured?.session.value).toBe(null)
+    expect(providerWrapper.emitted('ready')).toBeUndefined()
+    expect(providerWrapper.emitted('change')).toBeUndefined()
   })
 })

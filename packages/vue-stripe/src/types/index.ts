@@ -9,7 +9,9 @@ import type {
   StripeElementChangeEvent,
   ConfirmPaymentData,
   StripeConstructorOptions,
-  StripeCheckout,
+  StripeCheckoutElementsSdk,
+  StripeCheckoutElementsSdkOptions,
+  StripeCheckoutLoadActionsSuccess,
   StripeCheckoutSession,
   StripeCheckoutElementsOptions,
   PaymentIntentResult,
@@ -47,8 +49,12 @@ export type {
   StripeLinkAuthenticationElementChangeEvent,
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementClickEvent,
-  // Custom Checkout types
-  StripeCheckout,
+  // Elements with Checkout Sessions (Checkout Elements SDK) types
+  StripeCheckoutElementsSdk,
+  StripeCheckoutElementsSdkOptions,
+  StripeCheckoutElementsOptions,
+  StripeCheckoutLoadActionsSuccess,
+  StripeCheckoutLoadActionsResult,
   StripeCheckoutSession,
   StripeCheckoutContact,
   StripeCheckoutLineItem,
@@ -125,11 +131,6 @@ export interface VueStripeElementsProps {
    */
   captureMethod?: CaptureMethod | undefined
   /**
-   * List of payment method types to display.
-   * Omit to use Dashboard payment method settings.
-   */
-  paymentMethodTypes?: string[] | undefined
-  /**
    * Appearance API options to theme the Elements.
    * @see https://docs.stripe.com/elements/appearance-api
    */
@@ -153,20 +154,20 @@ export interface VueStripeElementsProps {
  */
 export interface VueStripeCheckoutProviderProps {
   /**
-   * Client secret of a Checkout Session created with `ui_mode: 'custom'`.
-   * Provide this OR `fetchClientSecret`.
+   * Client secret of a Checkout Session created with `ui_mode: 'elements'`,
+   * or a Promise resolving to it.
    */
-  clientSecret?: string | undefined
-  /**
-   * Async function that resolves to the Checkout Session client secret.
-   * Takes precedence over `clientSecret`.
-   */
+  clientSecret?: string | Promise<string> | undefined
+  /** Alternative to `clientSecret`: a function returning the client secret (v5 compatible). */
   fetchClientSecret?: (() => Promise<string>) | undefined
-  /**
-   * Appearance / fonts options forwarded to the Checkout Elements.
-   */
+  /** Appearance, fonts, loader, saved payment methods and address sync for the Checkout elements. */
   elementsOptions?: StripeCheckoutElementsOptions | undefined
+  adaptivePricing?: StripeCheckoutElementsSdkOptions['adaptivePricing'] | undefined
+  defaultValues?: StripeCheckoutElementsSdkOptions['defaultValues'] | undefined
 }
+
+/** Props of `VueStripeCheckoutElementsProvider` (same as the deprecated `VueStripeCheckoutProvider`). */
+export type VueStripeCheckoutElementsProviderProps = VueStripeCheckoutProviderProps
 
 /**
  * Props for VueStripePricingTable component.
@@ -274,30 +275,37 @@ export interface UseSetupIntentReturn {
 }
 
 /**
- * Return value of `useCheckoutSession()`. Method signatures are taken directly
- * from Stripe's `StripeCheckout` so they stay in sync with `@stripe/stripe-js`.
+ * Return value of `useCheckoutSession()`. Action signatures are taken directly
+ * from Stripe's `StripeCheckoutLoadActionsSuccess` so they stay in sync with `@stripe/stripe-js`.
  */
 export interface UseCheckoutSessionReturn {
-  /** The underlying StripeCheckout instance (null until initialized). */
-  checkout: Readonly<Ref<StripeCheckout | null>>
+  /** Checkout Elements SDK handle (null until initialized). */
+  checkout: Readonly<Ref<StripeCheckoutElementsSdk | null>>
+  /** Session actions (null until `loadActions()` resolves). */
+  actions: Readonly<Ref<StripeCheckoutLoadActionsSuccess | null>>
   /** Reactive session snapshot, updated on every Stripe `change` event. */
   session: Readonly<Ref<StripeCheckoutSession | null>>
+  /** True until the session actions have loaded. */
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
   /** Imperative snapshot of the current session (prefer the reactive `session`). */
   getSession: () => StripeCheckoutSession | null
-  confirm: StripeCheckout['confirm']
-  applyPromotionCode: StripeCheckout['applyPromotionCode']
-  removePromotionCode: StripeCheckout['removePromotionCode']
-  updateEmail: StripeCheckout['updateEmail']
-  updatePhoneNumber: StripeCheckout['updatePhoneNumber']
-  updateBillingAddress: StripeCheckout['updateBillingAddress']
-  updateShippingAddress: StripeCheckout['updateShippingAddress']
-  updateLineItemQuantity: StripeCheckout['updateLineItemQuantity']
-  updateShippingOption: StripeCheckout['updateShippingOption']
-  updateTaxIdInfo: StripeCheckout['updateTaxIdInfo']
-  runServerUpdate: StripeCheckout['runServerUpdate']
-  changeAppearance: StripeCheckout['changeAppearance']
+  confirm: StripeCheckoutLoadActionsSuccess['confirm']
+  applyPromotionCode: StripeCheckoutLoadActionsSuccess['applyPromotionCode']
+  removePromotionCode: StripeCheckoutLoadActionsSuccess['removePromotionCode']
+  updateEmail: StripeCheckoutLoadActionsSuccess['updateEmail']
+  updatePhoneNumber: StripeCheckoutLoadActionsSuccess['updatePhoneNumber']
+  updateBillingAddress: StripeCheckoutLoadActionsSuccess['updateBillingAddress']
+  updateShippingAddress: StripeCheckoutLoadActionsSuccess['updateShippingAddress']
+  updateLineItemQuantity: StripeCheckoutLoadActionsSuccess['updateLineItemQuantity']
+  updateShippingOption: StripeCheckoutLoadActionsSuccess['updateShippingOption']
+  updateTaxIdInfo: StripeCheckoutLoadActionsSuccess['updateTaxIdInfo']
+  runServerUpdate: StripeCheckoutLoadActionsSuccess['runServerUpdate']
+  validateElements: StripeCheckoutLoadActionsSuccess['validateElements']
+  addOptionalLineItem: StripeCheckoutLoadActionsSuccess['addOptionalLineItem']
+  removeOptionalLineItem: StripeCheckoutLoadActionsSuccess['removeOptionalLineItem']
+  changeAppearance: StripeCheckoutElementsSdk['changeAppearance']
+  loadFonts: StripeCheckoutElementsSdk['loadFonts']
 }
 
 /**

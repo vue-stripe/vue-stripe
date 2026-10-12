@@ -1,32 +1,13 @@
 <script setup lang="ts">
 import { ref, useSlots, computed } from 'vue-demi'
-import type { RedirectToCheckoutOptions } from '@stripe/stripe-js'
-import { useStripe } from '../composables/useStripe'
-import { VueStripeProviderError } from '../utils/errors'
+import { VueStripeCheckoutError } from '../utils/errors'
 
 interface Props {
   /**
-   * Checkout Session ID (starts with cs_).
-   * When provided, redirects to the session's checkout page.
-   */
-  sessionId?: string
-  /**
-   * Checkout Session URL from Stripe API.
-   * For @stripe/stripe-js v8.x compatibility where redirectToCheckout is removed.
-   * When provided, this takes precedence over sessionId.
+   * Hosted Checkout Session URL (`session.url`) created on your server.
+   * Stripe.js removed `redirectToCheckout` (sessionId / priceId) in Clover.
    */
   sessionUrl?: string
-  /**
-   * Price ID for client-side session creation (legacy, requires redirectToCheckout).
-   * @deprecated Use sessionUrl with server-side session creation for v8.x compatibility.
-   */
-  priceId?: string
-  mode?: 'payment' | 'subscription'
-  successUrl?: string
-  cancelUrl?: string
-  customerEmail?: string
-  clientReferenceId?: string
-  submitType?: 'auto' | 'book' | 'donate' | 'pay'
   buttonText?: string
   loadingText?: string
   disabled?: boolean
@@ -35,13 +16,12 @@ interface Props {
 
 interface Emits {
   (e: 'checkout'): void
+  (e: 'before-redirect', data: { url: string }): void
   (e: 'success'): void
   (e: 'error', error: Error): void
-  (e: 'before-redirect', data: { url: string }): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  mode: 'payment',
   buttonText: 'Checkout',
   loadingText: 'Redirecting...',
   disabled: false,
@@ -50,115 +30,30 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-const { stripe } = useStripe()
 const loading = ref(false)
 const slots = useSlots()
 
 // Check if user provided custom default slot content
 const hasCustomSlot = computed(() => !!slots['default'])
 
-/**
- * Check if redirectToCheckout is available (stripe-js v7.x)
- */
-const hasRedirectToCheckout = (): boolean => {
-  return stripe.value !== null && typeof stripe.value.redirectToCheckout === 'function'
-}
-
-/**
- * Handle checkout - supports both v7.x (redirectToCheckout) and v8.x (URL redirect)
- */
-const handleSubmit = async () => {
-  loading.value = true
+const handleSubmit = () => {
+  if (loading.value || props.disabled) return
   emit('checkout')
 
-  try {
-    // Option 1: Direct URL redirect (v8.x compatible, recommended)
-    if (props.sessionUrl) {
-      emit('before-redirect', { url: props.sessionUrl })
-      window.location.replace(props.sessionUrl)
-      emit('success')
-      return
-    }
-
-    // Option 2: Session-based checkout with redirectToCheckout (v7.x)
-    if (props.sessionId) {
-      // Check if redirectToCheckout is available
-      if (!hasRedirectToCheckout()) {
-        throw new VueStripeProviderError(
-          'redirectToCheckout is not available. This method was removed in @stripe/stripe-js v8.x. ' +
-            'Use sessionUrl prop with the checkout session URL instead.'
-        )
-      }
-
-      if (!stripe.value) {
-        throw new VueStripeProviderError('Stripe not initialized')
-      }
-
-      const result = await stripe.value.redirectToCheckout({
-        sessionId: props.sessionId
-      })
-
-      if (result.error) {
-        throw new VueStripeProviderError(result.error.message || 'Redirect to checkout failed')
-      }
-
-      emit('success')
-      return
-    }
-
-    // Option 3: Price-based checkout (v7.x only, deprecated)
-    if (props.priceId) {
-      if (!hasRedirectToCheckout()) {
-        throw new VueStripeProviderError(
-          'Price-based checkout using redirectToCheckout is not available in @stripe/stripe-js v8.x. ' +
-            'Create a Checkout Session on your server and use sessionUrl prop instead.'
-        )
-      }
-
-      if (!stripe.value) {
-        throw new VueStripeProviderError('Stripe not initialized')
-      }
-
-      console.warn(
-        '[Vue Stripe] Price-based checkout is deprecated in v8.x. ' +
-          'Create a Checkout Session on your server and use sessionUrl prop instead.'
-      )
-
-      const result = await stripe.value.redirectToCheckout({
-        lineItems: [
-          {
-            price: props.priceId,
-            quantity: 1
-          }
-        ],
-        mode: props.mode,
-        successUrl: props.successUrl || window.location.origin + '/success',
-        cancelUrl: props.cancelUrl || window.location.origin + '/cancel',
-        customerEmail: props.customerEmail,
-        clientReferenceId: props.clientReferenceId,
-        submitType: props.submitType
-      } as RedirectToCheckoutOptions)
-
-      if (result.error) {
-        throw new VueStripeProviderError(result.error.message || 'Redirect to checkout failed')
-      }
-
-      emit('success')
-      return
-    }
-
-    // No valid checkout option provided
-    throw new VueStripeProviderError(
-      'Either sessionUrl, sessionId, or priceId is required. ' +
-        'For @stripe/stripe-js v8.x, use sessionUrl.'
+  if (!props.sessionUrl) {
+    const error = new VueStripeCheckoutError(
+      'VueStripeCheckout: `sessionUrl` is required (create the Checkout Session on your server)'
     )
-  } catch (err) {
-    const error = err instanceof Error ? err : new Error('Checkout failed')
+    console.error('[Vue Stripe] Checkout error:', error.message)
     emit('error', error)
-    console.error('[Vue Stripe] Checkout error:', error)
-  } finally {
-    loading.value = false
+    return
   }
+
+  // The page navigates away; loading stays on until it does.
+  loading.value = true
+  emit('before-redirect', { url: props.sessionUrl })
+  window.location.replace(props.sessionUrl)
+  emit('success')
 }
 
 // Expose checkout method for custom button implementations

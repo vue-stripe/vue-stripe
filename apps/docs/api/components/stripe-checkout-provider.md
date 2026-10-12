@@ -50,8 +50,9 @@ const clientSecret = 'cs_test_xxx_secret_xxx'
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | `StripeCheckout` | Emitted once the Checkout session is initialized. Payload is the `StripeCheckout` instance |
-| `@error` | `string` | Emitted if `initCheckout()` fails. Payload is the error message |
+| `@ready` | `StripeCheckoutLoadActionsSuccess` | Emitted once `checkout.loadActions()` resolves. Payload is the session actions object |
+| `@change` | `StripeCheckoutSession` | Emitted on every Stripe `change` event with the new session snapshot |
+| `@error` | `string` | Emitted if `initCheckoutElementsSdk()` throws, `loadActions()` returns an error, or no client secret is given |
 
 ## Slots
 

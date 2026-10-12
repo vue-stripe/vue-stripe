@@ -366,3 +366,33 @@ describe('VueStripeElements options and reactivity', () => {
     expect(stripe.elements).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('VueStripeElements and Stripe.js 10 (Endive)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('never forwards paymentMethodTypes (removed from stripe.elements() in Endive)', async () => {
+    const { makeMockStripe } = await import('../setup')
+    const stripe = makeMockStripe()
+    const { loadStripe } = await import('@stripe/stripe-js')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+    mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: {
+        default: () =>
+          h(VueStripeElements, {
+            mode: 'payment',
+            currency: 'usd',
+            amount: 1000,
+            paymentMethodTypes: ['card'],
+            options: { paymentMethodTypes: ['card'] }
+          })
+      }
+    })
+    await flushPromises()
+    const passed = stripe.elements.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(passed).toMatchObject({ mode: 'payment', currency: 'usd', amount: 1000 })
+    expect(passed).not.toHaveProperty('paymentMethodTypes')
+  })
+})

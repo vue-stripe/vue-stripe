@@ -16,11 +16,10 @@ export { default as VueStripeCardCvcElement } from './VueStripeCardCvcElement.vu
 export { default as VueStripeLinkAuthenticationElement } from './VueStripeLinkAuthenticationElement.vue'
 export { default as VueStripeAddressElement } from './VueStripeAddressElement.vue'
 
-// European Regional Elements (v5.2.0)
+// Regional elements. The standalone iDEAL, P24, EPS and FPX elements were
+// removed by Stripe in Stripe.js 8 (Clover); use the Payment Element for them.
 export { default as VueStripeIbanElement } from './VueStripeIbanElement.vue'
-export { default as VueStripeIdealBankElement } from './VueStripeIdealBankElement.vue'
-export { default as VueStripeP24BankElement } from './VueStripeP24BankElement.vue'
-export { default as VueStripeEpsBankElement } from './VueStripeEpsBankElement.vue'
+export { default as VueStripeAuBankAccountElement } from './VueStripeAuBankAccountElement.vue'
 
 // Messaging Element (v5.5.0)
 export { default as VueStripePaymentMethodMessagingElement } from './VueStripePaymentMethodMessagingElement.vue'
@@ -28,12 +27,10 @@ export { default as VueStripePaymentMethodMessagingElement } from './VueStripePa
 // Checkout
 export { default as VueStripeCheckout } from './VueStripeCheckout.vue'
 
-// Custom Checkout (ui_mode: 'custom')
+// Elements with Checkout Sessions (stripe.initCheckoutElementsSdk)
+export { default as VueStripeCheckoutElementsProvider } from './VueStripeCheckoutProvider.vue'
+/** @deprecated Renamed to VueStripeCheckoutElementsProvider (mirrors Stripe's initCheckoutElementsSdk); removed in v7. */
 export { default as VueStripeCheckoutProvider } from './VueStripeCheckoutProvider.vue'
 
 // Pricing Table (v5.3.0)
 export { default as VueStripePricingTable } from './VueStripePricingTable.vue'
-
-// APAC Regional Elements
-export { default as VueStripeFpxBankElement } from './VueStripeFpxBankElement.vue'
-export { default as VueStripeAuBankAccountElement } from './VueStripeAuBankAccountElement.vue'

@@ -122,24 +122,6 @@ const europeanElements = [
     description: 'SEPA bank account collection',
     route: '/stripe-iban-element',
     icon: Landmark
-  },
-  {
-    title: 'iDEAL Bank',
-    description: 'Dutch payment method',
-    route: '/stripe-ideal-bank-element',
-    icon: Landmark
-  },
-  {
-    title: 'P24 Bank',
-    description: 'Polish payment method',
-    route: '/stripe-p24-bank-element',
-    icon: Landmark
-  },
-  {
-    title: 'EPS Bank',
-    description: 'Austrian payment method',
-    route: '/stripe-eps-bank-element',
-    icon: Landmark
   }
 ]
 </script>

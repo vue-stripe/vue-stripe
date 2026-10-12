@@ -2,7 +2,7 @@
 import { ref, inject, computed, defineComponent, h, watch, onBeforeUnmount } from 'vue'
 import {
   VueStripeProvider,
-  VueStripeCheckoutProvider,
+  VueStripeCheckoutElementsProvider,
   useCheckoutSession
 } from '@vue-stripe/vue-stripe'
 import type { StripePaymentElement } from '@stripe/stripe-js'
@@ -10,7 +10,7 @@ import type { StripePaymentElement } from '@stripe/stripe-js'
 const stripeConfig = inject<{ publishableKey: string }>('stripeConfig')
 
 // A Custom Checkout session client secret (cs_..._secret_...) created on your
-// server with `ui_mode: 'custom'`. Paste it here for the demo.
+// server with `ui_mode: 'elements'`. Paste it here for the demo.
 const checkoutSecret = ref('')
 const cleanSecret = computed(() => checkoutSecret.value.trim())
 const activeSecret = ref('')
@@ -55,11 +55,19 @@ const CheckoutDemo = defineComponent({
       const res = await applyPromotionCode(promo.value)
       message.value = res.type === 'error' ? `Error: ${res.error.message}` : 'Promotion applied'
     }
+    // The session carries its own return_url (set when it was created on the server),
+    // so confirm() takes no returnUrl; Stripe rejects passing both.
     const onConfirm = async () => {
       message.value = null
-      const res = await confirm({ returnUrl: `${window.location.origin}/custom-checkout` })
-      message.value =
-        res.type === 'error' ? `Error: ${res.error.message}` : `Status: ${res.session.status.type}`
+      try {
+        const res = await confirm()
+        message.value =
+          res.type === 'error'
+            ? `Error: ${res.error.message}`
+            : `Status: ${res.session.status.type}`
+      } catch (err) {
+        message.value = `Error: ${err instanceof Error ? err.message : String(err)}`
+      }
     }
 
     return () =>
@@ -109,8 +117,8 @@ const CheckoutDemo = defineComponent({
   <div class="page">
     <h2>Custom Checkout (useCheckoutSession)</h2>
     <p class="desc">
-      Full UI control via a Checkout Session (<code>ui_mode: 'custom'</code>). Create the session on
-      your server and paste its <code>client_secret</code> below.
+      Full UI control via a Checkout Session (<code>ui_mode: 'elements'</code>). Create the session
+      on your server and paste its <code>client_secret</code> below.
     </p>
 
     <div v-if="!stripeConfig?.publishableKey" class="warn">
@@ -125,13 +133,13 @@ const CheckoutDemo = defineComponent({
       </div>
 
       <VueStripeProvider v-else :publishable-key="stripeConfig.publishableKey">
-        <VueStripeCheckoutProvider :client-secret="activeSecret">
+        <VueStripeCheckoutElementsProvider :client-secret="activeSecret">
           <template #loading><p>Initializing checkout…</p></template>
           <template #error="{ error }"
             ><p class="err">{{ error }}</p></template
           >
           <component :is="CheckoutDemo" />
-        </VueStripeCheckoutProvider>
+        </VueStripeCheckoutElementsProvider>
       </VueStripeProvider>
     </template>
   </div>

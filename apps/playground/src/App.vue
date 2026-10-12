@@ -222,13 +222,8 @@ const navGroups = computed(() => {
     SetupIntent: KeyRound,
     LinkAuthentication: Link2,
     AddressElement: MapPin,
-    // European Regional Elements (v5.2.0)
+    // Regional elements
     IbanElement: Landmark,
-    IdealBankElement: Landmark,
-    P24BankElement: Landmark,
-    EpsBankElement: Landmark,
-    // APAC Regional Elements
-    FpxBankElement: Landmark,
     AuBankAccountElement: Landmark,
     // Pricing Table (v5.3.0)
     PricingTable: Table2
@@ -259,9 +254,9 @@ const navGroups = computed(() => {
   }
 
   // European element route names
-  const europeanElements = ['IbanElement', 'IdealBankElement', 'P24BankElement', 'EpsBankElement']
+  const europeanElements = ['IbanElement']
   // APAC element route names
-  const apacElements = ['FpxBankElement', 'AuBankAccountElement']
+  const apacElements = ['AuBankAccountElement']
 
   routes.forEach((route) => {
     const name = String(route.name)

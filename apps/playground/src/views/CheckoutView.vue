@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, inject, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { VueStripeProvider, VueStripeCheckout } from '@vue-stripe/vue-stripe'
+import { VueStripeCheckout } from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -11,11 +11,7 @@ import {
   AlertDescription,
   Button,
   Input,
-  Label,
-  Badge,
-  Tabs,
-  TabsList,
-  TabsTrigger
+  Label
 } from '@/components/ui'
 
 const route = useRoute()
@@ -26,13 +22,9 @@ const stripeConfig = inject<{
 
 const publishableKey = computed(() => stripeConfig?.publishableKey || '')
 
-// Session-based checkout (v7.x with sessionId, or v8.x with sessionUrl)
-const sessionId = ref('')
+// Hosted Checkout: the server creates the Checkout Session and returns its URL.
+// (stripe.redirectToCheckout with a session ID or price ID was removed in Stripe.js Clover.)
 const sessionUrl = ref('')
-
-// Price-based checkout (v7.x only, deprecated in v8.x)
-const priceId = ref('')
-const mode = ref<'payment' | 'subscription'>('payment')
 
 // Use current origin and route with result param
 const currentUrl = computed(() => {
@@ -48,9 +40,6 @@ const checkoutResult = ref<'success' | 'cancel' | null>(null)
 // Checkout state
 const checkoutError = ref<string | null>(null)
 const isRedirecting = ref(false)
-
-// Mode toggle: 'url' for v8.x compatible, 'session' for v7.x sessionId, 'price' for v7.x priceId
-const checkoutMode = ref<'url' | 'session' | 'price'>('url')
 
 // Check for result param on mount
 onMounted(() => {
@@ -93,17 +82,9 @@ const onCheckoutError = (error: Error) => {
 }
 
 // Computed: Is form valid?
-const isFormValid = computed(() => {
-  if (checkoutMode.value === 'url') {
-    return sessionUrl.value.startsWith('https://checkout.stripe.com/')
-  }
-  if (checkoutMode.value === 'session') {
-    return sessionId.value.startsWith('cs_')
-  }
-  return priceId.value.startsWith('price_')
-})
+const isFormValid = computed(() => sessionUrl.value.startsWith('https://checkout.stripe.com/'))
 
-// Handle before-redirect event (v8.x)
+// Handle before-redirect event
 const onBeforeRedirect = (data: { url: string }) => {
   logEvent('before-redirect', `Redirecting to: ${data.url.substring(0, 50)}...`)
 }
@@ -174,29 +155,13 @@ const clearResult = () => {
         </Alert>
 
         <div v-else class="mt-4">
-          <!-- Mode Selector -->
-          <div class="space-y-2">
-            <Label class="text-xs uppercase tracking-wide text-muted-foreground"
-              >Checkout Mode</Label
-            >
-            <Tabs v-model="checkoutMode" class="w-full">
-              <TabsList class="grid w-full grid-cols-3">
-                <TabsTrigger value="url">URL-Based (v8.x)</TabsTrigger>
-                <TabsTrigger value="session">Session ID (v7.x)</TabsTrigger>
-                <TabsTrigger value="price">Price-Based (v7.x)</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <!-- URL-Based Checkout (v8.x compatible) -->
-          <div v-if="checkoutMode === 'url'" class="bg-secondary border rounded-lg p-5 mt-4">
-            <h4 class="font-semibold mb-2">
-              URL-Based Checkout
-              <Badge variant="success" class="ml-2">v8.x Compatible</Badge>
-            </h4>
+          <!-- URL-based hosted Checkout -->
+          <div class="bg-secondary border rounded-lg p-5 mt-4">
+            <h4 class="font-semibold mb-2">Hosted Checkout</h4>
             <p class="text-muted-foreground text-sm">
-              Use the Checkout Session URL from your backend. This is the recommended approach for
-              @stripe/stripe-js v8.x where <code>redirectToCheckout</code> is removed.
+              Use the Checkout Session URL from your backend. Stripe.js removed
+              <code>redirectToCheckout</code> in Clover (8.x); the session is always created on the
+              server.
             </p>
 
             <div class="mt-4">
@@ -229,170 +194,25 @@ stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","
 
             <Alert variant="info" class="mt-4">
               <AlertDescription class="text-sm">
-                <strong>v8.x Migration:</strong> In @stripe/stripe-js v8.x,
-                <code>redirectToCheckout</code> was removed. Your server should return the session
-                URL directly, which is then used for a simple
-                <code>window.location.replace()</code> redirect.
+                Your server returns the session <code>url</code>; the component redirects with
+                <code>window.location.replace()</code>. No Stripe.js instance is needed.
               </AlertDescription>
             </Alert>
-          </div>
-
-          <!-- Session ID Checkout (v7.x) -->
-          <div v-if="checkoutMode === 'session'" class="bg-secondary border rounded-lg p-5 mt-4">
-            <h4 class="font-semibold mb-2">
-              Session ID Checkout
-              <Badge variant="warning" class="ml-2">v7.x Only</Badge>
-            </h4>
-            <p class="text-muted-foreground text-sm">
-              Use a pre-created Checkout Session ID. This uses <code>redirectToCheckout</code> which
-              is deprecated in v8.x.
-            </p>
-
-            <div class="mt-4">
-              <Label class="mb-2">Session ID</Label>
-              <Input
-                v-model="sessionId"
-                type="text"
-                placeholder="cs_test_..."
-                class="font-mono"
-                :class="{ 'border-success': sessionId.startsWith('cs_') }"
-              />
-            </div>
-
-            <div class="bg-card rounded-md border p-4 mt-4">
-              <h5 class="font-medium text-sm mb-2">How to get a Session ID:</h5>
-              <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
-                <li>
-                  Create a Checkout Session using Stripe CLI:
-                  <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">
-stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{
-                      successUrl
-                    }}" --cancel-url "{{ cancelUrl }}"</pre>
-                </li>
-                <li>Copy the <code>id</code> from the response (starts with <code>cs_</code>)</li>
-              </ol>
-            </div>
-
-            <Alert variant="warning" class="mt-4">
-              <AlertDescription class="text-sm">
-                <strong>Deprecated:</strong> This method uses <code>redirectToCheckout</code> which
-                is removed in @stripe/stripe-js v8.x. Use URL-Based checkout for v8.x compatibility.
-              </AlertDescription>
-            </Alert>
-          </div>
-
-          <!-- Price-Based Checkout (v7.x only) -->
-          <div v-if="checkoutMode === 'price'" class="bg-secondary border rounded-lg p-5 mt-4">
-            <h4 class="font-semibold mb-2">
-              Price-Based Checkout
-              <Badge variant="warning" class="ml-2">v7.x Only</Badge>
-            </h4>
-            <p class="text-muted-foreground text-sm">
-              Create a checkout session dynamically using a Price ID. This uses
-              <code>redirectToCheckout</code>
-              which is deprecated in v8.x.
-            </p>
-
-            <div class="mt-4">
-              <Label class="mb-2">Price ID</Label>
-              <Input
-                v-model="priceId"
-                type="text"
-                placeholder="price_..."
-                class="font-mono"
-                :class="{ 'border-success': priceId.startsWith('price_') }"
-              />
-            </div>
-
-            <div class="mt-3 space-y-2">
-              <Label class="text-xs uppercase tracking-wide text-muted-foreground">Mode</Label>
-              <Tabs v-model="mode" class="w-full">
-                <TabsList class="grid w-full grid-cols-2">
-                  <TabsTrigger value="payment">Payment</TabsTrigger>
-                  <TabsTrigger value="subscription">Subscription</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-
-            <div class="bg-card rounded-md p-3 mt-3 space-y-2 text-sm">
-              <div class="flex items-center gap-2">
-                <span class="text-muted-foreground min-w-[90px]">Success URL:</span>
-                <code class="text-xs bg-secondary px-2 py-0.5 rounded text-primary break-all">{{
-                  successUrl
-                }}</code>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-muted-foreground min-w-[90px]">Cancel URL:</span>
-                <code class="text-xs bg-secondary px-2 py-0.5 rounded text-primary break-all">{{
-                  cancelUrl
-                }}</code>
-              </div>
-            </div>
-
-            <div class="bg-card rounded-md border p-4 mt-4">
-              <h5 class="font-medium text-sm mb-2">How to get a Price ID:</h5>
-              <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
-                <li>
-                  Go to
-                  <a
-                    href="https://dashboard.stripe.com/test/products"
-                    target="_blank"
-                    class="text-primary hover:underline"
-                    >Stripe Dashboard → Products</a
-                  >
-                </li>
-                <li>Create or select a product</li>
-                <li>Copy the Price ID (starts with <code>price_</code>)</li>
-              </ol>
-            </div>
           </div>
 
           <!-- Checkout Button -->
           <div class="text-center mt-5">
-            <VueStripeProvider :publishable-key="publishableKey">
-              <!-- URL-Based (v8.x compatible) -->
-              <VueStripeCheckout
-                v-if="checkoutMode === 'url'"
-                :session-url="sessionUrl"
-                button-text="Checkout with URL (v8.x)"
-                loading-text="Redirecting..."
-                :disabled="!isFormValid"
-                button-class="checkout-button"
-                @click="onCheckoutClick"
-                @success="onCheckoutSuccess"
-                @error="onCheckoutError"
-                @before-redirect="onBeforeRedirect"
-              />
-
-              <!-- Session ID (v7.x) -->
-              <VueStripeCheckout
-                v-else-if="checkoutMode === 'session'"
-                :session-id="sessionId"
-                button-text="Checkout with Session ID (v7.x)"
-                loading-text="Redirecting..."
-                :disabled="!isFormValid"
-                button-class="checkout-button"
-                @click="onCheckoutClick"
-                @success="onCheckoutSuccess"
-                @error="onCheckoutError"
-              />
-
-              <!-- Price-Based (v7.x) -->
-              <VueStripeCheckout
-                v-else
-                :price-id="priceId"
-                :mode="mode"
-                :success-url="successUrl"
-                :cancel-url="cancelUrl"
-                button-text="Checkout with Price (v7.x)"
-                loading-text="Redirecting..."
-                :disabled="!isFormValid"
-                button-class="checkout-button"
-                @click="onCheckoutClick"
-                @success="onCheckoutSuccess"
-                @error="onCheckoutError"
-              />
-            </VueStripeProvider>
+            <VueStripeCheckout
+              :session-url="sessionUrl"
+              button-text="Checkout"
+              loading-text="Redirecting..."
+              :disabled="!isFormValid"
+              button-class="checkout-button"
+              @checkout="onCheckoutClick"
+              @success="onCheckoutSuccess"
+              @error="onCheckoutError"
+              @before-redirect="onBeforeRedirect"
+            />
           </div>
 
           <!-- Status display -->

@@ -18,7 +18,13 @@ export type {
   UseHandleNextActionReturn,
   HandleNextActionOptions,
   VueStripeCheckoutProviderProps,
+  VueStripeCheckoutElementsProviderProps,
   UseCheckoutSessionReturn,
+  VueStripeErrorResult,
+  ConfirmPaymentResult,
+  ConfirmSetupResult,
+  CreatePaymentMethodResult,
+  HandleNextActionResult,
   PaymentElementType,
   ExpressCheckoutType,
   VueStripeError,
@@ -51,8 +57,12 @@ export type {
   StripeLinkAuthenticationElementChangeEvent,
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementClickEvent,
-  // Custom Checkout types
-  StripeCheckout,
+  // Elements with Checkout Sessions (Checkout Elements SDK) types
+  StripeCheckoutElementsSdk,
+  StripeCheckoutElementsSdkOptions,
+  StripeCheckoutElementsOptions,
+  StripeCheckoutLoadActionsSuccess,
+  StripeCheckoutLoadActionsResult,
   StripeCheckoutSession,
   StripeCheckoutContact,
   StripeCheckoutLineItem,
@@ -62,8 +72,7 @@ export type {
 // Export checkout composable types (defined alongside useStripeCheckout)
 export type {
   UseStripeCheckoutReturn,
-  CheckoutRedirectOptions,
-  LegacyCheckoutOptions
+  CheckoutRedirectOptions
 } from './composables/useStripeCheckout'
 
 // Export all components

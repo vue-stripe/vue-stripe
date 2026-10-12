@@ -3,7 +3,6 @@ import * as VueStripe from '../src'
 import type {
   UseStripeCheckoutReturn,
   CheckoutRedirectOptions,
-  LegacyCheckoutOptions,
   ConfirmPaymentOptions,
   ConfirmSetupOptions
 } from '../src'
@@ -26,18 +25,30 @@ describe('public API exports', () => {
     expect(typeof VueStripe.useCheckoutSession).toBe('function')
   })
 
-  it('exports the Custom Checkout provider component', () => {
-    expect(VueStripe.VueStripeCheckoutProvider).toBeTruthy()
+  it('exports the Checkout Elements provider under its canonical name and the v5 alias', () => {
+    expect(VueStripe.VueStripeCheckoutElementsProvider).toBeTruthy()
+    expect(VueStripe.VueStripeCheckoutProvider).toBe(VueStripe.VueStripeCheckoutElementsProvider)
+  })
+
+  it('does not export elements removed in Stripe.js 8+ (Clover)', () => {
+    const removed = [
+      'VueStripeIdealBankElement',
+      'VueStripeP24BankElement',
+      'VueStripeEpsBankElement',
+      'VueStripeFpxBankElement'
+    ]
+    for (const name of removed) {
+      expect((VueStripe as Record<string, unknown>)[name]).toBeUndefined()
+    }
   })
 
   it('exports the checkout + confirm option types (compile-time check)', () => {
     // Type-only usage — fails `vue-tsc` if any of these are not exported (#384a).
     const redirect: CheckoutRedirectOptions = { url: 'https://example.com' }
-    const legacy: LegacyCheckoutOptions = { sessionId: 'cs_test_123' }
     const confirmPayment: ConfirmPaymentOptions = { clientSecret: 'pi_secret' }
     const confirmSetup: ConfirmSetupOptions = { clientSecret: 'seti_secret' }
     const checkoutReturn: UseStripeCheckoutReturn | null = null
 
-    expect([redirect, legacy, confirmPayment, confirmSetup, checkoutReturn]).toHaveLength(5)
+    expect([redirect, confirmPayment, confirmSetup, checkoutReturn]).toHaveLength(4)
   })
 })

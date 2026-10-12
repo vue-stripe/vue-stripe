@@ -2,7 +2,8 @@ import type { InjectionKey, Ref } from 'vue-demi'
 import type {
   Stripe,
   StripeElements,
-  StripeCheckout,
+  StripeCheckoutElementsSdk,
+  StripeCheckoutLoadActionsSuccess,
   StripeCheckoutSession
 } from '@stripe/stripe-js'
 
@@ -19,8 +20,12 @@ export interface StripeElementsInstance {
 }
 
 export interface StripeCheckoutInstance {
-  checkout: Ref<StripeCheckout | null>
+  /** Checkout Elements SDK handle (`stripe.initCheckoutElementsSdk()`, synchronous). */
+  checkout: Ref<StripeCheckoutElementsSdk | null>
+  /** Session actions, available once `checkout.loadActions()` resolves. */
+  actions: Ref<StripeCheckoutLoadActionsSuccess | null>
   session: Ref<StripeCheckoutSession | null>
+  /** True until `loadActions()` settles. */
   loading: Ref<boolean>
   error: Ref<string | null>
 }

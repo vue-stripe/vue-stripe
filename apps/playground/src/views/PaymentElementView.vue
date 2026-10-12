@@ -143,7 +143,7 @@ const elementOptions = computed((): StripePaymentElementOptions => ({
   layout: {
     type: selectedLayout.value,
     defaultCollapsed: selectedLayout.value === 'accordion',
-    radios: selectedLayout.value === 'accordion',
+    radios: selectedLayout.value === 'accordion' ? 'always' : 'never',
     spacedAccordionItems: selectedLayout.value === 'accordion'
   },
   ...(businessName.value ? { business: { name: businessName.value } } : {}),

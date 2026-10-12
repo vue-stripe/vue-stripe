@@ -39,12 +39,6 @@ Test Vue Stripe components with real Stripe integrations. These live demos conne
     <h3>Link Authentication</h3>
     <p>Enable one-click checkout with Stripe Link.</p>
   </a>
-
-  <a href="/live-demo/ideal-payment" class="example-card">
-    <div class="example-icon">🏦</div>
-    <h3>iDEAL Payment</h3>
-    <p>Accept iDEAL payments from customers in the Netherlands.</p>
-  </a>
 </div>
 
 ## Subscriptions
