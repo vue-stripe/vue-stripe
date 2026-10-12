@@ -59,7 +59,9 @@ export default /* @__PURE__ */ defineComponent({
   setup(props, { emit, slots }) {
     const stripeInstance = inject(stripeInjectionKey, null)
     if (!stripeInstance) {
-      throw new VueStripeProviderError('VueStripeElements must be used within VueStripeProvider')
+      throw new VueStripeProviderError(
+        'VueStripeElements must be used within VueStripeProvider or an app using createVueStripe()'
+      )
     }
 
     const elements = shallowRef<StripeElements | null>(null)
@@ -159,7 +161,8 @@ export default /* @__PURE__ */ defineComponent({
     return () =>
       statusShell(
         'vue-stripe-elements',
-        { error: error.value, loading: loading.value },
+        // Without a VueStripeProvider (createVueStripe() only), nothing else shows a Stripe load failure.
+        { error: error.value ?? stripeInstance.error.value, loading: loading.value },
         slots,
         {},
         'Initializing Elements...'

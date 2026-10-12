@@ -39,7 +39,7 @@ flowchart TD
 ```
 
 ::: tip Usage Context
-This composable must be called within a component that is a descendant of `VueStripeProvider`. If used within `VueStripeElements`, the elements instance is automatically injected.
+This composable must be called within a component that is a descendant of `VueStripeProvider` (or in an app that installs [`createVueStripe()`](/api/plugin)). If used within `VueStripeElements`, the elements instance is automatically injected.
 :::
 
 ## Usage
@@ -491,7 +491,7 @@ const handleSave = async (clientSecret: string) => {
 
 | Requirement | Details |
 |-------------|---------|
-| **VueStripeProvider** | Must be used within `VueStripeProvider` context |
+| **VueStripeProvider** | Must be used within `VueStripeProvider` context, or in an app that installs `createVueStripe()` |
 | **SetupIntent** | Need a SetupIntent client_secret from your backend |
 | **StripeElements** | Optional - elements auto-injected if available |
 

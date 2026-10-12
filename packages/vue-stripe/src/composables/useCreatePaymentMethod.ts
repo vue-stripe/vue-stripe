@@ -31,7 +31,7 @@ export function useCreatePaymentMethod(): UseCreatePaymentMethodReturn {
 
   if (!stripeInstance) {
     throw new VueStripeProviderError(
-      'useCreatePaymentMethod must be called within a VueStripeProvider component'
+      'useCreatePaymentMethod must be called within a VueStripeProvider component or an app using createVueStripe()'
     )
   }
 

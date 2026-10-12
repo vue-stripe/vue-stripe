@@ -28,7 +28,7 @@ export function useHandleNextAction(): UseHandleNextActionReturn {
 
   if (!stripeInstance) {
     throw new VueStripeProviderError(
-      'useHandleNextAction must be called within a VueStripeProvider component'
+      'useHandleNextAction must be called within a VueStripeProvider component or an app using createVueStripe()'
     )
   }
 

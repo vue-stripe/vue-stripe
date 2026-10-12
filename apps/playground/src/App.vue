@@ -213,6 +213,7 @@ const navGroups = computed(() => {
   // Define icons for each route
   const routeIcons: Record<string, Component> = {
     StripeProvider: Layers,
+    PluginProvider: Layers,
     StripeElements: Layers,
     CardElement: CreditCard,
     SplitCard: CreditCard,

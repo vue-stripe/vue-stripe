@@ -38,7 +38,7 @@ export function useSetupIntent(): UseSetupIntentReturn {
 
   if (!stripeInstance) {
     throw new VueStripeProviderError(
-      'useSetupIntent must be called within a VueStripeProvider component'
+      'useSetupIntent must be called within a VueStripeProvider component or an app using createVueStripe()'
     )
   }
 

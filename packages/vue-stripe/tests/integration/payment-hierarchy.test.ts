@@ -8,12 +8,13 @@ import { useStripe } from '../../src/composables/useStripe'
 import { useStripeElements } from '../../src/composables/useStripeElements'
 import { usePaymentIntent } from '../../src/composables/usePaymentIntent'
 import { useSetupIntent } from '../../src/composables/useSetupIntent'
+import { createVueStripe } from '../../src/plugin'
 import { flushPromises, makeMockElement } from '../setup'
 
 /**
  * Integration tests (#386): exercise the full provider-based hierarchy
- * Provider -> Elements -> Element + composables end-to-end. The plugin-only
- * pathway is intentionally out of scope here (blocked by #424).
+ * Provider -> Elements -> Element + composables end-to-end, and the same
+ * flow with createVueStripe() as the only provider (#424).
  */
 describe('integration: Provider > Elements > PaymentElement + composables', () => {
   beforeEach(() => vi.clearAllMocks())
@@ -41,19 +42,13 @@ describe('integration: Provider > Elements > PaymentElement + composables', () =
     return { submit, confirmPayment, confirmSetup, mockElement }
   }
 
+  const elementsTree = (Inner: ReturnType<typeof defineComponent>) =>
+    h(VueStripeElements, { clientSecret: 'pi_test_secret_123' }, { default: () => h(Inner) })
+
   const mountHierarchy = (Inner: ReturnType<typeof defineComponent>) =>
     mount(VueStripeProvider, {
       props: { publishableKey: 'pk_test_123' },
-      slots: {
-        default: () =>
-          h(
-            VueStripeElements,
-            { clientSecret: 'pi_test_secret_123' },
-            {
-              default: () => h(Inner)
-            }
-          )
-      }
+      slots: { default: () => elementsTree(Inner) }
     })
 
   it('resolves the stripe instance and elements group through the hierarchy', async () => {
@@ -144,5 +139,34 @@ describe('integration: Provider > Elements > PaymentElement + composables', () =
 
     expect(wrapper.find('.vue-stripe-error').exists()).toBe(true)
     expect(wrapper.emitted('error')).toBeTruthy()
+  })
+
+  it('confirms a payment with createVueStripe() as the only provider (#424)', async () => {
+    const { submit, confirmPayment } = await stubStripe()
+
+    const Inner = defineComponent({
+      setup() {
+        const { confirmPayment: confirm } = usePaymentIntent()
+        const result = ref<any>(null)
+        const pay = async () => {
+          result.value = await confirm({ clientSecret: 'pi_test_secret_123' })
+        }
+        return { pay, result }
+      },
+      render: () => h(VueStripePaymentElement)
+    })
+
+    const wrapper = mount(
+      { render: () => elementsTree(Inner) },
+      { global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] } }
+    )
+    await flushPromises()
+
+    const inner = wrapper.findComponent(Inner)
+    await (inner.vm as any).pay()
+
+    expect(submit).toHaveBeenCalled()
+    expect(confirmPayment).toHaveBeenCalled()
+    expect((inner.vm as any).result.paymentIntent.id).toBe('pi_1')
   })
 })

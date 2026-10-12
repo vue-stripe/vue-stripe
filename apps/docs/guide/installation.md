@@ -474,12 +474,15 @@ onMounted(() => {
 
 ## Plugin Registration (Optional)
 
-You can register Vue Stripe as a plugin to provide app-wide configuration:
+Instead of wrapping your tree in `<VueStripeProvider>`, you can install the plugin once. It provides Stripe to the whole app, so elements and composables work without a provider:
 
-```js
+::: code-group
+
+```js [Vue 3]
 // main.js or main.ts
 import { createApp } from 'vue'
 import { createVueStripe } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css'
 import App from './App.vue'
 
 const app = createApp(App)
@@ -491,31 +494,43 @@ app.use(createVueStripe({
 app.mount('#app')
 ```
 
-::: warning The plugin only provides config — it does NOT register components or load Stripe
-Registering the plugin does **not** make components globally available, and it does **not** supply the Stripe instance to elements or composables. You must still import each component, and you must still wrap elements/composables in a `<VueStripeProvider :publishable-key="...">` for Stripe to load.
+```js [Vue 2.7]
+// main.js
+import Vue from 'vue'
+import { createVueStripe } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css'
+import App from './App.vue'
 
-The plugin currently only powers config-only components such as `<VueStripePricingTable>`, which read their configuration from the provided plugin config. A full plugin-level global provider is a future enhancement tracked in [issue #424](https://github.com/vue-stripe/vue-stripe/issues/424).
+Vue.use(createVueStripe({
+  publishableKey: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
+}))
+
+new Vue({ render: (h) => h(App) }).$mount('#app')
+```
+
 :::
 
 ```vue
 <script setup>
-// Components must still be imported
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement
-} from '@vue-stripe/vue-stripe'
+// Components are still imported where you use them
+import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 </script>
 
 <template>
-  <!-- VueStripeProvider is still REQUIRED for elements and composables -->
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="clientSecret">
-      <VueStripePaymentElement />
-    </VueStripeElements>
-  </VueStripeProvider>
+  <!-- No VueStripeProvider needed: the plugin provides the Stripe instance -->
+  <VueStripeElements :client-secret="clientSecret">
+    <VueStripePaymentElement />
+  </VueStripeElements>
 </template>
 ```
+
+::: info What the plugin does and does not do
+- Stripe.js loads once, the first time a component or composable needs it, and never on the server.
+- A `<VueStripeProvider>` inside the app still wins for its own subtree, e.g. for a connected account or `betas`.
+- The plugin does **not** register components globally; import each component where you use it.
+
+See [createVueStripe](/api/plugin) for the full reference.
+:::
 
 ---
 

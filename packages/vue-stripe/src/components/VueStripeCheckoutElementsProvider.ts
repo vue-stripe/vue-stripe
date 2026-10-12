@@ -61,7 +61,7 @@ export default /* @__PURE__ */ defineComponent({
     const stripeInstance = inject(stripeInjectionKey, null)
     if (!stripeInstance) {
       throw new VueStripeProviderError(
-        'VueStripeCheckoutElementsProvider must be used within VueStripeProvider'
+        'VueStripeCheckoutElementsProvider must be used within VueStripeProvider or an app using createVueStripe()'
       )
     }
 
@@ -149,11 +149,13 @@ export default /* @__PURE__ */ defineComponent({
 
     provide(stripeCheckoutInjectionKey, { checkout, actions, session, loading, error })
 
-    return () =>
-      error.value || !checkout.value
+    return () => {
+      // Without a VueStripeProvider (createVueStripe() only), nothing else shows a Stripe load failure.
+      const shownError = error.value ?? stripeInstance.error.value
+      return shownError || !checkout.value
         ? statusShell(
             'vue-stripe-checkout',
-            { error: error.value, loading: true },
+            { error: shownError, loading: true },
             slots,
             {},
             'Initializing Checkout...'
@@ -168,5 +170,6 @@ export default /* @__PURE__ */ defineComponent({
               loading: loading.value
             })
           )
+    }
   }
 })

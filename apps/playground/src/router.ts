@@ -29,6 +29,8 @@ import CustomCheckoutView from './views/CustomCheckoutView.vue'
 import EmbeddedCheckoutView from './views/EmbeddedCheckoutView.vue'
 // Disclosures (React Stripe.js 7 parity, #494)
 import DisclosuresView from './views/DisclosuresView.vue'
+// createVueStripe() as a global provider (#424)
+import PluginProviderView from './views/PluginProviderView.vue'
 
 // Route metadata for SEO (typed via vue-router module augmentation)
 declare module 'vue-router' {
@@ -57,6 +59,16 @@ export const routes: RouteRecordRaw[] = [
       title: 'VueStripeProvider - Vue Stripe',
       description:
         'Learn how to use VueStripeProvider to initialize Stripe.js in your Vue application'
+    }
+  },
+  {
+    path: '/plugin-provider',
+    name: 'PluginProvider',
+    component: PluginProviderView,
+    meta: {
+      title: 'createVueStripe Plugin Provider - Vue Stripe',
+      description:
+        'Install createVueStripe() and use useStripe(), VueStripeElements and elements without VueStripeProvider'
     }
   },
   {

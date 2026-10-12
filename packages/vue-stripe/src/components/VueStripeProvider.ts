@@ -1,12 +1,12 @@
 import { defineComponent, onMounted, provide, ref, shallowRef, type PropType } from 'vue-demi'
-import { loadStripe, type Stripe, type StripeConstructorOptions } from '@stripe/stripe-js'
+import type { Stripe, StripeConstructorOptions } from '@stripe/stripe-js'
 import {
   stripeConfigInjectionKey,
   stripeInjectionKey,
   type VueStripeConfig
 } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
-import { STRIPE_PARTNER_DETAILS } from '../utils/constants'
+import { loadStripeInstance } from '../utils/load-stripe'
 import { statusShell } from '../utils/status-shell'
 
 /**
@@ -58,11 +58,7 @@ export default /* @__PURE__ */ defineComponent({
         if (apiVersion) options.apiVersion = apiVersion
         if (locale) options.locale = locale as NonNullable<StripeConstructorOptions['locale']>
 
-        stripe.value = await loadStripe(key, options)
-        if (!stripe.value) {
-          throw new VueStripeProviderError('Failed to initialize Stripe')
-        }
-        stripe.value.registerAppInfo(STRIPE_PARTNER_DETAILS)
+        stripe.value = await loadStripeInstance(key, options)
         emit('load', stripe.value)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load Stripe'

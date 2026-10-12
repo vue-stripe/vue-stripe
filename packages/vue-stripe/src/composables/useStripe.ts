@@ -5,7 +5,7 @@ import { VueStripeProviderError } from '../utils/errors'
 
 /**
  * Composable to access the Stripe instance
- * Must be used within a VueStripeProvider component
+ * Must be used within a VueStripeProvider component or an app using createVueStripe()
  *
  * @example
  * ```vue
@@ -32,7 +32,7 @@ export function useStripe(): UseStripeReturn {
 
   if (!stripeInstance) {
     throw new VueStripeProviderError(
-      'useStripe must be called within a VueStripeProvider component'
+      'useStripe must be called within a VueStripeProvider component or an app using createVueStripe()'
     )
   }
 

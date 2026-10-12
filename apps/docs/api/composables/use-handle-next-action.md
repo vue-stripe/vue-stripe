@@ -2,7 +2,7 @@
 
 Invoke the next required action (e.g. 3DS authentication) on a PaymentIntent or SetupIntent **without re-confirming it**. Wraps [`stripe.handleNextAction()`](https://docs.stripe.com/js/payment_intents/handle_next_action).
 
-Useful when you confirm an intent server-side and only need the client to complete required actions. Must be called within a `<VueStripeProvider>`.
+Useful when you confirm an intent server-side and only need the client to complete required actions. Must be called within a `<VueStripeProvider>` or an app that installs [`createVueStripe()`](/api/plugin).
 
 ## Usage
 

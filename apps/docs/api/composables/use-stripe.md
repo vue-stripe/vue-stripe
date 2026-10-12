@@ -1,6 +1,6 @@
 # useStripe
 
-Access the Stripe instance from any component within `VueStripeProvider`.
+Access the Stripe instance from any component within `VueStripeProvider`, or anywhere in an app that installs [`createVueStripe()`](/api/plugin).
 
 ## What is useStripe?
 
@@ -18,10 +18,10 @@ A composable that provides access to the Stripe.js instance from any child compo
 
 ```mermaid
 flowchart TD
-    A["Component calls useStripe()"] --> B["Composable checks for StripeProvider context<br/>(Uses Vue's inject with stripeInjectionKey)"]
+    A["Component calls useStripe()"] --> B["Composable checks for StripeProvider or createVueStripe() context<br/>(Uses Vue's inject with stripeInjectionKey)"]
     B --> C{Context Found?}
     C -->|Yes| D["<b>Context Found</b><br/>Returns { stripe, loading, error }"]
-    C -->|No| E["<b>No Context Found</b><br/>Throws Error:<br/>'useStripe must be called within<br/>a VueStripeProvider component'"]
+    C -->|No| E["<b>No Context Found</b><br/>Throws Error:<br/>'useStripe must be called within<br/>a VueStripeProvider component<br/>or an app using createVueStripe()'"]
     D --> F["Component uses stripe.value for API calls<br/><br/>if (stripe.value) {<br/>  await stripe.value.confirmPayment({ ... })<br/>}"]
 ```
 
@@ -31,7 +31,7 @@ flowchart TD
 <script setup>
 import { useStripe } from '@vue-stripe/vue-stripe'
 
-// Must be called inside a component that's within VueStripeProvider
+// Must be called inside VueStripeProvider, or in an app that installs createVueStripe()
 const { stripe, loading, error } = useStripe()
 </script>
 ```
@@ -162,12 +162,12 @@ onMounted(async () => {
 
 ## Error Handling
 
-`useStripe()` throws an error if called outside of `VueStripeProvider`:
+`useStripe()` throws an error if called outside of `VueStripeProvider` in an app that does not install [`createVueStripe()`](/api/plugin):
 
 ```vue
 <!-- Wrong - useStripe() called outside StripeProvider -->
 <script setup>
-const { stripe } = useStripe() // Throws: "useStripe must be called within a VueStripeProvider component"
+const { stripe } = useStripe() // Throws: "useStripe must be called within a VueStripeProvider component or an app using createVueStripe()"
 </script>
 
 <template>

@@ -104,7 +104,7 @@ export function createStripeDisclosure<TOptions extends object>(
       const providerCtx = inject(stripeInjectionKey, null)
       if (props.stripe === undefined && !providerCtx) {
         throw new VueStripeProviderError(
-          `${componentName} needs a \`stripe\` prop or a VueStripeProvider ancestor`
+          `${componentName} needs a \`stripe\` prop, a VueStripeProvider ancestor or an app using createVueStripe()`
         )
       }
       const loading = ref(true)

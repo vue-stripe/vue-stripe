@@ -1,50 +1,53 @@
 # createVueStripe Plugin
 
-A Vue plugin that provides app-wide Stripe configuration under a shared injection key.
+A Vue plugin that provides Stripe to your whole app, as an alternative to wrapping your tree in `VueStripeProvider`.
 
 ## What is createVueStripe?
 
-`createVueStripe` is a Vue plugin factory that provides global Stripe configuration to your entire application. It registers your options under the shared config injection key, so config-only components such as `VueStripePricingTable` work without an explicit `VueStripeProvider`.
-
-The plugin provides **configuration only** — it does not yet supply a reactive Stripe instance to `useStripe()` or `VueStripeElements`. Those still require a `VueStripeProvider` wrapper. A full plugin-level global provider is tracked in [issue #424](https://github.com/vue-stripe/vue-stripe/issues/424).
+`createVueStripe` is a Vue plugin factory. Install it once and every component in the app can use `useStripe()`, `VueStripeElements`, the element components, the intent composables, `VueStripeCheckoutElementsProvider` and `VueStripePricingTable` without a `VueStripeProvider` ancestor.
 
 | Feature | Description |
 |---------|-------------|
-| **Global Config** | Configure Stripe once at app initialization |
-| **Shared Injection Key** | Config is provided under the same key components inject |
-| **Config Only** | Does not supply a Stripe instance (see [#424](https://github.com/vue-stripe/vue-stripe/issues/424)) |
-| **SSR Safe** | No Stripe.js is loaded at install time |
+| **Global provider** | Provides the Stripe instance and config under the same injection keys `VueStripeProvider` uses |
+| **Loads once, on demand** | Stripe.js loads the first time a component or composable needs it, then every consumer shares that instance |
+| **Provider still wins** | A nested `VueStripeProvider` shadows the plugin for everything inside it |
+| **Vue 2.7 and Vue 3** | `app.use(...)` on Vue 3, `Vue.use(...)` on Vue 2.7 |
+| **SSR safe** | Nothing loads at install time or on the server |
 
 ## When to Use
 
-| Scenario | Use Plugin | Use StripeProvider |
+| Scenario | Use Plugin | Use VueStripeProvider |
 |----------|------------|-------------------|
-| Single Stripe account for entire app | Yes | Yes |
-| Multiple Stripe accounts (Connect) | No | Yes |
-| Need to change keys at runtime | No | Yes |
-| Want simpler component trees | Yes | No |
-| SSR with hydration | Careful | Easier |
+| Single Stripe account for the entire app | Yes | Yes |
+| Stripe in many unrelated parts of the app | Yes | Repeated wrappers |
+| Multiple Stripe accounts (Connect) | As the default, plus a provider per account | Yes |
+| Key or account known only at runtime | No | Yes |
+| Custom `#loading` / `#error` slots for Stripe.js loading | Use `useStripe()` state | Yes |
 
-::: tip When to Choose
-Use **createVueStripe** for simple apps with a single Stripe account.
-Use **StripeProvider** when you need runtime configuration or Stripe Connect.
+::: tip Mixing both
+Install the plugin for the common case and add a `VueStripeProvider` where one subtree needs a different key, connected account or `betas`. Vue resolves the nearest provider first, so the provider wins inside its subtree and the plugin covers everything else.
 :::
 
 ## How It Works
 
 ```mermaid
 flowchart TD
-    A["1. App Initialization<br/>app.use(createVueStripe({ publishableKey: '...' }))"] --> B["2. Plugin provides config via app.provide()<br/>stripeConfigInjectionKey → { publishableKey, stripeAccount, apiVersion, locale }"]
-    B --> C["3. Config-only components read the config<br/>e.g. VueStripePricingTable, no VueStripeProvider needed"]
-    C --> D["4. Stripe instance is NOT provided by the plugin<br/>useStripe() / VueStripeElements still need VueStripeProvider (see #424)"]
+    A["1. App initialization<br/>app.use(createVueStripe({ publishableKey: '...' }))"] --> B["2. The plugin provides app-wide<br/>stripeConfigInjectionKey → { publishableKey, stripeAccount, apiVersion, locale }<br/>stripeInjectionKey → { stripe, loading, error }"]
+    B --> C["3. The first consumer reads the Stripe context<br/>useStripe(), VueStripeElements, ..."]
+    C --> D["4. loadStripe() runs once<br/>stripe.value is set, loading.value becomes false"]
+    D --> E["5. Every consumer reacts to the same refs<br/>Elements are created, elements mount"]
+    B -.-> F["A nested VueStripeProvider provides its own<br/>context, which wins for its subtree"]
 ```
 
 ## Installation
 
-```ts
+::: code-group
+
+```ts [Vue 3]
 // main.ts
 import { createApp } from 'vue'
 import { createVueStripe } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css'
 import App from './App.vue'
 
 const app = createApp(App)
@@ -55,6 +58,24 @@ app.use(createVueStripe({
 
 app.mount('#app')
 ```
+
+```js [Vue 2.7]
+// main.js
+import Vue from 'vue'
+import { createVueStripe } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css'
+import App from './App.vue'
+
+Vue.use(createVueStripe({
+  publishableKey: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
+}))
+
+new Vue({ render: (h) => h(App) }).$mount('#app')
+```
+
+:::
+
+On Vue 2.7 the plugin provides through a global mixin that only runs on root instances, so it never overrides a nested `VueStripeProvider`.
 
 ## Options
 
@@ -83,70 +104,36 @@ interface VueStripeOptions {
 | `apiVersion` | `string` | No | Stripe API version (e.g., `'2023-10-16'`) |
 | `locale` | `StripeConstructorOptions['locale']` | No | Locale for Stripe Elements UI — a constrained union of Stripe-supported locales (`'auto'`, `'en'`, `'fr'`, `'de'`, etc.) |
 
+The options are passed to `loadStripe(publishableKey, { stripeAccount, apiVersion, locale })`. For `betas` or other `loadStripe()` options, use a `VueStripeProvider` with its `options` prop.
+
 ## Provided Values
 
-The plugin calls `app.provide()` once, registering the configuration under the shared config injection key. The provided value is the config derived from your options (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`):
+The plugin provides two values app-wide, under the same injection keys `VueStripeProvider` uses:
 
 ```ts
-// Provided value shape (under the shared config injection key)
+// Config (stripeConfigInjectionKey), read by VueStripePricingTable
 {
   publishableKey: '...',
   stripeAccount: '...', // optional
   apiVersion: '...',    // optional
   locale: '...'         // optional
 }
+
+// Stripe context (stripeInjectionKey), read by useStripe(), VueStripeElements, ...
+{
+  stripe: Ref<Stripe | null>,  // null until Stripe.js has loaded
+  loading: Ref<boolean>,       // true until loadStripe() settles
+  error: Ref<string | null>    // the load error, if any
+}
 ```
 
-Config-only components such as `VueStripePricingTable` read this value internally, so they work without an explicit `VueStripeProvider`.
-
-::: warning No Stripe instance
-The plugin does not supply a reactive Stripe instance. To access `stripe` via `useStripe()` or render `VueStripeElements`, wrap your tree in `VueStripeProvider`. A plugin-level global provider is tracked in [issue #424](https://github.com/vue-stripe/vue-stripe/issues/424).
-:::
+Stripe.js is loaded the first time something reads the Stripe context. An app that installs the plugin but renders no Stripe UI loads nothing. One plugin object loads one Stripe instance, even when it is installed into more than one app.
 
 ## Usage Examples
 
-### Basic Usage
-
-```ts
-// main.ts
-import { createApp } from 'vue'
-import { createVueStripe } from '@vue-stripe/vue-stripe'
-
-const app = createApp(App)
-
-app.use(createVueStripe({
-  publishableKey: 'pk_test_...'
-}))
-
-app.mount('#app')
-```
-
-### With All Options
-
-```ts
-app.use(createVueStripe({
-  publishableKey: 'pk_test_...',
-  stripeAccount: 'acct_...', // For Stripe Connect
-  apiVersion: '2023-10-16',
-  locale: 'fr'
-}))
-```
-
 ### Accessing Stripe in Components
 
-The plugin provides configuration only — it does not expose a Stripe instance. To access `stripe`, wrap your tree in `VueStripeProvider` and read it with `useStripe()`:
-
-```vue
-<script setup lang="ts">
-import { VueStripeProvider } from '@vue-stripe/vue-stripe'
-</script>
-
-<template>
-  <VueStripeProvider publishable-key="pk_test_...">
-    <CheckoutForm />
-  </VueStripeProvider>
-</template>
-```
+No wrapper is needed. Any component can call `useStripe()`:
 
 ```vue
 <!-- CheckoutForm.vue -->
@@ -163,38 +150,71 @@ const { stripe, loading, error } = useStripe()
 </template>
 ```
 
-::: tip
-`useStripe()` returns `{ stripe, loading, error, initialize }`. It requires a `VueStripeProvider` ancestor; the plugin alone is not sufficient (see [#424](https://github.com/vue-stripe/vue-stripe/issues/424)).
-:::
+`useStripe()` returns `{ stripe, loading, error, initialize }`, the same shape it returns under `VueStripeProvider`.
 
-### With StripeElements
+### With VueStripeElements
 
-`VueStripeElements` requires a Stripe instance from `VueStripeProvider`, so render it inside the provider:
+`VueStripeElements` and the element components get the Stripe instance from the plugin:
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement
-} from '@vue-stripe/vue-stripe'
+import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 
 const clientSecret = ref('pi_xxx_secret_xxx')
 </script>
 
 <template>
-  <VueStripeProvider publishable-key="pk_test_...">
-    <VueStripeElements :client-secret="clientSecret">
-      <VueStripePaymentElement />
-    </VueStripeElements>
+  <VueStripeElements :client-secret="clientSecret">
+    <VueStripePaymentElement />
+  </VueStripeElements>
+</template>
+```
+
+`VueStripeElements` shows its `#loading` slot until Stripe.js has loaded. If Stripe.js fails to load, it shows the load error in its `#error` slot (`VueStripeCheckoutElementsProvider` does the same).
+
+### Confirming a Payment
+
+The intent composables work the same way:
+
+```vue
+<script setup lang="ts">
+import { VueStripePaymentElement, usePaymentIntent } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
+const { confirmPayment, loading } = usePaymentIntent()
+
+const pay = () =>
+  confirmPayment({
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: `${window.location.origin}/complete` }
+  })
+</script>
+
+<template>
+  <!-- Rendered inside <VueStripeElements :client-secret="clientSecret"> -->
+  <VueStripePaymentElement />
+  <button :disabled="loading" @click="pay">Pay</button>
+</template>
+```
+
+### Overriding with VueStripeProvider
+
+A `VueStripeProvider` inside a plugin app wins for its own subtree, for example to act on a connected account:
+
+```vue
+<template>
+  <!-- Uses the plugin's Stripe instance -->
+  <PlatformCheckout />
+
+  <!-- Uses its own Stripe instance, loaded for the connected account -->
+  <VueStripeProvider publishable-key="pk_test_..." stripe-account="acct_...">
+    <ConnectedAccountCheckout />
   </VueStripeProvider>
 </template>
 ```
 
-::: warning Note
-The plugin does not supply a Stripe instance to `VueStripeElements`. Use `VueStripeProvider` to provide the Stripe instance to the element tree (see [#424](https://github.com/vue-stripe/vue-stripe/issues/424)).
-:::
+The provider does not inherit the plugin's options: give it its own `publishable-key` and any other options it needs.
 
 ## TypeScript
 
@@ -212,29 +232,26 @@ const options: VueStripeOptions = {
 app.use(createVueStripe(options))
 ```
 
-### Accessing Stripe via the Provider
-
-The plugin provides config only, so the Stripe instance is accessed through `VueStripeProvider` + `useStripe()`:
-
 ```ts
 import { useStripe } from '@vue-stripe/vue-stripe'
-import type { Stripe } from '@stripe/stripe-js'
 
-// stripe is Readonly<Ref<Stripe | null>>; requires a VueStripeProvider ancestor
+// stripe is Readonly<Ref<Stripe | null>>, from the nearest VueStripeProvider or the plugin
 const { stripe, loading, error, initialize } = useStripe()
 ```
 
-## Comparison with StripeProvider
+## Comparison with VueStripeProvider
 
-| Feature | createVueStripe | StripeProvider |
+| Feature | createVueStripe | VueStripeProvider |
 |---------|-----------------|----------------|
 | Configuration | Once at app init | Per component tree |
-| Provides Stripe instance | No (config only, see [#424](https://github.com/vue-stripe/vue-stripe/issues/424)) | Yes (on mount) |
-| Multiple Accounts | No | Yes (nested providers) |
-| Runtime Key Changes | No | Yes (reactive prop) |
-| Component Wrapper | Required for Stripe access | Required |
-| Composables | `useStripe()` (needs provider) | Built-in `useStripe()` |
-| SSR Handling | No Stripe load at install | Built-in |
+| Provides Stripe instance | Yes (loaded on first use) | Yes (loaded on mount) |
+| Wrapper component needed | No | Yes |
+| Multiple accounts | One default; add providers for others | Yes (one provider per account) |
+| Runtime key changes | No | Yes (remount the provider) |
+| `betas` / extra `loadStripe()` options | No | Yes (`betas`, `options` props) |
+| Loading / error UI | `useStripe()` state, `VueStripeElements` slots | `#loading` / `#error` slots |
+| `load` / `error` events | No | Yes |
+| SSR | Never loads on the server | Loads in `onMounted` (client only) |
 
 ## Best Practices
 
@@ -252,7 +269,7 @@ app.use(createVueStripe({
   locale: 'auto'
 }))
 
-// Access Stripe through VueStripeProvider + useStripe()
+// Read Stripe anywhere in the app
 const { stripe, loading, error } = useStripe()
 ```
 
@@ -264,32 +281,17 @@ app.use(createVueStripe({
   publishableKey: 'pk_live_actual_key_here'
 }))
 
-// Don't expect the plugin to provide a Stripe instance
-// The plugin provides config only; wrap your tree in VueStripeProvider (see #424)
-
-// Don't use for Stripe Connect with multiple accounts
-// Use StripeProvider instead for dynamic stripeAccount
+// Don't install a second plugin to switch accounts
+// Wrap the subtree that needs another account in a VueStripeProvider instead
 ```
 
 ## SSR Considerations
 
-Installing the plugin is SSR-safe because it only calls `app.provide()` with your config — no Stripe.js is loaded at install time. The Stripe instance is loaded client-side by `VueStripeProvider`, which only initializes Stripe in the browser:
-
-```vue
-<script setup lang="ts">
-import { VueStripeProvider } from '@vue-stripe/vue-stripe'
-</script>
-
-<template>
-  <!-- Stripe.js loads on the client; safe to render during SSR -->
-  <VueStripeProvider publishable-key="pk_test_...">
-    <CheckoutForm />
-  </VueStripeProvider>
-</template>
-```
+Installing the plugin is SSR-safe: `install()` only calls `app.provide()`, and the plugin never calls `loadStripe()` on the server. During server rendering `useStripe()` reports `loading: true` and `VueStripeElements` renders its `#loading` slot. In the browser, the first consumer starts the load.
 
 ## See Also
 
 - [Installation Guide](/guide/installation) — Setup for different frameworks
-- [StripeProvider](/api/components/stripe-provider) — Component-based alternative
+- [VueStripeProvider](/api/components/stripe-provider) — Component-based alternative
 - [useStripe](/api/composables/use-stripe) — Composable for accessing Stripe
+- [VueStripeElements](/api/components/stripe-elements) — Elements group

@@ -53,7 +53,7 @@ Legal text rendered by Stripe.js (React Stripe.js 7 parity):
 
 ## Plugin
 
-- [createVueStripe](/api/plugin) - Vue plugin for global Stripe configuration
+- [createVueStripe](/api/plugin) - Vue plugin that provides Stripe app-wide (an alternative to `VueStripeProvider`)
 
 ## Types
 

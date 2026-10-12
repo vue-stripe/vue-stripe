@@ -28,7 +28,7 @@ flowchart TD
 ```
 
 ::: tip Usage Context
-This composable must be called within a component that is a descendant of both `VueStripeProvider` and optionally `VueStripeElements`. The elements instance is automatically injected if available.
+This composable must be called within a component that is a descendant of `VueStripeProvider` (or in an app that installs [`createVueStripe()`](/api/plugin)) and optionally `VueStripeElements`. The elements instance is automatically injected if available.
 :::
 
 ## Usage

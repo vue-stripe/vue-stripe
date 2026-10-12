@@ -40,7 +40,7 @@ export default /* @__PURE__ */ defineComponent({
     const config = inject(stripeConfigInjectionKey, null)
     if (!config?.publishableKey) {
       throw new VueStripeProviderError(
-        'VueStripePricingTable must be used within a VueStripeProvider component'
+        'VueStripePricingTable must be used within a VueStripeProvider component or an app using createVueStripe()'
       )
     }
     const publishableKey = config.publishableKey

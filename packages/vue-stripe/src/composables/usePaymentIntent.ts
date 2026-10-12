@@ -38,7 +38,7 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
 
   if (!stripeInstance) {
     throw new VueStripeProviderError(
-      'usePaymentIntent must be called within a VueStripeProvider component'
+      'usePaymentIntent must be called within a VueStripeProvider component or an app using createVueStripe()'
     )
   }
 

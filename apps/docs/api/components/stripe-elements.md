@@ -4,7 +4,7 @@ Creates a Stripe Elements instance and provides it to child element components.
 
 ## What is StripeElements?
 
-StripeElements is the bridge between StripeProvider and individual Stripe element components. It:
+StripeElements is the bridge between StripeProvider (or the [`createVueStripe()`](/api/plugin) plugin) and individual Stripe element components. It:
 
 | Capability | Description |
 |------------|-------------|
@@ -17,7 +17,7 @@ StripeElements is the bridge between StripeProvider and individual Stripe elemen
 
 ```mermaid
 flowchart TD
-    A["StripeElements mounts inside StripeProvider<br/>(Receives Stripe instance from parent context)"] --> B["Waits for Stripe instance to be available<br/>(Shows #loading slot while waiting)"]
+    A["StripeElements mounts inside StripeProvider or a createVueStripe() app<br/>(Receives Stripe instance from parent context)"] --> B["Waits for Stripe instance to be available<br/>(Shows #loading slot while waiting)"]
     B --> C["Calls stripe.elements({ clientSecret, appearance, ... })<br/>Creates Elements instance with configuration"]
     C --> D{Result?}
     D -->|Success| E["<b>SUCCESS</b><br/>1. Store Elements ref<br/>2. provide() to tree<br/>3. Render #default"]
@@ -397,6 +397,16 @@ For other elements (Payment, Address, ...) without an Intent, use the deferred I
 </VueStripeElements>
 ```
 
+### Without VueStripeProvider
+
+In an app that installs [`createVueStripe()`](/api/plugin), `VueStripeElements` gets the Stripe instance from the plugin, so no provider is needed. If Stripe.js fails to load, `VueStripeElements` renders the load error in its `#error` slot.
+
+```vue
+<VueStripeElements :client-secret="clientSecret">
+  <VueStripePaymentElement />
+</VueStripeElements>
+```
+
 ## TypeScript
 
 ```ts
@@ -414,4 +424,5 @@ const appearance: Appearance = {
 
 - [useStripeElements](/api/composables/use-stripe-elements) - Access Elements in child components
 - [StripeProvider](/api/components/stripe-provider) - Parent provider component
+- [createVueStripe](/api/plugin) - App-wide alternative to the provider
 - [Appearance API](#appearance-api) - Themes, variables, rules and fonts

@@ -2,7 +2,7 @@
 
 Create a [PaymentMethod](https://docs.stripe.com/api/payment_methods) with the raw Stripe instance. Wraps [`stripe.createPaymentMethod()`](https://docs.stripe.com/js/payment_methods/create_payment_method).
 
-Must be called within a `<VueStripeProvider>`. When called without `elements` or a manual `type`, the Elements instance provided by `<VueStripeElements>` is used automatically (the Payment Element flow).
+Must be called within a `<VueStripeProvider>` or an app that installs [`createVueStripe()`](/api/plugin). When called without `elements` or a manual `type`, the Elements instance provided by `<VueStripeElements>` is used automatically (the Payment Element flow).
 
 ## Usage
 
