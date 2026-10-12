@@ -201,7 +201,7 @@ const userId = ref('user_123')
 
 // Track loading state
 const isLoaded = ref(false)
-const loadError = ref<string | null>(null)
+const scriptError = ref<string | null>(null)
 
 const handleLoad = () => {
   isLoaded.value = true
@@ -209,7 +209,7 @@ const handleLoad = () => {
 }
 
 const handleError = (error: Error) => {
-  loadError.value = error.message
+  scriptError.value = error.message
   console.error('Pricing table error:', error)
 }
 </script>

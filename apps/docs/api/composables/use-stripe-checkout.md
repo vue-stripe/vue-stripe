@@ -1,71 +1,40 @@
 # useStripeCheckout
 
-A composable for programmatically redirecting users to Stripe's hosted checkout page.
+A composable for programmatically redirecting users to Stripe's hosted Checkout page.
 
-::: warning @stripe/stripe-js v8.x Compatibility
-In `@stripe/stripe-js` v8.x, the `redirectToCheckout` method was removed. Use `redirectToUrl()` or `redirectToCheckout({ url })` with the Checkout Session URL from your backend instead.
+::: warning URL-only since v6
+Stripe.js removed `stripe.redirectToCheckout()` in Stripe.js Clover, so the client can no longer start Checkout from a session ID, price IDs or line items. Your server creates the Checkout Session and returns `session.url`; the composable redirects to that URL.
 :::
 
 ## What is useStripeCheckout?
 
-A composable for Stripe Checkout with built-in state management:
+A small redirect helper with built-in state:
 
 | Capability | Description |
 |------------|-------------|
-| **URL Redirect** | Redirect using session URL (v8.x compatible) |
-| **Legacy Redirect** | Wraps `stripe.redirectToCheckout()` (v7.x only) |
-| **Loading State** | Tracks whether redirect is in progress |
-| **Error State** | Captures and exposes checkout errors |
+| **URL Redirect** | Navigates to the hosted Checkout Session URL from your server |
+| **Validation** | `redirectToCheckout` rejects with `VueStripeCheckoutError` when the URL is missing |
+| **Loading State** | Tracks whether a redirect has started |
+| **Error State** | Exposes the last validation error |
+
+It is also exported as `useCheckout`.
 
 ## How It Works
 
 ```mermaid
 flowchart TD
-    A["Component calls useStripeCheckout()<br/>Returns { redirectToCheckout, redirectToUrl, loading, error }"] --> B["User triggers checkout<br/><br/>// v8.x: URL-based (recommended)<br/>redirectToUrl('https://checkout.stripe.com/...')<br/>// OR<br/>await redirectToCheckout({ url: 'https://checkout...' })<br/><br/>// v7.x: Session ID-based (legacy)<br/>await redirectToCheckout({ sessionId: 'cs_test_xxx' })"]
-    B --> C["Composable sets loading.value = true<br/>Redirects via window.location.replace() or redirectToCheckout"]
-    C --> D{Result?}
-    D -->|Success| E["<b>SUCCESS</b><br/>User redirected to<br/>Stripe Checkout<br/>(page navigates away)"]
-    D -->|Error| F["<b>ERROR</b><br/>loading = false<br/>error.value = message<br/>Throws StripeProviderError"]
+    A["Component calls useStripeCheckout()<br/>Returns { redirectToCheckout, redirectToUrl, loading, error }"] --> B["Your code asks the server for a Checkout Session<br/>Server returns { url: session.url }"]
+    B --> C["await redirectToCheckout({ url })<br/>or redirectToUrl(url)"]
+    C --> D{url present?}
+    D -->|Yes| E["<b>REDIRECT</b><br/>loading = true<br/>window.location.replace(url)<br/>(page navigates away)"]
+    D -->|No| F["<b>ERROR</b><br/>error.value = message<br/>redirectToCheckout rejects with VueStripeCheckoutError"]
 ```
 
 ::: tip Usage Context
-This composable must be called within a component that is a descendant of `VueStripeProvider`. It does not require `VueStripeElements`.
+No Stripe instance is involved, so the composable works with or without `VueStripeProvider`, and does not need `VueStripeElements`.
 :::
 
 ## Usage
-
-### v8.x (Recommended)
-
-```vue
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useStripeCheckout } from '@vue-stripe/vue-stripe'
-
-const { redirectToUrl, loading, error } = useStripeCheckout()
-const sessionUrl = ref('')
-
-onMounted(async () => {
-  const response = await fetch('/api/create-checkout-session', {
-    method: 'POST',
-    body: JSON.stringify({ priceId: 'price_xxx' })
-  })
-  const data = await response.json()
-  sessionUrl.value = data.url // Backend returns session URL
-})
-
-const handleCheckout = () => {
-  redirectToUrl(sessionUrl.value)
-}
-</script>
-
-<template>
-  <button @click="handleCheckout" :disabled="loading || !sessionUrl">
-    {{ loading ? 'Redirecting...' : 'Checkout' }}
-  </button>
-</template>
-```
-
-### v7.x (Legacy)
 
 ```vue
 <script setup>
@@ -74,237 +43,118 @@ import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 const { redirectToCheckout, loading, error } = useStripeCheckout()
 
 const handleCheckout = async () => {
-  try {
-    await redirectToCheckout({
-      sessionId: 'cs_test_xxx'
-    })
-  } catch (err) {
-    console.error('Checkout failed:', err.message)
-  }
+  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+  const { url } = await response.json() // Backend returns session.url
+  await redirectToCheckout({ url })
 }
 </script>
+
+<template>
+  <button @click="handleCheckout" :disabled="loading">
+    {{ loading ? 'Redirecting...' : 'Checkout' }}
+  </button>
+  <p v-if="error" class="error">{{ error }}</p>
+</template>
 ```
 
 ## Return Value
 
 ```ts
 interface UseStripeCheckoutReturn {
-  redirectToCheckout: (options: CheckoutRedirectOptions | LegacyCheckoutOptions) => Promise<void>
+  redirectToCheckout: (options: CheckoutRedirectOptions) => Promise<void>
   redirectToUrl: (url: string) => void
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
+}
+
+interface CheckoutRedirectOptions {
+  /** Hosted Checkout URL (session.url) returned by your server. */
+  url: string
 }
 ```
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `redirectToUrl` | `(url: string) => void` | Redirect using session URL **(v8.x, recommended)** |
-| `redirectToCheckout` | `Function` | Redirect with options (supports both v7.x and v8.x) |
-| `loading` | `Readonly<Ref<boolean>>` | Whether redirect is in progress |
-| `error` | `Readonly<Ref<string \| null>>` | Error message from the last redirect attempt |
-
-## redirectToCheckout Options
-
-### URL-Based Options (v8.x Compatible)
-
-```ts
-interface CheckoutRedirectOptions {
-  /** Checkout Session URL from your backend */
-  url: string
-}
-```
-
-### Session-Based Options (v7.x Only)
-
-```ts
-interface LegacyCheckoutOptions {
-  /** Checkout Session ID from your backend */
-  sessionId?: string
-
-  /** Line items to purchase */
-  lineItems?: Array<{
-    price: string
-    quantity: number
-  }>
-
-  /** Checkout mode */
-  mode?: 'payment' | 'subscription' | 'setup'
-
-  /** Redirect URL after successful payment */
-  successUrl?: string
-
-  /** Redirect URL when user cancels */
-  cancelUrl?: string
-}
-```
-
-::: warning v7.x Only
-`sessionId`, `lineItems`, and other legacy options require `stripe.redirectToCheckout()` which was removed in `@stripe/stripe-js` v8.x. Use `url` or `redirectToUrl()` for v8.x compatibility.
-:::
+| `redirectToCheckout` | `({ url }: CheckoutRedirectOptions) => Promise<void>` | Redirect to the session URL. Rejects with `VueStripeCheckoutError` when `url` is empty |
+| `redirectToUrl` | `(url: string) => void` | Redirect to the session URL without validation |
+| `loading` | `Readonly<Ref<boolean>>` | `true` once a redirect has started (stays `true` while the page navigates away) |
+| `error` | `Readonly<Ref<string \| null>>` | Error message from the last `redirectToCheckout` call |
 
 ## Examples
 
-### URL-Based Checkout (v8.x)
+### Session Created Up Front
 
 ```vue
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 
-const { redirectToUrl, loading, error } = useStripeCheckout()
+const { redirectToUrl, loading } = useStripeCheckout()
 const sessionUrl = ref('')
 
 onMounted(async () => {
-  const response = await fetch('/api/create-checkout-session', {
-    method: 'POST',
-    body: JSON.stringify({ priceId: 'price_xxx' })
-  })
+  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
   const data = await response.json()
-  sessionUrl.value = data.url // Backend returns session URL
+  sessionUrl.value = data.url
 })
-
-const handleCheckout = () => {
-  redirectToUrl(sessionUrl.value)
-}
 </script>
 
 <template>
-  <button @click="handleCheckout" :disabled="loading || !sessionUrl">
+  <button @click="redirectToUrl(sessionUrl)" :disabled="loading || !sessionUrl">
     {{ loading ? 'Redirecting...' : 'Checkout' }}
   </button>
-  <p v-if="error" class="error">{{ error }}</p>
 </template>
 ```
 
-### Session-Based Checkout (v7.x)
+### Cart Checkout
+
+Send the cart to your server and let it build the line items (look prices up on the server; never trust amounts from the client):
 
 ```vue
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useStripeCheckout } from '@vue-stripe/vue-stripe'
-
-const { redirectToCheckout, loading, error } = useStripeCheckout()
-const sessionId = ref('')
-
-// Create session on mount
-onMounted(async () => {
-  const response = await fetch('/api/create-checkout-session', {
-    method: 'POST',
-    body: JSON.stringify({ priceId: 'price_xxx' })
-  })
-  const data = await response.json()
-  sessionId.value = data.sessionId
-})
-
-const handleCheckout = async () => {
-  try {
-    await redirectToCheckout({ sessionId: sessionId.value })
-  } catch (err) {
-    // User stays on page if redirect fails
-    console.error('Checkout failed:', err.message)
-  }
-}
-</script>
-
-<template>
-  <button @click="handleCheckout" :disabled="loading || !sessionId">
-    {{ loading ? 'Redirecting...' : 'Checkout' }}
-  </button>
-  <p v-if="error" class="error">{{ error }}</p>
-</template>
-```
-
-### Multiple Products
-
-::: warning v7.x Only
-The `lineItems`/`mode`/`successUrl`/`cancelUrl` options below rely on `stripe.redirectToCheckout()`, which was removed in `@stripe/stripe-js` v8.x. On v8.x this call throws. Create a Checkout Session on your server and use `redirectToUrl()` or `redirectToCheckout({ url })` instead.
-:::
-
-```vue
-<script setup>
+import { ref } from 'vue'
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 
 const { redirectToCheckout, loading } = useStripeCheckout()
 
-// Shopping cart items
 const cart = ref([
-  { priceId: 'price_shirt', quantity: 2 },
-  { priceId: 'price_hat', quantity: 1 }
+  { sku: 'shirt', quantity: 2 },
+  { sku: 'hat', quantity: 1 }
 ])
 
 const handleCheckout = async () => {
-  await redirectToCheckout({
-    lineItems: cart.value.map(item => ({
-      price: item.priceId,
-      quantity: item.quantity
-    })),
-    mode: 'payment',
-    successUrl: `${window.location.origin}/order-complete`,
-    cancelUrl: `${window.location.origin}/cart`
+  const response = await fetch('/api/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items: cart.value })
   })
+  const { url } = await response.json()
+  await redirectToCheckout({ url })
 }
 </script>
 ```
 
-### Complete Integration Example
-
-::: warning v7.x Only
-The commented-out price-based (`lineItems`) option below relies on `stripe.redirectToCheckout()`, which was removed in `@stripe/stripe-js` v8.x and throws there. Prefer the backend session flow with `redirectToUrl()` or `redirectToCheckout({ url })`.
-:::
+### Plan Picker
 
 ```vue
-<script setup>
-import { ref, onMounted } from 'vue'
-import { VueStripeProvider, useStripeCheckout } from '@vue-stripe/vue-stripe'
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const selectedPlan = ref('')
-const isCreatingSession = ref(false)
-
-const plans = [
-  { id: 'basic', name: 'Basic', priceId: 'price_basic', price: '$9/mo' },
-  { id: 'pro', name: 'Pro', priceId: 'price_pro', price: '$29/mo' },
-  { id: 'enterprise', name: 'Enterprise', priceId: 'price_enterprise', price: '$99/mo' }
-]
-</script>
-
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <CheckoutHandler :plans="plans" />
-  </VueStripeProvider>
-</template>
-```
-
-```vue
-<!-- CheckoutHandler.vue -->
-<script setup>
+<script setup lang="ts">
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 
-const props = defineProps<{ plans: Array<{ id: string; name: string; priceId: string; price: string }> }>()
+defineProps<{ plans: Array<{ id: string; name: string; price: string }> }>()
 
 const { redirectToCheckout, loading, error } = useStripeCheckout()
 
-const handleSelectPlan = async (priceId: string) => {
+const handleSelectPlan = async (planId: string) => {
   try {
-    // Option 1: Create session on backend (recommended)
     const response = await fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priceId })
+      body: JSON.stringify({ planId })
     })
-    const { sessionId } = await response.json()
-
-    await redirectToCheckout({ sessionId })
-
-    // Option 2: Price-based (simpler but less secure)
-    // await redirectToCheckout({
-    //   lineItems: [{ price: priceId, quantity: 1 }],
-    //   mode: 'subscription',
-    //   successUrl: `${window.location.origin}/welcome`,
-    //   cancelUrl: window.location.href
-    // })
+    const { url } = await response.json()
+    await redirectToCheckout({ url })
   } catch (err) {
-    console.error('Failed to start checkout:', err.message)
+    console.error('Failed to start checkout:', (err as Error).message)
   }
 }
 </script>
@@ -314,7 +164,7 @@ const handleSelectPlan = async (priceId: string) => {
     <div v-for="plan in plans" :key="plan.id" class="plan-card">
       <h3>{{ plan.name }}</h3>
       <p class="price">{{ plan.price }}</p>
-      <button @click="handleSelectPlan(plan.priceId)" :disabled="loading">
+      <button @click="handleSelectPlan(plan.id)" :disabled="loading">
         {{ loading ? 'Processing...' : 'Select Plan' }}
       </button>
     </div>
@@ -326,98 +176,70 @@ const handleSelectPlan = async (priceId: string) => {
 ## TypeScript
 
 ```ts
-import { useStripeCheckout } from '@vue-stripe/vue-stripe'
-import type { CheckoutRedirectOptions, LegacyCheckoutOptions } from '@vue-stripe/vue-stripe'
+import { useStripeCheckout, VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
+import type { CheckoutRedirectOptions, UseStripeCheckoutReturn } from '@vue-stripe/vue-stripe'
 
-const { redirectToCheckout, redirectToUrl, loading, error } = useStripeCheckout()
+const { redirectToCheckout, redirectToUrl }: UseStripeCheckoutReturn = useStripeCheckout()
 
-// URL-based (v8.x compatible, recommended)
-const urlCheckout = async (url: string) => {
+const checkout = async (url: string) => {
   const options: CheckoutRedirectOptions = { url }
-  await redirectToCheckout(options)
-}
-
-// Session-based (v7.x only)
-const sessionCheckout = async (sessionId: string) => {
-  const options: LegacyCheckoutOptions = { sessionId }
-  await redirectToCheckout(options)
-}
-
-// Price-based (v7.x only)
-const priceCheckout = async (priceId: string) => {
-  const options: LegacyCheckoutOptions = {
-    lineItems: [{ price: priceId, quantity: 1 }],
-    mode: 'payment',
-    successUrl: 'https://example.com/success',
-    cancelUrl: 'https://example.com/cancel'
+  try {
+    await redirectToCheckout(options)
+  } catch (err) {
+    if (err instanceof VueStripeCheckoutError) {
+      // The server did not return a URL
+    }
   }
-  await redirectToCheckout(options)
 }
 ```
 
 ## Error Handling
 
-The composable handles errors in two ways:
-
-1. **Stripe Redirect Errors** - Stored in `error.value` and thrown
-2. **Initialization Errors** - Thrown immediately
+`redirectToCheckout` only fails when no URL is given: it sets `error.value` and rejects with a `VueStripeCheckoutError`. Errors from Stripe itself (an expired or invalid session) are shown on Stripe's hosted page after the redirect.
 
 ```vue
 <script setup>
-import { useStripeCheckout } from '@vue-stripe/vue-stripe'
+import { useStripeCheckout, VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
 
-const { redirectToCheckout, loading, error } = useStripeCheckout()
+const { redirectToCheckout } = useStripeCheckout()
 
 const handleCheckout = async () => {
+  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+  if (!response.ok) {
+    console.error('Could not create the Checkout Session')
+    return
+  }
+  const { url } = await response.json()
   try {
-    await redirectToCheckout({ sessionId: 'cs_test_xxx' })
-    // If successful, user is redirected (this line won't execute)
+    await redirectToCheckout({ url })
+    // The browser is navigating away now
   } catch (err) {
-    // User stays on page
-    if (err.message.includes('Stripe not initialized')) {
-      // Fixed string thrown by the composable when Stripe hasn't loaded
-      console.error('Please wait for Stripe to load')
-    } else if (err.message.includes('expired')) {
-      // Wording comes from Stripe's result.error.message — match loosely
-      await refreshCheckoutSession()
-    } else {
-      console.error('Checkout error:', err.message)
+    if (err instanceof VueStripeCheckoutError) {
+      console.error(err.message) // "useStripeCheckout: `url` is required ..."
     }
   }
 }
 </script>
 ```
 
-## Common Errors
+## useStripeCheckout vs VueStripeCheckout Component
 
-`Stripe not initialized` is a fixed string thrown by the composable. The remaining messages come from Stripe's `result.error.message` (forwarded verbatim into `error.value`), so the exact wording is determined by Stripe, not Vue Stripe. The phrases below are illustrative examples of Stripe-returned errors.
-
-| Error (source) | Cause | Solution |
-|----------------|-------|----------|
-| `Stripe not initialized` (Vue Stripe) | Stripe hasn't loaded | Wait for StripeProvider to load |
-| Session expired (Stripe `result.error.message`) | Session too old | Create a new session |
-| Invalid session (Stripe `result.error.message`) | Wrong session ID | Check session ID format |
-| Redirect failed (Stripe `result.error.message`) | Network or Stripe error | Show retry option |
-
-## useStripeCheckout vs StripeCheckout Component
-
-| Aspect | useStripeCheckout | StripeCheckout Component |
-|--------|-------------------|--------------------------|
-| **Use Case** | Custom UI, programmatic control | Quick integration |
-| **UI** | You build it | Pre-styled button |
+| Aspect | useStripeCheckout | VueStripeCheckout Component |
+|--------|-------------------|-----------------------------|
+| **Use Case** | Custom UI, session created on click | Quick integration with a ready URL |
+| **UI** | You build it | Pre-styled button (or your slot) |
 | **Flexibility** | Full control | Limited customization |
 | **Code** | More code | Less code |
 
-Use **useStripeCheckout** when you need custom checkout triggers (e.g., form submission, multi-step flow).
-Use **StripeCheckout** component for simple button-click checkout.
+Use **useStripeCheckout** when you need custom checkout triggers (e.g. form submission, multi-step flow).
+Use the **VueStripeCheckout** component for a simple button-click checkout.
 
 ## Requirements
 
 | Requirement | Details |
 |-------------|---------|
-| **StripeProvider** | Must be used within StripeProvider context |
-| **Checkout Session** | Need a session ID or valid Price ID |
-| **No StripeElements** | Does not require StripeElements wrapper |
+| **Checkout Session URL** | Created on your server (`session.url`) |
+| **No provider needed** | Works without `VueStripeProvider` and `VueStripeElements` |
 
 ## Creating Checkout Sessions (Backend)
 
@@ -425,12 +247,11 @@ Use **StripeCheckout** component for simple button-click checkout.
 // Node.js example
 const stripe = require('stripe')('sk_test_...')
 
-app.post('/create-checkout-session', async (req, res) => {
+app.post('/api/create-checkout-session', async (req, res) => {
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
     line_items: [
       {
-        price: req.body.priceId,
+        price: 'price_xxx',
         quantity: 1
       }
     ],
@@ -439,17 +260,13 @@ app.post('/create-checkout-session', async (req, res) => {
     cancel_url: 'https://example.com/cancel'
   })
 
-  // v8.x: Return URL (recommended)
   res.json({ url: session.url })
-
-  // v7.x: Return session ID (legacy)
-  // res.json({ sessionId: session.id })
 })
 ```
 
 ## See Also
 
-- [StripeCheckout](/api/components/stripe-checkout) - Pre-built checkout button component
-- [StripeProvider](/api/components/stripe-provider) - Required parent component
+- [VueStripeCheckout](/api/components/stripe-checkout) - Pre-built checkout button component
+- [useCheckoutSession](/api/composables/use-checkout-session) - Checkout Sessions with embedded Elements
 - [Checkout Guide](/guide/checkout) - Step-by-step implementation guide
-- [Stripe Checkout Docs](https://stripe.com/docs/payments/checkout) - Official documentation
+- [Stripe Checkout Docs](https://docs.stripe.com/payments/checkout) - Official documentation

@@ -83,6 +83,10 @@ const onChange = (event) => {
 |------|------|----------|-------------|
 | `options` | `StripeAuBankAccountElementOptions` | No | Element configuration |
 
+::: info Updating options
+Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+:::
+
 ### Options Object
 
 ```ts
@@ -153,64 +157,78 @@ interface StripeAuBankAccountElementChangeEvent {
 
 ## Slots
 
-### Loading Slot
-
-Rendered while the element is initializing:
+| Slot | Slot Props | Description |
+|------|-----------|-------------|
+| `#loading` | - | Rendered while the element is loading (default: "Loading BECS Direct Debit form...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change` or a creation error |
 
 ```vue
 <VueStripeAuBankAccountElement>
   <template #loading>
     <div class="skeleton-loader">Loading...</div>
   </template>
-</VueStripeAuBankAccountElement>
-```
 
-### Error Slot
-
-Rendered when there's an error:
-
-```vue
-<VueStripeAuBankAccountElement>
   <template #error="{ error }">
-    <div class="error-message">{{ error }}</div>
+    <p class="my-error">{{ error }}</p>
   </template>
 </VueStripeAuBankAccountElement>
 ```
 
-## Exposed Methods
+## Exposed Methods & Properties
 
-Access these methods via template ref:
+Access these via a template ref:
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `element` | `ShallowRef<StripeAuBankAccountElement \| null>` | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `focus()` | `() => void` | Focus the element |
+| `blur()` | `() => void` | Blur the element |
+| `clear()` | `() => void` | Clear the element's value |
+
+Refs are unwrapped on the template ref, so `auBankRef.value.element` is a `StripeAuBankAccountElement | null`. Type the template ref with the component type and the element with the Stripe type:
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
+import { VueStripeAuBankAccountElement } from '@vue-stripe/vue-stripe'
+import type { StripeAuBankAccountElement } from '@stripe/stripe-js'
 
-const auBankRef = ref()
+const auBankRef = ref<InstanceType<typeof VueStripeAuBankAccountElement> | null>(null)
 
-const focusElement = () => auBankRef.value?.focus()
-const clearElement = () => auBankRef.value?.clear()
+const focus = () => auBankRef.value?.focus()
+const clear = () => auBankRef.value?.clear()
+const stripeElement = (): StripeAuBankAccountElement | null => auBankRef.value?.element ?? null
 </script>
 
 <template>
   <VueStripeAuBankAccountElement ref="auBankRef" />
-  <button @click="focusElement">Focus</button>
-  <button @click="clearElement">Clear</button>
 </template>
 ```
 
-| Method | Description |
-|--------|-------------|
-| `focus()` | Focus the BSB field |
-| `blur()` | Blur the element |
-| `clear()` | Clear all input fields |
+## Styling
 
-## Exposed Properties
+The component renders this markup around Stripe's iframe:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `element` | `Ref<StripeAuBankAccountElement \| null>` | The Stripe element instance |
-| `loading` | `Ref<boolean>` | Whether the element is loading |
-| `error` | `Ref<string \| null>` | Current error message |
+```html
+<div class="vue-stripe-au-bank-account-element vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-au-bank-account-element-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus vue-stripe-au-bank-account-element-loading / vue-stripe-element-loading while loading -->
+  <div class="vue-stripe-au-bank-account-element-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-au-bank-account-element-loader vue-stripe-element-loader">...</div>
+</div>
+```
+
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-au-bank-account-element*` for this one.
 
 ## Examples
 
@@ -404,7 +422,7 @@ const handleChange = (event: StripeAuBankAccountElementChangeEvent) => {
 }
 
 // Template ref
-const auBankRef = ref<InstanceType<typeof VueStripeAuBankAccountElement>>()
+const auBankRef = ref<InstanceType<typeof VueStripeAuBankAccountElement> | null>(null)
 ```
 
 ## Mandate Agreement

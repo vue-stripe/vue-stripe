@@ -1,56 +1,148 @@
-# VueStripeCheckoutProvider
+# VueStripeCheckoutElementsProvider
 
-Initializes a **Custom Checkout** session (`ui_mode: 'custom'`) via `stripe.initCheckout()` and provides it to descendants. Pair it with the [`useCheckoutSession`](/api/composables/use-checkout-session) composable to drive a fully custom checkout UI built from Stripe Elements.
+Initializes **Elements with Checkout Sessions** via `stripe.initCheckoutElementsSdk()` and provides the Checkout SDK to descendants. Place element components inside it to build your own checkout page on top of a Checkout Session, and drive the session with the [`useCheckoutSession`](/api/composables/use-checkout-session) composable.
 
-::: tip Custom Checkout vs. the other checkout options
-- **`VueStripeCheckoutProvider`** (this) — full UI control with your own Elements, backed by a Checkout Session (`ui_mode: 'custom'`).
-- **`VueStripeCheckout`** — redirect / hosted Checkout.
+::: warning `VueStripeCheckoutProvider` is deprecated
+`VueStripeCheckoutProvider` is a deprecated alias of this same component (it mirrored the old `stripe.initCheckout()` name). It keeps working in v6 but may be removed in a future major release, so import `VueStripeCheckoutElementsProvider` instead.
+:::
+
+::: tip Elements with Checkout Sessions vs. the other checkout options
+- **`VueStripeCheckoutElementsProvider`** (this) — your own page and layout, Stripe Elements, backed by a Checkout Session (`ui_mode: 'elements'`). Stripe computes totals, tax, discounts and shipping on the session.
+- **`VueStripeCheckout`** — redirect to Stripe's hosted Checkout page.
 - **`VueStripePricingTable`** — embed a Dashboard-configured pricing table.
 :::
 
 ## Requirements
 
 - Must be used **inside** [`VueStripeProvider`](/api/components/stripe-provider).
-- Needs a Checkout Session created on your server with `ui_mode: 'custom'`; pass its `client_secret` to the provider.
+- Needs a Checkout Session created on your server with `ui_mode: 'elements'`; pass its `client_secret` to the provider.
+
+```js
+// Node.js
+const session = await stripe.checkout.sessions.create({
+  ui_mode: 'elements',
+  line_items: [{ price: 'price_xxx', quantity: 1 }],
+  mode: 'payment',
+  return_url: 'https://example.com/complete?session_id={CHECKOUT_SESSION_ID}'
+})
+
+res.json({ clientSecret: session.client_secret })
+```
+
+## How It Works
+
+```mermaid
+flowchart TD
+    A["VueStripeCheckoutElementsProvider mounts inside VueStripeProvider"] --> B["Waits for the Stripe instance<br/>(#loading slot)"]
+    B --> C["stripe.initCheckoutElementsSdk({ clientSecret, elementsOptions, ... })<br/>(synchronous: the SDK exists right away)"]
+    C --> D["Default slot renders<br/>Element components mount through the Checkout SDK"]
+    C --> E["sdk.loadActions()"]
+    E -->|success| F["actions + session available<br/>loading = false, @ready(actions)"]
+    E -->|error| G["#error slot, @error(message)"]
+    F --> H["sdk.on('change') keeps session in sync<br/>@change(session)"]
+```
 
 ## Usage
 
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeCheckoutProvider :client-secret="clientSecret">
+    <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
       <CheckoutForm />
-    </VueStripeCheckoutProvider>
+    </VueStripeCheckoutElementsProvider>
   </VueStripeProvider>
 </template>
 
 <script setup>
-import { VueStripeProvider, VueStripeCheckoutProvider } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
 import CheckoutForm from './CheckoutForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-// From your backend: stripe.checkout.sessions.create({ ui_mode: 'custom', ... })
-const clientSecret = 'cs_test_xxx_secret_xxx'
+
+// From your backend: stripe.checkout.sessions.create({ ui_mode: 'elements', ... })
+const clientSecret = fetch('/api/checkout-session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ uiMode: 'elements' })
+})
+  .then((res) => res.json())
+  .then((data) => data.clientSecret)
 </script>
 ```
 
-`CheckoutForm` (a descendant) then calls [`useCheckoutSession()`](/api/composables/use-checkout-session) to read the reactive session and mutate/confirm it.
+```vue
+<!-- CheckoutForm.vue -->
+<template>
+  <VueStripePaymentElement :options="{ layout: 'accordion' }" />
+  <p v-if="session">Total: {{ session.total.total.amount }}</p>
+  <button :disabled="loading || !session?.canConfirm" @click="pay">Pay</button>
+  <p v-if="message">{{ message }}</p>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { VueStripePaymentElement, useCheckoutSession } from '@vue-stripe/vue-stripe'
+
+const { session, confirm, loading } = useCheckoutSession()
+const message = ref('')
+
+const pay = async () => {
+  // The session was created with return_url, so confirm() takes no returnUrl.
+  const result = await confirm()
+  if (result.type === 'error') message.value = result.error.message
+}
+</script>
+```
 
 ## Props
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `clientSecret` | `string` | No\* | Client secret of a `ui_mode: 'custom'` Checkout Session. Wrapped automatically into a `fetchClientSecret` for Stripe |
-| `fetchClientSecret` | `() => Promise<string>` | No\* | Async function returning the client secret. Use for refreshable sessions; **takes precedence** over `clientSecret` |
-| `elementsOptions` | `object` | No | Appearance / fonts options forwarded to the Checkout Elements (`initCheckout({ elementsOptions })`) |
+| `clientSecret` | `string \| Promise<string>` | No\* | Client secret of a `ui_mode: 'elements'` Checkout Session, or a Promise resolving to it (passed to Stripe as is) |
+| `fetchClientSecret` | `() => Promise<string>` | No\* | Function returning the client secret (v5 compatible). **Takes precedence** over `clientSecret` |
+| `elementsOptions` | `StripeCheckoutElementsOptions` | No | Options for every Checkout element: `appearance`, `fonts`, `loader`, `savedPaymentMethod`, `syncAddressCheckbox` |
+| `adaptivePricing` | `{ allowed?: boolean }` | No | [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing): let customers pay in their local currency |
+| `defaultValues` | `object` | No | Prefill `email`, `phoneNumber`, `billingAddress`, `shippingAddress` |
 
-\* Provide **either** `clientSecret` **or** `fetchClientSecret`. If neither is set, the error slot renders.
+\* Provide **either** `clientSecret` **or** `fetchClientSecret`. If neither is set, the error slot renders and `@error` fires.
+
+The props are read once, when the SDK is initialized. To use another session, re-mount the provider (for example with a `:key`).
+
+### elementsOptions
+
+```ts
+interface StripeCheckoutElementsOptions {
+  appearance?: Appearance
+  loader?: 'auto' | 'always' | 'never'
+  fonts?: Array<CssFontSource | CustomFontSource>
+  savedPaymentMethod?: {
+    enableSave?: 'auto' | 'never'
+    enableRedisplay?: 'auto' | 'never'
+  }
+  syncAddressCheckbox?: 'billing' | 'shipping' | 'none'
+}
+```
+
+::: info Saved payment methods
+Since Stripe.js Clover, saved payment methods are on by default on the client. Use `elementsOptions.savedPaymentMethod` (`enableSave`, `enableRedisplay`: `'never'`) to turn the save checkbox or the redisplay of saved methods off.
+:::
+
+### defaultValues
+
+```ts
+interface DefaultValues {
+  email?: string
+  phoneNumber?: string
+  billingAddress?: StripeCheckoutContact
+  shippingAddress?: StripeCheckoutContact
+}
+```
 
 ## Events
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | `StripeCheckoutLoadActionsSuccess` | Emitted once `checkout.loadActions()` resolves. Payload is the session actions object |
+| `@ready` | `StripeCheckoutLoadActionsSuccess` | Emitted once `loadActions()` resolves. Payload is the session actions object |
 | `@change` | `StripeCheckoutSession` | Emitted on every Stripe `change` event with the new session snapshot |
 | `@error` | `string` | Emitted if `initCheckoutElementsSdk()` throws, `loadActions()` returns an error, or no client secret is given |
 
@@ -58,31 +150,104 @@ const clientSecret = 'cs_test_xxx_secret_xxx'
 
 | Slot | Props | Rendered when |
 |------|-------|---------------|
-| `default` | `{ checkout, session }` | Session is ready |
-| `loading` | — | While `initCheckout()` is in flight |
+| `default` | `{ checkout, actions, session, loading }` | As soon as the Checkout SDK exists (before the actions load) |
+| `loading` | — | Until the Checkout SDK exists (Stripe.js still loading) |
 | `error` | `{ error }` | Initialization failed |
 
+The default slot renders early so element components can mount while the session actions are still loading. Its `loading` prop (and `useCheckoutSession().loading`) stays `true` until `loadActions()` resolves; `actions` and `session` are `null` until then.
+
 ```vue
-<VueStripeCheckoutProvider :client-secret="clientSecret">
-  <template #loading><div>Preparing checkout…</div></template>
+<VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+  <template #loading><div>Preparing checkout...</div></template>
   <template #error="{ error }"><div class="error">{{ error }}</div></template>
 
-  <CheckoutForm />
-</VueStripeCheckoutProvider>
+  <template #default="{ session, loading }">
+    <VueStripePaymentElement />
+    <p v-if="!loading">Total: {{ session.total.total.amount }}</p>
+  </template>
+</VueStripeCheckoutElementsProvider>
+```
+
+| Slot Prop | Type | Description |
+|-----------|------|-------------|
+| `checkout` | `StripeCheckoutElementsSdk` | The Checkout Elements SDK instance |
+| `actions` | `StripeCheckoutLoadActionsSuccess \| null` | Session actions (`null` until loaded) |
+| `session` | `StripeCheckoutSession \| null` | Current session snapshot (`null` until loaded) |
+| `loading` | `boolean` | `true` until the actions have loaded |
+
+## Elements inside the provider
+
+Element components placed inside the provider are created with the Checkout SDK's creators instead of `elements.create()`:
+
+| Component | Created with | Accepted `options` |
+|-----------|--------------|--------------------|
+| [VueStripePaymentElement](/api/components/stripe-payment-element) | `createPaymentElement()` | `layout`, `paymentMethodOrder`, `readOnly`, `terms`, `fields`, `wallets`, `walletOptions` |
+| [VueStripeAddressElement](/api/components/stripe-address-element) | `createBillingAddressElement()` / `createShippingAddressElement()` (picked by `options.mode`: `'billing'` or `'shipping'`, default `'shipping'`) | `contacts`, `display`, `fields` |
+| [VueStripeExpressCheckoutElement](/api/components/stripe-express-checkout-element) | `createExpressCheckoutElement()` | `buttonHeight`, `buttonTheme`, `buttonType`, `layout`, `paymentMethods`, `paymentMethodOrder` |
+| [VueStripeTaxIdElement](/api/components/stripe-tax-id-element) | `createTaxIdElement()` | All Tax ID options (needs the Tax ID beta on `VueStripeProvider`) |
+| [VueStripeCurrencySelectorElement](/api/components/stripe-currency-selector-element) | `createCurrencySelectorElement()` | None |
+
+The Checkout SDK accepts only these option subsets; other keys you pass are dropped. Appearance and fonts are not element options here: set them with `elementsOptions`, or change them later with `useCheckoutSession().changeAppearance()` / `loadFonts()`.
+
+The Card, split card (number / expiry / CVC), IBAN, AU bank account and Link Authentication elements are **not** available with Checkout Sessions; rendering one inside this provider sets its error state and logs an error. A `VueStripeElements` nested inside the provider takes over for its own children.
+
+::: warning Express Checkout events under Checkout Sessions
+With Checkout Sessions, Express Checkout's `@click`, `@shippingaddresschange` and `@shippingratechange` never fire: Stripe handles them from the session. Confirm from `@confirm` with `useCheckoutSession().confirm({ expressCheckoutConfirmEvent: event })`.
+:::
+
+## Confirming the payment
+
+Call `confirm()` from [`useCheckoutSession()`](/api/composables/use-checkout-session) (or the `actions` slot prop). When the session was created with `return_url`, call `confirm()` **without** `returnUrl`: Stripe rejects a confirm that sets both. Pass `returnUrl` only when the session has no `return_url`.
+
+```ts
+const { confirm } = useCheckoutSession()
+
+// Session created with return_url
+await confirm()
+
+// Session created without return_url
+await confirm({ returnUrl: `${window.location.origin}/complete` })
 ```
 
 ## Provides
 
 | Key | Type | Description |
 |-----|------|-------------|
-| `checkout` | `Ref<StripeCheckout \| null>` | The Checkout instance |
+| `checkout` | `Ref<StripeCheckoutElementsSdk \| null>` | The Checkout Elements SDK instance |
+| `actions` | `Ref<StripeCheckoutLoadActionsSuccess \| null>` | Session actions, once `loadActions()` resolves |
 | `session` | `Ref<StripeCheckoutSession \| null>` | Reactive session snapshot (updates on every Stripe `change`) |
-| `loading` | `Ref<boolean>` | Whether the session is initializing |
+| `loading` | `Ref<boolean>` | `true` until the session actions have loaded |
 | `error` | `Ref<string \| null>` | Initialization error, if any |
 
 Access these via [`useCheckoutSession()`](/api/composables/use-checkout-session).
+
+## TypeScript
+
+```ts
+import type {
+  StripeCheckoutElementsOptions,
+  StripeCheckoutLoadActionsSuccess,
+  StripeCheckoutSession,
+  VueStripeCheckoutElementsProviderProps
+} from '@vue-stripe/vue-stripe'
+
+const elementsOptions: StripeCheckoutElementsOptions = {
+  appearance: { theme: 'stripe' },
+  savedPaymentMethod: { enableSave: 'never' }
+}
+
+const onReady = (actions: StripeCheckoutLoadActionsSuccess) => {
+  console.log(actions.getSession().total.total.amount)
+}
+
+const onChange = (session: StripeCheckoutSession) => {
+  console.log('Can confirm:', session.canConfirm)
+}
+```
 
 ## See Also
 
 - [useCheckoutSession](/api/composables/use-checkout-session) — drive the session from descendants
 - [VueStripeProvider](/api/components/stripe-provider) — required parent
+- [VueStripeCheckout](/api/components/stripe-checkout) — hosted Checkout redirect
+- [Stripe: Elements with Checkout Sessions](https://docs.stripe.com/payments/quickstart-checkout-sessions) — official guide

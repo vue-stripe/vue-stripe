@@ -2,8 +2,12 @@
 
 A complete address collection form with built-in autocomplete powered by Google Maps.
 
-::: tip No Backend Required
-StripeAddressElement works without a `clientSecret`. It only needs to be wrapped in `VueStripeProvider` and `VueStripeElements` to function.
+::: tip No Intent Required
+VueStripeAddressElement does not need a PaymentIntent. Wrap it in `VueStripeProvider` and `VueStripeElements`; when you have no `clientSecret`, give `VueStripeElements` a `mode` / `currency` / `amount` (deferred Intent flow).
+:::
+
+::: warning Pass `mode` when there is no `clientSecret`
+With neither `clientSecret` nor `mode` on `VueStripeElements`, Stripe.js Endive logs "Unable to select session" inside the Address Element's iframe. Use `<VueStripeElements mode="payment" currency="usd" :amount="1099">` (or `mode="setup"`) until you have an Intent.
 :::
 
 ## What is Address Element?
@@ -22,7 +26,7 @@ Address Element provides a complete, validated address collection form:
 
 ```mermaid
 flowchart TD
-    A["AddressElement mounts inside StripeElements<br/>(No clientSecret required - works standalone)"] --> B["Renders address form based on mode (shipping/billing)<br/>• Name field<br/>• Address line 1 (with autocomplete)<br/>• Address line 2<br/>• City, State/Province, Postal Code<br/>• Country selector<br/>• Phone (if configured)"]
+    A["AddressElement mounts inside VueStripeElements<br/>(clientSecret or mode/currency/amount)"] --> B["Renders address form based on mode (shipping/billing)<br/>• Name field<br/>• Address line 1 (with autocomplete)<br/>• Address line 2<br/>• City, State/Province, Postal Code<br/>• Country selector<br/>• Phone (if configured)"]
     B --> C["User starts typing address<br/>Google Maps suggests matching addresses"]
     C --> D{User Action?}
     D -->|Selects Suggestion| E["Auto-fills all fields"]
@@ -37,7 +41,7 @@ flowchart TD
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
+    <VueStripeElements mode="payment" currency="usd" :amount="1099">
       <VueStripeAddressElement
         :options="addressOptions"
         @ready="onReady"
@@ -79,6 +83,12 @@ const onChange = (event) => {
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `options` | `StripeAddressElementOptions` | No | Address element configuration (defaults to `{ mode: 'shipping' }`) |
+
+::: info Updating options
+Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+
+`mode` is the exception: Stripe cannot change it after creation, so it is never passed to `update()`. To switch between `'shipping'` and `'billing'`, re-mount the component (e.g. `:key="mode"`).
+:::
 
 ### Options Object
 
@@ -126,13 +136,15 @@ interface StripeAddressElementOptions {
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | - | Emitted when the element is fully rendered |
+| `@ready` | `StripeAddressElement` | Emitted when the element is fully rendered |
 | `@change` | `StripeAddressElementChangeEvent` | Emitted when the address value changes |
 | `@focus` | - | Emitted when any field gains focus |
 | `@blur` | - | Emitted when any field loses focus |
 | `@escape` | - | Emitted when the escape key is pressed |
-| `@loaderstart` | `{ elementType: 'address' }` | Emitted when the element starts loading |
-| `@loaderror` | `{ elementType: 'address'; error: { message: string } }` | Emitted if the element fails to load (renamed from `@loadError` in v6) |
+| `@loaderstart` | `{ elementType: 'address' }` | Emitted when the element starts loading (Stripe shows its loader) |
+| `@loaderror` | `{ elementType: 'address'; error: StripeError }` | Emitted if the element fails to load. Renamed from `@loadError` in v6: update `@loadError` listeners to `@loaderror` |
+
+`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'address', error: { message } }`; the message is also shown through the `#error` slot.
 
 ### Change Event
 
@@ -158,60 +170,112 @@ interface StripeAddressElementChangeEvent {
 }
 ```
 
-## Exposed Methods
+## Slots
 
-Access these methods via template ref:
+| Slot | Slot Props | Description |
+|------|-----------|-------------|
+| `#loading` | - | Rendered while the element is loading (default: "Loading address form...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change`, a load error or a creation error |
 
 ```vue
-<script setup>
+<VueStripeAddressElement>
+  <template #loading>
+    <div class="skeleton-loader">Loading...</div>
+  </template>
+
+  <template #error="{ error }">
+    <p class="my-error">{{ error }}</p>
+  </template>
+</VueStripeAddressElement>
+```
+
+## Exposed Methods & Properties
+
+Access these via a template ref:
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `element` | `ShallowRef<StripeAddressElement \| null>` | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `focus()` | `() => void` | Focus the element |
+| `blur()` | `() => void` | Blur the element |
+| `clear()` | `() => void` | Clear the element's value |
+| `getValue(options?)` | `(options?: { format?: 'localized' \| 'latin' }) => Promise<...>` | Validate the form and read the address (forwards to Stripe's `getValue()`) |
+
+Refs are unwrapped on the template ref, so `addressRef.value.element` is a `StripeAddressElement | null`. Type the template ref with the component type and the element with the Stripe type:
+
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
+import { VueStripeAddressElement } from '@vue-stripe/vue-stripe'
+import type { StripeAddressElement } from '@stripe/stripe-js'
 
-const addressRef = ref()
+const addressRef = ref<InstanceType<typeof VueStripeAddressElement> | null>(null)
 
-// Get current value programmatically
-const validateAddress = async () => {
-  const result = await addressRef.value?.getValue()
-  if (result.complete) {
-    console.log('Valid address:', result.value)
-  } else {
-    console.log('Address incomplete')
-  }
-}
-
-// Focus the first field
-const focusAddress = () => addressRef.value?.focus()
-
-// Clear all fields
-const clearAddress = () => addressRef.value?.clear()
+const focus = () => addressRef.value?.focus()
+const clear = () => addressRef.value?.clear()
+const stripeElement = (): StripeAddressElement | null => addressRef.value?.element ?? null
+const readAddress = () => addressRef.value?.getValue({ format: 'localized' })
 </script>
 
 <template>
   <VueStripeAddressElement ref="addressRef" />
-  <button @click="validateAddress">Validate</button>
-  <button @click="focusAddress">Focus</button>
-  <button @click="clearAddress">Clear</button>
 </template>
 ```
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `getValue()` | `Promise<{ complete, isNewAddress, value }>` | Get the current address data programmatically |
-| `focus()` | `void` | Focus the first input field |
-| `clear()` | `void` | Clear all address fields |
+### getValue() and the `state` format
 
-## Exposed Properties
+`getValue(options?)` forwards its options to Stripe's `addressElement.getValue()`. Since Stripe.js Dahlia, `value.address.state` is returned in **Latin** characters by default (e.g. a Japanese prefecture is romanized). Pass `{ format: 'localized' }` for the previous, localized behaviour:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `element` | `Ref<StripeAddressElement \| null>` | The Stripe address element instance |
+```ts
+const { complete, value } = await addressRef.value!.getValue({ format: 'localized' })
+```
+
+## With Checkout Sessions
+
+Inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider), the component is created with the Checkout SDK: `options.mode` picks `createBillingAddressElement()` (`'billing'`) or `createShippingAddressElement()` (`'shipping'`, the default). The Checkout SDK accepts only `contacts`, `display` and `fields`; other options are dropped. The address flows into the Checkout Session automatically.
+
+```vue
+<VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+  <VueStripeAddressElement :options="{ mode: 'shipping', display: { name: 'split' } }" />
+  <VueStripeAddressElement :options="{ mode: 'billing' }" />
+  <VueStripePaymentElement />
+</VueStripeCheckoutElementsProvider>
+```
+
+## Styling
+
+The component renders this markup around Stripe's iframe:
+
+```html
+<div class="vue-stripe-address-element vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-address-element-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus vue-stripe-address-element-loading / vue-stripe-element-loading while loading -->
+  <div class="vue-stripe-address-element-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-address-element-loader vue-stripe-element-loader">...</div>
+</div>
+```
+
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-address-element*` for this one.
 
 ## Examples
 
 ### Shipping vs Billing Mode
 
+`mode` cannot change after the element is created, so the example re-mounts the component with `:key`:
+
 ```vue
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const mode = ref('shipping')
 
@@ -349,19 +413,31 @@ const handleSubmit = async () => {
 
 ### Integration with Payment Element
 
+The composables must run in a component rendered **inside** `VueStripeElements`, so the page is split in two:
+
 ```vue
+<!-- CheckoutPage.vue -->
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <CheckoutSteps />
+    </VueStripeElements>
+  </VueStripeProvider>
+</template>
+```
+
+```vue
+<!-- CheckoutSteps.vue -->
 <script setup>
 import { ref } from 'vue'
 import {
-  VueStripeProvider,
-  VueStripeElements,
   VueStripeAddressElement,
   VueStripePaymentElement,
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
 
-const addressRef = ref()
+const addressRef = ref(null)
 const step = ref('address')
 
 const { stripe } = useStripe()
@@ -374,7 +450,7 @@ const handleContinue = async () => {
   }
 }
 
-const handlePayment = async (clientSecret) => {
+const handlePayment = async () => {
   const addressResult = await addressRef.value?.getValue()
 
   const { error } = await stripe.value.confirmPayment({
@@ -395,24 +471,19 @@ const handlePayment = async (clientSecret) => {
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :options="{ clientSecret }">
-      <!-- Step 1: Address -->
-      <div v-if="step === 'address'">
-        <h3>Shipping Address</h3>
-        <VueStripeAddressElement ref="addressRef" :options="{ mode: 'shipping' }" />
-        <button @click="handleContinue">Continue to Payment</button>
-      </div>
+  <!-- v-show keeps the Address Element mounted, so getValue() still works on step 2 -->
+  <div v-show="step === 'address'">
+    <h3>Shipping Address</h3>
+    <VueStripeAddressElement ref="addressRef" :options="{ mode: 'shipping' }" />
+    <button @click="handleContinue">Continue to Payment</button>
+  </div>
 
-      <!-- Step 2: Payment -->
-      <div v-if="step === 'payment'">
-        <h3>Payment</h3>
-        <VueStripePaymentElement />
-        <button @click="handlePayment(clientSecret)">Pay Now</button>
-        <button @click="step = 'address'">Back</button>
-      </div>
-    </VueStripeElements>
-  </VueStripeProvider>
+  <div v-show="step === 'payment'">
+    <h3>Payment</h3>
+    <VueStripePaymentElement />
+    <button @click="handlePayment">Pay Now</button>
+    <button @click="step = 'address'">Back</button>
+  </div>
 </template>
 ```
 
@@ -422,7 +493,7 @@ const handlePayment = async (clientSecret) => {
 import { ref } from 'vue'
 import { VueStripeAddressElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripeAddressElement as StripeAddressElementType,
+  StripeAddressElement,
   StripeAddressElementChangeEvent,
   StripeAddressElementOptions
 } from '@stripe/stripe-js'
@@ -435,8 +506,8 @@ const options: StripeAddressElementOptions = {
 }
 
 // Event handlers
-const handleReady = () => {
-  console.log('Address element ready')
+const handleReady = (element: StripeAddressElement) => {
+  console.log('Address element ready', element)
 }
 
 const handleChange = (event: StripeAddressElementChangeEvent) => {
@@ -445,7 +516,7 @@ const handleChange = (event: StripeAddressElementChangeEvent) => {
 }
 
 // Template ref with getValue()
-const addressRef = ref<InstanceType<typeof VueStripeAddressElement>>()
+const addressRef = ref<InstanceType<typeof VueStripeAddressElement> | null>(null)
 
 const validateAddress = async () => {
   const result = await addressRef.value?.getValue()
@@ -460,7 +531,8 @@ const validateAddress = async () => {
 ## Key Features
 
 - **Google Maps Autocomplete**: Built-in address suggestions as you type
-- **No clientSecret Required**: Works immediately with just StripeElements
+- **No Intent Required**: Works with a deferred-Intent `VueStripeElements` (`mode` / `currency` / `amount`)
+- **Checkout Sessions**: Works inside `VueStripeCheckoutElementsProvider` as the billing or shipping address element
 - **International Support**: Handles addresses from all countries with proper formatting
 - **Phone Number Support**: Optional phone field with country-aware formatting
 - **Validation**: Built-in validation for complete addresses
@@ -476,6 +548,7 @@ const validateAddress = async () => {
 
 ## See Also
 
-- [StripeElements](/api/components/stripe-elements) - Parent container component
-- [StripePaymentElement](/api/components/stripe-payment-element) - All-in-one payment UI
+- [VueStripeElements](/api/components/stripe-elements) - Parent container component
+- [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Parent for Checkout Sessions
+- [VueStripePaymentElement](/api/components/stripe-payment-element) - All-in-one payment UI
 - [Address Element Guide](/guide/address-element) - Step-by-step guide

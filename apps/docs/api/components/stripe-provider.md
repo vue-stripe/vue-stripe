@@ -62,21 +62,37 @@ const onError = (error) => {
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect |
 | `apiVersion` | `string` | No | Override Stripe API version |
 | `locale` | `string` | No | Locale for Stripe.js (e.g., 'en', 'es', 'fr') |
-| `options` | `object` | No | Additional Stripe initialization options |
+| `betas` | `string[]` | No | Stripe beta flags, forwarded to `loadStripe()` (e.g. the [Tax ID Element](/api/components/stripe-tax-id-element)'s beta) |
+| `options` | `StripeConstructorOptions` | No | Any `loadStripe()` option. Explicit props win over the same key in `options` |
 
 \* Either `publishableKey` or `stripeKey` is required.
 
+The props are read once, when Stripe.js loads. To switch keys or accounts, re-mount the provider (e.g. with a `:key`).
+
 ### Options Object
 
-The `options` prop accepts the following shape. This is illustrative only — `StripeProviderOptions` is not an exported type:
+The `options` prop accepts every `StripeConstructorOptions` key from `@stripe/stripe-js` and is passed to `loadStripe()`. When a dedicated prop (`stripeAccount`, `apiVersion`, `locale`, `betas`) is also set, the prop wins:
 
 ```ts
-// Illustrative shape (not an exported type)
-{
-  stripeAccount?: string
-  apiVersion?: string
-  locale?: string
+import type { StripeConstructorOptions } from '@stripe/stripe-js'
+
+// A few of the StripeConstructorOptions keys
+const options: StripeConstructorOptions = {
+  stripeAccount: 'acct_...',
+  locale: 'auto',
+  betas: ['custom_checkout_tax_id_1'],
+  developerTools: { assistant: { enabled: false } }
 }
+```
+
+```vue
+<!-- betas as a prop (wins over options.betas) -->
+<VueStripeProvider
+  :publishable-key="publishableKey"
+  :betas="['custom_checkout_tax_id_1']"
+>
+  <!-- ... -->
+</VueStripeProvider>
 ```
 
 ## Events

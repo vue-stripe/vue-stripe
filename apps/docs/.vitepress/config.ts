@@ -236,7 +236,10 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           text: 'Checkout & Subscriptions',
           items: [
             { text: 'VueStripeCheckout', link: '/api/components/stripe-checkout' },
-            { text: 'VueStripeCheckoutProvider', link: '/api/components/stripe-checkout-provider' },
+            {
+              text: 'VueStripeCheckoutElementsProvider',
+              link: '/api/components/stripe-checkout-provider'
+            },
             { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' }
           ]
         },

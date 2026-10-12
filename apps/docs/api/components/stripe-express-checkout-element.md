@@ -6,8 +6,8 @@ Displays wallet payment buttons like Apple Pay, Google Pay, and Link for one-cli
 Unlike `VueStripeLinkAuthenticationElement`, Express Checkout **can process payments independently**. It handles the full payment flow through the wallet's native interface.
 :::
 
-::: warning Requires clientSecret
-Express Checkout Element requires a `clientSecret` from a PaymentIntent. Ensure StripeElements has a valid clientSecret configured.
+::: warning Requires an Intent context
+Express Checkout needs `VueStripeElements` with a `clientSecret` (PaymentIntent) or a deferred Intent (`mode` / `currency` / `amount`), or a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (see [With Checkout Sessions](#with-checkout-sessions)).
 :::
 
 ## What This Element Does
@@ -109,6 +109,10 @@ const onConfirm = async (event) => {
 |------|------|----------|-------------|
 | `options` | `StripeExpressCheckoutElementOptions` | No | Element configuration options |
 
+::: info Updating options
+Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+:::
+
 ### Options Object
 
 ```ts
@@ -149,6 +153,10 @@ interface StripeExpressCheckoutElementOptions {
 | `@focus` | - | Emitted when a button gains focus |
 | `@blur` | - | Emitted when a button loses focus |
 | `@escape` | - | Emitted when the escape key is pressed |
+
+Unlike the other element components, `@ready` emits Stripe's ready event (it carries `availablePaymentMethods`), not the element. Use the exposed `element` member to reach the Stripe element.
+
+`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'expressCheckout', error: { message } }`; the message is also shown through the `#error` slot.
 
 ### Ready Event
 
@@ -205,35 +213,105 @@ interface StripeExpressCheckoutElementConfirmEvent {
 }
 ```
 
-## Exposed Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `element` | `Ref<StripeExpressCheckoutElement \| null>` | The Stripe element instance |
-| `loading` | `Ref<boolean>` | Whether the element is loading |
-| `error` | `Ref<string \| null>` | Error message if creation failed |
-
 ## Slots
 
-### Loading Slot
+| Slot | Slot Props | Description |
+|------|-----------|-------------|
+| `#loading` | - | Rendered while the element is loading (default: "Loading express checkout...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: a load error or a creation error |
 
 ```vue
 <VueStripeExpressCheckoutElement>
   <template #loading>
-    <div class="skeleton">Loading wallet buttons...</div>
+    <div class="skeleton-loader">Loading...</div>
+  </template>
+
+  <template #error="{ error }">
+    <p class="my-error">{{ error }}</p>
   </template>
 </VueStripeExpressCheckoutElement>
 ```
 
-### Error Slot
+## Exposed Methods & Properties
+
+Access these via a template ref:
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `element` | `ShallowRef<StripeExpressCheckoutElement \| null>` | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `focus()` | `() => void` | Focus the element |
+| `blur()` | `() => void` | Blur the element |
+| `clear()` | `() => void` | Clear the element's value |
+
+Refs are unwrapped on the template ref, so `expressRef.value.element` is a `StripeExpressCheckoutElement | null`. Type the template ref with the component type and the element with the Stripe type:
 
 ```vue
-<VueStripeExpressCheckoutElement>
-  <template #error="{ error }">
-    <div class="error">{{ error }}</div>
-  </template>
-</VueStripeExpressCheckoutElement>
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VueStripeExpressCheckoutElement } from '@vue-stripe/vue-stripe'
+import type { StripeExpressCheckoutElement } from '@stripe/stripe-js'
+
+const expressRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement> | null>(null)
+
+const focus = () => expressRef.value?.focus()
+const clear = () => expressRef.value?.clear()
+const stripeElement = (): StripeExpressCheckoutElement | null => expressRef.value?.element ?? null
+</script>
+
+<template>
+  <VueStripeExpressCheckoutElement ref="expressRef" />
+</template>
 ```
+
+## With Checkout Sessions
+
+Inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider), the component is created with `checkout.createExpressCheckoutElement()`. The Checkout SDK accepts only `buttonHeight`, `buttonTheme`, `buttonType`, `layout`, `paymentMethods` and `paymentMethodOrder`; other options are dropped.
+
+::: warning Events that never fire with Checkout Sessions
+Under Checkout Sessions, `@click`, `@shippingaddresschange` and `@shippingratechange` **never fire**: line items, shipping address and shipping rates come from the session. Listen to `@confirm` and pass the event to `confirm()`.
+:::
+
+```vue
+<script setup>
+import { VueStripeExpressCheckoutElement, useCheckoutSession } from '@vue-stripe/vue-stripe'
+
+const { confirm } = useCheckoutSession()
+
+const onConfirm = async (event) => {
+  const result = await confirm({ expressCheckoutConfirmEvent: event })
+  if (result.type === 'error') console.error(result.error.message)
+}
+</script>
+
+<template>
+  <VueStripeExpressCheckoutElement @confirm="onConfirm" />
+</template>
+```
+
+## Styling
+
+The component renders this markup around Stripe's iframe:
+
+```html
+<div class="vue-stripe-express-checkout-element vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-express-checkout-element-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus vue-stripe-express-checkout-element-loading / vue-stripe-element-loading while loading -->
+  <div class="vue-stripe-express-checkout-element-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-express-checkout-element-loader vue-stripe-element-loader">...</div>
+</div>
+```
+
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-express-checkout-element*` for this one.
 
 ## Examples
 
@@ -272,20 +350,20 @@ const onClickWithShipping = (event) => {
 
 ### Confirm and Payment Completion
 
-```vue
-<script setup>
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+The confirm event does **not** carry the Elements instance (`StripeExpressCheckoutElementConfirmEvent` has no `elements` field). Confirm with the Elements group provided by `VueStripeElements`: `usePaymentIntent()` picks it up automatically (and calls `elements.submit()` first), or read it with `useStripeElements().elements.value`.
 
-// Must be inside StripeElements context
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+```vue
+<!-- ExpressCheckout.vue: rendered inside <VueStripeElements :client-secret="clientSecret"> -->
+<script setup>
+import { VueStripeExpressCheckoutElement, usePaymentIntent } from '@vue-stripe/vue-stripe'
+
+const props = defineProps({ clientSecret: String })
+
+const { confirmPayment } = usePaymentIntent()
 
 const onConfirm = async (event) => {
-  if (!stripe.value || !elements.value) return
-
-  const { error } = await stripe.value.confirmPayment({
-    elements: elements.value,
-    clientSecret,
+  const { error } = await confirmPayment({
+    clientSecret: props.clientSecret,
     confirmParams: {
       return_url: window.location.href
     },
@@ -293,12 +371,41 @@ const onConfirm = async (event) => {
   })
 
   if (error) {
+    // Let the wallet sheet show the failure
+    event.paymentFailed({ reason: 'fail' })
     console.error('Payment failed:', error.message)
   } else {
     console.log('Payment succeeded!')
   }
 }
 </script>
+
+<template>
+  <VueStripeExpressCheckoutElement @confirm="onConfirm" />
+</template>
+```
+
+The same with the raw Stripe instance:
+
+```ts
+import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+
+const { stripe } = useStripe()
+const { elements } = useStripeElements()
+
+const onConfirm = async () => {
+  if (!stripe.value || !elements.value) return
+
+  const { error: submitError } = await elements.value.submit()
+  if (submitError) return
+
+  const { error } = await stripe.value.confirmPayment({
+    elements: elements.value, // from VueStripeElements, not from the event
+    clientSecret,
+    confirmParams: { return_url: window.location.href },
+    redirect: 'if_required'
+  })
+}
 ```
 
 ### Shipping Address Collection
@@ -435,7 +542,7 @@ const onReady = (event) => {
 import { ref } from 'vue'
 import { VueStripeExpressCheckoutElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripeExpressCheckoutElement as StripeExpressCheckoutElementType,
+  StripeExpressCheckoutElement,
   StripeExpressCheckoutElementOptions,
   StripeExpressCheckoutElementReadyEvent,
   StripeExpressCheckoutElementClickEvent,
@@ -494,8 +601,10 @@ const handleLoadError = (
   console.error('Express checkout failed to load:', event.error.message)
 }
 
-// Template ref
-const expressCheckoutRef = ref<StripeExpressCheckoutElementType | null>(null)
+// Template ref: type it with the component; `.element` is the Stripe element
+const expressCheckoutRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement> | null>(null)
+const stripeElement = (): StripeExpressCheckoutElement | null =>
+  expressCheckoutRef.value?.element ?? null
 ```
 
 ## Comparison with PaymentElement
@@ -513,7 +622,7 @@ const expressCheckoutRef = ref<StripeExpressCheckoutElementType | null>(null)
 
 | Requirement | Details |
 |-------------|---------|
-| **clientSecret** | From PaymentIntent |
+| **Intent context** | `clientSecret` or `mode` / `currency` / `amount` on `VueStripeElements`, or a Checkout Session provider |
 | **HTTPS** | Required (except localhost) |
 | **Wallet Enabled** | Must be enabled in Stripe Dashboard |
 | **Real Device** | Wallet buttons typically require real devices with configured wallets |
@@ -540,7 +649,8 @@ const expressCheckoutRef = ref<StripeExpressCheckoutElementType | null>(null)
 
 | Component | Relationship |
 |-----------|--------------|
-| [StripeElements](/api/components/stripe-elements) | **Required parent** - Provides Elements context |
+| [VueStripeElements](/api/components/stripe-elements) | **Parent** - Provides Elements context |
+| [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) | **Alternative parent** - Checkout Sessions |
 | [StripePaymentElement](/api/components/stripe-payment-element) | **Recommended pair** - Fallback payment form |
 | [StripeLinkAuthenticationElement](/api/components/stripe-link-authentication-element) | Alternative - Email-based Link authentication |
 

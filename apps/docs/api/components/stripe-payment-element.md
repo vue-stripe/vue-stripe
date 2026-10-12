@@ -78,19 +78,26 @@ const onChange = (event) => {
 
 ## Requirements
 
-The Payment Element requires a `clientSecret` from a PaymentIntent. You can:
+The Payment Element needs one of:
 
-1. **Create via your backend** - Recommended for production
-2. **Create via Stripe Dashboard** - For testing:
-   - Go to [Stripe Dashboard → Payments](https://dashboard.stripe.com/test/payments)
-   - Click **"+ Create"** → **"Create payment"**
-   - Enter an amount and copy the `client_secret`
+- **A `clientSecret`** on `VueStripeElements` from a PaymentIntent or SetupIntent:
+  1. **Create via your backend** - Recommended for production
+  2. **Create via Stripe Dashboard** - For testing:
+     - Go to [Stripe Dashboard → Payments](https://dashboard.stripe.com/test/payments)
+     - Click **"+ Create"** → **"Create payment"**
+     - Enter an amount and copy the `client_secret`
+- **A deferred Intent**: `mode` / `currency` / `amount` on `VueStripeElements`, creating the Intent on your server at submit time. Restrict payment methods here with `:options="{ allowedPaymentMethodTypes: [...] }"` on `VueStripeElements` (the v5 `paymentMethodTypes` prop was removed).
+- **A Checkout Session**: place it inside [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (see [With Checkout Sessions](#with-checkout-sessions)).
 
 ## Props
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `options` | `StripePaymentElementOptions` | No | Payment element configuration |
+
+::: info Updating options
+Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+:::
 
 ### Options Object
 
@@ -161,12 +168,14 @@ interface StripePaymentElementOptions {
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |
 | `@escape` | - | Emitted when the escape key is pressed |
-| `@loaderstart` | - | Emitted when the element starts loading |
+| `@loaderstart` | `{ elementType: 'payment' }` | Emitted when the element starts loading |
 | `@loaderror` | `{ elementType: 'payment'; error: StripeError }` | Emitted when the element fails to load |
 | `@availablepaymentmethodschange` | `StripePaymentElementAvailablePaymentMethodsChangeEvent` | Emitted when the set of payment methods shown changes |
 | `@carddetailschange` | `StripePaymentElementCardDetailsChangeEvent` | Emitted when the entered card's brand or details change |
 | `@savedpaymentmethodupdate` | `StripePaymentElementSavedPaymentMethodUpdateEvent` | Emitted when a saved payment method is updated |
 | `@savedpaymentmethodremove` | `StripePaymentElementSavedPaymentMethodRemoveEvent` | Emitted when a saved payment method is removed |
+
+`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'payment', error: { message } }`; the message is also shown through the `#error` slot.
 
 There is no `@loaderstop` event: Stripe.js never emits one (v5 listed it by mistake). The element is loaded when `@ready` fires.
 
@@ -186,37 +195,92 @@ interface StripePaymentElementChangeEvent {
 
 ## Slots
 
-### Loading Slot
-
-Rendered while the payment element is initializing:
+| Slot | Slot Props | Description |
+|------|-----------|-------------|
+| `#loading` | - | Rendered while the element is loading (default: "Loading payment form...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change`, a load error or a creation error |
 
 ```vue
 <VueStripePaymentElement>
   <template #loading>
-    <div class="skeleton-loader">Loading payment form...</div>
+    <div class="skeleton-loader">Loading...</div>
+  </template>
+
+  <template #error="{ error }">
+    <p class="my-error">{{ error }}</p>
   </template>
 </VueStripePaymentElement>
 ```
 
-### Error Slot
+## Exposed Methods & Properties
 
-Rendered when there's an error during element creation:
+Access these via a template ref:
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `element` | `ShallowRef<StripePaymentElement \| null>` | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `focus()` | `() => void` | Focus the element |
+| `blur()` | `() => void` | Blur the element |
+| `clear()` | `() => void` | Clear the element's value |
+| `collapse()` | `() => void` | Collapse the Payment Element (accordion layout) |
+
+Refs are unwrapped on the template ref, so `paymentRef.value.element` is a `StripePaymentElement | null`. Type the template ref with the component type and the element with the Stripe type:
 
 ```vue
-<VueStripePaymentElement>
-  <template #error="{ error }">
-    <div class="payment-error">{{ error }}</div>
-  </template>
-</VueStripePaymentElement>
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+import type { StripePaymentElement } from '@stripe/stripe-js'
+
+const paymentRef = ref<InstanceType<typeof VueStripePaymentElement> | null>(null)
+
+const focus = () => paymentRef.value?.focus()
+const clear = () => paymentRef.value?.clear()
+const stripeElement = (): StripePaymentElement | null => paymentRef.value?.element ?? null
+const collapse = () => paymentRef.value?.collapse()
+</script>
+
+<template>
+  <VueStripePaymentElement ref="paymentRef" />
+</template>
 ```
 
-## Exposed Properties
+## With Checkout Sessions
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `element` | `Ref<StripePaymentElement \| null>` | The Stripe payment element instance |
-| `loading` | `Ref<boolean>` | Whether the element is loading |
-| `error` | `Ref<string \| null>` | Current error message |
+Inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider), the component is created with `checkout.createPaymentElement()`. The Checkout SDK accepts only `layout`, `paymentMethodOrder`, `readOnly`, `terms`, `fields`, `wallets` and `walletOptions`; other options are dropped. Confirm with `useCheckoutSession().confirm()` instead of `usePaymentIntent()`.
+
+Saved payment methods are on by default with Checkout Sessions since Stripe.js Clover; control them with the provider's `elementsOptions.savedPaymentMethod`.
+
+```vue
+<VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+  <VueStripePaymentElement :options="{ layout: 'accordion' }" />
+</VueStripeCheckoutElementsProvider>
+```
+
+## Styling
+
+The component renders this markup around Stripe's iframe:
+
+```html
+<div class="vue-stripe-payment-element vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-payment-element-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus vue-stripe-payment-element-loading / vue-stripe-element-loading while loading -->
+  <div class="vue-stripe-payment-element-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-payment-element-loader vue-stripe-element-loader">...</div>
+</div>
+```
+
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-payment-element*` for this one.
 
 ## Examples
 
@@ -420,7 +484,7 @@ const appearance = {
 import { ref } from 'vue'
 import { VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripePaymentElement as StripePaymentElementType,
+  StripePaymentElement,
   StripePaymentElementChangeEvent,
   StripePaymentElementOptions
 } from '@stripe/stripe-js'
@@ -436,7 +500,7 @@ const options: StripePaymentElementOptions = {
 }
 
 // Event handlers
-const handleReady = (element: StripePaymentElementType) => {
+const handleReady = (element: StripePaymentElement) => {
   console.log('Ready:', element)
 }
 
@@ -446,7 +510,7 @@ const handleChange = (event: StripePaymentElementChangeEvent) => {
 }
 
 // Template ref
-const paymentRef = ref<InstanceType<typeof VueStripePaymentElement>>()
+const paymentRef = ref<InstanceType<typeof VueStripePaymentElement> | null>(null)
 ```
 
 ## Test Cards

@@ -64,6 +64,10 @@ const onChange = (event) => console.log('Complete:', event.complete)
 |------|------|----------|-------------|
 | `options` | `StripeTaxIdElementOptions` | No | Tax ID element configuration |
 
+::: info Updating options
+Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+:::
+
 ### Options Object
 
 ```ts
@@ -97,8 +101,10 @@ interface StripeTaxIdElementOptions {
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |
 | `@escape` | - | Emitted when the user presses the Escape key |
-| `@loaderstart` | - | Emitted when the element begins loading |
+| `@loaderstart` | `{ elementType: 'taxId' }` | Emitted when the element begins loading |
 | `@loaderror` | `{ elementType: 'taxId'; error: StripeError }` | Emitted when the element fails to load |
+
+`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'taxId', error: { message } }`; the message is also shown through the `#error` slot.
 
 ### Change Event
 
@@ -121,8 +127,20 @@ interface StripeTaxIdElementChangeEvent {
 
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
-| `#loading` | - | Rendered while the element is initializing |
-| `#error` | `{ error: string }` | Rendered when an error occurs; receives the error message string |
+| `#loading` | - | Rendered while the element is loading (default: "Loading tax ID form...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change`, a load error or a creation error |
+
+```vue
+<VueStripeTaxIdElement>
+  <template #loading>
+    <div class="skeleton-loader">Loading...</div>
+  </template>
+
+  <template #error="{ error }">
+    <p class="my-error">{{ error }}</p>
+  </template>
+</VueStripeTaxIdElement>
+```
 
 ## Exposed Methods & Properties
 
@@ -130,13 +148,57 @@ Access these via a template ref:
 
 | Member | Type | Description |
 |--------|------|-------------|
-| `element` | `Ref<StripeTaxIdElement \| null>` | The underlying Stripe element instance |
-| `loading` | `Ref<boolean>` | Whether the element is loading |
-| `error` | `Ref<string \| null>` | Current error message |
+| `element` | `ShallowRef<StripeTaxIdElement \| null>` | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
 | `focus()` | `() => void` | Focus the element |
 | `blur()` | `() => void` | Blur the element |
-| `clear()` | `() => void` | Clear the element |
-| `getValue()` | `() => Promise<...>` | Validate and read the current business name and tax ID |
+| `clear()` | `() => void` | Clear the element's value |
+| `getValue()` | `() => Promise<...>` | Validate the element and read the business name and tax ID (forwards to Stripe's `getValue()`) |
+
+Refs are unwrapped on the template ref, so `taxIdRef.value.element` is a `StripeTaxIdElement | null`. Type the template ref with the component type and the element with the Stripe type:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VueStripeTaxIdElement } from '@vue-stripe/vue-stripe'
+import type { StripeTaxIdElement } from '@stripe/stripe-js'
+
+const taxIdRef = ref<InstanceType<typeof VueStripeTaxIdElement> | null>(null)
+
+const focus = () => taxIdRef.value?.focus()
+const clear = () => taxIdRef.value?.clear()
+const stripeElement = (): StripeTaxIdElement | null => taxIdRef.value?.element ?? null
+const readTaxId = () => taxIdRef.value?.getValue()
+</script>
+
+<template>
+  <VueStripeTaxIdElement ref="taxIdRef" />
+</template>
+```
+
+## Styling
+
+The component renders this markup around Stripe's iframe:
+
+```html
+<div class="vue-stripe-tax-id-element vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-tax-id-element-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus vue-stripe-tax-id-element-loading / vue-stripe-element-loading while loading -->
+  <div class="vue-stripe-tax-id-element-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-tax-id-element-loader vue-stripe-element-loader">...</div>
+</div>
+```
+
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-tax-id-element*` for this one.
 
 ## TypeScript
 

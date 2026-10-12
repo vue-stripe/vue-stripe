@@ -6,8 +6,8 @@ Collects customer email and authenticates them with Stripe Link for faster check
 **This element must be paired with `VueStripePaymentElement`** to create a complete checkout flow. It cannot process payments on its own—it only handles email collection and Link authentication.
 :::
 
-::: warning Requires clientSecret
-StripeLinkAuthenticationElement requires a `clientSecret` from a PaymentIntent or SetupIntent. Ensure StripeElements has a valid clientSecret configured.
+::: warning Requires an Intent context
+VueStripeLinkAuthenticationElement needs `VueStripeElements` with a `clientSecret` (PaymentIntent or SetupIntent) or a deferred Intent (`mode` / `currency` / `amount`). It is not available inside `VueStripeCheckoutElementsProvider` (Checkout Sessions collect the email themselves).
 :::
 
 ## What This Element Does
@@ -25,7 +25,7 @@ StripeLinkAuthenticationElement requires a `clientSecret` from a PaymentIntent o
 |------------|-------------|
 | **Cannot process payments** | Must be paired with PaymentElement or other payment components |
 | **Cannot collect payment info** | Only handles email, not card numbers or payment methods |
-| **Cannot work standalone** | Requires StripeElements with a clientSecret |
+| **Cannot work standalone** | Requires VueStripeElements with a clientSecret or deferred Intent |
 
 ## Usage
 
@@ -98,6 +98,10 @@ flowchart TD
 |------|------|----------|-------------|
 | `options` | `StripeLinkAuthenticationElementOptions` | No | Element configuration options |
 
+::: info Updating options
+Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+:::
+
 ### Options Object
 
 ```ts
@@ -120,6 +124,8 @@ interface StripeLinkAuthenticationElementOptions {
 | `@loaderstart` | `{ elementType: 'linkAuthentication' }` | Emitted when the element starts loading |
 | `@loaderror` | `{ elementType: 'linkAuthentication'; error: StripeError }` | Emitted when the element fails to load |
 
+`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'linkAuthentication', error: { message } }`; the message is also shown through the `#error` slot.
+
 ### Change Event
 
 ```ts
@@ -132,67 +138,80 @@ interface StripeLinkAuthenticationElementChangeEvent {
 }
 ```
 
-## Exposed Methods
+## Slots
 
-Access these methods via template ref:
+| Slot | Slot Props | Description |
+|------|-----------|-------------|
+| `#loading` | - | Rendered while the element is loading (default: "Loading...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change`, a load error or a creation error |
 
 ```vue
-<script setup>
+<VueStripeLinkAuthenticationElement>
+  <template #loading>
+    <div class="skeleton-loader">Loading...</div>
+  </template>
+
+  <template #error="{ error }">
+    <p class="my-error">{{ error }}</p>
+  </template>
+</VueStripeLinkAuthenticationElement>
+```
+
+## Exposed Methods & Properties
+
+Access these via a template ref:
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `element` | `ShallowRef<StripeLinkAuthenticationElement \| null>` | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `focus()` | `() => void` | Focus the element |
+| `blur()` | `() => void` | Blur the element |
+| `clear()` | `() => void` | Clear the element's value |
+
+Refs are unwrapped on the template ref, so `linkAuthRef.value.element` is a `StripeLinkAuthenticationElement | null`. Type the template ref with the component type and the element with the Stripe type:
+
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
+import { VueStripeLinkAuthenticationElement } from '@vue-stripe/vue-stripe'
+import type { StripeLinkAuthenticationElement } from '@stripe/stripe-js'
 
-const linkAuthRef = ref()
+const linkAuthRef = ref<InstanceType<typeof VueStripeLinkAuthenticationElement> | null>(null)
 
-// Focus the email input
-const focusEmail = () => linkAuthRef.value?.focus()
-
-// Remove focus
-const blurEmail = () => linkAuthRef.value?.blur()
-
-// Clear the email input
-const clearEmail = () => linkAuthRef.value?.clear()
+const focus = () => linkAuthRef.value?.focus()
+const clear = () => linkAuthRef.value?.clear()
+const stripeElement = (): StripeLinkAuthenticationElement | null => linkAuthRef.value?.element ?? null
 </script>
 
 <template>
   <VueStripeLinkAuthenticationElement ref="linkAuthRef" />
-  <button @click="focusEmail">Focus</button>
-  <button @click="blurEmail">Blur</button>
-  <button @click="clearEmail">Clear</button>
 </template>
 ```
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `focus()` | `void` | Focus the email input |
-| `blur()` | `void` | Remove focus from the email input |
-| `clear()` | `void` | Clear the email input |
+## Styling
 
-## Exposed Properties
+The component renders this markup around Stripe's iframe:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `element` | `Ref<StripeLinkAuthenticationElement \| null>` | The Stripe element instance |
-| `loading` | `Ref<boolean>` | `true` until the element has finished mounting (becomes `false` on `ready`) |
-| `error` | `Ref<string \| null>` | Error message if the element fails to create or mount, otherwise `null` |
-
-## Slots
-
-| Slot | Slot Props | Description |
-|------|------------|-------------|
-| `error` | `{ error: string }` | Rendered when `error` is set. Override to customize the error display. |
-| `loading` | — | Rendered while `loading` is `true`. Override to customize the loading indicator. |
-
-```vue
-<template>
-  <VueStripeLinkAuthenticationElement>
-    <template #loading>
-      <span>Loading email field…</span>
-    </template>
-    <template #error="{ error }">
-      <p class="my-error">{{ error }}</p>
-    </template>
-  </VueStripeLinkAuthenticationElement>
-</template>
+```html
+<div class="vue-stripe-link-auth vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-link-auth-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus vue-stripe-link-auth-loading / vue-stripe-element-loading while loading -->
+  <div class="vue-stripe-link-auth-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-link-auth-loader vue-stripe-element-loader">...</div>
+</div>
 ```
+
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-link-auth*` for this one.
 
 ## Examples
 
@@ -398,7 +417,7 @@ const handleChange = (event) => {
 import { ref } from 'vue'
 import { VueStripeLinkAuthenticationElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripeLinkAuthenticationElement as StripeLinkAuthenticationElementType,
+  StripeLinkAuthenticationElement,
   StripeLinkAuthenticationElementChangeEvent,
   StripeLinkAuthenticationElementOptions
 } from '@stripe/stripe-js'
@@ -411,7 +430,7 @@ const options: StripeLinkAuthenticationElementOptions = {
 }
 
 // Event handlers
-const handleReady = (element: StripeLinkAuthenticationElementType) => {
+const handleReady = (element: StripeLinkAuthenticationElement) => {
   console.log('Element ready:', element)
 }
 
@@ -421,7 +440,7 @@ const handleChange = (event: StripeLinkAuthenticationElementChangeEvent) => {
 }
 
 // Template ref
-const linkAuthRef = ref<InstanceType<typeof VueStripeLinkAuthenticationElement>>()
+const linkAuthRef = ref<InstanceType<typeof VueStripeLinkAuthenticationElement> | null>(null)
 
 const focusEmail = () => {
   linkAuthRef.value?.focus()

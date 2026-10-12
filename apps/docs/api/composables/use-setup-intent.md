@@ -71,25 +71,17 @@ const handleSaveCard = async (clientSecret: string) => {
 
 ```ts
 interface UseSetupIntentReturn {
-  // Resolves with Stripe's confirmSetup result (passed through unchanged)
-  confirmSetup: (options: ConfirmSetupOptions) => Promise<any>
-  // Resolves with Stripe's retrieveSetupIntent result
-  retrieveSetupIntent: (clientSecret: string) => Promise<any>
+  confirmSetup: (options: ConfirmSetupOptions) => Promise<ConfirmSetupResult>
+  retrieveSetupIntent: (clientSecret: string) => Promise<ConfirmSetupResult>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
 ```
 
-::: tip Result type
-`confirmSetup` resolves to `Promise<any>` — it passes through Stripe's
-`confirmSetup()` result unchanged. The `ConfirmSetupResult` shape shown below is
-illustrative only; it is not an importable or declared type in this package.
-:::
-
 | Property | Type | Description |
 |----------|------|-------------|
-| `confirmSetup` | `Function` | Async function to confirm a setup intent |
-| `retrieveSetupIntent` | `Function` | Async function to look up a SetupIntent by its client secret |
+| `confirmSetup` | `(options: ConfirmSetupOptions) => Promise<ConfirmSetupResult>` | Confirm a setup intent |
+| `retrieveSetupIntent` | `(clientSecret: string) => Promise<ConfirmSetupResult>` | Look up a SetupIntent by its client secret |
 | `loading` | `Readonly<Ref<boolean>>` | Whether a confirm or retrieve is in progress |
 | `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirm or retrieve attempt |
 
@@ -151,30 +143,27 @@ interface ConfirmSetupOptions {
 
 ## confirmSetup Result
 
-The promise resolves with whatever `stripe.confirmSetup()` returns. The shape
-below is illustrative — `ConfirmSetupResult` is not a declared or importable
-type. For accurate typing, use `SetupIntent` and `StripeError` from
-`@stripe/stripe-js`.
+`confirmSetup` and `retrieveSetupIntent` resolve to a `ConfirmSetupResult`, exported from the package:
 
 ```ts
-// Illustrative shape (not an importable type)
-interface ConfirmSetupResult {
-  setupIntent?: {
-    id: string
-    status: 'succeeded' | 'processing' | 'requires_action' | 'requires_confirmation' | 'requires_payment_method' | 'canceled'
-    client_secret: string
-    payment_method: string | null
-    // ... other SetupIntent fields
-  }
-  error?: {
-    type: string
-    code?: string
-    message: string
-    decline_code?: string
-    param?: string
-  }
+import type { ConfirmSetupResult, VueStripeErrorResult } from '@vue-stripe/vue-stripe'
+
+// Stripe's own result, or the composable's error result
+type ConfirmSetupResult = SetupIntentResult | VueStripeErrorResult
+
+// SetupIntentResult (from @stripe/stripe-js):
+//   { setupIntent: SetupIntent; error?: undefined }
+//   | { setupIntent?: undefined; error: StripeError }
+
+interface VueStripeErrorResult {
+  error: { message: string }
+  paymentIntent?: undefined
+  setupIntent?: undefined
+  paymentMethod?: undefined
 }
 ```
+
+The promise never rejects. When Stripe.js has not loaded yet (`{ error: { message: 'Stripe not initialized' } }`) or the Stripe call throws, it resolves to a `VueStripeErrorResult`, so one `if (result.error)` check covers every failure. With `redirect: 'always'`, a successful confirmation navigates away instead of resolving.
 
 ## Examples
 
@@ -415,26 +404,22 @@ const SetupForm = {
 
 ```ts
 import { useSetupIntent } from '@vue-stripe/vue-stripe'
-import type {
-  SetupIntent,
-  StripeError
-} from '@stripe/stripe-js'
+import type { ConfirmSetupResult } from '@vue-stripe/vue-stripe'
 
 const { confirmSetup, loading, error } = useSetupIntent()
 
 // Type-safe result handling
 const handleSetup = async (clientSecret: string) => {
-  const result = await confirmSetup({
+  const result: ConfirmSetupResult = await confirmSetup({
     clientSecret,
     confirmParams: {
       return_url: window.location.href
     }
   })
 
-  // result is typed as `any` (Stripe's confirmSetup result, passed through).
-  // Narrow it yourself using SetupIntent / StripeError from @stripe/stripe-js:
-  // result.setupIntent as SetupIntent | undefined
-  // result.error as StripeError | undefined
+  // result: ConfirmSetupResult
+  // result.setupIntent is SetupIntent | undefined
+  // result.error is StripeError | { message: string } | undefined
 
   if (result.setupIntent) {
     const { id, status, payment_method } = result.setupIntent

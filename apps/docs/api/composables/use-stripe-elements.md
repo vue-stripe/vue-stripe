@@ -43,10 +43,27 @@ const { elements, submit, loading, error } = useStripeElements()
 |----------|------|-------------|
 | `elements` | `Readonly<Ref<StripeElements \| null>>` | The Elements instance |
 | `submit` | `() => Promise<ElementsSubmitResult>` | Triggers form validation and collects data required for wallets (Apple Pay, Google Pay). Call before `confirmPayment`/`confirmSetup` |
+| `fetchUpdates` | `() => Promise<{ error?: { message: string; status?: string } }>` | Re-fetches the Elements' data from Stripe after you updated the Intent on your server (e.g. a new amount). Wraps `elements.fetchUpdates()` |
 | `loading` | `Readonly<Ref<boolean>>` | True while Elements is initializing |
 | `error` | `Readonly<Ref<string \| null>>` | Error message if initialization failed |
 
-The `elements`, `loading` and `error` return values are **readonly refs**; `submit` is a function.
+The `elements`, `loading` and `error` return values are **readonly refs**; `submit` and `fetchUpdates` are functions. Called before the Elements group exists, both resolve to `{ error: { message: 'Elements not initialized' } }` instead of throwing.
+
+### fetchUpdates
+
+When your server changes the PaymentIntent (amount, currency, payment method options, ...) after the Payment Element has mounted, call `fetchUpdates()` so the mounted elements reflect it:
+
+```ts
+const { fetchUpdates } = useStripeElements()
+
+const applyCoupon = async (code: string) => {
+  // Your server updates the PaymentIntent amount
+  await fetch('/api/apply-coupon', { method: 'POST', body: JSON.stringify({ code }) })
+
+  const { error } = await fetchUpdates()
+  if (error) console.error(error.message)
+}
+```
 
 ## Examples
 
@@ -239,9 +256,10 @@ import type {
   StripePaymentElement
 } from '@stripe/stripe-js'
 
-const { elements, submit, loading, error } = useStripeElements()
-// elements: Readonly<Ref<StripeElements | null>>
-// submit:   () => Promise<ElementsSubmitResult>
+const { elements, submit, fetchUpdates, loading, error } = useStripeElements()
+// elements:     Readonly<Ref<StripeElements | null>>
+// submit:       () => Promise<ElementsSubmitResult>
+// fetchUpdates: () => Promise<{ error?: { message: string; status?: string } }>
 
 // Trigger validation / wallet collection.
 // submit() resolves to { error } on failure or { selectedPaymentMethod } on success.

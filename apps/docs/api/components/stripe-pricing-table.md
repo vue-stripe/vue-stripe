@@ -145,10 +145,11 @@ Access component state via template refs:
 | `error` | `Ref<string \| null>` | Error message if script failed to load |
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref, watchEffect } from 'vue'
+import { VueStripePricingTable } from '@vue-stripe/vue-stripe'
 
-const pricingTableRef = ref()
+const pricingTableRef = ref<InstanceType<typeof VueStripePricingTable> | null>(null)
 
 watchEffect(() => {
   if (pricingTableRef.value) {
@@ -165,6 +166,18 @@ watchEffect(() => {
   />
 </template>
 ```
+
+## The `<stripe-pricing-table>` custom element
+
+The component renders Stripe's `<stripe-pricing-table>` web component from a render function, so Vue never tries to resolve it as a Vue component: **no `isCustomElement` / `compilerOptions` setup is needed** in Vue 3, and there is no "Failed to resolve component" warning.
+
+- **Vue 2.7:** Vue 2 still checks unknown elements at runtime. Add this once in `main.js`:
+
+  ```js
+  Vue.config.ignoredElements = ['stripe-pricing-table']
+  ```
+
+- **Nuxt:** the pricing table script loads in the browser on mount. Render the component client-side only, e.g. inside `<ClientOnly>` or from a `.client.vue` component (see [Installation: Nuxt 3](/guide/installation#nuxt-3)).
 
 ## Examples
 
@@ -349,8 +362,12 @@ const props: VueStripePricingTableProps = {
 }
 
 // Event handlers
-const handleLoad = () => void
-const handleError = (error: Error) => void
+const handleLoad = (): void => {
+  console.log('Pricing table loaded')
+}
+const handleError = (error: Error): void => {
+  console.error(error.message)
+}
 ```
 
 ## See Also

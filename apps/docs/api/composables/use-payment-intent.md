@@ -62,10 +62,8 @@ const handleSubmit = async (clientSecret: string) => {
 
 ```ts
 interface UsePaymentIntentReturn {
-  // Resolves to Stripe's native confirmPayment result (typed `any`)
-  confirmPayment: (options: ConfirmPaymentOptions) => Promise<any>
-  // Resolves to Stripe's native retrievePaymentIntent result
-  retrievePaymentIntent: (clientSecret: string) => Promise<any>
+  confirmPayment: (options: ConfirmPaymentOptions) => Promise<ConfirmPaymentResult>
+  retrievePaymentIntent: (clientSecret: string) => Promise<ConfirmPaymentResult>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
@@ -73,8 +71,8 @@ interface UsePaymentIntentReturn {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `confirmPayment` | `Function` | Async function to confirm a payment |
-| `retrievePaymentIntent` | `Function` | Async function to look up a PaymentIntent by its client secret |
+| `confirmPayment` | `(options: ConfirmPaymentOptions) => Promise<ConfirmPaymentResult>` | Confirm a payment |
+| `retrievePaymentIntent` | `(clientSecret: string) => Promise<ConfirmPaymentResult>` | Look up a PaymentIntent by its client secret |
 | `loading` | `Readonly<Ref<boolean>>` | Whether a confirm or retrieve is in progress |
 | `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirm or retrieve attempt |
 
@@ -173,29 +171,27 @@ called. Pass `skipSubmit: true` to skip this step (not recommended).
 
 ## confirmPayment Result
 
-`confirmPayment` resolves to Stripe's native `stripe.confirmPayment()` result and is
-typed as `any`. The `ConfirmPaymentResult` interface below is **illustrative only** —
-it is **not** an importable type from this package. It documents the shape you can
-expect at runtime.
+`confirmPayment` and `retrievePaymentIntent` resolve to a `ConfirmPaymentResult`, exported from the package:
 
 ```ts
-// Illustrative shape — not importable
-interface ConfirmPaymentResult {
-  paymentIntent?: {
-    id: string
-    status: 'succeeded' | 'processing' | 'requires_action' | 'requires_confirmation' | 'requires_payment_method' | 'canceled'
-    client_secret: string
-    // ... other PaymentIntent fields
-  }
-  error?: {
-    type: string
-    code?: string
-    message: string
-    decline_code?: string
-    param?: string
-  }
+import type { ConfirmPaymentResult, VueStripeErrorResult } from '@vue-stripe/vue-stripe'
+
+// Stripe's own result, or the composable's error result
+type ConfirmPaymentResult = PaymentIntentResult | VueStripeErrorResult
+
+// PaymentIntentResult (from @stripe/stripe-js):
+//   { paymentIntent: PaymentIntent; error?: undefined }
+//   | { paymentIntent?: undefined; error: StripeError }
+
+interface VueStripeErrorResult {
+  error: { message: string }
+  paymentIntent?: undefined
+  setupIntent?: undefined
+  paymentMethod?: undefined
 }
 ```
+
+The promise never rejects. When Stripe.js has not loaded yet (`{ error: { message: 'Stripe not initialized' } }`) or the Stripe call throws, it resolves to a `VueStripeErrorResult`, so one `if (result.error)` check covers every failure. With `redirect: 'always'`, a successful confirmation navigates away instead of resolving.
 
 ## Examples
 
@@ -442,16 +438,13 @@ const handlePay = async (clientSecret: string) => {
 
 ```ts
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
-import type {
-  PaymentIntent,
-  StripeError
-} from '@stripe/stripe-js'
+import type { ConfirmPaymentResult } from '@vue-stripe/vue-stripe'
 
 const { confirmPayment, loading, error } = usePaymentIntent()
 
 // Type-safe result handling
 const handlePayment = async (clientSecret: string) => {
-  const result = await confirmPayment({
+  const result: ConfirmPaymentResult = await confirmPayment({
     clientSecret,
     confirmParams: {
       return_url: window.location.href
@@ -459,8 +452,8 @@ const handlePayment = async (clientSecret: string) => {
     redirect: 'if_required'
   })
 
-  // result.paymentIntent is typed as PaymentIntent | undefined
-  // result.error is typed as StripeError | undefined
+  // result.paymentIntent is PaymentIntent | undefined
+  // result.error is StripeError | { message: string } | undefined
 
   if (result.paymentIntent) {
     const { id, status, amount, currency } = result.paymentIntent

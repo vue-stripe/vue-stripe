@@ -59,13 +59,37 @@ const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 | `amount` | `number` | No | Amount in the smallest currency unit (e.g. cents for USD). Required for `'payment'` and `'subscription'` modes |
 | `setupFutureUsage` | `'off_session' \| 'on_session'` | No | Indicates intent to save the payment method for future use |
 | `captureMethod` | `'automatic' \| 'automatic_async' \| 'manual'` | No | Controls when to capture funds from the customer's account |
-| `paymentMethodTypes` | `string[]` | No | List of payment method types to display. Omit to use Dashboard payment method settings |
-| `appearance` | `object` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance` |
+| `appearance` | `object` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance`. Changes are applied live with `elements.update()` |
 | `fonts` | `object[]` | No | Custom fonts to load into the Elements iframe (`CssFontSource` / `CustomFontSource`). Convenience prop — equivalent to `options.fonts` |
-| `locale` | `string` | No | Locale to display Elements in (e.g. `'en'`, `'fr'`, `'auto'`). Convenience prop — equivalent to `options.locale` |
-| `options` | `object` | No | Additional options passed to `stripe.elements()` |
+| `locale` | `string` | No | Locale to display Elements in (e.g. `'en'`, `'fr'`, `'auto'`). Convenience prop — equivalent to `options.locale`. Changes are applied live with `elements.update()` |
+| `options` | `object` | No | Any other option passed to `stripe.elements()` (e.g. `allowedPaymentMethodTypes` in the mode-based flow, `loader`) |
 
 \* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation.
+
+A new `clientSecret`, `mode`, `currency`, `amount` or `setupFutureUsage` calls `stripe.elements()` again to create a new Elements group. Changes to the `appearance` and `locale` props are applied to the existing group with `elements.update()`, so mounted elements keep what the customer typed (keys inside `options` are read when the group is created).
+
+::: warning `paymentMethodTypes` was removed in v6
+Stripe.js Endive rejects `paymentMethodTypes` on `stripe.elements()` as an integration error, so `VueStripeElements` no longer has this prop (and drops the key if it appears in `options`). Choose the payment methods instead with:
+
+- **Mode-based flow** (deferred Intent: `mode` / `currency` / `amount`): pass `allowedPaymentMethodTypes` through `options`:
+
+  ```vue
+  <VueStripeElements
+    mode="payment"
+    currency="usd"
+    :amount="1099"
+    :options="{ allowedPaymentMethodTypes: ['card', 'klarna'] }"
+  >
+    <VueStripePaymentElement />
+  </VueStripeElements>
+  ```
+
+- **`clientSecret` flow**: set `payment_method_types` on the PaymentIntent / SetupIntent on your server, or manage payment methods in the Stripe Dashboard. `allowedPaymentMethodTypes` is **not** valid together with `clientSecret`.
+:::
+
+::: tip No Intent yet? Pass `mode`
+With neither `clientSecret` nor `mode`, Stripe.js Endive logs "Unable to select session" inside its iframe for some elements (verified with the Address Element). When you do not have an Intent yet, pass `mode` / `currency` / `amount` so Elements has a session to work with.
+:::
 
 ::: tip Convenience props vs. `options`
 `appearance`, `fonts`, and `locale` are first-class convenience props so you can bind them directly without nesting them inside `options`. If you set the same key in both `options` and a dedicated prop, the dedicated prop wins.
@@ -107,7 +131,11 @@ interface StripeElementsOptions {
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@ready` | `StripeElements` | Emitted after the Elements instance is created. The payload is the `StripeElements` instance |
-| `@error` | `string` | Emitted when Elements creation fails. The payload is the error message |
+| `@error` | `string` | Emitted when Elements creation fails, or when an `appearance` / `locale` update is rejected. The payload is the error message |
+
+::: info `elements.update()` is asynchronous
+Since Stripe.js Dahlia, `elements.update()` returns a Promise. `VueStripeElements` waits for it when it applies `appearance` / `locale` changes; a rejected update sets the component's error state and surfaces as `@error`.
+:::
 
 ```vue
 <template>
@@ -359,6 +387,14 @@ const appearance = {
     <VueStripeCardElement />
   </VueStripeElements>
 </VueStripeProvider>
+```
+
+For other elements (Payment, Address, ...) without an Intent, use the deferred Intent flow instead:
+
+```vue
+<VueStripeElements mode="payment" currency="usd" :amount="1099">
+  <VueStripeAddressElement :options="{ mode: 'shipping' }" />
+</VueStripeElements>
 ```
 
 ## TypeScript

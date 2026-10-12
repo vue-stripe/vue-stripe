@@ -599,7 +599,8 @@ import { loadStripe } from '@stripe/stripe-js'
 ### Components not rendering
 
 - Ensure `VueStripeProvider` is the outermost wrapper
-- Check that `VueStripeElements` has a valid `clientSecret` prop (required for most elements)
+- Check that `VueStripeElements` has a valid `clientSecret`, or `mode` / `currency` / `amount` when you have no Intent yet (most elements need one of them)
+- Make sure the stylesheet is imported once: `import '@vue-stripe/vue-stripe/style.css'`
 - Look for errors in the browser console
 
 ### TypeScript errors

@@ -18,9 +18,9 @@ Split Card Elements give you granular control over card input layout:
 
 | Component | Description |
 |-----------|-------------|
-| **StripeCardNumberElement** | Card number input with brand detection and Luhn validation |
-| **StripeCardExpiryElement** | MM/YY expiration date with auto-formatting |
-| **StripeCardCvcElement** | 3-4 digit security code (adapts to card brand) |
+| **VueStripeCardNumberElement** | Card number input with brand detection and Luhn validation |
+| **VueStripeCardExpiryElement** | MM/YY expiration date with auto-formatting |
+| **VueStripeCardCvcElement** | 3-4 digit security code (adapts to card brand) |
 
 ## How It Works
 
@@ -37,9 +37,9 @@ flowchart TD
 
 ## Components
 
-- **StripeCardNumberElement** - Card number input with brand detection
-- **StripeCardExpiryElement** - MM/YY expiration date input
-- **StripeCardCvcElement** - 3 or 4 digit security code input
+- **VueStripeCardNumberElement** - Card number input with brand detection
+- **VueStripeCardExpiryElement** - MM/YY expiration date input
+- **VueStripeCardCvcElement** - 3 or 4 digit security code input
 
 ## Usage
 
@@ -131,6 +131,10 @@ All three components share the same props interface:
 |------|------|----------|-------------|
 | `options` | `object` | No | Element configuration options |
 
+::: info Updating options
+Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+:::
+
 ### Options Object
 
 ```ts
@@ -154,8 +158,8 @@ All three components emit the same events:
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@ready` | `StripeElement` | Emitted when the element is fully rendered |
-| `@change` | `ChangeEvent` | Emitted when the element value changes |
+| `@ready` | `StripeCardNumberElement` / `StripeCardExpiryElement` / `StripeCardCvcElement` | Emitted when the element is fully rendered (payload: that component's Stripe element) |
+| `@change` | `StripeCardNumberElementChangeEvent` / `StripeCardExpiryElementChangeEvent` / `StripeCardCvcElementChangeEvent` | Emitted when the element value changes |
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |
 | `@escape` | - | Emitted when the escape key is pressed |
@@ -193,17 +197,55 @@ interface CardCvcChangeEvent {
 }
 ```
 
-## Exposed
+## Slots
 
-Access via template ref on each component. Every component exposes the same values and methods.
+Each component has the same slots:
+
+| Slot | Slot Props | Description |
+|------|-----------|-------------|
+| `#loading` | - | Rendered while the element is loading (default: "Loading cardNumber...", "Loading cardExpiry...", "Loading cardCvc...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change` or a creation error |
 
 ```vue
-<script setup>
-import { ref } from 'vue'
+<VueStripeCardNumberElement>
+  <template #loading>
+    <div class="skeleton-loader">Loading...</div>
+  </template>
 
-const numberRef = ref()
-const expiryRef = ref()
-const cvcRef = ref()
+  <template #error="{ error }">
+    <p class="field-error">{{ error }}</p>
+  </template>
+</VueStripeCardNumberElement>
+```
+
+## Exposed Methods & Properties
+
+Access via template ref on each component. Every component exposes the same members:
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `element` | `ShallowRef<StripeCardNumberElement \| null>` (`StripeCardExpiryElement` / `StripeCardCvcElement` for the others) | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation or creation error) |
+| `focus()` | `() => void` | Focus the input |
+| `blur()` | `() => void` | Blur the input |
+| `clear()` | `() => void` | Clear the input value |
+
+Refs are unwrapped on the template ref, so `numberRef.value.element` is a `StripeCardNumberElement | null`. Type the template refs with the component types and the elements with the Stripe types:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import {
+  VueStripeCardNumberElement,
+  VueStripeCardExpiryElement,
+  VueStripeCardCvcElement
+} from '@vue-stripe/vue-stripe'
+import type { StripeCardNumberElement } from '@stripe/stripe-js'
+
+const numberRef = ref<InstanceType<typeof VueStripeCardNumberElement> | null>(null)
+const expiryRef = ref<InstanceType<typeof VueStripeCardExpiryElement> | null>(null)
+const cvcRef = ref<InstanceType<typeof VueStripeCardCvcElement> | null>(null)
 
 const focusNumber = () => numberRef.value?.focus()
 const clearAll = () => {
@@ -211,6 +253,9 @@ const clearAll = () => {
   expiryRef.value?.clear()
   cvcRef.value?.clear()
 }
+
+// Pass the number element to stripe.createPaymentMethod({ type: 'card', card })
+const cardNumber = (): StripeCardNumberElement | null => numberRef.value?.element ?? null
 </script>
 
 <template>
@@ -220,21 +265,28 @@ const clearAll = () => {
 </template>
 ```
 
-### Exposed Values
+## Styling
 
-| Value | Type | Description |
-|-------|------|-------------|
-| `element` | `Ref<StripeCardNumberElement \| StripeCardExpiryElement \| StripeCardCvcElement \| null>` | The underlying Stripe element instance (`null` until created) |
-| `loading` | `Ref<boolean>` | `true` while the element is being created and mounted |
-| `error` | `Ref<string \| null>` | Current error message, or `null` when there is no error |
+Each component renders this markup around Stripe's iframe (`<type>` is `cardNumber`, `cardExpiry` or `cardCvc`):
 
-### Exposed Methods
+```html
+<div class="vue-stripe-<type>-element vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-<type>-element-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus -loading classes while loading -->
+  <div class="vue-stripe-<type>-element-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-<type>-element-loader vue-stripe-element-loader">...</div>
+</div>
+```
 
-| Method | Description |
-|--------|-------------|
-| `focus()` | Focus the input |
-| `blur()` | Blur the input |
-| `clear()` | Clear the input value |
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or e.g. `.vue-stripe-cardNumber-element*` for one field.
 
 ## Examples
 
@@ -394,7 +446,7 @@ import {
   VueStripeCardCvcElement
 } from '@vue-stripe/vue-stripe'
 import type {
-  StripeCardNumberElement as StripeCardNumberElementType,
+  StripeCardNumberElement,
   StripeCardNumberElementChangeEvent,
   StripeCardNumberElementOptions
 } from '@stripe/stripe-js'
@@ -414,9 +466,9 @@ const handleNumberChange = (event: StripeCardNumberElementChangeEvent) => {
 }
 
 // Template refs
-const numberRef = ref<InstanceType<typeof VueStripeCardNumberElement>>()
-const expiryRef = ref<InstanceType<typeof VueStripeCardExpiryElement>>()
-const cvcRef = ref<InstanceType<typeof VueStripeCardCvcElement>>()
+const numberRef = ref<InstanceType<typeof VueStripeCardNumberElement> | null>(null)
+const expiryRef = ref<InstanceType<typeof VueStripeCardExpiryElement> | null>(null)
+const cvcRef = ref<InstanceType<typeof VueStripeCardCvcElement> | null>(null)
 ```
 
 ## Test Cards

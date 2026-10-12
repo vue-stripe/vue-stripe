@@ -77,6 +77,10 @@ const onChange = (event) => {
 |------|------|----------|-------------|
 | `options` | `StripeIbanElementOptions` | No | IBAN element configuration |
 
+::: info Updating options
+Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+:::
+
 ### Options Object
 
 ```ts
@@ -165,68 +169,76 @@ interface StripeIbanElementChangeEvent {
 
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
-| `#loading` | - | Rendered while the element is initializing |
-| `#error` | `{ error: string }` | Rendered when an error occurs; receives the error message string |
-
-### Loading Slot
-
-Rendered while the element is initializing:
+| `#loading` | - | Rendered while the element is loading (default: "Loading IBAN form...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change` or a creation error |
 
 ```vue
 <VueStripeIbanElement>
   <template #loading>
-    <div class="skeleton-loader">Loading IBAN input...</div>
+    <div class="skeleton-loader">Loading...</div>
   </template>
-</VueStripeIbanElement>
-```
 
-### Error Slot
-
-Rendered when an error occurs. The slot is scoped and receives the current error message as a string:
-
-```vue
-<VueStripeIbanElement>
   <template #error="{ error }">
-    <div class="error-message">{{ error }}</div>
+    <p class="my-error">{{ error }}</p>
   </template>
 </VueStripeIbanElement>
 ```
 
-## Exposed Methods
+## Exposed Methods & Properties
 
-Access these methods via template ref:
+Access these via a template ref:
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `element` | `ShallowRef<StripeIbanElement \| null>` | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `focus()` | `() => void` | Focus the element |
+| `blur()` | `() => void` | Blur the element |
+| `clear()` | `() => void` | Clear the element's value |
+
+Refs are unwrapped on the template ref, so `ibanRef.value.element` is a `StripeIbanElement | null`. Type the template ref with the component type and the element with the Stripe type:
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
+import { VueStripeIbanElement } from '@vue-stripe/vue-stripe'
+import type { StripeIbanElement } from '@stripe/stripe-js'
 
-const ibanRef = ref()
+const ibanRef = ref<InstanceType<typeof VueStripeIbanElement> | null>(null)
 
-const focusIban = () => ibanRef.value?.focus()
-const clearIban = () => ibanRef.value?.clear()
-const blurIban = () => ibanRef.value?.blur()
+const focus = () => ibanRef.value?.focus()
+const clear = () => ibanRef.value?.clear()
+const stripeElement = (): StripeIbanElement | null => ibanRef.value?.element ?? null
 </script>
 
 <template>
   <VueStripeIbanElement ref="ibanRef" />
-  <button @click="focusIban">Focus</button>
-  <button @click="clearIban">Clear</button>
 </template>
 ```
 
-| Method | Description |
-|--------|-------------|
-| `focus()` | Focus the IBAN input |
-| `blur()` | Blur the IBAN input |
-| `clear()` | Clear the IBAN input value |
+## Styling
 
-## Exposed Properties
+The component renders this markup around Stripe's iframe:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `element` | `Ref<StripeIbanElement \| null>` | The Stripe IBAN element instance |
-| `loading` | `Ref<boolean>` | Whether the element is loading |
-| `error` | `Ref<string \| null>` | Current error message |
+```html
+<div class="vue-stripe-iban-element vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-iban-element-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus vue-stripe-iban-element-loading / vue-stripe-element-loading while loading -->
+  <div class="vue-stripe-iban-element-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-iban-element-loader vue-stripe-element-loader">...</div>
+</div>
+```
+
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-iban-element*` for this one.
 
 ## Examples
 
@@ -396,7 +408,7 @@ const handleChange = (event: StripeIbanElementChangeEvent) => {
 }
 
 // Template ref
-const ibanRef = ref<InstanceType<typeof VueStripeIbanElement>>()
+const ibanRef = ref<InstanceType<typeof VueStripeIbanElement> | null>(null)
 ```
 
 ## Test IBAN Numbers

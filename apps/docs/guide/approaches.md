@@ -10,6 +10,7 @@ Stripe offers several ways to collect payments. Here's how to choose the right o
 | **Card Element** | Card-only payments | Highest | Medium |
 | **Express Checkout** | Quick payments | Low | Easy |
 | **Checkout (Hosted)** | Fastest launch | Low | Easiest |
+| **Elements with Checkout Sessions** | Own page, Stripe-managed totals/tax/discounts | High | Medium |
 
 ## Payment Element (Recommended)
 
@@ -27,7 +28,7 @@ The Payment Element is Stripe's modern, all-in-one solution. It automatically sh
 
 **Cons:**
 - Less control over individual fields
-- Requires `clientSecret` (backend integration)
+- Needs an Intent: a `clientSecret`, or `mode` / `currency` / `amount` on `VueStripeElements` and an Intent created at submit time (backend integration either way)
 
 **Best for:** Most e-commerce, SaaS, and marketplace applications.
 
@@ -98,12 +99,8 @@ import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 const { redirectToUrl, loading, error } = useStripeCheckout()
 
 const handleBuy = async () => {
-  // Create a Checkout Session on your server (@stripe/stripe-js v8.x)
-  const response = await fetch('/api/create-checkout-session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ priceId: 'price_xxx' })
-  })
+  // Create a Checkout Session on your server; it returns session.url
+  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
   const { url } = await response.json()
 
   // Redirect to the hosted Checkout page
@@ -130,6 +127,32 @@ const handleBuy = async () => {
 - Less control over the experience
 
 **Best for:** Quick launches, simple products, subscription sign-ups.
+
+No `VueStripeProvider` is needed for the redirect. [Learn more about Stripe Checkout →](/guide/checkout)
+
+## Elements with Checkout Sessions
+
+Keep Checkout Sessions on the server (Stripe computes line items, tax, discounts and shipping) but render the payment UI on your own page with Stripe Elements. Create the session with `ui_mode: 'elements'` and pass its client secret:
+
+```vue
+<VueStripeProvider :publishable-key="key">
+  <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+    <VueStripePaymentElement />
+    <PayButton /> <!-- calls useCheckoutSession().confirm() -->
+  </VueStripeCheckoutElementsProvider>
+</VueStripeProvider>
+```
+
+**Pros:**
+- Customers stay on your site
+- Session features (promotion codes, tax, shipping options, Adaptive Pricing) without building the logic
+- Same element components as `VueStripeElements`
+
+**Cons:**
+- Only the Payment, Address, Express Checkout, Tax ID and Currency Selector elements are available
+- Requires a server-created session
+
+[Learn more about VueStripeCheckoutElementsProvider →](/api/components/stripe-checkout-provider)
 
 ## Decision Flowchart
 

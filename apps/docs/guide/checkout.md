@@ -2,8 +2,8 @@
 
 Redirect users to Stripe's hosted checkout page for a quick, secure payment experience without building custom payment UI.
 
-::: warning @stripe/stripe-js v8.x Compatibility
-In `@stripe/stripe-js` v8.x, the `redirectToCheckout` method was removed. Your backend should return the session URL directly, which is then used for `window.location.replace()`. See the [v8.x migration guide](/api/components/stripe-checkout#v8-x-migration) for details.
+::: info Session URL only
+Stripe.js no longer offers a client-side `redirectToCheckout()`. Your backend creates the Checkout Session and returns its `url`; Vue Stripe redirects with `window.location.replace()`. See [Migrating from v5](/api/components/stripe-checkout#migrating-from-v5) if you used `sessionId` or `priceId` before.
 :::
 
 ## Why Use Checkout?
@@ -36,7 +36,7 @@ Choose Checkout when you want the fastest integration with minimal code.
 
 ```mermaid
 flowchart TD
-    A["<b>1. Backend creates Checkout Session</b><br/>POST /v1/checkout/sessions → { url: 'https://...' }"] --> B["<b>2. Frontend receives session URL</b><br/>Pass to StripeCheckout component or useStripeCheckout"]
+    A["<b>1. Backend creates Checkout Session</b><br/>POST /v1/checkout/sessions → { url: 'https://...' }"] --> B["<b>2. Frontend receives session URL</b><br/>Pass to VueStripeCheckout or useStripeCheckout"]
     B --> C["<b>3. User clicks checkout button</b><br/>window.location.replace(sessionUrl)"]
     C --> D["<b>4. User redirected to Stripe's checkout page</b><br/>• Enters payment details<br/>• Handles 3D Secure if needed<br/>• Submits payment"]
     D --> E{Result?}
@@ -46,17 +46,13 @@ flowchart TD
 
 ## Required Components
 
-Checkout only needs `VueStripeProvider` - no `VueStripeElements` required:
-
-```mermaid
-flowchart TD
-    A["VueStripeProvider"] --> B["VueStripeCheckout<br/>(button that redirects)"]
-```
+The redirect does not use Stripe.js, so Checkout needs **no provider** at all: no `VueStripeProvider`, no `VueStripeElements`.
 
 | Component | Role |
 |-----------|------|
-| `VueStripeProvider` | Loads Stripe.js |
-| `VueStripeCheckout` | Renders button, handles redirect |
+| `VueStripeCheckout` | Renders the button, redirects to the session URL |
+
+(`useStripeCheckout()` does the same from your own code.)
 
 ## Basic Implementation
 
@@ -66,12 +62,11 @@ flowchart TD
 // Node.js / Express
 const stripe = require('stripe')('sk_test_...')
 
-app.post('/create-checkout-session', async (req, res) => {
+app.post('/api/create-checkout-session', async (req, res) => {
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
     line_items: [
       {
-        price: req.body.priceId,
+        price: 'price_xxx', // Decide the price on the server
         quantity: 1
       }
     ],
@@ -80,7 +75,6 @@ app.post('/create-checkout-session', async (req, res) => {
     cancel_url: 'https://example.com/cancel'
   })
 
-  // v8.x: Return URL (recommended)
   res.json({ url: session.url })
 })
 ```
@@ -90,22 +84,14 @@ app.post('/create-checkout-session', async (req, res) => {
 ```vue
 <script setup>
 import { ref, onMounted } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripeCheckout
-} from '@vue-stripe/vue-stripe'
+import { VueStripeCheckout } from '@vue-stripe/vue-stripe'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const sessionUrl = ref('')
 const loading = ref(true)
 
 // Fetch session on mount
 onMounted(async () => {
-  const response = await fetch('/api/create-checkout-session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ priceId: 'price_xxx' })
-  })
+  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
   const data = await response.json()
   sessionUrl.value = data.url
   loading.value = false
@@ -115,13 +101,12 @@ onMounted(async () => {
 <template>
   <div v-if="loading">Loading...</div>
 
-  <VueStripeProvider v-else :publishable-key="publishableKey">
-    <VueStripeCheckout
-      :session-url="sessionUrl"
-      button-text="Pay $49.99"
-      @error="(err) => console.error(err.message)"
-    />
-  </VueStripeProvider>
+  <VueStripeCheckout
+    v-else
+    :session-url="sessionUrl"
+    button-text="Pay $49.99"
+    @error="(err) => console.error(err.message)"
+  />
 </template>
 ```
 
@@ -130,27 +115,8 @@ onMounted(async () => {
 For more control, use `useStripeCheckout` instead of the component:
 
 ```vue
+<!-- CheckoutForm.vue (no provider needed) -->
 <script setup>
-import { ref, onMounted } from 'vue'
-import {
-  VueStripeProvider,
-  useStripeCheckout
-} from '@vue-stripe/vue-stripe'
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-</script>
-
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <CheckoutForm />
-  </VueStripeProvider>
-</template>
-```
-
-```vue
-<!-- CheckoutForm.vue (inside StripeProvider) -->
-<script setup>
-import { ref } from 'vue'
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 
 const { redirectToUrl, loading, error } = useStripeCheckout()
@@ -163,7 +129,7 @@ const handleCheckout = async () => {
   })
   const { url } = await response.json()
 
-  // Redirect to checkout (v8.x compatible)
+  // Redirect to the hosted Checkout page
   redirectToUrl(url)
 }
 </script>
@@ -198,73 +164,39 @@ const session = await stripe.checkout.sessions.create({
 ```vue
 <!-- Frontend -->
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <div class="pricing-card">
-      <h3>Pro Plan</h3>
-      <p>$29/month</p>
+  <div class="pricing-card">
+    <h3>Pro Plan</h3>
+    <p>$29/month</p>
 
-      <VueStripeCheckout
-        :session-url="proSessionUrl"
-        button-text="Subscribe to Pro"
-      />
-    </div>
-  </VueStripeProvider>
+    <VueStripeCheckout
+      :session-url="proSessionUrl"
+      button-text="Subscribe to Pro"
+    />
+  </div>
 </template>
 ```
 
-## URL-Based vs Session-Based vs Price-Based
+## Hosted Checkout vs Elements with Checkout Sessions
 
-### URL-Based (Recommended for v8.x)
+A Checkout Session can drive two UIs:
 
-Create session on backend, pass session URL to frontend:
+| | Hosted Checkout | Elements with Checkout Sessions |
+|---|-----------------|---------------------------------|
+| **Session** | `stripe.checkout.sessions.create({ ... })` | `stripe.checkout.sessions.create({ ui_mode: 'elements', ... })` |
+| **Server returns** | `session.url` | `session.client_secret` |
+| **Vue Stripe** | `VueStripeCheckout` / `useStripeCheckout()` | `VueStripeCheckoutElementsProvider` + element components + `useCheckoutSession()` |
+| **Payment page** | Stripe-hosted | Your page, your layout |
 
-```vue
-<VueStripeCheckout :session-url="sessionUrl" />
-```
-
-**Pros:**
-- Works with `@stripe/stripe-js` v8.x
-- Full control over session options
-- Most secure (server-side session creation)
-- Supports all Checkout features
-
-### Session-Based (v7.x Legacy)
-
-Create session on backend, pass session ID to frontend:
+For the embedded variant, see [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider):
 
 ```vue
-<VueStripeCheckout :session-id="sessionId" />
+<VueStripeProvider :publishable-key="publishableKey">
+  <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+    <VueStripePaymentElement />
+    <PayButton /> <!-- calls useCheckoutSession().confirm() -->
+  </VueStripeCheckoutElementsProvider>
+</VueStripeProvider>
 ```
-
-**Pros:**
-- Full control over session options
-- More secure (server-side)
-
-**Cons:**
-- Requires `@stripe/stripe-js` v7.x (uses deprecated `redirectToCheckout`)
-
-### Price-Based (v7.x Legacy, Deprecated)
-
-Create session client-side with just a Price ID:
-
-```vue
-<VueStripeCheckout
-  :price-id="priceId"
-  mode="payment"
-  :success-url="successUrl"
-  :cancel-url="cancelUrl"
-/>
-```
-
-**Pros:**
-- No backend needed
-- Quick prototyping
-
-**Cons:**
-- Requires `@stripe/stripe-js` v7.x
-- Limited options
-- Less secure
-- Not recommended for production
 
 ## Handling Success
 
@@ -376,24 +308,36 @@ When you pass custom content, clicking it automatically triggers checkout. No ne
 
 ## Error Handling
 
+`VueStripeCheckout` emits `@error` with a `VueStripeCheckoutError` when it is clicked without a `sessionUrl`. Problems with the session itself (expired, already paid) are shown by Stripe on the hosted page, so handle failures of your own session endpoint before rendering the button:
+
 ```vue
 <script setup>
-const handleError = (error) => {
-  if (error.message.includes('Session expired')) {
-    // Refresh the session
-    refreshSession()
-  } else if (error.message.includes('Stripe not initialized')) {
-    // Wait for Stripe to load
-    console.log('Please wait...')
-  } else {
-    console.error('Checkout error:', error.message)
+import { ref, onMounted } from 'vue'
+
+const sessionUrl = ref('')
+const failed = ref(false)
+
+onMounted(async () => {
+  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+  if (!response.ok) {
+    failed.value = true
+    return
   }
+  sessionUrl.value = (await response.json()).url
+})
+
+const handleError = (error) => {
+  // VueStripeCheckoutError: no session URL yet
+  console.error('Checkout error:', error.message)
 }
 </script>
 
 <template>
+  <p v-if="failed">Could not start checkout. Please try again.</p>
   <VueStripeCheckout
-    :session-id="sessionId"
+    v-else
+    :session-url="sessionUrl"
+    :disabled="!sessionUrl"
     @error="handleError"
   />
 </template>
@@ -430,7 +374,8 @@ stripe listen --forward-to localhost:3000/webhook
 
 ## Next Steps
 
-- [StripeCheckout API](/api/components/stripe-checkout) — Component reference
+- [VueStripeCheckout API](/api/components/stripe-checkout) — Component reference
 - [useStripeCheckout API](/api/composables/use-stripe-checkout) — Composable reference
+- [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) — Embedded Elements with Checkout Sessions
 - [Payment Element](/guide/payment-element) — For embedded payment UI
 - [Stripe Checkout Docs](https://stripe.com/docs/payments/checkout) — Official guide

@@ -49,6 +49,8 @@ The Currency Selector element takes no configuration options — it derives its 
 | `@escape` | - | Emitted when the user presses the Escape key |
 | `@loaderror` | `{ elementType: 'currencySelector'; error: StripeError }` | Emitted when the element fails to load |
 
+`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'currencySelector', error: { message } }`; the message is also shown through the `#error` slot.
+
 ::: tip
 The Currency Selector does **not** emit a `@change` event — the selected currency is reflected on the reactive session exposed by [useCheckoutSession](/api/composables/use-checkout-session).
 :::
@@ -57,8 +59,20 @@ The Currency Selector does **not** emit a `@change` event — the selected curre
 
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
-| `#loading` | - | Rendered while the element is initializing |
-| `#error` | `{ error: string }` | Rendered when an error occurs; receives the error message string |
+| `#loading` | - | Rendered while the element is loading (default: "Loading currency selector...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: a load error or a creation error |
+
+```vue
+<VueStripeCurrencySelectorElement>
+  <template #loading>
+    <div class="skeleton-loader">Loading...</div>
+  </template>
+
+  <template #error="{ error }">
+    <p class="my-error">{{ error }}</p>
+  </template>
+</VueStripeCurrencySelectorElement>
+```
 
 ## Exposed Methods & Properties
 
@@ -66,12 +80,55 @@ Access these via a template ref:
 
 | Member | Type | Description |
 |--------|------|-------------|
-| `element` | `Ref<StripeCurrencySelectorElement \| null>` | The underlying Stripe element instance |
-| `loading` | `Ref<boolean>` | Whether the element is loading |
-| `error` | `Ref<string \| null>` | Current error message |
+| `element` | `ShallowRef<StripeCurrencySelectorElement \| null>` | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
 | `focus()` | `() => void` | Focus the element |
 | `blur()` | `() => void` | Blur the element |
-| `clear()` | `() => void` | Clear the element |
+| `clear()` | `() => void` | Clear the element's value |
+
+Refs are unwrapped on the template ref, so `currencyRef.value.element` is a `StripeCurrencySelectorElement | null`. Type the template ref with the component type and the element with the Stripe type:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VueStripeCurrencySelectorElement } from '@vue-stripe/vue-stripe'
+import type { StripeCurrencySelectorElement } from '@stripe/stripe-js'
+
+const currencyRef = ref<InstanceType<typeof VueStripeCurrencySelectorElement> | null>(null)
+
+const focus = () => currencyRef.value?.focus()
+const clear = () => currencyRef.value?.clear()
+const stripeElement = (): StripeCurrencySelectorElement | null => currencyRef.value?.element ?? null
+</script>
+
+<template>
+  <VueStripeCurrencySelectorElement ref="currencyRef" />
+</template>
+```
+
+## Styling
+
+The component renders this markup around Stripe's iframe:
+
+```html
+<div class="vue-stripe-currency-selector-element vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-currency-selector-element-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus vue-stripe-currency-selector-element-loading / vue-stripe-element-loading while loading -->
+  <div class="vue-stripe-currency-selector-element-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-currency-selector-element-loader vue-stripe-element-loader">...</div>
+</div>
+```
+
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-currency-selector-element*` for this one.
 
 ## TypeScript
 

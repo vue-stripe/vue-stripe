@@ -7,7 +7,7 @@ The Express Checkout Element displays one-click payment buttons for Apple Pay, G
 ```vue
 <script setup>
 import { ref } from 'vue'
-import type { Stripe } from '@stripe/stripe-js'
+import type { Stripe, StripeElements } from '@stripe/stripe-js'
 import {
   VueStripeProvider,
   VueStripeElements,
@@ -17,18 +17,25 @@ import {
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('pi_..._secret_...')
 
-// Capture Stripe instance from component event
+// Capture the Stripe and Elements instances from component events
 const stripeInstance = ref<Stripe | null>(null)
+const elementsInstance = ref<StripeElements | null>(null)
 
 const onStripeLoad = (stripe: Stripe) => {
   stripeInstance.value = stripe
 }
 
-const handleConfirm = async (event) => {
-  if (!stripeInstance.value) return
+const onElementsReady = (elements: StripeElements) => {
+  elementsInstance.value = elements
+}
 
+const handleConfirm = async () => {
+  if (!stripeInstance.value || !elementsInstance.value) return
+
+  // The confirm event has no `elements` field: use the Elements group
+  // created by VueStripeElements.
   const { error } = await stripeInstance.value.confirmPayment({
-    elements: event.elements,
+    elements: elementsInstance.value,
     confirmParams: {
       return_url: `${window.location.origin}/complete`
     }
@@ -42,12 +49,16 @@ const handleConfirm = async (event) => {
 
 <template>
   <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
-    <VueStripeElements :client-secret="clientSecret">
+    <VueStripeElements :client-secret="clientSecret" @ready="onElementsReady">
       <VueStripeExpressCheckoutElement @confirm="handleConfirm" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 ```
+
+::: tip Inside a child component
+In a component rendered inside `VueStripeElements`, use the composables instead of capturing instances: `useStripeElements().elements.value` is the same Elements group, and `usePaymentIntent().confirmPayment()` uses it automatically.
+:::
 
 ## How It Works
 
@@ -258,11 +269,12 @@ const handleClick = ({ resolve }) => {
   })
 }
 
-const handleExpressConfirm = async (event) => {
-  if (!stripeInstance.value) return
+const handleExpressConfirm = async () => {
+  if (!stripeInstance.value || !elementsInstance.value) return
 
+  // Confirm with the Elements group from @ready (the confirm event has no `elements`)
   const { error } = await stripeInstance.value.confirmPayment({
-    elements: event.elements,
+    elements: elementsInstance.value,
     confirmParams: {
       return_url: `${window.location.origin}/complete`
     }
@@ -329,6 +341,27 @@ const handleSubmit = async () => {
       <div v-else>Loading...</div>
     </VueStripeProvider>
   </div>
+</template>
+```
+
+## With Checkout Sessions
+
+Inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider), the element is created from the Checkout Session. `@click`, `@shippingaddresschange` and `@shippingratechange` never fire there (the session owns line items and shipping); confirm with the session instead:
+
+```vue
+<script setup>
+import { VueStripeExpressCheckoutElement, useCheckoutSession } from '@vue-stripe/vue-stripe'
+
+const { confirm } = useCheckoutSession()
+
+const handleConfirm = async (event) => {
+  const result = await confirm({ expressCheckoutConfirmEvent: event })
+  if (result.type === 'error') console.error(result.error.message)
+}
+</script>
+
+<template>
+  <VueStripeExpressCheckoutElement @confirm="handleConfirm" />
 </template>
 ```
 

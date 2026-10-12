@@ -83,6 +83,10 @@ const onChange = (event) => {
 |------|------|----------|-------------|
 | `options` | `StripeCardElementOptions` | No | Card element configuration |
 
+::: info Updating options
+Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+:::
+
 ### Options Object
 
 ```ts
@@ -137,6 +141,8 @@ interface StripeElementStyle {
 | `@networkschange` | `{ elementType: 'card' }` | Emitted when the card networks available for the entered number change (co-badged cards) |
 | `@loaderror` | `{ elementType: 'card'; error: StripeError }` | Emitted when the element fails to load |
 
+`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'card', error: { message } }`; the message is also shown through the `#error` slot.
+
 ### Change Event
 
 ```ts
@@ -158,65 +164,78 @@ interface StripeCardElementChangeEvent {
 
 ## Slots
 
-### Loading Slot
-
-Rendered while the card element is initializing:
+| Slot | Slot Props | Description |
+|------|-----------|-------------|
+| `#loading` | - | Rendered while the element is loading (default: "Loading card form...") |
+| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change`, a load error or a creation error |
 
 ```vue
 <VueStripeCardElement>
   <template #loading>
-    <div class="skeleton-loader">Loading card form...</div>
+    <div class="skeleton-loader">Loading...</div>
   </template>
-</VueStripeCardElement>
-```
 
-### Error Slot
-
-Rendered when there's an error (from the change event):
-
-```vue
-<VueStripeCardElement>
   <template #error="{ error }">
-    <div class="card-error">{{ error }}</div>
+    <p class="my-error">{{ error }}</p>
   </template>
 </VueStripeCardElement>
 ```
 
-## Exposed Methods
+## Exposed Methods & Properties
 
-Access these methods via template ref:
+Access these via a template ref:
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `element` | `ShallowRef<StripeCardElement \| null>` | The Stripe element instance (`null` until created) |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
+| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `focus()` | `() => void` | Focus the element |
+| `blur()` | `() => void` | Blur the element |
+| `clear()` | `() => void` | Clear the element's value |
+
+Refs are unwrapped on the template ref, so `cardRef.value.element` is a `StripeCardElement | null`. Type the template ref with the component type and the element with the Stripe type:
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
+import { VueStripeCardElement } from '@vue-stripe/vue-stripe'
+import type { StripeCardElement } from '@stripe/stripe-js'
 
-const cardRef = ref()
+const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
 
-const focusCard = () => cardRef.value?.focus()
-const clearCard = () => cardRef.value?.clear()
-const blurCard = () => cardRef.value?.blur()
+const focus = () => cardRef.value?.focus()
+const clear = () => cardRef.value?.clear()
+const stripeElement = (): StripeCardElement | null => cardRef.value?.element ?? null
 </script>
 
 <template>
   <VueStripeCardElement ref="cardRef" />
-  <button @click="focusCard">Focus</button>
-  <button @click="clearCard">Clear</button>
 </template>
 ```
 
-| Method | Description |
-|--------|-------------|
-| `focus()` | Focus the card input |
-| `blur()` | Blur the card input |
-| `clear()` | Clear the card input value |
+## Styling
 
-## Exposed Properties
+The component renders this markup around Stripe's iframe:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `element` | `Ref<VueStripeCardElement \| null>` | The Stripe card element instance |
-| `loading` | `Ref<boolean>` | Whether the element is loading |
-| `error` | `Ref<string \| null>` | Current error message |
+```html
+<div class="vue-stripe-card-element vue-stripe-element">
+  <!-- only when there is an error (#error slot) -->
+  <div class="vue-stripe-card-element-error vue-stripe-element-error">...</div>
+  <!-- Stripe mounts its iframe here; plus vue-stripe-card-element-loading / vue-stripe-element-loading while loading -->
+  <div class="vue-stripe-card-element-mount vue-stripe-element-mount"></div>
+  <!-- only while loading (#loading slot) -->
+  <div class="vue-stripe-card-element-loader vue-stripe-element-loader">...</div>
+</div>
+```
+
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-card-element*` for this one.
 
 ## Examples
 
@@ -357,7 +376,7 @@ const handleSubmit = async (clientSecret) => {
 import { ref } from 'vue'
 import { VueStripeCardElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripeCardElement as StripeCardElementType,
+  StripeCardElement,
   StripeCardElementChangeEvent,
   StripeCardElementOptions
 } from '@stripe/stripe-js'
@@ -373,7 +392,7 @@ const options: StripeCardElementOptions = {
 }
 
 // Event handlers
-const handleReady = (element: StripeCardElementType) => {
+const handleReady = (element: StripeCardElement) => {
   console.log('Ready:', element)
 }
 
@@ -383,7 +402,7 @@ const handleChange = (event: StripeCardElementChangeEvent) => {
 }
 
 // Template ref
-const cardRef = ref<InstanceType<typeof VueStripeCardElement>>()
+const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
 ```
 
 ## Test Cards
