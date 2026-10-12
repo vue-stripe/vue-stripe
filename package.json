@@ -25,9 +25,13 @@
     "stripe:seed": "bash scripts/seed-stripe.sh",
     "stripe:seed:clean": "bash scripts/seed-stripe.sh --clean",
     "stripe:seed:reset": "bash scripts/seed-stripe.sh --clean --force",
-    "stripe:clean": "bash scripts/seed-stripe.sh --clean-only"
+    "stripe:clean": "bash scripts/seed-stripe.sh --clean-only",
+    "prepare": "husky",
+    "lint:commits": "commitlint --from origin/main --to HEAD --verbose"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
     "@eslint/js": "^10.0.1",
     "@vue-stripe/typescript-config": "workspace:*",
     "eslint": "^10.12.0",

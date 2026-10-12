@@ -21,10 +21,11 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to help us main
    git clone https://github.com/YOUR_USERNAME/vue-stripe.git
    cd vue-stripe
    ```
-3. Install dependencies:
+3. Install dependencies (this also installs the Husky git hooks):
    ```bash
    pnpm install
    ```
+   If your clone predates Husky and has an old `yorkie` hook, remove it first: `rm .git/hooks/pre-commit`.
 4. Create a branch for your changes:
    ```bash
    git checkout -b feature/your-feature-name
@@ -88,16 +89,20 @@ pnpm vue-stripe:test
 
 ### Code Quality
 
+CI fails on any ESLint warning, unformatted file or type error in any workspace.
+
 ```bash
-# Lint all packages
-pnpm lint
-
-# Fix linting issues
+pnpm lint           # eslint --max-warnings 0 in every workspace
 pnpm lint:fix
-
-# Type check all packages
-pnpm typecheck
+pnpm format:check   # prettier --check (pnpm format to fix)
+pnpm typecheck      # vue-tsc / tsc --noEmit in every workspace
 ```
+
+Git hooks (Husky): `pre-commit` runs lint-staged (ESLint + Prettier on staged files) and `commit-msg` runs commitlint.
+
+### Commit messages
+
+Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, `ci:`, `build:`, `perf:`, with an optional scope (`feat(checkout): ...`) and `!` for breaking changes (`feat!: ...`). PRs are squash-merged, so the PR title becomes the commit on `main` and the release note; CI checks both the commits (`pnpm lint:commits`) and the title.
 
 ## How to Contribute
 
@@ -127,7 +132,7 @@ pnpm typecheck
 4. Update documentation if needed
 5. Ensure all checks pass:
    ```bash
-   pnpm lint && pnpm typecheck && pnpm test
+   pnpm lint && pnpm format:check && pnpm typecheck && pnpm test
    ```
 6. Submit your PR with:
    - Clear title and description
@@ -142,7 +147,8 @@ pnpm typecheck
 - Use Composition API for Vue components
 - Follow existing code patterns and conventions
 - Keep components focused and single-purpose
-- Write meaningful commit messages
+- Write Conventional Commit messages (see above)
+- No emoji in code, docs, UI copy or commit messages
 
 ### Component Guidelines
 
