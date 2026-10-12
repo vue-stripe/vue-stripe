@@ -203,6 +203,8 @@ Access these via a template ref:
 | `clear()` | `() => void` | Clear the element's value |
 | `getValue(options?)` | `(options?: { format?: 'localized' \| 'latin' }) => Promise<...>` | Validate the form and read the address (forwards to Stripe's `getValue()`) |
 
+The component owns the element's lifecycle: it creates, mounts and destroys the element. Removing the component (for example with `v-if`) destroys the element, which takes the place of Stripe's `element.unmount()`; for a one-time listener use Vue's `.once` modifier (`@ready.once`) instead of `element.once()`.
+
 Refs are unwrapped on the template ref, so `addressRef.value.element` is a `StripeAddressElement | null`. Type the template ref with the component type and the element with the Stripe type:
 
 ```vue

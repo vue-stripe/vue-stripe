@@ -54,6 +54,19 @@ const POOLED_ELEMENT_MEMBERS = ['on', 'once', 'off', 'update']
 
 const ALLOWED: Array<CoverageItem['status']> = ['covered', 'deprecated']
 
+/**
+ * Surface the library calls that the installed `.d.ts` does not declare, with the
+ * reason. A row may name these; once Stripe.js types one, drop it from this list.
+ */
+const UNTYPED: Record<string, string> = {
+  'Stripe.createFinancialAccountDisclosure':
+    'absent from the Stripe.js 10.0.0 .d.ts; React Stripe.js 7 calls it at runtime',
+  'Stripe.createIssuingDisclosure':
+    'absent from the Stripe.js 10.0.0 .d.ts; React Stripe.js 7 calls it at runtime',
+  'Stripe.createTreasuryDisclosure':
+    'absent from the Stripe.js 10.0.0 .d.ts; React Stripe.js 7 calls it at runtime'
+}
+
 function readDts(dir: string): DtsFile[] {
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name)
@@ -132,7 +145,11 @@ function stripeSurface(files: DtsFile[]): Set<string> {
 }
 
 /** Every way the matrix disagrees with the installed surface, one line each. */
-function surfaceProblems(surface: Set<string>, matrix: CoverageCategory[]): string[] {
+function surfaceProblems(
+  surface: Set<string>,
+  matrix: CoverageCategory[],
+  untyped: Record<string, string> = UNTYPED
+): string[] {
   const rowsByKey = new Map<string, CoverageItem[]>()
   for (const item of matrix.flatMap((c) => c.items)) {
     for (const key of item.surface ?? []) {
@@ -154,7 +171,7 @@ function surfaceProblems(surface: Set<string>, matrix: CoverageCategory[]): stri
     }
   }
   for (const [key, rows] of rowsByKey) {
-    if (!surface.has(key)) {
+    if (!surface.has(key) && !(key in untyped)) {
       problems.push(
         `${key}: named by "${rows[0]!.name}", but @stripe/stripe-js no longer declares it`
       )
@@ -195,6 +212,20 @@ describe('Stripe.js surface guard', () => {
   it('every Stripe.js method and element type is covered or deprecated in the matrix', () => {
     const problems = surfaceProblems(surface, coverage)
     expect(problems, report(problems)).toEqual([])
+  })
+
+  it('allow-lists only untyped surface that a covered row still names', () => {
+    const items = coverage.flatMap((c) => c.items)
+    for (const [key, reason] of Object.entries(UNTYPED)) {
+      expect(surface.has(key), `${key} is typed now; remove it from UNTYPED (${reason})`).toBe(
+        false
+      )
+      const rows = items.filter((i) => i.surface?.includes(key))
+      expect(
+        rows.map((r) => r.status),
+        `${key} must be named by one covered row`
+      ).toEqual(['covered'])
+    }
   })
 
   it('the coverage tracker reads 100% (no accessible or planned rows)', () => {
@@ -255,6 +286,14 @@ describe('Stripe.js surface guard self-test (stubbed matrix)', () => {
     const problems = surfaceProblems(surface, stub([...surface, 'Stripe.redirectToCheckout']))
     expect(problems).toEqual([
       'Stripe.redirectToCheckout: named by "Stripe.redirectToCheckout", but @stripe/stripe-js no longer declares it'
+    ])
+  })
+
+  it('fails on an untyped key unless it is allow-listed with a reason', () => {
+    const matrix = stub([...surface, 'Stripe.createIssuingDisclosure'])
+    expect(surfaceProblems(surface, matrix)).toEqual([])
+    expect(surfaceProblems(surface, matrix, {})).toEqual([
+      'Stripe.createIssuingDisclosure: named by "Stripe.createIssuingDisclosure", but @stripe/stripe-js no longer declares it'
     ])
   })
 

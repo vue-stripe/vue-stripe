@@ -156,6 +156,8 @@ Access these via a template ref:
 | `clear()` | `() => void` | Clear the element's value |
 | `getValue()` | `() => Promise<...>` | Validate the element and read the business name and tax ID (forwards to Stripe's `getValue()`) |
 
+The component owns the element's lifecycle: it creates, mounts and destroys the element. Removing the component (for example with `v-if`) destroys the element, which takes the place of Stripe's `element.unmount()`; for a one-time listener use Vue's `.once` modifier (`@ready.once`) instead of `element.once()`.
+
 Refs are unwrapped on the template ref, so `taxIdRef.value.element` is a `StripeTaxIdElement | null`. Type the template ref with the component type and the element with the Stripe type:
 
 ```vue

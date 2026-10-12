@@ -191,7 +191,7 @@ Rendered when the page could not be created:
 | `loading` | `Ref<boolean>` | `true` until the page is mounted |
 | `error` | `Ref<string \| null>` | Error message, if creating the page failed |
 
-The component calls `checkout.destroy()` when it unmounts, so you rarely need the instance yourself.
+The component calls `checkout.destroy()` when it unmounts, so you rarely need the instance yourself. Removing the component (for example with `v-if`) destroys the page, which takes the place of Stripe's `checkout.unmount()`; mount a new component to show Checkout again.
 
 ## Markup and Styling
 

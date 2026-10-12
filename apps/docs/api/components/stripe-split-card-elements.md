@@ -231,6 +231,8 @@ Access via template ref on each component. Every component exposes the same memb
 | `blur()` | `() => void` | Blur the input |
 | `clear()` | `() => void` | Clear the input value |
 
+The component owns the element's lifecycle: it creates, mounts and destroys the element. Removing the component (for example with `v-if`) destroys the element, which takes the place of Stripe's `element.unmount()`; for a one-time listener use Vue's `.once` modifier (`@ready.once`) instead of `element.once()`.
+
 Refs are unwrapped on the template ref, so `numberRef.value.element` is a `StripeCardNumberElement | null`. Type the template refs with the component types and the elements with the Stripe types:
 
 ```vue

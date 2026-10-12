@@ -437,26 +437,31 @@ export const coverage: CoverageCategory[] = [
     ]
   },
   {
-    // Legal text rendered by Stripe.js (React Stripe.js 7 parity components).
+    // Legal text rendered by Stripe.js (React Stripe.js 7 parity components). The
+    // create*Disclosure() methods exist at runtime but not in the 10.0.0 .d.ts; the
+    // surface guard allow-lists them.
     group: 'Disclosures',
     items: [
       {
         name: 'Financial Account Disclosure',
         api: 'stripe.createFinancialAccountDisclosure()',
         status: 'covered',
-        artifact: 'VueStripeFinancialAccountDisclosure'
+        artifact: 'VueStripeFinancialAccountDisclosure',
+        surface: ['Stripe.createFinancialAccountDisclosure']
       },
       {
         name: 'Issuing Disclosure',
         api: 'stripe.createIssuingDisclosure()',
         status: 'covered',
-        artifact: 'VueStripeIssuingDisclosure'
+        artifact: 'VueStripeIssuingDisclosure',
+        surface: ['Stripe.createIssuingDisclosure']
       },
       {
         name: 'Treasury Disclosure',
         api: 'stripe.createTreasuryDisclosure()',
         status: 'covered',
-        artifact: 'VueStripeTreasuryDisclosure'
+        artifact: 'VueStripeTreasuryDisclosure',
+        surface: ['Stripe.createTreasuryDisclosure']
       }
     ]
   },
@@ -488,6 +493,8 @@ export const coverage: CoverageCategory[] = [
         artifact: 'VueStripePricingTable'
       },
       {
+        // The component mounts the page and destroys it on unmount; removing the component
+        // (v-if) is checkout.unmount(), and a new component mounts a new page.
         name: 'Embedded Checkout',
         api: 'stripe.createEmbeddedCheckoutPage()',
         status: 'covered',

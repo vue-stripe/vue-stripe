@@ -119,6 +119,8 @@ Access these via a template ref:
 | `getValue()` | `() => Promise<StripeCheckoutFormValue \| undefined>` | The current values and per-section status (`undefined` before the form exists) |
 | `setView(viewIndex)` | `(viewIndex: number) => Promise<void>` | Compact layout: go to the view at this index of the `@change` event's `views` |
 
+The component owns the element's lifecycle: it creates, mounts and destroys the element. Removing the component (for example with `v-if`) destroys the element, which takes the place of Stripe's `element.unmount()`; for a one-time listener use Vue's `.once` modifier (`@ready.once`) instead of `element.once()`.
+
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'

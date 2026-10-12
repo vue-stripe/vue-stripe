@@ -169,6 +169,8 @@ Access via template ref. Every Issuing component exposes the same members:
 | `blur()` | `() => void` | Calls `element.blur()` when the element supports it |
 | `clear()` | `() => void` | Calls `element.clear()` when the element supports it |
 
+The component owns the element's lifecycle: it creates, mounts and destroys the element. Removing the component (for example with `v-if`) destroys the element, which takes the place of Stripe's `element.unmount()`; for a one-time listener use Vue's `.once` modifier (`@ready.once`) instead of `element.once()`.
+
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
