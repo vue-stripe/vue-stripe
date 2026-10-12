@@ -35,9 +35,6 @@ const localClientSecret = ref('')
 const clientSecret = computed(() => localClientSecret.value.trim())
 const showSecretForm = computed(() => publishableKey.value && !clientSecret.value)
 
-// Express checkout ref
-const expressCheckoutRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement> | null>(null)
-
 // Track available wallets
 const availableWallets = ref<string[]>([])
 const isReady = ref(false)
@@ -221,7 +218,6 @@ const onShippingRateChange = (event: unknown) => {
             <VueStripeElements :client-secret="clientSecret">
               <div class="bg-card rounded-md p-4 border min-h-[60px]">
                 <VueStripeExpressCheckoutElement
-                  ref="expressCheckoutRef"
                   :options="expressCheckoutOptions"
                   @ready="onReady"
                   @click="onClick"

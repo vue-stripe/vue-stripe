@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
-import { TabsList } from 'radix-vue'
+import { TabsList } from 'reka-ui'
 import { cn } from '@/lib/utils'
 
 interface Props {

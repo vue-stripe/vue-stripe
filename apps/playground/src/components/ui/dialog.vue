@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogClose
-} from 'radix-vue'
+} from 'reka-ui'
 
 export {
   DialogTrigger,
@@ -21,7 +21,7 @@ export {
 </script>
 
 <script setup lang="ts">
-import { DialogRoot as Dialog } from 'radix-vue'
+import { DialogRoot as Dialog } from 'reka-ui'
 import { forwardable } from '@/lib/utils'
 
 // Runtime declaration so `open` defaults to `undefined` (uncontrolled) instead of

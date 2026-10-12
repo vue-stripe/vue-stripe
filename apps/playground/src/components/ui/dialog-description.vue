@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
-import { DialogDescription } from 'radix-vue'
+import { DialogDescription } from 'reka-ui'
 import { cn } from '@/lib/utils'
 
 interface Props {

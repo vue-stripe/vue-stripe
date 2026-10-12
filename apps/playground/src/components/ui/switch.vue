@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
-import { SwitchRoot, SwitchThumb } from 'radix-vue'
+import { SwitchRoot, SwitchThumb } from 'reka-ui'
 import { cn } from '@/lib/utils'
 
 interface Props {

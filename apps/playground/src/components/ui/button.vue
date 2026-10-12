@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
-import { Primitive, type PrimitiveProps } from 'radix-vue'
+import { Primitive, type PrimitiveProps } from 'reka-ui'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 

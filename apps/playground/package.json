@@ -16,31 +16,30 @@
   },
   "dependencies": {
     "@stripe/stripe-js": "^7.5.0",
-    "@unhead/vue": "^2.0.19",
-    "@vercel/analytics": "^1.6.1",
+    "@unhead/vue": "^3.4.2",
+    "@vercel/analytics": "^2.0.1",
     "@vue-stripe/vue-stripe": "workspace:*",
-    "@vueuse/core": "^14.1.0",
+    "@vueuse/core": "^15.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-vue-next": "^0.556.0",
-    "radix-vue": "^1.9.17",
-    "reka-ui": "^2.6.1",
-    "tailwind-merge": "^2.6.0",
+    "lucide-vue-next": "^1.0.0",
+    "reka-ui": "^2.11.0",
+    "tailwind-merge": "^3.7.0",
     "tailwindcss-animate": "^1.0.7",
-    "vite-ssg": "^28.2.2",
-    "vue": "^3.5.22",
-    "vue-router": "^4.5.1"
+    "vite-ssg": "^28.3.0",
+    "vue": "^3.5.43",
+    "vue-router": "^5.4.0"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.19",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "autoprefixer": "^10.4.20",
+    "@tailwindcss/typography": "^0.5.20",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "autoprefixer": "^10.6.1",
     "eslint": "^10.12.0",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.29",
     "prettier": "^3.9.10",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^3.4.18",
     "typescript": "^5.9.3",
-    "vite": "^7.1.11",
-    "vue-tsc": "^3.0.3"
+    "vite": "^8.3.4",
+    "vue-tsc": "^3.3.13"
   }
 }

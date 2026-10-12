@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { TabsRoot } from 'radix-vue'
+import { TabsRoot } from 'reka-ui'
+import { forwardable } from '@/lib/utils'
 
 interface Props {
   defaultValue?: string
@@ -15,9 +16,8 @@ const emit = defineEmits<{
 
 <template>
   <TabsRoot
-    :default-value="props.defaultValue"
-    :model-value="props.modelValue"
-    @update:model-value="emit('update:modelValue', $event)"
+    v-bind="forwardable({ defaultValue: props.defaultValue, modelValue: props.modelValue })"
+    @update:model-value="emit('update:modelValue', String($event))"
   >
     <slot />
   </TabsRoot>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
-import { Label as LabelPrimitive } from 'radix-vue'
+import { Label as LabelPrimitive } from 'reka-ui'
 import { cn, forwardable } from '@/lib/utils'
 
 interface Props {

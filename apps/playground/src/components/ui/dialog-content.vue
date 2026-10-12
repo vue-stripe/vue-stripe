@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
-import { DialogPortal, DialogOverlay, DialogContent, DialogClose } from 'radix-vue'
+import { DialogPortal, DialogOverlay, DialogContent, DialogClose } from 'reka-ui'
 import { X } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 

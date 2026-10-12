@@ -12,3 +12,7 @@ peerDependencyRules:
     # eslint-config-next 16 pulls eslint-plugin-{import,jsx-a11y,react}, which
     # work on ESLint 10 but have not widened their peer range yet.
     eslint: '10'
+    # @vercel/analytics 2 only uses the router's public API, which vue-router 5 keeps.
+    '@vercel/analytics>vue-router': '5'
+    # Vite 8 transforms with Oxc; esbuild is an optional peer used only for custom esbuild options.
+    'vite>esbuild': '0.21'
