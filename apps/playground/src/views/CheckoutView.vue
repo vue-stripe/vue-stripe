@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, inject, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { VueStripeCheckout } from '@vue-stripe/vue-stripe'
+import { VueStripeCheckout, useStripeCheckout } from '@vue-stripe/vue-stripe'
+import { apiUrl, createCheckoutSession } from '@/lib/backend'
 import {
   Card,
   CardHeader,
@@ -25,6 +26,10 @@ const publishableKey = computed(() => stripeConfig?.publishableKey || '')
 // Hosted Checkout: the server creates the Checkout Session and returns its URL.
 // (stripe.redirectToCheckout with a session ID or price ID was removed in Stripe.js Clover.)
 const sessionUrl = ref('')
+const creating = ref(false)
+
+// The composable path: no component, just a URL redirect.
+const { redirectToUrl } = useStripeCheckout()
 
 // Use current origin and route with result param
 const currentUrl = computed(() => {
@@ -79,6 +84,33 @@ const onCheckoutError = (error: Error) => {
   checkoutError.value = error.message
   isRedirecting.value = false
   logEvent('error', error.message)
+}
+
+// Ask the test-data backend for a hosted session (POST /api/checkout-session).
+const createSession = async () => {
+  creating.value = true
+  checkoutError.value = null
+  try {
+    const result = await createCheckoutSession({
+      amount: 1000,
+      currency: 'usd',
+      productName: 'Playground item',
+      successUrl: successUrl.value,
+      cancelUrl: cancelUrl.value
+    })
+    sessionUrl.value = result.url ?? ''
+    logEvent('session-created', result.sessionId)
+  } catch (err) {
+    checkoutError.value = err instanceof Error ? err.message : 'Failed to create session'
+    logEvent('error', checkoutError.value)
+  } finally {
+    creating.value = false
+  }
+}
+
+const redirectWithComposable = () => {
+  logEvent('redirectToUrl', 'useStripeCheckout().redirectToUrl(sessionUrl)')
+  redirectToUrl(sessionUrl.value)
 }
 
 // Computed: Is form valid?
@@ -138,8 +170,8 @@ const clearResult = () => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          StripeCheckout provides a simple button that redirects users to Stripe's hosted checkout
-          page. It supports both session-based and price-based checkout flows.
+          VueStripeCheckout is a button that redirects to Stripe's hosted Checkout page. Your server
+          creates the Checkout Session and passes its URL to the component.
         </p>
         <p class="text-sm mb-4">
           <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
@@ -164,6 +196,15 @@ const clearResult = () => {
               server.
             </p>
 
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+              <Button data-test="create-session" :disabled="creating" @click="createSession">
+                {{ creating ? 'Creating...' : 'Create a session on the backend' }}
+              </Button>
+              <span class="text-muted-foreground text-xs font-mono">
+                POST {{ apiUrl }}/api/checkout-session
+              </span>
+            </div>
+
             <div class="mt-4">
               <Label class="mb-2">Session URL</Label>
               <Input
@@ -176,7 +217,7 @@ const clearResult = () => {
             </div>
 
             <div class="bg-card rounded-md border p-4 mt-4">
-              <h5 class="font-medium text-sm mb-2">How to get a Session URL:</h5>
+              <h5 class="font-medium text-sm mb-2">Or create one yourself:</h5>
               <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
                 <li>
                   Create a Checkout Session using Stripe CLI:
@@ -200,8 +241,8 @@ stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","
             </Alert>
           </div>
 
-          <!-- Checkout Button -->
-          <div class="text-center mt-5">
+          <!-- Checkout Button (component) and redirectToUrl (composable) -->
+          <div class="mt-5 flex flex-col items-center gap-3">
             <VueStripeCheckout
               :session-url="sessionUrl"
               button-text="Checkout"
@@ -213,6 +254,14 @@ stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","
               @error="onCheckoutError"
               @before-redirect="onBeforeRedirect"
             />
+            <Button
+              variant="outline"
+              data-test="redirect-to-url"
+              :disabled="!isFormValid"
+              @click="redirectWithComposable"
+            >
+              Redirect with useStripeCheckout().redirectToUrl
+            </Button>
           </div>
 
           <!-- Status display -->

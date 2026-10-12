@@ -7,3 +7,8 @@ declare module '*.vue' {
   const component: Component
   export default component
 }
+
+interface ImportMetaEnv {
+  /** Test-data backend; defaults to https://backend.vuestripe.com. */
+  readonly VITE_API_URL?: string
+}
