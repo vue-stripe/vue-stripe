@@ -51,6 +51,12 @@ describe('public API exports', () => {
     expect(VueStripe.VueStripeEmbeddedCheckout).toBeTruthy()
   })
 
+  it('exports the Checkout Form SDK provider, form component and composable', () => {
+    expect(VueStripe.VueStripeCheckoutFormProvider).toBeTruthy()
+    expect(VueStripe.VueStripeCheckoutForm).toBeTruthy()
+    expect(typeof VueStripe.useCheckoutForm).toBe('function')
+  })
+
   it('does not export elements removed in Stripe.js 8+ (Clover)', () => {
     const removed = [
       'VueStripeIdealBankElement',

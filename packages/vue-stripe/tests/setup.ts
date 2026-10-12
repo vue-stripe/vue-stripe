@@ -70,6 +70,28 @@ export interface MockStripeCheckout {
   createLinkSignupElement: MockFn
 }
 
+// Stripe.js 10 Checkout Form SDK handle (`stripe.initCheckoutFormSdk()`, beta).
+export interface MockStripeCheckoutForm {
+  on: MockFn
+  loadActions: MockFn
+  changeAppearance: MockFn
+  loadFonts: MockFn
+  createForm: MockFn
+  getForm: MockFn
+  createCurrencySelectorElement: MockFn
+  getCurrencySelectorElement: MockFn
+}
+
+// Form SDK actions: the Elements SDK actions minus the updates the form UI owns.
+export type MockStripeCheckoutFormActions = Omit<
+  MockStripeCheckoutActions,
+  | 'updateEmail'
+  | 'updatePhoneNumber'
+  | 'updateShippingAddress'
+  | 'updateBillingAddress'
+  | 'updateTaxIdInfo'
+>
+
 export interface MockStripe {
   /** Every method-specific confirmer (`confirmCardPayment`, ...) from STRIPE_CONFIRMERS. */
   [confirmer: string]: MockFn
@@ -77,6 +99,7 @@ export interface MockStripe {
   confirmPayment: MockFn
   confirmSetup: MockFn
   initCheckoutElementsSdk: MockFn
+  initCheckoutFormSdk: MockFn
   createEmbeddedCheckoutPage: MockFn
   registerAppInfo: MockFn
 }
@@ -134,6 +157,33 @@ export function makeMockCheckout(actions = makeMockCheckoutActions()): MockStrip
     createContactDetailsElement: vi.fn(() => makeMockElement()),
     createTermsElement: vi.fn(() => makeMockElement()),
     createLinkSignupElement: vi.fn(() => makeMockElement())
+  }
+}
+
+export function makeMockCheckoutFormActions(): MockStripeCheckoutFormActions {
+  const {
+    updateEmail: _email,
+    updatePhoneNumber: _phone,
+    updateShippingAddress: _shipping,
+    updateBillingAddress: _billing,
+    updateTaxIdInfo: _taxId,
+    ...actions
+  } = makeMockCheckoutActions()
+  return actions
+}
+
+export function makeMockCheckoutForm(
+  actions = makeMockCheckoutFormActions()
+): MockStripeCheckoutForm {
+  return {
+    on: vi.fn(),
+    loadActions: vi.fn(() => Promise.resolve({ type: 'success', actions })),
+    changeAppearance: vi.fn(),
+    loadFonts: vi.fn(),
+    createForm: vi.fn(() => makeMockElement()),
+    getForm: vi.fn(() => null),
+    createCurrencySelectorElement: vi.fn(() => makeMockElement()),
+    getCurrencySelectorElement: vi.fn(() => null)
   }
 }
 
@@ -210,6 +260,7 @@ export function makeMockStripe(): MockStripe {
       })
     ),
     initCheckoutElementsSdk: vi.fn(() => makeMockCheckout()),
+    initCheckoutFormSdk: vi.fn(() => makeMockCheckoutForm()),
     createEmbeddedCheckoutPage: vi.fn(() =>
       Promise.resolve({ mount: vi.fn(), unmount: vi.fn(), destroy: vi.fn() })
     ),

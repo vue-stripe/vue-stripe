@@ -8,6 +8,7 @@ Initializes **Elements with Checkout Sessions** via `stripe.initCheckoutElements
 
 ::: tip Elements with Checkout Sessions vs. the other checkout options
 - **`VueStripeCheckoutElementsProvider`** (this) — your own page and layout, Stripe Elements, backed by a Checkout Session (`ui_mode: 'elements'`). Stripe computes totals, tax, discounts and shipping on the session.
+- **[`VueStripeCheckoutFormProvider`](/api/components/stripe-checkout-form-provider)** (beta) — Stripe renders the whole form as one element on your page (`ui_mode: 'form'`).
 - **`VueStripeCheckout`** — redirect to Stripe's hosted Checkout page.
 - **`VueStripePricingTable`** — embed a Dashboard-configured pricing table.
 :::

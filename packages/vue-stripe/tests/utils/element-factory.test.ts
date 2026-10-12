@@ -3,13 +3,20 @@ import { mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick, provide, ref, shallowRef } from 'vue-demi'
 import { createStripeElement, pick } from '../../src/utils/element-factory'
 import {
+  stripeCheckoutFormInjectionKey,
   stripeCheckoutInjectionKey,
   stripeElementsInjectionKey
 } from '../../src/utils/injection-keys'
 import { VueStripeElementsError } from '../../src/utils/errors'
-import { flushPromises, makeMockCheckout, makeMockElement, makeMockElements } from '../setup'
+import {
+  flushPromises,
+  makeMockCheckout,
+  makeMockCheckoutForm,
+  makeMockElement,
+  makeMockElements
+} from '../setup'
 
-type Ctx = 'elements' | 'checkout' | 'both'
+type Ctx = 'elements' | 'checkout' | 'both' | 'form' | 'elements+form'
 
 // Mount `Component` under a hand-provided Elements and/or Checkout context.
 function mountUnder(
@@ -21,20 +28,32 @@ function mountUnder(
   elements.create.mockImplementation(() => element)
   const checkout = makeMockCheckout()
   checkout.createPaymentElement.mockImplementation(() => element)
+  const checkoutForm = makeMockCheckoutForm()
+  checkoutForm.createForm.mockImplementation(() => element)
+  const formSdk = shallowRef<unknown>(checkoutForm)
   const options = ref<Record<string, unknown>>(props)
   const show = ref(true)
   const child = ref<Record<string, unknown> | null>(null)
 
   const Host = defineComponent({
     setup() {
-      if (ctx !== 'checkout') {
+      if (ctx === 'elements' || ctx === 'both' || ctx === 'elements+form') {
         provide(stripeElementsInjectionKey, {
           elements: shallowRef(elements as never),
           loading: ref(false),
           error: ref(null)
         })
       }
-      if (ctx !== 'elements') {
+      if (ctx === 'form' || ctx === 'elements+form') {
+        provide(stripeCheckoutFormInjectionKey, {
+          checkout: formSdk as never,
+          actions: shallowRef(null),
+          session: shallowRef(null),
+          loading: ref(false),
+          error: ref(null)
+        })
+      }
+      if (ctx === 'checkout' || ctx === 'both') {
         provide(stripeCheckoutInjectionKey, {
           checkout: shallowRef(checkout as never),
           actions: shallowRef(null),
@@ -49,7 +68,18 @@ function mountUnder(
   const wrapper = mount(Host)
   const handler = (name: string) =>
     element.on.mock.calls.find((call) => call[0] === name)?.[1] as (...a: unknown[]) => void
-  return { wrapper, element, elements, checkout, options, show, child, handler }
+  return {
+    wrapper,
+    element,
+    elements,
+    checkout,
+    checkoutForm,
+    formSdk,
+    options,
+    show,
+    child,
+    handler
+  }
 }
 
 describe('createStripeElement', () => {
@@ -283,6 +313,94 @@ describe('createStripeElement', () => {
   it('throws VueStripeElementsError when no context is present', () => {
     const Comp = createStripeElement({ elementType: 'x', componentName: 'X' })
     expect(() => mount(Comp)).toThrow(VueStripeElementsError)
+  })
+
+  it('uses the Checkout Form creator when only the Form context is present', async () => {
+    const Comp = createStripeElement({
+      elementType: 'checkoutForm',
+      componentName: 'X',
+      elements: false,
+      checkoutForm: (sdk, o) => sdk.createForm(o) as never
+    })
+    const { checkoutForm, element } = mountUnder(Comp, {
+      ctx: 'form',
+      props: { layout: 'compact' }
+    })
+    await flushPromises()
+    expect(checkoutForm.createForm).toHaveBeenCalledWith({ layout: 'compact' })
+    expect(element.mount).toHaveBeenCalledTimes(1)
+  })
+
+  it('skips the Elements context for definitions without an Elements type', async () => {
+    const Comp = createStripeElement({
+      elementType: 'checkoutForm',
+      componentName: 'X',
+      elements: false,
+      checkoutForm: (sdk, o) => sdk.createForm(o) as never
+    })
+    const { checkoutForm, elements } = mountUnder(Comp, { ctx: 'elements+form' })
+    await flushPromises()
+    expect(elements.create).not.toHaveBeenCalled()
+    expect(checkoutForm.createForm).toHaveBeenCalledTimes(1)
+  })
+
+  it('reports elements without a Form creator as unavailable in the Checkout Form', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const Comp = createStripeElement({ elementType: 'payment', componentName: 'X' })
+    const { wrapper } = mountUnder(Comp, { ctx: 'form' })
+    await flushPromises()
+    expect(wrapper.text()).toContain('X is not available inside VueStripeCheckoutFormProvider')
+    errorSpy.mockRestore()
+  })
+
+  it('reports Form-only definitions as unavailable in Checkout Sessions with Elements', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const Comp = createStripeElement({
+      elementType: 'checkoutForm',
+      componentName: 'X',
+      elements: false,
+      checkoutForm: (sdk, o) => sdk.createForm(o) as never
+    })
+    const { wrapper } = mountUnder(Comp, { ctx: 'checkout' })
+    await flushPromises()
+    expect(wrapper.text()).toContain('X is not available inside VueStripeCheckoutElementsProvider')
+    errorSpy.mockRestore()
+  })
+
+  it('moves to a new Checkout Form SDK: destroys the old element, creates from the new one', async () => {
+    const Comp = createStripeElement({
+      elementType: 'checkoutForm',
+      componentName: 'X',
+      elements: false,
+      checkoutForm: (sdk, o) => sdk.createForm(o) as never
+    })
+    const { element, formSdk } = mountUnder(Comp, { ctx: 'form' })
+    await flushPromises()
+    const next = makeMockCheckoutForm()
+    const second = makeMockElement()
+    next.createForm.mockImplementation(() => second)
+    formSdk.value = next
+    await flushPromises()
+    expect(element.destroy).toHaveBeenCalledTimes(1)
+    expect(second.mount).toHaveBeenCalledTimes(1)
+  })
+
+  it('names every supported parent when no context is present', () => {
+    const both = createStripeElement({
+      elementType: 'currencySelector',
+      componentName: 'X',
+      checkoutForm: (sdk) => sdk.createCurrencySelectorElement() as never
+    })
+    expect(() => mount(both)).toThrow(
+      'X must be used within VueStripeElements or VueStripeCheckoutElementsProvider or VueStripeCheckoutFormProvider'
+    )
+    const formOnly = createStripeElement({
+      elementType: 'checkoutForm',
+      componentName: 'Y',
+      elements: false,
+      checkoutForm: (sdk, o) => sdk.createForm(o) as never
+    })
+    expect(() => mount(formOnly)).toThrow('Y must be used within VueStripeCheckoutFormProvider')
   })
 
   it('pick() keeps only the listed keys', () => {

@@ -73,8 +73,12 @@ describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
       artifact: 'VueStripeEmbeddedCheckout'
     })
     expect(byApi('stripe.initCheckoutFormSdk()')[0]).toMatchObject({
-      status: 'planned',
-      issue: 493
+      status: 'covered',
+      artifact: 'VueStripeCheckoutFormProvider'
+    })
+    expect(byApi('checkoutFormSdk.createForm()')[0]).toMatchObject({
+      status: 'covered',
+      artifact: 'VueStripeCheckoutForm'
     })
   })
 

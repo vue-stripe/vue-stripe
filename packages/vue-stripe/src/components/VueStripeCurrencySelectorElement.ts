@@ -12,9 +12,9 @@ type CurrencySelectorEvents = {
 
 /**
  * Currency Selector Element: lets customers pay in their local currency (Adaptive Pricing).
- * Use within `<VueStripeCheckoutElementsProvider>`, or within `<VueStripeElements>` with
- * Stripe beta access. It has no `change` event: the chosen currency arrives on the session
- * (`useCheckoutSession().session.value.currency`).
+ * Use within `<VueStripeCheckoutElementsProvider>` or `<VueStripeCheckoutFormProvider>`,
+ * or within `<VueStripeElements>` with Stripe beta access. It has no `change` event: the
+ * chosen currency arrives on the session (`useCheckoutSession().session.value.currency`).
  */
 export default /* @__PURE__ */ createStripeElement<
   Record<string, never>,
@@ -26,6 +26,7 @@ export default /* @__PURE__ */ createStripeElement<
   componentName: 'VueStripeCurrencySelectorElement',
   events: ['ready', 'focus', 'blur', 'escape', 'loaderror'],
   checkout: (sdk) => sdk.createCurrencySelectorElement(),
+  checkoutForm: (sdk) => sdk.createCurrencySelectorElement(),
   className: 'vue-stripe-currency-selector-element',
   loadingText: 'Loading currency selector...'
 })

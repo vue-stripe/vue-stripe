@@ -15,7 +15,11 @@ import type {
   StripeElementComponent,
   StripeElementLike
 } from './element-types'
-import { stripeCheckoutInjectionKey, stripeElementsInjectionKey } from './injection-keys'
+import {
+  stripeCheckoutFormInjectionKey,
+  stripeCheckoutInjectionKey,
+  stripeElementsInjectionKey
+} from './injection-keys'
 import { VueStripeElementsError } from './errors'
 import { renderElement } from './element-render'
 
@@ -65,11 +69,16 @@ export function createStripeElement<
 
       // An Elements context always wins: inject() returns the nearest provider of each key,
       // so a VueStripeElements nested inside a Checkout provider drives its own children.
-      const elementsCtx = inject(stripeElementsInjectionKey, null)
+      // Definitions without an Elements type (the Checkout Form) ignore it.
+      const elementsCtx = def.elements === false ? null : inject(stripeElementsInjectionKey, null)
       const checkoutCtx = inject(stripeCheckoutInjectionKey, null)
-      if (!elementsCtx && !checkoutCtx) {
+      const formCtx = inject(stripeCheckoutFormInjectionKey, null)
+      if (!elementsCtx && !checkoutCtx && !formCtx) {
+        const parents =
+          def.elements === false ? [] : ['VueStripeElements', 'VueStripeCheckoutElementsProvider']
+        if (def.checkoutForm) parents.push('VueStripeCheckoutFormProvider')
         throw new VueStripeElementsError(
-          `${componentName} must be used within VueStripeElements or VueStripeCheckoutElementsProvider`
+          `${componentName} must be used within ${parents.join(' or ')}`
         )
       }
 
@@ -106,13 +115,22 @@ export function createStripeElement<
           | undefined
         if (elements) return elements.create(elementType, options)
         const sdk = checkoutCtx?.checkout.value
-        if (!sdk) return null
-        if (!def.checkout) {
+        if (sdk) {
+          if (def.checkout) return def.checkout(sdk, options)
           throw new VueStripeElementsError(
-            `${componentName} is not available inside Checkout Sessions; use it within VueStripeElements`
+            def.elements === false
+              ? `${componentName} is not available inside VueStripeCheckoutElementsProvider`
+              : `${componentName} is not available inside Checkout Sessions; use it within VueStripeElements`
           )
         }
-        return def.checkout(sdk, options)
+        const formSdk = formCtx?.checkout.value
+        if (!formSdk) return null
+        if (!def.checkoutForm) {
+          throw new VueStripeElementsError(
+            `${componentName} is not available inside VueStripeCheckoutFormProvider`
+          )
+        }
+        return def.checkoutForm(formSdk, options)
       }
 
       const create = () => {
@@ -174,7 +192,7 @@ export function createStripeElement<
       // VueStripeElements builds a new group when the Intent or the deferred-Intent
       // parameters change; an element left on the old group is invisible to confirm().
       watch(
-        () => elementsCtx?.elements.value ?? checkoutCtx?.checkout.value,
+        () => elementsCtx?.elements.value ?? checkoutCtx?.checkout.value ?? formCtx?.checkout.value,
         (next, prev) => {
           if (next !== prev) teardown()
           create()

@@ -3,6 +3,8 @@ import type {
   Stripe,
   StripeElements,
   StripeCheckoutElementsSdk,
+  StripeCheckoutFormLoadActionsSuccess,
+  StripeCheckoutFormSdk,
   StripeCheckoutLoadActionsSuccess,
   StripeCheckoutSession
 } from '@stripe/stripe-js'
@@ -30,6 +32,17 @@ export interface StripeCheckoutInstance {
   error: Ref<string | null>
 }
 
+export interface StripeCheckoutFormInstance {
+  /** Checkout Form SDK handle (`stripe.initCheckoutFormSdk()`, synchronous; Stripe beta). */
+  checkout: Ref<StripeCheckoutFormSdk | null>
+  /** Form SDK actions, available once `checkout.loadActions()` resolves. */
+  actions: Ref<StripeCheckoutFormLoadActionsSuccess | null>
+  session: Ref<StripeCheckoutSession | null>
+  /** True until `loadActions()` settles. */
+  loading: Ref<boolean>
+  error: Ref<string | null>
+}
+
 export interface VueStripeConfig {
   publishableKey: string
   stripeAccount?: string | undefined
@@ -42,4 +55,6 @@ export const stripeElementsInjectionKey: InjectionKey<StripeElementsInstance> =
   Symbol('stripe-elements')
 export const stripeCheckoutInjectionKey: InjectionKey<StripeCheckoutInstance> =
   Symbol('stripe-checkout')
+export const stripeCheckoutFormInjectionKey: InjectionKey<StripeCheckoutFormInstance> =
+  Symbol('stripe-checkout-form')
 export const stripeConfigInjectionKey: InjectionKey<VueStripeConfig> = Symbol('vue-stripe-config')

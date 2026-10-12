@@ -15,6 +15,16 @@ describe('VueStripeCurrencySelectorElement', () => {
     expect(wrapper.find('.vue-stripe-currency-selector-element-mount').exists()).toBe(true)
   })
 
+  it('creates via checkoutForm.createCurrencySelectorElement() inside VueStripeCheckoutFormProvider', async () => {
+    const { checkout, checkoutForm, element } = await mountLeaf(VueStripeCurrencySelectorElement, {
+      context: 'form',
+      options: { ignored: true }
+    })
+    expect(checkoutForm.createCurrencySelectorElement).toHaveBeenCalledWith()
+    expect(checkout.createCurrencySelectorElement).not.toHaveBeenCalled()
+    expect(element.mount).toHaveBeenCalledTimes(1)
+  })
+
   it('creates via elements.create("currencySelector") inside VueStripeElements (Stripe beta)', async () => {
     const { elements } = await mountLeaf(VueStripeCurrencySelectorElement, { context: 'elements' })
     expect(elements.create).toHaveBeenCalledWith('currencySelector', {})

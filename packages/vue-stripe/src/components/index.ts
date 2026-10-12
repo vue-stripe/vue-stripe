@@ -35,6 +35,10 @@ export { default as VueStripeCheckoutProvider } from './VueStripeCheckoutElement
 // Embedded Checkout (stripe.createEmbeddedCheckoutPage)
 export { default as VueStripeEmbeddedCheckout } from './VueStripeEmbeddedCheckout'
 
+// Checkout Form (stripe.initCheckoutFormSdk, Stripe beta)
+export { default as VueStripeCheckoutFormProvider } from './VueStripeCheckoutFormProvider'
+export { default as VueStripeCheckoutForm } from './VueStripeCheckoutForm'
+
 // Elements for Checkout Sessions (Stripe.js 10)
 export { default as VueStripeTaxIdElement } from './VueStripeTaxIdElement'
 export { default as VueStripeCurrencySelectorElement } from './VueStripeCurrencySelectorElement'

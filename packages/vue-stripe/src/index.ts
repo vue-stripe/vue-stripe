@@ -22,10 +22,12 @@ export type {
   HandleNextActionOptions,
   VueStripeCheckoutProviderProps,
   VueStripeCheckoutElementsProviderProps,
+  VueStripeCheckoutFormProviderProps,
   VueStripePricingTableProps,
   VueStripeEmbeddedCheckoutProps,
   ElementsSubmitResult,
   UseCheckoutSessionReturn,
+  UseCheckoutFormReturn,
   VueStripeErrorResult,
   ConfirmPaymentResult,
   ConfirmSetupResult,
@@ -100,7 +102,17 @@ export type {
   StripeEmbeddedCheckoutOptions,
   StripeEmbeddedCheckoutAnalyticsEventUnion,
   StripeEmbeddedCheckoutLineItemsChangeEvent,
-  PreCollectedConsent
+  PreCollectedConsent,
+  // Checkout Form SDK types (Stripe beta)
+  StripeCheckoutFormSdk,
+  StripeCheckoutFormSdkOptions,
+  StripeCheckoutFormLoadActionsSuccess,
+  StripeCheckoutFormLoadActionsResult,
+  StripeCheckoutForm,
+  StripeCheckoutFormOptions,
+  StripeCheckoutFormChangeEvent,
+  StripeCheckoutFormConfirmEvent,
+  StripeCheckoutFormValue
 } from './types'
 
 // Export checkout composable types (defined alongside useStripeCheckout)

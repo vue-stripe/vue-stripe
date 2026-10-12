@@ -33,6 +33,8 @@ import DisclosuresView from './views/DisclosuresView.vue'
 import PluginProviderView from './views/PluginProviderView.vue'
 // Financial Connections and Identity composables (#496)
 import FinancialConnectionsIdentityView from './views/FinancialConnectionsIdentityView.vue'
+// Checkout Form SDK, Stripe beta (#493)
+import CheckoutFormView from './views/CheckoutFormView.vue'
 
 // Route metadata for SEO (typed via vue-router module augmentation)
 declare module 'vue-router' {
@@ -267,6 +269,16 @@ export const routes: RouteRecordRaw[] = [
       title: 'Embedded Checkout - Vue Stripe',
       description:
         'Checkout Session with ui_mode embedded_page: VueStripeEmbeddedCheckout over stripe.createEmbeddedCheckoutPage'
+    }
+  },
+  {
+    path: '/checkout-form',
+    name: 'CheckoutForm',
+    component: CheckoutFormView,
+    meta: {
+      title: 'Checkout Form (beta) - Vue Stripe',
+      description:
+        'Checkout Session with ui_mode form: VueStripeCheckoutFormProvider, VueStripeCheckoutForm and useCheckoutForm'
     }
   }
 ]

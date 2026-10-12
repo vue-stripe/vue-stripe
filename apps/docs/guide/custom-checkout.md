@@ -9,6 +9,7 @@ Custom Checkout puts Stripe Elements on your own page while a **Checkout Session
 | [Stripe Checkout](/guide/checkout) | `checkout.stripe.com` | Stripe | Checkout Session |
 | [Embedded Checkout](/guide/embedded-checkout) | Your page (Stripe iframe) | Stripe | Checkout Session |
 | **Custom Checkout** | Your page | You, with Stripe Elements | Checkout Session |
+| [Checkout Form](/guide/checkout-form) (beta) | Your page | Stripe, as one form element | Checkout Session |
 | [Payment Element](/guide/payment-element) | Your page | You, with Stripe Elements | Your server (PaymentIntent) |
 
 Choose Custom Checkout when you want your own UI but don't want to recompute tax, discounts or shipping yourself.
@@ -240,5 +241,6 @@ The full list is in the [useCheckoutSession API](/api/composables/use-checkout-s
 
 - [Live Demo](/live-demo/custom-checkout): pay a test session end to end
 - [VueStripeCheckoutElementsProvider API](/api/components/stripe-checkout-provider)
+- [Checkout Form](/guide/checkout-form) (beta): Stripe renders the whole form for you
 - [useCheckoutSession API](/api/composables/use-checkout-session)
 - [Stripe: Elements with the Checkout Sessions API](https://docs.stripe.com/payments/quickstart-checkout-sessions)

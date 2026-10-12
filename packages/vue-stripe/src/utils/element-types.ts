@@ -1,5 +1,9 @@
 import type { ComponentOptionsMixin, DefineComponent, Ref, ShallowRef } from 'vue-demi'
-import type { StripeCheckoutElementsSdk, StripeError } from '@stripe/stripe-js'
+import type {
+  StripeCheckoutElementsSdk,
+  StripeCheckoutFormSdk,
+  StripeError
+} from '@stripe/stripe-js'
 
 // Public types of the element factory (src/utils/element-factory.ts).
 
@@ -26,6 +30,10 @@ export interface ElementDefinition {
   defaultOptions?: () => Record<string, unknown>
   /** Creator inside VueStripeCheckoutElementsProvider; omit when Checkout Sessions lack the element. */
   checkout?: (sdk: StripeCheckoutElementsSdk, options: Record<string, unknown>) => StripeElementLike
+  /** Creator inside VueStripeCheckoutFormProvider; omit when the Checkout Form SDK lacks the element. */
+  checkoutForm?: (sdk: StripeCheckoutFormSdk, options: Record<string, unknown>) => StripeElementLike
+  /** `false` when `elements.create()` has no such type (the Checkout Form): Elements contexts are ignored. */
+  elements?: boolean
   /** Extra members for the component's public instance (e.g. getValue). */
   expose?: (element: Ref<StripeElementLike | null>) => Record<string, unknown>
   loadingText?: string

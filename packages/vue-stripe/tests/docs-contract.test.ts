@@ -72,6 +72,8 @@ const MAP: Array<{ component: string; doc: string }> = [
   { component: 'VueStripeTreasuryDisclosure.ts', doc: 'stripe-treasury-disclosure.md' },
   { component: 'VueStripeCheckout.ts', doc: 'stripe-checkout.md' },
   { component: 'VueStripeCheckoutElementsProvider.ts', doc: 'stripe-checkout-provider.md' },
+  { component: 'VueStripeCheckoutFormProvider.ts', doc: 'stripe-checkout-form-provider.md' },
+  { component: 'VueStripeCheckoutForm.ts', doc: 'stripe-checkout-form.md' },
   { component: 'VueStripePricingTable.ts', doc: 'stripe-pricing-table.md' },
   { component: 'VueStripeEmbeddedCheckout.ts', doc: 'stripe-embedded-checkout.md' }
 ]

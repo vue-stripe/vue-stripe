@@ -32,6 +32,8 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clov
 - [VueStripeCheckout](/api/components/stripe-checkout) - Redirect to hosted Stripe Checkout (session URL)
 - [VueStripeEmbeddedCheckout](/api/components/stripe-embedded-checkout) - Stripe's Checkout page embedded in your page (`stripe.createEmbeddedCheckoutPage()`). Walkthrough: [Embedded Checkout guide](/guide/embedded-checkout)
 - [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Elements with Checkout Sessions (`VueStripeCheckoutProvider` is a deprecated alias). Walkthrough: [Custom Checkout guide](/guide/custom-checkout)
+- [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider) - Checkout Form SDK, `ui_mode: 'form'` (beta, requires Stripe access). Walkthrough: [Checkout Form guide](/guide/checkout-form)
+- [VueStripeCheckoutForm](/api/components/stripe-checkout-form) - Stripe's complete checkout form in one element (beta, requires Stripe access)
 - [VueStripePricingTable](/api/components/stripe-pricing-table) - Embedded Stripe pricing table
 
 ### Disclosures
@@ -52,6 +54,7 @@ Legal text rendered by Stripe.js (React Stripe.js 7 parity):
 - [useIdentity](/api/composables/use-identity) - Stripe Identity verification modal
 - [useStripeCheckout](/api/composables/use-stripe-checkout) - Redirect to Stripe Checkout (alias: `useCheckout`)
 - [useCheckoutSession](/api/composables/use-checkout-session) - Drive a Checkout Session inside `VueStripeCheckoutElementsProvider`
+- [useCheckoutForm](/api/composables/use-checkout-form) - Confirm the Checkout Form and drive its session inside `VueStripeCheckoutFormProvider` (beta)
 
 ### Method confirmers
 
@@ -80,6 +83,7 @@ import type {
   VueStripeElementsProps,
   VueStripeCheckoutElementsProviderProps,
   VueStripeCheckoutProviderProps, // deprecated alias name
+  VueStripeCheckoutFormProviderProps,
   VueStripePricingTableProps,
   VueStripeEmbeddedCheckoutProps,
 
@@ -91,6 +95,7 @@ import type {
   UseCreatePaymentMethodReturn,
   UseHandleNextActionReturn,
   UseCheckoutSessionReturn,
+  UseCheckoutFormReturn,
   UseStripeCheckoutReturn,
   UseStripeMethodReturn, // useConfirm<Method>Payment / Setup
   ConfirmPaymentOptions,
@@ -161,7 +166,18 @@ import type {
   StripeEmbeddedCheckoutAnalyticsEventUnion,
   StripeEmbeddedCheckoutLineItemsChangeEvent,
   // Re-exported Stripe.js Financial Connections type
-  PreCollectedConsent
+  PreCollectedConsent,
+
+  // Re-exported Stripe.js Checkout Form SDK types (beta)
+  StripeCheckoutFormSdk,
+  StripeCheckoutFormSdkOptions,
+  StripeCheckoutFormLoadActionsSuccess,
+  StripeCheckoutFormLoadActionsResult,
+  StripeCheckoutForm,
+  StripeCheckoutFormOptions,
+  StripeCheckoutFormChangeEvent,
+  StripeCheckoutFormConfirmEvent,
+  StripeCheckoutFormValue
 } from '@vue-stripe/vue-stripe'
 ```
 

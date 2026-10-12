@@ -189,7 +189,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Saving Payment Methods', link: '/guide/setup-intent' },
             { text: 'Checkout', link: '/guide/checkout' },
             { text: 'Embedded Checkout', link: '/guide/embedded-checkout' },
-            { text: 'Custom Checkout', link: '/guide/custom-checkout' }
+            { text: 'Custom Checkout', link: '/guide/custom-checkout' },
+            { text: 'Checkout Form (beta)', link: '/guide/checkout-form' }
           ]
         }
       ],
@@ -262,6 +263,11 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
               text: 'VueStripeCheckoutElementsProvider',
               link: '/api/components/stripe-checkout-provider'
             },
+            {
+              text: 'VueStripeCheckoutFormProvider (beta)',
+              link: '/api/components/stripe-checkout-form-provider'
+            },
+            { text: 'VueStripeCheckoutForm (beta)', link: '/api/components/stripe-checkout-form' },
             { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' }
           ]
         },
@@ -291,6 +297,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'useSetupIntent', link: '/api/composables/use-setup-intent' },
             { text: 'useStripeCheckout', link: '/api/composables/use-stripe-checkout' },
             { text: 'useCheckoutSession', link: '/api/composables/use-checkout-session' },
+            { text: 'useCheckoutForm (beta)', link: '/api/composables/use-checkout-form' },
             { text: 'useCreatePaymentMethod', link: '/api/composables/use-create-payment-method' },
             { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' },
             {

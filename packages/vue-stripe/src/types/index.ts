@@ -15,6 +15,9 @@ import type {
   StripeCheckoutSession,
   StripeCheckoutElementsOptions,
   StripeEmbeddedCheckoutOptions,
+  StripeCheckoutFormSdk,
+  StripeCheckoutFormSdkOptions,
+  StripeCheckoutFormLoadActionsSuccess,
   PaymentIntentResult,
   SetupIntentResult,
   PaymentMethodResult,
@@ -77,7 +80,17 @@ export type {
   StripeEmbeddedCheckoutAnalyticsEventUnion,
   StripeEmbeddedCheckoutLineItemsChangeEvent,
   // Financial Connections (pre-collected consent evidence, Stripe.js 9.17+)
-  PreCollectedConsent
+  PreCollectedConsent,
+  // Checkout Form SDK types (Stripe beta)
+  StripeCheckoutFormSdk,
+  StripeCheckoutFormSdkOptions,
+  StripeCheckoutFormLoadActionsSuccess,
+  StripeCheckoutFormLoadActionsResult,
+  StripeCheckoutForm,
+  StripeCheckoutFormOptions,
+  StripeCheckoutFormChangeEvent,
+  StripeCheckoutFormConfirmEvent,
+  StripeCheckoutFormValue
 } from '@stripe/stripe-js'
 
 // Vue-specific plugin configuration
@@ -200,6 +213,19 @@ export interface VueStripeEmbeddedCheckoutProps {
    * `permissions.update.line_items: 'server_only'`.
    */
   onLineItemsChange?: StripeEmbeddedCheckoutOptions['onLineItemsChange'] | undefined
+}
+
+/** Props of `VueStripeCheckoutFormProvider` (Checkout Form, `ui_mode: 'form'`; Stripe beta). */
+export interface VueStripeCheckoutFormProviderProps {
+  /** Client secret of a Checkout Session created with `ui_mode: 'form'`, or a Promise resolving to it. */
+  clientSecret?: string | Promise<string> | undefined
+  /** Alternative to `clientSecret`: a function returning the client secret. */
+  fetchClientSecret?: (() => Promise<string>) | undefined
+  appearance?: StripeCheckoutFormSdkOptions['appearance'] | undefined
+  loader?: StripeCheckoutFormSdkOptions['loader'] | undefined
+  fonts?: StripeCheckoutFormSdkOptions['fonts'] | undefined
+  savedPaymentMethod?: StripeCheckoutFormSdkOptions['savedPaymentMethod'] | undefined
+  defaultValues?: StripeCheckoutFormSdkOptions['defaultValues'] | undefined
 }
 
 /**
@@ -344,6 +370,37 @@ export interface UseCheckoutSessionReturn {
   removeOptionalLineItem: StripeCheckoutLoadActionsSuccess['removeOptionalLineItem']
   changeAppearance: StripeCheckoutElementsSdk['changeAppearance']
   loadFonts: StripeCheckoutElementsSdk['loadFonts']
+}
+
+/**
+ * Return value of `useCheckoutForm()`. Action signatures come from Stripe's
+ * `StripeCheckoutFormLoadActionsSuccess`: the Checkout Elements actions minus the
+ * email / phone / address / tax ID updates, which the form collects itself.
+ */
+export interface UseCheckoutFormReturn {
+  /** Checkout Form SDK handle (null until initialized). */
+  checkout: Readonly<Ref<StripeCheckoutFormSdk | null>>
+  /** Form SDK actions (null until `loadActions()` resolves). */
+  actions: Readonly<Ref<StripeCheckoutFormLoadActionsSuccess | null>>
+  /** Reactive session snapshot, updated on every Stripe `change` event. */
+  session: Readonly<Ref<StripeCheckoutSession | null>>
+  /** True until the actions have loaded. */
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+  /** Imperative snapshot of the current session (prefer the reactive `session`). */
+  getSession: () => StripeCheckoutSession | null
+  /** Confirm; pass the form's `@confirm` event as `{ formConfirmEvent }`. */
+  confirm: StripeCheckoutFormLoadActionsSuccess['confirm']
+  applyPromotionCode: StripeCheckoutFormLoadActionsSuccess['applyPromotionCode']
+  removePromotionCode: StripeCheckoutFormLoadActionsSuccess['removePromotionCode']
+  updateLineItemQuantity: StripeCheckoutFormLoadActionsSuccess['updateLineItemQuantity']
+  updateShippingOption: StripeCheckoutFormLoadActionsSuccess['updateShippingOption']
+  runServerUpdate: StripeCheckoutFormLoadActionsSuccess['runServerUpdate']
+  validateElements: StripeCheckoutFormLoadActionsSuccess['validateElements']
+  addOptionalLineItem: StripeCheckoutFormLoadActionsSuccess['addOptionalLineItem']
+  removeOptionalLineItem: StripeCheckoutFormLoadActionsSuccess['removeOptionalLineItem']
+  changeAppearance: StripeCheckoutFormSdk['changeAppearance']
+  loadFonts: StripeCheckoutFormSdk['loadFonts']
 }
 
 /**

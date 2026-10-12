@@ -210,6 +210,13 @@ export const coverage: CoverageCategory[] = [
   {
     group: 'Checkout Session Elements',
     items: [
+      // Checkout Form SDK form (Stripe beta); the Currency Selector is created by both SDKs.
+      {
+        name: 'Checkout Form element',
+        api: 'checkoutFormSdk.createForm()',
+        status: 'covered',
+        artifact: 'VueStripeCheckoutForm'
+      },
       // Checkout Elements SDK elements; Tax ID and Currency Selector also exist on
       // elements.create() behind a Stripe beta.
       {
@@ -315,10 +322,11 @@ export const coverage: CoverageCategory[] = [
         artifact: 'VueStripeCheckoutElementsProvider'
       },
       {
+        // Stripe beta: the account needs Checkout Form access.
         name: 'Checkout Form',
         api: 'stripe.initCheckoutFormSdk()',
-        status: 'planned',
-        issue: 493
+        status: 'covered',
+        artifact: 'VueStripeCheckoutFormProvider'
       }
     ]
   },

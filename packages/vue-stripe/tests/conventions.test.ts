@@ -77,8 +77,7 @@ const COMPONENT_ALLOW_LIST = [
   'VueStripeCheckoutFormProvider',
   'VueStripeEmbeddedCheckout',
   'VueStripeCheckout',
-  'VueStripePricingTable',
-  'VueStripeCheckoutForm'
+  'VueStripePricingTable'
 ]
 const factoryOnly = (s: Source): Violation[] => {
   const name = s.path.split(/[\\/]/).pop()!.replace(/\.ts$/, '')
@@ -132,8 +131,10 @@ const exportedFromIndex = (
 
 /** 8. Element `events` are a subset of the Stripe.js `.d.ts` union for that element type. */
 const kebab = (s: string) => s.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase())
+/** Element types whose `.d.ts` is not named after them. */
+const DTS_FILE: Record<string, string> = { checkoutForm: 'payment-form' }
 const stripeEventUnion = (elementType: string): Set<string> | null => {
-  const file = join(STRIPE_ELEMENTS_DTS, `${kebab(elementType)}.d.ts`)
+  const file = join(STRIPE_ELEMENTS_DTS, `${DTS_FILE[elementType] ?? kebab(elementType)}.d.ts`)
   if (!existsSync(file)) return null
   return new Set(
     [...readFileSync(file, 'utf8').matchAll(/eventType: '([a-z-]+)'/g)].map((m) => m[1]!)
