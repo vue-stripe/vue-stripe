@@ -286,9 +286,9 @@ stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","
             Interact with the Checkout button to see events...
           </div>
           <div v-for="(entry, index) in eventLog" :key="index" class="flex gap-3 py-1 text-sm">
-            <span class="text-muted-foreground">{{ entry.time }}</span>
-            <span class="font-medium text-primary">{{ entry.event }}</span>
-            <span v-if="entry.data" class="text-muted-foreground">{{ entry.data }}</span>
+            <span class="text-slate-400">{{ entry.time }}</span>
+            <span class="font-medium text-blue-400">{{ entry.event }}</span>
+            <span v-if="entry.data" class="text-slate-300">{{ entry.data }}</span>
           </div>
         </div>
       </CardContent>

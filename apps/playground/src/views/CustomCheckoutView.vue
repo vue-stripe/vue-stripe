@@ -1,207 +1,206 @@
 <script setup lang="ts">
-import { ref, inject, computed, defineComponent, h } from 'vue'
+import { ref, inject, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
 import {
-  VueStripeProvider,
-  VueStripeCheckoutElementsProvider,
-  VueStripePaymentElement,
-  VueStripeAddressElement,
-  VueStripeExpressCheckoutElement,
-  useCheckoutSession
-} from '@vue-stripe/vue-stripe'
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label
+} from '@/components/ui'
+import CheckoutSessionForm from '@/components/checkout/CheckoutSessionForm.vue'
+import { apiUrl, createCheckoutSession } from '@/lib/backend'
 
+const route = useRoute()
 const stripeConfig = inject<{ publishableKey: string }>('stripeConfig')
+const publishableKey = computed(() => stripeConfig?.publishableKey || '')
 
-// A Custom Checkout session client secret (cs_..._secret_...) created on your
-// server with `ui_mode: 'elements'`. Paste it here for the demo.
-const checkoutSecret = ref('')
-const cleanSecret = computed(() => checkoutSecret.value.trim())
-const activeSecret = ref('')
+// Options for the session and the Stripe instance.
+const useTaxId = ref(false)
+const useAdaptivePricing = ref(true)
+// Tax ID is a Stripe beta: the flag goes on the Stripe instance (VueStripeProvider `betas`).
+const betas = computed(() => (useTaxId.value ? ['custom_checkout_tax_id_1'] : undefined))
 
-const start = () => {
-  activeSecret.value = cleanSecret.value
+// What the provider gets: a Promise from the backend, or a pasted client secret.
+const clientSecret = ref<string | Promise<string> | null>(null)
+const pastedSecret = ref('')
+const setupError = ref<string | null>(null)
+const returnedSessionId = ref<string | null>(null)
+
+// Stripe sends redirect-based payment methods back here with the session ID.
+onMounted(() => {
+  const id = route.query['session_id']
+  if (typeof id === 'string') returnedSessionId.value = id
+})
+
+const eventLog = ref<Array<{ time: string; event: string; data?: string | undefined }>>([])
+const logEvent = (event: string, data?: string) => {
+  eventLog.value.unshift({ time: new Date().toLocaleTimeString(), event, data })
+  if (eventLog.value.length > 20) eventLog.value.pop()
 }
 
-// Child rendered inside the provider — drives the session via useCheckoutSession.
-const CheckoutDemo = defineComponent({
-  name: 'CheckoutDemo',
-  setup() {
-    const { session, confirm, updateEmail, applyPromotionCode, loading, error } =
-      useCheckoutSession()
-    const email = ref('')
-    const promo = ref('')
-    const message = ref<string | null>(null)
+const startWithBackend = () => {
+  setupError.value = null
+  const returnUrl = `${window.location.origin}${route.path}?session_id={CHECKOUT_SESSION_ID}`
+  const request = createCheckoutSession({
+    amount: 2500,
+    currency: 'usd',
+    productName: 'Playground order',
+    uiMode: 'elements',
+    returnUrl,
+    taxIdCollection: useTaxId.value
+  }).then((result) => {
+    if (!result.clientSecret) throw new Error('The backend did not return a client secret')
+    logEvent('session-created', result.sessionId)
+    return result.clientSecret
+  })
+  request.catch((err: unknown) => {
+    setupError.value = err instanceof Error ? err.message : String(err)
+  })
+  // The provider takes the Promise, so the elements mount while the session is created.
+  clientSecret.value = request
+}
 
-    const onUpdateEmail = async () => {
-      const res = await updateEmail(email.value)
-      message.value = res.type === 'error' ? `Error: ${res.error.message}` : 'Email updated'
-    }
-    const onApplyPromo = async () => {
-      const res = await applyPromotionCode(promo.value)
-      message.value = res.type === 'error' ? `Error: ${res.error.message}` : 'Promotion applied'
-    }
-    // The session carries its own return_url (set when it was created on the server),
-    // so confirm() takes no returnUrl; Stripe rejects passing both.
-    const onConfirm = async () => {
-      message.value = null
-      try {
-        const res = await confirm()
-        message.value =
-          res.type === 'error'
-            ? `Error: ${res.error.message}`
-            : `Status: ${res.session.status.type}`
-      } catch (err) {
-        message.value = `Error: ${err instanceof Error ? err.message : String(err)}`
-      }
-    }
+const startWithPasted = () => {
+  setupError.value = null
+  clientSecret.value = pastedSecret.value.trim()
+}
 
-    return () =>
-      h('div', { class: 'demo' }, [
-        h('div', { class: 'state', 'data-test': 'session-state' }, [
-          h('h4', 'Session'),
-          h('ul', [
-            h('li', [h('strong', 'status: '), session.value?.status?.type ?? '—']),
-            h('li', [h('strong', 'total: '), session.value?.total?.total?.amount ?? '—']),
-            h('li', [h('strong', 'email: '), session.value?.email ?? '—']),
-            h('li', [h('strong', 'canConfirm: '), String(session.value?.canConfirm ?? false)])
-          ])
-        ]),
-        // The element components detect the Checkout provider and use the Checkout SDK creators.
-        h('div', { class: 'pe', 'data-test': 'express-checkout-element' }, [
-          h('label', 'Express Checkout Element'),
-          h(VueStripeExpressCheckoutElement)
-        ]),
-        h('div', { class: 'pe', 'data-test': 'address-element' }, [
-          h('label', 'Billing address'),
-          h(VueStripeAddressElement, { options: { mode: 'billing' } })
-        ]),
-        h('div', { class: 'pe', 'data-test': 'payment-element' }, [
-          h('label', 'Payment Element'),
-          h(VueStripePaymentElement)
-        ]),
-        h('div', { class: 'row' }, [
-          h('input', {
-            value: email.value,
-            placeholder: 'customer@email.com',
-            onInput: (e: Event) => (email.value = (e.target as HTMLInputElement).value)
-          }),
-          h('button', { onClick: onUpdateEmail }, 'Update email')
-        ]),
-        h('div', { class: 'row' }, [
-          h('input', {
-            value: promo.value,
-            placeholder: 'PROMO CODE',
-            onInput: (e: Event) => (promo.value = (e.target as HTMLInputElement).value)
-          }),
-          h('button', { onClick: onApplyPromo }, 'Apply promo')
-        ]),
-        h(
-          'button',
-          { class: 'pay', disabled: loading.value, onClick: onConfirm, 'data-test': 'confirm' },
-          'Pay'
-        ),
-        message.value ? h('p', { class: 'msg', 'data-test': 'result' }, message.value) : null,
-        error.value ? h('p', { class: 'err' }, error.value) : null
-      ])
-  }
-})
+const reset = () => {
+  clientSecret.value = null
+  setupError.value = null
+  eventLog.value = []
+}
 </script>
 
 <template>
-  <div class="page">
-    <h2>Custom Checkout (useCheckoutSession)</h2>
-    <p class="desc">
-      Full UI control via a Checkout Session (<code>ui_mode: 'elements'</code>). Create the session
-      on your server and paste its <code>client_secret</code> below.
-    </p>
+  <div class="max-w-[900px] mx-auto flex flex-col gap-6">
+    <Alert v-if="returnedSessionId" variant="info">
+      <AlertDescription>
+        Returned from a redirect for session <code>{{ returnedSessionId }}</code
+        >. Check its status on your server with <code>stripe.checkout.sessions.retrieve()</code>.
+      </AlertDescription>
+    </Alert>
 
-    <div v-if="!stripeConfig?.publishableKey" class="warn">
-      No Stripe key configured — click <strong>"Add Key"</strong> in the header.
-    </div>
-
-    <template v-else>
-      <div v-if="!activeSecret" class="secret-form">
-        <label>Checkout Session client secret</label>
-        <input v-model="checkoutSecret" placeholder="cs_test_..._secret_..." />
-        <button :disabled="!cleanSecret" @click="start">Start Checkout</button>
-      </div>
-
-      <VueStripeProvider v-else :publishable-key="stripeConfig.publishableKey">
-        <VueStripeCheckoutElementsProvider :client-secret="activeSecret">
-          <template #loading><p>Initializing checkout…</p></template>
-          <template #error="{ error }"
-            ><p class="err">{{ error }}</p></template
+    <Card>
+      <CardHeader>
+        <CardTitle>Custom Checkout</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="text-muted-foreground mb-4">
+          Your own checkout page on a Checkout Session (<code>ui_mode: 'elements'</code>):
+          <code>VueStripeCheckoutElementsProvider</code> runs Stripe's Checkout Elements SDK and
+          <code>useCheckoutSession()</code> drives the session. Stripe keeps totals, tax and
+          currency on the session.
+        </p>
+        <p class="text-sm mb-4">
+          <a
+            href="https://vuestripe.com/guide/custom-checkout"
+            target="_blank"
+            class="text-primary hover:underline"
           >
-          <component :is="CheckoutDemo" />
-        </VueStripeCheckoutElementsProvider>
-      </VueStripeProvider>
-    </template>
+            Custom Checkout guide →
+          </a>
+        </p>
+
+        <Alert v-if="!publishableKey" variant="warning">
+          <AlertDescription>
+            Add your Stripe publishable key using the header button to test this component.
+          </AlertDescription>
+        </Alert>
+
+        <!-- Setup -->
+        <div v-else-if="!clientSecret" class="bg-secondary border rounded-lg p-5 mt-4 space-y-5">
+          <div class="space-y-2 text-sm">
+            <label class="flex items-center gap-2">
+              <input v-model="useAdaptivePricing" type="checkbox" />
+              Adaptive Pricing (shows the Currency Selector when Stripe offers local currencies)
+            </label>
+            <label class="flex items-center gap-2">
+              <input v-model="useTaxId" type="checkbox" data-test="use-tax-id" />
+              Tax ID element (Stripe beta; your account needs access)
+            </label>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <Button data-test="create-session" @click="startWithBackend">
+              Create a session on the backend
+            </Button>
+            <span class="text-muted-foreground text-xs font-mono">
+              POST {{ apiUrl }}/api/checkout-session { uiMode: 'elements' }
+            </span>
+          </div>
+
+          <div class="space-y-2">
+            <Label for="cs-secret">Or paste a Checkout Session client secret</Label>
+            <div class="flex gap-2">
+              <Input
+                id="cs-secret"
+                v-model="pastedSecret"
+                placeholder="cs_test_..._secret_..."
+                class="font-mono flex-1"
+              />
+              <Button variant="outline" :disabled="!pastedSecret.trim()" @click="startWithPasted">
+                Start
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checkout -->
+        <div v-else class="mt-4">
+          <div class="mb-4 flex justify-end">
+            <Button size="sm" variant="ghost" @click="reset">Start over</Button>
+          </div>
+
+          <Alert v-if="setupError" variant="destructive">
+            <AlertDescription>{{ setupError }}</AlertDescription>
+          </Alert>
+
+          <VueStripeProvider v-else :publishable-key="publishableKey" :betas="betas">
+            <VueStripeCheckoutElementsProvider
+              :client-secret="clientSecret"
+              :adaptive-pricing="{ allowed: useAdaptivePricing }"
+              @ready="logEvent('ready', 'session actions loaded')"
+              @change="
+                (s) => logEvent('change', `${s.total.total.amount}, canConfirm ${s.canConfirm}`)
+              "
+              @error="(e) => logEvent('error', e)"
+            >
+              <template #loading
+                ><p class="text-muted-foreground">Initializing checkout...</p></template
+              >
+              <template #error="{ error }">
+                <p class="text-destructive">{{ error }}</p>
+              </template>
+              <CheckoutSessionForm :tax-id="useTaxId" @log="logEvent" />
+            </VueStripeCheckoutElementsProvider>
+          </VueStripeProvider>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Event Log</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="event-log" data-test="event-log">
+          <div v-if="eventLog.length === 0" class="text-muted-foreground italic">
+            Start a checkout to see provider events and canConfirm changes...
+          </div>
+          <div v-for="(entry, index) in eventLog" :key="index" class="flex gap-3 py-1 text-sm">
+            <span class="text-slate-400">{{ entry.time }}</span>
+            <span class="font-medium text-blue-400">{{ entry.event }}</span>
+            <span v-if="entry.data" class="text-slate-300">{{ entry.data }}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   </div>
 </template>
-
-<style scoped>
-.page {
-  max-width: 560px;
-  margin: 32px auto;
-  padding: 16px;
-}
-.desc {
-  color: #666;
-  margin-bottom: 20px;
-}
-.warn {
-  background: #fff3cd;
-  padding: 12px;
-  border-radius: 6px;
-}
-.secret-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.secret-form input,
-.row input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-family: monospace;
-}
-.demo {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.state ul {
-  margin: 6px 0 0;
-  padding-left: 18px;
-}
-.row {
-  display: flex;
-  gap: 8px;
-}
-.row input {
-  flex: 1;
-}
-button {
-  background: #635bff;
-  color: #fff;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.pay {
-  background: #0a8a00;
-}
-.msg {
-  padding: 10px;
-  background: #f0f7ff;
-  border-radius: 6px;
-}
-.err {
-  color: #dc3545;
-}
-</style>

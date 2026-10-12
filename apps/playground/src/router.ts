@@ -218,7 +218,7 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Custom Checkout - Vue Stripe',
       description:
-        'Build a fully custom checkout with VueStripeCheckoutElementsProvider and useCheckoutSession'
+        'Checkout Session with ui_mode elements: VueStripeCheckoutElementsProvider, useCheckoutSession, Payment, billing Address, Currency Selector and Tax ID elements'
     }
   }
 ]
