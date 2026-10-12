@@ -45,3 +45,9 @@ peerDependencyRules:
     # Vite 8 transforms with Oxc; esbuild is an optional peer used only for custom esbuild options
     # (the audit override below lifts the shared esbuild to 0.25).
     'vite>esbuild': '0.25'
+packageExtensions:
+  # vue-template-compiler requires('vue') without declaring it; as a peer, pnpm links the
+  # Vue 2.7 copy next to it in packages/vue2-smoke instead of the hoisted Vue 3.
+  vue-template-compiler:
+    peerDependencies:
+      vue: 2.7.16

@@ -55,6 +55,32 @@ jobs:
       - name: Build docs (VitePress)
         run: pnpm --filter @vue-stripe/docs build
 
+  vue2-smoke:
+    name: Vue 2.7 compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Mounts the built dist/ on Vue 2.7.16 and checks it imports no Vue-3-only helpers.
+      - name: Build library
+        run: pnpm --filter @vue-stripe/vue-stripe build
+
+      - name: Vue 2.7 smoke test
+        run: pnpm --filter @vue-stripe/vue2-smoke test
+
   commits:
     name: Conventional commits
     if: github.event_name == 'pull_request'

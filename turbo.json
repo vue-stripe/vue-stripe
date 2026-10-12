@@ -11,7 +11,7 @@
       "persistent": true
     },
     "test": {
-      "dependsOn": ["build"],
+      "dependsOn": ["^build", "build"],
       "inputs": ["src/**", "tests/**", "*.config.ts", "package.json"],
       "env": ["NODE_ENV"]
     },
