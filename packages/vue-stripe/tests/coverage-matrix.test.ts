@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import * as VueStripe from '../src'
 import { coverage } from '../../../apps/docs/.vitepress/theme/data/stripe-coverage'
+import { STRIPE_CONFIRMERS, composableName } from './stripe-confirmers'
 
 /**
  * Guards the home-page Stripe.js coverage tracker
@@ -98,6 +99,15 @@ describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
       })
     }
     expect(byApi("'issuingAddToWalletButton'")[0]).toMatchObject({ status: 'planned', issue: 495 })
+  })
+
+  it('lists every method-specific confirmer as covered by its own composable', () => {
+    for (const method of STRIPE_CONFIRMERS) {
+      expect(byApi(`stripe.${method}()`), method).toEqual([
+        expect.objectContaining({ status: 'covered', artifact: composableName(method) })
+      ])
+    }
+    expect(byApi('stripe.confirm<Method>Payment/Setup()')).toEqual([])
   })
 
   it('planned rows point at open v6 milestone issues', () => {

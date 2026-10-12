@@ -292,7 +292,23 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'useStripeCheckout', link: '/api/composables/use-stripe-checkout' },
             { text: 'useCheckoutSession', link: '/api/composables/use-checkout-session' },
             { text: 'useCreatePaymentMethod', link: '/api/composables/use-create-payment-method' },
-            { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' }
+            { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' },
+            {
+              text: 'Method confirmers',
+              link: '/api/composables/confirm/',
+              collapsed: true,
+              items: [
+                { text: 'Cards', link: '/api/composables/confirm/cards' },
+                { text: 'Bank debits', link: '/api/composables/confirm/bank-debits' },
+                {
+                  text: 'Redirects and bank transfers',
+                  link: '/api/composables/confirm/redirects'
+                },
+                { text: 'Wallets', link: '/api/composables/confirm/wallets' },
+                { text: 'Buy now, pay later', link: '/api/composables/confirm/bnpl' },
+                { text: 'Vouchers', link: '/api/composables/confirm/vouchers' }
+              ]
+            }
           ]
         },
         {

@@ -97,6 +97,9 @@ export type {
   CheckoutRedirectOptions
 } from './composables/useStripeCheckout'
 
+// Return type of the method composables (useConfirmCardPayment, ...)
+export type { UseStripeMethodReturn, StripeMethodName } from './utils/method-factory'
+
 // Public types of the element components (template refs, InstanceType, custom elements)
 export type {
   StripeElementComponent,

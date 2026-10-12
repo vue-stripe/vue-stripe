@@ -51,6 +51,17 @@ Legal text rendered by Stripe.js (React Stripe.js 7 parity):
 - [useStripeCheckout](/api/composables/use-stripe-checkout) - Redirect to Stripe Checkout (alias: `useCheckout`)
 - [useCheckoutSession](/api/composables/use-checkout-session) - Drive a Checkout Session inside `VueStripeCheckoutElementsProvider`
 
+### Method confirmers
+
+One composable per Stripe.js `confirm<Method>Payment` / `confirm<Method>Setup` method (`useConfirmCardPayment`, `useConfirmSepaDebitSetup`, ...). [Overview and full list](/api/composables/confirm/).
+
+- [Cards](/api/composables/confirm/cards) - `useConfirmCardPayment`, `useConfirmCardSetup`
+- [Bank debits](/api/composables/confirm/bank-debits) - ACSS, AU BECS, Bacs, SEPA, US bank account
+- [Redirects and bank transfers](/api/composables/confirm/redirects) - Bancontact, EPS, FPX, giropay, iDEAL, Przelewy24, Sofort, Pay by Bank, Multibanco, customer balance
+- [Wallets](/api/composables/confirm/wallets) - Alipay, Amazon Pay, BLIK, Cash App Pay, GrabPay, MobilePay, PayNow, PayPal, Pix, PromptPay, TWINT, WeChat Pay
+- [Buy now, pay later](/api/composables/confirm/bnpl) - Affirm, Afterpay / Clearpay, Billie, Klarna
+- [Vouchers](/api/composables/confirm/vouchers) - Boleto, Konbini, OXXO
+
 ## Plugin
 
 - [createVueStripe](/api/plugin) - Vue plugin that provides Stripe app-wide (an alternative to `VueStripeProvider`)
@@ -79,6 +90,7 @@ import type {
   UseHandleNextActionReturn,
   UseCheckoutSessionReturn,
   UseStripeCheckoutReturn,
+  UseStripeMethodReturn, // useConfirm<Method>Payment / Setup
   ConfirmPaymentOptions,
   ConfirmSetupOptions,
   CreatePaymentMethodOptions,

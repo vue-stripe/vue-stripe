@@ -31,6 +31,14 @@ export interface CoverageCategory {
   items: CoverageItem[]
 }
 
+// A `stripe.confirm<Method>Payment/Setup()` row, covered by its `useConfirm<Method>...` composable.
+const confirmer = (name: string, method: string): CoverageItem => ({
+  name,
+  api: `stripe.${method}()`,
+  status: 'covered',
+  artifact: `use${method.charAt(0).toUpperCase()}${method.slice(1)}`
+})
+
 export const coverage: CoverageCategory[] = [
   {
     group: 'Core',
@@ -353,13 +361,6 @@ export const coverage: CoverageCategory[] = [
         status: 'covered',
         artifact: 'useSetupIntent'
       },
-      {
-        // ~50 confirmers incl. confirmCardPayment, confirmAmazonPaySetup, confirmBlikSetup,
-        // confirmPayByBankPayment. Dedicated composables are planned in #503.
-        name: 'Method-specific confirm*',
-        api: 'stripe.confirm<Method>Payment/Setup()',
-        status: 'accessible'
-      },
       { name: 'Create Token', api: 'stripe.createToken()', status: 'accessible' },
       {
         name: 'Create Confirmation Token',
@@ -371,6 +372,58 @@ export const coverage: CoverageCategory[] = [
         api: 'stripe.createRadarSession(), createEphemeralKeyNonce()',
         status: 'accessible'
       }
+    ]
+  },
+  {
+    // One composable per method-specific confirmer (useConfirmCardPayment, ...).
+    group: 'Payment method confirmers',
+    items: [
+      confirmer('ACSS Debit payment', 'confirmAcssDebitPayment'),
+      confirmer('ACSS Debit setup', 'confirmAcssDebitSetup'),
+      confirmer('Affirm payment', 'confirmAffirmPayment'),
+      confirmer('Afterpay / Clearpay payment', 'confirmAfterpayClearpayPayment'),
+      confirmer('Alipay payment', 'confirmAlipayPayment'),
+      confirmer('Amazon Pay setup', 'confirmAmazonPaySetup'),
+      confirmer('AU BECS Debit payment', 'confirmAuBecsDebitPayment'),
+      confirmer('AU BECS Debit setup', 'confirmAuBecsDebitSetup'),
+      confirmer('Bacs Debit setup', 'confirmBacsDebitSetup'),
+      confirmer('Bancontact payment', 'confirmBancontactPayment'),
+      confirmer('Bancontact setup', 'confirmBancontactSetup'),
+      confirmer('Billie payment', 'confirmBilliePayment'),
+      confirmer('BLIK payment', 'confirmBlikPayment'),
+      confirmer('BLIK setup', 'confirmBlikSetup'),
+      confirmer('Boleto payment', 'confirmBoletoPayment'),
+      confirmer('Card payment', 'confirmCardPayment'),
+      confirmer('Card setup', 'confirmCardSetup'),
+      confirmer('Cash App Pay payment', 'confirmCashappPayment'),
+      confirmer('Cash App Pay setup', 'confirmCashappSetup'),
+      confirmer('Customer balance payment', 'confirmCustomerBalancePayment'),
+      confirmer('EPS payment', 'confirmEpsPayment'),
+      confirmer('FPX payment', 'confirmFpxPayment'),
+      confirmer('giropay payment', 'confirmGiropayPayment'),
+      confirmer('GrabPay payment', 'confirmGrabPayPayment'),
+      confirmer('iDEAL payment', 'confirmIdealPayment'),
+      confirmer('iDEAL setup', 'confirmIdealSetup'),
+      confirmer('Klarna payment', 'confirmKlarnaPayment'),
+      confirmer('Konbini payment', 'confirmKonbiniPayment'),
+      confirmer('MobilePay payment', 'confirmMobilepayPayment'),
+      confirmer('Multibanco payment', 'confirmMultibancoPayment'),
+      confirmer('OXXO payment', 'confirmOxxoPayment'),
+      confirmer('Przelewy24 payment', 'confirmP24Payment'),
+      confirmer('Pay by Bank payment', 'confirmPayByBankPayment'),
+      confirmer('PayNow payment', 'confirmPayNowPayment'),
+      confirmer('PayPal payment', 'confirmPayPalPayment'),
+      confirmer('PayPal setup', 'confirmPayPalSetup'),
+      confirmer('Pix payment', 'confirmPixPayment'),
+      confirmer('PromptPay payment', 'confirmPromptPayPayment'),
+      confirmer('SEPA Debit payment', 'confirmSepaDebitPayment'),
+      confirmer('SEPA Debit setup', 'confirmSepaDebitSetup'),
+      confirmer('Sofort payment', 'confirmSofortPayment'),
+      confirmer('Sofort setup', 'confirmSofortSetup'),
+      confirmer('TWINT payment', 'confirmTwintPayment'),
+      confirmer('US bank account payment', 'confirmUsBankAccountPayment'),
+      confirmer('US bank account setup', 'confirmUsBankAccountSetup'),
+      confirmer('WeChat Pay payment', 'confirmWechatPayPayment')
     ]
   },
   {

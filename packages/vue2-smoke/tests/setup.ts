@@ -19,7 +19,8 @@ export const elements = {
 export const stripe = {
   elements: vi.fn(() => elements),
   registerAppInfo: vi.fn(),
-  initCheckoutElementsSdk: vi.fn()
+  initCheckoutElementsSdk: vi.fn(),
+  confirmCardPayment: vi.fn()
 }
 
 vi.mock('@stripe/stripe-js', () => ({ loadStripe: vi.fn(() => Promise.resolve(stripe)) }))

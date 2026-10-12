@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 import { config } from '@vue/test-utils'
 import { isVue2 } from 'vue-demi'
+import { STRIPE_CONFIRMERS } from './stripe-confirmers'
 
 // ---------------------------------------------------------------------------
 // Canonical, typed Stripe.js mock factories (single source of truth).
@@ -70,9 +71,10 @@ export interface MockStripeCheckout {
 }
 
 export interface MockStripe {
+  /** Every method-specific confirmer (`confirmCardPayment`, ...) from STRIPE_CONFIRMERS. */
+  [confirmer: string]: MockFn
   elements: MockFn
   confirmPayment: MockFn
-  confirmCardSetup: MockFn
   confirmSetup: MockFn
   initCheckoutElementsSdk: MockFn
   createEmbeddedCheckoutPage: MockFn
@@ -177,17 +179,29 @@ export function makeMockElements(): MockStripeElements {
   }
 }
 
+// One mock per method-specific confirmer, resolving Stripe's success shape.
+function makeMockConfirmers(): Record<string, MockFn> {
+  return Object.fromEntries(
+    STRIPE_CONFIRMERS.map((name) => [
+      name,
+      vi.fn(() =>
+        Promise.resolve(
+          name.endsWith('Setup')
+            ? { setupIntent: { id: 'seti_test_123', status: 'succeeded' } }
+            : { paymentIntent: { id: 'pi_test_123', status: 'succeeded' } }
+        )
+      )
+    ])
+  )
+}
+
 export function makeMockStripe(): MockStripe {
   return {
+    ...makeMockConfirmers(),
     elements: vi.fn(() => makeMockElements()),
     confirmPayment: vi.fn(() =>
       Promise.resolve({
         paymentIntent: { id: 'pi_test_123', status: 'succeeded' }
-      })
-    ),
-    confirmCardSetup: vi.fn(() =>
-      Promise.resolve({
-        setupIntent: { id: 'seti_test_123', status: 'succeeded' }
       })
     ),
     confirmSetup: vi.fn(() =>

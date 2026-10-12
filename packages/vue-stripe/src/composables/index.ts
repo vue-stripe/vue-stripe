@@ -6,3 +6,4 @@ export { useStripeElements, useStripeElements as useElements } from './useStripe
 export { useCreatePaymentMethod } from './useCreatePaymentMethod'
 export { useHandleNextAction } from './useHandleNextAction'
 export { useCheckoutSession } from './useCheckoutSession'
+export * from './confirm'

@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import * as VueStripe from '../src'
+import { STRIPE_CONFIRMERS, composableName } from './stripe-confirmers'
 import type {
   UseStripeCheckoutReturn,
   CheckoutRedirectOptions,
   ConfirmPaymentOptions,
-  ConfirmSetupOptions
+  ConfirmSetupOptions,
+  UseStripeMethodReturn
 } from '../src'
 
 describe('public API exports', () => {
@@ -23,6 +25,13 @@ describe('public API exports', () => {
     expect(typeof VueStripe.useStripeElements).toBe('function')
     expect(typeof VueStripe.useElements).toBe('function')
     expect(typeof VueStripe.useCheckoutSession).toBe('function')
+  })
+
+  it('exports a useConfirm<Method> composable for every Stripe.js confirmer', () => {
+    for (const method of STRIPE_CONFIRMERS) {
+      const name = composableName(method)
+      expect(typeof (VueStripe as Record<string, unknown>)[name], name).toBe('function')
+    }
   })
 
   it('exports the Checkout Elements provider under its canonical name and the v5 alias', () => {
@@ -52,7 +61,8 @@ describe('public API exports', () => {
     const confirmPayment: ConfirmPaymentOptions = { clientSecret: 'pi_secret' }
     const confirmSetup: ConfirmSetupOptions = { clientSecret: 'seti_secret' }
     const checkoutReturn: UseStripeCheckoutReturn | null = null
+    const methodReturn: UseStripeMethodReturn<'confirmCardPayment'> | null = null
 
-    expect([redirect, confirmPayment, confirmSetup, checkoutReturn]).toHaveLength(4)
+    expect([redirect, confirmPayment, confirmSetup, checkoutReturn, methodReturn]).toHaveLength(5)
   })
 })

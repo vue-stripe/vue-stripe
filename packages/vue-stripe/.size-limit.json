@@ -3,7 +3,7 @@
     "name": "ESM bundle (dist/es/index.js)",
     "path": "dist/es/index.js",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "7.9 kB",
+    "limit": "9.1 kB",
     "gzip": true
   },
   {
@@ -20,6 +20,14 @@
     "import": "{ useStripe }",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
     "limit": "310 B",
+    "gzip": true
+  },
+  {
+    "name": "Tree-shaken: import { useConfirmCardPayment }",
+    "path": "dist/es/index.js",
+    "import": "{ useConfirmCardPayment }",
+    "ignore": ["vue-demi", "@stripe/stripe-js"],
+    "limit": "540 B",
     "gzip": true
   }
 ]

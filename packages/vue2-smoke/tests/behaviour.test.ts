@@ -4,11 +4,12 @@ import {
   VueStripeCheckout,
   VueStripeElements,
   VueStripePricingTable,
-  VueStripeProvider
+  VueStripeProvider,
+  useConfirmCardPayment
 } from '@vue-stripe/vue-stripe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { CreateElement } from 'vue'
-import { element, flush } from './setup'
+import { element, flush, stripe } from './setup'
 
 const settle = async () => {
   await flush()
@@ -109,4 +110,33 @@ it('renders <stripe-pricing-table> with its attributes', async () => {
   expect(table.attributes('publishable-key')).toBe('pk_test_x')
   expect(table.attributes('customer-email')).toBe('a@b.co')
   script.mockRestore()
+})
+
+it('runs a method confirmer composable under Vue 2', async () => {
+  const result = { paymentIntent: { id: 'pi_123', status: 'succeeded' } }
+  stripe.confirmCardPayment.mockResolvedValueOnce(result)
+  let api!: ReturnType<typeof useConfirmCardPayment>
+  mount({
+    render(h: CreateElement) {
+      return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+        h({
+          setup() {
+            api = useConfirmCardPayment()
+            return {}
+          },
+          render: (h2: CreateElement) => h2('div')
+        })
+      ])
+    }
+  })
+  await settle()
+
+  const call = api.confirmCardPayment('pi_x_secret_y', { payment_method: 'pm_123' })
+  expect(api.loading.value).toBe(true)
+  await expect(call).resolves.toBe(result)
+  expect(stripe.confirmCardPayment).toHaveBeenCalledWith('pi_x_secret_y', {
+    payment_method: 'pm_123'
+  })
+  expect(api.loading.value).toBe(false)
+  expect(api.error.value).toBe(null)
 })

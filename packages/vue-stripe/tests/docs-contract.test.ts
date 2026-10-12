@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import * as VueStripe from '../src'
 
 /**
  * Doc/API contract test (issues #421, #498).
@@ -353,5 +354,28 @@ describe('docs/API contract: extractors', () => {
     expect(documentedTable(page, PROPS_HEADING)).toEqual(['options', 'other'])
     expect(documentedTable(page, EXPOSED_HEADING)).toEqual(['focus', 'getValue'])
     expect(documentedTable('## Events', EXPOSED_HEADING)).toBeNull()
+  })
+})
+
+describe('docs/API contract: method-specific confirm composables', () => {
+  const CONFIRM_DOCS = resolve(here, '../../../apps/docs/api/composables/confirm')
+  const pages = existsSync(CONFIRM_DOCS)
+    ? readdirSync(CONFIRM_DOCS)
+        .filter((f) => f.endsWith('.md'))
+        .map((file) => ({ file, doc: readFileSync(resolve(CONFIRM_DOCS, file), 'utf8') }))
+    : []
+  const confirmComposables = Object.keys(VueStripe).filter((name) =>
+    /^useConfirm\w+(Payment|Setup)$/.test(name)
+  )
+
+  it('finds the family pages and the exported useConfirm* composables', () => {
+    expect(pages.length).toBeGreaterThan(1)
+    expect(confirmComposables.length).toBeGreaterThan(0)
+  })
+
+  it.each(confirmComposables)('%s has a section in exactly one family page', (name) => {
+    const heading = new RegExp(`^#{2,3} ${name}$`, 'm')
+    const documentedIn = pages.filter((p) => heading.test(p.doc)).map((p) => p.file)
+    expect(documentedIn, `${name} sections`).toHaveLength(1)
   })
 })

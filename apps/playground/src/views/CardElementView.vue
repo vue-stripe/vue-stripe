@@ -4,7 +4,7 @@ import {
   VueStripeProvider,
   VueStripeElements,
   VueStripeCardElement,
-  useStripe
+  useConfirmCardPayment
 } from '@vue-stripe/vue-stripe'
 import type {
   PaymentIntent,
@@ -168,20 +168,19 @@ const PaymentButton = defineComponent({
   },
   emits: ['payment-success', 'payment-error', 'payment-processing'],
   setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const processing = ref(false)
+    // stripe.confirmCardPayment() through its composable; `loading` drives the button state.
+    const { confirmCardPayment, loading } = useConfirmCardPayment()
 
     const handlePayment = async () => {
-      if (!stripe.value || !props.cardElement) {
-        emit('payment-error', 'Stripe not initialized')
+      if (!props.cardElement) {
+        emit('payment-error', 'Card element not ready')
         return
       }
 
-      processing.value = true
       emit('payment-processing')
 
       try {
-        const { error, paymentIntent } = await stripe.value.confirmCardPayment(props.clientSecret, {
+        const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
           payment_method: {
             card: props.cardElement
           }
@@ -196,8 +195,6 @@ const PaymentButton = defineComponent({
         }
       } catch (err: unknown) {
         emit('payment-error', (err instanceof Error && err.message) || 'Payment failed')
-      } finally {
-        processing.value = false
       }
     }
 
@@ -206,10 +203,10 @@ const PaymentButton = defineComponent({
         Button,
         {
           variant: 'success',
-          disabled: !props.cardComplete || processing.value || !props.clientSecret,
+          disabled: !props.cardComplete || loading.value || !props.clientSecret,
           onClick: handlePayment
         },
-        () => (processing.value ? 'Processing...' : 'Confirm Payment')
+        () => (loading.value ? 'Processing...' : 'Confirm Payment')
       )
   }
 })
@@ -230,7 +227,7 @@ const handlePaymentError = (message: string) => {
 const handlePaymentProcessing = () => {
   paymentStatus.value = 'processing'
   paymentMessage.value = 'Processing payment...'
-  log('payment', 'Processing...')
+  log('payment', 'Processing with useConfirmCardPayment()...')
 }
 
 const resetPaymentState = () => {
