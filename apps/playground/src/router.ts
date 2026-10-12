@@ -23,6 +23,7 @@ import DocsVerificationView from './views/DocsVerificationView.vue'
 import PaymentMethodMessagingView from './views/PaymentMethodMessagingView.vue'
 // Convenience composables (v5.5 - #390)
 import ConvenienceComposablesView from './views/ConvenienceComposablesView.vue'
+import TokenComposablesView from './views/TokenComposablesView.vue'
 // Custom Checkout (#388)
 import CustomCheckoutView from './views/CustomCheckoutView.vue'
 // Embedded Checkout (#492)
@@ -239,6 +240,16 @@ export const routes: RouteRecordRaw[] = [
       title: 'Financial Connections and Identity - Vue Stripe',
       description:
         'useFinancialConnections (bank account collection, ACH Direct Debit) and useIdentity (Stripe Identity modal)'
+    }
+  },
+  {
+    path: '/token-composables',
+    name: 'TokenComposables',
+    component: TokenComposablesView,
+    meta: {
+      title: 'Token Composables - Vue Stripe',
+      description:
+        'useCreateToken, useCreateConfirmationToken, useRadarSession, useHandleCardAction, micro-deposit verification and useEphemeralKeyNonce'
     }
   },
   {

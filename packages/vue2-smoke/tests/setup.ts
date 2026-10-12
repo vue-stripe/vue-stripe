@@ -20,7 +20,8 @@ export const stripe = {
   elements: vi.fn(() => elements),
   registerAppInfo: vi.fn(),
   initCheckoutElementsSdk: vi.fn(),
-  confirmCardPayment: vi.fn()
+  confirmCardPayment: vi.fn(),
+  createConfirmationToken: vi.fn()
 }
 
 // The library loads Stripe.js through the side-effect-free pure entry only.

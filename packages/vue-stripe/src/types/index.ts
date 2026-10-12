@@ -21,7 +21,9 @@ import type {
   PaymentIntentResult,
   SetupIntentResult,
   PaymentMethodResult,
-  PaymentIntentOrSetupIntentResult
+  PaymentIntentOrSetupIntentResult,
+  ConfirmationTokenResult,
+  CreateConfirmationToken
 } from '@stripe/stripe-js'
 
 // Re-export commonly used Stripe.js types with their original names
@@ -449,6 +451,24 @@ export type CreatePaymentMethodOptions = Record<string, unknown> & {
 
 export interface UseCreatePaymentMethodReturn {
   createPaymentMethod: (options?: CreatePaymentMethodOptions) => Promise<CreatePaymentMethodResult>
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+}
+
+/** Options of `useCreateConfirmationToken().createConfirmationToken()`. */
+export interface CreateConfirmationTokenOptions {
+  /** Elements instance to read from; defaults to the one injected by `<VueStripeElements>`. */
+  elements?: StripeElements
+  /** ConfirmationToken parameters; values here override what Elements collected. */
+  params?: CreateConfirmationToken['params']
+  /** Skip the automatic `elements.submit()` before `createConfirmationToken`. Defaults to false. */
+  skipSubmit?: boolean
+}
+
+export interface UseCreateConfirmationTokenReturn {
+  createConfirmationToken: (
+    options?: CreateConfirmationTokenOptions
+  ) => Promise<ConfirmationTokenResult>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }

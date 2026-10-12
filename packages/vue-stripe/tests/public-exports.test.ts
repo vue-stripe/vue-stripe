@@ -13,7 +13,9 @@ import type {
   UseFinancialConnectionsReturn,
   UseIdentityReturn,
   VerifyIdentityResult,
-  ReleaseTrain
+  ReleaseTrain,
+  CreateConfirmationTokenOptions,
+  UseCreateConfirmationTokenReturn
 } from '../src'
 
 describe('public API exports', () => {
@@ -34,6 +36,21 @@ describe('public API exports', () => {
     expect(typeof VueStripe.useCheckoutSession).toBe('function')
     expect(typeof VueStripe.useFinancialConnections).toBe('function')
     expect(typeof VueStripe.useIdentity).toBe('function')
+  })
+
+  it('exports the token and other Stripe method composables', () => {
+    const names = [
+      'useCreateToken',
+      'useCreateConfirmationToken',
+      'useHandleCardAction',
+      'useVerifyMicrodepositsForPayment',
+      'useVerifyMicrodepositsForSetup',
+      'useRadarSession',
+      'useEphemeralKeyNonce'
+    ]
+    for (const name of names) {
+      expect(typeof (VueStripe as Record<string, unknown>)[name], name).toBe('function')
+    }
   })
 
   it('exports a useConfirm<Method> composable for every Stripe.js confirmer', () => {
@@ -91,8 +108,18 @@ describe('public API exports', () => {
     const confirmSetup: ConfirmSetupOptions = { clientSecret: 'seti_secret' }
     const checkoutReturn: UseStripeCheckoutReturn | null = null
     const methodReturn: UseStripeMethodReturn<'confirmCardPayment'> | null = null
+    const tokenOptions: CreateConfirmationTokenOptions = { skipSubmit: true }
+    const tokenReturn: UseCreateConfirmationTokenReturn | null = null
 
-    expect([redirect, confirmPayment, confirmSetup, checkoutReturn, methodReturn]).toHaveLength(5)
+    expect([
+      redirect,
+      confirmPayment,
+      confirmSetup,
+      checkoutReturn,
+      methodReturn,
+      tokenOptions,
+      tokenReturn
+    ]).toHaveLength(7)
   })
 
   it('exports the Financial Connections and Identity types (compile-time check)', () => {

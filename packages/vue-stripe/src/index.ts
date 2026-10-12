@@ -18,6 +18,8 @@ export type {
   ConfirmSetupOptions,
   UseCreatePaymentMethodReturn,
   CreatePaymentMethodOptions,
+  UseCreateConfirmationTokenReturn,
+  CreateConfirmationTokenOptions,
   UseHandleNextActionReturn,
   HandleNextActionOptions,
   VueStripeCheckoutProviderProps,

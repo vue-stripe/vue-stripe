@@ -144,6 +144,21 @@ describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
     }
   })
 
+  it('lists the token and other Stripe method composables as covered', () => {
+    const wrapped = {
+      'stripe.createToken()': 'useCreateToken',
+      'stripe.createConfirmationToken()': 'useCreateConfirmationToken',
+      'stripe.handleCardAction()': 'useHandleCardAction',
+      'stripe.verifyMicrodepositsForPayment()': 'useVerifyMicrodepositsForPayment',
+      'stripe.verifyMicrodepositsForSetup()': 'useVerifyMicrodepositsForSetup',
+      'stripe.createRadarSession()': 'useRadarSession',
+      'stripe.createEphemeralKeyNonce()': 'useEphemeralKeyNonce'
+    }
+    for (const [api, artifact] of Object.entries(wrapped)) {
+      expect(byApi(api), api).toEqual([expect.objectContaining({ status: 'covered', artifact })])
+    }
+  })
+
   it('planned rows point at open v6 milestone issues', () => {
     const v6Issues = new Set([473, 492, 493, 494, 495, 496, 497, 503, 504, 505, 506, 507, 508])
     for (const item of items.filter((i) => i.status === 'planned')) {

@@ -38,7 +38,7 @@ Create the nonce and the ephemeral key first, then render the elements. The comp
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import {
-  useStripe,
+  useEphemeralKeyNonce,
   VueStripeElements,
   VueStripeIssuingCardNumberDisplayElement,
   VueStripeIssuingCardExpiryDisplayElement,
@@ -47,11 +47,11 @@ import {
 } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{ cardId: string }>()
-const { stripe } = useStripe()
+const { createEphemeralKeyNonce } = useEphemeralKeyNonce()
 const card = ref<{ issuingCard: string; nonce: string; ephemeralKeySecret: string } | null>(null)
 
 onMounted(async () => {
-  const { nonce, error } = await stripe.value!.createEphemeralKeyNonce({ issuingCard: props.cardId })
+  const { nonce, error } = await createEphemeralKeyNonce({ issuingCard: props.cardId })
   if (error) throw error
   const response = await fetch('/api/issuing/ephemeral-keys', {
     method: 'POST',
@@ -101,7 +101,7 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 // Number, CVC, expiry and PIN displays (StripeIssuingCard*DisplayElementOptions)
 interface IssuingCardDisplayOptions {
   issuingCard: string          // 'ic_...'
-  nonce?: string               // from stripe.createEphemeralKeyNonce()
+  nonce?: string               // from useEphemeralKeyNonce().createEphemeralKeyNonce()
   ephemeralKeySecret?: string  // secret of the ephemeral key minted for that nonce
   style?: StripeElementStyle   // input-only parts (e.g. ::placeholder) do not apply
 }
@@ -274,5 +274,5 @@ import type {
 
 - [Issuing Elements guide](/guide/issuing) - the nonce and ephemeral key flow
 - [VueStripeElements](/api/components/stripe-elements) - the Elements group the components need
-- [useStripe](/api/composables/use-stripe) - the Stripe instance for `createEphemeralKeyNonce()`
+- [useEphemeralKeyNonce](/api/composables/use-ephemeral-key-nonce) - creates the nonce with `createEphemeralKeyNonce()`
 - [Stripe docs: Using Issuing Elements](https://docs.stripe.com/issuing/elements)

@@ -55,6 +55,13 @@ Legal text rendered by Stripe.js (React Stripe.js 7 parity):
 - [useHandleNextAction](/api/composables/use-handle-next-action) - Complete a required next action (3DS, ...)
 - [useFinancialConnections](/api/composables/use-financial-connections) - Financial Connections and ACH bank account collection
 - [useIdentity](/api/composables/use-identity) - Stripe Identity verification modal
+- [useCreateConfirmationToken](/api/composables/use-create-confirmation-token) - Create a ConfirmationToken from the Payment Element (confirm on the server)
+- [useCreateToken](/api/composables/use-create-token) - Create a single-use Token (card, bank account, PII, Connect account / person)
+- [useHandleCardAction](/api/composables/use-handle-card-action) - Run 3D Secure for a manually confirmed PaymentIntent (legacy)
+- [useVerifyMicrodepositsForPayment](/api/composables/use-verify-microdeposits-for-payment) - Verify a bank account with micro-deposits (PaymentIntent)
+- [useVerifyMicrodepositsForSetup](/api/composables/use-verify-microdeposits-for-setup) - Verify a bank account with micro-deposits (SetupIntent)
+- [useRadarSession](/api/composables/use-radar-session) - Create a Radar Session for fraud signals
+- [useEphemeralKeyNonce](/api/composables/use-ephemeral-key-nonce) - Create the nonce for Stripe Issuing card elements
 - [useStripeCheckout](/api/composables/use-stripe-checkout) - Redirect to Stripe Checkout (alias: `useCheckout`)
 - [useCheckoutSession](/api/composables/use-checkout-session) - Drive a Checkout Session inside `VueStripeCheckoutElementsProvider`
 - [useCheckoutForm](/api/composables/use-checkout-form) - Confirm the Checkout Form and drive its session inside `VueStripeCheckoutFormProvider` (beta)

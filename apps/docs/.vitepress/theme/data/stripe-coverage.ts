@@ -417,16 +417,47 @@ export const coverage: CoverageCategory[] = [
         status: 'covered',
         artifact: 'useSetupIntent'
       },
-      { name: 'Create Token', api: 'stripe.createToken()', status: 'accessible' },
+      {
+        name: 'Create Token',
+        api: 'stripe.createToken()',
+        status: 'covered',
+        artifact: 'useCreateToken'
+      },
       {
         name: 'Create Confirmation Token',
         api: 'stripe.createConfirmationToken()',
-        status: 'accessible'
+        status: 'covered',
+        artifact: 'useCreateConfirmationToken'
       },
       {
-        name: 'Radar session / ephemeral key nonce',
-        api: 'stripe.createRadarSession(), createEphemeralKeyNonce()',
-        status: 'accessible'
+        name: 'Handle Card Action',
+        api: 'stripe.handleCardAction()',
+        status: 'covered',
+        artifact: 'useHandleCardAction'
+      },
+      {
+        name: 'Verify micro-deposits (payment)',
+        api: 'stripe.verifyMicrodepositsForPayment()',
+        status: 'covered',
+        artifact: 'useVerifyMicrodepositsForPayment'
+      },
+      {
+        name: 'Verify micro-deposits (setup)',
+        api: 'stripe.verifyMicrodepositsForSetup()',
+        status: 'covered',
+        artifact: 'useVerifyMicrodepositsForSetup'
+      },
+      {
+        name: 'Radar Session',
+        api: 'stripe.createRadarSession()',
+        status: 'covered',
+        artifact: 'useRadarSession'
+      },
+      {
+        name: 'Ephemeral Key Nonce (Issuing)',
+        api: 'stripe.createEphemeralKeyNonce()',
+        status: 'covered',
+        artifact: 'useEphemeralKeyNonce'
       }
     ]
   },

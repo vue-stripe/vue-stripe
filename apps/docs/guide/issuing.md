@@ -62,15 +62,15 @@ Anyone who can call it for a card ID can read that card's number and CVC. Check 
 
 ## 2. Client: create the nonce and fetch the key
 
-`stripe.createEphemeralKeyNonce()` needs the Stripe instance, so do this in a component inside `<VueStripeProvider>` with [`useStripe()`](/api/composables/use-stripe). The provider renders its children once Stripe.js has loaded, so `stripe.value` is set.
+Create the nonce with [`useEphemeralKeyNonce()`](/api/composables/use-ephemeral-key-nonce), which wraps `stripe.createEphemeralKeyNonce()`, in a component inside `<VueStripeProvider>`. It returns Stripe's result untouched and tracks `loading` and `error`.
 
 ```ts
-import { useStripe } from '@vue-stripe/vue-stripe'
+import { useEphemeralKeyNonce } from '@vue-stripe/vue-stripe'
 
-const { stripe } = useStripe()
+const { createEphemeralKeyNonce } = useEphemeralKeyNonce()
 
 async function loadIssuingCard(cardId: string) {
-  const { nonce, error } = await stripe.value!.createEphemeralKeyNonce({ issuingCard: cardId })
+  const { nonce, error } = await createEphemeralKeyNonce({ issuingCard: cardId })
   if (error) throw new Error(error.message)
 
   const response = await fetch('/api/issuing/ephemeral-keys', {
@@ -85,9 +85,13 @@ async function loadIssuingCard(cardId: string) {
 
 ## 3. Client: retrieve the card
 
-Stripe's guide calls `stripe.retrieveIssuingCard()` with the key before it creates Issuing Elements; with the `issuing_elements_2` beta (Connect, physical card details) element creation fails without it ("Issuing card has not been retrieved."). Stripe.js 10.0.0 does not declare this method, so call it through a narrow type:
+Stripe's guide calls `stripe.retrieveIssuingCard()` with the key before it creates Issuing Elements; with the `issuing_elements_2` beta (Connect, physical card details) element creation fails without it ("Issuing card has not been retrieved."). Stripe.js 10.0.0 does not declare this method, so call it on the Stripe instance from [`useStripe()`](/api/composables/use-stripe) through a narrow type:
 
 ```ts
+import { useStripe } from '@vue-stripe/vue-stripe'
+
+const { stripe } = useStripe()
+
 type RetrieveIssuingCard = (
   cardId: string,
   options: { ephemeralKeySecret: string; nonce: string }

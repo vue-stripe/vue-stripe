@@ -309,6 +309,22 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'useCreatePaymentMethod', link: '/api/composables/use-create-payment-method' },
             { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' },
             {
+              text: 'useCreateConfirmationToken',
+              link: '/api/composables/use-create-confirmation-token'
+            },
+            { text: 'useCreateToken', link: '/api/composables/use-create-token' },
+            { text: 'useHandleCardAction', link: '/api/composables/use-handle-card-action' },
+            {
+              text: 'useVerifyMicrodepositsForPayment',
+              link: '/api/composables/use-verify-microdeposits-for-payment'
+            },
+            {
+              text: 'useVerifyMicrodepositsForSetup',
+              link: '/api/composables/use-verify-microdeposits-for-setup'
+            },
+            { text: 'useRadarSession', link: '/api/composables/use-radar-session' },
+            { text: 'useEphemeralKeyNonce', link: '/api/composables/use-ephemeral-key-nonce' },
+            {
               text: 'Method confirmers',
               link: '/api/composables/confirm/',
               collapsed: true,

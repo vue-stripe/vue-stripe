@@ -5,11 +5,12 @@ import {
   VueStripeElements,
   VueStripePricingTable,
   VueStripeProvider,
-  useConfirmCardPayment
+  useConfirmCardPayment,
+  useCreateConfirmationToken
 } from '@vue-stripe/vue-stripe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { CreateElement } from 'vue'
-import { element, flush, stripe } from './setup'
+import { element, elements, flush, stripe } from './setup'
 
 const settle = async () => {
   await flush()
@@ -137,6 +138,39 @@ it('runs a method confirmer composable under Vue 2', async () => {
   expect(stripe.confirmCardPayment).toHaveBeenCalledWith('pi_x_secret_y', {
     payment_method: 'pm_123'
   })
+  expect(api.loading.value).toBe(false)
+  expect(api.error.value).toBe(null)
+})
+
+it('creates a ConfirmationToken from the injected Elements under Vue 2', async () => {
+  const result = { confirmationToken: { id: 'ctoken_123' } }
+  elements.submit.mockResolvedValueOnce({})
+  stripe.createConfirmationToken.mockResolvedValueOnce(result)
+  let api!: ReturnType<typeof useCreateConfirmationToken>
+  mount({
+    render(h: CreateElement) {
+      return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+        h(
+          VueStripeElements as never,
+          { props: { mode: 'payment', amount: 1099, currency: 'usd' } },
+          [
+            h({
+              setup() {
+                api = useCreateConfirmationToken()
+                return {}
+              },
+              render: (h2: CreateElement) => h2('div')
+            })
+          ]
+        )
+      ])
+    }
+  })
+  await settle()
+
+  await expect(api.createConfirmationToken()).resolves.toBe(result)
+  expect(elements.submit).toHaveBeenCalledTimes(1)
+  expect(stripe.createConfirmationToken).toHaveBeenCalledWith({ elements })
   expect(api.loading.value).toBe(false)
   expect(api.error.value).toBe(null)
 })
