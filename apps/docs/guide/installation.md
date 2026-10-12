@@ -19,7 +19,7 @@ yarn add @vue-stripe/vue-stripe @stripe/stripe-js
 :::
 
 ::: tip Requirements
-Vue Stripe 6 requires `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive) and **Vue 2.7 or Vue 3**. Vue 2.6 is not supported (it is end-of-life and lacks the APIs the components use).
+Vue Stripe 6 requires `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive) and **Vue 2.7 or Vue 3**. Vue 2.6 is not supported (it is end-of-life and lacks the APIs the components use). Upgrading from v5? See [Migrating from v5](/guide/migration-v6).
 :::
 
 ### Import the stylesheet

@@ -150,7 +150,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           items: [
             { text: 'Introduction', link: '/guide/introduction' },
             { text: 'Installation', link: '/guide/installation' },
-            { text: 'Your First Payment', link: '/guide/first-payment' }
+            { text: 'Your First Payment', link: '/guide/first-payment' },
+            { text: 'Migrating from v5', link: '/guide/migration-v6' }
           ]
         },
         {
