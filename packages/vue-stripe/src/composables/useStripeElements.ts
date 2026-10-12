@@ -1,4 +1,5 @@
 import { inject, readonly } from 'vue-demi'
+import type { StripeElement, StripeElements } from '@stripe/stripe-js'
 import type { UseStripeElementsReturn } from '../types'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeElementsError } from '../utils/errors'
@@ -60,10 +61,26 @@ export function useStripeElements(): UseStripeElementsReturn {
     return elementsContext.elements.value.fetchUpdates()
   }
 
+  /**
+   * Looks up the element of a type created on this Elements group (`elements.getElement()`).
+   * Returns `null` when there is none, or before the group exists.
+   */
+  const getElement = ((elementType: string, options?: unknown) => {
+    const group = elementsContext.elements.value
+    if (!group) return null
+    // One implementation for all of Stripe's per-type overloads.
+    const lookup = group.getElement.bind(group) as (
+      type: string,
+      opts?: unknown
+    ) => StripeElement | null
+    return lookup(elementType, options)
+  }) as StripeElements['getElement']
+
   return {
     elements: readonly(elementsContext.elements),
     submit,
     fetchUpdates,
+    getElement,
     loading: readonly(elementsContext.loading),
     error: readonly(elementsContext.error)
   }

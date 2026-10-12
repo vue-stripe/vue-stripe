@@ -435,3 +435,124 @@ describe('VueStripeElements and Stripe.js Dahlia elements.update()', () => {
     errorSpy.mockRestore()
   })
 })
+
+describe('VueStripeElements @update-end', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  type Handler = () => void
+  const handlerOf = (group: { on: { mock: { calls: unknown[][] } } }) => {
+    const call = group.on.mock.calls.find(([event]) => event === 'update-end')
+    expect(call, "no on('update-end') listener on this Elements group").toBeDefined()
+    return call![1] as Handler
+  }
+
+  const setup = async (initial: Record<string, unknown>, withOff = false) => {
+    const { makeMockStripe, makeMockElements } = await import('../setup')
+    const groups: Array<ReturnType<typeof makeMockElements> & { off?: ReturnType<typeof vi.fn> }> =
+      []
+    const stripe = makeMockStripe()
+    stripe.elements.mockImplementation(() => {
+      const group = Object.assign(makeMockElements(), withOff ? { off: vi.fn() } : {})
+      groups.push(group)
+      return group
+    })
+    const { loadStripe } = await import('@stripe/stripe-js')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+    const props = ref<Record<string, unknown>>(initial)
+    const wrapper = mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: { default: () => h(VueStripeElements, props.value) }
+    })
+    await flushPromises()
+    const elementsWrapper = () => wrapper.findComponent(VueStripeElements)
+    return { wrapper, groups, props, elementsWrapper }
+  }
+
+  it("listens to the group's update-end and emits update-end", async () => {
+    const { groups, elementsWrapper } = await setup({ mode: 'payment', currency: 'usd', amount: 1 })
+    expect(groups).toHaveLength(1)
+    expect(groups[0]!.on).toHaveBeenCalledWith('update-end', expect.any(Function))
+
+    handlerOf(groups[0]!)()
+    expect(elementsWrapper().emitted('update-end')).toEqual([[]])
+  })
+
+  it('emits update-end after an appearance change applied with elements.update()', async () => {
+    const { groups, props, elementsWrapper } = await setup({
+      clientSecret: 'pi_1_secret_2',
+      appearance: { theme: 'stripe' }
+    })
+    groups[0]!.update.mockImplementationOnce(() => {
+      handlerOf(groups[0]!)()
+      return Promise.resolve()
+    })
+    props.value = { clientSecret: 'pi_1_secret_2', appearance: { theme: 'night' } }
+    await flushPromises()
+    expect(groups[0]!.update).toHaveBeenCalledTimes(1)
+    expect(elementsWrapper().emitted('update-end')).toHaveLength(1)
+  })
+
+  it('moves the listener to the new group when Elements is re-created', async () => {
+    const { groups, props, elementsWrapper } = await setup(
+      { mode: 'payment', currency: 'usd', amount: 1000 },
+      true
+    )
+    const oldHandler = handlerOf(groups[0]!)
+    props.value = { mode: 'payment', currency: 'usd', amount: 2500 }
+    await flushPromises()
+
+    expect(groups).toHaveLength(2)
+    expect(groups[0]!.off).toHaveBeenCalledWith('update-end', oldHandler)
+    expect(groups[1]!.on).toHaveBeenCalledWith('update-end', expect.any(Function))
+
+    handlerOf(groups[1]!)()
+    expect(elementsWrapper().emitted('update-end')).toHaveLength(1)
+  })
+
+  it('ignores update-end from a replaced group that has no off() (Stripe.js 10.0.0)', async () => {
+    const { groups, props, elementsWrapper } = await setup({
+      mode: 'payment',
+      currency: 'usd',
+      amount: 1000
+    })
+    expect(groups[0]).not.toHaveProperty('off')
+    const oldHandler = handlerOf(groups[0]!)
+    props.value = { mode: 'payment', currency: 'usd', amount: 2500 }
+    await flushPromises()
+
+    oldHandler()
+    expect(elementsWrapper().emitted('update-end')).toBeUndefined()
+    handlerOf(groups[1]!)()
+    expect(elementsWrapper().emitted('update-end')).toHaveLength(1)
+  })
+
+  it('detaches on unmount and emits nothing afterwards', async () => {
+    const { wrapper, groups } = await setup({ mode: 'payment', currency: 'usd', amount: 1 }, true)
+    const handler = handlerOf(groups[0]!)
+    const inner = wrapper.findComponent(VueStripeElements)
+    wrapper.unmount()
+
+    expect(groups[0]!.off).toHaveBeenCalledWith('update-end', handler)
+    handler()
+    expect(inner.emitted('update-end')).toBeUndefined()
+  })
+
+  it('tolerates an Elements group without on()', async () => {
+    const { makeMockStripe, makeMockElements } = await import('../setup')
+    const group: Partial<ReturnType<typeof makeMockElements>> = makeMockElements()
+    delete group.on
+    const stripe = makeMockStripe()
+    stripe.elements.mockReturnValue(group)
+    const { loadStripe } = await import('@stripe/stripe-js')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+    const wrapper = mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: { default: () => h(VueStripeElements, { clientSecret: 'pi_1_secret_2' }) }
+    })
+    await flushPromises()
+    expect(wrapper.findComponent(VueStripeElements).emitted('ready')).toHaveLength(1)
+    wrapper.unmount()
+  })
+})

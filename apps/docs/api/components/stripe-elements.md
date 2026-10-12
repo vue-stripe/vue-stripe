@@ -132,10 +132,48 @@ interface StripeElementsOptions {
 |-------|---------|-------------|
 | `@ready` | `StripeElements` | Emitted after the Elements instance is created. The payload is the `StripeElements` instance |
 | `@error` | `string` | Emitted when Elements creation fails, or when an `appearance` / `locale` update is rejected. The payload is the error message |
+| `@update-end` | - | Emitted when an `elements.update()` call has been applied to the mounted elements (Stripe's `update-end` event), e.g. after an `appearance` or `locale` change |
 
 ::: info `elements.update()` is asynchronous
 Since Stripe.js Dahlia, `elements.update()` returns a Promise. `VueStripeElements` waits for it when it applies `appearance` / `locale` changes; a rejected update sets the component's error state and surfaces as `@error`.
 :::
+
+### `@update-end`
+
+`VueStripeElements` listens to the group's `update-end` event (`elements.on('update-end', handler)`) and re-emits it, so you can react once Stripe has finished applying an update, for example to hide a spinner after switching themes:
+
+```vue
+<template>
+  <VueStripeElements
+    mode="payment"
+    currency="usd"
+    :amount="1099"
+    :appearance="appearance"
+    @update-end="applying = false"
+  >
+    <VueStripePaymentElement />
+  </VueStripeElements>
+  <button @click="switchTheme">Switch theme</button>
+  <span v-if="applying">Applying...</span>
+</template>
+
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+
+const theme = ref<'stripe' | 'night'>('stripe')
+// A computed keeps the object stable across re-renders, so only a theme change updates Elements.
+const appearance = computed(() => ({ theme: theme.value }))
+const applying = ref(false)
+
+function switchTheme() {
+  applying.value = true
+  theme.value = theme.value === 'stripe' ? 'night' : 'stripe'
+}
+</script>
+```
+
+The event fires for every `elements.update()` call on the group, including calls you make yourself through [`useStripeElements().elements`](/api/composables/use-stripe-elements). A new `clientSecret`, `mode`, `currency`, `amount` or `setupFutureUsage` creates a new group instead of updating it: that emits `@ready`, not `@update-end`. The listener moves to the new group, and an event from the replaced group is never re-emitted. Stripe.js 10.0.0 types the group with `on('update-end')` only; `VueStripeElements` calls `off()` on unmount and on re-creation when the runtime provides it.
 
 ```vue
 <template>

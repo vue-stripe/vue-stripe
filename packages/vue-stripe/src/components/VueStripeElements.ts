@@ -2,6 +2,7 @@ import {
   defineComponent,
   inject,
   nextTick,
+  onBeforeUnmount,
   onMounted,
   provide,
   ref,
@@ -19,6 +20,9 @@ import type { CaptureMethod, ElementsMode, SetupFutureUsage } from '../types'
 import { stripeElementsInjectionKey, stripeInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 import { statusShell } from '../utils/status-shell'
+
+/** Stripe.js 10.0.0 declares only `on('update-end')` on the Elements group; `off` is used when present. */
+type UpdateEndDetachable = { off?: (eventType: 'update-end', handler: () => void) => void }
 
 /**
  * Creates a Stripe Elements group (`stripe.elements()`) and provides it to the
@@ -55,7 +59,7 @@ export default /* @__PURE__ */ defineComponent({
     /** Any other `stripe.elements()` option (e.g. allowedPaymentMethodTypes in mode-based flows). */
     options: { type: Object as PropType<Record<string, unknown> | undefined>, default: undefined }
   },
-  emits: ['ready', 'error'],
+  emits: ['ready', 'error', 'update-end'],
   setup(props, { emit, slots }) {
     const stripeInstance = inject(stripeInjectionKey, null)
     if (!stripeInstance) {
@@ -67,6 +71,25 @@ export default /* @__PURE__ */ defineComponent({
     const elements = shallowRef<StripeElements | null>(null)
     const loading = ref(true)
     const error = ref<string | null>(null)
+
+    // `update-end` fires when an elements.update() call has been applied. The listener follows
+    // the current group: a re-created group gets a new one, and a replaced group (which may have
+    // no `off`) can no longer emit.
+    let detachUpdateEnd: (() => void) | null = null
+    const listenUpdateEnd = (group: StripeElements) => {
+      detachUpdateEnd?.()
+      detachUpdateEnd = null
+      if (typeof group.on !== 'function') return
+      let active = true
+      const handler = () => {
+        if (active) emit('update-end')
+      }
+      group.on('update-end', handler)
+      detachUpdateEnd = () => {
+        active = false
+        ;(group as UpdateEndDetachable).off?.('update-end', handler)
+      }
+    }
 
     const createElements = () => {
       const stripe = stripeInstance.stripe.value
@@ -102,6 +125,7 @@ export default /* @__PURE__ */ defineComponent({
         elements.value = props.clientSecret
           ? stripe.elements(elementsOptions as StripeElementsOptionsClientSecret)
           : stripe.elements(elementsOptions as unknown as StripeElementsOptionsMode)
+        listenUpdateEnd(elements.value)
         loading.value = false
 
         // Emit ready after Vue has rendered the children.
@@ -154,6 +178,11 @@ export default /* @__PURE__ */ defineComponent({
 
     onMounted(() => {
       if (stripeInstance.stripe.value && !elements.value) createElements()
+    })
+
+    onBeforeUnmount(() => {
+      detachUpdateEnd?.()
+      detachUpdateEnd = null
     })
 
     provide(stripeElementsInjectionKey, { elements, loading, error })

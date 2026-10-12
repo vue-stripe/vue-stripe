@@ -33,6 +33,8 @@ export interface MockStripeElements {
   getElement: MockFn
   update: MockFn
   fetchUpdates: MockFn
+  /** The Elements group only declares `on('update-end')` in Stripe.js 10.0.0 (no `off`). */
+  on: MockFn
 }
 
 export interface MockStripeCheckoutActions {
@@ -225,7 +227,8 @@ export function makeMockElements(): MockStripeElements {
     submit: vi.fn(() => Promise.resolve({ error: null })),
     getElement: vi.fn(),
     update: vi.fn(() => Promise.resolve()),
-    fetchUpdates: vi.fn(() => Promise.resolve({ error: null }))
+    fetchUpdates: vi.fn(() => Promise.resolve({ error: null })),
+    on: vi.fn()
   }
 }
 

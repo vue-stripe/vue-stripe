@@ -273,3 +273,81 @@ describe('useStripeElements().fetchUpdates', () => {
     })
   })
 })
+
+describe('useStripeElements().getElement', () => {
+  const mountWithElements = async () => {
+    const { makeMockStripe, makeMockElements } = await import('../setup')
+    const elementsInstance = makeMockElements()
+    const stripe = makeMockStripe()
+    stripe.elements.mockReturnValue(elementsInstance)
+    const { loadStripe } = await import('@stripe/stripe-js')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+
+    let api!: ReturnType<typeof useStripeElements>
+    const Comp = defineComponent({
+      setup() {
+        api = useStripeElements()
+        return () => h('div')
+      }
+    })
+    mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: {
+        default: () =>
+          h(VueStripeElements, { clientSecret: 'pi_1_secret_2' }, { default: () => h(Comp) })
+      }
+    })
+    await flushPromises()
+    return { api, elementsInstance }
+  }
+
+  it("forwards getElement('payment') to the Elements group and returns the element", async () => {
+    const { api, elementsInstance } = await mountWithElements()
+    const paymentElement = { mount: vi.fn() }
+    elementsInstance.getElement.mockReturnValueOnce(paymentElement)
+
+    expect(api.getElement('payment')).toBe(paymentElement)
+    expect(elementsInstance.getElement).toHaveBeenCalledWith('payment', undefined)
+    // Called on the group itself, so Stripe.js sees the right `this`.
+    expect(elementsInstance.getElement.mock.contexts[0]).toBe(elementsInstance)
+  })
+
+  it("passes the Address Element's getElement options through", async () => {
+    const { api, elementsInstance } = await mountWithElements()
+    api.getElement('address', { mode: 'shipping' })
+    expect(elementsInstance.getElement).toHaveBeenCalledWith('address', { mode: 'shipping' })
+  })
+
+  it('returns null when Stripe has no element of that type', async () => {
+    const { api, elementsInstance } = await mountWithElements()
+    elementsInstance.getElement.mockReturnValueOnce(null)
+    expect(api.getElement('card')).toBeNull()
+  })
+
+  it('returns null before Elements exists', async () => {
+    const { provide, shallowRef, ref: vref } = await import('vue-demi')
+    const { stripeElementsInjectionKey } = await import('../../src/utils/injection-keys')
+    let api!: ReturnType<typeof useStripeElements>
+    mount(
+      defineComponent({
+        setup() {
+          provide(stripeElementsInjectionKey, {
+            elements: shallowRef(null),
+            loading: vref(true),
+            error: vref(null)
+          })
+          return () =>
+            h(
+              defineComponent({
+                setup() {
+                  api = useStripeElements()
+                  return () => h('div')
+                }
+              })
+            )
+        }
+      })
+    )
+    expect(api.getElement('payment')).toBeNull()
+  })
+})

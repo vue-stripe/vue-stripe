@@ -153,7 +153,7 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements; the Payment Elem
 | Composable | Description |
 |------------|-------------|
 | `useStripe()` | The Stripe instance |
-| `useStripeElements()` | The Elements group, `submit()` and `fetchUpdates()` |
+| `useStripeElements()` | The Elements group, `submit()`, `fetchUpdates()` and `getElement()` |
 | `usePaymentIntent()` | Confirm and retrieve PaymentIntents |
 | `useSetupIntent()` | Confirm and retrieve SetupIntents |
 | `useCreatePaymentMethod()` | Create a PaymentMethod from Elements |

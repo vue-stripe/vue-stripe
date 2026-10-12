@@ -309,6 +309,12 @@ export interface UseStripeElementsReturn {
   submit: () => Promise<ElementsSubmitResult>
   /** Re-fetch Elements data after the Intent / Checkout Session changed on the server. */
   fetchUpdates: () => Promise<{ error?: { message: string; status?: string } }>
+  /**
+   * Looks up the element of a type created on this Elements group, typed through
+   * Stripe's `StripeElements['getElement']` overloads. Returns `null` when there is
+   * none, or before the group exists.
+   */
+  getElement: StripeElements['getElement']
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }

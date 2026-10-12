@@ -88,6 +88,14 @@ describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
       status: 'covered',
       artifact: 'useStripeElements'
     })
+    expect(byApi('elements.getElement()')[0]).toMatchObject({
+      status: 'covered',
+      artifact: 'useStripeElements'
+    })
+    expect(byApi("elements.on('update-end')")[0]).toMatchObject({
+      status: 'covered',
+      artifact: 'VueStripeElements'
+    })
     const checkoutSessionElements = {
       "'contactDetails'": 'VueStripeContactDetailsElement',
       "'terms'": 'VueStripeTermsElement',

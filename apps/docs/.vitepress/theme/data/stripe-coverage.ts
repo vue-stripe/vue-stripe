@@ -83,10 +83,22 @@ export const coverage: CoverageCategory[] = [
         artifact: 'useStripeElements'
       },
       {
-        name: 'Elements fetchUpdates / update-end',
-        api: "elements.fetchUpdates(), on('update-end')",
+        name: 'Elements fetchUpdates',
+        api: 'elements.fetchUpdates()',
         status: 'covered',
         artifact: 'useStripeElements'
+      },
+      {
+        name: 'Elements getElement',
+        api: 'elements.getElement()',
+        status: 'covered',
+        artifact: 'useStripeElements'
+      },
+      {
+        name: 'Elements update-end event',
+        api: "elements.on('update-end')",
+        status: 'covered',
+        artifact: 'VueStripeElements'
       }
     ]
   },

@@ -154,6 +154,18 @@
     @apply text-red-400;
   }
 
+  .event-log .event-type.update {
+    @apply text-sky-300;
+  }
+
+  .event-log .event-type.update-end {
+    @apply text-emerald-300;
+  }
+
+  .event-log .event-type.lookup {
+    @apply text-violet-300;
+  }
+
   .event-log .event-data {
     @apply text-slate-300;
   }

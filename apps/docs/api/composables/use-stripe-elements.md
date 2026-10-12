@@ -9,7 +9,7 @@ A composable that provides access to the Stripe Elements instance from any child
 | Capability | Description |
 |------------|-------------|
 | **Elements Instance Access** | Get the StripeElements instance for element retrieval |
-| **Element Retrieval** | Access individual elements via `getElement()` method |
+| **Element Retrieval** | Look up a mounted element by type with `getElement()` |
 | **Form Submission** | Trigger validation and wallet collection via `submit()` |
 | **Loading State** | Know when Elements is still initializing |
 | **Error State** | Detect if Elements creation failed |
@@ -21,9 +21,9 @@ A composable that provides access to the Stripe Elements instance from any child
 flowchart TD
     A["Component calls useStripeElements()"] --> B["Composable checks for StripeElements context<br/>(Uses Vue's inject with stripeElementsInjectionKey)"]
     B --> C{Context Found?}
-    C -->|Yes| D["<b>Context Found</b><br/>Returns { elements, submit, loading, error }"]
+    C -->|Yes| D["<b>Context Found</b><br/>Returns { elements, submit, fetchUpdates,<br/>getElement, loading, error }"]
     C -->|No| E["<b>No Context Found</b><br/>Throws VueStripeElementsError:<br/>'Elements context not found. Make sure to<br/>wrap your component with VueStripeElements.'"]
-    D --> F["Component uses elements.value for element access<br/><br/>// Get specific elements<br/>const card = elements.value?.getElement('card')<br/>const payment = elements.value?.getElement('payment')<br/><br/>// Trigger validation / wallet collection<br/>const { error } = await submit()<br/><br/>// Submit payment<br/>await stripe.value.confirmPayment({<br/>  elements: elements.value,<br/>  confirmParams: { return_url: '...' }<br/>})"]
+    D --> F["Component uses elements.value for element access<br/><br/>// Get specific elements<br/>const card = getElement('card')<br/>const payment = getElement('payment')<br/><br/>// Trigger validation / wallet collection<br/>const { error } = await submit()<br/><br/>// Submit payment<br/>await stripe.value.confirmPayment({<br/>  elements: elements.value,<br/>  confirmParams: { return_url: '...' }<br/>})"]
 ```
 
 ## Usage
@@ -44,10 +44,25 @@ const { elements, submit, loading, error } = useStripeElements()
 | `elements` | `Readonly<Ref<StripeElements \| null>>` | The Elements instance |
 | `submit` | `() => Promise<ElementsSubmitResult>` | Triggers form validation and collects data required for wallets (Apple Pay, Google Pay). Call before `confirmPayment`/`confirmSetup` |
 | `fetchUpdates` | `() => Promise<{ error?: { message: string; status?: string } }>` | Re-fetches the Elements' data from Stripe after you updated the Intent on your server (e.g. a new amount). Wraps `elements.fetchUpdates()` |
+| `getElement` | `StripeElements['getElement']` | Looks up the element of a type created on this Elements group, e.g. `getElement('payment')`. Typed through Stripe's per-type overloads; returns `null` when there is none |
 | `loading` | `Readonly<Ref<boolean>>` | True while Elements is initializing |
 | `error` | `Readonly<Ref<string \| null>>` | Error message if initialization failed |
 
-The `elements`, `loading` and `error` return values are **readonly refs**; `submit` and `fetchUpdates` are functions. Called before the Elements group exists, both resolve to `{ error: { message: 'Elements not initialized' } }` instead of throwing.
+The `elements`, `loading` and `error` return values are **readonly refs**; `submit`, `fetchUpdates` and `getElement` are functions. Called before the Elements group exists, `submit` and `fetchUpdates` resolve to `{ error: { message: 'Elements not initialized' } }` and `getElement` returns `null`, instead of throwing.
+
+### getElement
+
+`getElement(type)` wraps `elements.getElement()`. It has the same overloads as Stripe's method, so the return type follows the element type you pass (`StripePaymentElement | null` for `'payment'`, `StripeCardElement | null` for `'card'`, and so on), and the Address Element's lookup options pass through:
+
+```ts
+const { getElement } = useStripeElements()
+
+const payment = getElement('payment') // StripePaymentElement | null
+const shipping = getElement('address', { mode: 'shipping' }) // StripeAddressElement | null
+payment?.collapse()
+```
+
+It reads the current group on every call, so after `VueStripeElements` re-creates the group (a new `clientSecret` or amount) it returns the element remounted on the new group. To know when an `appearance` / `locale` update has been applied, listen to [`@update-end`](/api/components/stripe-elements#update-end) on `VueStripeElements`.
 
 ### fetchUpdates
 
@@ -95,16 +110,14 @@ const handleSubmit = async () => {
 <script setup>
 import { useStripeElements } from '@vue-stripe/vue-stripe'
 
-const { elements } = useStripeElements()
+const { getElement } = useStripeElements()
 
 const focusCard = () => {
-  const cardElement = elements.value?.getElement('card')
-  cardElement?.focus()
+  getElement('card')?.focus()
 }
 
 const clearCard = () => {
-  const cardElement = elements.value?.getElement('card')
-  cardElement?.clear()
+  getElement('card')?.clear()
 }
 </script>
 ```
@@ -236,14 +249,15 @@ You can retrieve different element types:
 
 ```ts
 // Get elements by type
-const paymentElement = elements.value?.getElement('payment')
-const cardElement = elements.value?.getElement('card')
-const cardNumberElement = elements.value?.getElement('cardNumber')
-const cardExpiryElement = elements.value?.getElement('cardExpiry')
-const cardCvcElement = elements.value?.getElement('cardCvc')
-const expressCheckoutElement = elements.value?.getElement('expressCheckout')
-const addressElement = elements.value?.getElement('address')
-const linkAuthenticationElement = elements.value?.getElement('linkAuthentication')
+const { getElement } = useStripeElements()
+const paymentElement = getElement('payment')
+const cardElement = getElement('card')
+const cardNumberElement = getElement('cardNumber')
+const cardExpiryElement = getElement('cardExpiry')
+const cardCvcElement = getElement('cardCvc')
+const expressCheckoutElement = getElement('expressCheckout')
+const addressElement = getElement('address')
+const linkAuthenticationElement = getElement('linkAuthentication')
 ```
 
 ## TypeScript
@@ -256,10 +270,11 @@ import type {
   StripePaymentElement
 } from '@stripe/stripe-js'
 
-const { elements, submit, fetchUpdates, loading, error } = useStripeElements()
+const { elements, submit, fetchUpdates, getElement, loading, error } = useStripeElements()
 // elements:     Readonly<Ref<StripeElements | null>>
 // submit:       () => Promise<ElementsSubmitResult>
 // fetchUpdates: () => Promise<{ error?: { message: string; status?: string } }>
+// getElement:   StripeElements['getElement']
 
 // Trigger validation / wallet collection.
 // submit() resolves to { error } on failure or { selectedPaymentMethod } on success.
@@ -268,14 +283,9 @@ const validate = async () => {
   return submitError
 }
 
-// Get typed elements
-const getCardElement = (): StripeCardElement | null => {
-  return elements.value?.getElement('card') || null
-}
-
-const getPaymentElement = (): StripePaymentElement | null => {
-  return elements.value?.getElement('payment') || null
-}
+// Typed through Stripe's getElement overloads
+const cardElement: StripeCardElement | null = getElement('card')
+const paymentElement: StripePaymentElement | null = getElement('payment')
 ```
 
 ## Common Patterns

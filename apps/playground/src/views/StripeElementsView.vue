@@ -5,6 +5,7 @@ import {
   VueStripeProvider,
   VueStripeElements,
   VueStripeCardElement,
+  VueStripePaymentElement,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
 import {
@@ -21,6 +22,7 @@ import {
   TabsList,
   TabsTrigger
 } from '@/components/ui'
+import ElementLookupDemo from '@/components/elements/ElementLookupDemo.vue'
 
 const stripeConfig = inject<{
   publishableKey: string
@@ -35,7 +37,9 @@ const log = (type: string, message: string) => {
 }
 
 // State for testing different scenarios
-const testScenario = ref<'basic' | 'with-options' | 'appearance' | 'dark-theme'>('basic')
+const testScenario = ref<'basic' | 'with-options' | 'appearance' | 'dark-theme' | 'update-events'>(
+  'basic'
+)
 
 // Mock client secret (in real app, this comes from your backend)
 const clientSecretInput = ref<string>('')
@@ -136,6 +140,26 @@ const darkAppearance = {
   }
 }
 
+// Update events scenario: a deferred-Intent group whose appearance changes in place
+// (elements.update() -> @update-end) and whose amount re-creates the group.
+const updateAmount = ref(1099)
+const updateTheme = ref<'stripe' | 'night'>('stripe')
+const updateAppearance = computed(() => ({ theme: updateTheme.value }))
+const updateEndCount = ref(0)
+const paymentElementRef = ref<{ element: unknown } | null>(null)
+const toggleUpdateTheme = () => {
+  updateTheme.value = updateTheme.value === 'stripe' ? 'night' : 'stripe'
+  log('update', `appearance.theme -> '${updateTheme.value}' (elements.update())`)
+}
+const changeUpdateAmount = () => {
+  updateAmount.value = updateAmount.value === 1099 ? 2500 : 1099
+  log('update', `amount -> ${updateAmount.value} (new Elements group)`)
+}
+const onUpdateEnd = () => {
+  updateEndCount.value++
+  log('update-end', `VueStripeElements emitted @update-end (#${updateEndCount.value})`)
+}
+
 // Custom fonts demo (first-class `fonts` prop, #389)
 const customFonts = [{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]
 
@@ -176,11 +200,12 @@ const onAppearanceCardReady = () => {
         <div class="space-y-3">
           <Label class="text-xs uppercase tracking-wide text-muted-foreground">Scenario</Label>
           <Tabs v-model="testScenario" class="w-full">
-            <TabsList class="grid w-full grid-cols-4">
+            <TabsList class="grid w-full grid-cols-5">
               <TabsTrigger value="basic">Basic</TabsTrigger>
               <TabsTrigger value="with-options">With Options</TabsTrigger>
               <TabsTrigger value="appearance">Appearance</TabsTrigger>
               <TabsTrigger value="dark-theme">Dark Theme</TabsTrigger>
+              <TabsTrigger value="update-events">Update Events</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -352,6 +377,49 @@ const onAppearanceCardReady = () => {
             </VueStripeElements>
           </VueStripeProvider>
         </div>
+
+        <!-- @update-end and getElement() (deferred Intent) -->
+        <div
+          v-else-if="testScenario === 'update-events'"
+          class="bg-secondary rounded-lg p-6"
+          data-test="update-events-scenario"
+        >
+          <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
+            <VueStripeElements
+              mode="payment"
+              currency="usd"
+              :amount="updateAmount"
+              :appearance="updateAppearance"
+              @update-end="onUpdateEnd"
+            >
+              <div class="bg-card rounded-lg shadow-sm p-5">
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                  <Button size="sm" data-test="toggle-theme" @click="toggleUpdateTheme">
+                    Toggle theme ({{ updateTheme }})
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    data-test="change-amount"
+                    @click="changeUpdateAmount"
+                  >
+                    Change amount ({{ updateAmount }})
+                  </Button>
+                  <span class="text-sm" data-test="update-end-count">
+                    @update-end received: <strong>{{ updateEndCount }}</strong>
+                  </span>
+                </div>
+                <div data-test="payment-element">
+                  <VueStripePaymentElement ref="paymentElementRef" />
+                </div>
+                <ElementLookupDemo
+                  :exposed-element="() => paymentElementRef?.element ?? null"
+                  @lookup="(message) => log('lookup', message)"
+                />
+              </div>
+            </VueStripeElements>
+          </VueStripeProvider>
+        </div>
       </CardContent>
     </Card>
 
@@ -363,8 +431,7 @@ const onAppearanceCardReady = () => {
       <CardContent>
         <div class="event-log">
           <div v-if="events.length === 0" class="text-slate-400 text-center py-4 italic">
-            No events yet. StripeElements doesn't emit events directly - use useStripeElements() to
-            access state.
+            No events yet. Open the Update Events scenario to see @update-end and getElement().
           </div>
           <div v-for="(event, index) in events" :key="index" class="event-entry">
             <span class="event-time">{{ event.time }}</span>
