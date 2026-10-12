@@ -146,7 +146,7 @@ jobs:
           cd /tmp/base
           pnpm install --frozen-lockfile
           pnpm --filter @vue-stripe/vue-stripe build
-          pnpm --filter @vue-stripe/vue-stripe exec size-limit --json > /tmp/size-base.json
+          pnpm --filter @vue-stripe/vue-stripe exec size-limit --json > /tmp/size-base.json || rm -f /tmp/size-base.json
 
       - name: Size comment on the PR
         if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository

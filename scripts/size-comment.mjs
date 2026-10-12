@@ -6,7 +6,14 @@ import { execFileSync } from 'node:child_process'
 
 const MARKER = '<!-- vue-stripe-size-summary -->'
 const [currentPath, basePath] = process.argv.slice(2)
-const load = (path) => (path && existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : [])
+// A base without size-limit (or a failed base build) leaves an empty/invalid file: no diff then.
+const load = (path) => {
+  try {
+    return path && existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : []
+  } catch {
+    return []
+  }
+}
 const current = load(currentPath)
 const base = new Map(load(basePath).map((entry) => [entry.name, entry.size]))
 const kb = (bytes) => (bytes === undefined ? 'n/a' : `${(bytes / 1000).toFixed(2)} kB`)
