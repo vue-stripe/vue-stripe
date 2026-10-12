@@ -1065,9 +1065,9 @@ git add -A && git commit -m "refactor!: drop dead error helpers (#380), remove a
   - `Payment Request Button` → `status: 'deprecated'` (removed in Endive; Express Checkout replaces it).
   - `Affirm Message`, `Afterpay/Clearpay Message` → `status: 'deprecated'` (removed in Clover).
   - `Redirect to Checkout` → `name: 'Hosted Checkout redirect', api: 'session.url redirect'`.
-  - `Embedded Checkout` → `api: 'stripe.createEmbeddedCheckoutPage()'`, `status: 'planned', issue: <v6.1 issue number>`.
+  - `Embedded Checkout` → `api: 'stripe.createEmbeddedCheckoutPage()'`, `status: 'planned', issue: 492`.
   - `Custom Checkout` → `name: 'Elements with Checkout Sessions', api: 'stripe.initCheckoutElementsSdk()', artifact: 'VueStripeCheckoutElementsProvider'`.
-  - Add `{ name: 'Checkout Form', api: 'stripe.initCheckoutFormSdk()', status: 'planned', issue: <v6.1> }`, `{ name: 'Contact Details', api: "create('contactDetails')", status: 'planned', issue: <v6.1> }`, `{ name: 'Terms', api: "create('terms')", status: 'planned', issue: <v6.1> }`, `{ name: 'Link Signup', api: "create('linkSignup')", status: 'planned', issue: <v6.1> }`, `{ name: 'Add to Wallet (Issuing)', api: "create('issuingAddToWalletButton')", status: 'accessible' }`.
+  - Add `{ name: 'Checkout Form', api: 'stripe.initCheckoutFormSdk()', status: 'planned', issue: 493 }`, `{ name: 'Contact Details', api: "create('contactDetails')", status: 'planned', issue: 494 }`, `{ name: 'Terms', api: "create('terms')", status: 'planned', issue: 494 }`, `{ name: 'Link Signup', api: "create('linkSignup')", status: 'planned', issue: 494 }`, `{ name: 'Add to Wallet (Issuing)', api: "create('issuingAddToWalletButton')", status: 'accessible' }`; Financial Connections / Identity → `issue: 496`.
 - [ ] **Step 2: Verify** — `pnpm vitest run tests/coverage-matrix.test.ts` and `pnpm docs:build`.
 - [ ] **Step 3: Commit** — `git commit -am "docs: coverage matrix reflects Stripe.js 10 (Endive)"`.
 
@@ -1744,4 +1744,35 @@ All element tasks are factory definitions + a test file + an API doc page + a co
 
 ## Issue map
 
-Filled in after the GitHub issues are created (see milestone #6 and #7 on GitHub). Each task ID above has exactly one issue; the issue carries the acceptance criteria and the test list.
+Each task has exactly one GitHub issue; the issue carries the acceptance criteria and the test list.
+
+**Milestone v6.0.0 — Stripe.js 10 (Endive)** ([#6](https://github.com/vue-stripe/vue-stripe/milestone/6))
+
+| Task | Issue | Task | Issue | Task | Issue |
+|---|---|---|---|---|---|
+| 1.1 | #461 | 2.5 | #471 | 3.5 | #481 |
+| 1.2 | #462 | 2.6 | #472 | 3.6 | #482 |
+| 1.3 | #463 | 2.7 | #473 | 4.1 | #483 |
+| 1.4 | #464 | 2.8 | #474 | 5.1 | #484 |
+| 1.5 | #465 | 2.9 | #475 | 5.2 | #485 |
+| 1.6 | #466 | 2.10 | #476 | 5.3 | #486 |
+| 2.1 | #467 | 3.1 | #477 | 5.4 | #487 |
+| 2.2 | #468 | 3.2 | #478 | 6.1 | #488 |
+| 2.3 | #469 | 3.3 | #479 | 6.2 | #489 |
+| 2.4 | #470 | 3.4 | #480 | 7.1 | #490 |
+| | | | | 8.1 | #491 |
+
+**Milestone v6.1.0 — Stripe.js 10 parity** ([#7](https://github.com/vue-stripe/vue-stripe/milestone/7))
+
+| Task | Issue |
+|---|---|
+| 9.1 Embedded Checkout | #492 |
+| 9.2 Checkout Form SDK | #493 |
+| 9.3 Contact Details / Terms / Link Signup | #494 |
+| 9.4 Issuing elements | #495 |
+| 9.5 useFinancialConnections / useIdentity | #496 |
+| 9.6 Plugin as global provider | #497 |
+| 9.7 docs-contract props + expose | #498 |
+| 9.8 Tailwind 4 (optional) | #499 |
+
+**Superseded and closed by this plan:** PR #451 (built for 8.x `initCheckout`, which no longer exists in 10.x), Dependabot PRs #456–#460 (replaced by #463–#466), issues #377, #379, #380, #381, #382, #383, #384, #387, #391, #392, #393, #395, #407, #413, #421, #422, #424, #449, #450.
