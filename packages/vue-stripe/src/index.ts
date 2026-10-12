@@ -31,6 +31,17 @@ export type {
   ConfirmSetupResult,
   CreatePaymentMethodResult,
   HandleNextActionResult,
+  UseFinancialConnectionsReturn,
+  CollectFinancialConnectionsAccountsOptions,
+  CollectBankAccountForPaymentOptions,
+  CollectBankAccountForSetupOptions,
+  CollectBankAccountTokenOptions,
+  CollectFinancialConnectionsAccountsResult,
+  CollectBankAccountForPaymentResult,
+  CollectBankAccountForSetupResult,
+  CollectBankAccountTokenResult,
+  UseIdentityReturn,
+  VerifyIdentityResult,
   PaymentElementType,
   ExpressCheckoutType,
   VueStripeError,
@@ -88,7 +99,8 @@ export type {
   StripeEmbeddedCheckout,
   StripeEmbeddedCheckoutOptions,
   StripeEmbeddedCheckoutAnalyticsEventUnion,
-  StripeEmbeddedCheckoutLineItemsChangeEvent
+  StripeEmbeddedCheckoutLineItemsChangeEvent,
+  PreCollectedConsent
 } from './types'
 
 // Export checkout composable types (defined alongside useStripeCheckout)

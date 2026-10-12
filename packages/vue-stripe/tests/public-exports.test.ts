@@ -6,7 +6,13 @@ import type {
   CheckoutRedirectOptions,
   ConfirmPaymentOptions,
   ConfirmSetupOptions,
-  UseStripeMethodReturn
+  UseStripeMethodReturn,
+  CollectFinancialConnectionsAccountsOptions,
+  CollectBankAccountTokenOptions,
+  CollectBankAccountForPaymentResult,
+  UseFinancialConnectionsReturn,
+  UseIdentityReturn,
+  VerifyIdentityResult
 } from '../src'
 
 describe('public API exports', () => {
@@ -25,6 +31,8 @@ describe('public API exports', () => {
     expect(typeof VueStripe.useStripeElements).toBe('function')
     expect(typeof VueStripe.useElements).toBe('function')
     expect(typeof VueStripe.useCheckoutSession).toBe('function')
+    expect(typeof VueStripe.useFinancialConnections).toBe('function')
+    expect(typeof VueStripe.useIdentity).toBe('function')
   })
 
   it('exports a useConfirm<Method> composable for every Stripe.js confirmer', () => {
@@ -64,5 +72,21 @@ describe('public API exports', () => {
     const methodReturn: UseStripeMethodReturn<'confirmCardPayment'> | null = null
 
     expect([redirect, confirmPayment, confirmSetup, checkoutReturn, methodReturn]).toHaveLength(5)
+  })
+
+  it('exports the Financial Connections and Identity types (compile-time check)', () => {
+    // Type-only usage: fails `vue-tsc` if any of these are not exported.
+    const accounts: CollectFinancialConnectionsAccountsOptions = {
+      clientSecret: 'fcsess_secret',
+      preCollectedConsent: { consent: 'fcconsent_123', collectedAt: 1760000000 }
+    }
+    const token: CollectBankAccountTokenOptions = { clientSecret: 'fcsess_secret' }
+    const notLoaded: CollectBankAccountForPaymentResult = {
+      error: { message: 'Stripe not initialized' }
+    }
+    const identity: VerifyIdentityResult = { error: { message: 'Stripe not initialized' } }
+    const returns: [UseFinancialConnectionsReturn | null, UseIdentityReturn | null] = [null, null]
+
+    expect([accounts, token, notLoaded, identity, returns]).toHaveLength(5)
   })
 })

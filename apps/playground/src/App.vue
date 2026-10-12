@@ -226,6 +226,7 @@ const navGroups = computed(() => {
     // Regional elements
     IbanElement: Landmark,
     AuBankAccountElement: Landmark,
+    FinancialConnectionsIdentity: Landmark,
     // Pricing Table (v5.3.0)
     PricingTable: Table2
   }

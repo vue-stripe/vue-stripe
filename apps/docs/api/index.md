@@ -48,6 +48,8 @@ Legal text rendered by Stripe.js (React Stripe.js 7 parity):
 - [useSetupIntent](/api/composables/use-setup-intent) - SetupIntent confirmation helpers
 - [useCreatePaymentMethod](/api/composables/use-create-payment-method) - Create a PaymentMethod
 - [useHandleNextAction](/api/composables/use-handle-next-action) - Complete a required next action (3DS, ...)
+- [useFinancialConnections](/api/composables/use-financial-connections) - Financial Connections and ACH bank account collection
+- [useIdentity](/api/composables/use-identity) - Stripe Identity verification modal
 - [useStripeCheckout](/api/composables/use-stripe-checkout) - Redirect to Stripe Checkout (alias: `useCheckout`)
 - [useCheckoutSession](/api/composables/use-checkout-session) - Drive a Checkout Session inside `VueStripeCheckoutElementsProvider`
 
@@ -95,6 +97,12 @@ import type {
   ConfirmSetupOptions,
   CreatePaymentMethodOptions,
   HandleNextActionOptions,
+  UseFinancialConnectionsReturn,
+  UseIdentityReturn,
+  CollectFinancialConnectionsAccountsOptions,
+  CollectBankAccountForPaymentOptions,
+  CollectBankAccountForSetupOptions,
+  CollectBankAccountTokenOptions,
   CheckoutRedirectOptions,
 
   // Composable results
@@ -104,6 +112,11 @@ import type {
   ConfirmSetupResult,
   CreatePaymentMethodResult,
   HandleNextActionResult,
+  CollectFinancialConnectionsAccountsResult,
+  CollectBankAccountForPaymentResult,
+  CollectBankAccountForSetupResult,
+  CollectBankAccountTokenResult,
+  VerifyIdentityResult,
 
   // Element components (template refs, InstanceType)
   StripeElementComponent,
@@ -146,7 +159,9 @@ import type {
   StripeEmbeddedCheckout,
   StripeEmbeddedCheckoutOptions,
   StripeEmbeddedCheckoutAnalyticsEventUnion,
-  StripeEmbeddedCheckoutLineItemsChangeEvent
+  StripeEmbeddedCheckoutLineItemsChangeEvent,
+  // Re-exported Stripe.js Financial Connections type
+  PreCollectedConsent
 } from '@vue-stripe/vue-stripe'
 ```
 

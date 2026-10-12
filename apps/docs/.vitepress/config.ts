@@ -308,7 +308,12 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
                 { text: 'Buy now, pay later', link: '/api/composables/confirm/bnpl' },
                 { text: 'Vouchers', link: '/api/composables/confirm/vouchers' }
               ]
-            }
+            },
+            {
+              text: 'useFinancialConnections',
+              link: '/api/composables/use-financial-connections'
+            },
+            { text: 'useIdentity', link: '/api/composables/use-identity' }
           ]
         },
         {

@@ -75,7 +75,9 @@ export type {
   StripeEmbeddedCheckout,
   StripeEmbeddedCheckoutOptions,
   StripeEmbeddedCheckoutAnalyticsEventUnion,
-  StripeEmbeddedCheckoutLineItemsChangeEvent
+  StripeEmbeddedCheckoutLineItemsChangeEvent,
+  // Financial Connections (pre-collected consent evidence, Stripe.js 9.17+)
+  PreCollectedConsent
 } from '@stripe/stripe-js'
 
 // Vue-specific plugin configuration
@@ -273,6 +275,9 @@ export interface VueStripeErrorResult {
   paymentIntent?: undefined
   setupIntent?: undefined
   paymentMethod?: undefined
+  financialConnectionsSession?: undefined
+  token?: undefined
+  verificationSession?: undefined
 }
 
 /** Result of `confirmPayment` (with `redirect: 'always'` a success navigates away). */
@@ -379,6 +384,69 @@ export type HandleNextActionOptions =
 
 export interface UseHandleNextActionReturn {
   handleNextAction: (options: HandleNextActionOptions) => Promise<HandleNextActionResult>
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+}
+
+/** Options of `collectFinancialConnectionsAccounts`, taken from `stripe.collectFinancialConnectionsAccounts`. */
+export type CollectFinancialConnectionsAccountsOptions = Parameters<
+  Stripe['collectFinancialConnectionsAccounts']
+>[0]
+/** Options of `collectBankAccountForPayment`, taken from `stripe.collectBankAccountForPayment`. */
+export type CollectBankAccountForPaymentOptions = Parameters<
+  Stripe['collectBankAccountForPayment']
+>[0]
+/** Options of `collectBankAccountForSetup`, taken from `stripe.collectBankAccountForSetup`. */
+export type CollectBankAccountForSetupOptions = Parameters<Stripe['collectBankAccountForSetup']>[0]
+/** Options of `collectBankAccountToken`, taken from `stripe.collectBankAccountToken`. */
+export type CollectBankAccountTokenOptions = Parameters<Stripe['collectBankAccountToken']>[0]
+
+/** Result of `collectFinancialConnectionsAccounts`: `{ financialConnectionsSession }` or `{ error }`. */
+export type CollectFinancialConnectionsAccountsResult =
+  Awaited<ReturnType<Stripe['collectFinancialConnectionsAccounts']>> | VueStripeErrorResult
+/** Result of `collectBankAccountForPayment`: `{ paymentIntent }` or `{ error }`. */
+export type CollectBankAccountForPaymentResult =
+  Awaited<ReturnType<Stripe['collectBankAccountForPayment']>> | VueStripeErrorResult
+/** Result of `collectBankAccountForSetup`: `{ setupIntent }` or `{ error }`. */
+export type CollectBankAccountForSetupResult =
+  Awaited<ReturnType<Stripe['collectBankAccountForSetup']>> | VueStripeErrorResult
+/**
+ * Result of `collectBankAccountToken`: `{ financialConnectionsSession, token }` or `{ error }`.
+ * Stripe's own `CollectBankAccountTokenResult`, widened with `VueStripeErrorResult`.
+ */
+export type CollectBankAccountTokenResult =
+  Awaited<ReturnType<Stripe['collectBankAccountToken']>> | VueStripeErrorResult
+
+export interface UseFinancialConnectionsReturn {
+  /** Opens the Financial Connections modal for a Financial Connections Session client secret. */
+  collectFinancialConnectionsAccounts: (
+    options: CollectFinancialConnectionsAccountsOptions
+  ) => Promise<CollectFinancialConnectionsAccountsResult>
+  /** Collects a US bank account and attaches it to a PaymentIntent (ACH Direct Debit). */
+  collectBankAccountForPayment: (
+    options: CollectBankAccountForPaymentOptions
+  ) => Promise<CollectBankAccountForPaymentResult>
+  /** Collects a US bank account and attaches it to a SetupIntent (ACH Direct Debit). */
+  collectBankAccountForSetup: (
+    options: CollectBankAccountForSetupOptions
+  ) => Promise<CollectBankAccountForSetupResult>
+  /** Opens the Financial Connections modal and returns a bank account token. */
+  collectBankAccountToken: (
+    options: CollectBankAccountTokenOptions
+  ) => Promise<CollectBankAccountTokenResult>
+  /** True while a Financial Connections modal call is in progress. */
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+}
+
+/** Result of `verifyIdentity`: `{ verificationSession }` or `{ error }`. */
+export type VerifyIdentityResult =
+  Awaited<ReturnType<Stripe['verifyIdentity']>> | VueStripeErrorResult
+
+export interface UseIdentityReturn {
+  /** Opens the Stripe Identity modal for a VerificationSession client secret. */
+  verifyIdentity: (clientSecret: string) => Promise<VerifyIdentityResult>
+  /** True while the Identity modal is open. */
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }

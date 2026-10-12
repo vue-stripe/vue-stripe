@@ -31,6 +31,8 @@ import EmbeddedCheckoutView from './views/EmbeddedCheckoutView.vue'
 import DisclosuresView from './views/DisclosuresView.vue'
 // createVueStripe() as a global provider (#424)
 import PluginProviderView from './views/PluginProviderView.vue'
+// Financial Connections and Identity composables (#496)
+import FinancialConnectionsIdentityView from './views/FinancialConnectionsIdentityView.vue'
 
 // Route metadata for SEO (typed via vue-router module augmentation)
 declare module 'vue-router' {
@@ -225,6 +227,16 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Convenience Composables - Vue Stripe',
       description: 'useCreatePaymentMethod, useHandleNextAction and retrieve helpers'
+    }
+  },
+  {
+    path: '/financial-connections-identity',
+    name: 'FinancialConnectionsIdentity',
+    component: FinancialConnectionsIdentityView,
+    meta: {
+      title: 'Financial Connections and Identity - Vue Stripe',
+      description:
+        'useFinancialConnections (bank account collection, ACH Direct Debit) and useIdentity (Stripe Identity modal)'
     }
   },
   {

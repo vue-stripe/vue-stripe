@@ -432,20 +432,20 @@ export const coverage: CoverageCategory[] = [
       {
         name: 'Financial Connections',
         api: 'stripe.collectFinancialConnectionsAccounts()',
-        status: 'planned',
-        issue: 496
+        status: 'covered',
+        artifact: 'useFinancialConnections'
       },
       {
         name: 'Identity Verification',
         api: 'stripe.verifyIdentity()',
-        status: 'planned',
-        issue: 496
+        status: 'covered',
+        artifact: 'useIdentity'
       },
       {
         name: 'Bank Account Collection / Token',
-        api: 'stripe.collectBankAccountForPayment(), collectBankAccountToken()',
-        status: 'planned',
-        issue: 496
+        api: 'stripe.collectBankAccountForPayment/Setup(), collectBankAccountToken()',
+        status: 'covered',
+        artifact: 'useFinancialConnections'
       }
     ]
   }
