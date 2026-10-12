@@ -1,4 +1,14 @@
+import type { StripeCurrencySelectorElement } from '@stripe/stripe-js'
+import type { LoadErrorEvent } from '../utils/element-factory'
 import { createStripeElement } from '../utils/element-factory'
+
+type CurrencySelectorEvents = {
+  ready: [element: StripeCurrencySelectorElement]
+  focus: []
+  blur: []
+  escape: []
+  loaderror: LoadErrorEvent<'currencySelector'>
+}
 
 /**
  * Currency Selector Element: lets customers pay in their local currency (Adaptive Pricing).
@@ -6,7 +16,12 @@ import { createStripeElement } from '../utils/element-factory'
  * Stripe beta access. It has no `change` event: the chosen currency arrives on the session
  * (`useCheckoutSession().session.value.currency`).
  */
-export default createStripeElement({
+export default createStripeElement<
+  Record<string, never>,
+  StripeCurrencySelectorElement,
+  Record<never, never>,
+  CurrencySelectorEvents
+>({
   elementType: 'currencySelector',
   componentName: 'VueStripeCurrencySelectorElement',
   events: ['ready', 'focus', 'blur', 'escape', 'loaderror'],

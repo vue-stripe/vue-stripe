@@ -4,8 +4,8 @@ import { h, nextTick } from 'vue-demi'
 import VueStripeCardNumberElement from '../../src/components/VueStripeCardNumberElement'
 import VueStripeCardExpiryElement from '../../src/components/VueStripeCardExpiryElement'
 import VueStripeCardCvcElement from '../../src/components/VueStripeCardCvcElement'
-import VueStripeElements from '../../src/components/VueStripeElements.vue'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
+import VueStripeElements from '../../src/components/VueStripeElements'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
 import { flushPromises, createMockElement } from '../setup'
 
 describe('Split Card Elements', () => {

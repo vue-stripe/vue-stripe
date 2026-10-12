@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, inject, ref } from 'vue-demi'
-import VueStripeElements from '../../src/components/VueStripeElements.vue'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
+import VueStripeElements from '../../src/components/VueStripeElements'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
 import { stripeElementsInjectionKey } from '../../src/utils/injection-keys'
 import { flushPromises } from '../setup'
 

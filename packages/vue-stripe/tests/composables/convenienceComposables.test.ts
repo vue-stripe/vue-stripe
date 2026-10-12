@@ -5,8 +5,8 @@ import { useCreatePaymentMethod } from '../../src/composables/useCreatePaymentMe
 import { useHandleNextAction } from '../../src/composables/useHandleNextAction'
 import { usePaymentIntent } from '../../src/composables/usePaymentIntent'
 import { useSetupIntent } from '../../src/composables/useSetupIntent'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
-import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
+import VueStripeElements from '../../src/components/VueStripeElements'
 import { flushPromises, makeMockStripe, makeMockElements } from '../setup'
 
 // Mount Provider > Elements > <component using `useComposable`> with a stripe

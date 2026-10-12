@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue-demi'
 import { useStripe } from '../../src/composables/useStripe'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
 import { flushPromises } from '../setup'
 
 // Simple component that uses useStripe

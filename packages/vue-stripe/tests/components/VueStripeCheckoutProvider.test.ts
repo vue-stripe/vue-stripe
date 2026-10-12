@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, inject, ref, shallowRef } from 'vue-demi'
 import { loadStripe } from '@stripe/stripe-js'
-import VueStripeCheckoutElementsProvider from '../../src/components/VueStripeCheckoutProvider.vue'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
+import VueStripeCheckoutElementsProvider from '../../src/components/VueStripeCheckoutElementsProvider'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
 import { stripeCheckoutInjectionKey } from '../../src/utils/injection-keys'
 import {
   flushPromises,

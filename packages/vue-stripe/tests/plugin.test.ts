@@ -3,7 +3,7 @@ import { createApp, defineComponent, h, inject } from 'vue-demi'
 import { mount } from '@vue/test-utils'
 import { createVueStripe } from '../src/plugin'
 import { stripeConfigInjectionKey, type VueStripeConfig } from '../src/utils/injection-keys'
-import VueStripePricingTable from '../src/components/VueStripePricingTable.vue'
+import VueStripePricingTable from '../src/components/VueStripePricingTable'
 import type { VueStripeOptions } from '../src/types'
 
 describe('createVueStripe Plugin', () => {

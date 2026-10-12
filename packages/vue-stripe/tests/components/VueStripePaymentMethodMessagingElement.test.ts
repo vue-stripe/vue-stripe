@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h } from 'vue-demi'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
-import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
+import VueStripeElements from '../../src/components/VueStripeElements'
 import VueStripePaymentMethodMessagingElement from '../../src/components/VueStripePaymentMethodMessagingElement'
 import { flushPromises, createMockElement } from '../setup'
 

@@ -3,8 +3,8 @@ import { mount } from '@vue/test-utils'
 import { defineComponent, h, provide, ref, shallowRef } from 'vue-demi'
 import { loadStripe } from '@stripe/stripe-js'
 import { useCheckoutSession } from '../../src/composables/useCheckoutSession'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
-import VueStripeCheckoutElementsProvider from '../../src/components/VueStripeCheckoutProvider.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
+import VueStripeCheckoutElementsProvider from '../../src/components/VueStripeCheckoutElementsProvider'
 import { stripeCheckoutInjectionKey } from '../../src/utils/injection-keys'
 import {
   flushPromises,

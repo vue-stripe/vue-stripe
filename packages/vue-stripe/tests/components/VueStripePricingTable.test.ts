@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
-import VueStripePricingTable from '../../src/components/VueStripePricingTable.vue'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
+import VueStripePricingTable from '../../src/components/VueStripePricingTable'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
 import { flushPromises } from '../setup'
 
 describe('VueStripePricingTable', () => {

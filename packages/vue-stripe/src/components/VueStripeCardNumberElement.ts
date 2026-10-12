@@ -1,7 +1,23 @@
+import type {
+  StripeCardNumberElement,
+  StripeCardNumberElementChangeEvent,
+  StripeCardNumberElementOptions
+} from '@stripe/stripe-js'
+import type { BaseElementEvents } from '../utils/element-factory'
 import { createStripeElement } from '../utils/element-factory'
 
+type CardNumberEvents = BaseElementEvents<
+  StripeCardNumberElement,
+  StripeCardNumberElementChangeEvent
+>
+
 /** Split card cardNumber input. Use within `<VueStripeElements>` next to the other split card elements. */
-export default createStripeElement({
+export default createStripeElement<
+  StripeCardNumberElementOptions,
+  StripeCardNumberElement,
+  Record<never, never>,
+  CardNumberEvents
+>({
   elementType: 'cardNumber',
   componentName: 'VueStripeCardNumberElement'
 })

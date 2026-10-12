@@ -1,4 +1,15 @@
+import type {
+  StripeTaxIdElement,
+  StripeTaxIdElementChangeEvent,
+  StripeTaxIdElementOptions
+} from '@stripe/stripe-js'
+import type { BaseElementEvents, LoadStartEvent, LoadErrorEvent } from '../utils/element-factory'
 import { BASE_EVENTS, createStripeElement } from '../utils/element-factory'
+
+type TaxIdEvents = BaseElementEvents<StripeTaxIdElement, StripeTaxIdElementChangeEvent> & {
+  loaderstart: LoadStartEvent<'taxId'>
+  loaderror: LoadErrorEvent<'taxId'>
+}
 
 /**
  * Tax ID Element: collects a business name and tax ID for Checkout Sessions.
@@ -6,7 +17,12 @@ import { BASE_EVENTS, createStripeElement } from '../utils/element-factory'
  * pass `betas` on `<VueStripeProvider>`), or within `<VueStripeElements>` with Stripe beta access.
  * @see https://docs.stripe.com/tax/advanced/tax-ids?payment-ui=embedded-components
  */
-export default createStripeElement({
+export default createStripeElement<
+  StripeTaxIdElementOptions,
+  StripeTaxIdElement,
+  { getValue: StripeTaxIdElement['getValue'] },
+  TaxIdEvents
+>({
   elementType: 'taxId',
   componentName: 'VueStripeTaxIdElement',
   events: [...BASE_EVENTS, 'loaderstart', 'loaderror'],

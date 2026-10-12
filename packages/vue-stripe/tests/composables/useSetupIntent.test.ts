@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue-demi'
 import { useSetupIntent } from '../../src/composables/useSetupIntent'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
-import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
+import VueStripeElements from '../../src/components/VueStripeElements'
 import { flushPromises } from '../setup'
 
 // Test component that uses useSetupIntent

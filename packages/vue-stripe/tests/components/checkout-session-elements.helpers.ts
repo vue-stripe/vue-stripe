@@ -2,9 +2,9 @@ import { mount } from '@vue/test-utils'
 import { h, ref, type Component } from 'vue-demi'
 import { vi } from 'vitest'
 import { loadStripe } from '@stripe/stripe-js'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
-import VueStripeCheckoutElementsProvider from '../../src/components/VueStripeCheckoutProvider.vue'
-import VueStripeElements from '../../src/components/VueStripeElements.vue'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
+import VueStripeCheckoutElementsProvider from '../../src/components/VueStripeCheckoutElementsProvider'
+import VueStripeElements from '../../src/components/VueStripeElements'
 import {
   flushPromises,
   makeMockCheckout,

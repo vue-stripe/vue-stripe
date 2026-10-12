@@ -37,6 +37,7 @@ import { useLinkTracking } from './composables/useLinkTracking'
 import { useUserPreferencesTracking } from './composables/useUserPreferencesTracking'
 import { useErrorTracking } from './composables/useErrorTracking'
 import { usePageTracking } from './composables/usePageTracking'
+import '@vue-stripe/vue-stripe/style.css'
 
 // Analytics wrapper component
 const AnalyticsWrapper = defineComponent({

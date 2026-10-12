@@ -14,14 +14,16 @@ const amountDollars = ref(120)
 const currency = ref<'usd' | 'gbp' | 'eur'>('usd')
 const countryCode = ref<'US' | 'GB' | 'DE'>('US')
 
-const methods = [
+type BnplMethod = 'affirm' | 'klarna' | 'afterpay_clearpay'
+
+const methods: Array<{ id: BnplMethod; label: string }> = [
   { id: 'affirm', label: 'Affirm' },
   { id: 'klarna', label: 'Klarna' },
   { id: 'afterpay_clearpay', label: 'Afterpay / Clearpay' }
 ]
-const selectedMethods = ref<string[]>(['affirm', 'klarna', 'afterpay_clearpay'])
+const selectedMethods = ref<BnplMethod[]>(['affirm', 'klarna', 'afterpay_clearpay'])
 
-function toggleMethod(id: string) {
+function toggleMethod(id: BnplMethod) {
   selectedMethods.value = selectedMethods.value.includes(id)
     ? selectedMethods.value.filter((m) => m !== id)
     : [...selectedMethods.value, id]
@@ -32,7 +34,8 @@ const ready = ref(false)
 // Options passed to the messaging element. amount is in the smallest currency unit.
 const messagingOptions = computed(() => ({
   amount: Math.round(amountDollars.value * 100),
-  currency: currency.value.toUpperCase(),
+  // Stripe expects upper-case ISO codes here.
+  currency: currency.value.toUpperCase() as Uppercase<typeof currency.value>,
   countryCode: countryCode.value,
   paymentMethodTypes: selectedMethods.value
 }))

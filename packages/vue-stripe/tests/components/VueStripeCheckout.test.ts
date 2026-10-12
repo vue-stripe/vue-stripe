@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h } from 'vue-demi'
-import VueStripeCheckout from '../../src/components/VueStripeCheckout.vue'
+import VueStripeCheckout from '../../src/components/VueStripeCheckout'
 import { VueStripeCheckoutError } from '../../src/utils/errors'
 import { flushPromises } from '../setup'
 

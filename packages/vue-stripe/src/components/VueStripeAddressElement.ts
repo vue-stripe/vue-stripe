@@ -1,4 +1,15 @@
+import type {
+  StripeAddressElement,
+  StripeAddressElementChangeEvent,
+  StripeAddressElementOptions
+} from '@stripe/stripe-js'
+import type { BaseElementEvents, LoadStartEvent, LoadErrorEvent } from '../utils/element-factory'
 import { BASE_EVENTS, createStripeElement, pick } from '../utils/element-factory'
+
+type AddressEvents = BaseElementEvents<StripeAddressElement, StripeAddressElementChangeEvent> & {
+  loaderstart: LoadStartEvent<'address'>
+  loaderror: LoadErrorEvent<'address'>
+}
 
 /**
  * Shipping or billing address form (`options.mode`, default `'shipping'`).
@@ -6,7 +17,12 @@ import { BASE_EVENTS, createStripeElement, pick } from '../utils/element-factory
  * Sessions accept only `contacts`, `display` and `fields`, and `mode` picks the billing or
  * shipping element.
  */
-export default createStripeElement({
+export default createStripeElement<
+  StripeAddressElementOptions,
+  StripeAddressElement,
+  { getValue: StripeAddressElement['getValue'] },
+  AddressEvents
+>({
   elementType: 'address',
   componentName: 'VueStripeAddressElement',
   events: [...BASE_EVENTS, 'loaderstart', 'loaderror'],

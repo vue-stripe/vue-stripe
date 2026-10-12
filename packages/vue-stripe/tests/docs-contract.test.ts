@@ -29,8 +29,8 @@ const factorySource = existsSync(FACTORY) ? readFileSync(FACTORY, 'utf8') : ''
 
 /** Component file -> API doc page. The split card elements share one page. */
 const MAP: Array<{ component: string; doc: string }> = [
-  { component: 'VueStripeProvider.vue', doc: 'stripe-provider.md' },
-  { component: 'VueStripeElements.vue', doc: 'stripe-elements.md' },
+  { component: 'VueStripeProvider.ts', doc: 'stripe-provider.md' },
+  { component: 'VueStripeElements.ts', doc: 'stripe-elements.md' },
   { component: 'VueStripePaymentElement.ts', doc: 'stripe-payment-element.md' },
   { component: 'VueStripeExpressCheckoutElement.ts', doc: 'stripe-express-checkout-element.md' },
   { component: 'VueStripeCardElement.ts', doc: 'stripe-card-element.md' },
@@ -53,9 +53,9 @@ const MAP: Array<{ component: string; doc: string }> = [
     component: 'VueStripeCurrencySelectorElement.ts',
     doc: 'stripe-currency-selector-element.md'
   },
-  { component: 'VueStripeCheckout.vue', doc: 'stripe-checkout.md' },
-  { component: 'VueStripeCheckoutProvider.vue', doc: 'stripe-checkout-provider.md' },
-  { component: 'VueStripePricingTable.vue', doc: 'stripe-pricing-table.md' }
+  { component: 'VueStripeCheckout.ts', doc: 'stripe-checkout.md' },
+  { component: 'VueStripeCheckoutElementsProvider.ts', doc: 'stripe-checkout-provider.md' },
+  { component: 'VueStripePricingTable.ts', doc: 'stripe-pricing-table.md' }
 ]
 
 /** Normalize an event name for naming-style-insensitive comparison. */
@@ -76,7 +76,7 @@ function baseEvents(): string[] {
  */
 function extractEmits(source: string): string[] {
   const names = new Set<string>()
-  if (source.includes('createStripeElement(')) {
+  if (/createStripeElement[<(]/.test(source)) {
     const list = source.match(/events:\s*\[([^\]]*)\]/)
     if (!list || (list[1] as string).includes('...BASE_EVENTS'))
       baseEvents().forEach((e) => names.add(e))

@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
 import VueStripeIbanElement from '../../src/components/VueStripeIbanElement'
-import VueStripeElements from '../../src/components/VueStripeElements.vue'
-import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
+import VueStripeElements from '../../src/components/VueStripeElements'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
 import { flushPromises, createMockElement } from '../setup'
 
 describe('VueStripeIbanElement', () => {

@@ -1,6 +1,7 @@
 import { ViteSSG } from 'vite-ssg'
 import { routes } from './router'
 import App from './App.vue'
+import '@vue-stripe/vue-stripe/style.css'
 import './styles/globals.css'
 
 // https://github.com/antfu/vite-ssg

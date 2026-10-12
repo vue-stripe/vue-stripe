@@ -7,10 +7,13 @@ import {
   ref,
   shallowRef,
   watch,
+  type ComponentOptionsMixin,
+  type DefineComponent,
   type PropType,
-  type Ref
+  type Ref,
+  type ShallowRef
 } from 'vue-demi'
-import type { StripeCheckoutElementsSdk } from '@stripe/stripe-js'
+import type { StripeCheckoutElementsSdk, StripeError } from '@stripe/stripe-js'
 import { stripeCheckoutInjectionKey, stripeElementsInjectionKey } from './injection-keys'
 import { VueStripeElementsError } from './errors'
 import { hx } from './h'
@@ -53,12 +56,65 @@ export interface ElementDefinition {
   className?: string
 }
 
-export function createStripeElement(def: ElementDefinition) {
+/** Members every element component exposes (template ref / `InstanceType`). */
+export interface StripeElementExposed<TElement> {
+  /** The Stripe element instance (null until created). */
+  element: ShallowRef<TElement | null>
+  loading: Ref<boolean>
+  error: Ref<string | null>
+  focus: () => void
+  blur: () => void
+  clear: () => void
+}
+
+/** Event name -> payload tuple, used to type a component's listeners (`@change`, ...). */
+export type ElementEvents = Record<string, unknown[]>
+
+/** Payloads of the events most elements share. */
+export type BaseElementEvents<TElement, TChange> = {
+  ready: [element: TElement]
+  change: [event: TChange]
+  focus: []
+  blur: []
+  escape: []
+}
+
+/** Payload of `loaderstart` / `loaderror` for an element type. */
+export type LoadStartEvent<T extends string> = [event: { elementType: T }]
+export type LoadErrorEvent<T extends string> = [event: { elementType: T; error: StripeError }]
+
+/** Public type of a factory-built element component. */
+export type StripeElementComponent<
+  TOptions extends object,
+  TElement,
+  TExtra extends object = Record<never, never>,
+  TEvents extends ElementEvents = ElementEvents
+> = DefineComponent<
+  { options?: TOptions | undefined },
+  StripeElementExposed<TElement> & TExtra,
+  Record<never, never>,
+  Record<never, never>,
+  Record<never, never>,
+  ComponentOptionsMixin,
+  ComponentOptionsMixin,
+  { [K in keyof TEvents]: (...args: TEvents[K]) => void }
+>
+
+/**
+ * Builds an element component from a definition. Type parameters describe the public
+ * surface: the `options` prop type, the Stripe element type and extra exposed members.
+ */
+export function createStripeElement<
+  TOptions extends object = Record<string, unknown>,
+  TElement = StripeElementLike,
+  TExtra extends object = Record<never, never>,
+  TEvents extends ElementEvents = ElementEvents
+>(def: ElementDefinition): StripeElementComponent<TOptions, TElement, TExtra, TEvents> {
   const { elementType, componentName, events = BASE_EVENTS } = def
   const loadingText = def.loadingText ?? `Loading ${elementType}...`
   const className = def.className ?? `vue-stripe-${elementType}-element`
 
-  return defineComponent({
+  const component = defineComponent({
     name: componentName,
     props: {
       options: { type: Object as PropType<Record<string, unknown>>, default: () => ({}) }
@@ -198,4 +254,6 @@ export function createStripeElement(def: ElementDefinition) {
         ])
     }
   })
+  // The runtime component is typed loosely; callers get the precise public type.
+  return component as unknown as StripeElementComponent<TOptions, TElement, TExtra, TEvents>
 }
