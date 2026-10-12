@@ -301,6 +301,25 @@ describe('usePaymentRequest', () => {
     expect(pr.count()).toBe(0)
   })
 
+  it('once() delivers the next event only, and its return value removes it early', async () => {
+    const pr = makeMockPaymentRequest()
+    const { api } = withStripe(shallowRef(makeStripe(pr)))
+    await flushPromises()
+
+    const onCancel = vi.fn()
+    api.once('cancel', onCancel)
+    pr.emit('cancel')
+    pr.emit('cancel')
+    expect(onCancel).toHaveBeenCalledTimes(1)
+
+    const onToken = vi.fn()
+    const stop = api.once('token', onToken)
+    stop()
+    pr.emit('token', {})
+    expect(onToken).not.toHaveBeenCalled()
+    expect(pr.count()).toBe(0)
+  })
+
   it('off(event) without a handler removes every handler registered for that event', async () => {
     const pr = makeMockPaymentRequest()
     const { api } = withStripe(shallowRef(makeStripe(pr)))

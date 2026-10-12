@@ -171,6 +171,20 @@ export function usePaymentRequest(options: PaymentRequestOptions): UsePaymentReq
     return () => off(event, handler)
   }
 
+  // Stripe's own once() would bypass the listener list that moves handlers to a new
+  // request and detaches them on dispose, so build it on on() / off().
+  const once = <K extends PaymentRequestEventType>(
+    event: K,
+    handler: PaymentRequestEventHandler<K>
+  ) => {
+    const deliver = handler as (...args: unknown[]) => unknown
+    const wrapper = ((...args: unknown[]) => {
+      off(event, wrapper)
+      return deliver(...args)
+    }) as PaymentRequestEventHandler<K>
+    return on(event, wrapper)
+  }
+
   if (getCurrentScope()) {
     onScopeDispose(() => {
       const pr = paymentRequest.value
@@ -190,6 +204,7 @@ export function usePaymentRequest(options: PaymentRequestOptions): UsePaymentReq
     abort: () => call('abort', (pr) => pr.abort()),
     isShowing: () => paymentRequest.value?.isShowing() ?? false,
     on,
+    once,
     off,
     loading: readonly(loading),
     error: readonly(error)

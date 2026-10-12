@@ -72,7 +72,7 @@ Wallets need HTTPS (or `localhost`), a registered domain for Apple Pay and Googl
 
 ### Events
 
-Register handlers with `on(event, handler)`. Handlers registered before Stripe.js has loaded are attached as soon as the `PaymentRequest` exists. `on` returns a function that removes the handler; `off(event, handler)` does the same, and `off(event)` removes every handler you registered for that event.
+Register handlers with `on(event, handler)`. Handlers registered before Stripe.js has loaded are attached as soon as the `PaymentRequest` exists. `on` returns a function that removes the handler; `off(event, handler)` does the same, and `off(event)` removes every handler you registered for that event. `once(event, handler)` works like `on` but removes the handler after its first event (remove it earlier with the function it returns).
 
 | Event | Payload | When |
 |-------|---------|------|
@@ -105,6 +105,10 @@ interface UsePaymentRequestReturn {
     event: K,
     handler: PaymentRequestEventHandler<K>
   ) => () => void
+  once: <K extends PaymentRequestEventType>(
+    event: K,
+    handler: PaymentRequestEventHandler<K>
+  ) => () => void
   off: <K extends PaymentRequestEventType>(
     event: K,
     handler?: PaymentRequestEventHandler<K>
@@ -116,13 +120,14 @@ interface UsePaymentRequestReturn {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `paymentRequest` | `Readonly<Ref<PaymentRequest \| null>>` | The Stripe.js `PaymentRequest`, or `null` until Stripe.js has loaded. Use it for anything not wrapped here, such as `once()`. |
+| `paymentRequest` | `Readonly<Ref<PaymentRequest \| null>>` | The Stripe.js `PaymentRequest`, or `null` until Stripe.js has loaded. Use it for anything not wrapped here. |
 | `canMakePayment` | `Readonly<Ref<CanMakePaymentResult \| null>>` | The wallets `canMakePayment()` reported, or `null` (see above). |
 | `show` | `() => void` | Opens the browser's payment interface. Call it from a click handler. |
 | `update` | `(options: PaymentRequestUpdateOptions) => void` | Updates `currency`, `total`, `displayItems`, `shippingOptions` or `applePay`. Stripe does not allow it while the interface is showing. |
 | `abort` | `() => void` | Closes the payment interface. |
 | `isShowing` | `() => boolean` | `true` while the payment interface is showing. |
 | `on` | `(event, handler) => () => void` | Adds an event handler; returns a function that removes it. |
+| `once` | `(event, handler) => () => void` | Like `on`, but the handler is removed after its first event; returns a function that removes it earlier. |
 | `off` | `(event, handler?) => void` | Removes a handler added with `on`, or all of them for `event`. |
 | `loading` | `Readonly<Ref<boolean>>` | `true` while `canMakePayment()` is pending. |
 | `error` | `Readonly<Ref<string \| null>>` | The last error, or `null`. |

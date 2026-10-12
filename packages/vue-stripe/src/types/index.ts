@@ -632,6 +632,11 @@ export interface UsePaymentRequestReturn {
     event: K,
     handler: PaymentRequestEventHandler<K>
   ) => () => void
+  /** Like `on`, but removes the handler after its first event. Returns a function that removes it. */
+  once: <K extends PaymentRequestEventType>(
+    event: K,
+    handler: PaymentRequestEventHandler<K>
+  ) => () => void
   /** Removes a handler registered with `on`, or all of them for `event` when `handler` is omitted. */
   off: <K extends PaymentRequestEventType>(
     event: K,
