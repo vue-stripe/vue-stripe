@@ -42,7 +42,6 @@ vue-stripe/
 │   ├── docs/              # VitePress documentation
 │   └── playground/        # Development playground
 └── tools/
-    ├── eslint-config/     # Shared ESLint config
     └── typescript-config/ # Shared TypeScript config
 ```
 

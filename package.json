@@ -26,8 +26,6 @@
     "stripe:clean": "bash scripts/seed-stripe.sh --clean-only"
   },
   "devDependencies": {
-    "@turbo/gen": "^2.5.8",
-    "@vue-stripe/eslint-config": "workspace:*",
     "@vue-stripe/typescript-config": "workspace:*",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",

@@ -111,7 +111,6 @@ vue-stripe/
 │   └── playground/        # Development playground
 │   └── backend/           # Backend for the playground
 └── tools/
-    ├── eslint-config/     # Shared ESLint configuration
     └── typescript-config/ # Shared TypeScript configuration
 ```
 
