@@ -127,8 +127,8 @@ vue-stripe/
 
 ### Prerequisites
 
-- Node.js 20+
-- pnpm 8+
+- Node.js 22+ (24 recommended, see `.nvmrc`)
+- pnpm 12+ (`corepack enable`)
 
 ### Getting Started
 

@@ -2,3 +2,7 @@ packages:
   - 'packages/*'
   - 'apps/*'
   - 'tools/*'
+allowBuilds:
+  esbuild: true
+  sharp: false
+  vue-demi: true

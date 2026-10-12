@@ -10,8 +10,8 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to help us main
 
 ### Prerequisites
 
-- Node.js 18+
-- pnpm 8+
+- Node.js 22+ (24 recommended, see `.nvmrc`)
+- pnpm 12+ (`corepack enable`)
 
 ### Setup
 

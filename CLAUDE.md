@@ -86,4 +86,4 @@ Vitest + `@vue/test-utils` in a `jsdom` environment; setup in `tests/setup.ts`. 
 - Public API surface is `src/index.ts` — new components/composables/types must be exported there (and components also via `src/components/index.ts`). `tests/public-exports.test.ts` guards this.
 - Support backwards-compatible prop aliases where the existing code does (e.g. `VueStripeProvider` accepts both `publishableKey` and `stripeKey`).
 - Errors use the typed classes in `src/utils/errors.ts`; prefix console output with `[Vue Stripe]`.
-- `node >=20`, `pnpm >=8`. Husky + lint-staged run eslint/prettier on commit.
+- `node >=22` (`.nvmrc`: 24), `pnpm >=12` (via corepack; dependency build scripts are allow-listed under `allowBuilds` in `pnpm-workspace.yaml`). Husky + lint-staged run eslint/prettier on commit.
