@@ -32,5 +32,9 @@ export { default as VueStripeCheckoutElementsProvider } from './VueStripeCheckou
 /** @deprecated Renamed to VueStripeCheckoutElementsProvider (mirrors Stripe's initCheckoutElementsSdk); removed in v7. */
 export { default as VueStripeCheckoutProvider } from './VueStripeCheckoutProvider.vue'
 
+// Elements for Checkout Sessions (Stripe.js 10)
+export { default as VueStripeTaxIdElement } from './VueStripeTaxIdElement'
+export { default as VueStripeCurrencySelectorElement } from './VueStripeCurrencySelectorElement'
+
 // Pricing Table (v5.3.0)
 export { default as VueStripePricingTable } from './VueStripePricingTable.vue'

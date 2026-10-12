@@ -15,6 +15,8 @@ interface Props {
   stripeAccount?: string
   apiVersion?: string
   locale?: string
+  /** Stripe beta flags, e.g. the Tax ID Element's beta (forwarded to `loadStripe`). */
+  betas?: string[]
   /** Any `loadStripe()` option (`stripeAccount`, `apiVersion`, `locale`, `betas`, ...). Explicit props win. */
   options?: StripeConstructorOptions
 }
@@ -55,6 +57,7 @@ const initialize = async () => {
     const apiVersion = props.apiVersion || props.options?.apiVersion
     const locale = props.locale || props.options?.locale
 
+    if (props.betas?.length) options.betas = props.betas
     if (stripeAccount) options.stripeAccount = stripeAccount
     if (apiVersion) options.apiVersion = apiVersion
     if (locale) options.locale = locale as NonNullable<StripeConstructorOptions['locale']>

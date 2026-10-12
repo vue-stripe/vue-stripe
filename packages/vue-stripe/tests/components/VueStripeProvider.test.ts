@@ -104,6 +104,20 @@ describe('VueStripeProvider', () => {
     })
   })
 
+  it('forwards the betas prop to loadStripe (required by the Tax ID element)', async () => {
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+
+    mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123', betas: ['custom_checkout_tax_id_1'] }
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(mockLoadStripe).toHaveBeenCalledWith('pk_test_123', {
+      betas: ['custom_checkout_tax_id_1']
+    })
+  })
+
   // === New Tests ===
 
   it('should emit load event with Stripe instance', async () => {

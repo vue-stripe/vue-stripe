@@ -190,14 +190,14 @@ export const coverage: CoverageCategory[] = [
       {
         name: 'Currency Selector',
         api: "checkout.createCurrencySelectorElement() / create('currencySelector')",
-        status: 'planned',
-        issue: 473
+        status: 'covered',
+        artifact: 'VueStripeCurrencySelectorElement'
       },
       {
         name: 'Tax ID',
         api: "checkout.createTaxIdElement() / create('taxId')",
-        status: 'planned',
-        issue: 473
+        status: 'covered',
+        artifact: 'VueStripeTaxIdElement'
       }
     ]
   },

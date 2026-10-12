@@ -48,6 +48,11 @@ const MAP: Array<{ component: string; doc: string }> = [
     component: 'VueStripePaymentMethodMessagingElement.ts',
     doc: 'stripe-payment-method-messaging-element.md'
   },
+  { component: 'VueStripeTaxIdElement.ts', doc: 'stripe-tax-id-element.md' },
+  {
+    component: 'VueStripeCurrencySelectorElement.ts',
+    doc: 'stripe-currency-selector-element.md'
+  },
   { component: 'VueStripeCheckout.vue', doc: 'stripe-checkout.md' },
   { component: 'VueStripeCheckoutProvider.vue', doc: 'stripe-checkout-provider.md' },
   { component: 'VueStripePricingTable.vue', doc: 'stripe-pricing-table.md' }
