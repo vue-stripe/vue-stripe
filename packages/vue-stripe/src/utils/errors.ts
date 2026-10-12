@@ -18,28 +18,3 @@ export class VueStripeCheckoutError extends Error {
     this.name = 'VueStripeCheckoutError'
   }
 }
-
-export class VueStripeLoadError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'VueStripeLoadError'
-  }
-}
-
-export function createVueStripeError(
-  type: 'provider' | 'elements' | 'checkout' | 'load',
-  message: string
-): Error {
-  switch (type) {
-    case 'provider':
-      return new VueStripeProviderError(message)
-    case 'elements':
-      return new VueStripeElementsError(message)
-    case 'checkout':
-      return new VueStripeCheckoutError(message)
-    case 'load':
-      return new VueStripeLoadError(message)
-    default:
-      return new Error(message)
-  }
-}

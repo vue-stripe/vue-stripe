@@ -15,11 +15,8 @@ interface Props {
   stripeAccount?: string
   apiVersion?: string
   locale?: string
-  options?: {
-    stripeAccount?: string
-    apiVersion?: string
-    locale?: string
-  }
+  /** Any `loadStripe()` option (`stripeAccount`, `apiVersion`, `locale`, `betas`, ...). Explicit props win. */
+  options?: StripeConstructorOptions
 }
 
 const props = defineProps<Props>()
@@ -52,7 +49,8 @@ const initialize = async () => {
     error.value = null
 
     // Build options object, only including defined values
-    const options: StripeConstructorOptions = {}
+    // Start from every loadStripe() option given in `options`; explicit props win.
+    const options: StripeConstructorOptions = { ...props.options }
     const stripeAccount = props.stripeAccount || props.options?.stripeAccount
     const apiVersion = props.apiVersion || props.options?.apiVersion
     const locale = props.locale || props.options?.locale

@@ -164,6 +164,16 @@ describe('useHandleNextAction', () => {
     expect(result.paymentIntent.status).toBe('succeeded')
   })
 
+  it('forwards a hashedValue (shared payment token flow, Stripe.js 9.4+)', async () => {
+    const handleNextAction = vi.fn(() =>
+      Promise.resolve({ paymentIntent: { status: 'succeeded' } })
+    )
+    const { api } = await mountWith({ handleNextAction }, () => useHandleNextAction())
+
+    await api().handleNextAction({ hashedValue: 'spt_hashed_123' })
+    expect(handleNextAction).toHaveBeenCalledWith({ hashedValue: 'spt_hashed_123' })
+  })
+
   it('surfaces a Stripe error result on the error ref and resets loading', async () => {
     const handleNextAction = vi.fn(() =>
       Promise.resolve({ error: { message: 'Authentication failed' } })

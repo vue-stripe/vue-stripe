@@ -50,6 +50,9 @@ export type {
   StripeAddressElement,
   StripeLinkAuthenticationElement,
   StripeExpressCheckoutElement,
+  StripeTaxIdElement,
+  StripeTaxIdElementOptions,
+  StripeCurrencySelectorElement,
   // Event types
   StripeCardElementChangeEvent,
   StripePaymentElementChangeEvent,
@@ -57,6 +60,7 @@ export type {
   StripeLinkAuthenticationElementChangeEvent,
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementClickEvent,
+  StripeTaxIdElementChangeEvent,
   // Elements with Checkout Sessions (Checkout Elements SDK) types
   StripeCheckoutElementsSdk,
   StripeCheckoutElementsSdkOptions,
@@ -85,9 +89,7 @@ export * from './composables'
 export {
   VueStripeProviderError,
   VueStripeElementsError,
-  VueStripeCheckoutError,
-  VueStripeLoadError,
-  createVueStripeError
+  VueStripeCheckoutError
 } from './utils/errors'
 
 // Export plugin

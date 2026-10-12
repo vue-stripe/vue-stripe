@@ -42,6 +42,9 @@ export type {
   StripeAddressElement,
   StripeLinkAuthenticationElement,
   StripeExpressCheckoutElement,
+  StripeTaxIdElement,
+  StripeTaxIdElementOptions,
+  StripeCurrencySelectorElement,
   // Event types
   StripeCardElementChangeEvent,
   StripePaymentElementChangeEvent,
@@ -49,6 +52,7 @@ export type {
   StripeLinkAuthenticationElementChangeEvent,
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementClickEvent,
+  StripeTaxIdElementChangeEvent,
   // Elements with Checkout Sessions (Checkout Elements SDK) types
   StripeCheckoutElementsSdk,
   StripeCheckoutElementsSdkOptions,
@@ -332,10 +336,19 @@ export interface UseCreatePaymentMethodReturn {
   error: Readonly<Ref<string | null>>
 }
 
-export interface HandleNextActionOptions {
-  /** Client secret of the PaymentIntent or SetupIntent requiring an action. */
-  clientSecret: string
-}
+/**
+ * Either the client secret of the PaymentIntent / SetupIntent requiring an action,
+ * or the `hashedValue` of a shared payment token (agentic commerce, Stripe.js 9.4+).
+ */
+export type HandleNextActionOptions =
+  | {
+      /** Client secret of the PaymentIntent or SetupIntent requiring an action. */
+      clientSecret: string
+    }
+  | {
+      /** Hashed value of a shared payment token. */
+      hashedValue: string
+    }
 
 export interface UseHandleNextActionReturn {
   handleNextAction: (options: HandleNextActionOptions) => Promise<HandleNextActionResult>

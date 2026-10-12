@@ -45,9 +45,12 @@ export function useHandleNextAction(): UseHandleNextActionReturn {
     error.value = null
 
     try {
-      const result = await stripeInstance.stripe.value.handleNextAction({
-        clientSecret: options.clientSecret
-      })
+      // Two Stripe overloads: an Intent client secret, or a shared payment token's hashedValue.
+      const stripe = stripeInstance.stripe.value
+      const result =
+        'hashedValue' in options
+          ? await stripe.handleNextAction({ hashedValue: options.hashedValue })
+          : await stripe.handleNextAction({ clientSecret: options.clientSecret })
 
       if (result.error) {
         error.value = result.error.message || 'Failed to handle next action'

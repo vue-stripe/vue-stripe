@@ -85,6 +85,25 @@ describe('VueStripeProvider', () => {
     })
   })
 
+  it('forwards every StripeConstructorOptions key in `options`, explicit props winning', async () => {
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+
+    mount(VueStripeProvider, {
+      props: {
+        publishableKey: 'pk_test_123',
+        locale: 'fr',
+        options: { locale: 'de', developerTools: { assistant: { enabled: false } } }
+      }
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(mockLoadStripe).toHaveBeenCalledWith('pk_test_123', {
+      locale: 'fr',
+      developerTools: { assistant: { enabled: false } }
+    })
+  })
+
   // === New Tests ===
 
   it('should emit load event with Stripe instance', async () => {
