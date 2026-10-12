@@ -43,8 +43,8 @@
     "test:integration": "vitest run tests/integration",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "type-check": "vue-tsc --noEmit",
-    "typecheck": "vue-tsc --noEmit",
+    "type-check": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "clean": "rm -rf dist",
     "format:check": "prettier --check . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore",
     "format": "prettier --write . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore"
@@ -70,20 +70,16 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@stripe/stripe-js": "^10.0.0",
-    "@vitejs/plugin-vue": "^6.0.10",
     "@vitest/coverage-v8": "^5.0.3",
     "@vue-stripe/typescript-config": "workspace:*",
     "@vue/test-utils": "^2.5.1",
     "eslint": "^10.12.0",
-    "eslint-plugin-vue": "^10.11.1",
     "jsdom": "^30.1.2",
     "prettier": "^3.9.10",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.71.1",
     "vite": "^8.3.4",
-    "vite-plugin-dts": "^5.1.2",
     "vitest": "^5.0.3",
-    "vue": "^3.5.43",
-    "vue-tsc": "^3.3.13"
+    "vue": "^3.5.43"
   }
 }

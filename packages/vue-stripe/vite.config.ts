@@ -1,6 +1,4 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import dts from 'vite-plugin-dts'
 import { resolve } from 'path'
 import pkg from './package.json' with { type: 'json' }
 
@@ -8,17 +6,6 @@ export default defineConfig({
   define: {
     __VUE_STRIPE_VERSION__: JSON.stringify(pkg.version)
   },
-  plugins: [
-    vue(),
-    dts({
-      processor: 'vue',
-      outDirs: 'dist/types',
-      insertTypesEntry: true,
-      staticImport: true,
-      bundleTypes: false,
-      exclude: ['**/*.spec.ts', '**/*.test.ts', 'src/**/__tests__/**']
-    })
-  ],
   build: {
     lib: {
       entry: resolve(import.meta.dirname, 'src/index.ts'),
@@ -39,8 +26,7 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      // Note: 'vue' is NOT externalized - it gets aliased to vue-demi
-      // This ensures all vue imports become vue-demi imports for Vue 2/3 compatibility
+      // Source imports Vue APIs only from vue-demi (enforced by lint), which picks Vue 2.7 or 3.
       external: ['vue-demi', '@stripe/stripe-js'],
       output: {
         globals: {
@@ -53,10 +39,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(import.meta.dirname, 'src'),
-      // Alias vue to vue-demi so compiled SFC templates use vue-demi
-      // This is critical for Vue 2 compatibility
-      vue: 'vue-demi'
+      '@': resolve(import.meta.dirname, 'src')
     }
   }
 })
