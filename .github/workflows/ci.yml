@@ -16,6 +16,9 @@ jobs:
   verify:
     name: Lint, type-check, test, build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
@@ -48,6 +51,19 @@ jobs:
 
       - name: Test (coverage thresholds + doc-contract)
         run: pnpm --filter @vue-stripe/vue-stripe test:coverage
+
+      - name: Coverage summary on the PR
+        if: always() && matrix.node == 24 && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
+        with:
+          working-directory: packages/vue-stripe
+
+      - name: Upload coverage
+        if: always() && matrix.node == 24
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: packages/vue-stripe/coverage/lcov.info
 
       - name: Build package
         run: pnpm --filter @vue-stripe/vue-stripe build

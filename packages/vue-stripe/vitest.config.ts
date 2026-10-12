@@ -18,17 +18,21 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'html', 'lcov'],
+      // json-summary + json feed the PR coverage comment in CI.
+      reporter: ['text', 'html', 'lcov', 'json-summary', 'json'],
       reportsDirectory: './coverage',
       include: ['src/**/*.ts'],
       exclude: ['src/index.ts', 'src/**/index.ts', 'src/types/**', 'src/utils/constants.ts'],
-      // Ratchet: one point below the totals measured after the render-function
-      // rewrite (91.58 / 79.36 / 98.07 / 92.81, #481). Never lower these.
+      // Self-ratcheting: when coverage rises, the run rewrites these numbers upward
+      // (rounded down to whole points). Never edit them downward.
+      // perFile: every src file must also meet these floors on its own.
       thresholds: {
-        statements: 90,
-        branches: 78,
-        functions: 97,
-        lines: 91
+        autoUpdate: (newThreshold: number) => Math.floor(newThreshold),
+        perFile: { statements: 80, branches: 70, functions: 60, lines: 80 },
+        statements: 98,
+        branches: 87,
+        functions: 100,
+        lines: 99
       }
     }
   }

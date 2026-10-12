@@ -77,7 +77,7 @@ Both follow the same lifecycle contract: create the element from the injected `e
 
 ### Tests
 
-Vitest + `@vue/test-utils` in a `jsdom` environment; setup in `tests/setup.ts`. Coverage uses **ratchet thresholds** in `vitest.config.ts` — set just below current levels to prevent regressions; raise them as coverage improves rather than lowering.
+Vitest + `@vue/test-utils` in a `jsdom` environment; setup in `tests/setup.ts`. Coverage thresholds in `vitest.config.ts` **ratchet themselves**: `autoUpdate` rewrites them upward whenever coverage rises (commit the change), and `perFile` floors (80/70/60/80) make every `src` file meet a minimum on its own, so a new untested file fails CI. Never edit a threshold downward; a PR that lowers one is rejected. CI comments the coverage summary on each PR.
 
 `tests/docs-contract.test.ts` is a guard test: it extracts each component's real `defineEmits` surface and fails if `apps/docs/api/components/*.md` doesn't document those events. **When you add/remove a component event, update the matching docs page** or this test fails (set `DOCS_CONTRACT_STRICT=0` only to temporarily downgrade to warnings).
 
