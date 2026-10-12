@@ -18,7 +18,7 @@
 
 <p align="center">
   <strong>Vue.js library for Stripe Checkout and Elements</strong><br/>
-  Vue 3.x with TypeScript-first development
+  Vue 3 and Vue 2.7, TypeScript-first
 </p>
 
 <p align="center">
@@ -37,164 +37,118 @@
 
 Thank you for your patience! This is an early release of the new Vue Stripe. As with any early release, you may encounter bugs. If you find any issues or have suggestions, please [create an issue](https://github.com/vue-stripe/vue-stripe/issues) or [submit a pull request](https://github.com/vue-stripe/vue-stripe/pulls). Your contributions are greatly appreciated!
 
+## Requirements
+
+| Package | Version |
+|---------|---------|
+| `vue` | `^2.7.0 \|\| ^3.0.0` (Vue 2.6 is not supported) |
+| `@stripe/stripe-js` | `^10.0.0` (Stripe.js Endive) |
+
+Upgrading from v5? Read [Migrating from v5 to v6](https://vuestripe.com/guide/migration-v6).
+
 ## Installation
 
 ```bash
 npm install @vue-stripe/vue-stripe @stripe/stripe-js
 ```
 
+Import the component styles once, for example in `main.ts`:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
 ## Basic Usage
 
+Composables such as `usePaymentIntent()` read the Stripe context, so call them in a component rendered **inside** `VueStripeElements`:
+
 ```vue
+<!-- CheckoutPage.vue -->
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <VueStripePaymentElement @ready="onReady" />
-      <button @click="processPayment">Pay Now</button>
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement />
+      <PayButton :client-secret="clientSecret" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 
 <script setup lang="ts">
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement,
-  usePaymentIntent
-} from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+import PayButton from './PayButton.vue'
 
 const publishableKey = 'pk_test_...'
-const { confirmPayment } = usePaymentIntent()
-
-const processPayment = async () => {
-  const result = await confirmPayment(clientSecret)
-  // Handle result
-}
+const clientSecret = 'pi_..._secret_...' // from your server
 </script>
 ```
+
+```vue
+<!-- PayButton.vue -->
+<template>
+  <button :disabled="loading" @click="pay">Pay now</button>
+  <p v-if="error">{{ error }}</p>
+</template>
+
+<script setup lang="ts">
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
+const { confirmPayment, loading, error } = usePaymentIntent()
+
+const pay = () =>
+  confirmPayment({
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: `${window.location.origin}/complete` }
+  })
+</script>
 
 ## Components
 
-### Provider Components
+### Providers
 
 | Component | Description |
 |-----------|-------------|
-| `VueStripeProvider` | Root component that loads Stripe.js and provides context |
-| `VueStripeElements` | Creates an Elements instance and provides it to child components |
+| `VueStripeProvider` | Loads Stripe.js and provides the Stripe instance |
+| `VueStripeElements` | Creates an Elements group (client secret or mode/currency/amount) |
+| `VueStripeCheckoutElementsProvider` | Elements with Checkout Sessions (`ui_mode: 'elements'`); `VueStripeCheckoutProvider` is a deprecated alias |
 
-### Payment Components
-
-| Component | Description |
-|-----------|-------------|
-| `VueStripePaymentElement` | Modern payment element supporting 40+ payment methods |
-| `VueStripeExpressCheckoutElement` | Wallet payments (Apple Pay, Google Pay, etc.) |
-| `VueStripeLinkAuthenticationElement` | Link authentication element |
-| `VueStripeAddressElement` | Address collection with Google Maps autocomplete |
-| `VueStripeCheckout` | Embedded Stripe Checkout |
-
-### VueStripeAddressElement
-
-Collect shipping or billing addresses with Google Maps autocomplete:
-
-```vue
-<template>
-  <VueStripeAddressElement
-    ref="addressRef"
-    :options="{ mode: 'shipping' }"
-    @change="onAddressChange"
-  />
-  <button @click="validateAddress">Validate</button>
-</template>
-
-<script setup>
-import { ref } from 'vue'
-
-const addressRef = ref()
-
-// Use getValue() to programmatically get address data
-const validateAddress = async () => {
-  const result = await addressRef.value?.getValue()
-  if (result.complete) {
-    console.log('Valid address:', result.value)
-  }
-}
-</script>
-```
-
-### VueStripeLinkAuthenticationElement
-
-Enable Stripe Link for faster checkout by collecting and authenticating the customer's email.
-
-> **Note:** This element collects email only and **must be paired with `VueStripePaymentElement`** for a complete checkout flow. It cannot process payments on its own.
-
-```vue
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="clientSecret">
-      <!-- Step 1: Email + Link authentication -->
-      <VueStripeLinkAuthenticationElement @change="onEmailChange" />
-
-      <!-- Step 2: Payment methods (auto-fills if Link authenticated) -->
-      <VueStripePaymentElement @change="onPaymentChange" />
-
-      <button :disabled="!canPay">Pay Now</button>
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-
-<script setup>
-import { ref, computed } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripeLinkAuthenticationElement,
-  StripePaymentElement
-} from '@vue-stripe/vue-stripe'
-
-const emailComplete = ref(false)
-const paymentComplete = ref(false)
-const canPay = computed(() => emailComplete.value && paymentComplete.value)
-
-const onEmailChange = (event) => {
-  emailComplete.value = event.complete
-  if (event.complete) {
-    console.log('Email:', event.value.email)
-  }
-}
-
-const onPaymentChange = (event) => {
-  paymentComplete.value = event.complete
-}
-</script>
-```
-
-### Legacy Card Components
+### Elements
 
 | Component | Description |
 |-----------|-------------|
-| `VueStripeCardElement` | Single card input field |
-| `VueStripeCardNumberElement` | Card number input |
-| `VueStripeCardExpiryElement` | Expiry date input |
-| `VueStripeCardCvcElement` | CVC input |
+| `VueStripePaymentElement` | Every payment method in one UI (recommended) |
+| `VueStripeExpressCheckoutElement` | Apple Pay, Google Pay, Link and other wallets |
+| `VueStripeLinkAuthenticationElement` | Email collection and Link sign-in |
+| `VueStripeAddressElement` | Billing or shipping address with autocomplete |
+| `VueStripePaymentMethodMessagingElement` | Buy now, pay later messaging |
+| `VueStripeCardElement` | Single card input |
+| `VueStripeCardNumberElement`, `VueStripeCardExpiryElement`, `VueStripeCardCvcElement` | Split card inputs |
+| `VueStripeIbanElement` | IBAN for SEPA Direct Debit |
+| `VueStripeAuBankAccountElement` | BECS Direct Debit (Australia) |
+| `VueStripeTaxIdElement` | Business tax ID (Checkout Sessions, Stripe beta) |
+| `VueStripeCurrencySelectorElement` | Local currency selection (Checkout Sessions, Adaptive Pricing) |
 
-### European Regional Elements
+Stripe removed the standalone iDEAL, P24, EPS and FPX elements; the Payment Element collects these payment methods.
+
+### Checkout
 
 | Component | Description |
 |-----------|-------------|
-| `VueStripeIbanElement` | IBAN input for SEPA payments |
-| `VueStripeIdealBankElement` | iDEAL bank selector (Netherlands) |
-| `VueStripeP24BankElement` | Przelewy24 bank selector (Poland) |
-| `VueStripeEpsBankElement` | EPS bank selector (Austria) |
+| `VueStripeCheckout` | Button that redirects to a hosted Checkout Session URL |
+| `VueStripePricingTable` | Embeds a pricing table configured in the Stripe Dashboard |
 
 ## Composables
 
 | Composable | Description |
 |------------|-------------|
-| `useStripe()` | Access Stripe instance |
-| `useStripeElements()` | Access Elements instance |
-| `usePaymentIntent()` | Payment confirmation helpers |
-| `useSetupIntent()` | Setup intent handling |
-| `useStripeCheckout()` | Checkout session management |
+| `useStripe()` | The Stripe instance |
+| `useStripeElements()` | The Elements group, `submit()` and `fetchUpdates()` |
+| `usePaymentIntent()` | Confirm and retrieve PaymentIntents |
+| `useSetupIntent()` | Confirm and retrieve SetupIntents |
+| `useCreatePaymentMethod()` | Create a PaymentMethod from Elements |
+| `useHandleNextAction()` | Finish 3D Secure and other next actions |
+| `useCheckoutSession()` | Session state and actions inside `VueStripeCheckoutElementsProvider` |
+| `useStripeCheckout()` | Redirect to a hosted Checkout Session URL |
 
 ## TypeScript
 

@@ -19,12 +19,12 @@
 
 <p align="center">
   <strong>Vue.js library for Stripe Checkout and Elements</strong><br/>
-  Vue 3.x with TypeScript-first development
+  Vue 3 and Vue 2.7, TypeScript-first
 </p>
 
 <p align="center">
   <a href="https://vuestripe.com">Website</a> |
-  <a href="https://vuestripe.com/guides/">Guides</a> |
+  <a href="https://vuestripe.com/guide/introduction">Guides</a> |
   <a href="https://vuestripe.com/api/">API</a>
   <a href="https://playground.vuestripe.com">Playground</a>
   <a href="https://backend.vuestripe.com">Backend</a>
@@ -48,47 +48,81 @@ Thank you for understanding, and for continuing to support Vue Stripe.
 
 ## Features
 
-- **Vue 3** — Built for Vue 3.x
+- **Vue 3 and Vue 2.7** — One build for both, tested on each in CI
+- **Stripe.js 10** — Payment, Express Checkout, Address, Tax ID, Currency Selector and more, plus Checkout Sessions with Elements
 - **TypeScript First** — Full TypeScript support with comprehensive types
 - **Modern Elements** — Payment Element supporting 40+ payment methods
-- **Composition API** — Vue 3 Composition API
+- **Composition API** — Composables for confirming payments and driving Checkout Sessions
 - **Customizable** — Full support for Stripe's Appearance API
 - **Well Tested** — Comprehensive test suite
 - **SSR Ready** — Support for Nuxt 3 and server-side rendering
 
 ## Quick Start
 
+### Requirements
+
+| Package | Version |
+|---------|---------|
+| `vue` | `^2.7.0 \|\| ^3.0.0` (Vue 2.6 is not supported) |
+| `@stripe/stripe-js` | `^10.0.0` (Stripe.js Endive) |
+
+Upgrading from v5? Read [Migrating from v5 to v6](https://vuestripe.com/guide/migration-v6).
+
+### Installation
+
 ```bash
 npm install @vue-stripe/vue-stripe @stripe/stripe-js
 ```
 
+Import the component styles once, for example in `main.ts`:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+### Basic Usage
+
+Composables such as `usePaymentIntent()` read the Stripe context, so call them in a component rendered **inside** `VueStripeElements`:
+
 ```vue
+<!-- CheckoutPage.vue -->
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <VueStripePaymentElement @ready="onReady" />
-      <button @click="processPayment">Pay Now</button>
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement />
+      <PayButton :client-secret="clientSecret" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 
 <script setup lang="ts">
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement,
-  usePaymentIntent
-} from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+import PayButton from './PayButton.vue'
 
 const publishableKey = 'pk_test_...'
-const { confirmPayment } = usePaymentIntent()
-
-const processPayment = async () => {
-  const result = await confirmPayment(clientSecret)
-  // Handle result
-}
+const clientSecret = 'pi_..._secret_...' // from your server
 </script>
 ```
+
+```vue
+<!-- PayButton.vue -->
+<template>
+  <button :disabled="loading" @click="pay">Pay now</button>
+  <p v-if="error">{{ error }}</p>
+</template>
+
+<script setup lang="ts">
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
+const { confirmPayment, loading, error } = usePaymentIntent()
+
+const pay = () =>
+  confirmPayment({
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: `${window.location.origin}/complete` }
+  })
+</script>
 
 ## Documentation
 
@@ -105,10 +139,11 @@ This repository is organized as a monorepo using pnpm workspaces and Turborepo:
 ```
 vue-stripe/
 ├── packages/
-│   └── vue-stripe/        # Main library (@vue-stripe/vue-stripe)
+│   ├── vue-stripe/        # Main library (@vue-stripe/vue-stripe)
+│   └── vue2-smoke/        # Runs the built library under Vue 2.7 in CI
 ├── apps/
 │   ├── docs/              # VitePress documentation site
-│   └── playground/        # Development playground
+│   ├── playground/        # Development playground
 │   └── backend/           # Backend for the playground
 └── tools/
     └── typescript-config/ # Shared TypeScript configuration
@@ -196,4 +231,4 @@ Support this project with your organization. Your logo will show up here with a 
 
 ---
 
-Made with :heart: by [Joff Tiquez](https://twitter.com/jrtiquez)
+Made with love by [Joff Tiquez](https://twitter.com/jrtiquez)

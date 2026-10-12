@@ -46,7 +46,7 @@ Releases are cut **manually** (the library is published from a git tag — there
 3. Tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 4. The `publish.yml` workflow runs on the `v*` tag → `npm publish` + auto-generated GitHub Release notes (from merged PRs).
 
-Use semver: additive/backwards-compatible work is a **minor** bump. Release notes live on [GitHub Releases](https://github.com/vue-stripe/vue-stripe/releases), not a hand-maintained changelog.
+Use semver: additive/backwards-compatible work is a **minor** bump. Release notes live on [GitHub Releases](https://github.com/vue-stripe/vue-stripe/releases), not a hand-maintained changelog. A major release documents every breaking change in `apps/docs/guide/migration-v<N>.md` (v6: `migration-v6.md`), and its GitHub Release links that guide.
 
 ## Architecture
 
