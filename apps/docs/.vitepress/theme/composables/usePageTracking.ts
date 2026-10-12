@@ -9,7 +9,7 @@ export function usePageTracking() {
   const journeySteps = [
     { path: '/guide/introduction', name: 'getting_started', step: 1 },
     { path: '/guide/installation', name: 'getting_started', step: 2 },
-    { path: '/guide/first-payment', name: 'getting_started', step: 3 },
+    { path: '/guide/first-payment', name: 'getting_started', step: 3 }
   ]
 
   const detectComponentType = (path: string): 'api' | 'guide' | null => {
@@ -33,16 +33,16 @@ export function usePageTracking() {
       trackComponentView({
         component_name: componentName,
         component_type: componentType,
-        page_path: path,
+        page_path: path
       })
 
       // Track journey progress
-      const journeyStep = journeySteps.find(step => step.path === path)
+      const journeyStep = journeySteps.find((step) => step.path === path)
       if (journeyStep) {
         trackUserJourney({
           journey_step: componentName,
           journey_name: journeyStep.name,
-          step_number: journeyStep.step,
+          step_number: journeyStep.step
         })
       }
     }
@@ -57,13 +57,16 @@ export function usePageTracking() {
   }
 
   // Track route changes
-  watch(() => route.path, (newPath, oldPath) => {
-    if (newPath !== oldPath) {
-      trackPageContent(newPath)
+  watch(
+    () => route.path,
+    (newPath, oldPath) => {
+      if (newPath !== oldPath) {
+        trackPageContent(newPath)
+      }
     }
-  })
+  )
 
   return {
-    trackPageContent,
+    trackPageContent
   }
 }

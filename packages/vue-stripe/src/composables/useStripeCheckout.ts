@@ -1,4 +1,5 @@
 import { ref, readonly, type Ref } from 'vue-demi'
+import type { RedirectToCheckoutOptions } from '@stripe/stripe-js'
 import { useStripe } from './useStripe'
 import { VueStripeProviderError } from '../utils/errors'
 
@@ -81,8 +82,7 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
    * Check if redirectToCheckout is available (stripe-js v7.x)
    */
   const hasRedirectToCheckout = (): boolean => {
-    return stripe.value !== null &&
-      typeof (stripe.value as any).redirectToCheckout === 'function'
+    return stripe.value !== null && typeof stripe.value.redirectToCheckout === 'function'
   }
 
   /**
@@ -117,7 +117,7 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
       if (!hasRedirectToCheckout()) {
         throw new VueStripeProviderError(
           'redirectToCheckout is not available. This method was removed in @stripe/stripe-js v8.x. ' +
-          'Create a Checkout Session on your server and use redirectToUrl() or pass { url } instead.'
+            'Create a Checkout Session on your server and use redirectToUrl() or pass { url } instead.'
         )
       }
 
@@ -127,10 +127,12 @@ export function useStripeCheckout(): UseStripeCheckoutReturn {
 
       console.warn(
         '[Vue Stripe] Legacy redirectToCheckout is deprecated in @stripe/stripe-js v8.x. ' +
-        'Use redirectToUrl() with a session URL from your server instead.'
+          'Use redirectToUrl() with a session URL from your server instead.'
       )
 
-      const result = await (stripe.value as any).redirectToCheckout(legacyOptions)
+      const result = await stripe.value.redirectToCheckout(
+        legacyOptions as RedirectToCheckoutOptions
+      )
 
       if (result.error) {
         const errorMessage = result.error.message || 'Checkout redirect failed'

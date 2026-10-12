@@ -20,7 +20,7 @@ import {
   Button,
   Input,
   Label,
-  Badge,
+  Badge
 } from '@/components/ui'
 
 const stripeConfig = inject<{
@@ -92,7 +92,6 @@ const onClick = (event: StripeExpressCheckoutElementClickEvent) => {
 const onConfirm = (event: StripeExpressCheckoutElementConfirmEvent) => {
   logEvent('confirm', `Payment type: ${event.expressPaymentType}`)
   // In a real app, you would confirm the payment here
-  console.info('Express checkout confirm event:', event)
 }
 
 const onCancel = () => {
@@ -135,7 +134,9 @@ const onShippingRateChange = (event: unknown) => {
         <!-- Client Secret Form -->
         <div v-else-if="showSecretForm" class="bg-secondary rounded-lg p-5 mt-4">
           <h4 class="font-semibold mb-2">Enter Client Secret</h4>
-          <p class="text-muted-foreground text-sm mb-4">The Express Checkout Element requires a <code>clientSecret</code> from a PaymentIntent.</p>
+          <p class="text-muted-foreground text-sm mb-4">
+            The Express Checkout Element requires a <code>clientSecret</code> from a PaymentIntent.
+          </p>
 
           <div class="mb-4">
             <Label class="mb-2">Client Secret</Label>
@@ -151,7 +152,15 @@ const onShippingRateChange = (event: unknown) => {
           <div class="bg-card rounded-md border p-4 mt-4">
             <h5 class="font-medium text-sm mb-2">How to get a Client Secret:</h5>
             <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
-              <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Payments</a></li>
+              <li>
+                Go to
+                <a
+                  href="https://dashboard.stripe.com/test/payments"
+                  target="_blank"
+                  class="text-primary hover:underline"
+                  >Stripe Dashboard → Payments</a
+                >
+              </li>
               <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
               <li>Enter an amount (e.g., $10.00)</li>
               <li>Copy the <code>client_secret</code> from the response</li>
@@ -167,8 +176,8 @@ const onShippingRateChange = (event: unknown) => {
           <h4 class="font-semibold mb-3">Configuration</h4>
           <div class="p-4 bg-secondary rounded-lg">
             <p class="text-muted-foreground text-sm">
-              Express Checkout buttons are configured with <code>buy</code> button type and <code>black</code> theme.
-              The actual availability of payment methods depends on:
+              Express Checkout buttons are configured with <code>buy</code> button type and
+              <code>black</code> theme. The actual availability of payment methods depends on:
             </p>
             <ul class="text-muted-foreground text-sm mt-2 pl-5 list-disc space-y-1">
               <li>Customer's device and browser (Apple Pay requires Safari on Apple devices)</li>
@@ -187,15 +196,22 @@ const onShippingRateChange = (event: unknown) => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground text-sm mb-4">
-          Wallet payment buttons will appear below if available on your device.
-          Testing typically requires a real device with a configured wallet.
+          Wallet payment buttons will appear below if available on your device. Testing typically
+          requires a real device with a configured wallet.
         </p>
 
         <!-- Show current secret and allow clearing -->
         <div class="flex items-center gap-3 p-3 bg-secondary rounded-md flex-wrap mb-4">
           <span class="text-sm text-muted-foreground">Client Secret:</span>
-          <code class="font-mono text-xs bg-card px-2 py-0.5 rounded">{{ clientSecret.slice(0, 15) }}...{{ clientSecret.slice(-8) }}</code>
-          <Button size="sm" variant="ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
+          <code class="font-mono text-xs bg-card px-2 py-0.5 rounded"
+            >{{ clientSecret.slice(0, 15) }}...{{ clientSecret.slice(-8) }}</code
+          >
+          <Button
+            size="sm"
+            variant="ghost"
+            title="Clear and enter new secret"
+            @click="localClientSecret = ''"
+          >
             Clear
           </Button>
         </div>
@@ -237,9 +253,7 @@ const onShippingRateChange = (event: unknown) => {
           </div>
           <div v-else class="text-muted-foreground text-sm">
             <p>No wallet payment methods available on this device/browser.</p>
-            <p class="text-sm mt-2">
-              This is normal when testing. Express Checkout requires:
-            </p>
+            <p class="text-sm mt-2">This is normal when testing. Express Checkout requires:</p>
             <ul class="text-sm mt-2 pl-5 list-disc space-y-1">
               <li>Apple Pay: Safari on macOS/iOS with Apple Wallet configured</li>
               <li>Google Pay: Chrome with Google Pay configured</li>
@@ -263,11 +277,12 @@ const onShippingRateChange = (event: unknown) => {
           <div v-for="(entry, index) in eventLog" :key="index" class="flex gap-3 py-1 text-sm">
             <span class="text-muted-foreground">{{ entry.time }}</span>
             <span class="font-medium text-primary">{{ entry.event }}</span>
-            <span v-if="entry.data" class="text-muted-foreground break-words">{{ entry.data }}</span>
+            <span v-if="entry.data" class="text-muted-foreground break-words">{{
+              entry.data
+            }}</span>
           </div>
         </div>
       </CardContent>
     </Card>
-
   </div>
 </template>

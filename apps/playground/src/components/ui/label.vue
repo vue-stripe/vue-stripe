@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
 import { Label as LabelPrimitive } from 'radix-vue'
-import { cn } from '@/lib/utils'
+import { cn, forwardable } from '@/lib/utils'
 
 interface Props {
   class?: HTMLAttributes['class']
@@ -19,7 +19,7 @@ const labelClass = computed(() =>
 </script>
 
 <template>
-  <LabelPrimitive :class="labelClass" :for="props.for">
+  <LabelPrimitive :class="labelClass" v-bind="forwardable({ for: props.for })">
     <slot />
   </LabelPrimitive>
 </template>

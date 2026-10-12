@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import { h, inject, ref } from 'vue-demi'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
-import { stripeElementsInjectionKey, stripeInjectionKey } from '../../src/utils/injection-keys'
+import { stripeElementsInjectionKey } from '../../src/utils/injection-keys'
 import { flushPromises } from '../setup'
 
 describe('VueStripeElements', () => {
@@ -203,9 +203,14 @@ describe('VueStripeElements', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(ChildComponent)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(ChildComponent)
+            }
+          )
       }
     })
 
@@ -243,9 +248,10 @@ describe('VueStripeElements', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {
-          clientSecret: clientSecret.value
-        })
+        default: () =>
+          h(VueStripeElements, {
+            clientSecret: clientSecret.value
+          })
       }
     })
 
@@ -269,7 +275,9 @@ describe('VueStripeElements', () => {
     )
 
     // Provider's loading state
-    expect(wrapper.find('.vue-stripe-loading').exists() || wrapper.find('.custom-spinner').exists()).toBe(true)
+    expect(
+      wrapper.find('.vue-stripe-loading').exists() || wrapper.find('.custom-spinner').exists()
+    ).toBe(true)
   })
 
   it('should render default error message when no error slot provided', async () => {
@@ -345,10 +353,16 @@ describe('VueStripeElements options and reactivity', () => {
   })
 
   it('applies appearance and locale changes through elements.update() without re-creating', async () => {
-    const { stripe, elementsInstance, props } = await setup({ clientSecret: 'pi_1_secret_2', appearance: { theme: 'stripe' } })
+    const { stripe, elementsInstance, props } = await setup({
+      clientSecret: 'pi_1_secret_2',
+      appearance: { theme: 'stripe' }
+    })
     props.value = { clientSecret: 'pi_1_secret_2', appearance: { theme: 'night' }, locale: 'fr' }
     await flushPromises()
-    expect(elementsInstance.update).toHaveBeenCalledWith({ appearance: { theme: 'night' }, locale: 'fr' })
+    expect(elementsInstance.update).toHaveBeenCalledWith({
+      appearance: { theme: 'night' },
+      locale: 'fr'
+    })
     expect(stripe.elements).toHaveBeenCalledTimes(1)
   })
 })

@@ -7,6 +7,10 @@ import {
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
+import type {
+  StripePaymentElementChangeEvent,
+  StripePaymentElementOptions
+} from '@stripe/stripe-js'
 import {
   Card,
   CardHeader,
@@ -19,7 +23,7 @@ import {
   Label,
   Tabs,
   TabsList,
-  TabsTrigger,
+  TabsTrigger
 } from '@/components/ui'
 
 // Child component for payment submission (needs to be inside VueStripeElements)
@@ -68,26 +72,31 @@ const PaymentForm = defineComponent({
         } else if (paymentIntent?.status === 'succeeded') {
           emit('payment-success')
         }
-      } catch (err: any) {
-        emit('payment-error', err.message || 'Payment failed')
+      } catch (err: unknown) {
+        emit('payment-error', (err instanceof Error && err.message) || 'Payment failed')
       } finally {
         processing.value = false
       }
     }
 
-    return () => h('div', { class: 'mt-5' }, [
-      h(Button, {
-        class: 'w-full',
-        size: 'lg',
-        disabled: !props.paymentComplete || processing.value,
-        onClick: handleSubmit
-      }, () => processing.value ? 'Processing...' : 'Pay Now'),
-      h('p', { class: 'text-muted-foreground text-sm mt-3 text-center' }, [
-        'Use test card ',
-        h('code', { class: 'bg-muted px-1.5 py-0.5 rounded text-xs' }, '4242 4242 4242 4242'),
-        ' with any future date and CVC'
+    return () =>
+      h('div', { class: 'mt-5' }, [
+        h(
+          Button,
+          {
+            class: 'w-full',
+            size: 'lg',
+            disabled: !props.paymentComplete || processing.value,
+            onClick: handleSubmit
+          },
+          () => (processing.value ? 'Processing...' : 'Pay Now')
+        ),
+        h('p', { class: 'text-muted-foreground text-sm mt-3 text-center' }, [
+          'Use test card ',
+          h('code', { class: 'bg-muted px-1.5 py-0.5 rounded text-xs' }, '4242 4242 4242 4242'),
+          ' with any future date and CVC'
+        ])
       ])
-    ])
   }
 })
 
@@ -130,15 +139,17 @@ watch([selectedLayout, selectedTheme, showWallets], () => {
 })
 
 // Computed element options
-const elementOptions = computed(() => ({
+const elementOptions = computed((): StripePaymentElementOptions => ({
   layout: {
     type: selectedLayout.value,
     defaultCollapsed: selectedLayout.value === 'accordion',
     radios: selectedLayout.value === 'accordion',
     spacedAccordionItems: selectedLayout.value === 'accordion'
   },
-  business: businessName.value ? { name: businessName.value } : undefined,
-  wallets: showWallets.value ? { applePay: 'auto', googlePay: 'auto' } : { applePay: 'never', googlePay: 'never' }
+  ...(businessName.value ? { business: { name: businessName.value } } : {}),
+  wallets: showWallets.value
+    ? { applePay: 'auto', googlePay: 'auto' }
+    : { applePay: 'never', googlePay: 'never' }
 }))
 
 // Computed appearance based on theme
@@ -170,7 +181,7 @@ const appearance = computed(() => {
 })
 
 // Event log
-const eventLog = ref<Array<{ time: string; event: string; data?: string }>>([])
+const eventLog = ref<Array<{ time: string; event: string; data?: string | undefined }>>([])
 
 const logEvent = (event: string, data?: string) => {
   const time = new Date().toLocaleTimeString()
@@ -187,7 +198,7 @@ const onReady = () => {
   logEvent('ready', 'Payment Element mounted')
 }
 
-const onChange = (event: any) => {
+const onChange = (event: StripePaymentElementChangeEvent) => {
   paymentComplete.value = event.complete
   if (event.value?.type) {
     logEvent('change', `type: ${event.value.type}, complete: ${event.complete}`)
@@ -216,8 +227,8 @@ const onLoaderStop = () => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          The Payment Element is Stripe's recommended all-in-one payment UI.
-          It automatically handles cards, wallets, bank transfers, and more.
+          The Payment Element is Stripe's recommended all-in-one payment UI. It automatically
+          handles cards, wallets, bank transfers, and more.
         </p>
         <p class="text-sm mb-4">
           <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
@@ -235,7 +246,11 @@ const onLoaderStop = () => {
         <!-- Client Secret Form -->
         <div v-else-if="showSecretForm" class="bg-secondary rounded-lg p-5 mt-4">
           <h4 class="font-semibold mb-2">Enter Client Secret</h4>
-          <p class="text-muted-foreground text-sm mb-4">The Payment Element requires a <code class="bg-muted px-1.5 py-0.5 rounded text-xs">clientSecret</code> from a PaymentIntent.</p>
+          <p class="text-muted-foreground text-sm mb-4">
+            The Payment Element requires a
+            <code class="bg-muted px-1.5 py-0.5 rounded text-xs">clientSecret</code> from a
+            PaymentIntent.
+          </p>
 
           <div class="space-y-2">
             <Label for="client-secret">Client Secret</Label>
@@ -251,10 +266,22 @@ const onLoaderStop = () => {
           <div class="bg-card rounded-md border p-4 mt-4">
             <h5 class="font-medium text-sm mb-2">How to get a Client Secret:</h5>
             <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
-              <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Payments</a></li>
+              <li>
+                Go to
+                <a
+                  href="https://dashboard.stripe.com/test/payments"
+                  target="_blank"
+                  class="text-primary hover:underline"
+                  >Stripe Dashboard → Payments</a
+                >
+              </li>
               <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
               <li>Enter an amount (e.g., $10.00)</li>
-              <li>Copy the <code class="bg-muted px-1.5 py-0.5 rounded text-xs">client_secret</code> from the response</li>
+              <li>
+                Copy the
+                <code class="bg-muted px-1.5 py-0.5 rounded text-xs">client_secret</code> from the
+                response
+              </li>
             </ol>
           </div>
         </div>
@@ -262,10 +289,22 @@ const onLoaderStop = () => {
         <!-- Payment Element -->
         <div v-else class="mt-4 space-y-4">
           <!-- Show current secret and allow clearing -->
-          <div class="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md flex-wrap">
-            <span class="text-sm font-medium text-green-700 dark:text-green-400">Client Secret:</span>
-            <code class="font-mono text-xs bg-white dark:bg-slate-800 px-2 py-0.5 rounded flex-1 min-w-0 truncate">{{ clientSecret.slice(0, 15) }}...{{ clientSecret.slice(-8) }}</code>
-            <Button size="sm" variant="ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
+          <div
+            class="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md flex-wrap"
+          >
+            <span class="text-sm font-medium text-green-700 dark:text-green-400"
+              >Client Secret:</span
+            >
+            <code
+              class="font-mono text-xs bg-white dark:bg-slate-800 px-2 py-0.5 rounded flex-1 min-w-0 truncate"
+              >{{ clientSecret.slice(0, 15) }}...{{ clientSecret.slice(-8) }}</code
+            >
+            <Button
+              size="sm"
+              variant="ghost"
+              title="Clear and enter new secret"
+              @click="localClientSecret = ''"
+            >
               Clear
             </Button>
           </div>
@@ -276,7 +315,9 @@ const onLoaderStop = () => {
               <div class="space-y-6">
                 <!-- Layout Selection -->
                 <div class="space-y-3">
-                  <Label class="text-xs uppercase tracking-wide text-muted-foreground">Layout Style</Label>
+                  <Label class="text-xs uppercase tracking-wide text-muted-foreground"
+                    >Layout Style</Label
+                  >
                   <Tabs v-model="selectedLayout" class="w-full">
                     <TabsList class="grid w-full grid-cols-3">
                       <TabsTrigger value="tabs">Tabs</TabsTrigger>
@@ -300,8 +341,14 @@ const onLoaderStop = () => {
 
                 <!-- Wallets Toggle -->
                 <div class="space-y-3">
-                  <Label class="text-xs uppercase tracking-wide text-muted-foreground">Digital Wallets</Label>
-                  <Tabs :model-value="showWallets ? 'show' : 'hide'" @update:model-value="showWallets = $event === 'show'" class="w-full">
+                  <Label class="text-xs uppercase tracking-wide text-muted-foreground"
+                    >Digital Wallets</Label
+                  >
+                  <Tabs
+                    :model-value="showWallets ? 'show' : 'hide'"
+                    class="w-full"
+                    @update:model-value="showWallets = $event === 'show'"
+                  >
                     <TabsList class="grid w-full grid-cols-2">
                       <TabsTrigger value="show">Show Wallets</TabsTrigger>
                       <TabsTrigger value="hide">Hide Wallets</TabsTrigger>
@@ -311,7 +358,11 @@ const onLoaderStop = () => {
 
                 <!-- Business Name -->
                 <div class="space-y-2">
-                  <Label for="business-name" class="text-xs uppercase tracking-wide text-muted-foreground">Business Name (optional)</Label>
+                  <Label
+                    for="business-name"
+                    class="text-xs uppercase tracking-wide text-muted-foreground"
+                    >Business Name (optional)</Label
+                  >
                   <Input
                     id="business-name"
                     v-model="businessName"
@@ -353,7 +404,7 @@ const onLoaderStop = () => {
                   :client-secret="clientSecret"
                   :payment-complete="paymentComplete"
                   @payment-success="paymentStatus = 'succeeded'"
-                  @payment-error="(msg) => paymentError = msg"
+                  @payment-error="(msg) => (paymentError = msg)"
                 />
               </VueStripeElements>
             </VueStripeProvider>
@@ -380,7 +431,11 @@ const onLoaderStop = () => {
           <div v-if="eventLog.length === 0" class="text-muted-foreground italic text-center py-4">
             Interact with the Payment Element to see events...
           </div>
-          <div v-for="(entry, index) in eventLog" :key="index" class="flex gap-3 py-1.5 text-sm border-b border-border last:border-0">
+          <div
+            v-for="(entry, index) in eventLog"
+            :key="index"
+            class="flex gap-3 py-1.5 text-sm border-b border-border last:border-0"
+          >
             <span class="text-muted-foreground font-mono text-xs">{{ entry.time }}</span>
             <span class="font-medium text-primary">{{ entry.event }}</span>
             <span v-if="entry.data" class="text-muted-foreground">{{ entry.data }}</span>
@@ -388,6 +443,5 @@ const onLoaderStop = () => {
         </div>
       </CardContent>
     </Card>
-
   </div>
 </template>

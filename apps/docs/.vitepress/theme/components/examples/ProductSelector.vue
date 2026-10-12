@@ -43,7 +43,7 @@ onMounted(() => {
 
 defineExpose({
   selected,
-  reload: loadProducts,
+  reload: loadProducts
 })
 </script>
 

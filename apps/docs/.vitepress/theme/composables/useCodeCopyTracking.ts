@@ -7,9 +7,8 @@ export function useCodeCopyTracking() {
   const detectLanguage = (codeBlock: HTMLElement): string => {
     // Try to get language from class names
     const classList = Array.from(codeBlock.classList)
-    const langClass = classList.find(cls =>
-      cls.startsWith('language-') ||
-      cls.startsWith('lang-')
+    const langClass = classList.find(
+      (cls) => cls.startsWith('language-') || cls.startsWith('lang-')
     )
 
     if (langClass) {
@@ -20,9 +19,8 @@ export function useCodeCopyTracking() {
     const pre = codeBlock.closest('pre')
     if (pre) {
       const preClasses = Array.from(pre.classList)
-      const preLangClass = preClasses.find(cls =>
-        cls.startsWith('language-') ||
-        cls.startsWith('lang-')
+      const preLangClass = preClasses.find(
+        (cls) => cls.startsWith('language-') || cls.startsWith('lang-')
       )
       if (preLangClass) {
         return preLangClass.replace(/^(language-|lang-)/, '')
@@ -42,8 +40,9 @@ export function useCodeCopyTracking() {
 
       if (copyButton) {
         // Find the associated code block
-        const codeContainer = copyButton.closest('.vp-code-group, div[class*="language-"], pre') ||
-                            copyButton.parentElement?.querySelector('code, pre')
+        const codeContainer =
+          copyButton.closest('.vp-code-group, div[class*="language-"], pre') ||
+          copyButton.parentElement?.querySelector('code, pre')
 
         if (codeContainer) {
           const codeElement = codeContainer.querySelector('code') || codeContainer
@@ -53,7 +52,7 @@ export function useCodeCopyTracking() {
           trackCodeCopy({
             code_language: language,
             code_length: codeText.length,
-            page_path: window.location.pathname,
+            page_path: window.location.pathname
           })
         }
       }
@@ -74,7 +73,7 @@ export function useCodeCopyTracking() {
         trackCodeCopy({
           code_language: language,
           code_length: codeText.length,
-          page_path: window.location.pathname,
+          page_path: window.location.pathname
         })
       }
     }
@@ -101,6 +100,6 @@ export function useCodeCopyTracking() {
   })
 
   return {
-    setupCodeCopyTracking,
+    setupCodeCopyTracking
   }
 }

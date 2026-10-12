@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { ref, inject, defineComponent, h, computed } from 'vue'
-import { VueStripeProvider, VueStripeElements, VueStripeCardElement, useStripeElements } from '@vue-stripe/vue-stripe'
+import { ref, inject, defineComponent, h, computed, type PropType } from 'vue'
+import { CircleCheck, CircleX, Moon, Palette } from 'lucide-vue-next'
+import {
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeCardElement,
+  useStripeElements
+} from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -13,7 +19,7 @@ import {
   Label,
   Tabs,
   TabsList,
-  TabsTrigger,
+  TabsTrigger
 } from '@/components/ui'
 
 const stripeConfig = inject<{
@@ -26,22 +32,25 @@ const events = ref<{ time: string; type: string; message: string }[]>([])
 const log = (type: string, message: string) => {
   const time = new Date().toLocaleTimeString()
   events.value.unshift({ time, type, message })
-  console.info(`[StripeElements Test] ${type}:`, message)
 }
 
 // State for testing different scenarios
 const testScenario = ref<'basic' | 'with-options' | 'appearance' | 'dark-theme'>('basic')
 
 // Mock client secret (in real app, this comes from your backend)
-const clientSecret = ref<string>('')
+const clientSecretInput = ref<string>('')
 
 // Validate client secret format
 const clientSecretStatus = computed(() => {
-  if (!clientSecret.value) {
-    return { valid: false, type: 'none', message: 'No client secret provided (optional for CardElement)' }
+  if (!clientSecretInput.value) {
+    return {
+      valid: false,
+      type: 'none',
+      message: 'No client secret provided (optional for CardElement)'
+    }
   }
 
-  const value = clientSecret.value.trim()
+  const value = clientSecretInput.value.trim()
 
   if (value.startsWith('pi_') && value.includes('_secret_')) {
     return { valid: true, type: 'payment_intent', message: 'Valid PaymentIntent client secret' }
@@ -51,41 +60,58 @@ const clientSecretStatus = computed(() => {
     return { valid: true, type: 'setup_intent', message: 'Valid SetupIntent client secret' }
   }
 
-  return { valid: false, type: 'invalid', message: 'Invalid format. Expected pi_xxx_secret_xxx or seti_xxx_secret_xxx' }
+  return {
+    valid: false,
+    type: 'invalid',
+    message: 'Invalid format. Expected pi_xxx_secret_xxx or seti_xxx_secret_xxx'
+  }
 })
 
 // Computed for clean client secret value
-const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
+const cleanClientSecret = computed(() => clientSecretInput.value.trim() || undefined)
 
 // Child component that uses useStripeElements to verify provide/inject works
 const ElementsConsumer = defineComponent({
   name: 'ElementsConsumer',
   props: {
-    clientSecret: String
+    clientSecret: { type: String as PropType<string | undefined> }
   },
   setup(props) {
     const { elements, loading, error } = useStripeElements()
 
-    return () => h('div', { class: 'mt-5 p-4 bg-secondary rounded-lg text-left text-sm' }, [
-      h('h4', { class: 'mt-0 mb-3 text-base font-semibold' }, 'useStripeElements() Status'),
-      h('ul', { class: 'mb-3 pl-5 list-disc' }, [
-        h('li', { class: 'mb-2' }, [h('strong', 'loading: '), String(loading.value)]),
-        h('li', { class: 'mb-2' }, [h('strong', 'error: '), error.value || 'null']),
-        h('li', { class: 'mb-2' }, [
-          h('strong', 'elements: '),
-          elements.value ? '✅ StripeElements instance available' : '❌ null'
+    return () =>
+      h('div', { class: 'mt-5 p-4 bg-secondary rounded-lg text-left text-sm' }, [
+        h('h4', { class: 'mt-0 mb-3 text-base font-semibold' }, 'useStripeElements() Status'),
+        h('ul', { class: 'mb-3 pl-5 list-disc' }, [
+          h('li', { class: 'mb-2' }, [h('strong', 'loading: '), String(loading.value)]),
+          h('li', { class: 'mb-2' }, [h('strong', 'error: '), error.value || 'null']),
+          h('li', { class: 'mb-2' }, [
+            h('strong', 'elements: '),
+            elements.value ? 'StripeElements instance available' : 'null'
+          ]),
+          h('li', { class: 'mb-2' }, [
+            h('strong', 'clientSecret: '),
+            props.clientSecret
+              ? h('span', { class: 'text-success' }, [
+                  'Provided (',
+                  props.clientSecret.slice(0, 10),
+                  '...)'
+                ])
+              : h('span', { class: 'text-muted-foreground' }, 'Not provided')
+          ])
         ]),
-        h('li', { class: 'mb-2' }, [
-          h('strong', 'clientSecret: '),
-          props.clientSecret
-            ? h('span', { class: 'text-success' }, ['✅ Provided (', props.clientSecret.slice(0, 10), '...)'])
-            : h('span', { class: 'text-muted-foreground' }, '⚪ Not provided')
-        ])
-      ]),
-      props.clientSecret
-        ? h('p', { class: 'mt-3 p-3 rounded-md text-sm bg-success/10 text-success' }, '→ PaymentElement can be used')
-        : h('p', { class: 'mt-3 p-3 rounded-md text-sm bg-info/10 text-info' }, '→ CardElement can be used (no clientSecret needed)')
-    ])
+        props.clientSecret
+          ? h(
+              'p',
+              { class: 'mt-3 p-3 rounded-md text-sm bg-success/10 text-success' },
+              '→ PaymentElement can be used'
+            )
+          : h(
+              'p',
+              { class: 'mt-3 p-3 rounded-md text-sm bg-info/10 text-info' },
+              '→ CardElement can be used (no clientSecret needed)'
+            )
+      ])
   }
 })
 
@@ -111,9 +137,7 @@ const darkAppearance = {
 }
 
 // Custom fonts demo (first-class `fonts` prop, #389)
-const customFonts = [
-  { cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }
-]
+const customFonts = [{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]
 
 // Tracks the themed Card element mounting successfully (proves first-class
 // appearance/fonts/locale props flow through to a real Stripe element).
@@ -132,8 +156,8 @@ const onAppearanceCardReady = () => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          Creates a Stripe Elements instance and provides it to child element components.
-          Must be used within a StripeProvider.
+          Creates a Stripe Elements instance and provides it to child element components. Must be
+          used within a StripeProvider.
         </p>
         <p class="text-sm">
           <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
@@ -170,13 +194,13 @@ const onAppearanceCardReady = () => {
       </CardHeader>
       <CardContent>
         <p class="text-sm text-muted-foreground mb-4">
-          For Payment Element, you need a clientSecret from a PaymentIntent.
-          For Card Element, clientSecret is not required on StripeElements.
+          For Payment Element, you need a clientSecret from a PaymentIntent. For Card Element,
+          clientSecret is not required on StripeElements.
         </p>
 
         <div class="flex gap-3">
           <Input
-            v-model="clientSecret"
+            v-model="clientSecretInput"
             type="text"
             placeholder="pi_xxx_secret_xxx (optional)"
             :class="{
@@ -185,7 +209,7 @@ const onAppearanceCardReady = () => {
             }"
             class="flex-1 font-mono text-sm"
           />
-          <Button variant="secondary" size="sm" @click="clientSecret = ''">Clear</Button>
+          <Button variant="secondary" size="sm" @click="clientSecretInput = ''">Clear</Button>
         </div>
         <div
           class="mt-3 p-3 rounded-md text-sm"
@@ -195,7 +219,7 @@ const onAppearanceCardReady = () => {
             'bg-secondary text-muted-foreground': clientSecretStatus.type === 'none'
           }"
         >
-          {{ clientSecretStatus.valid ? '✅ ' : clientSecretStatus.type === 'invalid' ? '❌ ' : '' }}{{ clientSecretStatus.message }}
+          {{ clientSecretStatus.message }}
           <span v-if="clientSecretStatus.valid" class="font-medium ml-1">
             ({{ clientSecretStatus.type === 'payment_intent' ? 'PaymentIntent' : 'SetupIntent' }})
           </span>
@@ -221,22 +245,26 @@ const onAppearanceCardReady = () => {
             <VueStripeElements :client-secret="cleanClientSecret">
               <template #loading>
                 <div class="text-center py-8">
-                  <div class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+                  <div
+                    class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"
+                  ></div>
                   <p class="text-muted-foreground">Initializing Stripe Elements...</p>
                 </div>
               </template>
 
               <template #error="{ error }">
                 <div class="text-center py-5 text-destructive">
-                  <span class="text-2xl">❌</span>
+                  <CircleX class="size-6 mx-auto" />
                   <p>{{ error }}</p>
                 </div>
               </template>
 
               <div class="text-center py-8 bg-card rounded-lg shadow-sm">
-                <span class="text-4xl mb-4 block">✅</span>
+                <CircleCheck class="size-10 mx-auto mb-4 text-success" />
                 <strong class="block text-lg mb-2">StripeElements Ready!</strong>
-                <p class="text-muted-foreground">The Elements instance is now available to child components.</p>
+                <p class="text-muted-foreground">
+                  The Elements instance is now available to child components.
+                </p>
                 <component :is="ElementsConsumer" :client-secret="cleanClientSecret" />
               </div>
             </VueStripeElements>
@@ -246,21 +274,22 @@ const onAppearanceCardReady = () => {
         <!-- With options -->
         <div v-else-if="testScenario === 'with-options'" class="bg-secondary rounded-lg p-6">
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
-            <VueStripeElements
-              :client-secret="cleanClientSecret"
-              :options="{ locale: 'en' }"
-            >
+            <VueStripeElements :client-secret="cleanClientSecret" :options="{ locale: 'en' }">
               <template #loading>
                 <div class="text-center py-8">
-                  <div class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+                  <div
+                    class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"
+                  ></div>
                   <p class="text-muted-foreground">Initializing with options...</p>
                 </div>
               </template>
 
               <div class="text-center py-8 bg-card rounded-lg shadow-sm">
-                <span class="text-4xl mb-4 block">✅</span>
+                <CircleCheck class="size-10 mx-auto mb-4 text-success" />
                 <strong class="block text-lg mb-2">StripeElements with Options</strong>
-                <p class="text-muted-foreground">Initialized with <code class="bg-muted px-1 rounded">locale: 'en'</code></p>
+                <p class="text-muted-foreground">
+                  Initialized with <code class="bg-muted px-1 rounded">locale: 'en'</code>
+                </p>
                 <component :is="ElementsConsumer" :client-secret="cleanClientSecret" />
               </div>
             </VueStripeElements>
@@ -270,43 +299,54 @@ const onAppearanceCardReady = () => {
         <!-- Custom appearance (first-class appearance/fonts/locale props, #389) -->
         <div v-else-if="testScenario === 'appearance'" class="bg-secondary rounded-lg p-6">
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
-            <VueStripeElements
-              :appearance="appearanceOptions"
-              :fonts="customFonts"
-              locale="en"
-            >
-              <div class="text-center py-8 bg-card rounded-lg shadow-sm" data-test="appearance-scenario">
-                <span class="text-4xl mb-4 block">🎨</span>
+            <VueStripeElements :appearance="appearanceOptions" :fonts="customFonts" locale="en">
+              <div
+                class="text-center py-8 bg-card rounded-lg shadow-sm"
+                data-test="appearance-scenario"
+              >
+                <Palette class="size-10 mx-auto mb-4" />
                 <strong class="block text-lg mb-2">Custom Appearance (first-class props)</strong>
                 <p class="text-muted-foreground">
                   Bound directly via <code class="bg-muted px-1 rounded">:appearance</code>,
                   <code class="bg-muted px-1 rounded">:fonts</code> and
-                  <code class="bg-muted px-1 rounded">locale</code> props — no <code class="bg-muted px-1 rounded">:options</code> nesting.
+                  <code class="bg-muted px-1 rounded">locale</code> props — no
+                  <code class="bg-muted px-1 rounded">:options</code> nesting.
                 </p>
                 <div class="max-w-md mx-auto mt-4 text-left">
-                  <VueStripeCardElement data-test="appearance-card" @ready="onAppearanceCardReady" />
+                  <VueStripeCardElement
+                    data-test="appearance-card"
+                    @ready="onAppearanceCardReady"
+                  />
                 </div>
                 <p
                   v-if="appearanceCardReady"
                   data-test="appearance-ready"
                   class="mt-3 p-3 rounded-md text-sm bg-success/10 text-success"
                 >
-                  ✅ Themed Card element mounted with first-class props
+                  Themed Card element mounted with first-class props
                 </p>
-                <pre class="bg-secondary p-3 rounded-md text-xs text-left overflow-x-auto mt-3">{{ JSON.stringify(appearanceOptions, null, 2) }}</pre>
+                <pre class="bg-secondary p-3 rounded-md text-xs text-left overflow-x-auto mt-3">{{
+                  JSON.stringify(appearanceOptions, null, 2)
+                }}</pre>
               </div>
             </VueStripeElements>
           </VueStripeProvider>
         </div>
 
         <!-- Dark theme (first-class appearance prop, #389) -->
-        <div v-else-if="testScenario === 'dark-theme'" class="bg-slate-900 text-slate-100 rounded-lg p-6">
+        <div
+          v-else-if="testScenario === 'dark-theme'"
+          class="bg-slate-900 text-slate-100 rounded-lg p-6"
+        >
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
             <VueStripeElements :appearance="darkAppearance">
               <div class="text-center py-8 bg-slate-800 rounded-lg shadow-sm">
-                <span class="text-4xl mb-4 block">🌙</span>
+                <Moon class="size-10 mx-auto mb-4" />
                 <strong class="block text-lg mb-2">Dark Theme (first-class prop)</strong>
-                <p class="text-slate-400">Bound via <code class="bg-slate-700 px-1 rounded">:appearance="{ theme: 'night' }"</code>.</p>
+                <p class="text-slate-400">
+                  Bound via
+                  <code class="bg-slate-700 px-1 rounded">:appearance="{ theme: 'night' }"</code>.
+                </p>
                 <component :is="ElementsConsumer" :client-secret="cleanClientSecret" />
               </div>
             </VueStripeElements>
@@ -323,14 +363,10 @@ const onAppearanceCardReady = () => {
       <CardContent>
         <div class="event-log">
           <div v-if="events.length === 0" class="text-slate-400 text-center py-4 italic">
-            No events yet. StripeElements doesn't emit events directly -
-            use useStripeElements() to access state.
+            No events yet. StripeElements doesn't emit events directly - use useStripeElements() to
+            access state.
           </div>
-          <div
-            v-for="(event, index) in events"
-            :key="index"
-            class="event-entry"
-          >
+          <div v-for="(event, index) in events" :key="index" class="event-entry">
             <span class="event-time">{{ event.time }}</span>
             <span :class="['event-type', event.type]">{{ event.type }}</span>
             <span class="event-data">{{ event.message }}</span>

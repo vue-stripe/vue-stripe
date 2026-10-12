@@ -1,10 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vitepress'
-
-const route = useRoute()
-const router = useRouter()
-
 const status = ref<'succeeded' | 'failed' | 'processing' | 'canceled' | null>(null)
 const paymentIntentId = ref<string | null>(null)
 const setupIntentId = ref<string | null>(null)
@@ -88,7 +83,7 @@ defineExpose({
   status,
   paymentIntentId,
   setupIntentId,
-  dismiss,
+  dismiss
 })
 </script>
 
@@ -97,7 +92,7 @@ defineExpose({
     <div class="status-content">
       <span class="status-icon">
         <template v-if="status === 'succeeded'">✓</template>
-        <template v-else-if="status === 'processing'">⏳</template>
+        <template v-else-if="status === 'processing'">…</template>
         <template v-else-if="status === 'failed'">✕</template>
         <template v-else-if="status === 'canceled'">⊘</template>
       </span>
@@ -112,9 +107,7 @@ defineExpose({
         </p>
       </div>
 
-      <button class="dismiss-btn" @click="dismiss" aria-label="Dismiss">
-        ×
-      </button>
+      <button class="dismiss-btn" aria-label="Dismiss" @click="dismiss">×</button>
     </div>
   </div>
 </template>
@@ -234,7 +227,9 @@ defineExpose({
   line-height: 1;
   color: var(--vp-c-text-2);
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .dismiss-btn:hover {

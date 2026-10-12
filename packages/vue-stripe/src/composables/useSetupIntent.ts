@@ -1,4 +1,5 @@
 import { inject, ref, readonly } from 'vue-demi'
+import type { ConfirmSetupData } from '@stripe/stripe-js'
 import type { UseSetupIntentReturn, ConfirmSetupOptions } from '../types'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
@@ -68,13 +69,22 @@ export function useSetupIntent(): UseSetupIntentReturn {
         }
       }
 
-      // Use stripe.confirmSetup() which works with Payment Element
-      const result = await (stripeInstance.stripe.value as any).confirmSetup({
-        elements: elements ?? undefined,
-        clientSecret: options.clientSecret,
-        confirmParams: options.confirmParams ?? {},
-        redirect: options.redirect ?? 'if_required'
-      })
+      const stripe = stripeInstance.stripe.value
+      const base = { clientSecret: options.clientSecret, ...(elements ? { elements } : {}) }
+      // Stripe types `redirect: 'always'` and `'if_required'` as separate overloads.
+      // 'always' requires confirmParams.return_url; Stripe reports it if missing.
+      const result =
+        options.redirect === 'always'
+          ? await stripe.confirmSetup({
+              ...base,
+              confirmParams: (options.confirmParams ?? {}) as ConfirmSetupData,
+              redirect: 'always'
+            })
+          : await stripe.confirmSetup({
+              ...base,
+              confirmParams: options.confirmParams ?? {},
+              redirect: 'if_required'
+            })
 
       if (result.error) {
         error.value = result.error.message || 'Setup confirmation failed'
@@ -100,7 +110,7 @@ export function useSetupIntent(): UseSetupIntentReturn {
     error.value = null
 
     try {
-      const result = await (stripeInstance.stripe.value as any).retrieveSetupIntent(clientSecret)
+      const result = await stripeInstance.stripe.value.retrieveSetupIntent(clientSecret)
       if (result.error) {
         error.value = result.error.message || 'Failed to retrieve setup intent'
       }

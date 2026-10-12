@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ResultDisplay } from '@/components/result-display'
 import { Wallet, Loader2 } from 'lucide-react'
+import type { ApiResponse } from '@/lib/api'
 
 interface SetupIntentResult {
   clientSecret: string
@@ -32,11 +33,11 @@ export default function SetupIntentPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...(customerId && { customerId }),
-          ...(description && { description }),
-        }),
+          ...(description && { description })
+        })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as ApiResponse<SetupIntentResult>
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create Setup Intent')
@@ -59,9 +60,7 @@ export default function SetupIntentPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Setup Intent</h1>
-            <p className="text-sm text-muted-foreground">
-              Save payment methods for future use
-            </p>
+            <p className="text-sm text-muted-foreground">Save payment methods for future use</p>
           </div>
         </div>
       </div>
@@ -70,12 +69,12 @@ export default function SetupIntentPage() {
         <CardHeader>
           <CardTitle>Configuration</CardTitle>
           <CardDescription>
-            Create a Setup Intent to collect and save payment method details
-            without charging the customer.
+            Create a Setup Intent to collect and save payment method details without charging the
+            customer.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="customerId">Customer ID (optional)</Label>
               <Input
@@ -120,12 +119,12 @@ export default function SetupIntentPage() {
             fields={[
               {
                 label: 'Client Secret',
-                value: result.clientSecret,
+                value: result.clientSecret
               },
               {
                 label: 'Setup Intent ID',
-                value: result.setupIntentId,
-              },
+                value: result.setupIntentId
+              }
             ]}
           />
 

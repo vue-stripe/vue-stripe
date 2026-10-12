@@ -8,7 +8,7 @@ export function getStripe(): Stripe {
       throw new Error('STRIPE_SECRET_KEY is not set in environment variables')
     }
     stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      typescript: true,
+      typescript: true
     })
   }
   return stripeInstance

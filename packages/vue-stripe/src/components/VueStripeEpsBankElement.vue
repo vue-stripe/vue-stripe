@@ -31,9 +31,7 @@ const error = ref<string | null>(null)
 const elementsInstance = inject(stripeElementsInjectionKey)
 
 if (!elementsInstance) {
-  throw new VueStripeElementsError(
-    'VueStripeEpsBankElement must be used within VueStripeElements'
-  )
+  throw new VueStripeElementsError('VueStripeEpsBankElement must be used within VueStripeElements')
 }
 
 // Named handlers so listeners can be detached with .off() on teardown.
@@ -143,14 +141,8 @@ defineExpose({
 
 <template>
   <div class="vue-stripe-eps-bank-element">
-    <div
-      v-if="error"
-      class="vue-stripe-eps-bank-element-error"
-    >
-      <slot
-        name="error"
-        :error="error"
-      >
+    <div v-if="error" class="vue-stripe-eps-bank-element-error">
+      <slot name="error" :error="error">
         <div class="vue-stripe-error-message">
           {{ error }}
         </div>
@@ -161,14 +153,9 @@ defineExpose({
       class="vue-stripe-eps-bank-element-mount"
       :class="{ 'vue-stripe-eps-bank-element-loading': loading }"
     />
-    <div
-      v-if="loading"
-      class="vue-stripe-eps-bank-element-loader"
-    >
+    <div v-if="loading" class="vue-stripe-eps-bank-element-loader">
       <slot name="loading">
-        <div class="vue-stripe-loading-message">
-          Loading EPS bank selector...
-        </div>
+        <div class="vue-stripe-loading-message">Loading EPS bank selector...</div>
       </slot>
     </div>
   </div>

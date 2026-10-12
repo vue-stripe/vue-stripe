@@ -11,6 +11,8 @@
     "test:watch": "turbo run test:watch",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
+    "format": "prettier --write .",
+    "format:check": "turbo run format:check && prettier --check '*.{js,json,yml,yaml}' '.github/**/*.{yml,yaml}' 'scripts/**/*.json' 'tools/**/*.json'",
     "typecheck": "turbo run typecheck",
     "type-check": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules",
@@ -26,26 +28,34 @@
     "stripe:clean": "bash scripts/seed-stripe.sh --clean-only"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@vue-stripe/typescript-config": "workspace:*",
+    "eslint": "^10.12.0",
+    "eslint-config-next": "16.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.11.1",
+    "globals": "^17.13.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
     "prettier-plugin-organize-imports": "^4.3.0",
     "turbo": "^2.11.7",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.1",
     "vite": "^8.3.4",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "vue-tsc": "^3.3.13"
   },
   "engines": {
     "node": ">=22",
     "pnpm": ">=12"
   },
   "lint-staged": {
-    "*.{js,ts,vue}": [
-      "eslint --fix",
+    "*.{js,mjs,ts,tsx,vue}": [
+      "eslint --fix --max-warnings 0",
       "prettier --write"
     ],
-    "*.{json,md,yml,yaml}": [
+    "*.{json,yml,yaml,css}": [
       "prettier --write"
     ]
   },

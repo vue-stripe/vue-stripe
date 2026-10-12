@@ -18,11 +18,16 @@ describe('VueStripeExpressCheckoutElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {
-          clientSecret: 'pi_test_secret_123'
-        }, {
-          default: () => h(VueStripeExpressCheckoutElement, expressCheckoutProps)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {
+              clientSecret: 'pi_test_secret_123'
+            },
+            {
+              default: () => h(VueStripeExpressCheckoutElement, expressCheckoutProps)
+            }
+          )
       }
     })
 
@@ -496,7 +501,7 @@ describe('VueStripeExpressCheckoutElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders()
@@ -521,7 +526,7 @@ describe('VueStripeExpressCheckoutElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders()
@@ -544,7 +549,7 @@ describe('VueStripeExpressCheckoutElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders()
@@ -569,7 +574,7 @@ describe('VueStripeExpressCheckoutElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const initialOptions = {
@@ -598,7 +603,7 @@ describe('VueStripeExpressCheckoutElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       // Suppress console.error for this test
@@ -625,7 +630,7 @@ describe('VueStripeExpressCheckoutElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       // Suppress console.error for this test

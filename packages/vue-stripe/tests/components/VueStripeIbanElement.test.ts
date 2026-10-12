@@ -18,9 +18,14 @@ describe('VueStripeIbanElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(VueStripeIbanElement, ibanProps, ibanSlots)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(VueStripeIbanElement, ibanProps, ibanSlots)
+            }
+          )
       }
     })
 
@@ -62,9 +67,12 @@ describe('VueStripeIbanElement', () => {
     await mountWithProviders()
 
     // IBAN element defaults to supportedCountries: ['SEPA']
-    expect(mockCreate).toHaveBeenCalledWith('iban', expect.objectContaining({
-      supportedCountries: ['SEPA']
-    }))
+    expect(mockCreate).toHaveBeenCalledWith(
+      'iban',
+      expect.objectContaining({
+        supportedCountries: ['SEPA']
+      })
+    )
     expect(mockElement.mount).toHaveBeenCalled()
   })
 

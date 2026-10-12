@@ -1,4 +1,5 @@
 import { inject, ref, readonly } from 'vue-demi'
+import type { ConfirmPaymentData } from '@stripe/stripe-js'
 import type { UsePaymentIntentReturn, ConfirmPaymentOptions } from '../types'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
@@ -68,13 +69,22 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
         }
       }
 
-      // Use type assertion to handle complex Stripe overloads
-      const result = await (stripeInstance.stripe.value as any).confirmPayment({
-        elements: elements ?? undefined,
-        clientSecret: options.clientSecret,
-        confirmParams: options.confirmParams ?? {},
-        redirect: options.redirect ?? 'if_required'
-      })
+      const stripe = stripeInstance.stripe.value
+      const base = { clientSecret: options.clientSecret, ...(elements ? { elements } : {}) }
+      // Stripe types `redirect: 'always'` and `'if_required'` as separate overloads.
+      // 'always' requires confirmParams.return_url; Stripe reports it if missing.
+      const result =
+        options.redirect === 'always'
+          ? await stripe.confirmPayment({
+              ...base,
+              confirmParams: (options.confirmParams ?? {}) as ConfirmPaymentData,
+              redirect: 'always'
+            })
+          : await stripe.confirmPayment({
+              ...base,
+              confirmParams: options.confirmParams ?? {},
+              redirect: 'if_required'
+            })
 
       if (result.error) {
         error.value = result.error.message || 'Payment confirmation failed'
@@ -100,7 +110,7 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
     error.value = null
 
     try {
-      const result = await (stripeInstance.stripe.value as any).retrievePaymentIntent(clientSecret)
+      const result = await stripeInstance.stripe.value.retrievePaymentIntent(clientSecret)
       if (result.error) {
         error.value = result.error.message || 'Failed to retrieve payment intent'
       }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, useSlots, computed } from 'vue-demi'
+import type { RedirectToCheckoutOptions } from '@stripe/stripe-js'
 import { useStripe } from '../composables/useStripe'
 import { VueStripeProviderError } from '../utils/errors'
 
@@ -60,8 +61,7 @@ const hasCustomSlot = computed(() => !!slots['default'])
  * Check if redirectToCheckout is available (stripe-js v7.x)
  */
 const hasRedirectToCheckout = (): boolean => {
-  return stripe.value !== null &&
-    typeof (stripe.value as any).redirectToCheckout === 'function'
+  return stripe.value !== null && typeof stripe.value.redirectToCheckout === 'function'
 }
 
 /**
@@ -86,7 +86,7 @@ const handleSubmit = async () => {
       if (!hasRedirectToCheckout()) {
         throw new VueStripeProviderError(
           'redirectToCheckout is not available. This method was removed in @stripe/stripe-js v8.x. ' +
-          'Use sessionUrl prop with the checkout session URL instead.'
+            'Use sessionUrl prop with the checkout session URL instead.'
         )
       }
 
@@ -94,7 +94,7 @@ const handleSubmit = async () => {
         throw new VueStripeProviderError('Stripe not initialized')
       }
 
-      const result = await (stripe.value as any).redirectToCheckout({
+      const result = await stripe.value.redirectToCheckout({
         sessionId: props.sessionId
       })
 
@@ -111,7 +111,7 @@ const handleSubmit = async () => {
       if (!hasRedirectToCheckout()) {
         throw new VueStripeProviderError(
           'Price-based checkout using redirectToCheckout is not available in @stripe/stripe-js v8.x. ' +
-          'Create a Checkout Session on your server and use sessionUrl prop instead.'
+            'Create a Checkout Session on your server and use sessionUrl prop instead.'
         )
       }
 
@@ -121,10 +121,10 @@ const handleSubmit = async () => {
 
       console.warn(
         '[Vue Stripe] Price-based checkout is deprecated in v8.x. ' +
-        'Create a Checkout Session on your server and use sessionUrl prop instead.'
+          'Create a Checkout Session on your server and use sessionUrl prop instead.'
       )
 
-      const result = await (stripe.value as any).redirectToCheckout({
+      const result = await stripe.value.redirectToCheckout({
         lineItems: [
           {
             price: props.priceId,
@@ -137,7 +137,7 @@ const handleSubmit = async () => {
         customerEmail: props.customerEmail,
         clientReferenceId: props.clientReferenceId,
         submitType: props.submitType
-      })
+      } as RedirectToCheckoutOptions)
 
       if (result.error) {
         throw new VueStripeProviderError(result.error.message || 'Redirect to checkout failed')
@@ -150,7 +150,7 @@ const handleSubmit = async () => {
     // No valid checkout option provided
     throw new VueStripeProviderError(
       'Either sessionUrl, sessionId, or priceId is required. ' +
-      'For @stripe/stripe-js v8.x, use sessionUrl.'
+        'For @stripe/stripe-js v8.x, use sessionUrl.'
     )
   } catch (err) {
     const error = err instanceof Error ? err : new Error('Checkout failed')
@@ -167,25 +167,12 @@ defineExpose({ checkout: handleSubmit, loading })
 
 <template>
   <!-- Custom slot: wrap with click handler so user doesn't need scoped slot syntax -->
-  <span
-    v-if="hasCustomSlot"
-    @click="handleSubmit"
-    class="vue-stripe-checkout-wrapper"
-  >
-    <slot
-      :checkout="handleSubmit"
-      :loading="loading"
-      :disabled="disabled"
-    />
+  <span v-if="hasCustomSlot" class="vue-stripe-checkout-wrapper" @click="handleSubmit">
+    <slot :checkout="handleSubmit" :loading="loading" :disabled="disabled" />
   </span>
 
   <!-- Default button when no slot content provided -->
-  <button
-    v-else
-    :disabled="loading || disabled"
-    :class="buttonClass"
-    @click="handleSubmit"
-  >
+  <button v-else :disabled="loading || disabled" :class="buttonClass" @click="handleSubmit">
     <template v-if="!loading">
       {{ buttonText }}
     </template>
@@ -235,7 +222,11 @@ defineExpose({ checkout: handleSubmit, loading })
 }
 
 @keyframes vue-stripe-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

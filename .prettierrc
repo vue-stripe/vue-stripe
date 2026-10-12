@@ -1,7 +1,7 @@
 {
-  "semi": true,
-  "trailingComma": "all",
+  "semi": false,
   "singleQuote": true,
+  "trailingComma": "none",
   "printWidth": 100,
   "tabWidth": 2,
   "useTabs": false,
@@ -12,6 +12,5 @@
   "proseWrap": "preserve",
   "htmlWhitespaceSensitivity": "css",
   "vueIndentScriptAndStyle": false,
-  "singleAttributePerLine": false,
-  "plugins": ["prettier-plugin-organize-imports"]
+  "singleAttributePerLine": false
 }

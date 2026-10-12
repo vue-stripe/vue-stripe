@@ -32,14 +32,10 @@ export function ResultDisplay({ title = 'Result', fields }: ResultDisplayProps) 
             className="flex items-start justify-between gap-4 rounded-md border bg-background p-3"
           >
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-muted-foreground">
-                {field.label}
-              </p>
+              <p className="text-xs font-medium text-muted-foreground">{field.label}</p>
               <p className="mt-1 break-all font-mono text-sm">{field.value}</p>
             </div>
-            {field.copyable !== false && (
-              <CopyButton value={field.value} className="shrink-0" />
-            )}
+            {field.copyable !== false && <CopyButton value={field.value} className="shrink-0" />}
           </div>
         ))}
       </CardContent>

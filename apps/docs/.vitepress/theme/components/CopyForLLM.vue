@@ -48,14 +48,14 @@ async function copyMarkdown() {
       return
     }
 
-    const content = await loader() as string
+    const content = (await loader()) as string
     await navigator.clipboard.writeText(content)
 
     // Track the copy event in Google Analytics
     trackEvent('copy_for_llm', {
       page_path: route.path,
       content_length: content.length,
-      content_type: route.path.startsWith('/guide/') ? 'guide' : 'api',
+      content_type: route.path.startsWith('/guide/') ? 'guide' : 'api'
     })
 
     copied.value = true

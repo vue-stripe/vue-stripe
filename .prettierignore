@@ -2,8 +2,8 @@
 dist
 .vitepress/dist
 .vitepress/cache
+.next
 coverage
-lib
 
 # Dependencies
 node_modules
@@ -31,3 +31,8 @@ firebase-debug.log
 # Generated files
 *.d.ts
 pnpm-lock.yaml
+*.timestamp-*.mjs
+
+# Markdown is content (VitePress pages with Vue components, custom containers and
+# hand-aligned tables); Prettier would reflow it. Code blocks are checked by review.
+*.md

@@ -8,9 +8,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const bodyClass = computed(() =>
-  cn('[&_tr:last-child]:border-0', props.class)
-)
+const bodyClass = computed(() => cn('[&_tr:last-child]:border-0', props.class))
 </script>
 
 <template>

@@ -73,7 +73,8 @@ const createElement = () => {
     element.value.on('blur', handleBlur)
     element.value.on('escape', handleEscape)
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to create link authentication element'
+    const message =
+      err instanceof Error ? err.message : 'Failed to create link authentication element'
     error.value = message
     loading.value = false
     console.error('[Vue Stripe] Link authentication element creation error:', message)
@@ -109,10 +110,12 @@ watch(
 watch(
   () => props.options,
   (newOptions) => {
-
-    if (element.value && newOptions && typeof (element.value as any).update === 'function') {
-
-      (element.value as any).update(newOptions)
+    // Stripe.js 7 does not type update() on this element, but the runtime supports it.
+    const el = element.value as {
+      update?: (options: StripeLinkAuthenticationElementOptions) => void
+    } | null
+    if (el && newOptions) {
+      el.update?.(newOptions)
     }
   },
   { deep: true }
@@ -141,31 +144,17 @@ defineExpose({
 
 <template>
   <div class="vue-stripe-link-auth">
-    <div
-      v-if="error"
-      class="vue-stripe-link-auth-error"
-    >
-      <slot
-        name="error"
-        :error="error"
-      >
+    <div v-if="error" class="vue-stripe-link-auth-error">
+      <slot name="error" :error="error">
         <div class="vue-stripe-error-message">
           {{ error }}
         </div>
       </slot>
     </div>
-    <div
-      ref="elementRef"
-      class="vue-stripe-link-auth-element"
-    />
-    <div
-      v-if="loading"
-      class="vue-stripe-link-auth-loading"
-    >
+    <div ref="elementRef" class="vue-stripe-link-auth-element" />
+    <div v-if="loading" class="vue-stripe-link-auth-loading">
       <slot name="loading">
-        <div class="vue-stripe-loading-message">
-          Loading…
-        </div>
+        <div class="vue-stripe-loading-message">Loading…</div>
       </slot>
     </div>
   </div>

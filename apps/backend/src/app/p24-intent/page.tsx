@@ -10,15 +10,16 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 import { ResultDisplay } from '@/components/result-display'
 import { Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import type { ApiResponse } from '@/lib/api'
 
 const currencies = [
   { value: 'eur', label: 'EUR - Euro' },
-  { value: 'pln', label: 'PLN - Polish Zloty' },
+  { value: 'pln', label: 'PLN - Polish Zloty' }
 ]
 
 interface PaymentIntentResult {
@@ -49,11 +50,11 @@ export default function P24IntentPage() {
         body: JSON.stringify({
           amount: parseInt(amount, 10),
           currency,
-          ...(description && { description }),
-        }),
+          ...(description && { description })
+        })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as ApiResponse<PaymentIntentResult>
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create P24 Payment Intent')
@@ -87,12 +88,12 @@ export default function P24IntentPage() {
         <CardHeader>
           <CardTitle>Configuration</CardTitle>
           <CardDescription>
-            Configure the P24 payment. Supports EUR and PLN currencies. The client secret can be used with
-            VueStripeP24BankElement.
+            Configure the P24 payment. Supports EUR and PLN currencies. The client secret can be
+            used with VueStripeP24BankElement.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount (in cents)</Label>
@@ -157,17 +158,17 @@ export default function P24IntentPage() {
             fields={[
               {
                 label: 'Client Secret',
-                value: result.clientSecret,
+                value: result.clientSecret
               },
               {
                 label: 'Payment Intent ID',
-                value: result.paymentIntentId,
+                value: result.paymentIntentId
               },
               {
                 label: 'Amount',
                 value: formatCurrency(result.amount, result.currency),
-                copyable: false,
-              },
+                copyable: false
+              }
             ]}
           />
 

@@ -72,7 +72,10 @@ const createAuBankAccountElement = () => {
     loading.value = true
 
     // Create AU Bank Account element
-    auBankAccountElement.value = elementsInstance.elements.value.create('auBankAccount', props.options)
+    auBankAccountElement.value = elementsInstance.elements.value.create(
+      'auBankAccount',
+      props.options
+    )
 
     // Set up event listeners (named handlers, removed in onUnmounted)
     auBankAccountElement.value.on('ready', handleReady)
@@ -84,7 +87,8 @@ const createAuBankAccountElement = () => {
     // Mount the element
     auBankAccountElement.value.mount(elementRef.value)
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to create AU Bank Account element'
+    const errorMessage =
+      err instanceof Error ? err.message : 'Failed to create AU Bank Account element'
     error.value = errorMessage
     loading.value = false
     console.error('[Vue Stripe] AU Bank Account element creation error:', errorMessage)
@@ -144,14 +148,8 @@ defineExpose({
 
 <template>
   <div class="vue-stripe-au-bank-account-element">
-    <div
-      v-if="error"
-      class="vue-stripe-au-bank-account-element-error"
-    >
-      <slot
-        name="error"
-        :error="error"
-      >
+    <div v-if="error" class="vue-stripe-au-bank-account-element-error">
+      <slot name="error" :error="error">
         <div class="vue-stripe-error-message">
           {{ error }}
         </div>
@@ -162,14 +160,9 @@ defineExpose({
       class="vue-stripe-au-bank-account-element-mount"
       :class="{ 'vue-stripe-au-bank-account-element-loading': loading }"
     />
-    <div
-      v-if="loading"
-      class="vue-stripe-au-bank-account-element-loader"
-    >
+    <div v-if="loading" class="vue-stripe-au-bank-account-element-loader">
       <slot name="loading">
-        <div class="vue-stripe-loading-message">
-          Loading BECS Direct Debit form...
-        </div>
+        <div class="vue-stripe-loading-message">Loading BECS Direct Debit form...</div>
       </slot>
     </div>
   </div>

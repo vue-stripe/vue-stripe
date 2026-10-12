@@ -54,7 +54,7 @@ watch(
 
 defineExpose({
   clientSecret,
-  isValid,
+  isValid
 })
 </script>
 
@@ -67,8 +67,8 @@ defineExpose({
     </div>
 
     <p class="description">
-      The client secret from Step 1 is automatically provided below.
-      This is what your backend returns to authorize the payment.
+      The client secret from Step 1 is automatically provided below. This is what your backend
+      returns to authorize the payment.
     </p>
 
     <div class="input-wrapper">
@@ -85,7 +85,6 @@ defineExpose({
     </div>
 
     <div v-else-if="!hasInput" class="waiting-msg">
-      <span class="icon">⏳</span>
       Select a product and generate a payment intent in Step 1
     </div>
   </div>

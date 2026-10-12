@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { ref, inject, computed, defineComponent, h, onMounted } from 'vue'
+import { ref, inject, computed, defineComponent, h, onMounted, type PropType } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { VueStripeProvider, VueStripeElements, VueStripeFpxBankElement, useStripe } from '@vue-stripe/vue-stripe'
-import type { StripeFpxBankElement as StripeFpxBankElementType, StripeFpxBankElementChangeEvent } from '@stripe/stripe-js'
+import {
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeFpxBankElement,
+  useStripe
+} from '@vue-stripe/vue-stripe'
+import type {
+  StripeFpxBankElement as StripeFpxBankElementType,
+  StripeFpxBankElementChangeEvent
+} from '@stripe/stripe-js'
 import {
   Card,
   CardHeader,
@@ -12,7 +20,7 @@ import {
   AlertDescription,
   Button,
   Label,
-  Input,
+  Input
 } from '@/components/ui'
 
 // Mark VueStripeElements as used (it's used in template)
@@ -24,7 +32,7 @@ const FpxPaymentForm = defineComponent({
   props: {
     clientSecret: { type: String, default: '' },
     bankComplete: { type: Boolean, default: false },
-    fpxElement: { type: Object, default: null }
+    fpxElement: { type: Object as PropType<StripeFpxBankElementType | null>, default: null }
   },
   emits: ['payment-success', 'payment-error', 'log'],
   setup(props, { emit }) {
@@ -46,20 +54,20 @@ const FpxPaymentForm = defineComponent({
       emit('log', 'confirm', 'Starting FPX payment confirmation...')
 
       try {
-        const { error, paymentIntent } = await stripe.value.confirmFpxPayment(
-          props.clientSecret,
-          {
-            payment_method: {
-              fpx: props.fpxElement,
-            },
-            return_url: window.location.href
-          }
-        )
+        const { error, paymentIntent } = await stripe.value.confirmFpxPayment(props.clientSecret, {
+          payment_method: {
+            fpx: props.fpxElement
+          },
+          return_url: window.location.href
+        })
 
         if (error) {
           emit('payment-error', error.message || 'Payment failed')
           emit('log', 'error', error.message || 'Payment failed')
-        } else if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'requires_action') {
+        } else if (
+          paymentIntent?.status === 'succeeded' ||
+          paymentIntent?.status === 'requires_action'
+        ) {
           emit('payment-success', `PaymentIntent ${paymentIntent.status}!`)
           emit('log', 'success', `PaymentIntent ${paymentIntent.id} - ${paymentIntent.status}`)
         } else {
@@ -74,27 +82,45 @@ const FpxPaymentForm = defineComponent({
       }
     }
 
-    const canConfirm = computed(() =>
-      props.bankComplete && props.clientSecret && !processing.value
-    )
+    const canConfirm = computed(() => props.bankComplete && props.clientSecret && !processing.value)
 
-    return () => h('div', { class: 'mt-4 pt-4 border-t border-border' }, [
-      h(Button, {
-        class: 'w-full',
-        size: 'lg',
-        disabled: !canConfirm.value,
-        onClick: handleConfirmPayment
-      }, () => processing.value ? 'Processing...' : 'Confirm FPX Payment'),
-      h('p', {
-        class: 'text-muted-foreground text-xs mt-2 text-center'
-      }, 'Note: FPX payments require a redirect to the bank for authorization'),
-      !props.clientSecret && h('p', {
-        class: 'text-muted-foreground text-sm mt-2 text-center'
-      }, 'Enter a client secret above to enable confirmation'),
-      props.clientSecret && !props.bankComplete && h('p', {
-        class: 'text-muted-foreground text-sm mt-2 text-center'
-      }, 'Select a bank to enable confirmation')
-    ])
+    return () =>
+      h('div', { class: 'mt-4 pt-4 border-t border-border' }, [
+        h(
+          Button,
+          {
+            class: 'w-full',
+            size: 'lg',
+            disabled: !canConfirm.value,
+            onClick: handleConfirmPayment
+          },
+          () => (processing.value ? 'Processing...' : 'Confirm FPX Payment')
+        ),
+        h(
+          'p',
+          {
+            class: 'text-muted-foreground text-xs mt-2 text-center'
+          },
+          'Note: FPX payments require a redirect to the bank for authorization'
+        ),
+        !props.clientSecret &&
+          h(
+            'p',
+            {
+              class: 'text-muted-foreground text-sm mt-2 text-center'
+            },
+            'Enter a client secret above to enable confirmation'
+          ),
+        props.clientSecret &&
+          !props.bankComplete &&
+          h(
+            'p',
+            {
+              class: 'text-muted-foreground text-sm mt-2 text-center'
+            },
+            'Select a bank to enable confirmation'
+          )
+      ])
   }
 })
 
@@ -112,8 +138,8 @@ const paymentIntentId = ref<string | null>(null)
 
 // Check for redirect status on mount
 onMounted(() => {
-  const status = route.query.redirect_status as string | undefined
-  const piId = route.query.payment_intent as string | undefined
+  const status = route.query['redirect_status'] as string | undefined
+  const piId = route.query['payment_intent'] as string | undefined
 
   if (status === 'succeeded' || status === 'failed') {
     redirectStatus.value = status
@@ -144,7 +170,6 @@ const log = (type: string, message: string) => {
   const time = new Date().toLocaleTimeString()
   events.value.unshift({ time, type, message })
   if (events.value.length > 20) events.value.pop()
-  console.info(`[FpxBankElement Test] ${type}:`, message)
 }
 
 // FPX element ref for programmatic access
@@ -228,15 +253,19 @@ const clearFpx = () => {
 }
 
 // Client secret for FPX payment confirmation
-const clientSecret = ref<string>('')
+const clientSecretInput = ref<string>('')
 
 // Validate client secret format
 const clientSecretStatus = computed(() => {
-  if (!clientSecret.value) {
-    return { valid: false, type: 'none', message: 'No client secret provided (required for confirming FPX payments)' }
+  if (!clientSecretInput.value) {
+    return {
+      valid: false,
+      type: 'none',
+      message: 'No client secret provided (required for confirming FPX payments)'
+    }
   }
 
-  const value = clientSecret.value.trim()
+  const value = clientSecretInput.value.trim()
 
   if (value.startsWith('pi_') && value.includes('_secret_')) {
     return { valid: true, type: 'payment_intent', message: 'Valid PaymentIntent client secret' }
@@ -246,7 +275,7 @@ const clientSecretStatus = computed(() => {
 })
 
 // Computed for clean client secret value
-const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
+const cleanClientSecret = computed(() => clientSecretInput.value.trim() || undefined)
 </script>
 
 <template>
@@ -274,10 +303,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
         </Button>
       </AlertDescription>
     </Alert>
-    <Alert
-      v-if="redirectStatus === 'failed'"
-      variant="destructive"
-    >
+    <Alert v-if="redirectStatus === 'failed'" variant="destructive">
       <AlertDescription class="flex items-center justify-between">
         <div>
           <strong>Payment Failed</strong>
@@ -285,12 +311,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
             PaymentIntent: {{ paymentIntentId }}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="h-6 px-2"
-          @click="dismissRedirectStatus"
-        >
+        <Button variant="ghost" size="sm" class="h-6 px-2" @click="dismissRedirectStatus">
           Dismiss
         </Button>
       </AlertDescription>
@@ -302,15 +323,11 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          The FPX Bank Element displays a dropdown list of Malaysian banks for FPX payments.
-          FPX (Financial Process Exchange) is Malaysia's national real-time online banking system.
+          The FPX Bank Element displays a dropdown list of Malaysian banks for FPX payments. FPX
+          (Financial Process Exchange) is Malaysia's national real-time online banking system.
         </p>
         <p class="text-sm">
-          <a
-            href="https://vuestripe.com"
-            target="_blank"
-            class="text-primary hover:underline"
-          >
+          <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
             View full documentation →
           </a>
         </p>
@@ -320,19 +337,17 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
     <!-- Client Secret Input -->
     <Card>
       <CardHeader>
-        <CardTitle class="text-lg">
-          Client Secret
-        </CardTitle>
+        <CardTitle class="text-lg"> Client Secret </CardTitle>
       </CardHeader>
       <CardContent>
         <p class="text-sm text-muted-foreground mb-4">
-          For FPX payments, you need a client secret from a PaymentIntent
-          created with <code class="bg-muted px-1 rounded">fpx</code> payment method type.
+          For FPX payments, you need a client secret from a PaymentIntent created with
+          <code class="bg-muted px-1 rounded">fpx</code> payment method type.
         </p>
 
         <div class="flex gap-3">
           <Input
-            v-model="clientSecret"
+            v-model="clientSecretInput"
             type="text"
             placeholder="pi_xxx_secret_xxx"
             :class="{
@@ -341,13 +356,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
             }"
             class="flex-1 font-mono text-sm"
           />
-          <Button
-            variant="secondary"
-            size="sm"
-            @click="clientSecret = ''"
-          >
-            Clear
-          </Button>
+          <Button variant="secondary" size="sm" @click="clientSecretInput = ''"> Clear </Button>
         </div>
         <div
           class="mt-3 p-3 rounded-md text-sm"
@@ -357,13 +366,8 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
             'bg-secondary text-muted-foreground': clientSecretStatus.type === 'none'
           }"
         >
-          {{ clientSecretStatus.valid ? '✅ ' : clientSecretStatus.type === 'invalid' ? '❌ ' : '' }}{{ clientSecretStatus.message }}
-          <span
-            v-if="clientSecretStatus.valid"
-            class="font-medium ml-1"
-          >
-            (PaymentIntent)
-          </span>
+          {{ clientSecretStatus.message }}
+          <span v-if="clientSecretStatus.valid" class="font-medium ml-1"> (PaymentIntent) </span>
         </div>
       </CardContent>
     </Card>
@@ -371,32 +375,24 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
     <!-- Live Demo -->
     <Card>
       <CardHeader>
-        <CardTitle class="text-lg">
-          Live Demo
-        </CardTitle>
+        <CardTitle class="text-lg"> Live Demo </CardTitle>
       </CardHeader>
       <CardContent>
-        <Alert
-          v-if="!stripeConfig?.publishableKey"
-          variant="warning"
-        >
+        <Alert v-if="!stripeConfig?.publishableKey" variant="warning">
           <AlertDescription>
             No Stripe key configured. Click <strong>"Add Key"</strong> in the header above.
           </AlertDescription>
         </Alert>
 
-        <div
-          v-else
-          class="bg-secondary rounded-lg p-6"
-        >
+        <div v-else class="bg-secondary rounded-lg p-6">
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
             <VueStripeElements :client-secret="cleanClientSecret">
               <template #loading>
                 <div class="text-center py-8">
-                  <div class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4" />
-                  <p class="text-muted-foreground">
-                    Initializing Stripe Elements...
-                  </p>
+                  <div
+                    class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"
+                  />
+                  <p class="text-muted-foreground">Initializing Stripe Elements...</p>
                 </div>
               </template>
 
@@ -418,7 +414,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
                   <div class="flex gap-2">
                     <span class="text-muted-foreground">Complete:</span>
                     <span :class="fpxState.complete ? 'text-success' : ''">
-                      {{ fpxState.complete ? '✅ Yes' : '❌ No' }}
+                      {{ fpxState.complete ? 'Yes' : 'No' }}
                     </span>
                   </div>
                   <div class="flex gap-2">
@@ -429,10 +425,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
                     <span class="text-muted-foreground">Selected Bank:</span>
                     <span>{{ fpxState.value || '-' }}</span>
                   </div>
-                  <div
-                    v-if="fpxState.error"
-                    class="w-full text-destructive mt-2"
-                  >
+                  <div v-if="fpxState.error" class="w-full text-destructive mt-2">
                     <span class="text-muted-foreground">Error:</span>
                     <span>{{ fpxState.error }}</span>
                   </div>
@@ -440,20 +433,8 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
 
                 <!-- Action Buttons -->
                 <div class="flex flex-wrap gap-2 mt-4">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    @click="focusFpx"
-                  >
-                    Focus
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    @click="clearFpx"
-                  >
-                    Clear
-                  </Button>
+                  <Button variant="secondary" size="sm" @click="focusFpx"> Focus </Button>
+                  <Button variant="secondary" size="sm" @click="clearFpx"> Clear </Button>
                 </div>
 
                 <!-- Confirmation Form -->
@@ -476,11 +457,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
                     {{ confirmationMessage }}
                   </AlertDescription>
                 </Alert>
-                <Alert
-                  v-if="confirmationStatus === 'error'"
-                  variant="destructive"
-                  class="mt-4"
-                >
+                <Alert v-if="confirmationStatus === 'error'" variant="destructive" class="mt-4">
                   <AlertDescription>
                     {{ confirmationMessage }}
                   </AlertDescription>
@@ -495,23 +472,14 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
     <!-- Event Log -->
     <Card>
       <CardHeader>
-        <CardTitle class="text-lg">
-          Event Log
-        </CardTitle>
+        <CardTitle class="text-lg"> Event Log </CardTitle>
       </CardHeader>
       <CardContent>
         <div class="event-log">
-          <div
-            v-if="events.length === 0"
-            class="text-slate-400 text-center py-4"
-          >
+          <div v-if="events.length === 0" class="text-slate-400 text-center py-4">
             No events yet. Interact with the bank selector to see events.
           </div>
-          <div
-            v-for="(event, index) in events"
-            :key="index"
-            class="event-entry"
-          >
+          <div v-for="(event, index) in events" :key="index" class="event-entry">
             <span class="event-time">{{ event.time }}</span>
             <span :class="['event-type', event.type]">{{ event.type }}</span>
             <span class="event-data">{{ event.message }}</span>

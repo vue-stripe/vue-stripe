@@ -54,9 +54,13 @@ const handleReady = (event: StripeExpressCheckoutElementReadyEvent) => {
 const handleClick = (event: StripeExpressCheckoutElementClickEvent) => emit('click', event)
 const handleConfirm = (event: StripeExpressCheckoutElementConfirmEvent) => emit('confirm', event)
 const handleCancel = () => emit('cancel')
-const handleShippingAddressChange = (event: StripeExpressCheckoutElementShippingAddressChangeEvent) => emit('shippingaddresschange', event)
-const handleShippingRateChange = (event: StripeExpressCheckoutElementShippingRateChangeEvent) => emit('shippingratechange', event)
-const handleLoaderError = (event: { elementType: 'expressCheckout'; error: StripeError }) => emit('loaderror', event)
+const handleShippingAddressChange = (
+  event: StripeExpressCheckoutElementShippingAddressChangeEvent
+) => emit('shippingaddresschange', event)
+const handleShippingRateChange = (event: StripeExpressCheckoutElementShippingRateChangeEvent) =>
+  emit('shippingratechange', event)
+const handleLoaderError = (event: { elementType: 'expressCheckout'; error: StripeError }) =>
+  emit('loaderror', event)
 
 const createExpressCheckoutElement = () => {
   if (!elementsInstance.elements.value) {
@@ -76,7 +80,10 @@ const createExpressCheckoutElement = () => {
     loading.value = true
 
     // Create express checkout element
-    expressCheckoutElement.value = elementsInstance.elements.value.create('expressCheckout', props.options)
+    expressCheckoutElement.value = elementsInstance.elements.value.create(
+      'expressCheckout',
+      props.options
+    )
 
     // Set up event listeners (named handlers, removed in onUnmounted)
     expressCheckoutElement.value.on('ready', handleReady)
@@ -90,7 +97,8 @@ const createExpressCheckoutElement = () => {
     // Mount the element
     expressCheckoutElement.value.mount(elementRef.value)
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to create express checkout element'
+    const errorMessage =
+      err instanceof Error ? err.message : 'Failed to create express checkout element'
     error.value = errorMessage
     loading.value = false
     console.error('[Vue Stripe] Express checkout element creation error:', errorMessage)
@@ -149,14 +157,8 @@ defineExpose({
 
 <template>
   <div class="vue-stripe-express-checkout-element">
-    <div
-      v-if="error"
-      class="vue-stripe-express-checkout-element-error"
-    >
-      <slot
-        name="error"
-        :error="error"
-      >
+    <div v-if="error" class="vue-stripe-express-checkout-element-error">
+      <slot name="error" :error="error">
         <div class="vue-stripe-error-message">
           {{ error }}
         </div>
@@ -167,14 +169,9 @@ defineExpose({
       class="vue-stripe-express-checkout-element-mount"
       :class="{ 'vue-stripe-express-checkout-element-loading': loading }"
     />
-    <div
-      v-if="loading"
-      class="vue-stripe-express-checkout-element-loader"
-    >
+    <div v-if="loading" class="vue-stripe-express-checkout-element-loader">
       <slot name="loading">
-        <div class="vue-stripe-loading-message">
-          Loading express checkout...
-        </div>
+        <div class="vue-stripe-loading-message">Loading express checkout...</div>
       </slot>
     </div>
   </div>

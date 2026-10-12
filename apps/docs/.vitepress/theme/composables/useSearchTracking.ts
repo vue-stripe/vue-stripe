@@ -17,7 +17,7 @@ export function useSearchTracking() {
           trackSearch({
             search_term: searchTerm,
             search_results: resultsCount,
-            search_location: 'header',
+            search_location: 'header'
           })
         }
       }, 1000) // Wait 1 second after user stops typing
@@ -30,7 +30,9 @@ export function useSearchTracking() {
           mutation.addedNodes.forEach((node) => {
             if (node instanceof HTMLElement) {
               // VitePress search modal
-              const searchInput = node.querySelector('.DocSearch-Input, [role="searchbox"], input[type="search"]')
+              const searchInput = node.querySelector(
+                '.DocSearch-Input, [role="searchbox"], input[type="search"]'
+              )
               if (searchInput) {
                 let lastSearchTerm = ''
 
@@ -44,8 +46,12 @@ export function useSearchTracking() {
 
                     // Try to count results
                     setTimeout(() => {
-                      const resultsContainer = document.querySelector('.VPLocalSearchBox [role="list"], .DocSearch-Dropdown')
-                      const results = resultsContainer?.querySelectorAll('[role="listitem"], .DocSearch-Hit')
+                      const resultsContainer = document.querySelector(
+                        '.VPLocalSearchBox [role="list"], .DocSearch-Dropdown'
+                      )
+                      const results = resultsContainer?.querySelectorAll(
+                        '[role="listitem"], .DocSearch-Hit'
+                      )
                       const resultsCount = results?.length || 0
 
                       trackSearchQuery(searchTerm, resultsCount)
@@ -61,13 +67,15 @@ export function useSearchTracking() {
                     const resultLink = target.closest('a[href], [role="option"]')
 
                     if (resultLink) {
-                      const searchInput = node.querySelector('input[type="search"]') as HTMLInputElement
+                      const searchInput = node.querySelector(
+                        'input[type="search"]'
+                      ) as HTMLInputElement
                       const searchTerm = searchInput?.value || ''
 
                       if (searchTerm) {
                         trackSearch({
                           search_term: `${searchTerm} [clicked]`,
-                          search_location: 'header',
+                          search_location: 'header'
                         })
                       }
                     }
@@ -81,7 +89,7 @@ export function useSearchTracking() {
 
       observer.observe(document.body, {
         childList: true,
-        subtree: true,
+        subtree: true
       })
 
       return observer
@@ -103,6 +111,6 @@ export function useSearchTracking() {
   })
 
   return {
-    setupSearchTracking,
+    setupSearchTracking
   }
 }

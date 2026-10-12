@@ -46,9 +46,13 @@ describe('integration: Provider > Elements > PaymentElement + composables', () =
       props: { publishableKey: 'pk_test_123' },
       slots: {
         default: () =>
-          h(VueStripeElements, { clientSecret: 'pi_test_secret_123' }, {
-            default: () => h(Inner)
-          })
+          h(
+            VueStripeElements,
+            { clientSecret: 'pi_test_secret_123' },
+            {
+              default: () => h(Inner)
+            }
+          )
       }
     })
 

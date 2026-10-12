@@ -25,10 +25,15 @@ describe('docs coverage matrix', () => {
   it('planned entries link a roadmap issue; only covered entries carry an artifact', () => {
     for (const item of items) {
       if (item.status === 'planned') {
-        expect(typeof item.issue, `"${item.name}" is planned but has no issue number`).toBe('number')
+        expect(typeof item.issue, `"${item.name}" is planned but has no issue number`).toBe(
+          'number'
+        )
       }
       if (item.status !== 'covered') {
-        expect(item.artifact, `"${item.name}" is ${item.status} but names an artifact`).toBeUndefined()
+        expect(
+          item.artifact,
+          `"${item.name}" is ${item.status} but names an artifact`
+        ).toBeUndefined()
       }
     }
   })

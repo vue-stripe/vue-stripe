@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useBackendApi, type Product, type PaymentIntentResult } from '../../composables/useBackendApi'
+import {
+  useBackendApi,
+  type Product,
+  type PaymentIntentResult
+} from '../../composables/useBackendApi'
 
 const props = defineProps<{
   product?: Product | null
@@ -45,8 +49,8 @@ async function generate() {
       description: `Payment for ${props.product.name}`,
       metadata: {
         productId: props.product.id,
-        productName: props.product.name,
-      },
+        productName: props.product.name
+      }
     }
 
     let response: PaymentIntentResult
@@ -102,7 +106,7 @@ watch(
 
 defineExpose({
   result,
-  generate,
+  generate
 })
 </script>
 
@@ -114,10 +118,7 @@ defineExpose({
       <span class="badge backend">Backend</span>
     </div>
 
-    <div v-if="!product" class="info-box">
-      <span class="icon">ℹ️</span>
-      Select a product above to generate a payment intent.
-    </div>
+    <div v-if="!product" class="info-box">Select a product above to generate a payment intent.</div>
 
     <div v-else class="generator-content">
       <div class="product-summary">

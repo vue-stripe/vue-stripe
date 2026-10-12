@@ -12,8 +12,8 @@ import { VueStripeElementsError } from '../utils/errors'
 // Extended interface for Payment Element with loader events - uses standalone interface
 // since TypeScript has issues extending the complex Stripe type
 interface StripePaymentElementWithLoaderEvents {
-  on(eventType: string, handler: (...args: any[]) => void): void
-  off(eventType: string, handler?: (...args: any[]) => void): void
+  on(eventType: string, handler: (...args: never[]) => void): void
+  off(eventType: string, handler?: (...args: never[]) => void): void
 }
 
 interface Props {
@@ -42,9 +42,7 @@ const error = ref<string | null>(null)
 const elementsInstance = inject(stripeElementsInjectionKey)
 
 if (!elementsInstance) {
-  throw new VueStripeElementsError(
-    'VueStripePaymentElement must be used within VueStripeElements'
-  )
+  throw new VueStripeElementsError('VueStripePaymentElement must be used within VueStripeElements')
 }
 
 // Named handlers so listeners can be detached with .off() on teardown.
@@ -58,7 +56,8 @@ const handleBlur = () => emit('blur')
 const handleEscape = () => emit('escape')
 const handleLoaderStart = () => emit('loaderstart')
 const handleLoaderStop = () => emit('loaderstop')
-const handleLoaderError = (event: { elementType: 'payment'; error: StripeError }) => emit('loaderror', event)
+const handleLoaderError = (event: { elementType: 'payment'; error: StripeError }) =>
+  emit('loaderror', event)
 
 const createPaymentElement = () => {
   if (!elementsInstance.elements.value) {
@@ -87,7 +86,8 @@ const createPaymentElement = () => {
     paymentElement.value.on('blur', handleBlur)
     paymentElement.value.on('escape', handleEscape)
 
-    const paymentElementWithLoader = paymentElement.value as unknown as StripePaymentElementWithLoaderEvents
+    const paymentElementWithLoader =
+      paymentElement.value as unknown as StripePaymentElementWithLoaderEvents
     paymentElementWithLoader.on('loaderstart', handleLoaderStart)
     paymentElementWithLoader.on('loaderstop', handleLoaderStop)
     paymentElementWithLoader.on('loaderror', handleLoaderError)
@@ -138,7 +138,8 @@ onUnmounted(() => {
     paymentElement.value.off('blur', handleBlur)
     paymentElement.value.off('escape', handleEscape)
 
-    const paymentElementWithLoader = paymentElement.value as unknown as StripePaymentElementWithLoaderEvents
+    const paymentElementWithLoader =
+      paymentElement.value as unknown as StripePaymentElementWithLoaderEvents
     paymentElementWithLoader.off('loaderstart', handleLoaderStart)
     paymentElementWithLoader.off('loaderstop', handleLoaderStop)
     paymentElementWithLoader.off('loaderror', handleLoaderError)
@@ -158,14 +159,8 @@ defineExpose({
 
 <template>
   <div class="vue-stripe-payment-element">
-    <div
-      v-if="error"
-      class="vue-stripe-payment-element-error"
-    >
-      <slot
-        name="error"
-        :error="error"
-      >
+    <div v-if="error" class="vue-stripe-payment-element-error">
+      <slot name="error" :error="error">
         <div class="vue-stripe-error-message">
           {{ error }}
         </div>
@@ -176,14 +171,9 @@ defineExpose({
       class="vue-stripe-payment-element-mount"
       :class="{ 'vue-stripe-payment-element-loading': loading }"
     />
-    <div
-      v-if="loading"
-      class="vue-stripe-payment-element-loader"
-    >
+    <div v-if="loading" class="vue-stripe-payment-element-loader">
       <slot name="loading">
-        <div class="vue-stripe-loading-message">
-          Loading payment form...
-        </div>
+        <div class="vue-stripe-loading-message">Loading payment form...</div>
       </slot>
     </div>
   </div>

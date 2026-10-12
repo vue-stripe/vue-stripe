@@ -10,11 +10,12 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 import { ResultDisplay } from '@/components/result-display'
 import { ShoppingCart, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import type { ApiResponse } from '@/lib/api'
 
 const currencies = [
   { value: 'usd', label: 'USD - US Dollar' },
@@ -23,13 +24,13 @@ const currencies = [
   { value: 'jpy', label: 'JPY - Japanese Yen' },
   { value: 'cad', label: 'CAD - Canadian Dollar' },
   { value: 'aud', label: 'AUD - Australian Dollar' },
-  { value: 'php', label: 'PHP - Philippine Peso' },
+  { value: 'php', label: 'PHP - Philippine Peso' }
 ]
 
 const modes = [
   { value: 'payment', label: 'Payment - One-time charge' },
   { value: 'subscription', label: 'Subscription - Recurring' },
-  { value: 'setup', label: 'Setup - Save payment method' },
+  { value: 'setup', label: 'Setup - Save payment method' }
 ]
 
 interface CheckoutSessionResult {
@@ -66,11 +67,11 @@ export default function CheckoutSessionPage() {
           currency,
           quantity: parseInt(quantity, 10),
           mode,
-          ...(customerEmail && { customerEmail }),
-        }),
+          ...(customerEmail && { customerEmail })
+        })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as ApiResponse<CheckoutSessionResult>
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create Checkout Session')
@@ -93,9 +94,7 @@ export default function CheckoutSessionPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Checkout Session</h1>
-            <p className="text-sm text-muted-foreground">
-              Create a hosted Checkout page
-            </p>
+            <p className="text-sm text-muted-foreground">Create a hosted Checkout page</p>
           </div>
         </div>
       </div>
@@ -104,12 +103,12 @@ export default function CheckoutSessionPage() {
         <CardHeader>
           <CardTitle>Configuration</CardTitle>
           <CardDescription>
-            Configure the checkout session. You can either redirect users to the
-            URL or use the session ID with VueStripeCheckout component.
+            Configure the checkout session. You can either redirect users to the URL or use the
+            session ID with VueStripeCheckout component.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="productName">Product Name</Label>
               <Input
@@ -224,12 +223,12 @@ export default function CheckoutSessionPage() {
             fields={[
               {
                 label: 'Checkout URL',
-                value: result.url,
+                value: result.url
               },
               {
                 label: 'Session ID',
-                value: result.sessionId,
-              },
+                value: result.sessionId
+              }
             ]}
           />
 

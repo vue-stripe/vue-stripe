@@ -5,7 +5,7 @@ import {
   ScrollAreaViewport,
   ScrollAreaScrollbar,
   ScrollAreaThumb,
-  ScrollAreaCorner,
+  ScrollAreaCorner
 } from 'radix-vue'
 import { cn } from '@/lib/utils'
 
@@ -15,9 +15,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const scrollAreaClass = computed(() =>
-  cn('relative overflow-hidden', props.class)
-)
+const scrollAreaClass = computed(() => cn('relative overflow-hidden', props.class))
 </script>
 
 <template>

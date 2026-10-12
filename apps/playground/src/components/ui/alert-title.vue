@@ -8,9 +8,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const titleClass = computed(() =>
-  cn('mb-1 font-medium leading-none tracking-tight', props.class)
-)
+const titleClass = computed(() => cn('mb-1 font-medium leading-none tracking-tight', props.class))
 </script>
 
 <template>

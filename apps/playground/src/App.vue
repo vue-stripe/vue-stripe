@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, provide, computed, reactive, watch, onMounted } from 'vue'
+import { ref, provide, computed, reactive, watch, onMounted, type Component } from 'vue'
 import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 import { useDark, useToggle } from '@vueuse/core'
 import { useHead } from '@unhead/vue'
@@ -16,8 +16,7 @@ import {
   CheckSquare,
   Layers,
   Landmark,
-  Euro,
-  Table2,
+  Table2
 } from 'lucide-vue-next'
 import {
   Button,
@@ -46,7 +45,7 @@ import {
   SidebarRail,
   SidebarTrigger,
   Separator,
-  TooltipProvider,
+  TooltipProvider
 } from '@/components/ui'
 
 // Dark mode
@@ -61,20 +60,28 @@ onMounted(() => {
 // SEO head management
 const route = useRoute()
 useHead({
-  title: computed(() => (route.meta?.title as string) || 'Vue Stripe Playground'),
+  title: computed(() => route.meta.title || 'Vue Stripe Playground'),
   meta: [
     {
       name: 'description',
-      content: computed(() => (route.meta?.description as string) || 'Interactive playground for testing Vue Stripe components and integrations')
+      content: computed(
+        () =>
+          route.meta.description ||
+          'Interactive playground for testing Vue Stripe components and integrations'
+      )
     },
     // Open Graph
     {
       property: 'og:title',
-      content: computed(() => (route.meta?.title as string) || 'Vue Stripe Playground')
+      content: computed(() => route.meta.title || 'Vue Stripe Playground')
     },
     {
       property: 'og:description',
-      content: computed(() => (route.meta?.description as string) || 'Interactive playground for testing Vue Stripe components and integrations')
+      content: computed(
+        () =>
+          route.meta.description ||
+          'Interactive playground for testing Vue Stripe components and integrations'
+      )
     },
     {
       property: 'og:type',
@@ -87,11 +94,15 @@ useHead({
     },
     {
       name: 'twitter:title',
-      content: computed(() => (route.meta?.title as string) || 'Vue Stripe Playground')
+      content: computed(() => route.meta.title || 'Vue Stripe Playground')
     },
     {
       name: 'twitter:description',
-      content: computed(() => (route.meta?.description as string) || 'Interactive playground for testing Vue Stripe components and integrations')
+      content: computed(
+        () =>
+          route.meta.description ||
+          'Interactive playground for testing Vue Stripe components and integrations'
+      )
     }
   ],
   link: [
@@ -108,8 +119,15 @@ const STORAGE_KEY = 'vue-stripe-playground-config'
 // Check if we're in a browser environment (SSR-safe)
 const isBrowser = typeof window !== 'undefined'
 
+interface PlaygroundConfig {
+  publishableKey: string
+  clientSecret: string
+  setupSecret: string
+  sessionId: string
+}
+
 // Load config from localStorage
-const loadConfig = () => {
+const loadConfig = (): PlaygroundConfig => {
   if (!isBrowser) {
     // Return default config during SSR
     return {
@@ -123,7 +141,7 @@ const loadConfig = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
-      return JSON.parse(stored)
+      return JSON.parse(stored) as PlaygroundConfig
     }
   } catch (e) {
     console.warn('Failed to load config from localStorage:', e)
@@ -164,9 +182,13 @@ const clearConfig = () => {
 const stripeConfig = reactive(loadConfig())
 
 // Save whenever config changes
-watch(stripeConfig, (newConfig) => {
-  saveConfig(newConfig)
-}, { deep: true })
+watch(
+  stripeConfig,
+  (newConfig) => {
+    saveConfig(newConfig)
+  },
+  { deep: true }
+)
 
 // Provide config to all child components
 provide('stripeConfig', stripeConfig)
@@ -178,55 +200,61 @@ const router = useRouter()
 const tempPublishableKey = ref(stripeConfig.publishableKey)
 const tempClientSecret = ref(stripeConfig.clientSecret)
 
+interface NavItem {
+  name: string
+  path: string
+  icon: Component
+}
+
 // Navigation items grouped by category
 const navGroups = computed(() => {
-  const routes = router.getRoutes().filter(r => r.name !== 'home')
+  const routes = router.getRoutes().filter((r) => r.name !== 'home')
 
   // Define icons for each route
-  const routeIcons: Record<string, any> = {
-    'StripeProvider': Layers,
-    'StripeElements': Layers,
-    'CardElement': CreditCard,
-    'SplitCard': CreditCard,
-    'PaymentElement': Wallet,
-    'Checkout': CheckSquare,
-    'ExpressCheckout': Wallet,
-    'SetupIntent': KeyRound,
-    'LinkAuthentication': Link2,
-    'AddressElement': MapPin,
+  const routeIcons: Record<string, Component> = {
+    StripeProvider: Layers,
+    StripeElements: Layers,
+    CardElement: CreditCard,
+    SplitCard: CreditCard,
+    PaymentElement: Wallet,
+    Checkout: CheckSquare,
+    ExpressCheckout: Wallet,
+    SetupIntent: KeyRound,
+    LinkAuthentication: Link2,
+    AddressElement: MapPin,
     // European Regional Elements (v5.2.0)
-    'IbanElement': Landmark,
-    'IdealBankElement': Landmark,
-    'P24BankElement': Landmark,
-    'EpsBankElement': Landmark,
+    IbanElement: Landmark,
+    IdealBankElement: Landmark,
+    P24BankElement: Landmark,
+    EpsBankElement: Landmark,
     // APAC Regional Elements
-    'FpxBankElement': Landmark,
-    'AuBankAccountElement': Landmark,
+    FpxBankElement: Landmark,
+    AuBankAccountElement: Landmark,
     // Pricing Table (v5.3.0)
-    'PricingTable': Table2,
+    PricingTable: Table2
   }
 
   // Group routes
   const groups = {
     core: {
       label: 'Core Components',
-      items: [] as { name: string; path: string; icon: any }[]
+      items: [] as NavItem[]
     },
     elements: {
       label: 'Stripe Elements',
-      items: [] as { name: string; path: string; icon: any }[]
+      items: [] as NavItem[]
     },
     european: {
       label: 'European Elements',
-      items: [] as { name: string; path: string; icon: any }[]
+      items: [] as NavItem[]
     },
     apac: {
       label: 'APAC Elements',
-      items: [] as { name: string; path: string; icon: any }[]
+      items: [] as NavItem[]
     },
     checkout: {
       label: 'Checkout',
-      items: [] as { name: string; path: string; icon: any }[]
+      items: [] as NavItem[]
     }
   }
 
@@ -235,12 +263,12 @@ const navGroups = computed(() => {
   // APAC element route names
   const apacElements = ['FpxBankElement', 'AuBankAccountElement']
 
-  routes.forEach(route => {
+  routes.forEach((route) => {
     const name = String(route.name)
     const icon = routeIcons[name] || CreditCard
     const item = { name, path: route.path, icon }
 
-    if (name.includes('Provider') || name.includes('Elements') && !name.includes('Element')) {
+    if (name.includes('Provider') || (name.includes('Elements') && !name.includes('Element'))) {
       groups.core.items.push(item)
     } else if (name.includes('Checkout') || name === 'PricingTable') {
       groups.checkout.items.push(item)
@@ -253,13 +281,15 @@ const navGroups = computed(() => {
     }
   })
 
-  return Object.values(groups).filter(g => g.items.length > 0)
+  return Object.values(groups).filter((g) => g.items.length > 0)
 })
 
 const hasKey = computed(() => {
-  return !!stripeConfig.publishableKey &&
+  return (
+    !!stripeConfig.publishableKey &&
     stripeConfig.publishableKey !== 'pk_test_your_key_here' &&
     stripeConfig.publishableKey.startsWith('pk_')
+  )
 })
 
 const openConfigModal = () => {
@@ -293,8 +323,10 @@ const resetConfig = () => {
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" as-child>
                 <RouterLink to="/" class="flex items-center gap-3">
-                  <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg">
-                    💳
+                  <div
+                    class="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg"
+                  >
+                    <CreditCard class="size-4" />
                   </div>
                   <div class="grid flex-1 text-left text-sm leading-tight">
                     <span class="truncate font-semibold">Vue Stripe</span>
@@ -333,7 +365,7 @@ const resetConfig = () => {
           <SidebarMenu>
             <!-- Stripe Key Status -->
             <SidebarMenuItem>
-              <SidebarMenuButton @click="openConfigModal" class="w-full">
+              <SidebarMenuButton class="w-full" @click="openConfigModal">
                 <div
                   class="size-2 rounded-full"
                   :class="hasKey ? 'bg-green-500' : 'bg-orange-500'"
@@ -392,7 +424,8 @@ const resetConfig = () => {
       <DialogHeader>
         <DialogTitle>Stripe Configuration</DialogTitle>
         <DialogDescription>
-          Enter your Stripe test keys. These are stored in your browser's localStorage and never sent anywhere.
+          Enter your Stripe test keys. These are stored in your browser's localStorage and never
+          sent anywhere.
         </DialogDescription>
       </DialogHeader>
 
@@ -439,16 +472,9 @@ const resetConfig = () => {
       </div>
 
       <DialogFooter class="flex-col sm:flex-row gap-2">
-        <Button variant="outline" @click="showConfigModal = false">
-          Cancel
-        </Button>
-        <Button v-if="hasKey" variant="destructive" @click="resetConfig">
-          Reset All
-        </Button>
-        <Button
-          @click="saveConfigModal"
-          :disabled="!tempPublishableKey.startsWith('pk_')"
-        >
+        <Button variant="outline" @click="showConfigModal = false"> Cancel </Button>
+        <Button v-if="hasKey" variant="destructive" @click="resetConfig"> Reset All </Button>
+        <Button :disabled="!tempPublishableKey.startsWith('pk_')" @click="saveConfigModal">
           Save & Reload
         </Button>
       </DialogFooter>

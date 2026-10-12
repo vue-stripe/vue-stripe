@@ -52,9 +52,7 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
       const elementsInstance = inject(stripeElementsInjectionKey)
 
       if (!elementsInstance) {
-        throw new VueStripeElementsError(
-          `${componentName} must be used within VueStripeElements`
-        )
+        throw new VueStripeElementsError(`${componentName} must be used within VueStripeElements`)
       }
 
       // Named handlers so listeners can be detached with .off() on teardown.
@@ -93,9 +91,14 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
           error.value = null
           loading.value = true
 
-          // Create element - use type assertion since we know our element types are valid
-           
-          const createdElement = (elementsInstance.elements.value as any).create(elementType, props.options) as StripeElementLike
+          // elements.create() is overloaded per element type; this factory is generic over them.
+          const elements = elementsInstance.elements.value as unknown as {
+            create: (
+              type: StripeElementType,
+              options?: Record<string, unknown>
+            ) => StripeElementLike
+          }
+          const createdElement = elements.create(elementType, props.options)
           element.value = createdElement
 
           // Set up event listeners (named handlers, removed in onUnmounted)
@@ -108,7 +111,8 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
           // Mount the element
           createdElement.mount(elementRef.value)
         } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : `Failed to create ${elementType} element`
+          const errorMessage =
+            err instanceof Error ? err.message : `Failed to create ${elementType} element`
           error.value = errorMessage
           loading.value = false
           console.error(`[Vue Stripe] ${componentName} creation error:`, errorMessage)
@@ -173,11 +177,12 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
 
       return () => {
         const className = `vue-stripe-${elementType}-element`
-        
+
         return h('div', { class: className }, [
-          error.value && h('div', { class: `${className}-error` }, [
-            h('div', { class: 'vue-stripe-error-message' }, error.value)
-          ]),
+          error.value &&
+            h('div', { class: `${className}-error` }, [
+              h('div', { class: 'vue-stripe-error-message' }, error.value)
+            ]),
           h('div', {
             ref: elementRef,
             class: {
@@ -185,9 +190,10 @@ export function createStripeElement({ elementType, componentName }: ElementFacto
               [`${className}-loading`]: loading.value
             }
           }),
-          loading.value && h('div', { class: `${className}-loader` }, [
-            h('div', { class: 'vue-stripe-loading-message' }, `Loading ${elementType}...`)
-          ])
+          loading.value &&
+            h('div', { class: `${className}-loader` }, [
+              h('div', { class: 'vue-stripe-loading-message' }, `Loading ${elementType}...`)
+            ])
         ])
       }
     }

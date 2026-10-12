@@ -1,11 +1,13 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Package, Loader2, RefreshCw, Calendar, DollarSign } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/utils'
+import type { ApiResponse } from '@/lib/api'
 
 interface ProductPrice {
   id: string
@@ -25,34 +27,43 @@ interface Product {
   metadata: Record<string, string>
 }
 
+async function fetchProducts(): Promise<Product[]> {
+  const response = await fetch('/api/products')
+  const data = (await response.json()) as ApiResponse<{ products: Product[] }>
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to fetch products')
+  }
+
+  return data.products
+}
+
 export default function ProductsPage() {
   const [products, setProducts] = React.useState<Product[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
 
-  const fetchProducts = React.useCallback(async () => {
+  // State is only updated from the promise callbacks (after the request settles),
+  // so this is safe to start from an effect.
+  const loadProducts = React.useCallback(
+    () =>
+      fetchProducts()
+        .then((list) => setProducts(list))
+        .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Unknown error'))
+        .finally(() => setLoading(false)),
+    []
+  )
+
+  // Initial state is already loading with no error, so the first load can start directly.
+  React.useEffect(() => {
+    void loadProducts()
+  }, [loadProducts])
+
+  const refreshProducts = () => {
     setLoading(true)
     setError(null)
-
-    try {
-      const response = await fetch('/api/products')
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch products')
-      }
-
-      setProducts(data.products)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  React.useEffect(() => {
-    fetchProducts()
-  }, [fetchProducts])
+    void loadProducts()
+  }
 
   const oneTimeProducts = products.filter((p) => p.type === 'one_time')
   const recurringProducts = products.filter((p) => p.type === 'recurring')
@@ -72,12 +83,7 @@ export default function ProductsPage() {
               </p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchProducts}
-            disabled={loading}
-          >
+          <Button variant="outline" size="sm" onClick={refreshProducts} disabled={loading}>
             {loading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -102,12 +108,7 @@ export default function ProductsPage() {
             <div className="text-center text-destructive">
               <p className="font-medium">Failed to load products</p>
               <p className="text-sm">{error}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-4"
-                onClick={fetchProducts}
-              >
+              <Button variant="outline" size="sm" className="mt-4" onClick={refreshProducts}>
                 Try Again
               </Button>
             </div>
@@ -173,24 +174,16 @@ export default function ProductsPage() {
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-base">API Endpoint</CardTitle>
-            <CardDescription>
-              Fetch these products programmatically using the API
-            </CardDescription>
+            <CardDescription>Fetch these products programmatically using the API</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div>
-                <p className="mb-1 text-xs font-medium text-muted-foreground">
-                  Endpoint
-                </p>
-                <code className="block rounded-md bg-muted p-3 text-sm">
-                  GET /api/products
-                </code>
+                <p className="mb-1 text-xs font-medium text-muted-foreground">Endpoint</p>
+                <code className="block rounded-md bg-muted p-3 text-sm">GET /api/products</code>
               </div>
               <div>
-                <p className="mb-1 text-xs font-medium text-muted-foreground">
-                  Example Response
-                </p>
+                <p className="mb-1 text-xs font-medium text-muted-foreground">Example Response</p>
                 <pre className="overflow-x-auto rounded-md bg-muted p-3 text-xs">
                   {JSON.stringify(
                     {
@@ -198,8 +191,8 @@ export default function ProductsPage() {
                         id: p.id,
                         name: p.name,
                         type: p.type,
-                        price: p.price,
-                      })),
+                        price: p.price
+                      }))
                     },
                     null,
                     2
@@ -219,9 +212,7 @@ function ProductCard({ product }: { product: Product }) {
     ? formatCurrency(product.price.amount, product.price.currency)
     : 'Free'
 
-  const intervalDisplay = product.price.interval
-    ? `/${product.price.interval}`
-    : ''
+  const intervalDisplay = product.price.interval ? `/${product.price.interval}` : ''
 
   return (
     <Card className="transition-shadow hover:shadow-md">
@@ -229,9 +220,13 @@ function ProductCard({ product }: { product: Product }) {
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             {product.images[0] ? (
-              <img
+              <Image
                 src={product.images[0]}
                 alt={product.name}
+                width={48}
+                height={48}
+                // Product images are arbitrary remote URLs from Stripe; serve them as-is.
+                unoptimized
                 className="h-12 w-12 rounded-lg object-cover"
               />
             ) : (
@@ -248,9 +243,7 @@ function ProductCard({ product }: { product: Product }) {
               )}
             </div>
           </div>
-          <Badge
-            variant={product.type === 'recurring' ? 'default' : 'secondary'}
-          >
+          <Badge variant={product.type === 'recurring' ? 'default' : 'secondary'}>
             {product.type === 'recurring' ? 'Subscription' : 'One-time'}
           </Badge>
         </div>
@@ -265,15 +258,11 @@ function ProductCard({ product }: { product: Product }) {
         <div className="mt-3 space-y-1">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Product ID</span>
-            <code className="rounded bg-muted px-1.5 py-0.5">
-              {product.id}
-            </code>
+            <code className="rounded bg-muted px-1.5 py-0.5">{product.id}</code>
           </div>
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Price ID</span>
-            <code className="rounded bg-muted px-1.5 py-0.5">
-              {product.price.id}
-            </code>
+            <code className="rounded bg-muted px-1.5 py-0.5">{product.price.id}</code>
           </div>
         </div>
       </CardContent>

@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { ref, inject, computed, defineComponent, h } from 'vue'
-import { VueStripeProvider, VueStripeElements, VueStripeCardElement, useStripe } from '@vue-stripe/vue-stripe'
-import type { StripeCardElement as StripeCardElementType, StripeCardElementChangeEvent } from '@stripe/stripe-js'
+import {
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeCardElement,
+  useStripe
+} from '@vue-stripe/vue-stripe'
+import type {
+  PaymentIntent,
+  StripeCardElement as StripeCardElementType,
+  StripeCardElementChangeEvent
+} from '@stripe/stripe-js'
 import {
   Card,
   CardHeader,
@@ -14,7 +23,7 @@ import {
   Label,
   Tabs,
   TabsList,
-  TabsTrigger,
+  TabsTrigger
 } from '@/components/ui'
 
 // Mark VueStripeElements as used (it's used in template)
@@ -38,7 +47,6 @@ const log = (type: string, message: string) => {
   const time = new Date().toLocaleTimeString()
   events.value.unshift({ time, type, message })
   if (events.value.length > 20) events.value.pop()
-  console.info(`[CardElement Test] ${type}:`, message)
 }
 
 // Card element ref for programmatic access
@@ -173,14 +181,11 @@ const PaymentButton = defineComponent({
       emit('payment-processing')
 
       try {
-        const { error, paymentIntent } = await stripe.value.confirmCardPayment(
-          props.clientSecret,
-          {
-            payment_method: {
-              card: props.cardElement
-            }
+        const { error, paymentIntent } = await stripe.value.confirmCardPayment(props.clientSecret, {
+          payment_method: {
+            card: props.cardElement
           }
-        )
+        })
 
         if (error) {
           emit('payment-error', error.message || 'Payment failed')
@@ -189,23 +194,28 @@ const PaymentButton = defineComponent({
         } else {
           emit('payment-error', `Payment status: ${paymentIntent?.status}`)
         }
-      } catch (err: any) {
-        emit('payment-error', err.message || 'Payment failed')
+      } catch (err: unknown) {
+        emit('payment-error', (err instanceof Error && err.message) || 'Payment failed')
       } finally {
         processing.value = false
       }
     }
 
-    return () => h(Button, {
-      variant: 'success',
-      disabled: !props.cardComplete || processing.value || !props.clientSecret,
-      onClick: handlePayment
-    }, () => processing.value ? 'Processing...' : 'Confirm Payment')
+    return () =>
+      h(
+        Button,
+        {
+          variant: 'success',
+          disabled: !props.cardComplete || processing.value || !props.clientSecret,
+          onClick: handlePayment
+        },
+        () => (processing.value ? 'Processing...' : 'Confirm Payment')
+      )
   }
 })
 
 // Payment event handlers
-const handlePaymentSuccess = (paymentIntent: any) => {
+const handlePaymentSuccess = (paymentIntent: PaymentIntent) => {
   paymentStatus.value = 'succeeded'
   paymentMessage.value = `Payment succeeded! ID: ${paymentIntent.id}`
   log('payment', `SUCCESS - PaymentIntent: ${paymentIntent.id}`)
@@ -238,8 +248,8 @@ const resetPaymentState = () => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          A single unified card input for collecting card number, expiry, CVC, and postal code.
-          This is the classic Stripe card input - simpler than PaymentElement but card-only.
+          A single unified card input for collecting card number, expiry, CVC, and postal code. This
+          is the classic Stripe card input - simpler than PaymentElement but card-only.
         </p>
         <p class="text-sm">
           <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
@@ -285,7 +295,9 @@ const resetPaymentState = () => {
             <VueStripeElements>
               <template #loading>
                 <div class="text-center py-8">
-                  <div class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+                  <div
+                    class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"
+                  ></div>
                   <p class="text-muted-foreground">Initializing Stripe Elements...</p>
                 </div>
               </template>
@@ -309,7 +321,7 @@ const resetPaymentState = () => {
                   <div class="flex gap-2">
                     <span class="text-muted-foreground">Complete:</span>
                     <span :class="cardState.complete ? 'text-success' : ''">
-                      {{ cardState.complete ? '✅ Yes' : '❌ No' }}
+                      {{ cardState.complete ? 'Yes' : 'No' }}
                     </span>
                   </div>
                   <div class="flex gap-2">
@@ -343,7 +355,8 @@ const resetPaymentState = () => {
                 <div v-if="showSecretForm" class="bg-secondary rounded-lg p-5 mt-4">
                   <h4 class="font-medium mb-3">Enter Client Secret</h4>
                   <p class="text-muted-foreground text-sm mb-4">
-                    To test payment confirmation, you need a <code class="bg-muted px-1 rounded">client_secret</code> from a PaymentIntent.
+                    To test payment confirmation, you need a
+                    <code class="bg-muted px-1 rounded">client_secret</code> from a PaymentIntent.
                   </p>
 
                   <div class="space-y-2">
@@ -360,12 +373,19 @@ const resetPaymentState = () => {
 
                 <!-- Payment Mode: Ready to Pay -->
                 <div v-else-if="showPaymentSection && activeClientSecret" class="mt-4">
-                  <div class="flex items-center gap-3 p-3 bg-info/10 border border-info/30 rounded-md">
+                  <div
+                    class="flex items-center gap-3 p-3 bg-info/10 border border-info/30 rounded-md"
+                  >
                     <span class="text-sm text-info font-medium">Client Secret:</span>
                     <code class="text-xs bg-background px-2 py-0.5 rounded font-mono">
                       {{ activeClientSecret.slice(0, 15) }}...{{ activeClientSecret.slice(-8) }}
                     </code>
-                    <Button variant="ghost" size="sm" class="ml-auto" @click="localClientSecret = ''">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      class="ml-auto"
+                      @click="localClientSecret = ''"
+                    >
                       Clear
                     </Button>
                   </div>
@@ -393,14 +413,22 @@ const resetPaymentState = () => {
                   <!-- Payment Status -->
                   <Alert
                     v-if="paymentMessage"
-                    :variant="paymentStatus === 'succeeded' ? 'success' : paymentStatus === 'error' ? 'destructive' : 'warning'"
+                    :variant="
+                      paymentStatus === 'succeeded'
+                        ? 'success'
+                        : paymentStatus === 'error'
+                          ? 'destructive'
+                          : 'warning'
+                    "
                     class="mt-3"
                   >
                     <AlertDescription>{{ paymentMessage }}</AlertDescription>
                   </Alert>
 
                   <p class="text-muted-foreground text-sm mt-3">
-                    Use test card <code class="bg-muted px-1 rounded">4242 4242 4242 4242</code> with any future date and CVC
+                    Use test card
+                    <code class="bg-muted px-1 rounded">4242 4242 4242 4242</code> with any future
+                    date and CVC
                   </p>
                 </div>
               </div>
@@ -420,11 +448,7 @@ const resetPaymentState = () => {
           <div v-if="events.length === 0" class="text-slate-400 text-center py-4">
             No events yet. Interact with the card input to see events.
           </div>
-          <div
-            v-for="(event, index) in events"
-            :key="index"
-            class="event-entry"
-          >
+          <div v-for="(event, index) in events" :key="index" class="event-entry">
             <span class="event-time">{{ event.time }}</span>
             <span :class="['event-type', event.type]">{{ event.type }}</span>
             <span class="event-data">{{ event.message }}</span>

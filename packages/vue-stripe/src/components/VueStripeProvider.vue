@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { provide, ref, onMounted } from 'vue-demi'
-import { loadStripe, type Stripe } from '@stripe/stripe-js'
-import { stripeInjectionKey, stripeConfigInjectionKey, type VueStripeConfig } from '../utils/injection-keys'
+import { loadStripe, type Stripe, type StripeConstructorOptions } from '@stripe/stripe-js'
+import {
+  stripeInjectionKey,
+  stripeConfigInjectionKey,
+  type VueStripeConfig
+} from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 import { STRIPE_PARTNER_DETAILS } from '../utils/constants'
 
@@ -48,15 +52,14 @@ const initialize = async () => {
     error.value = null
 
     // Build options object, only including defined values
-     
-    const options: any = {}
+    const options: StripeConstructorOptions = {}
     const stripeAccount = props.stripeAccount || props.options?.stripeAccount
     const apiVersion = props.apiVersion || props.options?.apiVersion
     const locale = props.locale || props.options?.locale
 
     if (stripeAccount) options.stripeAccount = stripeAccount
     if (apiVersion) options.apiVersion = apiVersion
-    if (locale) options.locale = locale
+    if (locale) options.locale = locale as NonNullable<StripeConstructorOptions['locale']>
 
     stripe.value = await loadStripe(key, options)
 
@@ -91,27 +94,16 @@ provide(stripeInjectionKey, {
 </script>
 
 <template>
-  <div
-    v-if="error"
-    class="vue-stripe-error"
-  >
-    <slot
-      name="error"
-      :error="error"
-    >
+  <div v-if="error" class="vue-stripe-error">
+    <slot name="error" :error="error">
       <div class="vue-stripe-error-message">
         {{ error }}
       </div>
     </slot>
   </div>
-  <div
-    v-else-if="loading"
-    class="vue-stripe-loading"
-  >
+  <div v-else-if="loading" class="vue-stripe-loading">
     <slot name="loading">
-      <div class="vue-stripe-loading-message">
-        Loading Stripe...
-      </div>
+      <div class="vue-stripe-loading-message">Loading Stripe...</div>
     </slot>
   </div>
   <div v-else>

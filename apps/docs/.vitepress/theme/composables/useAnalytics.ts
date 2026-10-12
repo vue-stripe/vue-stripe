@@ -1,6 +1,4 @@
-import { onMounted, onUnmounted } from 'vue'
 import type {
-  AnalyticsEvent,
   SearchEvent,
   NavigationEvent,
   CodeCopyEvent,
@@ -16,17 +14,15 @@ import type {
 export function useAnalytics() {
   const isGALoaded = () => typeof window !== 'undefined' && typeof window.gtag === 'function'
 
-  const trackEvent = (eventName: string, parameters?: Record<string, any>) => {
-    if (!isGALoaded()) {
-      console.debug('GA not loaded, skipping event:', eventName)
-      return
-    }
+  const trackEvent = (eventName: string, parameters?: Record<string, unknown>) => {
+    // GA is not loaded in local dev or when blocked; skip silently.
+    if (!isGALoaded()) return
 
     window.gtag!('event', eventName, {
       ...parameters,
       timestamp: new Date().toISOString(),
       page_location: window.location.href,
-      page_path: window.location.pathname,
+      page_path: window.location.pathname
     })
   }
 
@@ -34,7 +30,7 @@ export function useAnalytics() {
     trackEvent('doc_search', {
       search_term: params.search_term,
       search_results: params.search_results,
-      search_location: params.search_location || 'header',
+      search_location: params.search_location || 'header'
     })
   }
 
@@ -43,7 +39,7 @@ export function useAnalytics() {
       link_text: params.link_text,
       link_url: params.link_url,
       link_type: params.link_type,
-      section: params.section,
+      section: params.section
     })
   }
 
@@ -51,7 +47,7 @@ export function useAnalytics() {
     trackEvent('code_copy', {
       code_language: params.code_language || 'unknown',
       code_length: params.code_length,
-      page_path: params.page_path,
+      page_path: params.page_path
     })
   }
 
@@ -59,7 +55,7 @@ export function useAnalytics() {
     trackEvent('scroll_depth', {
       scroll_depth: params.scroll_depth,
       page_path: params.page_path,
-      time_to_depth: params.time_to_depth,
+      time_to_depth: params.time_to_depth
     })
   }
 
@@ -67,7 +63,7 @@ export function useAnalytics() {
     trackEvent('content_engagement', {
       engagement_time: params.engagement_time,
       page_path: params.page_path,
-      scroll_percentage: params.scroll_percentage,
+      scroll_percentage: params.scroll_percentage
     })
   }
 
@@ -75,7 +71,7 @@ export function useAnalytics() {
     trackEvent('component_view', {
       component_name: params.component_name,
       component_type: params.component_type,
-      page_path: params.page_path,
+      page_path: params.page_path
     })
   }
 
@@ -83,7 +79,7 @@ export function useAnalytics() {
     trackEvent('user_journey', {
       journey_step: params.journey_step,
       journey_name: params.journey_name,
-      step_number: params.step_number,
+      step_number: params.step_number
     })
   }
 
@@ -92,7 +88,7 @@ export function useAnalytics() {
       error_message: params.error_message,
       error_type: params.error_type,
       page_path: params.page_path,
-      stack_trace: params.stack_trace,
+      stack_trace: params.stack_trace
     })
   }
 
@@ -101,14 +97,14 @@ export function useAnalytics() {
       link_domain: params.link_domain,
       link_url: params.link_url,
       link_text: params.link_text,
-      outbound: params.outbound,
+      outbound: params.outbound
     })
   }
 
   const trackUserPreference = (params: UserPreference) => {
     trackEvent('user_preference', {
       preference_type: params.preference_type,
-      preference_value: params.preference_value,
+      preference_value: params.preference_value
     })
   }
 
@@ -118,11 +114,11 @@ export function useAnalytics() {
     window.gtag!('event', 'page_view', {
       page_path: path || window.location.pathname,
       page_location: window.location.href,
-      page_title: document.title,
+      page_title: document.title
     })
   }
 
-  const setUserProperties = (properties: Record<string, any>) => {
+  const setUserProperties = (properties: Record<string, unknown>) => {
     if (!isGALoaded()) return
 
     window.gtag!('set', 'user_properties', properties)
@@ -142,6 +138,6 @@ export function useAnalytics() {
     trackUserPreference,
     trackPageView,
     setUserProperties,
-    isGALoaded,
+    isGALoaded
   }
 }

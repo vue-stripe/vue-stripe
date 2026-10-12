@@ -19,9 +19,9 @@ pnpm build                # build everything
 pnpm vue-stripe:build     # build the library only
 pnpm test                 # all tests (depends on build)
 pnpm vue-stripe:test      # library tests only
-pnpm lint                 # eslint
-pnpm lint:fix
-pnpm typecheck            # vue-tsc --noEmit across packages
+pnpm lint                 # eslint --max-warnings 0 in every workspace (one root eslint.config.js)
+pnpm format:check         # prettier --check in every workspace + root files (pnpm format to fix)
+pnpm typecheck            # vue-tsc / tsc --noEmit in every workspace
 ```
 
 Library-scoped work — `cd packages/vue-stripe`, then:
@@ -35,7 +35,7 @@ pnpm vitest run -t "name of test"    # single test by name
 pnpm build                           # vite build + tsc (emits dist/{es,cjs,umd,types})
 ```
 
-Before submitting changes, run `pnpm lint && pnpm typecheck && pnpm test`.
+Before submitting changes, run `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test`. CI runs the same gates on Node 22 and 24; a single ESLint warning, unformatted file or type error in any workspace fails the build. `no-explicit-any` is an error outside `tests/`, and library `src/` may not import from `'vue'`.
 
 ### Releasing
 

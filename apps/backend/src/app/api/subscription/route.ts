@@ -1,9 +1,23 @@
 import { NextResponse } from 'next/server'
+import type Stripe from 'stripe'
+import { readJsonBody } from '@/lib/api'
 import { getStripe } from '@/lib/stripe'
+
+interface CreateSubscriptionBody {
+  /** Required: the price to subscribe to. */
+  priceId?: string
+  /** Required: used to find or create the customer. */
+  customerEmail?: string
+  /** Payment method to attach to the customer and set as default. */
+  paymentMethodId?: string
+  /** Customer name, used only when a new customer is created. */
+  name?: string
+  metadata?: Stripe.MetadataParam
+}
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => ({}))
+    const body = await readJsonBody<CreateSubscriptionBody>(request)
     const stripe = getStripe()
 
     const { priceId, paymentMethodId, customerEmail } = body
@@ -19,7 +33,7 @@ export async function POST(request: Request) {
     // Find existing customer or create a new one
     const customers = await stripe.customers.list({
       email: customerEmail,
-      limit: 1,
+      limit: 1
     })
 
     let customer = customers.data[0]
@@ -28,7 +42,7 @@ export async function POST(request: Request) {
       customer = await stripe.customers.create({
         email: customerEmail,
         ...(body.name && { name: body.name }),
-        ...(body.metadata && { metadata: body.metadata }),
+        ...(body.metadata && { metadata: body.metadata })
       })
     }
 
@@ -39,15 +53,15 @@ export async function POST(request: Request) {
 
       if (paymentMethod.customer !== customer.id) {
         await stripe.paymentMethods.attach(paymentMethodId, {
-          customer: customer.id,
+          customer: customer.id
         })
       }
 
       // Set as default payment method
       await stripe.customers.update(customer.id, {
         invoice_settings: {
-          default_payment_method: paymentMethodId,
-        },
+          default_payment_method: paymentMethodId
+        }
       })
     }
 
@@ -57,10 +71,10 @@ export async function POST(request: Request) {
       items: [{ price: priceId }],
       payment_behavior: 'default_incomplete',
       payment_settings: {
-        save_default_payment_method: 'on_subscription',
+        save_default_payment_method: 'on_subscription'
       },
       expand: ['latest_invoice.payment_intent'],
-      ...(body.metadata && { metadata: body.metadata }),
+      ...(body.metadata && { metadata: body.metadata })
     })
 
     // Extract the client secret from the payment intent
@@ -78,7 +92,7 @@ export async function POST(request: Request) {
       subscriptionId: subscription.id,
       clientSecret,
       status: subscription.status,
-      customerId: customer.id,
+      customerId: customer.id
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
@@ -87,7 +101,7 @@ export async function POST(request: Request) {
 }
 
 // Health check / documentation
-export async function GET() {
+export function GET() {
   return NextResponse.json({
     endpoint: 'POST /api/subscription',
     description: 'Create a subscription for a customer',
@@ -96,13 +110,13 @@ export async function GET() {
       customerEmail: 'string (required) - Customer email address',
       paymentMethodId: 'string (optional) - Payment method to attach',
       name: 'string (optional) - Customer name',
-      metadata: 'object (optional) - Additional metadata',
+      metadata: 'object (optional) - Additional metadata'
     },
     response: {
       subscriptionId: 'string - The subscription ID',
       clientSecret: 'string - Client secret for payment confirmation',
       status: 'string - Subscription status',
-      customerId: 'string - The customer ID',
-    },
+      customerId: 'string - The customer ID'
+    }
   })
 }

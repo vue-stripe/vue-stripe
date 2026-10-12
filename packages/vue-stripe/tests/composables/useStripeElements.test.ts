@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h, ref, defineComponent } from 'vue-demi'
+import { h, defineComponent } from 'vue-demi'
 import { useStripeElements } from '../../src/composables/useStripeElements'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
@@ -40,9 +40,14 @@ describe('useStripeElements', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(TestComponent)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(TestComponent)
+            }
+          )
       }
     })
 
@@ -69,9 +74,14 @@ describe('useStripeElements', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(TestComponent)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(TestComponent)
+            }
+          )
       }
     })
 
@@ -99,9 +109,14 @@ describe('useStripeElements', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(TestComponent)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(TestComponent)
+            }
+          )
       }
     })
 
@@ -130,14 +145,19 @@ describe('useStripeElements', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(TestComponent)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(TestComponent)
+            }
+          )
       }
     })
 
     await flushPromises()
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await new Promise((resolve) => setTimeout(resolve, 10))
 
     expect(elementsInstance).toBeDefined()
   })
@@ -176,9 +196,14 @@ describe('useStripeElements', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(NestedComponent)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(NestedComponent)
+            }
+          )
       }
     })
 

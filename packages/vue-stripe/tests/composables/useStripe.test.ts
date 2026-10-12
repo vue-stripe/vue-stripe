@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { defineComponent, ref, h } from 'vue-demi'
+import { defineComponent, h } from 'vue-demi'
 import { useStripe } from '../../src/composables/useStripe'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises } from '../setup'

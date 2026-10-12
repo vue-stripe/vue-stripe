@@ -15,14 +15,22 @@ async function mountWith(checkout = makeMockCheckout()) {
 
   let api: any
   const Comp = defineComponent({
-    setup() { api = useCheckoutSession(); return {} },
+    setup() {
+      api = useCheckoutSession()
+      return {}
+    },
     render: () => h('div')
   })
 
   mount(VueStripeProvider, {
     props: { publishableKey: 'pk_test_123' },
     slots: {
-      default: () => h(VueStripeCheckoutProvider, { clientSecret: 'cs_test_123_secret' }, { default: () => h(Comp) })
+      default: () =>
+        h(
+          VueStripeCheckoutProvider,
+          { clientSecret: 'cs_test_123_secret' },
+          { default: () => h(Comp) }
+        )
     }
   })
   await flushPromises()
@@ -34,7 +42,15 @@ describe('useCheckoutSession', () => {
 
   it('throws when used outside a VueStripeCheckoutProvider', () => {
     expect(() =>
-      mount(defineComponent({ setup() { useCheckoutSession(); return {} }, render: () => h('div') }))
+      mount(
+        defineComponent({
+          setup() {
+            useCheckoutSession()
+            return {}
+          },
+          render: () => h('div')
+        })
+      )
     ).toThrow('useCheckoutSession must be used within a VueStripeCheckoutProvider component')
   })
 
@@ -68,9 +84,17 @@ describe('useCheckoutSession', () => {
   it('forwards every session method to the underlying checkout instance', async () => {
     const { api, checkout } = await mountWith()
     const methods = [
-      'confirm', 'applyPromotionCode', 'removePromotionCode', 'updateEmail',
-      'updatePhoneNumber', 'updateBillingAddress', 'updateShippingAddress',
-      'updateLineItemQuantity', 'updateShippingOption', 'updateTaxIdInfo', 'runServerUpdate'
+      'confirm',
+      'applyPromotionCode',
+      'removePromotionCode',
+      'updateEmail',
+      'updatePhoneNumber',
+      'updateBillingAddress',
+      'updateShippingAddress',
+      'updateLineItemQuantity',
+      'updateShippingOption',
+      'updateTaxIdInfo',
+      'runServerUpdate'
     ] as const
     for (const name of methods) {
       await (api() as any)[name]('arg')
@@ -88,7 +112,13 @@ describe('useCheckoutSession', () => {
   it('returns a graceful error result if a method is called before the session is ready', async () => {
     // Inject a context whose checkout ref is still null (session not yet created).
     let api: any
-    const Comp = defineComponent({ setup() { api = useCheckoutSession(); return {} }, render: () => h('div') })
+    const Comp = defineComponent({
+      setup() {
+        api = useCheckoutSession()
+        return {}
+      },
+      render: () => h('div')
+    })
     const Host = defineComponent({
       setup() {
         provide(stripeCheckoutInjectionKey, {
@@ -112,7 +142,13 @@ describe('useCheckoutSession', () => {
   it('changeAppearance warns and no-ops when the session is not ready', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     let api: any
-    const Comp = defineComponent({ setup() { api = useCheckoutSession(); return {} }, render: () => h('div') })
+    const Comp = defineComponent({
+      setup() {
+        api = useCheckoutSession()
+        return {}
+      },
+      render: () => h('div')
+    })
     const Host = defineComponent({
       setup() {
         provide(stripeCheckoutInjectionKey, {

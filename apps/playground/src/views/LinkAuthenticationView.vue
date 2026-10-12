@@ -19,7 +19,7 @@ import {
   Badge,
   Tabs,
   TabsList,
-  TabsTrigger,
+  TabsTrigger
 } from '@/components/ui'
 
 // Ref to the link auth element component
@@ -148,7 +148,10 @@ const handleClear = () => {
         <!-- Client Secret Form -->
         <div v-else-if="showSecretForm" class="bg-secondary rounded-lg p-5 mt-4">
           <h4 class="font-semibold mb-2">Enter Client Secret</h4>
-          <p class="text-muted-foreground text-sm mb-4">The Link Authentication Element requires a <code>clientSecret</code> from a PaymentIntent.</p>
+          <p class="text-muted-foreground text-sm mb-4">
+            The Link Authentication Element requires a <code>clientSecret</code> from a
+            PaymentIntent.
+          </p>
 
           <div class="mb-4">
             <Label class="mb-2">Client Secret</Label>
@@ -163,7 +166,15 @@ const handleClear = () => {
           <div class="bg-card rounded-md border p-4 mt-4">
             <h5 class="font-medium text-sm mb-2">How to get a Client Secret:</h5>
             <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
-              <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Payments</a></li>
+              <li>
+                Go to
+                <a
+                  href="https://dashboard.stripe.com/test/payments"
+                  target="_blank"
+                  class="text-primary hover:underline"
+                  >Stripe Dashboard → Payments</a
+                >
+              </li>
               <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
               <li>Enter an amount (e.g., $10.00)</li>
               <li>Copy the <code>client_secret</code> from the response</li>
@@ -180,8 +191,14 @@ const handleClear = () => {
 
           <div class="p-4 bg-secondary rounded-lg">
             <div class="space-y-3">
-              <Label class="text-xs uppercase tracking-wide text-muted-foreground">Pre-fill Email</Label>
-              <Tabs :model-value="useDefaultEmail ? 'prefill' : 'empty'" @update:model-value="useDefaultEmail = $event === 'prefill'" class="w-full">
+              <Label class="text-xs uppercase tracking-wide text-muted-foreground"
+                >Pre-fill Email</Label
+              >
+              <Tabs
+                :model-value="useDefaultEmail ? 'prefill' : 'empty'"
+                class="w-full"
+                @update:model-value="useDefaultEmail = $event === 'prefill'"
+              >
                 <TabsList class="grid w-full grid-cols-2">
                   <TabsTrigger value="empty">Empty</TabsTrigger>
                   <TabsTrigger value="prefill">test@example.com</TabsTrigger>
@@ -200,15 +217,22 @@ const handleClear = () => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground text-sm mb-4">
-          Enter an email address. If the email is associated with a Stripe Link account,
-          the user can authenticate for faster checkout.
+          Enter an email address. If the email is associated with a Stripe Link account, the user
+          can authenticate for faster checkout.
         </p>
 
         <!-- Show current secret and allow clearing -->
         <div class="flex items-center gap-3 p-3 bg-secondary rounded-md flex-wrap mb-4">
           <span class="text-sm text-muted-foreground">Client Secret:</span>
-          <code class="font-mono text-xs bg-card px-2 py-0.5 rounded">{{ clientSecret.slice(0, 15) }}...{{ clientSecret.slice(-8) }}</code>
-          <Button size="sm" variant="ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
+          <code class="font-mono text-xs bg-card px-2 py-0.5 rounded"
+            >{{ clientSecret.slice(0, 15) }}...{{ clientSecret.slice(-8) }}</code
+          >
+          <Button
+            size="sm"
+            variant="ghost"
+            title="Clear and enter new secret"
+            @click="localClientSecret = ''"
+          >
             Clear
           </Button>
         </div>
@@ -243,7 +267,7 @@ const handleClear = () => {
           <h4 class="font-semibold text-sm mb-3">Collected Data</h4>
           <div class="flex gap-2 mb-3">
             <Badge :variant="authData.complete ? 'success' : 'warning'">
-              {{ authData.complete ? '✅ Complete' : '⏳ Incomplete' }}
+              {{ authData.complete ? 'Complete' : 'Incomplete' }}
             </Badge>
           </div>
 
@@ -279,6 +303,5 @@ const handleClear = () => {
         </div>
       </CardContent>
     </Card>
-
   </div>
 </template>

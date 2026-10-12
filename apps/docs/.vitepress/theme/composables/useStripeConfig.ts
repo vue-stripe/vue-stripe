@@ -12,6 +12,6 @@ export function useStripeConfig() {
 
   return {
     publishableKey,
-    apiUrl,
+    apiUrl
   }
 }

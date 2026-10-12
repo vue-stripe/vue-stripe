@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from 'vitepress'
+import { defineConfigWithTheme, loadEnv, type DefaultTheme, type HeadConfig } from 'vitepress'
 import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
 import { coverage } from './theme/data/stripe-coverage'
 
@@ -18,13 +18,21 @@ const getEnv = (key: string): string => {
   const shellEnv = process.env[key]
   if (shellEnv) return shellEnv
   // Fall back to .env file values (for local development)
-  return (envFromFile as Record<string, string>)[key] || ''
+  return envFromFile[key] || ''
 }
 
 // Google Analytics Measurement ID
 const GA_MEASUREMENT_ID = getEnv('VITE_GA_MEASUREMENT_ID')
 
-export default defineConfig({
+// Default theme config plus the live-demo Stripe settings exposed through `useData().theme`.
+interface ThemeConfig extends DefaultTheme.Config {
+  stripeConfig: {
+    publishableKey: string
+    apiUrl: string
+  }
+}
+
+export default defineConfigWithTheme<ThemeConfig>({
   title: 'Vue Stripe',
   description: 'Stripe Elements for Vue.js',
   lang: 'en-US',
@@ -32,8 +40,14 @@ export default defineConfig({
 
   head: [
     // Google Analytics with Enhanced Measurement
-    ['script', { async: '', src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}` }],
-    ['script', {}, `window.dataLayer = window.dataLayer || [];
+    [
+      'script',
+      { async: '', src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}` }
+    ],
+    [
+      'script',
+      {},
+      `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 
@@ -68,7 +82,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
   gtag('config', '${GA_MEASUREMENT_ID}', {
     debug_mode: true
   });
-}`],
+}`
+    ],
 
     // Favicon
     ['link', { rel: 'icon', href: '/favicon.ico' }],
@@ -77,7 +92,14 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     // Basic meta
     ['meta', { name: 'theme-color', content: '#635bff' }],
     ['meta', { name: 'author', content: 'Vue Stripe Contributors' }],
-    ['meta', { name: 'keywords', content: 'vue, stripe, payment, checkout, vue.js, vue 3, stripe elements, payment element, card element' }],
+    [
+      'meta',
+      {
+        name: 'keywords',
+        content:
+          'vue, stripe, payment, checkout, vue.js, vue 3, stripe elements, payment element, card element'
+      }
+    ],
 
     // Open Graph
     ['meta', { property: 'og:type', content: 'website' }],
@@ -89,7 +111,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     // Twitter Card
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'twitter:title', content: 'Vue Stripe' }],
-    ['meta', { name: 'twitter:description', content: 'Stripe Checkout & Elements for Vue.js' }],
+    ['meta', { name: 'twitter:description', content: 'Stripe Checkout & Elements for Vue.js' }]
   ],
 
   sitemap: {
@@ -104,7 +126,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     // Environment config for live demos (passed to components via useData())
     stripeConfig: {
       publishableKey: getEnv('VITE_STRIPE_PUBLISHABLE_KEY'),
-      apiUrl: getEnv('VITE_API_URL') || 'https://backend.vuestripe.com',
+      apiUrl: getEnv('VITE_API_URL') || 'https://backend.vuestripe.com'
     },
 
     nav: [
@@ -116,7 +138,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
         text: 'Links',
         items: [
           { text: 'GitHub', link: 'https://github.com/vue-stripe/vue-stripe' },
-          { text: 'NPM', link: 'https://www.npmjs.com/package/@vue-stripe/vue-stripe' },
+          { text: 'NPM', link: 'https://www.npmjs.com/package/@vue-stripe/vue-stripe' }
         ]
       }
     ],
@@ -128,14 +150,14 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           items: [
             { text: 'Introduction', link: '/guide/introduction' },
             { text: 'Installation', link: '/guide/installation' },
-            { text: 'Your First Payment', link: '/guide/first-payment' },
+            { text: 'Your First Payment', link: '/guide/first-payment' }
           ]
         },
         {
           text: 'Core Concepts',
           items: [
             { text: 'Architecture', link: '/guide/architecture' },
-            { text: 'Choosing Your Approach', link: '/guide/approaches' },
+            { text: 'Choosing Your Approach', link: '/guide/approaches' }
           ]
         },
         {
@@ -145,7 +167,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Card Element', link: '/guide/card-element' },
             { text: 'Address Element', link: '/guide/address-element' },
             { text: 'Link Authentication', link: '/guide/link-authentication' },
-            { text: 'Express Checkout', link: '/guide/express-checkout' },
+            { text: 'Express Checkout', link: '/guide/express-checkout' }
           ]
         },
         {
@@ -154,70 +176,81 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'IBAN Element', link: '/guide/iban-element' },
             { text: 'iDEAL Bank Element', link: '/guide/ideal-bank-element' },
             { text: 'P24 Bank Element', link: '/guide/p24-bank-element' },
-            { text: 'EPS Bank Element', link: '/guide/eps-bank-element' },
+            { text: 'EPS Bank Element', link: '/guide/eps-bank-element' }
           ]
         },
         {
           text: 'APAC Elements',
           items: [
             { text: 'FPX Bank Element', link: '/guide/fpx-bank-element' },
-            { text: 'AU Bank Account Element', link: '/guide/au-bank-account-element' },
+            { text: 'AU Bank Account Element', link: '/guide/au-bank-account-element' }
           ]
         },
         {
           text: 'Subscriptions',
-          items: [
-            { text: 'Pricing Table', link: '/guide/pricing-table' },
-          ]
+          items: [{ text: 'Pricing Table', link: '/guide/pricing-table' }]
         },
         {
           text: 'Advanced',
           items: [
             { text: 'Saving Payment Methods', link: '/guide/setup-intent' },
-            { text: 'Checkout', link: '/guide/checkout' },
+            { text: 'Checkout', link: '/guide/checkout' }
           ]
-        },
+        }
       ],
       '/api/': [
         {
           text: 'Overview',
-          items: [
-            { text: 'API Reference', link: '/api/' },
-          ]
+          items: [{ text: 'API Reference', link: '/api/' }]
         },
         {
           text: 'Provider Components',
           items: [
             { text: 'VueStripeProvider', link: '/api/components/stripe-provider' },
-            { text: 'VueStripeElements', link: '/api/components/stripe-elements' },
+            { text: 'VueStripeElements', link: '/api/components/stripe-elements' }
           ]
         },
         {
           text: 'Element Components',
           items: [
             { text: 'VueStripePaymentElement', link: '/api/components/stripe-payment-element' },
-            { text: 'VueStripeExpressCheckoutElement', link: '/api/components/stripe-express-checkout-element' },
+            {
+              text: 'VueStripeExpressCheckoutElement',
+              link: '/api/components/stripe-express-checkout-element'
+            },
             { text: 'VueStripeCardElement', link: '/api/components/stripe-card-element' },
             { text: 'Split Card Elements', link: '/api/components/stripe-split-card-elements' },
             { text: 'VueStripeAddressElement', link: '/api/components/stripe-address-element' },
-            { text: 'VueStripeLinkAuthenticationElement', link: '/api/components/stripe-link-authentication-element' },
-            { text: 'VueStripePaymentMethodMessagingElement (BNPL)', link: '/api/components/stripe-payment-method-messaging-element' },
+            {
+              text: 'VueStripeLinkAuthenticationElement',
+              link: '/api/components/stripe-link-authentication-element'
+            },
+            {
+              text: 'VueStripePaymentMethodMessagingElement (BNPL)',
+              link: '/api/components/stripe-payment-method-messaging-element'
+            }
           ]
         },
         {
           text: 'European Elements',
           items: [
             { text: 'VueStripeIbanElement', link: '/api/components/stripe-iban-element' },
-            { text: 'VueStripeIdealBankElement', link: '/api/components/stripe-ideal-bank-element' },
+            {
+              text: 'VueStripeIdealBankElement',
+              link: '/api/components/stripe-ideal-bank-element'
+            },
             { text: 'VueStripeP24BankElement', link: '/api/components/stripe-p24-bank-element' },
-            { text: 'VueStripeEpsBankElement', link: '/api/components/stripe-eps-bank-element' },
+            { text: 'VueStripeEpsBankElement', link: '/api/components/stripe-eps-bank-element' }
           ]
         },
         {
           text: 'APAC Elements',
           items: [
             { text: 'VueStripeFpxBankElement', link: '/api/components/stripe-fpx-bank-element' },
-            { text: 'VueStripeAuBankAccountElement', link: '/api/components/stripe-au-bank-account-element' },
+            {
+              text: 'VueStripeAuBankAccountElement',
+              link: '/api/components/stripe-au-bank-account-element'
+            }
           ]
         },
         {
@@ -225,7 +258,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           items: [
             { text: 'VueStripeCheckout', link: '/api/components/stripe-checkout' },
             { text: 'VueStripeCheckoutProvider', link: '/api/components/stripe-checkout-provider' },
-            { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' },
+            { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' }
           ]
         },
         {
@@ -238,22 +271,18 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'useStripeCheckout', link: '/api/composables/use-stripe-checkout' },
             { text: 'useCheckoutSession', link: '/api/composables/use-checkout-session' },
             { text: 'useCreatePaymentMethod', link: '/api/composables/use-create-payment-method' },
-            { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' },
+            { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' }
           ]
         },
         {
           text: 'Plugin',
-          items: [
-            { text: 'createVueStripe', link: '/api/plugin' },
-          ]
-        },
+          items: [{ text: 'createVueStripe', link: '/api/plugin' }]
+        }
       ],
       '/live-demo/': [
         {
           text: 'Live Demo',
-          items: [
-            { text: 'Overview', link: '/live-demo/' },
-          ]
+          items: [{ text: 'Overview', link: '/live-demo/' }]
         },
         {
           text: 'One-Time Payments',
@@ -264,21 +293,19 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },
             { text: 'Link Authentication', link: '/live-demo/link-authentication' },
             { text: 'Express Checkout', link: '/live-demo/express-checkout' },
-            { text: 'Address Element', link: '/live-demo/address-element' },
+            { text: 'Address Element', link: '/live-demo/address-element' }
           ]
         },
         {
           text: 'Saving Cards',
           items: [
             { text: 'Save a Card (SetupIntent)', link: '/live-demo/setup-intent' },
-            { text: 'Create Payment Method', link: '/live-demo/create-payment-method' },
+            { text: 'Create Payment Method', link: '/live-demo/create-payment-method' }
           ]
         },
         {
           text: 'Buy Now, Pay Later',
-          items: [
-            { text: 'Payment Method Messaging', link: '/live-demo/payment-method-messaging' },
-          ]
+          items: [{ text: 'Payment Method Messaging', link: '/live-demo/payment-method-messaging' }]
         },
         {
           text: 'Regional Payment Methods',
@@ -286,29 +313,27 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'iDEAL (Netherlands)', link: '/live-demo/ideal-payment' },
             { text: 'SEPA Direct Debit', link: '/live-demo/iban-element' },
             { text: 'Przelewy24 (Poland)', link: '/live-demo/p24-payment' },
-            { text: 'EPS (Austria)', link: '/live-demo/eps-payment' },
+            { text: 'EPS (Austria)', link: '/live-demo/eps-payment' }
           ]
         },
         {
           text: 'APAC Payments',
           items: [
             { text: 'FPX (Malaysia)', link: '/live-demo/fpx-payment' },
-            { text: 'BECS Direct Debit (Australia)', link: '/live-demo/becs-payment' },
+            { text: 'BECS Direct Debit (Australia)', link: '/live-demo/becs-payment' }
           ]
         },
         {
           text: 'Subscriptions',
           items: [
             { text: 'Stripe Checkout', link: '/live-demo/subscription-checkout' },
-            { text: 'Embedded Elements', link: '/live-demo/subscription-embedded' },
+            { text: 'Embedded Elements', link: '/live-demo/subscription-embedded' }
           ]
-        },
-      ],
+        }
+      ]
     },
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/vue-stripe/vue-stripe' },
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/vue-stripe/vue-stripe' }],
 
     footer: {
       message: 'Released under the MIT License.',
@@ -327,14 +352,14 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     docFooter: {
       prev: 'Previous',
       next: 'Next'
-    },
+    }
   },
 
   markdown: {
     theme: {
       light: 'github-light',
       dark: 'github-dark'
-    },
+    }
   },
 
   vite: {
@@ -348,9 +373,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     },
     // Explicitly define environment variables to ensure they're inlined during SSG build
     define: {
-      'import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY': JSON.stringify(getEnv('VITE_STRIPE_PUBLISHABLE_KEY')),
-      'import.meta.env.VITE_API_URL': JSON.stringify(getEnv('VITE_API_URL') || 'https://backend.vuestripe.com'),
-      'import.meta.env.VITE_GA_MEASUREMENT_ID': JSON.stringify(getEnv('VITE_GA_MEASUREMENT_ID')),
+      'import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY': JSON.stringify(
+        getEnv('VITE_STRIPE_PUBLISHABLE_KEY')
+      ),
+      'import.meta.env.VITE_API_URL': JSON.stringify(
+        getEnv('VITE_API_URL') || 'https://backend.vuestripe.com'
+      ),
+      'import.meta.env.VITE_GA_MEASUREMENT_ID': JSON.stringify(getEnv('VITE_GA_MEASUREMENT_ID'))
     }
   },
 
@@ -366,9 +395,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
   transformHead({ pageData }) {
     // Pages that don't have dynamic OG images generated (not in sidebar)
     const pagesWithoutDynamicOG = ['index.md', '404.md', 'guide/index.md']
-    const head = []
+    const head: HeadConfig[] = []
 
-    if (pagesWithoutDynamicOG.some(page => pageData.relativePath === page || pageData.relativePath === '')) {
+    if (
+      pagesWithoutDynamicOG.some(
+        (page) => pageData.relativePath === page || pageData.relativePath === ''
+      )
+    ) {
       head.push(
         ['meta', { property: 'og:image', content: 'https://vuestripe.com/og-image.png' }],
         ['meta', { property: 'og:image:width', content: '1200' }],
@@ -385,9 +418,9 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     await buildEndGenerateOpenGraphImages({
       baseUrl: 'https://vuestripe.com',
       category: {
-        byLevel: 2,
+        byLevel: 2
       },
-      templateSvgPath: './public/og-template.svg',
+      templateSvgPath: './public/og-template.svg'
     })(siteConfig)
-  },
+  }
 })

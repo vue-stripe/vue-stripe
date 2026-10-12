@@ -67,12 +67,12 @@ export default {
     // Initialize Mermaid renderer with theme support
     const initMermaid = () => {
       createMermaidRenderer({
-        theme: isDark.value ? 'dark' : 'default',
+        theme: isDark.value ? 'dark' : 'default'
       })
     }
 
     // Initial Mermaid setup
-    nextTick(() => initMermaid())
+    void nextTick(() => initMermaid())
 
     // Re-render Mermaid charts on theme change
     watch(
@@ -88,12 +88,12 @@ export default {
       // Analytics tracking (invisible component)
       'layout-top': () => h(AnalyticsWrapper),
       // GitHub stars CTA after hero actions
-      'home-hero-actions-after': () => h(GitHubStarsCTA),
+      'home-hero-actions-after': () => h(GitHubStarsCTA)
       // Carbon Ads placeholder - will be injected when you have the actual code
       // 'aside-ads-before': () => h('div', { id: 'carbon-ads-container' })
     })
   },
-  enhanceApp({ app, router, siteData }) {
+  enhanceApp({ app }) {
     // Register example components globally for use in markdown
     app.component('ProductSelector', ProductSelector)
     app.component('PaymentIntentGenerator', PaymentIntentGenerator)

@@ -24,9 +24,14 @@ describe('Split Card Elements', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(ElementComponent, elementProps, elementSlots)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(ElementComponent, elementProps, elementSlots)
+            }
+          )
       }
     })
 
@@ -63,7 +68,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       await mountWithProviders(VueStripeCardNumberElement)
@@ -83,7 +88,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const options = {
@@ -116,7 +121,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(VueStripeCardNumberElement)
@@ -151,7 +156,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       await mountWithProviders(VueStripeCardNumberElement)
@@ -191,7 +196,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       await mountWithProviders(VueStripeCardExpiryElement)
@@ -218,7 +223,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(VueStripeCardExpiryElement)
@@ -251,7 +256,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(VueStripeCardExpiryElement)
@@ -302,7 +307,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       await mountWithProviders(VueStripeCardCvcElement)
@@ -329,7 +334,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(VueStripeCardCvcElement)
@@ -363,7 +368,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders(VueStripeCardCvcElement)
@@ -399,7 +404,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = mount(VueStripeProvider, {
@@ -407,13 +412,18 @@ describe('Split Card Elements', () => {
           publishableKey: 'pk_test_123'
         },
         slots: {
-          default: () => h(VueStripeElements, {}, {
-            default: () => [
-              h(VueStripeCardNumberElement, { key: 'number' }),
-              h(VueStripeCardExpiryElement, { key: 'expiry' }),
-              h(VueStripeCardCvcElement, { key: 'cvc' })
-            ]
-          })
+          default: () =>
+            h(
+              VueStripeElements,
+              {},
+              {
+                default: () => [
+                  h(VueStripeCardNumberElement, { key: 'number' }),
+                  h(VueStripeCardExpiryElement, { key: 'expiry' }),
+                  h(VueStripeCardCvcElement, { key: 'cvc' })
+                ]
+              }
+            )
         }
       })
 
@@ -439,7 +449,7 @@ describe('Split Card Elements', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = mount(VueStripeProvider, {
@@ -447,13 +457,18 @@ describe('Split Card Elements', () => {
           publishableKey: 'pk_test_123'
         },
         slots: {
-          default: () => h(VueStripeElements, {}, {
-            default: () => [
-              h(VueStripeCardNumberElement, { key: 'number' }),
-              h(VueStripeCardExpiryElement, { key: 'expiry' }),
-              h(VueStripeCardCvcElement, { key: 'cvc' })
-            ]
-          })
+          default: () =>
+            h(
+              VueStripeElements,
+              {},
+              {
+                default: () => [
+                  h(VueStripeCardNumberElement, { key: 'number' }),
+                  h(VueStripeCardExpiryElement, { key: 'expiry' }),
+                  h(VueStripeCardCvcElement, { key: 'cvc' })
+                ]
+              }
+            )
         }
       })
 
@@ -461,7 +476,7 @@ describe('Split Card Elements', () => {
       wrapper.unmount()
 
       // All elements should be destroyed, with listeners detached first (#376)
-      mockElements.forEach(element => {
+      mockElements.forEach((element) => {
         expect(element.off).toHaveBeenCalledWith('ready', expect.any(Function))
         expect(element.off).toHaveBeenCalledWith('change', expect.any(Function))
         expect(element.destroy).toHaveBeenCalled()

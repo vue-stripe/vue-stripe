@@ -18,9 +18,14 @@ describe('VueStripeCardElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(VueStripeCardElement, cardProps, cardSlots)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(VueStripeCardElement, cardProps, cardSlots)
+            }
+          )
       }
     })
 
@@ -361,16 +366,22 @@ describe('VueStripeCardElement', () => {
       }
     })
 
-    const wrapper = mount(VueStripeProvider, {
+    mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(VueStripeCardElement, {
-            options: options.value
-          })
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () =>
+                h(VueStripeCardElement, {
+                  options: options.value
+                })
+            }
+          )
       }
     })
 
@@ -500,12 +511,22 @@ describe('VueStripeCardElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(VueStripeCardElement, {}, {
-            error: ({ error }: { error: string }) =>
-              h('div', { class: 'custom-error-display' }, `Custom: ${error}`)
-          })
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () =>
+                h(
+                  VueStripeCardElement,
+                  {},
+                  {
+                    error: ({ error }: { error: string }) =>
+                      h('div', { class: 'custom-error-display' }, `Custom: ${error}`)
+                  }
+                )
+            }
+          )
       }
     })
 

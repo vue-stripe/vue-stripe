@@ -2,7 +2,11 @@
 import { ref } from 'vue'
 import ProductSelector from './ProductSelector.vue'
 import PaymentStatus from './PaymentStatus.vue'
-import { useBackendApi, type Product, type CheckoutSessionResult } from '../../composables/useBackendApi'
+import {
+  useBackendApi,
+  type Product,
+  type CheckoutSessionResult
+} from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
 
 const { publishableKey } = useStripeConfig()
@@ -47,7 +51,7 @@ async function startCheckout() {
       priceId: selectedProduct.value.price.id,
       mode: 'subscription',
       successUrl: `${window.location.href}?result=success`,
-      cancelUrl: `${window.location.href}?result=cancel`,
+      cancelUrl: `${window.location.href}?result=cancel`
     })
 
     sessionResult.value = result
@@ -68,9 +72,7 @@ async function startCheckout() {
     <!-- Check for publishable key -->
     <div v-if="!publishableKey" class="warning-box">
       <strong>Missing Configuration</strong>
-      <p>
-        Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.
-      </p>
+      <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
     <template v-else>
@@ -79,12 +81,18 @@ async function startCheckout() {
 
       <!-- Progress Steps -->
       <div class="progress-steps">
-        <div class="progress-step" :class="{ active: step === 'select', completed: step !== 'select' }">
+        <div
+          class="progress-step"
+          :class="{ active: step === 'select', completed: step !== 'select' }"
+        >
           <span class="step-dot">1</span>
           <span class="step-label">Plan</span>
         </div>
         <div class="progress-line" :class="{ completed: step !== 'select' }"></div>
-        <div class="progress-step" :class="{ active: step === 'checkout', completed: step === 'complete' }">
+        <div
+          class="progress-step"
+          :class="{ active: step === 'checkout', completed: step === 'complete' }"
+        >
           <span class="step-dot">2</span>
           <span class="step-label">Checkout</span>
         </div>
@@ -97,10 +105,7 @@ async function startCheckout() {
 
       <!-- Step 1: Select Subscription Product -->
       <div v-if="step === 'select'" class="step-content">
-        <ProductSelector
-          filter="recurring"
-          @select="onProductSelected"
-        />
+        <ProductSelector filter="recurring" @select="onProductSelected" />
       </div>
 
       <!-- Step 2: Start Checkout -->
@@ -118,23 +123,22 @@ async function startCheckout() {
                 <p v-if="selectedProduct?.description">{{ selectedProduct.description }}</p>
               </div>
               <div class="product-price">
-                {{ formatPrice(selectedProduct?.price.amount || 0, selectedProduct?.price.currency || 'usd') }}
+                {{
+                  formatPrice(
+                    selectedProduct?.price.amount || 0,
+                    selectedProduct?.price.currency || 'usd'
+                  )
+                }}
                 <span class="interval">/{{ selectedProduct?.price.interval }}</span>
               </div>
             </div>
 
-            <button
-              class="checkout-btn"
-              :disabled="loading || redirecting"
-              @click="startCheckout"
-            >
+            <button class="checkout-btn" :disabled="loading || redirecting" @click="startCheckout">
               <span v-if="loading || redirecting" class="spinner"></span>
               {{ redirecting ? 'Redirecting to Stripe...' : 'Subscribe with Stripe Checkout' }}
             </button>
 
-            <p class="checkout-note">
-              You'll be redirected to Stripe's secure checkout page.
-            </p>
+            <p class="checkout-note">You'll be redirected to Stripe's secure checkout page.</p>
           </div>
 
           <div v-if="sessionError || error" class="error-box">
@@ -265,8 +269,14 @@ async function startCheckout() {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .step-section {

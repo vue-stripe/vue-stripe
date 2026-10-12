@@ -10,7 +10,7 @@ import {
   Wallet,
   ExternalLink,
   Landmark,
-  Package,
+  Package
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
@@ -20,20 +20,20 @@ const generators = [
     name: 'Payment Intent',
     href: '/payment-intent',
     icon: CreditCard,
-    description: 'One-time payments',
+    description: 'One-time payments'
   },
   {
     name: 'Setup Intent',
     href: '/setup-intent',
     icon: Wallet,
-    description: 'Save payment methods',
+    description: 'Save payment methods'
   },
   {
     name: 'Checkout Session',
     href: '/checkout-session',
     icon: ShoppingCart,
-    description: 'Hosted checkout',
-  },
+    description: 'Hosted checkout'
+  }
 ]
 
 const catalog = [
@@ -41,8 +41,8 @@ const catalog = [
     name: 'Products',
     href: '/products',
     icon: Package,
-    description: 'View seeded products',
-  },
+    description: 'View seeded products'
+  }
 ]
 
 const euPayments = [
@@ -50,26 +50,26 @@ const euPayments = [
     name: 'iDEAL (Netherlands)',
     href: '/ideal-intent',
     icon: Landmark,
-    description: 'Dutch bank payments',
+    description: 'Dutch bank payments'
   },
   {
     name: 'EPS (Austria)',
     href: '/eps-intent',
     icon: Landmark,
-    description: 'Austrian bank payments',
+    description: 'Austrian bank payments'
   },
   {
     name: 'P24 (Poland)',
     href: '/p24-intent',
     icon: Landmark,
-    description: 'Polish bank payments',
+    description: 'Polish bank payments'
   },
   {
     name: 'SEPA Debit',
     href: '/sepa-debit-intent',
     icon: Landmark,
-    description: 'EU IBAN payments',
-  },
+    description: 'EU IBAN payments'
+  }
 ]
 
 const apacPayments = [
@@ -77,27 +77,27 @@ const apacPayments = [
     name: 'FPX (Malaysia)',
     href: '/fpx-intent',
     icon: Landmark,
-    description: 'Malaysian bank payments',
+    description: 'Malaysian bank payments'
   },
   {
     name: 'BECS (Australia)',
     href: '/becs-intent',
     icon: Landmark,
-    description: 'AU Direct Debit',
-  },
+    description: 'AU Direct Debit'
+  }
 ]
 
 const externalLinks = [
   {
     name: 'Vue Stripe Docs',
     href: 'https://vuestripe.com',
-    icon: ExternalLink,
+    icon: ExternalLink
   },
   {
     name: 'Stripe Dashboard',
     href: 'https://dashboard.stripe.com/test',
-    icon: ExternalLink,
-  },
+    icon: ExternalLink
+  }
 ]
 
 export function Sidebar() {
@@ -137,9 +137,7 @@ export function Sidebar() {
               <item.icon className="h-4 w-4" />
               <div>
                 <p className="font-medium">{item.name}</p>
-                {!isActive && (
-                  <p className="text-xs opacity-70">{item.description}</p>
-                )}
+                {!isActive && <p className="text-xs opacity-70">{item.description}</p>}
               </div>
             </Link>
           )
@@ -164,9 +162,7 @@ export function Sidebar() {
               <item.icon className="h-4 w-4" />
               <div>
                 <p className="font-medium">{item.name}</p>
-                {!isActive && (
-                  <p className="text-xs opacity-70">{item.description}</p>
-                )}
+                {!isActive && <p className="text-xs opacity-70">{item.description}</p>}
               </div>
             </Link>
           )
@@ -191,9 +187,7 @@ export function Sidebar() {
               <item.icon className="h-4 w-4" />
               <div>
                 <p className="font-medium">{item.name}</p>
-                {!isActive && (
-                  <p className="text-xs opacity-70">{item.description}</p>
-                )}
+                {!isActive && <p className="text-xs opacity-70">{item.description}</p>}
               </div>
             </Link>
           )
@@ -218,9 +212,7 @@ export function Sidebar() {
               <item.icon className="h-4 w-4" />
               <div>
                 <p className="font-medium">{item.name}</p>
-                {!isActive && (
-                  <p className="text-xs opacity-70">{item.description}</p>
-                )}
+                {!isActive && <p className="text-xs opacity-70">{item.description}</p>}
               </div>
             </Link>
           )

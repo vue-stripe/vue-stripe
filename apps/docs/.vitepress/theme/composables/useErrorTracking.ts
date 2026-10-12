@@ -5,13 +5,15 @@ export function useErrorTracking() {
   const { trackError } = useAnalytics()
 
   const handleError = (event: ErrorEvent) => {
-    const { message, filename, lineno, colno, error } = event
+    const { message, filename, lineno, colno } = event
+    const error: unknown = event.error
+    const stack = error instanceof Error ? error.stack : undefined
 
     trackError({
       error_message: message,
       error_type: 'runtime_error',
       page_path: window.location.pathname,
-      stack_trace: error?.stack || `${filename}:${lineno}:${colno}`,
+      stack_trace: stack || `${filename}:${lineno}:${colno}`
     })
 
     // Don't prevent default error handling
@@ -19,9 +21,9 @@ export function useErrorTracking() {
   }
 
   const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-    const reason = event.reason
+    const reason: unknown = event.reason
 
-    let errorMessage = 'Unhandled Promise Rejection'
+    let errorMessage: string
     let stackTrace = ''
 
     if (reason instanceof Error) {
@@ -30,14 +32,15 @@ export function useErrorTracking() {
     } else if (typeof reason === 'string') {
       errorMessage = reason
     } else {
-      errorMessage = JSON.stringify(reason)
+      // JSON.stringify returns undefined for e.g. `undefined` or functions.
+      errorMessage = JSON.stringify(reason) ?? 'Unhandled Promise Rejection'
     }
 
     trackError({
       error_message: errorMessage,
       error_type: 'unhandled_rejection',
       page_path: window.location.pathname,
-      stack_trace: stackTrace,
+      stack_trace: stackTrace
     })
   }
 
@@ -50,21 +53,22 @@ export function useErrorTracking() {
       trackError({
         error_message: `Failed to load resource: ${src}`,
         error_type: 'resource_error',
-        page_path: window.location.pathname,
+        page_path: window.location.pathname
       })
     }
   }
 
   const track404Errors = () => {
     // Check if current page is 404
-    if (window.location.pathname.includes('404') ||
-        document.title.toLowerCase().includes('not found') ||
-        document.body.textContent?.toLowerCase().includes('page not found')) {
-
+    if (
+      window.location.pathname.includes('404') ||
+      document.title.toLowerCase().includes('not found') ||
+      document.body.textContent?.toLowerCase().includes('page not found')
+    ) {
       trackError({
         error_message: `404 - Page not found: ${window.location.pathname}`,
         error_type: '404_error',
-        page_path: window.location.pathname,
+        page_path: window.location.pathname
       })
     }
   }
@@ -106,6 +110,6 @@ export function useErrorTracking() {
   return {
     setupErrorTracking,
     handleError,
-    handleUnhandledRejection,
+    handleUnhandledRejection
   }
 }

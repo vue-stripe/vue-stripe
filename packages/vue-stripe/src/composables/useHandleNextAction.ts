@@ -45,7 +45,7 @@ export function useHandleNextAction(): UseHandleNextActionReturn {
     error.value = null
 
     try {
-      const result = await (stripeInstance.stripe.value as any).handleNextAction({
+      const result = await stripeInstance.stripe.value.handleNextAction({
         clientSecret: options.clientSecret
       })
 

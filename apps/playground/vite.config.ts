@@ -21,9 +21,6 @@ export default defineConfig({
     formatting: 'minify',
     crittersOptions: {
       reduceInlineStyles: false
-    },
-    onFinished() {
-      console.log('SSG build complete!')
     }
   }
 })

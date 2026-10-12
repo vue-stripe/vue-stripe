@@ -71,19 +71,10 @@ defineExpose({
 
 <template>
   <div class="vue-stripe-pricing-table">
-    <slot
-      v-if="loading"
-      name="loading"
-    >
-      <div class="vue-stripe-pricing-table-loading">
-        Loading pricing table...
-      </div>
+    <slot v-if="loading" name="loading">
+      <div class="vue-stripe-pricing-table-loading">Loading pricing table...</div>
     </slot>
-    <slot
-      v-else-if="error"
-      name="error"
-      :error="error"
-    >
+    <slot v-else-if="error" name="error" :error="error">
       <div class="vue-stripe-pricing-table-error">
         {{ error }}
       </div>

@@ -3,7 +3,11 @@ import { ref } from 'vue'
 import { VueStripeProvider, VueStripeCheckout } from '@vue-stripe/vue-stripe'
 import ProductSelector from './ProductSelector.vue'
 import PaymentStatus from './PaymentStatus.vue'
-import { useBackendApi, type Product, type CheckoutSessionResult } from '../../composables/useBackendApi'
+import {
+  useBackendApi,
+  type Product,
+  type CheckoutSessionResult
+} from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
 
 const { publishableKey } = useStripeConfig()
@@ -48,7 +52,7 @@ async function createSession() {
       priceId: selectedProduct.value.price.id,
       mode: 'payment',
       successUrl: `${window.location.href}?result=success`,
-      cancelUrl: `${window.location.href}?result=cancel`,
+      cancelUrl: `${window.location.href}?result=cancel`
     })
 
     sessionResult.value = result
@@ -97,9 +101,7 @@ function onBeforeRedirect() {
     <!-- Check for publishable key -->
     <div v-if="!publishableKey" class="warning-box">
       <strong>Missing Configuration</strong>
-      <p>
-        Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.
-      </p>
+      <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
     <template v-else>
@@ -108,12 +110,18 @@ function onBeforeRedirect() {
 
       <!-- Progress Steps -->
       <div class="progress-steps">
-        <div class="progress-step" :class="{ active: step === 'select', completed: step !== 'select' }">
+        <div
+          class="progress-step"
+          :class="{ active: step === 'select', completed: step !== 'select' }"
+        >
           <span class="step-dot">1</span>
           <span class="step-label">Product</span>
         </div>
         <div class="progress-line" :class="{ completed: step !== 'select' }"></div>
-        <div class="progress-step" :class="{ active: step === 'checkout', completed: step === 'complete' }">
+        <div
+          class="progress-step"
+          :class="{ active: step === 'checkout', completed: step === 'complete' }"
+        >
           <span class="step-dot">2</span>
           <span class="step-label">Checkout</span>
         </div>
@@ -126,10 +134,7 @@ function onBeforeRedirect() {
 
       <!-- Step 1: Select Product -->
       <div v-if="step === 'select'" class="step-content">
-        <ProductSelector
-          filter="one_time"
-          @select="onProductSelected"
-        />
+        <ProductSelector filter="one_time" @select="onProductSelected" />
       </div>
 
       <!-- Step 2: Checkout -->
@@ -142,10 +147,7 @@ function onBeforeRedirect() {
 
           <!-- Toggle between approaches -->
           <div class="approach-toggle">
-            <button
-              :class="['toggle-btn', { active: useComponent }]"
-              @click="useComponent = true"
-            >
+            <button :class="['toggle-btn', { active: useComponent }]" @click="useComponent = true">
               VueStripeCheckout Component
             </button>
             <button
@@ -163,7 +165,12 @@ function onBeforeRedirect() {
                 <p v-if="selectedProduct?.description">{{ selectedProduct.description }}</p>
               </div>
               <div class="product-price">
-                {{ formatPrice(selectedProduct?.price.amount || 0, selectedProduct?.price.currency || 'usd') }}
+                {{
+                  formatPrice(
+                    selectedProduct?.price.amount || 0,
+                    selectedProduct?.price.currency || 'usd'
+                  )
+                }}
               </div>
             </div>
 
@@ -185,7 +192,10 @@ function onBeforeRedirect() {
                 <div v-else class="session-ready">
                   <div class="session-info">
                     <span class="check">✓</span>
-                    <span>Session created: <code>{{ sessionResult.sessionId.slice(0, 20) }}...</code></span>
+                    <span
+                      >Session created:
+                      <code>{{ sessionResult.sessionId.slice(0, 20) }}...</code></span
+                    >
                   </div>
 
                   <VueStripeCheckout
@@ -341,8 +351,14 @@ function onBeforeRedirect() {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .step-section {

@@ -1,16 +1,19 @@
-import type { Updater } from "@tanstack/vue-table"
-import type { ClassValue } from "clsx"
-import type { Ref } from "vue"
-import { clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import type { ClassValue } from 'clsx'
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function valueUpdater<T extends Updater<any>>(updaterOrValue: T, ref: Ref) {
-  ref.value
-    = typeof updaterOrValue === "function"
-      ? updaterOrValue(ref.value)
-      : updaterOrValue
+/**
+ * Props objects from `defineProps` type every optional prop as `T | undefined`, but
+ * component props declared as `prop?: T` reject an explicit `undefined` under
+ * `exactOptionalPropertyTypes`. At runtime Vue already treats an `undefined` prop
+ * like an omitted one, so this narrows the type only and returns the same object.
+ */
+export type Forwardable<T> = { [K in keyof T]?: Exclude<T[K], undefined> }
+
+export function forwardable<T extends object>(props: T): Forwardable<T> {
+  return props
 }

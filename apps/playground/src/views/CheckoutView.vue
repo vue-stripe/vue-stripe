@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, inject, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  VueStripeProvider,
-  VueStripeCheckout
-} from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeCheckout } from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -18,7 +15,7 @@ import {
   Badge,
   Tabs,
   TabsList,
-  TabsTrigger,
+  TabsTrigger
 } from '@/components/ui'
 
 const route = useRoute()
@@ -57,7 +54,7 @@ const checkoutMode = ref<'url' | 'session' | 'price'>('url')
 
 // Check for result param on mount
 onMounted(() => {
-  const result = route.query.result as string
+  const result = route.query['result'] as string
   if (result === 'success') {
     checkoutResult.value = 'success'
     logEvent('checkout-complete', 'Payment was successful!')
@@ -68,7 +65,7 @@ onMounted(() => {
 })
 
 // Event log
-const eventLog = ref<Array<{ time: string; event: string; data?: string }>>([])
+const eventLog = ref<Array<{ time: string; event: string; data?: string | undefined }>>([])
 
 const logEvent = (event: string, data?: string) => {
   const time = new Date().toLocaleTimeString()
@@ -126,7 +123,9 @@ const clearResult = () => {
       v-if="checkoutResult === 'success'"
       class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-gradient-to-r from-green-100 to-green-50 border border-success"
     >
-      <div class="w-12 h-12 rounded-full bg-success text-white flex items-center justify-center text-2xl font-bold flex-shrink-0">
+      <div
+        class="w-12 h-12 rounded-full bg-success text-white flex items-center justify-center text-2xl font-bold flex-shrink-0"
+      >
         ✓
       </div>
       <div class="flex-1">
@@ -140,7 +139,9 @@ const clearResult = () => {
       v-if="checkoutResult === 'cancel'"
       class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-gradient-to-r from-yellow-100 to-yellow-50 border border-warning"
     >
-      <div class="w-12 h-12 rounded-full bg-warning text-yellow-800 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+      <div
+        class="w-12 h-12 rounded-full bg-warning text-yellow-800 flex items-center justify-center text-2xl font-bold flex-shrink-0"
+      >
         ✕
       </div>
       <div class="flex-1">
@@ -156,8 +157,8 @@ const clearResult = () => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          StripeCheckout provides a simple button that redirects users to Stripe's hosted checkout page.
-          It supports both session-based and price-based checkout flows.
+          StripeCheckout provides a simple button that redirects users to Stripe's hosted checkout
+          page. It supports both session-based and price-based checkout flows.
         </p>
         <p class="text-sm mb-4">
           <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
@@ -175,7 +176,9 @@ const clearResult = () => {
         <div v-else class="mt-4">
           <!-- Mode Selector -->
           <div class="space-y-2">
-            <Label class="text-xs uppercase tracking-wide text-muted-foreground">Checkout Mode</Label>
+            <Label class="text-xs uppercase tracking-wide text-muted-foreground"
+              >Checkout Mode</Label
+            >
             <Tabs v-model="checkoutMode" class="w-full">
               <TabsList class="grid w-full grid-cols-3">
                 <TabsTrigger value="url">URL-Based (v8.x)</TabsTrigger>
@@ -192,8 +195,8 @@ const clearResult = () => {
               <Badge variant="success" class="ml-2">v8.x Compatible</Badge>
             </h4>
             <p class="text-muted-foreground text-sm">
-              Use the Checkout Session URL from your backend. This is the recommended approach
-              for @stripe/stripe-js v8.x where <code>redirectToCheckout</code> is removed.
+              Use the Checkout Session URL from your backend. This is the recommended approach for
+              @stripe/stripe-js v8.x where <code>redirectToCheckout</code> is removed.
             </p>
 
             <div class="mt-4">
@@ -212,16 +215,24 @@ const clearResult = () => {
               <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
                 <li>
                   Create a Checkout Session using Stripe CLI:
-                  <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{ successUrl }}" --cancel-url "{{ cancelUrl }}"</pre>
+                  <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">
+stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{
+                      successUrl
+                    }}" --cancel-url "{{ cancelUrl }}"</pre>
                 </li>
-                <li>Copy the <code>url</code> from the response (starts with <code>https://checkout.stripe.com/</code>)</li>
+                <li>
+                  Copy the <code>url</code> from the response (starts with
+                  <code>https://checkout.stripe.com/</code>)
+                </li>
               </ol>
             </div>
 
             <Alert variant="info" class="mt-4">
               <AlertDescription class="text-sm">
-                <strong>v8.x Migration:</strong> In @stripe/stripe-js v8.x, <code>redirectToCheckout</code> was removed.
-                Your server should return the session URL directly, which is then used for a simple <code>window.location.replace()</code> redirect.
+                <strong>v8.x Migration:</strong> In @stripe/stripe-js v8.x,
+                <code>redirectToCheckout</code> was removed. Your server should return the session
+                URL directly, which is then used for a simple
+                <code>window.location.replace()</code> redirect.
               </AlertDescription>
             </Alert>
           </div>
@@ -253,7 +264,10 @@ const clearResult = () => {
               <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
                 <li>
                   Create a Checkout Session using Stripe CLI:
-                  <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{ successUrl }}" --cancel-url "{{ cancelUrl }}"</pre>
+                  <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">
+stripe checkout sessions create --line-items '[{"price_data":{"currency":"usd","product_data":{"name":"Demo Item"},"unit_amount":1000},"quantity":1}]' --mode payment --success-url "{{
+                      successUrl
+                    }}" --cancel-url "{{ cancelUrl }}"</pre>
                 </li>
                 <li>Copy the <code>id</code> from the response (starts with <code>cs_</code>)</li>
               </ol>
@@ -261,8 +275,8 @@ const clearResult = () => {
 
             <Alert variant="warning" class="mt-4">
               <AlertDescription class="text-sm">
-                <strong>Deprecated:</strong> This method uses <code>redirectToCheckout</code> which is removed in @stripe/stripe-js v8.x.
-                Use URL-Based checkout for v8.x compatibility.
+                <strong>Deprecated:</strong> This method uses <code>redirectToCheckout</code> which
+                is removed in @stripe/stripe-js v8.x. Use URL-Based checkout for v8.x compatibility.
               </AlertDescription>
             </Alert>
           </div>
@@ -274,7 +288,8 @@ const clearResult = () => {
               <Badge variant="warning" class="ml-2">v7.x Only</Badge>
             </h4>
             <p class="text-muted-foreground text-sm">
-              Create a checkout session dynamically using a Price ID. This uses <code>redirectToCheckout</code>
+              Create a checkout session dynamically using a Price ID. This uses
+              <code>redirectToCheckout</code>
               which is deprecated in v8.x.
             </p>
 
@@ -302,18 +317,30 @@ const clearResult = () => {
             <div class="bg-card rounded-md p-3 mt-3 space-y-2 text-sm">
               <div class="flex items-center gap-2">
                 <span class="text-muted-foreground min-w-[90px]">Success URL:</span>
-                <code class="text-xs bg-secondary px-2 py-0.5 rounded text-primary break-all">{{ successUrl }}</code>
+                <code class="text-xs bg-secondary px-2 py-0.5 rounded text-primary break-all">{{
+                  successUrl
+                }}</code>
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-muted-foreground min-w-[90px]">Cancel URL:</span>
-                <code class="text-xs bg-secondary px-2 py-0.5 rounded text-primary break-all">{{ cancelUrl }}</code>
+                <code class="text-xs bg-secondary px-2 py-0.5 rounded text-primary break-all">{{
+                  cancelUrl
+                }}</code>
               </div>
             </div>
 
             <div class="bg-card rounded-md border p-4 mt-4">
               <h5 class="font-medium text-sm mb-2">How to get a Price ID:</h5>
               <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
-                <li>Go to <a href="https://dashboard.stripe.com/test/products" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Products</a></li>
+                <li>
+                  Go to
+                  <a
+                    href="https://dashboard.stripe.com/test/products"
+                    target="_blank"
+                    class="text-primary hover:underline"
+                    >Stripe Dashboard → Products</a
+                  >
+                </li>
                 <li>Create or select a product</li>
                 <li>Copy the Price ID (starts with <code>price_</code>)</li>
               </ol>
@@ -397,7 +424,6 @@ const clearResult = () => {
         </div>
       </CardContent>
     </Card>
-
   </div>
 </template>
 

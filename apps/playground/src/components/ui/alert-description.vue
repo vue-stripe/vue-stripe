@@ -8,9 +8,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const descClass = computed(() =>
-  cn('text-sm [&_p]:leading-relaxed', props.class)
-)
+const descClass = computed(() => cn('text-sm [&_p]:leading-relaxed', props.class))
 </script>
 
 <template>

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h } from 'vue-demi'
 import VueStripeCheckout from '../../src/components/VueStripeCheckout.vue'
@@ -140,7 +140,7 @@ describe('VueStripeCheckout', () => {
 
   it('should show loading text during redirect', async () => {
     let resolveRedirect: () => void
-    const redirectPromise = new Promise<void>(resolve => {
+    const redirectPromise = new Promise<void>((resolve) => {
       resolveRedirect = resolve
     })
 
@@ -209,7 +209,11 @@ describe('VueStripeCheckout', () => {
       { sessionId: 'cs_test_123' },
       {
         default: ({ checkout, loading }: { checkout: () => void; loading: boolean }) =>
-          h('button', { class: 'custom-button', onClick: checkout }, loading ? 'Loading...' : 'Custom Pay')
+          h(
+            'button',
+            { class: 'custom-button', onClick: checkout },
+            loading ? 'Loading...' : 'Custom Pay'
+          )
       }
     )
 

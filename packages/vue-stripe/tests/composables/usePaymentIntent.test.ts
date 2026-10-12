@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { defineComponent, h, ref } from 'vue-demi'
+import { defineComponent, h } from 'vue-demi'
 import { usePaymentIntent } from '../../src/composables/usePaymentIntent'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
@@ -27,11 +27,16 @@ describe('usePaymentIntent', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {
-          clientSecret: 'pi_test_secret_123'
-        }, {
-          default: () => h(component)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {
+              clientSecret: 'pi_test_secret_123'
+            },
+            {
+              default: () => h(component)
+            }
+          )
       }
     })
 
@@ -81,7 +86,7 @@ describe('usePaymentIntent', () => {
   it('should set loading to true during payment confirmation', async () => {
     // Create a mock that delays resolution
     let resolvePayment: () => void
-    const paymentPromise = new Promise<void>(resolve => {
+    const paymentPromise = new Promise<void>((resolve) => {
       resolvePayment = resolve
     })
 
@@ -127,9 +132,11 @@ describe('usePaymentIntent', () => {
   })
 
   it('should call stripe.confirmPayment with correct parameters', async () => {
-    const mockConfirmPayment = vi.fn(() => Promise.resolve({
-      paymentIntent: { id: 'pi_test', status: 'succeeded' }
-    }))
+    const mockConfirmPayment = vi.fn(() =>
+      Promise.resolve({
+        paymentIntent: { id: 'pi_test', status: 'succeeded' }
+      })
+    )
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
@@ -171,9 +178,11 @@ describe('usePaymentIntent', () => {
   })
 
   it('should return successful payment result', async () => {
-    const mockConfirmPayment = vi.fn(() => Promise.resolve({
-      paymentIntent: { id: 'pi_test_123', status: 'succeeded' }
-    }))
+    const mockConfirmPayment = vi.fn(() =>
+      Promise.resolve({
+        paymentIntent: { id: 'pi_test_123', status: 'succeeded' }
+      })
+    )
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
@@ -205,9 +214,11 @@ describe('usePaymentIntent', () => {
   })
 
   it('should handle payment error from Stripe', async () => {
-    const mockConfirmPayment = vi.fn(() => Promise.resolve({
-      error: { message: 'Your card was declined' }
-    }))
+    const mockConfirmPayment = vi.fn(() =>
+      Promise.resolve({
+        error: { message: 'Your card was declined' }
+      })
+    )
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
@@ -313,9 +324,11 @@ describe('usePaymentIntent', () => {
   })
 
   it('should use default redirect value of if_required', async () => {
-    const mockConfirmPayment = vi.fn(() => Promise.resolve({
-      paymentIntent: { id: 'pi_test', status: 'succeeded' }
-    }))
+    const mockConfirmPayment = vi.fn(() =>
+      Promise.resolve({
+        paymentIntent: { id: 'pi_test', status: 'succeeded' }
+      })
+    )
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
@@ -349,9 +362,11 @@ describe('usePaymentIntent', () => {
   })
 
   it('should use injected elements if not provided in options', async () => {
-    const mockConfirmPayment = vi.fn(() => Promise.resolve({
-      paymentIntent: { id: 'pi_test', status: 'succeeded' }
-    }))
+    const mockConfirmPayment = vi.fn(() =>
+      Promise.resolve({
+        paymentIntent: { id: 'pi_test', status: 'succeeded' }
+      })
+    )
 
     const mockElements = {
       create: vi.fn(() => ({
@@ -388,9 +403,11 @@ describe('usePaymentIntent', () => {
   })
 
   it('should allow overriding elements in options', async () => {
-    const mockConfirmPayment = vi.fn(() => Promise.resolve({
-      paymentIntent: { id: 'pi_test', status: 'succeeded' }
-    }))
+    const mockConfirmPayment = vi.fn(() =>
+      Promise.resolve({
+        paymentIntent: { id: 'pi_test', status: 'succeeded' }
+      })
+    )
 
     const mockElements = {
       create: vi.fn(() => ({

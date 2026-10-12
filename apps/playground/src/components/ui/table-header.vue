@@ -8,9 +8,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const headerClass = computed(() =>
-  cn('[&_tr]:border-b', props.class)
-)
+const headerClass = computed(() => cn('[&_tr]:border-b', props.class))
 </script>
 
 <template>

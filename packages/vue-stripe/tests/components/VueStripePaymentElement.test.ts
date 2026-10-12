@@ -18,11 +18,16 @@ describe('VueStripePaymentElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {
-          clientSecret: 'pi_test_secret_123'
-        }, {
-          default: () => h(VueStripePaymentElement, paymentProps, paymentSlots)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {
+              clientSecret: 'pi_test_secret_123'
+            },
+            {
+              default: () => h(VueStripePaymentElement, paymentProps, paymentSlots)
+            }
+          )
       }
     })
 
@@ -495,7 +500,6 @@ describe('VueStripePaymentElement', () => {
     // In Vue 3 with script setup, defineExpose makes these available
     // The exposed values are refs, so we check they exist on the component
     // The component exposes: element, loading, error
-    const vm = paymentComponent.vm as any
 
     // Check that vm exists and is accessible
     // Note: In some Vue versions, exposed values may be accessed differently
@@ -537,14 +541,24 @@ describe('VueStripePaymentElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {
-          clientSecret: 'pi_test_secret_123'
-        }, {
-          default: () => h(VueStripePaymentElement, {}, {
-            error: ({ error }: { error: string }) =>
-              h('div', { class: 'custom-error-display' }, `Custom: ${error}`)
-          })
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {
+              clientSecret: 'pi_test_secret_123'
+            },
+            {
+              default: () =>
+                h(
+                  VueStripePaymentElement,
+                  {},
+                  {
+                    error: ({ error }: { error: string }) =>
+                      h('div', { class: 'custom-error-display' }, `Custom: ${error}`)
+                  }
+                )
+            }
+          )
       }
     })
 

@@ -23,9 +23,14 @@ describe('VueStripePaymentMethodMessagingElement (v5.5)', () => {
     const wrapper = mount(VueStripeProvider, {
       props: { publishableKey: 'pk_test_123' },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(VueStripePaymentMethodMessagingElement, { options })
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(VueStripePaymentMethodMessagingElement, { options })
+            }
+          )
       }
     })
     await flushPromises()
@@ -33,8 +38,9 @@ describe('VueStripePaymentMethodMessagingElement (v5.5)', () => {
   }
 
   it('throws when used outside VueStripeElements', () => {
-    expect(() => mount(VueStripePaymentMethodMessagingElement))
-      .toThrow('VueStripePaymentMethodMessagingElement must be used within VueStripeElements')
+    expect(() => mount(VueStripePaymentMethodMessagingElement)).toThrow(
+      'VueStripePaymentMethodMessagingElement must be used within VueStripeElements'
+    )
   })
 
   it("creates the 'paymentMethodMessaging' element and mounts it", async () => {
@@ -44,7 +50,12 @@ describe('VueStripePaymentMethodMessagingElement (v5.5)', () => {
   })
 
   it('passes options (amount, currency, paymentMethodTypes) through to create()', async () => {
-    const options = { amount: 9900, currency: 'USD', paymentMethodTypes: ['affirm'], countryCode: 'US' }
+    const options = {
+      amount: 9900,
+      currency: 'USD',
+      paymentMethodTypes: ['affirm'],
+      countryCode: 'US'
+    }
     const { mockCreate } = await mountWith(options)
     expect(mockCreate).toHaveBeenCalledWith('paymentMethodMessaging', options)
   })

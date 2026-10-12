@@ -1,11 +1,11 @@
 export interface AnalyticsEvent {
   event: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface SearchEvent {
   search_term: string
-  search_results?: number
+  search_results?: number | undefined
   search_location?: string
 }
 
@@ -61,13 +61,13 @@ export interface LinkClickEvent {
 }
 
 export interface UserPreference {
-  preference_type: 'theme' | 'device' | 'browser'
+  preference_type: 'theme' | 'device' | 'browser' | 'screen' | 'viewport'
   preference_value: string
 }
 
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void
-    dataLayer?: any[]
+    gtag?: (...args: unknown[]) => void
+    dataLayer?: unknown[]
   }
 }

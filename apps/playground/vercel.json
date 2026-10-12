@@ -3,9 +3,7 @@
   "buildCommand": "cd ../.. && pnpm install && pnpm vue-stripe:build && cd apps/playground && pnpm build",
   "outputDirectory": "dist",
   "framework": null,
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/$1.html" }
-  ],
+  "rewrites": [{ "source": "/(.*)", "destination": "/$1.html" }],
   "headers": [
     {
       "source": "/(.*)",

@@ -18,9 +18,14 @@ describe('VueStripeLinkAuthenticationElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, { clientSecret: 'pi_test_secret_123' }, {
-          default: () => h(VueStripeLinkAuthenticationElement, linkAuthProps)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            { clientSecret: 'pi_test_secret_123' },
+            {
+              default: () => h(VueStripeLinkAuthenticationElement, linkAuthProps)
+            }
+          )
       }
     })
 

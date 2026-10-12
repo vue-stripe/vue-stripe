@@ -12,7 +12,7 @@ const containerClasses = computed(() => {
   const variants = {
     default: 'bg-secondary',
     dark: 'bg-slate-900 text-slate-100',
-    error: 'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900',
+    error: 'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900'
   }
 
   return cn(base, variants[props.variant || 'default'])

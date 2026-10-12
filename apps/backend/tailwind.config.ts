@@ -2,9 +2,7 @@ import type { Config } from 'tailwindcss'
 
 const config: Config = {
   darkMode: ['class'],
-  content: [
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
       colors: {
@@ -16,55 +14,55 @@ const config: Config = {
         foreground: 'hsl(var(--foreground))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          foreground: 'hsl(var(--primary-foreground))'
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          foreground: 'hsl(var(--secondary-foreground))'
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+          foreground: 'hsl(var(--destructive-foreground))'
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+          foreground: 'hsl(var(--muted-foreground))'
         },
         accent: {
           DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          foreground: 'hsl(var(--accent-foreground))'
         },
         popover: {
           DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
+          foreground: 'hsl(var(--popover-foreground))'
         },
         card: {
           DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+          foreground: 'hsl(var(--card-foreground))'
         },
         // Custom Vue Stripe colors
         stripe: {
           purple: '#635bff',
           'purple-light': '#7c6dff',
-          'purple-dark': '#5046e5',
+          'purple-dark': '#5046e5'
         },
         vue: {
           green: '#42b883',
-          'green-light': '#42d392',
+          'green-light': '#42d392'
         },
         'vue-stripe': {
           yellow: '#fed968',
-          'yellow-light': '#fde047',
-        },
+          'yellow-light': '#fde047'
+        }
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-      },
-    },
+        sm: 'calc(var(--radius) - 4px)'
+      }
+    }
   },
-  plugins: [],
+  plugins: []
 }
 
 export default config

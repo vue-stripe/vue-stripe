@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import {
   VueStripeProvider,
   VueStripeElements,
-  VueStripePaymentMethodMessagingElement,
+  VueStripePaymentMethodMessagingElement
 } from '@vue-stripe/vue-stripe'
 import { useStripeConfig } from '../../composables/useStripeConfig'
 
@@ -17,7 +17,7 @@ const countryCode = ref<'US' | 'GB' | 'DE'>('US')
 const methods = [
   { id: 'affirm', label: 'Affirm' },
   { id: 'klarna', label: 'Klarna' },
-  { id: 'afterpay_clearpay', label: 'Afterpay / Clearpay' },
+  { id: 'afterpay_clearpay', label: 'Afterpay / Clearpay' }
 ]
 const selectedMethods = ref<string[]>(['affirm', 'klarna', 'afterpay_clearpay'])
 
@@ -34,7 +34,7 @@ const messagingOptions = computed(() => ({
   amount: Math.round(amountDollars.value * 100),
   currency: currency.value.toUpperCase(),
   countryCode: countryCode.value,
-  paymentMethodTypes: selectedMethods.value,
+  paymentMethodTypes: selectedMethods.value
 }))
 </script>
 
@@ -48,8 +48,8 @@ const messagingOptions = computed(() => ({
     <template v-else>
       <p class="intro">
         The Payment Method Messaging Element is <strong>display-only</strong> — it promotes
-        Buy&nbsp;Now,&nbsp;Pay&nbsp;Later availability (Affirm, Klarna, Afterpay/Clearpay) for a given
-        amount. Adjust the controls and the message updates live.
+        Buy&nbsp;Now,&nbsp;Pay&nbsp;Later availability (Affirm, Klarna, Afterpay/Clearpay) for a
+        given amount. Adjust the controls and the message updates live.
       </p>
 
       <!-- Controls -->
@@ -57,7 +57,9 @@ const messagingOptions = computed(() => ({
         <div class="control">
           <label>Amount</label>
           <div class="amount-input">
-            <span class="prefix">{{ currency === 'gbp' ? '£' : currency === 'eur' ? '€' : '$' }}</span>
+            <span class="prefix">{{
+              currency === 'gbp' ? '£' : currency === 'eur' ? '€' : '$'
+            }}</span>
             <input v-model.number="amountDollars" type="number" min="1" step="1" />
           </div>
         </div>
@@ -116,30 +118,128 @@ const messagingOptions = computed(() => ({
 </template>
 
 <style scoped>
-.bnpl-example { padding: 1.5rem; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); border-radius: 12px; }
-.warning-box { padding: 1rem; background: var(--vp-c-yellow-soft); border: 1px solid var(--vp-c-yellow-1); border-radius: 8px; color: var(--vp-c-yellow-darker); }
-.warning-box strong { display: block; margin-bottom: 0.5rem; }
-.warning-box p { margin: 0; font-size: 0.875rem; }
-.warning-box code { padding: 0.125rem 0.375rem; background: rgba(0,0,0,0.1); border-radius: 3px; }
+.bnpl-example {
+  padding: 1.5rem;
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+}
+.warning-box {
+  padding: 1rem;
+  background: var(--vp-c-yellow-soft);
+  border: 1px solid var(--vp-c-yellow-1);
+  border-radius: 8px;
+  color: var(--vp-c-yellow-darker);
+}
+.warning-box strong {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.warning-box p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+.warning-box code {
+  padding: 0.125rem 0.375rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
 
-.intro { margin: 0 0 1.25rem; font-size: 0.9rem; color: var(--vp-c-text-2); }
+.intro {
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+  color: var(--vp-c-text-2);
+}
 
-.controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
-.control { display: flex; flex-direction: column; gap: 0.375rem; }
-.control label { font-size: 0.75rem; font-weight: 500; color: var(--vp-c-text-2); }
-.amount-input { display: flex; align-items: center; background: var(--vp-c-bg-soft); border: 1px solid var(--vp-c-divider); border-radius: 6px; padding: 0 0.5rem; }
-.amount-input .prefix { color: var(--vp-c-text-3); }
-.amount-input input { width: 6rem; padding: 0.5rem; background: transparent; border: none; color: var(--vp-c-text-1); }
-.control select { padding: 0.5rem; background: var(--vp-c-bg-soft); border: 1px solid var(--vp-c-divider); border-radius: 6px; color: var(--vp-c-text-1); }
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.control label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--vp-c-text-2);
+}
+.amount-input {
+  display: flex;
+  align-items: center;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  padding: 0 0.5rem;
+}
+.amount-input .prefix {
+  color: var(--vp-c-text-3);
+}
+.amount-input input {
+  width: 6rem;
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--vp-c-text-1);
+}
+.control select {
+  padding: 0.5rem;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  color: var(--vp-c-text-1);
+}
 
-.methods { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
-.methods-label { font-size: 0.75rem; font-weight: 500; color: var(--vp-c-text-2); margin-right: 0.25rem; }
-.chip { padding: 0.375rem 0.75rem; background: var(--vp-c-bg-soft); border: 1px solid var(--vp-c-divider); border-radius: 999px; font-size: 0.8rem; color: var(--vp-c-text-2); cursor: pointer; transition: all 0.15s; }
-.chip.active { background: var(--vp-c-brand-1); border-color: var(--vp-c-brand-1); color: white; }
+.methods {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.methods-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--vp-c-text-2);
+  margin-right: 0.25rem;
+}
+.chip {
+  padding: 0.375rem 0.75rem;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip.active {
+  background: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+  color: white;
+}
 
-.stripe-container { padding: 1.5rem; background: var(--vp-c-bg-soft); border-radius: 8px; }
-.indicator { display: inline-block; margin-bottom: 0.75rem; font-size: 0.75rem; color: var(--vp-c-text-3); }
-.indicator.ready { color: var(--vp-c-green-1); }
+.stripe-container {
+  padding: 1.5rem;
+  background: var(--vp-c-bg-soft);
+  border-radius: 8px;
+}
+.indicator {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--vp-c-text-3);
+}
+.indicator.ready {
+  color: var(--vp-c-green-1);
+}
 
-.note { margin: 1rem 0 0; font-size: 0.8rem; color: var(--vp-c-text-3); }
+.note {
+  margin: 1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--vp-c-text-3);
+}
 </style>

@@ -6,7 +6,7 @@ import pkg from './package.json' with { type: 'json' }
 export default defineConfig({
   plugins: [vue()],
   define: {
-    __VUE_STRIPE_VERSION__: JSON.stringify(pkg.version),
+    __VUE_STRIPE_VERSION__: JSON.stringify(pkg.version)
   },
   resolve: {
     alias: {

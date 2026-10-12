@@ -6,7 +6,7 @@
  * to ensure they work correctly when users copy them.
  */
 import { ref, computed, inject } from 'vue'
-import type { Stripe, StripeElements } from '@stripe/stripe-js'
+import type { Stripe, StripeElements, StripeAddressElementChangeEvent } from '@stripe/stripe-js'
 import {
   VueStripeProvider,
   VueStripeElements,
@@ -27,7 +27,7 @@ const examples = [
   { id: 'payment-element', name: 'Payment Element' },
   { id: 'card-element', name: 'Card Element' },
   { id: 'address-element', name: 'Address Element' },
-  { id: 'express-checkout', name: 'Express Checkout' },
+  { id: 'express-checkout', name: 'Express Checkout' }
 ] as const
 
 const selectedExample = ref<string>('first-payment')
@@ -58,12 +58,10 @@ const resetExample = () => {
 // Event handlers - exact pattern from documentation
 const onStripeLoad = (stripe: Stripe) => {
   stripeInstance.value = stripe
-  console.info(`[${selectedExample.value}] Stripe loaded:`, !!stripe)
 }
 
 const onElementsReady = (elements: StripeElements) => {
   elementsInstance.value = elements
-  console.info(`[${selectedExample.value}] Elements ready:`, !!elements)
 }
 
 // First Payment / Payment Element submit handler
@@ -104,24 +102,22 @@ const handleCardSubmit = async () => {
 
   // For card element, we'd normally call confirmCardPayment with a clientSecret
   // For this test, we just verify the element loaded
-  console.info('[CardElement] Card element retrieved successfully')
   loading.value = false
 }
 
 // Address Element change handler
-const onAddressChange = (event: any) => {
+const onAddressChange = (event: StripeAddressElementChangeEvent) => {
   addressComplete.value = event.complete
-  if (event.complete) {
-    console.info('[AddressElement] Address complete:', event.value)
-  }
 }
 
 // Express Checkout confirm handler
-const handleExpressConfirm = async (event: any) => {
-  if (!stripeInstance.value) return
+// The confirm event does not carry an `elements` instance, so confirm with the
+// one captured from VueStripeElements' ready event.
+const handleExpressConfirm = async () => {
+  if (!stripeInstance.value || !elementsInstance.value) return
 
   const { error } = await stripeInstance.value.confirmPayment({
-    elements: event.elements,
+    elements: elementsInstance.value,
     confirmParams: {
       return_url: `${window.location.origin}/docs-verification`
     }
@@ -141,12 +137,13 @@ const addressOptions = {
 
 <template>
   <div class="docs-verification">
-    <h2>📚 Documentation Code Verification</h2>
+    <h2>Documentation Code Verification</h2>
     <p class="subtitle">Testing exact code examples from the documentation</p>
 
     <!-- No key configured -->
     <div v-if="!publishableKey" class="secret-input">
-      No Stripe publishable key configured. Click <strong>"Add Key"</strong> in the header to add a test key.
+      No Stripe publishable key configured. Click <strong>"Add Key"</strong> in the header to add a
+      test key.
     </div>
 
     <!-- Example Selector -->
@@ -160,16 +157,15 @@ const addressOptions = {
     </div>
 
     <!-- Client Secret Input (for examples that need it) -->
-    <div v-if="!clientSecret && selectedExample !== 'address-element' && selectedExample !== 'card-element'" class="secret-input">
+    <div
+      v-if="
+        !clientSecret && selectedExample !== 'address-element' && selectedExample !== 'card-element'
+      "
+      class="secret-input"
+    >
       <label>Client Secret:</label>
-      <input
-        v-model="clientSecretInput"
-        type="text"
-        placeholder="pi_xxx_secret_xxx"
-      />
-      <button @click="setClientSecret" :disabled="!clientSecretInput.trim()">
-        Load Example
-      </button>
+      <input v-model="clientSecretInput" type="text" placeholder="pi_xxx_secret_xxx" />
+      <button :disabled="!clientSecretInput.trim()" @click="setClientSecret">Load Example</button>
       <p class="hint">
         Get a client secret from
         <a href="https://dashboard.stripe.com/test/payments" target="_blank">Stripe Dashboard</a>
@@ -178,20 +174,16 @@ const addressOptions = {
 
     <!-- Example Components -->
     <div class="example-container">
-
       <!-- ============================================================
            FIRST PAYMENT EXAMPLE
            From: guide/first-payment.md - Complete Example section
            ============================================================ -->
       <div v-if="selectedExample === 'first-payment' && clientSecret" class="example-box">
-        <h3>✅ First Payment Example</h3>
+        <h3>First Payment Example</h3>
         <p class="source">Source: guide/first-payment.md - Complete Example</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
-          <VueStripeElements
-            :client-secret="clientSecret"
-            @ready="onElementsReady"
-          >
+          <VueStripeElements :client-secret="clientSecret" @ready="onElementsReady">
             <form @submit.prevent="handleSubmit">
               <VueStripePaymentElement />
 
@@ -208,10 +200,10 @@ const addressOptions = {
 
         <div class="status">
           <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? '✅ Loaded' : '⏳ Loading...' }}
+            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? '✅ Ready' : '⏳ Loading...' }}
+            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
           </span>
         </div>
       </div>
@@ -221,7 +213,7 @@ const addressOptions = {
            From: guide/payment-element.md - Basic Setup
            ============================================================ -->
       <div v-if="selectedExample === 'payment-element' && clientSecret" class="example-box">
-        <h3>✅ Payment Element Example</h3>
+        <h3>Payment Element Example</h3>
         <p class="source">Source: guide/payment-element.md - Basic Setup</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
@@ -237,10 +229,10 @@ const addressOptions = {
 
         <div class="status">
           <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? '✅ Loaded' : '⏳ Loading...' }}
+            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? '✅ Ready' : '⏳ Loading...' }}
+            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
           </span>
         </div>
       </div>
@@ -250,7 +242,7 @@ const addressOptions = {
            From: guide/card-element.md - Single Card Element
            ============================================================ -->
       <div v-if="selectedExample === 'card-element'" class="example-box">
-        <h3>✅ Card Element Example</h3>
+        <h3>Card Element Example</h3>
         <p class="source">Source: guide/card-element.md - Single Card Element</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
@@ -266,10 +258,10 @@ const addressOptions = {
 
         <div class="status">
           <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? '✅ Loaded' : '⏳ Loading...' }}
+            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? '✅ Ready' : '⏳ Loading...' }}
+            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
           </span>
         </div>
       </div>
@@ -279,28 +271,25 @@ const addressOptions = {
            From: guide/address-element.md - Basic Usage
            ============================================================ -->
       <div v-if="selectedExample === 'address-element'" class="example-box">
-        <h3>✅ Address Element Example</h3>
+        <h3>Address Element Example</h3>
         <p class="source">Source: guide/address-element.md - Basic Usage</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
           <VueStripeElements @ready="onElementsReady">
-            <VueStripeAddressElement
-              :options="addressOptions"
-              @change="onAddressChange"
-            />
+            <VueStripeAddressElement :options="addressOptions" @change="onAddressChange" />
             <button type="button">Continue</button>
           </VueStripeElements>
         </VueStripeProvider>
 
         <div class="status">
           <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? '✅ Loaded' : '⏳ Loading...' }}
+            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? '✅ Ready' : '⏳ Loading...' }}
+            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
           </span>
           <span :class="addressComplete ? 'success' : 'pending'">
-            Address: {{ addressComplete ? '✅ Complete' : '⏳ Incomplete' }}
+            Address: {{ addressComplete ? 'Complete' : 'Incomplete' }}
           </span>
         </div>
       </div>
@@ -310,7 +299,7 @@ const addressOptions = {
            From: guide/express-checkout.md - Basic Setup
            ============================================================ -->
       <div v-if="selectedExample === 'express-checkout' && clientSecret" class="example-box">
-        <h3>✅ Express Checkout Example</h3>
+        <h3>Express Checkout Example</h3>
         <p class="source">Source: guide/express-checkout.md - Basic Setup</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
@@ -321,20 +310,22 @@ const addressOptions = {
 
         <div class="status">
           <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? '✅ Loaded' : '⏳ Loading...' }}
+            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? '✅ Ready' : '⏳ Loading...' }}
+            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
           </span>
         </div>
 
-        <p class="note">Note: Express Checkout buttons only appear on HTTPS with saved payment methods.</p>
+        <p class="note">
+          Note: Express Checkout buttons only appear on HTTPS with saved payment methods.
+        </p>
       </div>
     </div>
 
     <!-- Debug Panel -->
     <div class="debug-panel">
-      <h4>🔍 Debug Info</h4>
+      <h4>Debug Info</h4>
       <ul>
         <li>Selected: {{ selectedExample }}</li>
         <li>Client Secret Set: {{ !!clientSecret }}</li>

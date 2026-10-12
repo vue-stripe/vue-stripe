@@ -6,25 +6,27 @@ import { CreditCard, Wallet, ShoppingCart, ArrowRight } from 'lucide-react'
 const generators = [
   {
     title: 'Payment Intent',
-    description: 'Create a Payment Intent for one-time payments. Returns a client secret for use with Payment Element.',
+    description:
+      'Create a Payment Intent for one-time payments. Returns a client secret for use with Payment Element.',
     href: '/payment-intent',
     icon: CreditCard,
-    color: 'bg-stripe-purple',
+    color: 'bg-stripe-purple'
   },
   {
     title: 'Setup Intent',
     description: 'Create a Setup Intent to save payment methods for future use without charging.',
     href: '/setup-intent',
     icon: Wallet,
-    color: 'bg-vue-green',
+    color: 'bg-vue-green'
   },
   {
     title: 'Checkout Session',
-    description: 'Create a Checkout Session for Stripe\'s hosted checkout page. Returns a URL and session ID.',
+    description:
+      "Create a Checkout Session for Stripe's hosted checkout page. Returns a URL and session ID.",
     href: '/checkout-session',
     icon: ShoppingCart,
-    color: 'bg-vue-stripe-yellow',
-  },
+    color: 'bg-vue-stripe-yellow'
+  }
 ]
 
 export default function Home() {
@@ -33,16 +35,21 @@ export default function Home() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Test Data Generator</h1>
         <p className="mt-2 text-muted-foreground">
-          Generate Stripe test data for your Vue Stripe demos. Create Payment Intents,
-          Setup Intents, and Checkout Sessions, then copy the IDs to use in your app.
+          Generate Stripe test data for your Vue Stripe demos. Create Payment Intents, Setup
+          Intents, and Checkout Sessions, then copy the IDs to use in your app.
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {generators.map((generator) => (
-          <Card key={generator.href} className="group relative overflow-hidden transition-shadow hover:shadow-lg">
+          <Card
+            key={generator.href}
+            className="group relative overflow-hidden transition-shadow hover:shadow-lg"
+          >
             <CardHeader>
-              <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${generator.color}`}>
+              <div
+                className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${generator.color}`}
+              >
                 <generator.icon className="h-5 w-5 text-white" />
               </div>
               <CardTitle className="text-lg">{generator.title}</CardTitle>

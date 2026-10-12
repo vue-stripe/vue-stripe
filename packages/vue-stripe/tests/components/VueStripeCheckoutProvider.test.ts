@@ -8,7 +8,11 @@ import { flushPromises, makeMockStripe, makeMockCheckout, makeMockCheckoutSessio
 
 // Mount Provider > CheckoutProvider with a stripe whose initCheckout resolves to
 // the given checkout mock; returns the wrapper.
-async function mountWith(checkout = makeMockCheckout(), providerProps: Record<string, unknown> = { clientSecret: 'cs_test_123_secret' }, slots = {}) {
+async function mountWith(
+  checkout = makeMockCheckout(),
+  providerProps: Record<string, unknown> = { clientSecret: 'cs_test_123_secret' },
+  slots = {}
+) {
   const stripe = { ...makeMockStripe(), initCheckout: vi.fn(() => Promise.resolve(checkout)) }
   const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
   mockLoadStripe.mockResolvedValueOnce(stripe as any)
@@ -28,9 +32,9 @@ describe('VueStripeCheckoutProvider', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('throws when used outside VueStripeProvider', () => {
-    expect(() =>
-      mount(VueStripeCheckoutProvider, { props: { clientSecret: 'cs_test' } })
-    ).toThrow('VueStripeCheckoutProvider must be used within VueStripeProvider')
+    expect(() => mount(VueStripeCheckoutProvider, { props: { clientSecret: 'cs_test' } })).toThrow(
+      'VueStripeCheckoutProvider must be used within VueStripeProvider'
+    )
   })
 
   it('calls stripe.initCheckout, wrapping a raw clientSecret in fetchClientSecret', async () => {
@@ -50,7 +54,10 @@ describe('VueStripeCheckoutProvider', () => {
 
   it('forwards elementsOptions to initCheckout', async () => {
     const elementsOptions = { appearance: { theme: 'night' } }
-    const { stripe } = await mountWith(makeMockCheckout(), { clientSecret: 'cs_test_123_secret', elementsOptions })
+    const { stripe } = await mountWith(makeMockCheckout(), {
+      clientSecret: 'cs_test_123_secret',
+      elementsOptions
+    })
     expect(stripe.initCheckout.mock.calls[0][0].elementsOptions).toEqual(elementsOptions)
   })
 
@@ -95,16 +102,25 @@ describe('VueStripeCheckoutProvider', () => {
   })
 
   it('renders the error slot when initCheckout rejects', async () => {
-    const stripe = { ...makeMockStripe(), initCheckout: vi.fn(() => Promise.reject(new Error('bad session'))) }
+    const stripe = {
+      ...makeMockStripe(),
+      initCheckout: vi.fn(() => Promise.reject(new Error('bad session')))
+    }
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce(stripe as any)
 
     const wrapper = mount(VueStripeProvider, {
       props: { publishableKey: 'pk_test_123' },
       slots: {
-        default: () => h(VueStripeCheckoutProvider, { clientSecret: 'cs_test_123_secret' }, {
-          error: ({ error }: { error: string }) => h('div', { class: 'custom-checkout-error' }, error)
-        })
+        default: () =>
+          h(
+            VueStripeCheckoutProvider,
+            { clientSecret: 'cs_test_123_secret' },
+            {
+              error: ({ error }: { error: string }) =>
+                h('div', { class: 'custom-checkout-error' }, error)
+            }
+          )
       }
     })
     await flushPromises()
@@ -135,9 +151,13 @@ describe('VueStripeCheckoutProvider', () => {
         return () => h('div')
       }
     }
-    const { wrapper } = await mountWith(checkout, { clientSecret: 'cs_test_123_secret' }, {
-      default: () => h(Child)
-    })
+    const { wrapper } = await mountWith(
+      checkout,
+      { clientSecret: 'cs_test_123_secret' },
+      {
+        default: () => h(Child)
+      }
+    )
 
     // Ready: refs populated, change handler registered.
     expect(injected.checkout.value).toBe(checkout)

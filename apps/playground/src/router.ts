@@ -30,10 +30,12 @@ import ConvenienceComposablesView from './views/ConvenienceComposablesView.vue'
 // Custom Checkout (#388)
 import CustomCheckoutView from './views/CustomCheckoutView.vue'
 
-// Route metadata for SEO
-export interface RouteMeta {
-  title: string
-  description: string
+// Route metadata for SEO (typed via vue-router module augmentation)
+declare module 'vue-router' {
+  interface RouteMeta {
+    title?: string
+    description?: string
+  }
 }
 
 // Routes exported separately for vite-ssg
@@ -53,7 +55,8 @@ export const routes: RouteRecordRaw[] = [
     component: StripeProviderView,
     meta: {
       title: 'VueStripeProvider - Vue Stripe',
-      description: 'Learn how to use VueStripeProvider to initialize Stripe.js in your Vue application'
+      description:
+        'Learn how to use VueStripeProvider to initialize Stripe.js in your Vue application'
     }
   },
   {
@@ -236,7 +239,8 @@ export const routes: RouteRecordRaw[] = [
     component: PaymentMethodMessagingView,
     meta: {
       title: 'Payment Method Messaging - Vue Stripe',
-      description: 'Display Buy Now, Pay Later (BNPL) promotional messaging for Affirm, Klarna and Afterpay/Clearpay'
+      description:
+        'Display Buy Now, Pay Later (BNPL) promotional messaging for Affirm, Klarna and Afterpay/Clearpay'
     }
   },
   {
@@ -254,7 +258,8 @@ export const routes: RouteRecordRaw[] = [
     component: CustomCheckoutView,
     meta: {
       title: 'Custom Checkout - Vue Stripe',
-      description: 'Build a fully custom checkout with VueStripeCheckoutProvider and useCheckoutSession'
+      description:
+        'Build a fully custom checkout with VueStripeCheckoutProvider and useCheckoutSession'
     }
   }
 ]

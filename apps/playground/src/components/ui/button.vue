@@ -16,19 +16,19 @@ const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
         success: 'bg-success text-success-foreground hover:bg-success/90',
-        warning: 'bg-warning text-warning-foreground hover:bg-warning/90',
+        warning: 'bg-warning text-warning-foreground hover:bg-warning/90'
       },
       size: {
         default: 'h-10 px-4 py-2',
         sm: 'h-9 rounded-md px-3',
         lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
-      },
+        icon: 'h-10 w-10'
+      }
     },
     defaultVariants: {
       variant: 'default',
-      size: 'default',
-    },
+      size: 'default'
+    }
   }
 )
 
@@ -41,7 +41,7 @@ interface Props extends PrimitiveProps {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  as: 'button',
+  as: 'button'
 })
 
 const delegatedProps = computed(() => {
@@ -51,10 +51,7 @@ const delegatedProps = computed(() => {
 </script>
 
 <template>
-  <Primitive
-    v-bind="delegatedProps"
-    :class="cn(buttonVariants({ variant, size }), props.class)"
-  >
+  <Primitive v-bind="delegatedProps" :class="cn(buttonVariants({ variant, size }), props.class)">
     <slot />
   </Primitive>
 </template>

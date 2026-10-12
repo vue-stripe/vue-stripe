@@ -36,11 +36,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Zero-warning gates for every workspace (library, playground, docs, backend).
       - name: Lint
-        run: pnpm --filter @vue-stripe/vue-stripe lint
+        run: pnpm lint
+
+      - name: Format
+        run: pnpm format:check
 
       - name: Type-check
-        run: pnpm --filter @vue-stripe/vue-stripe type-check
+        run: pnpm typecheck
 
       - name: Test (coverage thresholds + doc-contract)
         run: pnpm --filter @vue-stripe/vue-stripe test:coverage

@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { ref, inject, computed, defineComponent, h, onMounted } from 'vue'
+import { ref, inject, computed, defineComponent, h, onMounted, type PropType } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { VueStripeProvider, VueStripeElements, VueStripeAuBankAccountElement, useStripe } from '@vue-stripe/vue-stripe'
-import type { StripeAuBankAccountElement as StripeAuBankAccountElementType, StripeAuBankAccountElementChangeEvent } from '@stripe/stripe-js'
+import {
+  VueStripeProvider,
+  VueStripeElements,
+  VueStripeAuBankAccountElement,
+  useStripe
+} from '@vue-stripe/vue-stripe'
+import type {
+  StripeAuBankAccountElement as StripeAuBankAccountElementType,
+  StripeAuBankAccountElementChangeEvent
+} from '@stripe/stripe-js'
 import {
   Card,
   CardHeader,
@@ -12,7 +20,7 @@ import {
   AlertDescription,
   Button,
   Label,
-  Input,
+  Input
 } from '@/components/ui'
 
 // Mark VueStripeElements as used (it's used in template)
@@ -24,7 +32,10 @@ const BecsPaymentForm = defineComponent({
   props: {
     clientSecret: { type: String, default: '' },
     formComplete: { type: Boolean, default: false },
-    auBankAccountElement: { type: Object, default: null }
+    auBankAccountElement: {
+      type: Object as PropType<StripeAuBankAccountElementType | null>,
+      default: null
+    }
   },
   emits: ['payment-success', 'payment-error', 'log'],
   setup(props, { emit }) {
@@ -55,14 +66,17 @@ const BecsPaymentForm = defineComponent({
                 name: 'Test Customer',
                 email: 'test@example.com'
               }
-            },
+            }
           }
         )
 
         if (error) {
           emit('payment-error', error.message || 'Payment failed')
           emit('log', 'error', error.message || 'Payment failed')
-        } else if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'processing') {
+        } else if (
+          paymentIntent?.status === 'succeeded' ||
+          paymentIntent?.status === 'processing'
+        ) {
           emit('payment-success', `PaymentIntent ${paymentIntent.status}!`)
           emit('log', 'success', `PaymentIntent ${paymentIntent.id} - ${paymentIntent.status}`)
         } else {
@@ -77,27 +91,45 @@ const BecsPaymentForm = defineComponent({
       }
     }
 
-    const canConfirm = computed(() =>
-      props.formComplete && props.clientSecret && !processing.value
-    )
+    const canConfirm = computed(() => props.formComplete && props.clientSecret && !processing.value)
 
-    return () => h('div', { class: 'mt-4 pt-4 border-t border-border' }, [
-      h(Button, {
-        class: 'w-full',
-        size: 'lg',
-        disabled: !canConfirm.value,
-        onClick: handleConfirmPayment
-      }, () => processing.value ? 'Processing...' : 'Confirm BECS Direct Debit Payment'),
-      h('p', {
-        class: 'text-muted-foreground text-xs mt-2 text-center'
-      }, 'Note: BECS Direct Debit payments are processed asynchronously'),
-      !props.clientSecret && h('p', {
-        class: 'text-muted-foreground text-sm mt-2 text-center'
-      }, 'Enter a client secret above to enable confirmation'),
-      props.clientSecret && !props.formComplete && h('p', {
-        class: 'text-muted-foreground text-sm mt-2 text-center'
-      }, 'Enter valid BSB and account number to enable confirmation')
-    ])
+    return () =>
+      h('div', { class: 'mt-4 pt-4 border-t border-border' }, [
+        h(
+          Button,
+          {
+            class: 'w-full',
+            size: 'lg',
+            disabled: !canConfirm.value,
+            onClick: handleConfirmPayment
+          },
+          () => (processing.value ? 'Processing...' : 'Confirm BECS Direct Debit Payment')
+        ),
+        h(
+          'p',
+          {
+            class: 'text-muted-foreground text-xs mt-2 text-center'
+          },
+          'Note: BECS Direct Debit payments are processed asynchronously'
+        ),
+        !props.clientSecret &&
+          h(
+            'p',
+            {
+              class: 'text-muted-foreground text-sm mt-2 text-center'
+            },
+            'Enter a client secret above to enable confirmation'
+          ),
+        props.clientSecret &&
+          !props.formComplete &&
+          h(
+            'p',
+            {
+              class: 'text-muted-foreground text-sm mt-2 text-center'
+            },
+            'Enter valid BSB and account number to enable confirmation'
+          )
+      ])
   }
 })
 
@@ -115,8 +147,8 @@ const paymentIntentId = ref<string | null>(null)
 
 // Check for redirect status on mount
 onMounted(() => {
-  const status = route.query.redirect_status as string | undefined
-  const piId = route.query.payment_intent as string | undefined
+  const status = route.query['redirect_status'] as string | undefined
+  const piId = route.query['payment_intent'] as string | undefined
 
   if (status === 'succeeded' || status === 'failed') {
     redirectStatus.value = status
@@ -147,7 +179,6 @@ const log = (type: string, message: string) => {
   const time = new Date().toLocaleTimeString()
   events.value.unshift({ time, type, message })
   if (events.value.length > 20) events.value.pop()
-  console.info(`[AuBankAccountElement Test] ${type}:`, message)
 }
 
 // AU Bank Account element ref for programmatic access
@@ -204,7 +235,10 @@ const handleChange = (event: StripeAuBankAccountElementChangeEvent) => {
   if (event.error) {
     log('error', event.error.message)
   } else if (event.complete) {
-    log('complete', `Bank: ${event.bankName || 'Unknown'}, Branch: ${event.branchName || 'Unknown'}`)
+    log(
+      'complete',
+      `Bank: ${event.bankName || 'Unknown'}, Branch: ${event.branchName || 'Unknown'}`
+    )
   } else if (!event.empty) {
     log('change', 'Entering bank details...')
   }
@@ -234,15 +268,19 @@ const clearAuBankAccount = () => {
 }
 
 // Client secret for BECS payment confirmation
-const clientSecret = ref<string>('')
+const clientSecretInput = ref<string>('')
 
 // Validate client secret format
 const clientSecretStatus = computed(() => {
-  if (!clientSecret.value) {
-    return { valid: false, type: 'none', message: 'No client secret provided (required for confirming BECS payments)' }
+  if (!clientSecretInput.value) {
+    return {
+      valid: false,
+      type: 'none',
+      message: 'No client secret provided (required for confirming BECS payments)'
+    }
   }
 
-  const value = clientSecret.value.trim()
+  const value = clientSecretInput.value.trim()
 
   if (value.startsWith('pi_') && value.includes('_secret_')) {
     return { valid: true, type: 'payment_intent', message: 'Valid PaymentIntent client secret' }
@@ -252,11 +290,15 @@ const clientSecretStatus = computed(() => {
     return { valid: true, type: 'setup_intent', message: 'Valid SetupIntent client secret' }
   }
 
-  return { valid: false, type: 'invalid', message: 'Invalid format. Expected pi_xxx_secret_xxx or seti_xxx_secret_xxx' }
+  return {
+    valid: false,
+    type: 'invalid',
+    message: 'Invalid format. Expected pi_xxx_secret_xxx or seti_xxx_secret_xxx'
+  }
 })
 
 // Computed for clean client secret value
-const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
+const cleanClientSecret = computed(() => clientSecretInput.value.trim() || undefined)
 </script>
 
 <template>
@@ -284,10 +326,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
         </Button>
       </AlertDescription>
     </Alert>
-    <Alert
-      v-if="redirectStatus === 'failed'"
-      variant="destructive"
-    >
+    <Alert v-if="redirectStatus === 'failed'" variant="destructive">
       <AlertDescription class="flex items-center justify-between">
         <div>
           <strong>Payment Failed</strong>
@@ -295,12 +334,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
             PaymentIntent: {{ paymentIntentId }}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="h-6 px-2"
-          @click="dismissRedirectStatus"
-        >
+        <Button variant="ghost" size="sm" class="h-6 px-2" @click="dismissRedirectStatus">
           Dismiss
         </Button>
       </AlertDescription>
@@ -312,15 +346,12 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          The AU Bank Account Element collects BSB number and account number for BECS Direct Debit payments.
-          BECS (Bulk Electronic Clearing System) is Australia's direct debit payment system.
+          The AU Bank Account Element collects BSB number and account number for BECS Direct Debit
+          payments. BECS (Bulk Electronic Clearing System) is Australia's direct debit payment
+          system.
         </p>
         <p class="text-sm">
-          <a
-            href="https://vuestripe.com"
-            target="_blank"
-            class="text-primary hover:underline"
-          >
+          <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
             View full documentation →
           </a>
         </p>
@@ -330,19 +361,17 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
     <!-- Client Secret Input -->
     <Card>
       <CardHeader>
-        <CardTitle class="text-lg">
-          Client Secret
-        </CardTitle>
+        <CardTitle class="text-lg"> Client Secret </CardTitle>
       </CardHeader>
       <CardContent>
         <p class="text-sm text-muted-foreground mb-4">
-          For BECS payments, you need a client secret from a PaymentIntent
-          created with <code class="bg-muted px-1 rounded">au_becs_debit</code> payment method type.
+          For BECS payments, you need a client secret from a PaymentIntent created with
+          <code class="bg-muted px-1 rounded">au_becs_debit</code> payment method type.
         </p>
 
         <div class="flex gap-3">
           <Input
-            v-model="clientSecret"
+            v-model="clientSecretInput"
             type="text"
             placeholder="pi_xxx_secret_xxx or seti_xxx_secret_xxx"
             :class="{
@@ -351,13 +380,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
             }"
             class="flex-1 font-mono text-sm"
           />
-          <Button
-            variant="secondary"
-            size="sm"
-            @click="clientSecret = ''"
-          >
-            Clear
-          </Button>
+          <Button variant="secondary" size="sm" @click="clientSecretInput = ''"> Clear </Button>
         </div>
         <div
           class="mt-3 p-3 rounded-md text-sm"
@@ -367,11 +390,8 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
             'bg-secondary text-muted-foreground': clientSecretStatus.type === 'none'
           }"
         >
-          {{ clientSecretStatus.valid ? '✅ ' : clientSecretStatus.type === 'invalid' ? '❌ ' : '' }}{{ clientSecretStatus.message }}
-          <span
-            v-if="clientSecretStatus.valid"
-            class="font-medium ml-1"
-          >
+          {{ clientSecretStatus.message }}
+          <span v-if="clientSecretStatus.valid" class="font-medium ml-1">
             ({{ clientSecretStatus.type === 'payment_intent' ? 'PaymentIntent' : 'SetupIntent' }})
           </span>
         </div>
@@ -381,32 +401,24 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
     <!-- Live Demo -->
     <Card>
       <CardHeader>
-        <CardTitle class="text-lg">
-          Live Demo
-        </CardTitle>
+        <CardTitle class="text-lg"> Live Demo </CardTitle>
       </CardHeader>
       <CardContent>
-        <Alert
-          v-if="!stripeConfig?.publishableKey"
-          variant="warning"
-        >
+        <Alert v-if="!stripeConfig?.publishableKey" variant="warning">
           <AlertDescription>
             No Stripe key configured. Click <strong>"Add Key"</strong> in the header above.
           </AlertDescription>
         </Alert>
 
-        <div
-          v-else
-          class="bg-secondary rounded-lg p-6"
-        >
+        <div v-else class="bg-secondary rounded-lg p-6">
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
             <VueStripeElements :client-secret="cleanClientSecret">
               <template #loading>
                 <div class="text-center py-8">
-                  <div class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4" />
-                  <p class="text-muted-foreground">
-                    Initializing Stripe Elements...
-                  </p>
+                  <div
+                    class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"
+                  />
+                  <p class="text-muted-foreground">Initializing Stripe Elements...</p>
                 </div>
               </template>
 
@@ -428,7 +440,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
                   <div class="flex gap-2">
                     <span class="text-muted-foreground">Complete:</span>
                     <span :class="auBankAccountState.complete ? 'text-success' : ''">
-                      {{ auBankAccountState.complete ? '✅ Yes' : '❌ No' }}
+                      {{ auBankAccountState.complete ? 'Yes' : 'No' }}
                     </span>
                   </div>
                   <div class="flex gap-2">
@@ -443,10 +455,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
                     <span class="text-muted-foreground">Branch:</span>
                     <span>{{ auBankAccountState.branchName || '-' }}</span>
                   </div>
-                  <div
-                    v-if="auBankAccountState.error"
-                    class="w-full text-destructive mt-2"
-                  >
+                  <div v-if="auBankAccountState.error" class="w-full text-destructive mt-2">
                     <span class="text-muted-foreground">Error:</span>
                     <span>{{ auBankAccountState.error }}</span>
                   </div>
@@ -463,20 +472,8 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
 
                 <!-- Action Buttons -->
                 <div class="flex flex-wrap gap-2 mt-4">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    @click="focusAuBankAccount"
-                  >
-                    Focus
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    @click="clearAuBankAccount"
-                  >
-                    Clear
-                  </Button>
+                  <Button variant="secondary" size="sm" @click="focusAuBankAccount"> Focus </Button>
+                  <Button variant="secondary" size="sm" @click="clearAuBankAccount"> Clear </Button>
                 </div>
 
                 <!-- Confirmation Form -->
@@ -499,11 +496,7 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
                     {{ confirmationMessage }}
                   </AlertDescription>
                 </Alert>
-                <Alert
-                  v-if="confirmationStatus === 'error'"
-                  variant="destructive"
-                  class="mt-4"
-                >
+                <Alert v-if="confirmationStatus === 'error'" variant="destructive" class="mt-4">
                   <AlertDescription>
                     {{ confirmationMessage }}
                   </AlertDescription>
@@ -518,23 +511,14 @@ const cleanClientSecret = computed(() => clientSecret.value.trim() || undefined)
     <!-- Event Log -->
     <Card>
       <CardHeader>
-        <CardTitle class="text-lg">
-          Event Log
-        </CardTitle>
+        <CardTitle class="text-lg"> Event Log </CardTitle>
       </CardHeader>
       <CardContent>
         <div class="event-log">
-          <div
-            v-if="events.length === 0"
-            class="text-slate-400 text-center py-4"
-          >
+          <div v-if="events.length === 0" class="text-slate-400 text-center py-4">
             No events yet. Enter bank details to see events.
           </div>
-          <div
-            v-for="(event, index) in events"
-            :key="index"
-            class="event-entry"
-          >
+          <div v-for="(event, index) in events" :key="index" class="event-entry">
             <span class="event-time">{{ event.time }}</span>
             <span :class="['event-type', event.type]">{{ event.type }}</span>
             <span class="event-data">{{ event.message }}</span>

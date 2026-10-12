@@ -9,7 +9,11 @@ export function useUserPreferencesTracking() {
     if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
       return 'tablet'
     }
-    if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+    if (
+      /Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(
+        ua
+      )
+    ) {
       return 'mobile'
     }
     return 'desktop'
@@ -56,7 +60,7 @@ export function useUserPreferencesTracking() {
           const theme = getThemePreference()
           trackUserPreference({
             preference_type: 'theme',
-            preference_value: theme,
+            preference_value: theme
           })
         }
       })
@@ -64,7 +68,7 @@ export function useUserPreferencesTracking() {
 
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['class'],
+      attributeFilter: ['class']
     })
 
     return observer
@@ -77,35 +81,35 @@ export function useUserPreferencesTracking() {
     const deviceType = getDeviceType()
     trackUserPreference({
       preference_type: 'device',
-      preference_value: deviceType,
+      preference_value: deviceType
     })
 
     // Track browser
     const { browser, version } = getBrowserInfo()
     trackUserPreference({
       preference_type: 'browser',
-      preference_value: `${browser} ${version}`,
+      preference_value: `${browser} ${version}`
     })
 
     // Track initial theme
     const theme = getThemePreference()
     trackUserPreference({
       preference_type: 'theme',
-      preference_value: theme,
+      preference_value: theme
     })
 
     // Track screen size
     const screenSize = `${window.screen.width}x${window.screen.height}`
     trackUserPreference({
       preference_type: 'screen',
-      preference_value: screenSize,
+      preference_value: screenSize
     })
 
     // Track viewport size
     const viewportSize = `${window.innerWidth}x${window.innerHeight}`
     trackUserPreference({
       preference_type: 'viewport',
-      preference_value: viewportSize,
+      preference_value: viewportSize
     })
 
     // Set user properties for segmentation
@@ -113,19 +117,19 @@ export function useUserPreferencesTracking() {
       device_type: deviceType,
       browser: browser,
       browser_version: version,
-      theme_preference: theme,
+      theme_preference: theme
     })
 
     // Track timezone
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
     setUserProperties({
-      timezone,
+      timezone
     })
 
     // Track language
     const language = navigator.language || 'en-US'
     setUserProperties({
-      language,
+      language
     })
   }
 
@@ -139,6 +143,6 @@ export function useUserPreferencesTracking() {
     trackThemeChange,
     getDeviceType,
     getBrowserInfo,
-    getThemePreference,
+    getThemePreference
   }
 }

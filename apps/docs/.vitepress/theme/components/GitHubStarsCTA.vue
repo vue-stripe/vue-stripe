@@ -11,7 +11,7 @@ onMounted(async () => {
       const data = await response.json()
       stars.value = data.stargazers_count
     }
-  } catch (e) {
+  } catch {
     // Silently fail - we'll just not show the count
   } finally {
     loading.value = false
@@ -42,7 +42,9 @@ function formatStars(count: number): string {
         fill="currentColor"
         class="star-icon"
       >
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        <polygon
+          points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+        />
       </svg>
       <span class="cta-text">Star Us on GitHub</span>
       <span v-if="!loading && stars !== null" class="star-count">

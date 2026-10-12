@@ -8,9 +8,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const headerClass = computed(() =>
-  cn('flex flex-col space-y-1.5 p-6', props.class)
-)
+const headerClass = computed(() => cn('flex flex-col space-y-1.5 p-6', props.class))
 </script>
 
 <template>

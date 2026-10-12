@@ -140,34 +140,20 @@ provide(stripeCheckoutInjectionKey, {
 </script>
 
 <template>
-  <div
-    v-if="error"
-    class="vue-stripe-checkout-error"
-  >
-    <slot
-      name="error"
-      :error="error"
-    >
+  <div v-if="error" class="vue-stripe-checkout-error">
+    <slot name="error" :error="error">
       <div class="vue-stripe-error-message">
         {{ error }}
       </div>
     </slot>
   </div>
-  <div
-    v-else-if="loading"
-    class="vue-stripe-checkout-loading"
-  >
+  <div v-else-if="loading" class="vue-stripe-checkout-loading">
     <slot name="loading">
-      <div class="vue-stripe-loading-message">
-        Initializing Checkout...
-      </div>
+      <div class="vue-stripe-loading-message">Initializing Checkout...</div>
     </slot>
   </div>
   <div v-else>
-    <slot
-      :checkout="checkout"
-      :session="session"
-    />
+    <slot :checkout="checkout" :session="session" />
   </div>
 </template>
 

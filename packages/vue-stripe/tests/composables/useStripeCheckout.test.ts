@@ -69,7 +69,7 @@ describe('useStripeCheckout', () => {
 
   it('should set loading to true during checkout redirect', async () => {
     let resolveCheckout: () => void
-    const checkoutPromise = new Promise<void>(resolve => {
+    const checkoutPromise = new Promise<void>((resolve) => {
       resolveCheckout = resolve
     })
 
@@ -151,9 +151,11 @@ describe('useStripeCheckout', () => {
     const testComponent = wrapper.findComponent(TestComponent)
     const { redirectToCheckout, error } = testComponent.vm.checkoutComposable
 
-    await expect(redirectToCheckout({
-      sessionId: 'cs_test_123'
-    })).rejects.toThrow('Session expired')
+    await expect(
+      redirectToCheckout({
+        sessionId: 'cs_test_123'
+      })
+    ).rejects.toThrow('Session expired')
 
     expect(error.value).toBe('Session expired')
   })
@@ -166,9 +168,11 @@ describe('useStripeCheckout', () => {
     const testComponent = wrapper.findComponent(TestComponent)
     const { redirectToCheckout, error, loading } = testComponent.vm.checkoutComposable
 
-    await expect(redirectToCheckout({
-      sessionId: 'cs_test_123'
-    })).rejects.toThrow('Network error')
+    await expect(
+      redirectToCheckout({
+        sessionId: 'cs_test_123'
+      })
+    ).rejects.toThrow('Network error')
 
     expect(error.value).toBe('Network error')
     expect(loading.value).toBe(false)
@@ -203,9 +207,11 @@ describe('useStripeCheckout', () => {
 
     // Should throw when trying to use legacy redirectToCheckout while stripe is null
     // The error message should mention that redirectToCheckout is not available (v8.x behavior)
-    await expect(capturedComposable!.redirectToCheckout({
-      sessionId: 'cs_test_123'
-    })).rejects.toThrow('redirectToCheckout is not available')
+    await expect(
+      capturedComposable!.redirectToCheckout({
+        sessionId: 'cs_test_123'
+      })
+    ).rejects.toThrow('redirectToCheckout is not available')
   })
 
   it('should redirect using URL (v8.x compatible)', async () => {

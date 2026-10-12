@@ -9,9 +9,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const descClass = computed(() =>
-  cn('text-sm text-muted-foreground', props.class)
-)
+const descClass = computed(() => cn('text-sm text-muted-foreground', props.class))
 </script>
 
 <template>

@@ -22,12 +22,10 @@ const elementsInstance = ref<StripeElements | null>(null)
 
 const onStripeLoad = (stripe: Stripe) => {
   stripeInstance.value = stripe
-  console.info('[DocsExample] Stripe loaded:', !!stripe)
 }
 
 const onElementsReady = (elements: StripeElements) => {
   elementsInstance.value = elements
-  console.info('[DocsExample] Elements ready:', !!elements)
 }
 
 const setClientSecret = () => {
@@ -35,10 +33,6 @@ const setClientSecret = () => {
 }
 
 const handleSubmit = async () => {
-  console.info('[DocsExample] handleSubmit called')
-  console.info('[DocsExample] stripeInstance:', !!stripeInstance.value)
-  console.info('[DocsExample] elementsInstance:', !!elementsInstance.value)
-
   if (!stripeInstance.value || !elementsInstance.value) {
     errorMessage.value = 'Stripe not ready'
     return
@@ -73,7 +67,8 @@ const handleSubmit = async () => {
 
     <!-- No key configured -->
     <div v-if="!publishableKey" class="error">
-      No Stripe publishable key configured. Click <strong>"Add Key"</strong> in the header to add a test key.
+      No Stripe publishable key configured. Click <strong>"Add Key"</strong> in the header to add a
+      test key.
     </div>
 
     <template v-else>
@@ -86,11 +81,13 @@ const handleSubmit = async () => {
           type="text"
           placeholder="pi_xxx_secret_xxx"
         />
-        <button @click="setClientSecret" :disabled="!clientSecretInput.trim()">
+        <button :disabled="!clientSecretInput.trim()" @click="setClientSecret">
           Set Client Secret
         </button>
         <p class="hint">
-          Create a PaymentIntent in <a href="https://dashboard.stripe.com/test/payments" target="_blank">Stripe Dashboard</a> and paste the client_secret here.
+          Create a PaymentIntent in
+          <a href="https://dashboard.stripe.com/test/payments" target="_blank">Stripe Dashboard</a>
+          and paste the client_secret here.
         </p>
       </div>
 

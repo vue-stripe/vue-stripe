@@ -9,14 +9,10 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Vue Stripe Test Data Generator',
-  description: 'Generate test data for Vue Stripe demos',
+  description: 'Generate test data for Vue Stripe demos'
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -29,7 +25,7 @@ export default function RootLayout({
                   document.documentElement.classList.add('dark');
                 }
               })();
-            `,
+            `
           }}
         />
       </head>

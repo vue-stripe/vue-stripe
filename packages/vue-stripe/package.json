@@ -37,11 +37,13 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:integration": "vitest run tests/integration",
-    "lint": "eslint src --ext .ts,.vue",
-    "lint:fix": "eslint src --ext .ts,.vue --fix",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
     "type-check": "vue-tsc --noEmit",
     "typecheck": "vue-tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "format:check": "prettier --check . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore",
+    "format": "prettier --write . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore"
   },
   "keywords": [
     "vue",
@@ -71,6 +73,7 @@
     "eslint": "^10.12.0",
     "eslint-plugin-vue": "^10.11.1",
     "jsdom": "^30.1.2",
+    "prettier": "^3.9.10",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.71.1",
     "vite": "^8.3.4",

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { ResultDisplay } from '@/components/result-display'
 import { Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import type { ApiResponse } from '@/lib/api'
 
 interface PaymentIntentResult {
   clientSecret: string
@@ -35,11 +36,11 @@ export default function BecsIntentPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: parseInt(amount, 10),
-          ...(description && { description }),
-        }),
+          ...(description && { description })
+        })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as ApiResponse<PaymentIntentResult>
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create BECS Payment Intent')
@@ -73,12 +74,12 @@ export default function BecsIntentPage() {
         <CardHeader>
           <CardTitle>Configuration</CardTitle>
           <CardDescription>
-            Configure the BECS Direct Debit payment. Currency is always AUD (Australian Dollar). The client secret can be used with
-            VueStripeAuBankAccountElement.
+            Configure the BECS Direct Debit payment. Currency is always AUD (Australian Dollar). The
+            client secret can be used with VueStripeAuBankAccountElement.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="amount">Amount (in cents)</Label>
               <Input
@@ -125,17 +126,17 @@ export default function BecsIntentPage() {
             fields={[
               {
                 label: 'Client Secret',
-                value: result.clientSecret,
+                value: result.clientSecret
               },
               {
                 label: 'Payment Intent ID',
-                value: result.paymentIntentId,
+                value: result.paymentIntentId
               },
               {
                 label: 'Amount',
                 value: formatCurrency(result.amount, result.currency),
-                copyable: false,
-              },
+                copyable: false
+              }
             ]}
           />
 
@@ -157,7 +158,8 @@ export default function BecsIntentPage() {
             <CardContent className="py-4">
               <p className="text-sm text-amber-800">
                 <strong>Note:</strong> BECS Direct Debit payments require customer agreement to the
-                Direct Debit Request Service Agreement. Payments typically settle in 3-4 business days.
+                Direct Debit Request Service Agreement. Payments typically settle in 3-4 business
+                days.
               </p>
             </CardContent>
           </Card>

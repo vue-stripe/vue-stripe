@@ -11,7 +11,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   orientation: 'horizontal',
-  decorative: true,
+  decorative: true
 })
 
 const separatorClass = computed(() =>

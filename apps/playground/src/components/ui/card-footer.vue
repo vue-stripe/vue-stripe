@@ -8,9 +8,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const footerClass = computed(() =>
-  cn('flex items-center p-6 pt-0', props.class)
-)
+const footerClass = computed(() => cn('flex items-center p-6 pt-0', props.class))
 </script>
 
 <template>

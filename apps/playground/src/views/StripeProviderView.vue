@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, inject, watch } from 'vue'
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
+import { CircleCheck, Siren } from 'lucide-vue-next'
 import type { Stripe } from '@stripe/stripe-js'
 import {
   Card,
@@ -13,7 +14,7 @@ import {
   Label,
   Tabs,
   TabsList,
-  TabsTrigger,
+  TabsTrigger
 } from '@/components/ui'
 
 const stripeConfig = inject<{
@@ -26,15 +27,13 @@ const events = ref<{ time: string; type: string; message: string }[]>([])
 const log = (type: string, message: string) => {
   const time = new Date().toLocaleTimeString()
   events.value.unshift({ time, type, message })
-  console.info(`[StripeProvider Test] ${type}:`, message)
 }
 
 // Track load event
-const onLoad = (stripe: Stripe) => {
+const onLoad = (_stripe: Stripe) => {
   // Stripe instance is ready - you can now use it for payments
   // The stripe object has methods like confirmPayment, confirmSetup, etc.
   log('load', `Stripe.js loaded successfully! Instance ready for payments.`)
-  console.info('[StripeProvider Test] Stripe instance:', stripe)
 }
 
 // Track error event
@@ -60,8 +59,8 @@ watch(testScenario, (scenario) => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          The root component that loads Stripe.js and provides the Stripe instance
-          to all child components via Vue's provide/inject system.
+          The root component that loads Stripe.js and provides the Stripe instance to all child
+          components via Vue's provide/inject system.
         </p>
         <p class="text-sm">
           <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
@@ -98,23 +97,33 @@ watch(testScenario, (scenario) => {
       </CardHeader>
       <CardContent>
         <!-- Normal scenario with valid key -->
-        <div v-if="testScenario === 'normal' && stripeConfig?.publishableKey" class="bg-secondary rounded-lg p-6">
+        <div
+          v-if="testScenario === 'normal' && stripeConfig?.publishableKey"
+          class="bg-secondary rounded-lg p-6"
+        >
           <VueStripeProvider
             :publishable-key="stripeConfig.publishableKey"
             @load="onLoad"
             @error="onError"
           >
             <div class="text-center py-8 bg-card rounded-lg shadow-sm">
-              <span class="text-4xl mb-4 block">✅</span>
+              <CircleCheck class="size-10 mx-auto mb-4 text-success" />
               <strong class="block text-lg mb-2">Stripe Loaded Successfully!</strong>
-              <p class="text-muted-foreground">The Stripe.js library has been loaded and is ready to use.</p>
-              <p class="text-sm text-muted-foreground mt-4">Child components can now use useStripe() to access the Stripe instance.</p>
+              <p class="text-muted-foreground">
+                The Stripe.js library has been loaded and is ready to use.
+              </p>
+              <p class="text-sm text-muted-foreground mt-4">
+                Child components can now use useStripe() to access the Stripe instance.
+              </p>
             </div>
           </VueStripeProvider>
         </div>
 
         <!-- Custom loading slot -->
-        <div v-else-if="testScenario === 'custom-loading' && stripeConfig?.publishableKey" class="bg-secondary rounded-lg p-6">
+        <div
+          v-else-if="testScenario === 'custom-loading' && stripeConfig?.publishableKey"
+          class="bg-secondary rounded-lg p-6"
+        >
           <VueStripeProvider
             :publishable-key="stripeConfig.publishableKey"
             @load="onLoad"
@@ -122,13 +131,15 @@ watch(testScenario, (scenario) => {
           >
             <template #loading>
               <div class="text-center py-8">
-                <div class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+                <div
+                  class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"
+                ></div>
                 <p class="text-muted-foreground">Custom loading message: Connecting to Stripe...</p>
               </div>
             </template>
 
             <div class="text-center py-8 bg-card rounded-lg shadow-sm">
-              <span class="text-4xl mb-4 block">✅</span>
+              <CircleCheck class="size-10 mx-auto mb-4 text-success" />
               <strong class="block text-lg">Stripe Ready (Custom Loading Used)</strong>
             </div>
           </VueStripeProvider>
@@ -143,7 +154,7 @@ watch(testScenario, (scenario) => {
           >
             <template #error="{ error }">
               <div class="text-center py-8 bg-destructive/10 rounded-lg">
-                <span class="text-4xl mb-4 block">🚨</span>
+                <Siren class="size-10 mx-auto mb-4 text-destructive" />
                 <strong class="block text-lg text-destructive mb-2">Custom Error Display</strong>
                 <p class="text-muted-foreground mb-4">{{ error }}</p>
                 <Button size="sm" @click="testScenario = 'normal'">
@@ -190,21 +201,22 @@ watch(testScenario, (scenario) => {
           <div v-if="events.length === 0" class="text-slate-400 text-center py-4">
             No events yet. Events will appear as they fire.
           </div>
-          <div
-            v-for="(event, index) in events"
-            :key="index"
-            class="event-entry"
-          >
+          <div v-for="(event, index) in events" :key="index" class="event-entry">
             <span class="event-time">{{ event.time }}</span>
             <span :class="['event-type', event.type]">{{ event.type }}</span>
             <span class="event-data">{{ event.message }}</span>
           </div>
         </div>
-        <Button v-if="events.length > 0" variant="secondary" size="sm" class="mt-4" @click="events = []">
+        <Button
+          v-if="events.length > 0"
+          variant="secondary"
+          size="sm"
+          class="mt-4"
+          @click="events = []"
+        >
           Clear Log
         </Button>
       </CardContent>
     </Card>
-
   </div>
 </template>

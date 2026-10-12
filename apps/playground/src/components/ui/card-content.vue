@@ -8,9 +8,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const contentClass = computed(() =>
-  cn('p-6 pt-0', props.class)
-)
+const contentClass = computed(() => cn('p-6 pt-0', props.class))
 </script>
 
 <template>

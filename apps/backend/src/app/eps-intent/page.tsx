@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { ResultDisplay } from '@/components/result-display'
 import { Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import type { ApiResponse } from '@/lib/api'
 
 interface PaymentIntentResult {
   clientSecret: string
@@ -35,11 +36,11 @@ export default function EpsIntentPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: parseInt(amount, 10),
-          ...(description && { description }),
-        }),
+          ...(description && { description })
+        })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as ApiResponse<PaymentIntentResult>
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create EPS Payment Intent')
@@ -78,7 +79,7 @@ export default function EpsIntentPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="amount">Amount (in cents)</Label>
               <Input
@@ -125,17 +126,17 @@ export default function EpsIntentPage() {
             fields={[
               {
                 label: 'Client Secret',
-                value: result.clientSecret,
+                value: result.clientSecret
               },
               {
                 label: 'Payment Intent ID',
-                value: result.paymentIntentId,
+                value: result.paymentIntentId
               },
               {
                 label: 'Amount',
                 value: formatCurrency(result.amount, result.currency),
-                copyable: false,
-              },
+                copyable: false
+              }
             ]}
           />
 

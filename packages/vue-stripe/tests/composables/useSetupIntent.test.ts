@@ -27,11 +27,16 @@ describe('useSetupIntent', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {
-          clientSecret: 'seti_test_secret_123'
-        }, {
-          default: () => h(component)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {
+              clientSecret: 'seti_test_secret_123'
+            },
+            {
+              default: () => h(component)
+            }
+          )
       }
     })
 
@@ -81,7 +86,7 @@ describe('useSetupIntent', () => {
   it('should set loading to true during setup confirmation', async () => {
     // Create a mock that delays resolution
     let resolveSetup: () => void
-    const setupPromise = new Promise<void>(resolve => {
+    const setupPromise = new Promise<void>((resolve) => {
       resolveSetup = resolve
     })
 
@@ -127,9 +132,11 @@ describe('useSetupIntent', () => {
   })
 
   it('should call stripe.confirmSetup with correct parameters', async () => {
-    const mockConfirmSetup = vi.fn(() => Promise.resolve({
-      setupIntent: { id: 'seti_test', status: 'succeeded' }
-    }))
+    const mockConfirmSetup = vi.fn(() =>
+      Promise.resolve({
+        setupIntent: { id: 'seti_test', status: 'succeeded' }
+      })
+    )
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
@@ -169,9 +176,11 @@ describe('useSetupIntent', () => {
   })
 
   it('should return successful setup result', async () => {
-    const mockConfirmSetup = vi.fn(() => Promise.resolve({
-      setupIntent: { id: 'seti_test_123', status: 'succeeded' }
-    }))
+    const mockConfirmSetup = vi.fn(() =>
+      Promise.resolve({
+        setupIntent: { id: 'seti_test_123', status: 'succeeded' }
+      })
+    )
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
@@ -203,9 +212,11 @@ describe('useSetupIntent', () => {
   })
 
   it('should handle setup error from Stripe', async () => {
-    const mockConfirmSetup = vi.fn(() => Promise.resolve({
-      error: { message: 'Your card was declined' }
-    }))
+    const mockConfirmSetup = vi.fn(() =>
+      Promise.resolve({
+        error: { message: 'Your card was declined' }
+      })
+    )
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
@@ -307,9 +318,11 @@ describe('useSetupIntent', () => {
   })
 
   it('should use injected elements if available', async () => {
-    const mockConfirmSetup = vi.fn(() => Promise.resolve({
-      setupIntent: { id: 'seti_test', status: 'succeeded' }
-    }))
+    const mockConfirmSetup = vi.fn(() =>
+      Promise.resolve({
+        setupIntent: { id: 'seti_test', status: 'succeeded' }
+      })
+    )
 
     const mockElements = {
       create: vi.fn(() => ({

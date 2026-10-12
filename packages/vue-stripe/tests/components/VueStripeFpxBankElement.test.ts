@@ -18,9 +18,14 @@ describe('VueStripeFpxBankElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(VueStripeFpxBankElement, fpxProps, fpxSlots)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(VueStripeFpxBankElement, fpxProps, fpxSlots)
+            }
+          )
       }
     })
 
@@ -62,9 +67,12 @@ describe('VueStripeFpxBankElement', () => {
     await mountWithProviders()
 
     // FPX requires accountHolderType, default is 'individual'
-    expect(mockCreate).toHaveBeenCalledWith('fpxBank', expect.objectContaining({
-      accountHolderType: 'individual'
-    }))
+    expect(mockCreate).toHaveBeenCalledWith(
+      'fpxBank',
+      expect.objectContaining({
+        accountHolderType: 'individual'
+      })
+    )
     expect(mockElement.mount).toHaveBeenCalled()
   })
 
@@ -86,9 +94,12 @@ describe('VueStripeFpxBankElement', () => {
       accountHolderType: 'company'
     })
 
-    expect(mockCreate).toHaveBeenCalledWith('fpxBank', expect.objectContaining({
-      accountHolderType: 'company'
-    }))
+    expect(mockCreate).toHaveBeenCalledWith(
+      'fpxBank',
+      expect.objectContaining({
+        accountHolderType: 'company'
+      })
+    )
   })
 
   it('should pass options to FPX bank element', async () => {
@@ -119,10 +130,13 @@ describe('VueStripeFpxBankElement', () => {
       options: fpxOptions
     })
 
-    expect(mockCreate).toHaveBeenCalledWith('fpxBank', expect.objectContaining({
-      ...fpxOptions,
-      accountHolderType: 'individual'
-    }))
+    expect(mockCreate).toHaveBeenCalledWith(
+      'fpxBank',
+      expect.objectContaining({
+        ...fpxOptions,
+        accountHolderType: 'individual'
+      })
+    )
   })
 
   it('should set up event listeners on FPX bank element', async () => {
@@ -305,14 +319,30 @@ describe('VueStripeFpxBankElement', () => {
     // Harness owns reactive props so we can mutate them after mount.
     const Harness = defineComponent({
       setup() {
-        return { accountHolderType: ref<'individual' | 'company'>('individual'), options: ref<Record<string, unknown>>({}) }
+        return {
+          accountHolderType: ref<'individual' | 'company'>('individual'),
+          options: ref<Record<string, unknown>>({})
+        }
       },
       render() {
-        return h(VueStripeProvider, { publishableKey: 'pk_test_123' }, {
-          default: () => h(VueStripeElements, {}, {
-            default: () => h(VueStripeFpxBankElement, { accountHolderType: this.accountHolderType, options: this.options })
-          })
-        })
+        return h(
+          VueStripeProvider,
+          { publishableKey: 'pk_test_123' },
+          {
+            default: () =>
+              h(
+                VueStripeElements,
+                {},
+                {
+                  default: () =>
+                    h(VueStripeFpxBankElement, {
+                      accountHolderType: this.accountHolderType,
+                      options: this.options
+                    })
+                }
+              )
+          }
+        )
       }
     })
 
@@ -348,13 +378,29 @@ describe('VueStripeFpxBankElement', () => {
     // members aren't on the render proxy that findComponent().vm returns).
     const exposed = ref<any>(null)
     const Harness = defineComponent({
-      setup() { return { exposed } },
+      setup() {
+        return { exposed }
+      },
       render() {
-        return h(VueStripeProvider, { publishableKey: 'pk_test_123' }, {
-          default: () => h(VueStripeElements, {}, {
-            default: () => h(VueStripeFpxBankElement, { ref: (el: any) => { exposed.value = el } })
-          })
-        })
+        return h(
+          VueStripeProvider,
+          { publishableKey: 'pk_test_123' },
+          {
+            default: () =>
+              h(
+                VueStripeElements,
+                {},
+                {
+                  default: () =>
+                    h(VueStripeFpxBankElement, {
+                      ref: (el: any) => {
+                        exposed.value = el
+                      }
+                    })
+                }
+              )
+          }
+        )
       }
     })
     mount(Harness)

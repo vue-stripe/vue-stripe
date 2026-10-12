@@ -21,18 +21,21 @@
     },
     "lint": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "src/**/*.vue", "*.js", "*.ts"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/eslint.config.js",
+        "$TURBO_ROOT$/tools/typescript-config/*.json"
+      ]
     },
     "lint:fix": {
       "cache": false
     },
-    "type-check": {
-      "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "src/**/*.vue", "*.ts", "tsconfig.json"]
+    "format:check": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.prettierrc", "$TURBO_ROOT$/.prettierignore"]
     },
     "typecheck": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "src/**/*.vue", "*.ts", "tsconfig.json"]
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tools/typescript-config/*.json"]
     },
     "dev": {
       "cache": false,

@@ -18,9 +18,14 @@ describe('VueStripeAddressElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(VueStripeAddressElement, addressProps)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(VueStripeAddressElement, addressProps)
+            }
+          )
       }
     })
 
@@ -448,7 +453,7 @@ describe('VueStripeAddressElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders()
@@ -493,7 +498,7 @@ describe('VueStripeAddressElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders()
@@ -519,7 +524,7 @@ describe('VueStripeAddressElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders()
@@ -544,7 +549,7 @@ describe('VueStripeAddressElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders()
@@ -569,7 +574,7 @@ describe('VueStripeAddressElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       const wrapper = await mountWithProviders()
@@ -594,7 +599,7 @@ describe('VueStripeAddressElement', () => {
         })),
         confirmPayment: vi.fn(),
         confirmCardSetup: vi.fn(),
-      registerAppInfo: vi.fn()
+        registerAppInfo: vi.fn()
       } as any)
 
       await mountWithProviders({

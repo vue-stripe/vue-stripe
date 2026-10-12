@@ -8,6 +8,7 @@ import {
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
+import type { SetupIntent, StripePaymentElementChangeEvent } from '@stripe/stripe-js'
 import {
   Card,
   CardHeader,
@@ -18,7 +19,7 @@ import {
   Button,
   Input,
   Label,
-  Badge,
+  Badge
 } from '@/components/ui'
 
 // Child component for setup submission (needs to be inside VueStripeElements)
@@ -62,30 +63,38 @@ const SetupForm = defineComponent({
         } else if (result.setupIntent?.status === 'succeeded') {
           emit('setup-success', result.setupIntent)
         }
-      } catch (err: any) {
-        emit('setup-error', err.message || 'Setup failed')
+      } catch (err: unknown) {
+        emit('setup-error', (err instanceof Error && err.message) || 'Setup failed')
       }
     }
 
-    return () => h('div', { class: 'mt-5' }, [
-      h('div', { class: 'flex items-center gap-2 p-2 bg-secondary rounded-sm text-sm mb-3' }, [
-        h('span', { class: 'text-muted-foreground' }, 'useSetupIntent state:'),
-        h('span', { class: loading.value ? 'text-yellow-600 font-medium' : 'text-green-600 font-medium' },
-          loading.value ? 'Processing...' : 'Ready'),
-        error.value ? h('span', { class: 'text-destructive ml-auto' }, error.value) : null
-      ]),
-      h(Button, {
-        class: 'w-full',
-        size: 'lg',
-        disabled: !props.setupComplete || loading.value,
-        onClick: handleSubmit
-      }, () => loading.value ? 'Saving Card...' : 'Save Card'),
-      h('p', { class: 'text-muted-foreground text-sm mt-3 text-center' }, [
-        'Use test card ',
-        h('code', '4242 4242 4242 4242'),
-        ' with any future date and CVC'
+    return () =>
+      h('div', { class: 'mt-5' }, [
+        h('div', { class: 'flex items-center gap-2 p-2 bg-secondary rounded-sm text-sm mb-3' }, [
+          h('span', { class: 'text-muted-foreground' }, 'useSetupIntent state:'),
+          h(
+            'span',
+            { class: loading.value ? 'text-yellow-600 font-medium' : 'text-green-600 font-medium' },
+            loading.value ? 'Processing...' : 'Ready'
+          ),
+          error.value ? h('span', { class: 'text-destructive ml-auto' }, error.value) : null
+        ]),
+        h(
+          Button,
+          {
+            class: 'w-full',
+            size: 'lg',
+            disabled: !props.setupComplete || loading.value,
+            onClick: handleSubmit
+          },
+          () => (loading.value ? 'Saving Card...' : 'Save Card')
+        ),
+        h('p', { class: 'text-muted-foreground text-sm mt-3 text-center' }, [
+          'Use test card ',
+          h('code', '4242 4242 4242 4242'),
+          ' with any future date and CVC'
+        ])
       ])
-    ])
   }
 })
 
@@ -105,7 +114,7 @@ const showSecretForm = computed(() => publishableKey.value && !setupSecret.value
 const setupComplete = ref(false)
 const setupError = ref<string | null>(null)
 const setupStatus = ref<string>('')
-const savedSetupIntent = ref<any>(null)
+const savedSetupIntent = ref<SetupIntent | null>(null)
 
 // Element state
 const elementReady = ref(false)
@@ -115,7 +124,7 @@ const elementLoading = ref(true)
 const elementKey = ref(0)
 
 // Event log
-const eventLog = ref<Array<{ time: string; event: string; data?: string }>>([])
+const eventLog = ref<Array<{ time: string; event: string; data?: string | undefined }>>([])
 
 const logEvent = (event: string, data?: string) => {
   const time = new Date().toLocaleTimeString()
@@ -132,7 +141,7 @@ const onReady = () => {
   logEvent('ready', 'Payment Element mounted')
 }
 
-const onChange = (event: any) => {
+const onChange = (event: StripePaymentElementChangeEvent) => {
   setupComplete.value = event.complete
   if (event.value?.type) {
     logEvent('change', `type: ${event.value.type}, complete: ${event.complete}`)
@@ -144,7 +153,7 @@ const onChange = (event: any) => {
 const onFocus = () => logEvent('focus')
 const onBlur = () => logEvent('blur')
 
-const handleSetupSuccess = (setupIntent: any) => {
+const handleSetupSuccess = (setupIntent: SetupIntent) => {
   setupStatus.value = 'succeeded'
   savedSetupIntent.value = setupIntent
   logEvent('setup-success', `SetupIntent ID: ${setupIntent.id}`)
@@ -173,8 +182,8 @@ const resetForm = () => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          Save a payment method for future use without charging the customer.
-          This is used for subscriptions, saved cards, and pay-later flows.
+          Save a payment method for future use without charging the customer. This is used for
+          subscriptions, saved cards, and pay-later flows.
         </p>
         <p class="text-sm mb-4">
           <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
@@ -192,7 +201,9 @@ const resetForm = () => {
         <!-- Setup Secret Form -->
         <div v-else-if="showSecretForm" class="bg-secondary rounded-lg p-5 mt-4">
           <h4 class="font-semibold mb-2">Enter Setup Secret</h4>
-          <p class="text-muted-foreground text-sm mb-4">A SetupIntent is required to save a payment method.</p>
+          <p class="text-muted-foreground text-sm mb-4">
+            A SetupIntent is required to save a payment method.
+          </p>
 
           <div class="mb-4">
             <Label class="mb-2">Setup Secret</Label>
@@ -210,7 +221,8 @@ const resetForm = () => {
               <li>Create a SetupIntent via the Stripe API or Dashboard</li>
               <li>
                 <strong>Quick method with cURL:</strong>
-                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">curl https://api.stripe.com/v1/setup_intents \
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">
+curl https://api.stripe.com/v1/setup_intents \
   -u sk_test_YOUR_SECRET_KEY: \
   -d "payment_method_types[]"=card</pre>
               </li>
@@ -234,7 +246,9 @@ const resetForm = () => {
             </Alert>
 
             <div class="bg-secondary rounded-md p-4 mt-4">
-              <h5 class="text-sm text-muted-foreground uppercase tracking-wide mb-3">SetupIntent Details</h5>
+              <h5 class="text-sm text-muted-foreground uppercase tracking-wide mb-3">
+                SetupIntent Details
+              </h5>
               <div class="space-y-2">
                 <div class="flex items-center gap-3 py-2 border-b">
                   <span class="text-muted-foreground text-sm min-w-[120px]">ID:</span>
@@ -251,18 +265,25 @@ const resetForm = () => {
               </div>
             </div>
 
-            <Button variant="secondary" class="mt-4" @click="resetForm">
-              Save Another Card
-            </Button>
+            <Button variant="secondary" class="mt-4" @click="resetForm"> Save Another Card </Button>
           </div>
 
           <!-- Form State -->
           <template v-else>
             <!-- Show current secret and allow clearing -->
-            <div class="flex items-center gap-3 p-3 bg-info/10 border border-info rounded-md flex-wrap">
+            <div
+              class="flex items-center gap-3 p-3 bg-info/10 border border-info rounded-md flex-wrap"
+            >
               <span class="text-sm font-medium text-info">Setup Secret:</span>
-              <code class="font-mono text-xs bg-card px-2 py-0.5 rounded flex-1 min-w-0 truncate">{{ setupSecret.slice(0, 15) }}...{{ setupSecret.slice(-8) }}</code>
-              <Button size="sm" variant="ghost" @click="localSetupSecret = ''" title="Clear and enter new secret">
+              <code class="font-mono text-xs bg-card px-2 py-0.5 rounded flex-1 min-w-0 truncate"
+                >{{ setupSecret.slice(0, 15) }}...{{ setupSecret.slice(-8) }}</code
+              >
+              <Button
+                size="sm"
+                variant="ghost"
+                title="Clear and enter new secret"
+                @click="localSetupSecret = ''"
+              >
                 Clear
               </Button>
             </div>
@@ -319,6 +340,5 @@ const resetForm = () => {
         </div>
       </CardContent>
     </Card>
-
   </div>
 </template>

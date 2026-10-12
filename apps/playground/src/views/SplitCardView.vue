@@ -8,7 +8,14 @@ import {
   VueStripeCardCvcElement,
   useStripe
 } from '@vue-stripe/vue-stripe'
-import type { StripeCardNumberElement as StripeCardNumberElementType } from '@stripe/stripe-js'
+import { CreditCard } from 'lucide-vue-next'
+import type {
+  PaymentIntent,
+  StripeCardCvcElementChangeEvent,
+  StripeCardExpiryElementChangeEvent,
+  StripeCardNumberElement as StripeCardNumberElementType,
+  StripeCardNumberElementChangeEvent
+} from '@stripe/stripe-js'
 import {
   Card,
   CardHeader,
@@ -18,7 +25,7 @@ import {
   AlertDescription,
   Button,
   Input,
-  Label,
+  Label
 } from '@/components/ui'
 
 // Mark VueStripeElements as used (it's used in template)
@@ -52,8 +59,8 @@ const cardExpiryRef = ref<InstanceType<typeof VueStripeCardExpiryElement> | null
 const cardCvcRef = ref<InstanceType<typeof VueStripeCardCvcElement> | null>(null)
 
 // All fields complete?
-const allComplete = computed(() =>
-  cardNumberComplete.value && cardExpiryComplete.value && cardCvcComplete.value
+const allComplete = computed(
+  () => cardNumberComplete.value && cardExpiryComplete.value && cardCvcComplete.value
 )
 
 // Event log for demonstration
@@ -70,7 +77,7 @@ const logEvent = (event: string, data?: string) => {
 }
 
 // Event handlers
-const onCardNumberChange = (event: any) => {
+const onCardNumberChange = (event: StripeCardNumberElementChangeEvent) => {
   cardNumberComplete.value = event.complete
   cardNumberError.value = event.error?.message || null
   if (event.brand) {
@@ -79,13 +86,13 @@ const onCardNumberChange = (event: any) => {
   logEvent('cardNumber:change', `complete: ${event.complete}, brand: ${event.brand}`)
 }
 
-const onCardExpiryChange = (event: any) => {
+const onCardExpiryChange = (event: StripeCardExpiryElementChangeEvent) => {
   cardExpiryComplete.value = event.complete
   cardExpiryError.value = event.error?.message || null
   logEvent('cardExpiry:change', `complete: ${event.complete}`)
 }
 
-const onCardCvcChange = (event: any) => {
+const onCardCvcChange = (event: StripeCardCvcElementChangeEvent) => {
   cardCvcComplete.value = event.complete
   cardCvcError.value = event.error?.message || null
   logEvent('cardCvc:change', `complete: ${event.complete}`)
@@ -139,19 +146,19 @@ const elementStyle = {
   }
 }
 
-// Brand icons mapping
-const brandIcon = computed(() => {
-  const icons: Record<string, string> = {
-    visa: '💳 Visa',
-    mastercard: '💳 Mastercard',
-    amex: '💳 Amex',
-    discover: '💳 Discover',
-    diners: '💳 Diners',
-    jcb: '💳 JCB',
-    unionpay: '💳 UnionPay',
-    unknown: '💳'
+// Brand labels mapping
+const brandLabel = computed(() => {
+  const labels: Record<string, string> = {
+    visa: 'Visa',
+    mastercard: 'Mastercard',
+    amex: 'Amex',
+    discover: 'Discover',
+    diners: 'Diners',
+    jcb: 'JCB',
+    unionpay: 'UnionPay',
+    unknown: ''
   }
-  return icons[cardBrand.value] || '💳'
+  return labels[cardBrand.value] || ''
 })
 
 // Get active client secret (from header config or local input)
@@ -189,14 +196,11 @@ const PaymentButton = defineComponent({
 
       try {
         // For split elements, use the cardNumber element
-        const { error, paymentIntent } = await stripe.value.confirmCardPayment(
-          props.clientSecret,
-          {
-            payment_method: {
-              card: props.cardNumberElement
-            }
+        const { error, paymentIntent } = await stripe.value.confirmCardPayment(props.clientSecret, {
+          payment_method: {
+            card: props.cardNumberElement
           }
-        )
+        })
 
         if (error) {
           emit('payment-error', error.message || 'Payment failed')
@@ -205,24 +209,29 @@ const PaymentButton = defineComponent({
         } else {
           emit('payment-error', `Payment status: ${paymentIntent?.status}`)
         }
-      } catch (err: any) {
-        emit('payment-error', err.message || 'Payment failed')
+      } catch (err: unknown) {
+        emit('payment-error', (err instanceof Error && err.message) || 'Payment failed')
       } finally {
         processing.value = false
       }
     }
 
-    return () => h(Button, {
-      variant: 'default',
-      class: 'bg-green-600 hover:bg-green-700',
-      disabled: !props.cardComplete || processing.value || !props.clientSecret,
-      onClick: handlePayment
-    }, () => processing.value ? 'Processing...' : 'Confirm Payment')
+    return () =>
+      h(
+        Button,
+        {
+          variant: 'default',
+          class: 'bg-green-600 hover:bg-green-700',
+          disabled: !props.cardComplete || processing.value || !props.clientSecret,
+          onClick: handlePayment
+        },
+        () => (processing.value ? 'Processing...' : 'Confirm Payment')
+      )
   }
 })
 
 // Payment event handlers
-const handlePaymentSuccess = (paymentIntent: any) => {
+const handlePaymentSuccess = (paymentIntent: PaymentIntent) => {
   paymentStatus.value = 'succeeded'
   paymentMessage.value = `Payment succeeded! ID: ${paymentIntent.id}`
   logEvent('payment:success', `PaymentIntent: ${paymentIntent.id}`)
@@ -255,8 +264,8 @@ const resetPaymentState = () => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          Three separate inputs for card number, expiry, and CVC.
-          Provides more control over layout and styling than the unified CardElement.
+          Three separate inputs for card number, expiry, and CVC. Provides more control over layout
+          and styling than the unified CardElement.
         </p>
         <p class="text-sm mb-4">
           <a href="https://vuestripe.com" target="_blank" class="text-primary hover:underline">
@@ -277,7 +286,9 @@ const resetPaymentState = () => {
               <div class="mb-4">
                 <Label class="flex justify-between items-center mb-2">
                   <span>Card Number</span>
-                  <span class="text-xs text-muted-foreground">{{ brandIcon }}</span>
+                  <span class="inline-flex items-center gap-1 text-xs text-muted-foreground"
+                    ><CreditCard class="size-3" />{{ brandLabel }}</span
+                  >
                 </Label>
                 <VueStripeCardNumberElement
                   ref="cardNumberRef"
@@ -286,8 +297,12 @@ const resetPaymentState = () => {
                   @change="onCardNumberChange"
                   @focus="onCardNumberFocus"
                 />
-                <div v-if="cardNumberError" class="text-destructive text-xs mt-1">{{ cardNumberError }}</div>
-                <div v-else-if="cardNumberComplete" class="text-green-600 text-xs mt-1">Valid card number</div>
+                <div v-if="cardNumberError" class="text-destructive text-xs mt-1">
+                  {{ cardNumberError }}
+                </div>
+                <div v-else-if="cardNumberComplete" class="text-green-600 text-xs mt-1">
+                  Valid card number
+                </div>
               </div>
 
               <!-- Expiry and CVC Row -->
@@ -301,8 +316,12 @@ const resetPaymentState = () => {
                     @change="onCardExpiryChange"
                     @focus="onCardExpiryFocus"
                   />
-                  <div v-if="cardExpiryError" class="text-destructive text-xs mt-1">{{ cardExpiryError }}</div>
-                  <div v-else-if="cardExpiryComplete" class="text-green-600 text-xs mt-1">Valid</div>
+                  <div v-if="cardExpiryError" class="text-destructive text-xs mt-1">
+                    {{ cardExpiryError }}
+                  </div>
+                  <div v-else-if="cardExpiryComplete" class="text-green-600 text-xs mt-1">
+                    Valid
+                  </div>
                 </div>
 
                 <div class="flex-1">
@@ -314,20 +333,37 @@ const resetPaymentState = () => {
                     @change="onCardCvcChange"
                     @focus="onCardCvcFocus"
                   />
-                  <div v-if="cardCvcError" class="text-destructive text-xs mt-1">{{ cardCvcError }}</div>
+                  <div v-if="cardCvcError" class="text-destructive text-xs mt-1">
+                    {{ cardCvcError }}
+                  </div>
                   <div v-else-if="cardCvcComplete" class="text-green-600 text-xs mt-1">Valid</div>
                 </div>
               </div>
 
               <!-- Status -->
               <div class="flex gap-4 justify-center bg-card rounded-md p-3 mt-4">
-                <span :class="['text-sm', cardNumberComplete ? 'text-green-600 font-medium' : 'text-muted-foreground']">
+                <span
+                  :class="[
+                    'text-sm',
+                    cardNumberComplete ? 'text-green-600 font-medium' : 'text-muted-foreground'
+                  ]"
+                >
                   Number {{ cardNumberComplete ? '✓' : '○' }}
                 </span>
-                <span :class="['text-sm', cardExpiryComplete ? 'text-green-600 font-medium' : 'text-muted-foreground']">
+                <span
+                  :class="[
+                    'text-sm',
+                    cardExpiryComplete ? 'text-green-600 font-medium' : 'text-muted-foreground'
+                  ]"
+                >
                   Expiry {{ cardExpiryComplete ? '✓' : '○' }}
                 </span>
-                <span :class="['text-sm', cardCvcComplete ? 'text-green-600 font-medium' : 'text-muted-foreground']">
+                <span
+                  :class="[
+                    'text-sm',
+                    cardCvcComplete ? 'text-green-600 font-medium' : 'text-muted-foreground'
+                  ]"
+                >
                   CVC {{ cardCvcComplete ? '✓' : '○' }}
                 </span>
               </div>
@@ -337,9 +373,7 @@ const resetPaymentState = () => {
                 <Button size="sm" variant="secondary" @click="focusCardNumber">
                   Focus Number
                 </Button>
-                <Button size="sm" variant="secondary" @click="clearAll">
-                  Clear All
-                </Button>
+                <Button size="sm" variant="secondary" @click="clearAll"> Clear All </Button>
                 <Button
                   size="sm"
                   :variant="showPaymentSection ? 'default' : 'secondary'"
@@ -353,7 +387,8 @@ const resetPaymentState = () => {
               <div v-if="showSecretForm" class="bg-card rounded-lg p-5 mt-4">
                 <h4 class="font-semibold mb-3">Enter Client Secret</h4>
                 <p class="text-muted-foreground text-sm mb-4">
-                  To test payment confirmation, you need a <code>client_secret</code> from a PaymentIntent.
+                  To test payment confirmation, you need a <code>client_secret</code> from a
+                  PaymentIntent.
                 </p>
 
                 <div class="mb-4">
@@ -369,7 +404,15 @@ const resetPaymentState = () => {
                 <div class="border-t pt-4 mt-4">
                   <h5 class="font-medium text-sm mb-2">How to get a Client Secret:</h5>
                   <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
-                    <li>Go to <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Payments</a></li>
+                    <li>
+                      Go to
+                      <a
+                        href="https://dashboard.stripe.com/test/payments"
+                        target="_blank"
+                        class="text-primary hover:underline"
+                        >Stripe Dashboard → Payments</a
+                      >
+                    </li>
                     <li>Click <strong>"+ Create"</strong> → <strong>"Create payment"</strong></li>
                     <li>Enter an amount (e.g., $10.00)</li>
                     <li>Copy the <code>client_secret</code> from the response</li>
@@ -382,10 +425,22 @@ const resetPaymentState = () => {
 
               <!-- Payment Mode: Ready to Pay -->
               <div v-else-if="showPaymentSection && activeClientSecret" class="mt-4">
-                <div class="flex items-center gap-3 p-3 bg-info/10 border border-info rounded-md flex-wrap">
+                <div
+                  class="flex items-center gap-3 p-3 bg-info/10 border border-info rounded-md flex-wrap"
+                >
                   <span class="text-sm font-medium text-info">Client Secret:</span>
-                  <code class="font-mono text-xs bg-card px-2 py-0.5 rounded flex-1 min-w-0 truncate">{{ activeClientSecret.slice(0, 15) }}...{{ activeClientSecret.slice(-8) }}</code>
-                  <Button size="sm" variant="ghost" @click="localClientSecret = ''" title="Clear and enter new secret">
+                  <code
+                    class="font-mono text-xs bg-card px-2 py-0.5 rounded flex-1 min-w-0 truncate"
+                    >{{ activeClientSecret.slice(0, 15) }}...{{
+                      activeClientSecret.slice(-8)
+                    }}</code
+                  >
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    title="Clear and enter new secret"
+                    @click="localClientSecret = ''"
+                  >
                     Clear
                   </Button>
                 </div>
@@ -413,7 +468,13 @@ const resetPaymentState = () => {
                 <!-- Payment Status -->
                 <Alert
                   v-if="paymentMessage"
-                  :variant="paymentStatus === 'succeeded' ? 'success' : paymentStatus === 'error' ? 'destructive' : 'warning'"
+                  :variant="
+                    paymentStatus === 'succeeded'
+                      ? 'success'
+                      : paymentStatus === 'error'
+                        ? 'destructive'
+                        : 'warning'
+                  "
                   class="mt-3"
                 >
                   <AlertDescription>{{ paymentMessage }}</AlertDescription>
@@ -421,7 +482,10 @@ const resetPaymentState = () => {
 
                 <p class="text-muted-foreground text-sm mt-3">
                   Use test card <code>4242 4242 4242 4242</code> with any future date and CVC.
-                  <br><small>For split elements, Stripe collects data from all three fields when you pass the cardNumber element.</small>
+                  <br /><small
+                    >For split elements, Stripe collects data from all three fields when you pass
+                    the cardNumber element.</small
+                  >
                 </p>
               </div>
             </div>
@@ -448,7 +512,6 @@ const resetPaymentState = () => {
         </div>
       </CardContent>
     </Card>
-
   </div>
 </template>
 

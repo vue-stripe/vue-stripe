@@ -18,9 +18,14 @@ describe('VueStripeEpsBankElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(VueStripeEpsBankElement, epsProps, epsSlots)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(VueStripeEpsBankElement, epsProps, epsSlots)
+            }
+          )
       }
     })
 

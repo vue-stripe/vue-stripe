@@ -11,7 +11,11 @@ import type {
   StripeConstructorOptions,
   StripeCheckout,
   StripeCheckoutSession,
-  StripeCheckoutElementsOptions
+  StripeCheckoutElementsOptions,
+  PaymentIntentResult,
+  SetupIntentResult,
+  PaymentMethodResult,
+  PaymentIntentOrSetupIntentResult
 } from '@stripe/stripe-js'
 
 // Re-export commonly used Stripe.js types with their original names
@@ -225,6 +229,25 @@ export interface UseStripeElementsReturn {
   error: Readonly<Ref<string | null>>
 }
 
+/**
+ * Returned by the composables without a Stripe result: when Stripe.js has not
+ * loaded yet, or when the Stripe call threw. It has the same `{ error }` shape as
+ * Stripe's own error results, so callers can handle both the same way.
+ */
+export interface VueStripeErrorResult {
+  error: { message: string }
+  paymentIntent?: undefined
+  setupIntent?: undefined
+  paymentMethod?: undefined
+}
+
+/** Result of `confirmPayment` (with `redirect: 'always'` a success navigates away). */
+export type ConfirmPaymentResult = PaymentIntentResult | VueStripeErrorResult
+/** Result of `confirmSetup` (with `redirect: 'always'` a success navigates away). */
+export type ConfirmSetupResult = SetupIntentResult | VueStripeErrorResult
+export type CreatePaymentMethodResult = PaymentMethodResult | VueStripeErrorResult
+export type HandleNextActionResult = PaymentIntentOrSetupIntentResult | VueStripeErrorResult
+
 export interface ConfirmPaymentOptions {
   clientSecret: string
   confirmParams?: ConfirmPaymentData
@@ -235,17 +258,17 @@ export interface ConfirmPaymentOptions {
 }
 
 export interface UsePaymentIntentReturn {
-  confirmPayment: (options: ConfirmPaymentOptions) => Promise<any>
+  confirmPayment: (options: ConfirmPaymentOptions) => Promise<ConfirmPaymentResult>
   /** Retrieve a PaymentIntent's current status from its client secret. */
-  retrievePaymentIntent: (clientSecret: string) => Promise<any>
+  retrievePaymentIntent: (clientSecret: string) => Promise<ConfirmPaymentResult>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
 
 export interface UseSetupIntentReturn {
-  confirmSetup: (options: ConfirmSetupOptions) => Promise<any>
+  confirmSetup: (options: ConfirmSetupOptions) => Promise<ConfirmSetupResult>
   /** Retrieve a SetupIntent's current status from its client secret. */
-  retrieveSetupIntent: (clientSecret: string) => Promise<any>
+  retrieveSetupIntent: (clientSecret: string) => Promise<ConfirmSetupResult>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
@@ -294,7 +317,7 @@ export type CreatePaymentMethodOptions = Record<string, unknown> & {
 }
 
 export interface UseCreatePaymentMethodReturn {
-  createPaymentMethod: (options?: CreatePaymentMethodOptions) => Promise<any>
+  createPaymentMethod: (options?: CreatePaymentMethodOptions) => Promise<CreatePaymentMethodResult>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
@@ -305,7 +328,7 @@ export interface HandleNextActionOptions {
 }
 
 export interface UseHandleNextActionReturn {
-  handleNextAction: (options: HandleNextActionOptions) => Promise<any>
+  handleNextAction: (options: HandleNextActionOptions) => Promise<HandleNextActionResult>
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }
@@ -354,12 +377,7 @@ export type PaymentElementType =
   | 'zip'
 
 // Express checkout payment methods
-export type ExpressCheckoutType =
-  | 'apple_pay'
-  | 'google_pay'
-  | 'paypal'
-  | 'amazon_pay'
-  | 'link'
+export type ExpressCheckoutType = 'apple_pay' | 'google_pay' | 'paypal' | 'amazon_pay' | 'link'
 
 // Error types
 export interface VueStripeError {

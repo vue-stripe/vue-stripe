@@ -1,27 +1,33 @@
 <script lang="ts">
 import {
-  DialogRoot,
   DialogTrigger,
   DialogPortal,
   DialogOverlay,
   DialogContent,
   DialogTitle,
   DialogDescription,
-  DialogClose,
+  DialogClose
 } from 'radix-vue'
 
-export { DialogTrigger, DialogPortal, DialogClose, DialogOverlay, DialogContent, DialogTitle, DialogDescription }
+export {
+  DialogTrigger,
+  DialogPortal,
+  DialogClose,
+  DialogOverlay,
+  DialogContent,
+  DialogTitle,
+  DialogDescription
+}
 </script>
 
 <script setup lang="ts">
 import { DialogRoot as Dialog } from 'radix-vue'
+import { forwardable } from '@/lib/utils'
 
-interface Props {
-  open?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  open: undefined,
+// Runtime declaration so `open` defaults to `undefined` (uncontrolled) instead of
+// Vue's implicit Boolean `false`; type-based withDefaults cannot express that default.
+const props = defineProps({
+  open: { type: Boolean, default: undefined }
 })
 
 const emit = defineEmits<{
@@ -30,7 +36,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <Dialog :open="props.open" @update:open="emit('update:open', $event)">
+  <Dialog v-bind="forwardable({ open: props.open })" @update:open="emit('update:open', $event)">
     <slot />
   </Dialog>
 </template>

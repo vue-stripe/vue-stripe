@@ -18,9 +18,14 @@ describe('VueStripeAuBankAccountElement', () => {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripeElements, {}, {
-          default: () => h(VueStripeAuBankAccountElement, auBankProps, auBankSlots)
-        })
+        default: () =>
+          h(
+            VueStripeElements,
+            {},
+            {
+              default: () => h(VueStripeAuBankAccountElement, auBankProps, auBankSlots)
+            }
+          )
       }
     })
 
@@ -279,13 +284,29 @@ describe('VueStripeAuBankAccountElement', () => {
     // members aren't on the render proxy that findComponent().vm returns).
     const exposed = ref<any>(null)
     const Harness = defineComponent({
-      setup() { return { exposed } },
+      setup() {
+        return { exposed }
+      },
       render() {
-        return h(VueStripeProvider, { publishableKey: 'pk_test_123' }, {
-          default: () => h(VueStripeElements, {}, {
-            default: () => h(VueStripeAuBankAccountElement, { ref: (el: any) => { exposed.value = el } })
-          })
-        })
+        return h(
+          VueStripeProvider,
+          { publishableKey: 'pk_test_123' },
+          {
+            default: () =>
+              h(
+                VueStripeElements,
+                {},
+                {
+                  default: () =>
+                    h(VueStripeAuBankAccountElement, {
+                      ref: (el: any) => {
+                        exposed.value = el
+                      }
+                    })
+                }
+              )
+          }
+        )
       }
     })
     mount(Harness)
@@ -322,9 +343,12 @@ describe('VueStripeAuBankAccountElement', () => {
       }
     })
 
-    expect(mockCreate).toHaveBeenCalledWith('auBankAccount', expect.objectContaining({
-      iconStyle: 'solid'
-    }))
+    expect(mockCreate).toHaveBeenCalledWith(
+      'auBankAccount',
+      expect.objectContaining({
+        iconStyle: 'solid'
+      })
+    )
   })
 
   it('should handle hideIcon option', async () => {
@@ -347,8 +371,11 @@ describe('VueStripeAuBankAccountElement', () => {
       }
     })
 
-    expect(mockCreate).toHaveBeenCalledWith('auBankAccount', expect.objectContaining({
-      hideIcon: true
-    }))
+    expect(mockCreate).toHaveBeenCalledWith(
+      'auBankAccount',
+      expect.objectContaining({
+        hideIcon: true
+      })
+    )
   })
 })

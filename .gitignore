@@ -116,3 +116,6 @@ playwright/.cache/
 
 .claude
 /docs
+
+# Vite config bundling leftovers
+*.timestamp-*.mjs

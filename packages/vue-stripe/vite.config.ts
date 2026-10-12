@@ -6,7 +6,7 @@ import pkg from './package.json' with { type: 'json' }
 
 export default defineConfig({
   define: {
-    __VUE_STRIPE_VERSION__: JSON.stringify(pkg.version),
+    __VUE_STRIPE_VERSION__: JSON.stringify(pkg.version)
   },
   plugins: [
     vue(),
@@ -55,7 +55,7 @@ export default defineConfig({
       '@': resolve(import.meta.dirname, 'src'),
       // Alias vue to vue-demi so compiled SFC templates use vue-demi
       // This is critical for Vue 2 compatibility
-      'vue': 'vue-demi'
+      vue: 'vue-demi'
     }
   }
 })

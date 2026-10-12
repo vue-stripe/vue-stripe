@@ -110,21 +110,23 @@ export function makeMockElement(): MockStripeElement {
     blur: vi.fn(),
     clear: vi.fn(),
     // Address element specific
-    getValue: vi.fn(() => Promise.resolve({
-      complete: true,
-      isNewAddress: true,
-      value: {
-        name: 'John Doe',
-        address: {
-          line1: '123 Main St',
-          line2: null,
-          city: 'San Francisco',
-          state: 'CA',
-          postal_code: '94102',
-          country: 'US'
+    getValue: vi.fn(() =>
+      Promise.resolve({
+        complete: true,
+        isNewAddress: true,
+        value: {
+          name: 'John Doe',
+          address: {
+            line1: '123 Main St',
+            line2: null,
+            city: 'San Francisco',
+            state: 'CA',
+            postal_code: '94102',
+            country: 'US'
+          }
         }
-      }
-    }))
+      })
+    )
   }
 }
 
@@ -141,15 +143,21 @@ export function makeMockElements(): MockStripeElements {
 export function makeMockStripe(): MockStripe {
   return {
     elements: vi.fn(() => makeMockElements()),
-    confirmPayment: vi.fn(() => Promise.resolve({
-      paymentIntent: { id: 'pi_test_123', status: 'succeeded' }
-    })),
-    confirmCardSetup: vi.fn(() => Promise.resolve({
-      setupIntent: { id: 'seti_test_123', status: 'succeeded' }
-    })),
-    confirmSetup: vi.fn(() => Promise.resolve({
-      setupIntent: { id: 'seti_test_123', status: 'succeeded' }
-    })),
+    confirmPayment: vi.fn(() =>
+      Promise.resolve({
+        paymentIntent: { id: 'pi_test_123', status: 'succeeded' }
+      })
+    ),
+    confirmCardSetup: vi.fn(() =>
+      Promise.resolve({
+        setupIntent: { id: 'seti_test_123', status: 'succeeded' }
+      })
+    ),
+    confirmSetup: vi.fn(() =>
+      Promise.resolve({
+        setupIntent: { id: 'seti_test_123', status: 'succeeded' }
+      })
+    ),
     initCheckout: vi.fn(() => Promise.resolve(makeMockCheckout())),
     registerAppInfo: vi.fn()
   }
@@ -174,7 +182,7 @@ if (isVue2) {
 export const createMockStripe = makeMockStripe
 export const createMockElement = makeMockElement
 
-export const waitForStripeLoad = () => new Promise(resolve => setTimeout(resolve, 100))
+export const waitForStripeLoad = () => new Promise((resolve) => setTimeout(resolve, 100))
 
 // Flush all pending promises - useful for waiting on async operations
-export const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0))
+export const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0))

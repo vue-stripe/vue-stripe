@@ -14,10 +14,8 @@ import { VueStripeElementsError } from '../utils/errors'
 
 // Extended element type to include event methods and getValue with looser typing
 interface AddressElementWithEvents extends StripeAddressElementType {
-   
-  on(eventType: string, handler: (...args: any[]) => void): this
-   
-  off(eventType: string, handler?: (...args: any[]) => void): this
+  on(eventType: string, handler: (...args: never[]) => void): this
+  off(eventType: string, handler?: (...args: never[]) => void): this
   getValue(): Promise<Pick<StripeAddressElementChangeEvent, 'complete' | 'isNewAddress' | 'value'>>
 }
 
@@ -39,7 +37,9 @@ export default defineComponent({
     const elementsInstance = inject(stripeElementsInjectionKey)
 
     if (!elementsInstance) {
-      throw new VueStripeElementsError('VueStripeAddressElement must be used within VueStripeElements')
+      throw new VueStripeElementsError(
+        'VueStripeAddressElement must be used within VueStripeElements'
+      )
     }
 
     const handleReady = () => {
@@ -70,7 +70,10 @@ export default defineComponent({
       if (!elementsInstance.elements.value || !addressRef.value) return
 
       try {
-        elementRef.value = elementsInstance.elements.value.create('address', props.options) as AddressElementWithEvents
+        elementRef.value = elementsInstance.elements.value.create(
+          'address',
+          props.options
+        ) as AddressElementWithEvents
         elementRef.value.mount(addressRef.value)
 
         elementRef.value.on('ready', handleReady)
@@ -129,9 +132,13 @@ export default defineComponent({
       destroyElement()
     })
 
-    watch(() => props.options, () => {
-      updateElement()
-    }, { deep: true })
+    watch(
+      () => props.options,
+      () => {
+        updateElement()
+      },
+      { deep: true }
+    )
 
     // Expose element and methods to parent via ref
     expose({

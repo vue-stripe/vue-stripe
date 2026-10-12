@@ -24,13 +24,9 @@ export function CopyButton({ value, className }: CopyButtonProps) {
       variant="ghost"
       size="icon"
       className={cn('h-8 w-8', className)}
-      onClick={handleCopy}
+      onClick={() => void handleCopy()}
     >
-      {copied ? (
-        <Check className="h-4 w-4 text-vue-green" />
-      ) : (
-        <Copy className="h-4 w-4" />
-      )}
+      {copied ? <Check className="h-4 w-4 text-vue-green" /> : <Copy className="h-4 w-4" />}
       <span className="sr-only">Copy</span>
     </Button>
   )

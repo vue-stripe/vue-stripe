@@ -5,14 +5,7 @@ import {
   VueStripeElements,
   VueStripePaymentMethodMessagingElement
 } from '@vue-stripe/vue-stripe'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  Alert,
-  AlertDescription
-} from '@/components/ui'
+import { Card, CardHeader, CardTitle, CardContent, Alert, AlertDescription } from '@/components/ui'
 
 const stripeConfig = inject<{ publishableKey: string }>('stripeConfig')
 
@@ -48,13 +41,20 @@ const messagingReady = ref(false)
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
             <VueStripeElements>
               <VueStripePaymentMethodMessagingElement
-                :options="{ amount: 9900, currency: 'USD', paymentMethodTypes: ['affirm'], countryCode: 'US' }"
+                :options="{
+                  amount: 9900,
+                  currency: 'USD',
+                  paymentMethodTypes: ['affirm'],
+                  countryCode: 'US'
+                }"
                 @ready="messagingReady = true"
               />
             </VueStripeElements>
           </VueStripeProvider>
         </div>
-        <p class="text-xs text-muted-foreground mt-2" data-test="messaging-ready">ready: {{ messagingReady }}</p>
+        <p class="text-xs text-muted-foreground mt-2" data-test="messaging-ready">
+          ready: {{ messagingReady }}
+        </p>
       </CardContent>
     </Card>
   </div>

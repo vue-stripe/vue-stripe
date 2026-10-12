@@ -27,7 +27,7 @@ export function useScrollTracking() {
     }
 
     // Track depth milestones
-    depths.forEach(depth => {
+    depths.forEach((depth) => {
       if (scrollPercentage >= depth && !trackedDepths.value.has(depth)) {
         trackedDepths.value.add(depth)
         const timeToDepth = Date.now() - startTime.value
@@ -35,7 +35,7 @@ export function useScrollTracking() {
         trackScrollDepth({
           scroll_depth: depth,
           page_path: window.location.pathname,
-          time_to_depth: Math.round(timeToDepth / 1000), // Convert to seconds
+          time_to_depth: Math.round(timeToDepth / 1000) // Convert to seconds
         })
       }
     })
@@ -49,7 +49,7 @@ export function useScrollTracking() {
       trackContentEngagement({
         engagement_time: Math.round(engagementTime / 1000), // Convert to seconds
         page_path: window.location.pathname,
-        scroll_percentage: maxScrollPercentage.value,
+        scroll_percentage: maxScrollPercentage.value
       })
     }
   }
@@ -60,8 +60,8 @@ export function useScrollTracking() {
     maxScrollPercentage.value = 0
   }
 
-  let scrollListener: any
-  let visibilityListener: any
+  let scrollListener: (() => void) | null = null
+  let visibilityListener: (() => void) | null = null
 
   onMounted(() => {
     if (typeof window === 'undefined') return
@@ -104,6 +104,6 @@ export function useScrollTracking() {
 
   return {
     reset,
-    maxScrollPercentage,
+    maxScrollPercentage
   }
 }

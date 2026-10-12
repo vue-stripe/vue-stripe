@@ -10,11 +10,12 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 import { ResultDisplay } from '@/components/result-display'
 import { CreditCard, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import type { ApiResponse } from '@/lib/api'
 
 const currencies = [
   { value: 'usd', label: 'USD - US Dollar' },
@@ -23,7 +24,7 @@ const currencies = [
   { value: 'jpy', label: 'JPY - Japanese Yen' },
   { value: 'cad', label: 'CAD - Canadian Dollar' },
   { value: 'aud', label: 'AUD - Australian Dollar' },
-  { value: 'php', label: 'PHP - Philippine Peso' },
+  { value: 'php', label: 'PHP - Philippine Peso' }
 ]
 
 interface PaymentIntentResult {
@@ -54,11 +55,11 @@ export default function PaymentIntentPage() {
         body: JSON.stringify({
           amount: parseInt(amount, 10),
           currency,
-          ...(description && { description }),
-        }),
+          ...(description && { description })
+        })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as ApiResponse<PaymentIntentResult>
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create Payment Intent')
@@ -92,12 +93,11 @@ export default function PaymentIntentPage() {
         <CardHeader>
           <CardTitle>Configuration</CardTitle>
           <CardDescription>
-            Configure the payment details. The client secret can be used with
-            VueStripeElements.
+            Configure the payment details. The client secret can be used with VueStripeElements.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount (in cents)</Label>
@@ -162,17 +162,17 @@ export default function PaymentIntentPage() {
             fields={[
               {
                 label: 'Client Secret',
-                value: result.clientSecret,
+                value: result.clientSecret
               },
               {
                 label: 'Payment Intent ID',
-                value: result.paymentIntentId,
+                value: result.paymentIntentId
               },
               {
                 label: 'Amount',
                 value: formatCurrency(result.amount, result.currency),
-                copyable: false,
-              },
+                copyable: false
+              }
             ]}
           />
 

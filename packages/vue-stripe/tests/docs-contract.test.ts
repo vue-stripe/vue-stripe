@@ -33,10 +33,25 @@ const MAP: Array<{ component: string; doc: string; viaFactory?: boolean }> = [
   { component: 'VueStripePaymentElement.vue', doc: 'stripe-payment-element.md' },
   { component: 'VueStripeExpressCheckoutElement.vue', doc: 'stripe-express-checkout-element.md' },
   { component: 'VueStripeCardElement.vue', doc: 'stripe-card-element.md' },
-  { component: 'VueStripeCardNumberElement.vue', doc: 'stripe-split-card-elements.md', viaFactory: true },
-  { component: 'VueStripeCardExpiryElement.vue', doc: 'stripe-split-card-elements.md', viaFactory: true },
-  { component: 'VueStripeCardCvcElement.vue', doc: 'stripe-split-card-elements.md', viaFactory: true },
-  { component: 'VueStripeLinkAuthenticationElement.vue', doc: 'stripe-link-authentication-element.md' },
+  {
+    component: 'VueStripeCardNumberElement.vue',
+    doc: 'stripe-split-card-elements.md',
+    viaFactory: true
+  },
+  {
+    component: 'VueStripeCardExpiryElement.vue',
+    doc: 'stripe-split-card-elements.md',
+    viaFactory: true
+  },
+  {
+    component: 'VueStripeCardCvcElement.vue',
+    doc: 'stripe-split-card-elements.md',
+    viaFactory: true
+  },
+  {
+    component: 'VueStripeLinkAuthenticationElement.vue',
+    doc: 'stripe-link-authentication-element.md'
+  },
   { component: 'VueStripeAddressElement.vue', doc: 'stripe-address-element.md' },
   { component: 'VueStripeIbanElement.vue', doc: 'stripe-iban-element.md' },
   { component: 'VueStripeIdealBankElement.vue', doc: 'stripe-ideal-bank-element.md' },

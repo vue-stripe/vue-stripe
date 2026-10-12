@@ -3,13 +3,16 @@ import { ref, computed } from 'vue'
 import {
   VueStripeProvider,
   VueStripeElements,
-  VueStripePaymentElement,
-  useStripe,
-  useStripeElements,
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 import ProductSelector from './ProductSelector.vue'
 import PaymentStatus from './PaymentStatus.vue'
-import { useBackendApi, type Product, type SubscriptionResult } from '../../composables/useBackendApi'
+import ConfirmSubscriptionButton from './ConfirmSubscriptionButton.vue'
+import {
+  useBackendApi,
+  type Product,
+  type SubscriptionResult
+} from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
 
 const { publishableKey } = useStripeConfig()
@@ -37,7 +40,7 @@ const canProceedToPayment = computed(() => {
 })
 
 const canConfirm = computed(() => {
-  return clientSecret.value && elementsReady.value && paymentReady.value && !confirming.value
+  return !!clientSecret.value && elementsReady.value && paymentReady.value && !confirming.value
 })
 
 // Handlers
@@ -55,7 +58,7 @@ async function proceedToPayment() {
     // Create subscription (this returns a client secret for confirming the payment)
     const result = await createSubscription({
       priceId: selectedProduct.value.price.id,
-      customerEmail: customerEmail.value,
+      customerEmail: customerEmail.value
     })
 
     subscriptionResult.value = result
@@ -95,9 +98,7 @@ function reset() {
     <!-- Check for publishable key -->
     <div v-if="!publishableKey" class="warning-box">
       <strong>Missing Configuration</strong>
-      <p>
-        Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.
-      </p>
+      <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
     <template v-else>
@@ -106,17 +107,32 @@ function reset() {
 
       <!-- Progress Steps -->
       <div class="progress-steps">
-        <div class="progress-step" :class="{ active: step === 'select', completed: step !== 'select' }">
+        <div
+          class="progress-step"
+          :class="{ active: step === 'select', completed: step !== 'select' }"
+        >
           <span class="step-dot">1</span>
           <span class="step-label">Select Plan</span>
         </div>
         <div class="progress-line" :class="{ completed: step !== 'select' }"></div>
-        <div class="progress-step" :class="{ active: step === 'email', completed: step === 'payment' || step === 'complete' }">
+        <div
+          class="progress-step"
+          :class="{
+            active: step === 'email',
+            completed: step === 'payment' || step === 'complete'
+          }"
+        >
           <span class="step-dot">2</span>
           <span class="step-label">Email</span>
         </div>
-        <div class="progress-line" :class="{ completed: step === 'payment' || step === 'complete' }"></div>
-        <div class="progress-step" :class="{ active: step === 'payment', completed: step === 'complete' }">
+        <div
+          class="progress-line"
+          :class="{ completed: step === 'payment' || step === 'complete' }"
+        ></div>
+        <div
+          class="progress-step"
+          :class="{ active: step === 'payment', completed: step === 'complete' }"
+        >
           <span class="step-dot">3</span>
           <span class="step-label">Payment</span>
         </div>
@@ -124,10 +140,7 @@ function reset() {
 
       <!-- Step 1: Select Subscription Product -->
       <div v-if="step === 'select'" class="step-content">
-        <ProductSelector
-          filter="recurring"
-          @select="onProductSelected"
-        />
+        <ProductSelector filter="recurring" @select="onProductSelected" />
       </div>
 
       <!-- Step 2: Enter Email -->
@@ -141,7 +154,12 @@ function reset() {
           <span class="plan-label">Selected plan:</span>
           <strong>{{ selectedProduct?.name }}</strong>
           <span class="plan-price">
-            {{ formatPrice(selectedProduct?.price.amount || 0, selectedProduct?.price.currency || 'usd') }}/{{ selectedProduct?.price.interval }}
+            {{
+              formatPrice(
+                selectedProduct?.price.amount || 0,
+                selectedProduct?.price.currency || 'usd'
+              )
+            }}/{{ selectedProduct?.price.interval }}
           </span>
           <button class="change-btn" @click="step = 'select'">Change</button>
         </div>
@@ -190,16 +208,20 @@ function reset() {
           </div>
           <div class="summary-row total">
             <span>Total:</span>
-            <strong>{{ formatPrice(selectedProduct?.price.amount || 0, selectedProduct?.price.currency || 'usd') }}/{{ selectedProduct?.price.interval }}</strong>
+            <strong
+              >{{
+                formatPrice(
+                  selectedProduct?.price.amount || 0,
+                  selectedProduct?.price.currency || 'usd'
+                )
+              }}/{{ selectedProduct?.price.interval }}</strong
+            >
           </div>
         </div>
 
         <div class="stripe-container">
           <VueStripeProvider :publishable-key="publishableKey">
-            <VueStripeElements
-              :client-secret="clientSecret"
-              @ready="onElementsReady"
-            >
+            <VueStripeElements :client-secret="clientSecret" @ready="onElementsReady">
               <VueStripePaymentElement @ready="onPaymentReady" />
 
               <ConfirmSubscriptionButton
@@ -208,7 +230,7 @@ function reset() {
                 @confirm-start="confirming = true"
                 @confirm-end="confirming = false"
                 @success="step = 'complete'"
-                @error="(e) => confirmError = e"
+                @error="(e) => (confirmError = e)"
               />
             </VueStripeElements>
           </VueStripeProvider>
@@ -225,7 +247,7 @@ function reset() {
           <span class="success-icon">✓</span>
           <h4>Subscription Active!</h4>
           <p>Thank you for subscribing to {{ selectedProduct?.name }}.</p>
-          <p class="subscription-id" v-if="subscriptionResult">
+          <p v-if="subscriptionResult" class="subscription-id">
             Subscription ID: <code>{{ subscriptionResult.subscriptionId }}</code>
           </p>
           <button class="reset-btn" @click="reset">Start Over</button>
@@ -234,79 +256,6 @@ function reset() {
     </template>
   </div>
 </template>
-
-<script lang="ts">
-// Separate component for confirm button (needs stripe context)
-import { defineComponent, h } from 'vue'
-
-const ConfirmSubscriptionButton = defineComponent({
-  name: 'ConfirmSubscriptionButton',
-  props: {
-    canConfirm: Boolean,
-    confirming: Boolean,
-  },
-  emits: ['confirm-start', 'confirm-end', 'success', 'error'],
-  setup(props, { emit }) {
-    // Call composables during setup (required by Vue)
-    const { stripe } = useStripe()
-    const { elements } = useStripeElements()
-
-    async function confirmPayment() {
-      emit('confirm-start')
-      emit('error', null)
-
-      try {
-        if (!stripe.value || !elements.value) {
-          throw new Error('Stripe not initialized')
-        }
-
-        // First submit the elements form
-        const { error: submitError } = await elements.value.submit()
-        if (submitError) {
-          throw new Error(submitError.message)
-        }
-
-        // Then confirm the payment
-        const { error } = await stripe.value.confirmPayment({
-          elements: elements.value,
-          confirmParams: {
-            return_url: window.location.href,
-          },
-          redirect: 'if_required',
-        })
-
-        if (error) {
-          throw new Error(error.message)
-        }
-
-        // Payment succeeded
-        emit('success')
-      } catch (err) {
-        emit('error', err instanceof Error ? err.message : 'Payment failed')
-      } finally {
-        emit('confirm-end')
-      }
-    }
-
-    return () =>
-      h(
-        'button',
-        {
-          class: ['confirm-btn', { disabled: !props.canConfirm || props.confirming }],
-          disabled: !props.canConfirm || props.confirming,
-          onClick: confirmPayment,
-        },
-        props.confirming ? 'Processing...' : 'Start Subscription'
-      )
-  },
-})
-
-export default {
-  components: {
-    ConfirmSubscriptionButton,
-  },
-}
-</script>
 
 <style scoped>
 .subscription-embedded-example {

@@ -19,7 +19,7 @@ export function useLinkTracking() {
   const isOutboundLink = (url: string): boolean => {
     // Check for common external domains
     const outboundDomains = ['github.com', 'npmjs.com', 'stripe.com', 'twitter.com']
-    return outboundDomains.some(domain => url.includes(domain))
+    return outboundDomains.some((domain) => url.includes(domain))
   }
 
   const getSection = (element: HTMLElement): string => {
@@ -56,7 +56,7 @@ export function useLinkTracking() {
           link_domain: url.hostname,
           link_url: href,
           link_text: linkText,
-          outbound: isOutboundLink(href),
+          outbound: isOutboundLink(href)
         })
 
         // Also track as navigation event
@@ -64,7 +64,7 @@ export function useLinkTracking() {
           link_text: linkText,
           link_url: href,
           link_type: 'external',
-          section,
+          section
         })
       } else {
         // Internal navigation
@@ -72,7 +72,7 @@ export function useLinkTracking() {
           link_text: linkText,
           link_url: href,
           link_type: 'internal',
-          section,
+          section
         })
       }
     }
@@ -85,7 +85,7 @@ export function useLinkTracking() {
           link_text: hash.replace('#', ''),
           link_url: hash,
           link_type: 'internal',
-          section: 'table-of-contents',
+          section: 'table-of-contents'
         })
       }
     }
@@ -106,7 +106,7 @@ export function useLinkTracking() {
         link_text: document.title,
         link_url: to,
         link_type: 'internal',
-        section: 'spa-navigation',
+        section: 'spa-navigation'
       })
     }
   }
@@ -133,6 +133,6 @@ export function useLinkTracking() {
 
   return {
     setupLinkTracking,
-    trackRouteChange,
+    trackRouteChange
   }
 }

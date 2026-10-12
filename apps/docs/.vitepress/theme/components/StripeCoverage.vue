@@ -38,29 +38,45 @@ const issueUrl = (n?: number) =>
   <div class="coverage">
     <div class="coverage-summary">
       <div class="coverage-headline">
-        <span class="coverage-fraction">{{ stats.covered }}<span class="coverage-of">/{{ stats.total }}</span></span>
-        <span class="coverage-caption">Stripe.js elements &amp; features wrapped in dedicated Vue components</span>
+        <span class="coverage-fraction"
+          >{{ stats.covered }}<span class="coverage-of">/{{ stats.total }}</span></span
+        >
+        <span class="coverage-caption"
+          >Stripe.js elements &amp; features wrapped in dedicated Vue components</span
+        >
       </div>
 
-      <div class="coverage-bar" role="img" :aria-label="`${stats.coveredPct}% covered, ${stats.reachablePct}% reachable`">
+      <div
+        class="coverage-bar"
+        role="img"
+        :aria-label="`${stats.coveredPct}% covered, ${stats.reachablePct}% reachable`"
+      >
         <div class="coverage-bar-fill is-covered" :style="{ width: stats.coveredPct + '%' }" />
         <div
           class="coverage-bar-fill is-accessible"
-          :style="{ width: (stats.reachablePct - stats.coveredPct) + '%' }"
+          :style="{ width: stats.reachablePct - stats.coveredPct + '%' }"
         />
       </div>
 
       <div class="coverage-legend">
-        <span class="coverage-chip is-covered">{{ META.covered.icon }} {{ stats.covered }} Covered</span>
-        <span class="coverage-chip is-accessible">{{ META.accessible.icon }} {{ stats.accessible }} Via raw API</span>
-        <span class="coverage-chip is-planned">{{ META.planned.icon }} {{ stats.planned }} Planned</span>
-        <span class="coverage-chip is-deprecated">{{ META.deprecated.icon }} {{ stats.deprecated }} Deprecated</span>
+        <span class="coverage-chip is-covered"
+          >{{ META.covered.icon }} {{ stats.covered }} Covered</span
+        >
+        <span class="coverage-chip is-accessible"
+          >{{ META.accessible.icon }} {{ stats.accessible }} Via raw API</span
+        >
+        <span class="coverage-chip is-planned"
+          >{{ META.planned.icon }} {{ stats.planned }} Planned</span
+        >
+        <span class="coverage-chip is-deprecated"
+          >{{ META.deprecated.icon }} {{ stats.deprecated }} Deprecated</span
+        >
       </div>
 
       <p class="coverage-note">
         <strong>{{ stats.coveredPct }}%</strong> have a dedicated wrapper, and
-        <strong>{{ stats.reachablePct }}%</strong> are reachable today — anything not wrapped is still
-        available through the raw <code>stripe</code> / <code>elements</code> instance from
+        <strong>{{ stats.reachablePct }}%</strong> are reachable today — anything not wrapped is
+        still available through the raw <code>stripe</code> / <code>elements</code> instance from
         <code>useStripe()</code>.
       </p>
     </div>
@@ -69,7 +85,11 @@ const issueUrl = (n?: number) =>
       <section v-for="cat in coverage" :key="cat.group" class="coverage-group">
         <h4 class="coverage-group-title">{{ cat.group }}</h4>
         <ul class="coverage-items">
-          <li v-for="item in cat.items" :key="item.name" :class="['coverage-item', META[item.status].cls]">
+          <li
+            v-for="item in cat.items"
+            :key="item.name"
+            :class="['coverage-item', META[item.status].cls]"
+          >
             <span class="coverage-item-icon">{{ META[item.status].icon }}</span>
             <span class="coverage-item-name">
               <component
@@ -77,7 +97,8 @@ const issueUrl = (n?: number) =>
                 :href="issueUrl(item.issue)"
                 :target="item.issue ? '_blank' : undefined"
                 rel="noopener noreferrer"
-              >{{ item.name }}</component>
+                >{{ item.name }}</component
+              >
             </span>
             <code class="coverage-item-api">{{ item.api }}</code>
           </li>

@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, computed } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripePricingTable
-} from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripePricingTable } from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -21,6 +18,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui'
+import { forwardable } from '@/lib/utils'
 
 const stripeConfig = inject<{
   publishableKey: string
@@ -38,7 +36,7 @@ const isTableLoaded = ref(false)
 const tableError = ref<string | null>(null)
 
 // Event log
-const eventLog = ref<Array<{ time: string; event: string; data?: string }>>([])
+const eventLog = ref<Array<{ time: string; event: string; data?: string | undefined }>>([])
 
 const logEvent = (event: string, data?: string) => {
   const time = new Date().toLocaleTimeString()
@@ -46,7 +44,6 @@ const logEvent = (event: string, data?: string) => {
   if (eventLog.value.length > 15) {
     eventLog.value.pop()
   }
-  console.info(`[PricingTable] ${event}:`, data)
 }
 
 // Event handlers
@@ -79,11 +76,15 @@ const isFormValid = computed(() => {
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
-          Embed a subscription pricing table configured in your Stripe Dashboard.
-          No backend code required - just provide the pricing table ID.
+          Embed a subscription pricing table configured in your Stripe Dashboard. No backend code
+          required - just provide the pricing table ID.
         </p>
         <p class="text-sm mb-4">
-          <a href="https://dashboard.stripe.com/test/pricing-tables" target="_blank" class="text-primary hover:underline">
+          <a
+            href="https://dashboard.stripe.com/test/pricing-tables"
+            target="_blank"
+            class="text-primary hover:underline"
+          >
             Create a Pricing Table in Stripe Dashboard →
           </a>
         </p>
@@ -176,23 +177,13 @@ const isFormValid = computed(() => {
 
         <div>
           <Label class="mb-2">Customer Email (optional)</Label>
-          <Input
-            v-model="customerEmail"
-            type="email"
-            placeholder="customer@example.com"
-          />
-          <p class="text-xs text-muted-foreground mt-1">
-            Pre-fills the email field in checkout
-          </p>
+          <Input v-model="customerEmail" type="email" placeholder="customer@example.com" />
+          <p class="text-xs text-muted-foreground mt-1">Pre-fills the email field in checkout</p>
         </div>
 
         <div>
           <Label class="mb-2">Client Reference ID (optional)</Label>
-          <Input
-            v-model="clientReferenceId"
-            type="text"
-            placeholder="user_123"
-          />
+          <Input v-model="clientReferenceId" type="text" placeholder="user_123" />
           <p class="text-xs text-muted-foreground mt-1">
             Use for reconciling subscriptions with your internal systems
           </p>
@@ -202,7 +193,15 @@ const isFormValid = computed(() => {
         <div class="bg-card rounded-md border p-4 mt-4">
           <h5 class="font-medium text-sm mb-2">How to create a Pricing Table:</h5>
           <ol class="text-muted-foreground text-sm space-y-2 pl-5 list-decimal">
-            <li>Go to <a href="https://dashboard.stripe.com/test/pricing-tables" target="_blank" class="text-primary hover:underline">Stripe Dashboard → Pricing tables</a></li>
+            <li>
+              Go to
+              <a
+                href="https://dashboard.stripe.com/test/pricing-tables"
+                target="_blank"
+                class="text-primary hover:underline"
+                >Stripe Dashboard → Pricing tables</a
+              >
+            </li>
             <li>Click "Create pricing table"</li>
             <li>Add your products and configure the appearance</li>
             <li>Copy the <code>pricing-table-id</code> from the embed code</li>
@@ -221,8 +220,12 @@ const isFormValid = computed(() => {
           <VueStripeProvider :publishable-key="publishableKey">
             <VueStripePricingTable
               :pricing-table-id="pricingTableId"
-              :customer-email="customerEmail || undefined"
-              :client-reference-id="clientReferenceId || undefined"
+              v-bind="
+                forwardable({
+                  customerEmail: customerEmail || undefined,
+                  clientReferenceId: clientReferenceId || undefined
+                })
+              "
               @load="onLoad"
               @error="onError"
             >
@@ -234,9 +237,7 @@ const isFormValid = computed(() => {
               </template>
               <template #error="{ error }">
                 <Alert variant="destructive">
-                  <AlertDescription>
-                    Failed to load pricing table: {{ error }}
-                  </AlertDescription>
+                  <AlertDescription> Failed to load pricing table: {{ error }} </AlertDescription>
                 </Alert>
               </template>
             </VueStripePricingTable>

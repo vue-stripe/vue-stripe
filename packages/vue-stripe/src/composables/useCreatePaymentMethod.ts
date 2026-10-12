@@ -1,4 +1,5 @@
 import { inject, ref, readonly } from 'vue-demi'
+import type { CreatePaymentMethodData, CreatePaymentMethodFromElements } from '@stripe/stripe-js'
 import type { UseCreatePaymentMethodReturn, CreatePaymentMethodOptions } from '../types'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
@@ -61,14 +62,18 @@ export function useCreatePaymentMethod(): UseCreatePaymentMethodReturn {
       // instance. The manual `{ type, card }` flow must NOT submit.
       // See: https://docs.stripe.com/js/elements/submit
       if (params.elements && !skipSubmit) {
-        const { error: submitError } = await (params.elements as any).submit()
+        const { error: submitError } = await params.elements.submit()
         if (submitError) {
           error.value = submitError.message || 'Form validation failed'
           return { error: submitError }
         }
       }
 
-      const result = await (stripeInstance.stripe.value as any).createPaymentMethod(params)
+      // Stripe overloads createPaymentMethod by input shape: Elements-based or raw data.
+      const stripe = stripeInstance.stripe.value
+      const result = params.elements
+        ? await stripe.createPaymentMethod(params as CreatePaymentMethodFromElements)
+        : await stripe.createPaymentMethod(params as CreatePaymentMethodData)
 
       if (result.error) {
         error.value = result.error.message || 'Failed to create payment method'

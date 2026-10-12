@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { provide, ref, inject, watch, onMounted, nextTick } from 'vue-demi'
-import type { StripeElements } from '@stripe/stripe-js'
+import type {
+  StripeElements,
+  StripeElementsOptionsClientSecret,
+  StripeElementsOptionsMode
+} from '@stripe/stripe-js'
 import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 
 // Use a looser type for additional options since Stripe has multiple option shapes
-type ElementsOptions = Record<string, any>
+type ElementsOptions = Record<string, unknown>
 
 interface Emits {
   (e: 'ready', elements: StripeElements): void
@@ -102,9 +106,7 @@ const props = defineProps<Props>()
 const stripeInstance = inject(stripeInjectionKey)
 
 if (!stripeInstance) {
-  throw new VueStripeProviderError(
-    'VueStripeElements must be used within VueStripeProvider'
-  )
+  throw new VueStripeProviderError('VueStripeElements must be used within VueStripeProvider')
 }
 
 const elements = ref<StripeElements | null>(null)
@@ -166,8 +168,11 @@ const createElements = () => {
       elementsOptions['locale'] = props.locale
     }
 
-    // Use type assertion since Stripe has complex overloads
-    elements.value = (stripeInstance.stripe.value as any).elements(elementsOptions)
+    // stripe.elements() is overloaded on the intent flow: clientSecret vs. deferred mode.
+    const stripe = stripeInstance.stripe.value
+    elements.value = props.clientSecret
+      ? stripe.elements(elementsOptions as StripeElementsOptionsClientSecret)
+      : stripe.elements(elementsOptions as StripeElementsOptionsMode)
     loading.value = false
 
     // Emit ready event after Vue updates the DOM
@@ -224,7 +229,9 @@ watch(
       const updateOptions: Record<string, unknown> = {}
       if (props.appearance) updateOptions['appearance'] = props.appearance
       if (props.locale) updateOptions['locale'] = props.locale
-      ;(elements.value as { update: (options: Record<string, unknown>) => void }).update(updateOptions)
+      ;(elements.value as { update: (options: Record<string, unknown>) => void }).update(
+        updateOptions
+      )
     }
   },
   { deep: true }
@@ -245,27 +252,16 @@ provide(stripeElementsInjectionKey, {
 </script>
 
 <template>
-  <div
-    v-if="error"
-    class="vue-stripe-elements-error"
-  >
-    <slot
-      name="error"
-      :error="error"
-    >
+  <div v-if="error" class="vue-stripe-elements-error">
+    <slot name="error" :error="error">
       <div class="vue-stripe-error-message">
         {{ error }}
       </div>
     </slot>
   </div>
-  <div
-    v-else-if="loading"
-    class="vue-stripe-elements-loading"
-  >
+  <div v-else-if="loading" class="vue-stripe-elements-loading">
     <slot name="loading">
-      <div class="vue-stripe-loading-message">
-        Initializing Elements...
-      </div>
+      <div class="vue-stripe-loading-message">Initializing Elements...</div>
     </slot>
   </div>
   <div v-else>

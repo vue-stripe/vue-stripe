@@ -1,26 +1,37 @@
 import { NextResponse } from 'next/server'
+import type Stripe from 'stripe'
+import { readJsonBody } from '@/lib/api'
 import { getStripe } from '@/lib/stripe'
+
+interface CreatePaymentIntentBody {
+  /** Amount in cents (default: 1000). */
+  amount?: number
+  /** Three-letter ISO currency code (default: usd). */
+  currency?: string
+  description?: string
+  metadata?: Stripe.MetadataParam
+}
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => ({}))
+    const body = await readJsonBody<CreatePaymentIntentBody>(request)
     const stripe = getStripe()
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: body.amount || 1000,
       currency: body.currency || 'usd',
       automatic_payment_methods: {
-        enabled: true,
+        enabled: true
       },
       ...(body.description && { description: body.description }),
-      ...(body.metadata && { metadata: body.metadata }),
+      ...(body.metadata && { metadata: body.metadata })
     })
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
       amount: paymentIntent.amount,
-      currency: paymentIntent.currency,
+      currency: paymentIntent.currency
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
@@ -29,7 +40,7 @@ export async function POST(request: Request) {
 }
 
 // Health check
-export async function GET() {
+export function GET() {
   return NextResponse.json({
     endpoint: 'POST /api/payment-intent',
     description: 'Create a Payment Intent and return client secret',
@@ -37,7 +48,7 @@ export async function GET() {
       amount: 'number (in cents, default: 1000)',
       currency: 'string (default: usd)',
       description: 'string (optional)',
-      metadata: 'object (optional)',
-    },
+      metadata: 'object (optional)'
+    }
   })
 }

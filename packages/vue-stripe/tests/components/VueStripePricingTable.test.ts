@@ -18,7 +18,7 @@ describe('VueStripePricingTable', () => {
   afterEach(() => {
     // Clean up pricing table scripts
     const scripts = document.querySelectorAll('script[src*="pricing-table.js"]')
-    scripts.forEach(script => script.remove())
+    scripts.forEach((script) => script.remove())
   })
 
   // Helper to mount within VueStripeProvider
@@ -156,7 +156,7 @@ describe('VueStripePricingTable', () => {
     const wrapper = await mountWithProvider()
 
     // Wait for script load
-    await new Promise(resolve => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50))
     await flushPromises()
 
     const pricingTableComponent = wrapper.findComponent(VueStripePricingTable)
@@ -180,7 +180,7 @@ describe('VueStripePricingTable', () => {
     })
 
     // Need to mount a fresh instance where script hasn't been loaded
-    document.querySelectorAll('script[src*="pricing-table.js"]').forEach(s => s.remove())
+    document.querySelectorAll('script[src*="pricing-table.js"]').forEach((s) => s.remove())
 
     const wrapper = mount(VueStripeProvider, {
       props: {
@@ -195,7 +195,7 @@ describe('VueStripePricingTable', () => {
     await wrapper.vm.$nextTick()
 
     // Wait for script error
-    await new Promise(resolve => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50))
     await flushPromises()
     await nextTick()
 
@@ -220,19 +220,22 @@ describe('VueStripePricingTable', () => {
     })
 
     // Clean up existing scripts
-    document.querySelectorAll('script[src*="pricing-table.js"]').forEach(s => s.remove())
+    document.querySelectorAll('script[src*="pricing-table.js"]').forEach((s) => s.remove())
 
     const wrapper = mount(VueStripeProvider, {
       props: {
         publishableKey: 'pk_test_123'
       },
       slots: {
-        default: () => h(VueStripePricingTable,
-          { pricingTableId: 'prctbl_test_123' },
-          {
-            error: ({ error }: { error: string }) => h('div', { class: 'custom-error' }, `Error: ${error}`)
-          }
-        )
+        default: () =>
+          h(
+            VueStripePricingTable,
+            { pricingTableId: 'prctbl_test_123' },
+            {
+              error: ({ error }: { error: string }) =>
+                h('div', { class: 'custom-error' }, `Error: ${error}`)
+            }
+          )
       }
     })
 
@@ -240,7 +243,7 @@ describe('VueStripePricingTable', () => {
     await wrapper.vm.$nextTick()
 
     // Wait for script error
-    await new Promise(resolve => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50))
     await flushPromises()
     await nextTick()
 

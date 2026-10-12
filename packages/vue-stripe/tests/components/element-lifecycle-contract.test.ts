@@ -15,7 +15,13 @@ import VueStripeLinkAuthenticationElement from '../../src/components/VueStripeLi
 import VueStripeAddressElement from '../../src/components/VueStripeAddressElement.vue'
 import VueStripePaymentElement from '../../src/components/VueStripePaymentElement.vue'
 import VueStripeExpressCheckoutElement from '../../src/components/VueStripeExpressCheckoutElement.vue'
-import { flushPromises, makeMockElement, makeMockElements, makeMockStripe, type MockStripeElement } from '../setup'
+import {
+  flushPromises,
+  makeMockElement,
+  makeMockElements,
+  makeMockStripe,
+  type MockStripeElement
+} from '../setup'
 
 // The lifecycle contract every element component follows (see CLAUDE.md):
 // create from the injected Elements, attach named handlers, mount, forward
@@ -54,19 +60,30 @@ async function mountElement(Element: Component, elementType: string) {
   stripe.elements.mockReturnValue(elements)
   vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
 
-  const options = ref<Record<string, unknown>>(elementType === 'address' ? { mode: 'shipping' } : {})
+  const options = ref<Record<string, unknown>>(
+    elementType === 'address' ? { mode: 'shipping' } : {}
+  )
   const child = ref<Record<string, unknown> | null>(null)
   const show = ref(true)
 
   const Host = defineComponent({
     setup() {
       return () =>
-        h(VueStripeProvider, { publishableKey: 'pk_test_123' }, {
-          default: () =>
-            h(VueStripeElements, { clientSecret: 'pi_123_secret_456' }, {
-              default: () => (show.value ? h(Element, { ref: child, options: options.value }) : null)
-            })
-        })
+        h(
+          VueStripeProvider,
+          { publishableKey: 'pk_test_123' },
+          {
+            default: () =>
+              h(
+                VueStripeElements,
+                { clientSecret: 'pi_123_secret_456' },
+                {
+                  default: () =>
+                    show.value ? h(Element, { ref: child, options: options.value }) : null
+                }
+              )
+          }
+        )
     }
   })
 
@@ -75,7 +92,8 @@ async function mountElement(Element: Component, elementType: string) {
   await flushPromises()
 
   const handlers = new Map<string, (...args: unknown[]) => void>()
-  for (const [name, handler] of element.on.mock.calls) handlers.set(name as string, handler as never)
+  for (const [name, handler] of element.on.mock.calls)
+    handlers.set(name as string, handler as never)
 
   return { wrapper, element, elements, options, child, show, handlers }
 }
@@ -106,17 +124,25 @@ describe.each(ELEMENTS)('%s lifecycle contract', (name, Element, elementType) =>
     }
   })
 
-  itContract('change-error')('shows the change-event error and clears it on the next valid change', async () => {
-    const { wrapper, handlers } = await mountElement(Element, elementType)
-    const change = handlers.get('change')
-    if (!change) return // elements without a change event (e.g. Express Checkout)
-    change({ elementType, complete: false, empty: false, error: { message: 'Your card number is incomplete.' } })
-    await flushPromises()
-    expect(wrapper.text()).toContain('Your card number is incomplete.')
-    change({ elementType, complete: true, empty: false })
-    await flushPromises()
-    expect(wrapper.text()).not.toContain('Your card number is incomplete.')
-  })
+  itContract('change-error')(
+    'shows the change-event error and clears it on the next valid change',
+    async () => {
+      const { wrapper, handlers } = await mountElement(Element, elementType)
+      const change = handlers.get('change')
+      if (!change) return // elements without a change event (e.g. Express Checkout)
+      change({
+        elementType,
+        complete: false,
+        empty: false,
+        error: { message: 'Your card number is incomplete.' }
+      })
+      await flushPromises()
+      expect(wrapper.text()).toContain('Your card number is incomplete.')
+      change({ elementType, complete: true, empty: false })
+      await flushPromises()
+      expect(wrapper.text()).not.toContain('Your card number is incomplete.')
+    }
+  )
 
   it('calls element.update() when options change', async () => {
     const { element, options } = await mountElement(Element, elementType)
@@ -127,7 +153,11 @@ describe.each(ELEMENTS)('%s lifecycle contract', (name, Element, elementType) =>
 
   itContract('expose')('exposes focus/blur/clear that proxy to the Stripe element', async () => {
     const { child, element } = await mountElement(Element, elementType)
-    const exposed = child.value as unknown as { focus: () => void; blur: () => void; clear: () => void }
+    const exposed = child.value as unknown as {
+      focus: () => void
+      blur: () => void
+      clear: () => void
+    }
     exposed.focus()
     exposed.blur()
     exposed.clear()
@@ -160,16 +190,24 @@ describe.each(ELEMENTS)('%s lifecycle contract', (name, Element, elementType) =>
       props: { publishableKey: 'pk_test_123' },
       slots: {
         default: () =>
-          h(VueStripeElements, { clientSecret: 'pi_123_secret_456' }, {
-            default: () => h(Element, { options: elementType === 'address' ? { mode: 'shipping' } : {} })
-          })
+          h(
+            VueStripeElements,
+            { clientSecret: 'pi_123_secret_456' },
+            {
+              default: () =>
+                h(Element, { options: elementType === 'address' ? { mode: 'shipping' } : {} })
+            }
+          )
       }
     })
     await flushPromises()
     await flushPromises()
     expect(wrapper.text()).toContain(`${elementType} create failed`)
     expect(element.mount).not.toHaveBeenCalled()
-    expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/^\[Vue Stripe\]/), expect.anything())
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/^\[Vue Stripe\]/),
+      expect.anything()
+    )
     errorSpy.mockRestore()
   })
 })

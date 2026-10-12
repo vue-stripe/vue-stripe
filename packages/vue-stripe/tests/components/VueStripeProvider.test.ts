@@ -37,7 +37,7 @@ describe('VueStripeProvider', () => {
 
     // Wait for loading to complete
     await wrapper.vm.$nextTick()
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     expect(wrapper.find('.vue-stripe-loading').exists()).toBe(false)
     expect(wrapper.text()).toContain('Payment Form')
@@ -58,7 +58,7 @@ describe('VueStripeProvider', () => {
     })
 
     await wrapper.vm.$nextTick()
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     expect(wrapper.find('.vue-stripe-error').exists()).toBe(true)
     expect(wrapper.text()).toContain('Custom Error')
@@ -76,7 +76,7 @@ describe('VueStripeProvider', () => {
       }
     })
 
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     expect(mockLoadStripe).toHaveBeenCalledWith('pk_test_123', {
       stripeAccount: 'acct_123',

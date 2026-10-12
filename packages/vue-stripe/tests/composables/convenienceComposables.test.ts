@@ -18,13 +18,17 @@ async function mountWith(stripeMethods: Record<string, unknown>, useComposable: 
 
   let api: any
   const Comp = defineComponent({
-    setup() { api = useComposable(); return {} },
+    setup() {
+      api = useComposable()
+      return {}
+    },
     render: () => h('div')
   })
   mount(VueStripeProvider, {
     props: { publishableKey: 'pk_test_123' },
     slots: {
-      default: () => h(VueStripeElements, { clientSecret: 'pi_test_secret_123' }, { default: () => h(Comp) })
+      default: () =>
+        h(VueStripeElements, { clientSecret: 'pi_test_secret_123' }, { default: () => h(Comp) })
     }
   })
   await flushPromises()
@@ -35,8 +39,17 @@ describe('useCreatePaymentMethod', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('throws when used outside a provider', () => {
-    expect(() => mount(defineComponent({ setup() { useCreatePaymentMethod(); return {} }, render: () => h('div') })))
-      .toThrow('useCreatePaymentMethod must be called within a VueStripeProvider component')
+    expect(() =>
+      mount(
+        defineComponent({
+          setup() {
+            useCreatePaymentMethod()
+            return {}
+          },
+          render: () => h('div')
+        })
+      )
+    ).toThrow('useCreatePaymentMethod must be called within a VueStripeProvider component')
   })
 
   it('calls stripe.createPaymentMethod, injecting the elements instance', async () => {
@@ -51,7 +64,9 @@ describe('useCreatePaymentMethod', () => {
   })
 
   it('surfaces a Stripe error on the error ref', async () => {
-    const createPaymentMethod = vi.fn(() => Promise.resolve({ error: { message: 'card declined' } }))
+    const createPaymentMethod = vi.fn(() =>
+      Promise.resolve({ error: { message: 'card declined' } })
+    )
     const { api } = await mountWith({ createPaymentMethod }, () => useCreatePaymentMethod())
 
     const result = await api().createPaymentMethod({ type: 'card', card: {} })
@@ -61,12 +76,17 @@ describe('useCreatePaymentMethod', () => {
 
   it('calls elements.submit() before createPaymentMethod on the Payment Element flow', async () => {
     const order: string[] = []
-    const submit = vi.fn(async () => { order.push('submit'); return { error: null } })
+    const submit = vi.fn(async () => {
+      order.push('submit')
+      return { error: null }
+    })
     const elements = { ...makeMockElements(), submit }
-    const createPaymentMethod = vi.fn(async () => { order.push('create'); return { paymentMethod: { id: 'pm_123' } } })
-    const { api } = await mountWith(
-      { elements: vi.fn(() => elements), createPaymentMethod },
-      () => useCreatePaymentMethod()
+    const createPaymentMethod = vi.fn(async () => {
+      order.push('create')
+      return { paymentMethod: { id: 'pm_123' } }
+    })
+    const { api } = await mountWith({ elements: vi.fn(() => elements), createPaymentMethod }, () =>
+      useCreatePaymentMethod()
     )
 
     await api().createPaymentMethod()
@@ -78,9 +98,8 @@ describe('useCreatePaymentMethod', () => {
     const submit = vi.fn(() => Promise.resolve({ error: { message: 'incomplete' } }))
     const elements = { ...makeMockElements(), submit }
     const createPaymentMethod = vi.fn()
-    const { api } = await mountWith(
-      { elements: vi.fn(() => elements), createPaymentMethod },
-      () => useCreatePaymentMethod()
+    const { api } = await mountWith({ elements: vi.fn(() => elements), createPaymentMethod }, () =>
+      useCreatePaymentMethod()
     )
 
     const result = await api().createPaymentMethod()
@@ -93,9 +112,8 @@ describe('useCreatePaymentMethod', () => {
     const submit = vi.fn(() => Promise.resolve({ error: null }))
     const elements = { ...makeMockElements(), submit }
     const createPaymentMethod = vi.fn(() => Promise.resolve({ paymentMethod: { id: 'pm_1' } }))
-    const { api } = await mountWith(
-      { elements: vi.fn(() => elements), createPaymentMethod },
-      () => useCreatePaymentMethod()
+    const { api } = await mountWith({ elements: vi.fn(() => elements), createPaymentMethod }, () =>
+      useCreatePaymentMethod()
     )
 
     await api().createPaymentMethod({ skipSubmit: true })
@@ -108,9 +126,8 @@ describe('useCreatePaymentMethod', () => {
     const submit = vi.fn()
     const elements = { ...makeMockElements(), submit }
     const createPaymentMethod = vi.fn(() => Promise.resolve({ paymentMethod: { id: 'pm_1' } }))
-    const { api } = await mountWith(
-      { elements: vi.fn(() => elements), createPaymentMethod },
-      () => useCreatePaymentMethod()
+    const { api } = await mountWith({ elements: vi.fn(() => elements), createPaymentMethod }, () =>
+      useCreatePaymentMethod()
     )
 
     await api().createPaymentMethod({ type: 'card', card: {} })
@@ -123,12 +140,23 @@ describe('useHandleNextAction', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('throws when used outside a provider', () => {
-    expect(() => mount(defineComponent({ setup() { useHandleNextAction(); return {} }, render: () => h('div') })))
-      .toThrow('useHandleNextAction must be called within a VueStripeProvider component')
+    expect(() =>
+      mount(
+        defineComponent({
+          setup() {
+            useHandleNextAction()
+            return {}
+          },
+          render: () => h('div')
+        })
+      )
+    ).toThrow('useHandleNextAction must be called within a VueStripeProvider component')
   })
 
   it('calls stripe.handleNextAction with the client secret', async () => {
-    const handleNextAction = vi.fn(() => Promise.resolve({ paymentIntent: { status: 'succeeded' } }))
+    const handleNextAction = vi.fn(() =>
+      Promise.resolve({ paymentIntent: { status: 'succeeded' } })
+    )
     const { api } = await mountWith({ handleNextAction }, () => useHandleNextAction())
 
     const result = await api().handleNextAction({ clientSecret: 'pi_test_secret_123' })
@@ -137,7 +165,9 @@ describe('useHandleNextAction', () => {
   })
 
   it('surfaces a Stripe error result on the error ref and resets loading', async () => {
-    const handleNextAction = vi.fn(() => Promise.resolve({ error: { message: 'Authentication failed' } }))
+    const handleNextAction = vi.fn(() =>
+      Promise.resolve({ error: { message: 'Authentication failed' } })
+    )
     const { api } = await mountWith({ handleNextAction }, () => useHandleNextAction())
 
     const result = await api().handleNextAction({ clientSecret: 'pi_test_secret_123' })
@@ -161,7 +191,9 @@ describe('usePaymentIntent.retrievePaymentIntent', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('retrieves a PaymentIntent by client secret', async () => {
-    const retrievePaymentIntent = vi.fn(() => Promise.resolve({ paymentIntent: { id: 'pi_1', status: 'requires_payment_method' } }))
+    const retrievePaymentIntent = vi.fn(() =>
+      Promise.resolve({ paymentIntent: { id: 'pi_1', status: 'requires_payment_method' } })
+    )
     const { api } = await mountWith({ retrievePaymentIntent }, () => usePaymentIntent())
 
     const result = await api().retrievePaymentIntent('pi_test_secret_123')
@@ -172,8 +204,12 @@ describe('usePaymentIntent.retrievePaymentIntent', () => {
 
   it('clears a stale error from a prior failed confirm on successful retrieve', async () => {
     const confirmPayment = vi.fn(() => Promise.resolve({ error: { message: 'previous failure' } }))
-    const retrievePaymentIntent = vi.fn(() => Promise.resolve({ paymentIntent: { id: 'pi_1', status: 'succeeded' } }))
-    const { api } = await mountWith({ confirmPayment, retrievePaymentIntent }, () => usePaymentIntent())
+    const retrievePaymentIntent = vi.fn(() =>
+      Promise.resolve({ paymentIntent: { id: 'pi_1', status: 'succeeded' } })
+    )
+    const { api } = await mountWith({ confirmPayment, retrievePaymentIntent }, () =>
+      usePaymentIntent()
+    )
 
     await api().confirmPayment({ clientSecret: 'pi_test_secret_123' })
     expect(api().error.value).toBe('previous failure')
@@ -183,7 +219,9 @@ describe('usePaymentIntent.retrievePaymentIntent', () => {
   })
 
   it('surfaces a retrieve error on the error ref', async () => {
-    const retrievePaymentIntent = vi.fn(() => Promise.resolve({ error: { message: 'no such payment_intent' } }))
+    const retrievePaymentIntent = vi.fn(() =>
+      Promise.resolve({ error: { message: 'no such payment_intent' } })
+    )
     const { api } = await mountWith({ retrievePaymentIntent }, () => usePaymentIntent())
 
     const result = await api().retrievePaymentIntent('pi_bad')
@@ -196,7 +234,9 @@ describe('useSetupIntent.retrieveSetupIntent', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('retrieves a SetupIntent by client secret', async () => {
-    const retrieveSetupIntent = vi.fn(() => Promise.resolve({ setupIntent: { id: 'seti_1', status: 'requires_confirmation' } }))
+    const retrieveSetupIntent = vi.fn(() =>
+      Promise.resolve({ setupIntent: { id: 'seti_1', status: 'requires_confirmation' } })
+    )
     const { api } = await mountWith({ retrieveSetupIntent }, () => useSetupIntent())
 
     const result = await api().retrieveSetupIntent('seti_test_secret_123')
@@ -206,7 +246,9 @@ describe('useSetupIntent.retrieveSetupIntent', () => {
   })
 
   it('surfaces a retrieve error on the error ref', async () => {
-    const retrieveSetupIntent = vi.fn(() => Promise.resolve({ error: { message: 'no such setup_intent' } }))
+    const retrieveSetupIntent = vi.fn(() =>
+      Promise.resolve({ error: { message: 'no such setup_intent' } })
+    )
     const { api } = await mountWith({ retrieveSetupIntent }, () => useSetupIntent())
 
     const result = await api().retrieveSetupIntent('seti_bad')

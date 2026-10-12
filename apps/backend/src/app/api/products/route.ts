@@ -8,13 +8,13 @@ export async function GET() {
     // Fetch all active products with their default prices expanded
     const products = await stripe.products.list({
       active: true,
-      expand: ['data.default_price'],
+      expand: ['data.default_price']
     })
 
     // Fetch all active prices to get complete price information
     const prices = await stripe.prices.list({
       active: true,
-      expand: ['data.product'],
+      expand: ['data.product']
     })
 
     // Build a map of product ID to prices for quick lookup
@@ -56,9 +56,9 @@ export async function GET() {
             amount: price.unit_amount,
             currency: price.currency,
             interval: price.recurring?.interval || null,
-            intervalCount: price.recurring?.interval_count || null,
+            intervalCount: price.recurring?.interval_count || null
           },
-          metadata: product.metadata,
+          metadata: product.metadata
         }
       })
       .filter((p): p is NonNullable<typeof p> => p !== null)
