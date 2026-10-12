@@ -37,7 +37,11 @@ const onLoadError = (event) => console.error('Failed to load', event.error)
 
 ## Props
 
-The Currency Selector element takes no configuration options — it derives its choices from the Checkout Session.
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `options` | `Record<string, never>` | No | Accepted like on every element, but this element has no options |
+
+The Currency Selector element takes no configuration: Stripe's `StripeCurrencySelectorElementOptions` is empty and the Checkout SDK's `createCurrencySelectorElement()` takes no arguments. It derives its choices from the Checkout Session.
 
 ## Events
 
