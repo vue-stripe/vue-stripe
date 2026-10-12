@@ -131,10 +131,10 @@ With the signals off, Radar has less information about each session, so it can b
 
 The setting is a load parameter of the Stripe.js script, so it only takes effect if this provider is the first thing on the page to load Stripe.js:
 
-- Set it on every `VueStripeProvider` and on [`createVueStripe()`](/api/plugin) in the app. If another loader already started Stripe.js with the signals on, the provider logs a `[Vue Stripe]` warning and uses that Stripe.js.
-- Do not import the default `@stripe/stripe-js` entry at runtime yourself (type imports are fine), and do not add a Stripe.js `<script>` tag. Both load Stripe.js with the signals on. Import `loadStripe` from `@stripe/stripe-js/pure` or from `@vue-stripe/vue-stripe` instead.
+- Set it on every `VueStripeProvider` and on [`createVueStripe()`](/api/plugin) in the app. If another loader already started Stripe.js with the signals on, the provider logs a `[Vue Stripe]` warning and uses that Stripe.js. When several providers load with the signals off, Stripe.js logs that "existing script parameters will be used" for each load after the first; that script already has the parameter, so the notice is harmless.
+- Do not import the default `@stripe/stripe-js` entry at runtime yourself (type imports are fine), and do not add a Stripe.js `<script>` tag. Both load Stripe.js with the signals on. Import `loadStripe` from `@vue-stripe/vue-stripe` instead: it is the `@stripe/stripe-js/pure` loader (with `setLoadParameters`), and it shares one Stripe.js load with every provider on the page.
 
-Vue Stripe only loads Stripe.js through the `@stripe/stripe-js/pure` entry, so importing the library loads nothing: Stripe.js is requested when the first provider mounts (or, with the plugin, when something first needs Stripe). Stripe recommends loading Stripe.js on every page so the fraud signals cover the whole visit. If you want that, mount the provider high in the app, or import `@stripe/stripe-js` in your app entry (only when the signals stay on).
+Vue Stripe only loads Stripe.js through the `@stripe/stripe-js/pure` entry, so importing the library loads nothing: Stripe.js is requested when the first provider mounts (or, with the plugin, when something first needs Stripe). Providers that mount together share that one load. Stripe recommends loading Stripe.js on every page so the fraud signals cover the whole visit. If you want that, mount the provider high in the app, or import `@stripe/stripe-js` in your app entry (only when the signals stay on).
 
 ### Stripe.js Release Train
 

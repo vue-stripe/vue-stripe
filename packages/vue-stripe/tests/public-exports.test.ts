@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import * as VueStripe from '../src'
 import { STRIPE_CONFIRMERS, composableName } from './stripe-confirmers'
 import type {
@@ -117,9 +117,12 @@ describe('public API exports', () => {
     expect(train).toBe('endive')
   })
 
-  it('re-exports the side-effect-free loader from @stripe/stripe-js/pure', async () => {
-    const pure = await import('@stripe/stripe-js/pure')
-    expect(VueStripe.loadStripe).toBe(pure.loadStripe)
-    expect(typeof VueStripe.loadStripe.setLoadParameters).toBe('function')
+  it('re-exports a pure-entry loadStripe that keeps setLoadParameters', async () => {
+    const pure = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
+    await VueStripe.loadStripe('pk_test_123', { locale: 'fr' })
+    expect(pure).toHaveBeenCalledWith('pk_test_123', { locale: 'fr' })
+
+    VueStripe.loadStripe.setLoadParameters({ advancedFraudSignals: false })
+    expect(pure.setLoadParameters).toHaveBeenCalledWith({ advancedFraudSignals: false })
   })
 })

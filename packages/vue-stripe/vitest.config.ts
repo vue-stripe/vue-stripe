@@ -16,6 +16,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.test.ts'],
+    // Processed by Vite (not Node's module cache) so vi.resetModules() gives
+    // tests/utils/load-stripe.test.ts a fresh real @stripe/stripe-js/pure loader.
+    server: { deps: { inline: ['@stripe/stripe-js'] } },
     coverage: {
       provider: 'v8',
       // json-summary + json feed the PR coverage comment in CI.

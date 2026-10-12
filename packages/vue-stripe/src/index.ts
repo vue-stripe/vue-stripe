@@ -170,6 +170,7 @@ export {
 // Export plugin
 export { createVueStripe } from './plugin'
 
-// Re-export Stripe.js for convenience. The pure entry (the same loadStripe plus
-// setLoadParameters) keeps importing the library free of a Stripe.js <script>.
-export { loadStripe } from '@stripe/stripe-js/pure'
+// Re-export Stripe.js for convenience: the pure entry's loadStripe (plus
+// setLoadParameters), so importing the library injects no Stripe.js <script>,
+// with concurrent calls sharing one script load (see utils/load-stripe.ts).
+export { loadStripe } from './utils/load-stripe'
