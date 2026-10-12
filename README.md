@@ -44,7 +44,7 @@ I've decided to start using AI to help me maintain Vue Stripe, and I want to be 
 
 To be honest about the reality of it: I maintain this project largely on my own, and only in whatever extra time I can find. That time is limited, and I'm often not able to give it my full 100%. With just one person, it's genuinely hard to find the time to provide the quality and pace of work the project deserves without some extra help. Bringing AI in as an assistant lets me move faster and cover more ground — more tests, better docs, quicker fixes — while I stay in the loop as the human who reviews and approves everything.
 
-Thank you for understanding, and for continuing to support Vue Stripe. 🙏
+Thank you for understanding, and for continuing to support Vue Stripe.
 
 ## Features
 
@@ -192,7 +192,7 @@ Support this project with your organization. Your logo will show up here with a 
 
 ## License
 
-[MIT](LICENSE) License © 2017-2026 Vue Stripe Contributors
+[MIT](LICENSE) License. Copyright 2017-2026 Vue Stripe Contributors.
 
 ---
 

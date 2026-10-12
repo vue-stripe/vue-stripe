@@ -165,7 +165,7 @@ onMounted(async () => {
 `useStripe()` throws an error if called outside of `VueStripeProvider`:
 
 ```vue
-<!-- ❌ Wrong - useStripe() called outside StripeProvider -->
+<!-- Wrong - useStripe() called outside StripeProvider -->
 <script setup>
 const { stripe } = useStripe() // Throws: "useStripe must be called within a VueStripeProvider component"
 </script>
@@ -178,7 +178,7 @@ const { stripe } = useStripe() // Throws: "useStripe must be called within a Vue
 ```
 
 ```vue
-<!-- ✅ Correct - create a child component -->
+<!-- Correct - create a child component -->
 <!-- MyForm.vue -->
 <script setup>
 const { stripe } = useStripe() // Works!

@@ -182,7 +182,7 @@ const checkElements = () => {
 `useStripeElements()` throws a `VueStripeElementsError` with the message `'Elements context not found. Make sure to wrap your component with VueStripeElements.'` if called outside of `VueStripeElements`:
 
 ```vue
-<!-- ❌ Wrong - outside StripeElements -->
+<!-- Wrong - outside StripeElements -->
 <script setup>
 const { elements } = useStripeElements() // Throws VueStripeElementsError
 </script>
@@ -197,7 +197,7 @@ const { elements } = useStripeElements() // Throws VueStripeElementsError
 ```
 
 ```vue
-<!-- ✅ Correct - inside StripeElements -->
+<!-- Correct - inside StripeElements -->
 <!-- MyPaymentForm.vue -->
 <script setup>
 const { elements } = useStripeElements() // Works!

@@ -11,31 +11,26 @@ Test Vue Stripe components with real Stripe integrations. These live demos conne
 
 <div class="examples-grid">
   <a href="/live-demo/checkout-redirect" class="example-card">
-    <div class="example-icon">🛒</div>
     <h3>Stripe Checkout</h3>
     <p>Redirect to Stripe's hosted checkout page. v8.x compatible with URL redirect.</p>
   </a>
 
   <a href="/live-demo/payment-element" class="example-card">
-    <div class="example-icon">💳</div>
     <h3>Payment Element</h3>
     <p>Accept cards, wallets, and bank payments with the universal Payment Element.</p>
   </a>
 
   <a href="/live-demo/card-element" class="example-card">
-    <div class="example-icon">💳</div>
     <h3>Card Element</h3>
     <p>Legacy single-field card input with full styling control.</p>
   </a>
 
   <a href="/live-demo/split-card-elements" class="example-card">
-    <div class="example-icon">🔢</div>
     <h3>Split Card Elements</h3>
     <p>Separate inputs for card number, expiry, and CVC.</p>
   </a>
 
   <a href="/live-demo/link-authentication" class="example-card">
-    <div class="example-icon">⚡</div>
     <h3>Link Authentication</h3>
     <p>Enable one-click checkout with Stripe Link.</p>
   </a>
@@ -45,13 +40,11 @@ Test Vue Stripe components with real Stripe integrations. These live demos conne
 
 <div class="examples-grid">
   <a href="/live-demo/subscription-checkout" class="example-card">
-    <div class="example-icon">🔄</div>
     <h3>Stripe Checkout</h3>
     <p>Redirect customers to Stripe's hosted checkout page for subscriptions.</p>
   </a>
 
   <a href="/live-demo/subscription-embedded" class="example-card">
-    <div class="example-icon">📱</div>
     <h3>Embedded Elements</h3>
     <p>Keep customers on your site with embedded subscription forms.</p>
   </a>
@@ -93,10 +86,6 @@ Use any future expiry date, any 3-digit CVC, and any postal code.
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.example-icon {
-  font-size: 2rem;
-  margin-bottom: 0.75rem;
-}
 
 .example-card h3 {
   margin: 0 0 0.5rem 0;

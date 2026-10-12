@@ -218,4 +218,4 @@ import type {
 
 ## License
 
-[MIT](LICENSE) License © 2017-2026 Vue Stripe Contributors
+[MIT](LICENSE) License. Copyright 2017-2026 Vue Stripe Contributors.

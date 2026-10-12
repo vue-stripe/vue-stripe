@@ -19,11 +19,11 @@ The plugin provides **configuration only** — it does not yet supply a reactive
 
 | Scenario | Use Plugin | Use StripeProvider |
 |----------|------------|-------------------|
-| Single Stripe account for entire app | ✅ | ✅ |
-| Multiple Stripe accounts (Connect) | ❌ | ✅ |
-| Need to change keys at runtime | ❌ | ✅ |
-| Want simpler component trees | ✅ | ❌ |
-| SSR with hydration | ⚠️ Careful | ✅ Easier |
+| Single Stripe account for entire app | Yes | Yes |
+| Multiple Stripe accounts (Connect) | No | Yes |
+| Need to change keys at runtime | No | Yes |
+| Want simpler component trees | Yes | No |
+| SSR with hydration | Careful | Easier |
 
 ::: tip When to Choose
 Use **createVueStripe** for simple apps with a single Stripe account.
@@ -241,33 +241,33 @@ const { stripe, loading, error, initialize } = useStripe()
 ### Do
 
 ```ts
-// ✅ Use environment variables
+// Use environment variables
 app.use(createVueStripe({
   publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 }))
 
-// ✅ Use a constrained locale value
+// Use a constrained locale value
 app.use(createVueStripe({
   publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
   locale: 'auto'
 }))
 
-// ✅ Access Stripe through VueStripeProvider + useStripe()
+// Access Stripe through VueStripeProvider + useStripe()
 const { stripe, loading, error } = useStripe()
 ```
 
 ### Don't
 
 ```ts
-// ❌ Don't hardcode keys
+// Don't hardcode keys
 app.use(createVueStripe({
   publishableKey: 'pk_live_actual_key_here'
 }))
 
-// ❌ Don't expect the plugin to provide a Stripe instance
+// Don't expect the plugin to provide a Stripe instance
 // The plugin provides config only; wrap your tree in VueStripeProvider (see #424)
 
-// ❌ Don't use for Stripe Connect with multiple accounts
+// Don't use for Stripe Connect with multiple accounts
 // Use StripeProvider instead for dynamic stripeAccount
 ```
 

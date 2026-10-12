@@ -241,7 +241,7 @@ flowchart TD
 ### 1. Using composables outside providers
 
 ```vue
-<!-- ❌ Wrong - useStripe() called outside StripeProvider -->
+<!-- Wrong - useStripe() called outside StripeProvider -->
 <script setup>
 const { stripe } = useStripe() // Throws error!
 </script>
@@ -254,7 +254,7 @@ const { stripe } = useStripe() // Throws error!
 ```
 
 ```vue
-<!-- ✅ Correct - create a child component -->
+<!-- Correct - create a child component -->
 <!-- PaymentForm.vue -->
 <script setup>
 const { stripe } = useStripe() // Works!
@@ -271,12 +271,12 @@ const { stripe } = useStripe() // Works!
 ### 2. Using elements without StripeElements
 
 ```vue
-<!-- ❌ Wrong - StripePaymentElement needs StripeElements parent -->
+<!-- Wrong - StripePaymentElement needs StripeElements parent -->
 <VueStripeProvider :publishable-key="key">
   <VueStripePaymentElement /> <!-- Throws error! -->
 </VueStripeProvider>
 
-<!-- ✅ Correct -->
+<!-- Correct -->
 <VueStripeProvider :publishable-key="key">
   <VueStripeElements :client-secret="secret">
     <VueStripePaymentElement />
@@ -287,13 +287,13 @@ const { stripe } = useStripe() // Works!
 ### 3. Forgetting to wait for loading
 
 ```vue
-<!-- ❌ Wrong - stripe might be null -->
+<!-- Wrong - stripe might be null -->
 <script setup>
 const { stripe } = useStripe()
 stripe.value.confirmPayment(...) // Error if still loading!
 </script>
 
-<!-- ✅ Correct - check first -->
+<!-- Correct - check first -->
 <script setup>
 const { stripe, loading } = useStripe()
 

@@ -462,12 +462,12 @@ const onError = (error) => {
     <template #error="{ error }">
       <p>Error: {{ error }}</p>
     </template>
-    <p>✅ Stripe is ready!</p>
+    <p>Stripe is ready!</p>
   </VueStripeProvider>
 </template>
 ```
 
-If you see "✅ Stripe is ready!" and the console shows "Stripe loaded!", you're good to go!
+If you see "Stripe is ready!" and the console shows "Stripe loaded!", you're good to go!
 
 ---
 
@@ -495,10 +495,10 @@ If you see hydration mismatch warnings, ensure Stripe components only render on 
 Make sure you're importing from `@vue-stripe/vue-stripe`, not `@stripe/stripe-js` directly:
 
 ```js
-// ✅ Correct
+// Correct
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
-// ❌ Wrong - This is the raw Stripe.js library
+// Wrong - This is the raw Stripe.js library
 import { loadStripe } from '@stripe/stripe-js'
 ```
 

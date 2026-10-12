@@ -383,7 +383,7 @@ const handleChange = (event) => {
         </div>
 
         <div class="status">
-          <p>Status: {{ isComplete ? '✅ Valid' : '⏳ Incomplete' }}</p>
+          <p>Status: {{ isComplete ? 'Valid' : 'Incomplete' }}</p>
           <p v-if="collectedEmail">Email: {{ collectedEmail }}</p>
         </div>
       </div>

@@ -410,8 +410,8 @@ const handleError = (error: Error) => {
 | **Flexibility** | Full control | Full control | Limited options |
 | **Security** | Most secure | Secure | Less secure |
 | **Use Case** | Production apps | Legacy v7.x apps | Prototypes only |
-| **Recommended** | ✅ Yes | For v7.x only | ❌ No |
-| **v8.x Compatible** | ✅ Yes | ❌ No | ❌ No |
+| **Recommended** | Yes | For v7.x only | No |
+| **v8.x Compatible** | Yes | No | No |
 
 ## Checkout vs Payment Element
 
@@ -458,9 +458,9 @@ res.json({ url: session.url })
 
 | Prop | @stripe/stripe-js v7.x | @stripe/stripe-js v8.x |
 |------|------------------------|------------------------|
-| `sessionUrl` | ✅ Works | ✅ Works (recommended) |
-| `sessionId` | ✅ Works | ❌ Error |
-| `priceId` | ✅ Works (deprecated) | ❌ Error |
+| `sessionUrl` | Works | Works (recommended) |
+| `sessionId` | Works | Error |
+| `priceId` | Works (deprecated) | Error |
 
 ### Backend Changes
 

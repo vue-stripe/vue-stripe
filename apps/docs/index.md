@@ -14,17 +14,13 @@ hero:
       link: /guide/introduction
 
 features:
-  - icon: 🔄
-    title: Vue 3 Ready
+  - title: Vue 3 Ready
     details: Built for Vue 3 with full Composition API support and modern Vue patterns.
-  - icon: 💳
-    title: All Stripe Elements
+  - title: All Stripe Elements
     details: Payment Element, Card Element, Express Checkout, and more - all wrapped in Vue components.
-  - icon: 🎯
-    title: Type-Safe
+  - title: Type-Safe
     details: Full TypeScript support with proper type definitions for all components and composables.
-  - icon: ⚡
-    title: Reactive by Design
+  - title: Reactive by Design
     details: Leverage Vue's reactivity system with composables like useStripe() and useStripeElements().
 ---
 

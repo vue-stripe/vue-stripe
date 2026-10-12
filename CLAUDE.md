@@ -87,3 +87,18 @@ Vitest + `@vue/test-utils` in a `jsdom` environment; setup in `tests/setup.ts`. 
 - Support backwards-compatible prop aliases where the existing code does (e.g. `VueStripeProvider` accepts both `publishableKey` and `stripeKey`).
 - Errors use the typed classes in `src/utils/errors.ts`; prefix console output with `[Vue Stripe]`.
 - `node >=22` (`.nvmrc`: 24), `pnpm >=12` (via corepack; dependency build scripts are allow-listed under `allowBuilds` in `pnpm-workspace.yaml`). Husky + lint-staged run eslint/prettier on commit.
+
+### Rules enforced by `packages/vue-stripe/tests/conventions.test.ts`
+
+Each rule fails the build with `file:line`; each also has a negative fixture in the same test.
+
+1. No `.vue` files under `packages/vue-stripe/src` (render-function components only).
+2. Vue APIs are imported from `vue-demi`, never from `'vue'`.
+3. Every file in `src/components/` is a `createStripeElement(...)` definition, unless it is on the test's allow-list (providers, `VueStripeCheckout`, `VueStripePricingTable`, `VueStripe*Disclosure`, ...). Growing the allow-list needs a review.
+4. `console.error` / `console.warn` messages start with `[Vue Stripe]`; `console.log` / `info` / `debug` are not allowed.
+5. Only the typed error classes from `src/utils/errors.ts` are thrown.
+6. No `as any`, no `@ts-ignore`; `@ts-expect-error` only with a trailing `-- reason`.
+7. Every component and composable module is exported from its `index.ts`.
+8. An element definition's `events` list only contains events the installed `@stripe/stripe-js` `.d.ts` declares for that element type.
+9. Every exported component and composable has an API page under `apps/docs/api/`.
+10. **No emoji anywhere** in docs, the playground, the backend UI, library source or READMEs (maintainer rule). Write words instead: "Yes" / "No" in tables, "Correct" / "Wrong" in code comments, text labels for status. Do not propose emoji in docs or UI copy.
