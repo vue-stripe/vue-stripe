@@ -32,7 +32,7 @@ const DISCLOSURE = resolve(here, '../src/utils/disclosure.ts')
 const factorySource = existsSync(FACTORY) ? readFileSync(FACTORY, 'utf8') : ''
 const disclosureSource = existsSync(DISCLOSURE) ? readFileSync(DISCLOSURE, 'utf8') : ''
 
-/** Component file -> API doc page. The split card elements share one page. */
+/** Component file -> API doc page. The split card elements and the Issuing elements share one page each. */
 const MAP: Array<{ component: string; doc: string }> = [
   { component: 'VueStripeProvider.ts', doc: 'stripe-provider.md' },
   { component: 'VueStripeElements.ts', doc: 'stripe-elements.md' },
@@ -75,7 +75,15 @@ const MAP: Array<{ component: string; doc: string }> = [
   { component: 'VueStripeCheckoutFormProvider.ts', doc: 'stripe-checkout-form-provider.md' },
   { component: 'VueStripeCheckoutForm.ts', doc: 'stripe-checkout-form.md' },
   { component: 'VueStripePricingTable.ts', doc: 'stripe-pricing-table.md' },
-  { component: 'VueStripeEmbeddedCheckout.ts', doc: 'stripe-embedded-checkout.md' }
+  { component: 'VueStripeEmbeddedCheckout.ts', doc: 'stripe-embedded-checkout.md' },
+  ...[
+    'IssuingCardNumberDisplay',
+    'IssuingCardCvcDisplay',
+    'IssuingCardExpiryDisplay',
+    'IssuingCardPinDisplay',
+    'IssuingCardCopyButton',
+    'IssuingAddToWalletButton'
+  ].map((name) => ({ component: `VueStripe${name}Element.ts`, doc: 'stripe-issuing-elements.md' }))
 ]
 
 /** Normalize an event name for naming-style-insensitive comparison. */
@@ -272,8 +280,10 @@ describe('docs/API contract: component events', () => {
         `[docs-contract] ${component}: events not documented in ${doc}: ${missing.map((e) => '@' + e).join(', ')}`
       )
 
-    // The harness itself must have found the component's events.
-    expect(emits.length, `no events extracted from ${component}`).toBeGreaterThan(0)
+    // The harness itself must have found the component's events, unless the definition
+    // declares none (`events: []`, e.g. the Issuing display elements).
+    if (!/events:\s*\[\s*\]/.test(source))
+      expect(emits.length, `no events extracted from ${component}`).toBeGreaterThan(0)
   })
 })
 
@@ -315,6 +325,11 @@ describe('docs/API contract: extractors', () => {
     })`
     expect(extractProps(source)).toEqual(['sessionUrl', 'buttonText', 'fetchClientSecret'])
     expect(extractExposed(source)).toEqual(['checkout', 'loading', 'clear'])
+  })
+
+  it('reads an empty factory events list as no events, and a missing one as BASE_EVENTS', () => {
+    expect(extractEmits(`createStripeElement({ elementType: 'x', events: [] })`)).toEqual([])
+    expect(extractEmits(`createStripeElement({ elementType: 'x' })`)).toEqual(baseEvents())
   })
 
   it('reads factory props, the standard exposed set and definition extras', () => {

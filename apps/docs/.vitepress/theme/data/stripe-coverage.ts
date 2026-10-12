@@ -239,22 +239,39 @@ export const coverage: CoverageCategory[] = [
       {
         name: 'Card Number Display',
         api: "create('issuingCardNumberDisplay')",
-        status: 'accessible'
+        status: 'covered',
+        artifact: 'VueStripeIssuingCardNumberDisplayElement'
       },
-      { name: 'Card CVC Display', api: "create('issuingCardCvcDisplay')", status: 'accessible' },
+      {
+        name: 'Card CVC Display',
+        api: "create('issuingCardCvcDisplay')",
+        status: 'covered',
+        artifact: 'VueStripeIssuingCardCvcDisplayElement'
+      },
       {
         name: 'Card Expiry Display',
         api: "create('issuingCardExpiryDisplay')",
-        status: 'accessible'
+        status: 'covered',
+        artifact: 'VueStripeIssuingCardExpiryDisplayElement'
       },
-      { name: 'Card PIN Display', api: "create('issuingCardPinDisplay')", status: 'accessible' },
-      { name: 'Card Copy Button', api: "create('issuingCardCopyButton')", status: 'accessible' },
       {
-        // No typed elements.create() overload in Stripe.js 10.0.0.
+        name: 'Card PIN Display',
+        api: "create('issuingCardPinDisplay')",
+        status: 'covered',
+        artifact: 'VueStripeIssuingCardPinDisplayElement'
+      },
+      {
+        name: 'Card Copy Button',
+        api: "create('issuingCardCopyButton')",
+        status: 'covered',
+        artifact: 'VueStripeIssuingCardCopyButtonElement'
+      },
+      {
+        // No typed elements.create() overload in Stripe.js 10.0.0; created by type string.
         name: 'Add to Wallet (Issuing)',
         api: "create('issuingAddToWalletButton')",
-        status: 'planned',
-        issue: 495
+        status: 'covered',
+        artifact: 'VueStripeIssuingAddToWalletButtonElement'
       }
     ]
   },

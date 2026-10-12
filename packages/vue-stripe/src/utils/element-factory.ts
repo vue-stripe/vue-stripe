@@ -145,6 +145,8 @@ export function createStripeElement<
           element.value = created
           for (const name of events) created.on(name, handlers[name] as never)
           created.mount(target)
+          // Elements without a `ready` event (e.g. the Issuing displays) are shown once mounted.
+          if (!events.includes('ready')) loading.value = false
         } catch (err) {
           error.value =
             err instanceof Error ? err.message : `Failed to create ${elementType} element`

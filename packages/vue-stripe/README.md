@@ -130,6 +130,8 @@ const pay = () =>
 | `VueStripeContactDetailsElement` | Customer email (Checkout Sessions or Elements) |
 | `VueStripeTermsElement` | Terms the customer accepts (Stripe beta) |
 | `VueStripeLinkSignupElement` | Save details to Link (Stripe beta) |
+| `VueStripeIssuingCardNumberDisplayElement`, `VueStripeIssuingCardCvcDisplayElement`, `VueStripeIssuingCardExpiryDisplayElement`, `VueStripeIssuingCardPinDisplayElement` | Stripe Issuing card details in Stripe-hosted iframes |
+| `VueStripeIssuingCardCopyButtonElement`, `VueStripeIssuingAddToWalletButtonElement` | Copy an issued card detail; add an issued card to a wallet (Stripe private preview) |
 
 Stripe removed the standalone iDEAL, P24, EPS and FPX elements; the Payment Element collects these payment methods.
 

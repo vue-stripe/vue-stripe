@@ -184,6 +184,10 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           items: [{ text: 'Pricing Table', link: '/guide/pricing-table' }]
         },
         {
+          text: 'Issuing',
+          items: [{ text: 'Issuing Elements', link: '/guide/issuing' }]
+        },
+        {
           text: 'Advanced',
           items: [
             { text: 'Saving Payment Methods', link: '/guide/setup-intent' },
@@ -250,6 +254,10 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
               link: '/api/components/stripe-au-bank-account-element'
             }
           ]
+        },
+        {
+          text: 'Issuing',
+          items: [{ text: 'Issuing Elements', link: '/api/components/stripe-issuing-elements' }]
         },
         {
           text: 'Checkout & Subscriptions',

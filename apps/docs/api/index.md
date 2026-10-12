@@ -28,6 +28,9 @@ Complete API documentation for Vue Stripe components and composables.
 
 Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clover (8.0); collect these payment methods with the [Payment Element](/api/components/stripe-payment-element).
 
+### Issuing Elements
+- [Issuing Elements](/api/components/stripe-issuing-elements) - `VueStripeIssuingCardNumberDisplayElement`, `...CvcDisplayElement`, `...ExpiryDisplayElement`, `...PinDisplayElement`, `...CopyButtonElement`, `...AddToWalletButtonElement`: issued card details in Stripe-hosted iframes. Walkthrough: [Issuing Elements guide](/guide/issuing)
+
 ### Checkout
 - [VueStripeCheckout](/api/components/stripe-checkout) - Redirect to hosted Stripe Checkout (session URL)
 - [VueStripeEmbeddedCheckout](/api/components/stripe-embedded-checkout) - Stripe's Checkout page embedded in your page (`stripe.createEmbeddedCheckoutPage()`). Walkthrough: [Embedded Checkout guide](/guide/embedded-checkout)

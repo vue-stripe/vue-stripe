@@ -134,8 +134,12 @@ const kebab = (s: string) => s.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase())
 /** Element types whose `.d.ts` is not named after them. */
 const DTS_FILE: Record<string, string> = { checkoutForm: 'payment-form' }
 const stripeEventUnion = (elementType: string): Set<string> | null => {
-  const file = join(STRIPE_ELEMENTS_DTS, `${DTS_FILE[elementType] ?? kebab(elementType)}.d.ts`)
-  if (!existsSync(file)) return null
+  // Issuing element types live in their own folder (elements/issuing/*.d.ts).
+  const name = `${DTS_FILE[elementType] ?? kebab(elementType)}.d.ts`
+  const file = ['', 'issuing']
+    .map((dir) => join(STRIPE_ELEMENTS_DTS, dir, name))
+    .find((path) => existsSync(path))
+  if (!file) return null
   return new Set(
     [...readFileSync(file, 'utf8').matchAll(/eventType: '([a-z-]+)'/g)].map((m) => m[1]!)
   )
@@ -169,7 +173,13 @@ const COMPONENT_PAGE: Record<string, string> = {
   VueStripeCardExpiryElement: 'stripe-split-card-elements',
   VueStripeCardCvcElement: 'stripe-split-card-elements',
   VueStripeCheckoutElementsProvider: 'stripe-checkout-provider',
-  VueStripeCheckoutProvider: 'stripe-checkout-provider'
+  VueStripeCheckoutProvider: 'stripe-checkout-provider',
+  VueStripeIssuingCardNumberDisplayElement: 'stripe-issuing-elements',
+  VueStripeIssuingCardCvcDisplayElement: 'stripe-issuing-elements',
+  VueStripeIssuingCardExpiryDisplayElement: 'stripe-issuing-elements',
+  VueStripeIssuingCardPinDisplayElement: 'stripe-issuing-elements',
+  VueStripeIssuingCardCopyButtonElement: 'stripe-issuing-elements',
+  VueStripeIssuingAddToWalletButtonElement: 'stripe-issuing-elements'
 }
 const COMPOSABLE_PAGE: Record<string, string> = {
   useCheckout: 'use-stripe-checkout',
@@ -270,6 +280,11 @@ describe('conventions (enforced by tests/conventions.test.ts)', () => {
         composablesIndex
       )
     ]).toEqual([])
+  })
+
+  it('8. reads Issuing element unions from elements/issuing/*.d.ts', () => {
+    expect(stripeEventUnion('issuingCardCopyButton')).toEqual(new Set(['click']))
+    expect(stripeEventUnion('issuingCardCvcDisplay')).toEqual(new Set())
   })
 
   it('8. element events are a subset of the installed Stripe.js .d.ts unions', () => {

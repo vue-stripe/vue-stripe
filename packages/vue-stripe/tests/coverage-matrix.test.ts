@@ -102,7 +102,20 @@ describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
         artifact: `VueStripe${name}Disclosure`
       })
     }
-    expect(byApi("'issuingAddToWalletButton'")[0]).toMatchObject({ status: 'planned', issue: 495 })
+  })
+
+  it('marks the six Issuing elements covered by their components', () => {
+    const issuing: Array<[string, string]> = [
+      ['issuingCardNumberDisplay', 'VueStripeIssuingCardNumberDisplayElement'],
+      ['issuingCardCvcDisplay', 'VueStripeIssuingCardCvcDisplayElement'],
+      ['issuingCardExpiryDisplay', 'VueStripeIssuingCardExpiryDisplayElement'],
+      ['issuingCardPinDisplay', 'VueStripeIssuingCardPinDisplayElement'],
+      ['issuingCardCopyButton', 'VueStripeIssuingCardCopyButtonElement'],
+      ['issuingAddToWalletButton', 'VueStripeIssuingAddToWalletButtonElement']
+    ]
+    for (const [type, artifact] of issuing) {
+      expect(byApi(`'${type}'`)[0], type).toMatchObject({ status: 'covered', artifact })
+    }
   })
 
   it('lists every method-specific confirmer as covered by its own composable', () => {

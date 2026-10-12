@@ -51,5 +51,13 @@ export { default as VueStripeFinancialAccountDisclosure } from './VueStripeFinan
 export { default as VueStripeIssuingDisclosure } from './VueStripeIssuingDisclosure'
 export { default as VueStripeTreasuryDisclosure } from './VueStripeTreasuryDisclosure'
 
+// Issuing Elements (Stripe Issuing card details; need an ephemeral key + nonce)
+export { default as VueStripeIssuingCardNumberDisplayElement } from './VueStripeIssuingCardNumberDisplayElement'
+export { default as VueStripeIssuingCardCvcDisplayElement } from './VueStripeIssuingCardCvcDisplayElement'
+export { default as VueStripeIssuingCardExpiryDisplayElement } from './VueStripeIssuingCardExpiryDisplayElement'
+export { default as VueStripeIssuingCardPinDisplayElement } from './VueStripeIssuingCardPinDisplayElement'
+export { default as VueStripeIssuingCardCopyButtonElement } from './VueStripeIssuingCardCopyButtonElement'
+export { default as VueStripeIssuingAddToWalletButtonElement } from './VueStripeIssuingAddToWalletButtonElement'
+
 // Pricing Table (v5.3.0)
 export { default as VueStripePricingTable } from './VueStripePricingTable'

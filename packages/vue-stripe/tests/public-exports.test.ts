@@ -57,6 +57,20 @@ describe('public API exports', () => {
     expect(typeof VueStripe.useCheckoutForm).toBe('function')
   })
 
+  it('exports the six Issuing elements', () => {
+    const issuing = [
+      'VueStripeIssuingCardNumberDisplayElement',
+      'VueStripeIssuingCardCvcDisplayElement',
+      'VueStripeIssuingCardExpiryDisplayElement',
+      'VueStripeIssuingCardPinDisplayElement',
+      'VueStripeIssuingCardCopyButtonElement',
+      'VueStripeIssuingAddToWalletButtonElement'
+    ]
+    for (const name of issuing) {
+      expect((VueStripe as Record<string, unknown>)[name], name).toBeTruthy()
+    }
+  })
+
   it('does not export elements removed in Stripe.js 8+ (Clover)', () => {
     const removed = [
       'VueStripeIdealBankElement',

@@ -139,6 +139,16 @@ describe('createStripeElement', () => {
     expect(wrapper.find('.vue-stripe-element-loader').exists()).toBe(false)
   })
 
+  it('turns loading off after mount when the element has no ready event', async () => {
+    const Comp = createStripeElement({ elementType: 'x', componentName: 'X', events: ['click'] })
+    const { wrapper, element, child } = mountUnder(Comp)
+    await flushPromises()
+    expect(element.mount).toHaveBeenCalledTimes(1)
+    expect((child.value as unknown as Record<string, unknown>)['loading']).toBe(false)
+    expect(wrapper.find('.vue-stripe-element-loader').exists()).toBe(false)
+    expect(wrapper.find('.vue-stripe-element-loading').exists()).toBe(false)
+  })
+
   it('sets error from change events and clears it', async () => {
     const Comp = createStripeElement({ elementType: 'x', componentName: 'X' })
     const { wrapper, handler } = mountUnder(Comp)
