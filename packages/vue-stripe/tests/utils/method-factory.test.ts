@@ -13,7 +13,7 @@ const useConfirmCardPayment = createStripeMethodComposable('confirmCardPayment')
 // given method mocks; returns the composable's value and the stripe instance.
 async function mountWith(stripeMethods: Record<string, unknown>, useComposable: () => unknown) {
   const stripe = { ...makeMockStripe(), ...stripeMethods }
-  const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+  const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
   mockLoadStripe.mockResolvedValueOnce(stripe as any)
 
   let api: any

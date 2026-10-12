@@ -48,7 +48,7 @@ describe('useStripe', () => {
   })
 
   it('should reflect error state when Stripe fails to load', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockRejectedValueOnce(new Error('Network error'))
 
     // Use the loading slot to capture context, since it renders initially

@@ -12,7 +12,8 @@ import type {
   CollectBankAccountForPaymentResult,
   UseFinancialConnectionsReturn,
   UseIdentityReturn,
-  VerifyIdentityResult
+  VerifyIdentityResult,
+  ReleaseTrain
 } from '../src'
 
 describe('public API exports', () => {
@@ -108,5 +109,17 @@ describe('public API exports', () => {
     const returns: [UseFinancialConnectionsReturn | null, UseIdentityReturn | null] = [null, null]
 
     expect([accounts, token, notLoaded, identity, returns]).toHaveLength(5)
+  })
+
+  it('re-exports the ReleaseTrain type of the installed @stripe/stripe-js (compile-time check)', () => {
+    // @stripe/stripe-js 10 loads https://js.stripe.com/endive/stripe.js.
+    const train: ReleaseTrain = 'endive'
+    expect(train).toBe('endive')
+  })
+
+  it('re-exports the side-effect-free loader from @stripe/stripe-js/pure', async () => {
+    const pure = await import('@stripe/stripe-js/pure')
+    expect(VueStripe.loadStripe).toBe(pure.loadStripe)
+    expect(typeof VueStripe.loadStripe.setLoadParameters).toBe('function')
   })
 })

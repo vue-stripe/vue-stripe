@@ -27,11 +27,13 @@ export default defineConfig({
     },
     rollupOptions: {
       // Source imports Vue APIs only from vue-demi (enforced by lint), which picks Vue 2.7 or 3.
-      external: ['vue-demi', '@stripe/stripe-js'],
+      // Stripe.js is loaded through '@stripe/stripe-js/pure' (no <script> on import).
+      external: ['vue-demi', '@stripe/stripe-js', '@stripe/stripe-js/pure'],
       output: {
         globals: {
           'vue-demi': 'VueDemi',
-          '@stripe/stripe-js': 'Stripe'
+          '@stripe/stripe-js': 'Stripe',
+          '@stripe/stripe-js/pure': 'Stripe'
         }
       }
     },

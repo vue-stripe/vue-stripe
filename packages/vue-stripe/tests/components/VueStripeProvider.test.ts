@@ -44,7 +44,7 @@ describe('VueStripeProvider', () => {
   })
 
   it('should render error state when Stripe fails to load', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockRejectedValueOnce(new Error('Network error'))
 
     const wrapper = mount(VueStripeProvider, {
@@ -65,7 +65,7 @@ describe('VueStripeProvider', () => {
   })
 
   it('should pass correct options to loadStripe', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
 
     mount(VueStripeProvider, {
       props: {
@@ -86,7 +86,7 @@ describe('VueStripeProvider', () => {
   })
 
   it('forwards every StripeConstructorOptions key in `options`, explicit props winning', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
 
     mount(VueStripeProvider, {
       props: {
@@ -105,7 +105,7 @@ describe('VueStripeProvider', () => {
   })
 
   it('forwards the betas prop to loadStripe (required by the Tax ID element)', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
 
     mount(VueStripeProvider, {
       props: { publishableKey: 'pk_test_123', betas: ['custom_checkout_tax_id_1'] }
@@ -116,6 +116,72 @@ describe('VueStripeProvider', () => {
     expect(mockLoadStripe).toHaveBeenCalledWith('pk_test_123', {
       betas: ['custom_checkout_tax_id_1']
     })
+  })
+
+  it('forwards the developerTools prop to loadStripe, winning over options', async () => {
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
+
+    mount(VueStripeProvider, {
+      props: {
+        publishableKey: 'pk_test_123',
+        developerTools: { assistant: { enabled: false } },
+        options: { developerTools: { assistant: { enabled: true } } }
+      }
+    })
+
+    await flushPromises()
+
+    expect(mockLoadStripe).toHaveBeenCalledWith('pk_test_123', {
+      developerTools: { assistant: { enabled: false } }
+    })
+  })
+
+  it('leaves the Stripe.js load parameters alone by default', async () => {
+    const { loadStripe } = vi.mocked(await import('@stripe/stripe-js/pure'))
+
+    mount(VueStripeProvider, { props: { publishableKey: 'pk_test_123' } })
+    await flushPromises()
+
+    expect(loadStripe).toHaveBeenCalledTimes(1)
+    expect(loadStripe.setLoadParameters).not.toHaveBeenCalled()
+  })
+
+  it('with advancedFraudSignals false, sets the load parameters before loading Stripe.js', async () => {
+    const { loadStripe } = vi.mocked(await import('@stripe/stripe-js/pure'))
+
+    const wrapper = mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123', advancedFraudSignals: false },
+      slots: { default: '<div>Payment Form</div>' }
+    })
+    await flushPromises()
+
+    expect(loadStripe.setLoadParameters).toHaveBeenCalledWith({ advancedFraudSignals: false })
+    expect(loadStripe).toHaveBeenCalledWith('pk_test_123', {})
+    expect(loadStripe.setLoadParameters.mock.invocationCallOrder[0]).toBeLessThan(
+      loadStripe.mock.invocationCallOrder[0] ?? 0
+    )
+    expect(wrapper.text()).toContain('Payment Form')
+  })
+
+  it('warns and still loads when Stripe.js already started loading with fraud signals on', async () => {
+    const { loadStripe } = vi.mocked(await import('@stripe/stripe-js/pure'))
+    loadStripe.setLoadParameters.mockImplementationOnce(() => {
+      throw new Error('You cannot change load parameters after calling loadStripe')
+    })
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const wrapper = mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123', advancedFraudSignals: false },
+      slots: { default: '<div>Payment Form</div>' }
+    })
+    await flushPromises()
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringMatching(/^\[Vue Stripe\] advancedFraudSignals: false was ignored/)
+    )
+    expect(loadStripe).toHaveBeenCalledTimes(1)
+    expect(wrapper.text()).toContain('Payment Form')
+    warn.mockRestore()
   })
 
   // === New Tests ===
@@ -135,7 +201,7 @@ describe('VueStripeProvider', () => {
   })
 
   it('should emit error event when loading fails', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockRejectedValueOnce(new Error('Network error'))
 
     const wrapper = mount(VueStripeProvider, {
@@ -177,7 +243,7 @@ describe('VueStripeProvider', () => {
   })
 
   it('should accept stripeKey prop for backwards compatibility', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
 
     const wrapper = mount(VueStripeProvider, {
       props: {
@@ -195,7 +261,7 @@ describe('VueStripeProvider', () => {
   })
 
   it('should pass error message to error slot scope', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockRejectedValueOnce(new Error('Custom error message'))
 
     const wrapper = mount(VueStripeProvider, {

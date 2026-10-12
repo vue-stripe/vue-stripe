@@ -29,8 +29,9 @@ function createLazyStripeInstance(options: VueStripeOptions): StripeInstance {
     if (options.stripeAccount) loadOptions.stripeAccount = options.stripeAccount
     if (options.apiVersion) loadOptions.apiVersion = options.apiVersion
     if (options.locale) loadOptions.locale = options.locale
+    if (options.developerTools) loadOptions.developerTools = options.developerTools
 
-    loadStripeInstance(options.publishableKey, loadOptions)
+    loadStripeInstance(options.publishableKey, loadOptions, options.advancedFraudSignals)
       .then((instance) => {
         stripe.value = instance
       })

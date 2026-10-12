@@ -54,7 +54,7 @@ describe('VueStripeExpressCheckoutElement', () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: mockCreate
@@ -74,7 +74,7 @@ describe('VueStripeExpressCheckoutElement', () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: mockCreate
@@ -110,7 +110,7 @@ describe('VueStripeExpressCheckoutElement', () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: mockCreate
@@ -142,7 +142,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -186,7 +186,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -227,7 +227,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -272,7 +272,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -320,7 +320,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -356,7 +356,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -389,7 +389,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -435,7 +435,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -471,7 +471,7 @@ describe('VueStripeExpressCheckoutElement', () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: mockCreate
@@ -494,7 +494,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
-      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
       mockLoadStripe.mockResolvedValueOnce({
         elements: vi.fn(() => ({
           create: mockCreate
@@ -519,7 +519,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
-      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
       mockLoadStripe.mockResolvedValueOnce({
         elements: vi.fn(() => ({
           create: mockCreate
@@ -542,7 +542,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
-      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
       mockLoadStripe.mockResolvedValueOnce({
         elements: vi.fn(() => ({
           create: mockCreate
@@ -567,7 +567,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
-      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
       mockLoadStripe.mockResolvedValueOnce({
         elements: vi.fn(() => ({
           create: mockCreate
@@ -594,7 +594,7 @@ describe('VueStripeExpressCheckoutElement', () => {
 
   describe('error handling', () => {
     it('should set error state when element creation fails', async () => {
-      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
       mockLoadStripe.mockResolvedValueOnce({
         elements: vi.fn(() => ({
           create: vi.fn(() => {
@@ -621,7 +621,7 @@ describe('VueStripeExpressCheckoutElement', () => {
     })
 
     it('should display error message in template', async () => {
-      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
       mockLoadStripe.mockResolvedValueOnce({
         elements: vi.fn(() => ({
           create: vi.fn(() => {

@@ -54,7 +54,7 @@ describe('VueStripeAuBankAccountElement', () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: mockCreate
@@ -74,7 +74,7 @@ describe('VueStripeAuBankAccountElement', () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: mockCreate
@@ -106,7 +106,7 @@ describe('VueStripeAuBankAccountElement', () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: mockCreate
@@ -136,7 +136,7 @@ describe('VueStripeAuBankAccountElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -170,7 +170,7 @@ describe('VueStripeAuBankAccountElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -213,7 +213,7 @@ describe('VueStripeAuBankAccountElement', () => {
       })
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -246,7 +246,7 @@ describe('VueStripeAuBankAccountElement', () => {
   it('detaches listeners with .off() before destroy on unmount (#376)', async () => {
     const mockElement = makeMockElement()
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -270,7 +270,7 @@ describe('VueStripeAuBankAccountElement', () => {
   it('should expose element and methods via defineExpose', async () => {
     const mockElement = makeMockElement()
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => mockElement)
@@ -327,7 +327,7 @@ describe('VueStripeAuBankAccountElement', () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: mockCreate
@@ -355,7 +355,7 @@ describe('VueStripeAuBankAccountElement', () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: mockCreate

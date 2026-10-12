@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { defineComponent, h, provide, ref, shallowRef } from 'vue-demi'
-import { loadStripe } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js/pure'
 import VueStripeEmbeddedCheckout from '../../src/components/VueStripeEmbeddedCheckout'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
 import { stripeInjectionKey } from '../../src/utils/injection-keys'

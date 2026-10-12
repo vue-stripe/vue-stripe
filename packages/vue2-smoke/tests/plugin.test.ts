@@ -1,5 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import { loadStripe, type Stripe } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js/pure'
+import type { Stripe } from '@stripe/stripe-js'
 import {
   createVueStripe,
   useStripe,

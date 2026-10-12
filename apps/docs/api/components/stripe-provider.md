@@ -63,6 +63,8 @@ const onError = (error) => {
 | `apiVersion` | `string` | No | Override Stripe API version |
 | `locale` | `string` | No | Locale for Stripe.js (e.g., 'en', 'es', 'fr') |
 | `betas` | `string[]` | No | Stripe beta flags, forwarded to `loadStripe()` (e.g. the [Tax ID Element](/api/components/stripe-tax-id-element)'s beta) |
+| `developerTools` | `StripeConstructorOptions['developerTools']` | No | Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }`, forwarded to `loadStripe()` |
+| `advancedFraudSignals` | `boolean` | No | Default `true`. `false` loads Stripe.js without advanced fraud signals. See [Advanced fraud signals](#advanced-fraud-signals) |
 | `options` | `StripeConstructorOptions` | No | Any `loadStripe()` option. Explicit props win over the same key in `options` |
 
 \* Either `publishableKey` or `stripeKey` is required.
@@ -71,7 +73,7 @@ The props are read once, when Stripe.js loads. To switch keys or accounts, re-mo
 
 ### Options Object
 
-The `options` prop accepts every `StripeConstructorOptions` key from `@stripe/stripe-js` and is passed to `loadStripe()`. When a dedicated prop (`stripeAccount`, `apiVersion`, `locale`, `betas`) is also set, the prop wins:
+Every `StripeConstructorOptions` key from `@stripe/stripe-js` (`stripeAccount`, `apiVersion`, `locale`, `betas`, `developerTools`) is a prop. The `options` prop accepts the same keys and is passed to `loadStripe()`. When a dedicated prop is also set, the prop wins:
 
 ```ts
 import type { StripeConstructorOptions } from '@stripe/stripe-js'
@@ -93,6 +95,57 @@ const options: StripeConstructorOptions = {
 >
   <!-- ... -->
 </VueStripeProvider>
+```
+
+### Developer Tools
+
+`developerTools` configures Stripe.js's developer tooling. For example, turn off the Stripe.js assistant:
+
+```vue
+<VueStripeProvider
+  :publishable-key="publishableKey"
+  :developer-tools="{ assistant: { enabled: false } }"
+>
+  <!-- ... -->
+</VueStripeProvider>
+```
+
+### Advanced Fraud Signals
+
+By default Stripe.js collects [advanced fraud detection signals](https://docs.stripe.com/disputes/prevention/advanced-fraud-detection) for Radar. Set `advancedFraudSignals` to `false` to load Stripe.js without them:
+
+```vue
+<VueStripeProvider
+  :publishable-key="publishableKey"
+  :advanced-fraud-signals="false"
+>
+  <!-- ... -->
+</VueStripeProvider>
+```
+
+The provider then calls `loadStripe.setLoadParameters({ advancedFraudSignals: false })` from `@stripe/stripe-js/pure` before it loads Stripe.js, and Stripe.js is requested as `https://js.stripe.com/endive/stripe.js?advancedFraudSignals=false`.
+
+::: warning Trade-off
+With the signals off, Radar has less information about each session, so it can be less accurate at telling fraudulent payments from legitimate ones. Turn them off only if you have a reason to, such as a privacy requirement, and keep Radar rules in mind.
+:::
+
+The setting is a load parameter of the Stripe.js script, so it only takes effect if this provider is the first thing on the page to load Stripe.js:
+
+- Set it on every `VueStripeProvider` and on [`createVueStripe()`](/api/plugin) in the app. If another loader already started Stripe.js with the signals on, the provider logs a `[Vue Stripe]` warning and uses that Stripe.js.
+- Do not import the default `@stripe/stripe-js` entry at runtime yourself (type imports are fine), and do not add a Stripe.js `<script>` tag. Both load Stripe.js with the signals on. Import `loadStripe` from `@stripe/stripe-js/pure` or from `@vue-stripe/vue-stripe` instead.
+
+Vue Stripe only loads Stripe.js through the `@stripe/stripe-js/pure` entry, so importing the library loads nothing: Stripe.js is requested when the first provider mounts (or, with the plugin, when something first needs Stripe). Stripe recommends loading Stripe.js on every page so the fraud signals cover the whole visit. If you want that, mount the provider high in the app, or import `@stripe/stripe-js` in your app entry (only when the signals stay on).
+
+### Stripe.js Release Train
+
+Each major version of `@stripe/stripe-js` loads one Stripe.js release train. `@stripe/stripe-js` 10, which Vue Stripe 6 requires, loads the `endive` train from `https://js.stripe.com/endive/stripe.js`, so the Stripe.js API follows the Endive release. A newer release train comes with a new `@stripe/stripe-js` major, and Vue Stripe moves to it in its own release. See Stripe's [Stripe.js versioning](https://docs.stripe.com/sdks/stripejs-versioning) guide.
+
+The `ReleaseTrain` type is re-exported from `@stripe/stripe-js` for code that needs to name the train:
+
+```ts
+import type { ReleaseTrain } from '@vue-stripe/vue-stripe'
+
+const train: ReleaseTrain = 'endive'
 ```
 
 ## Events

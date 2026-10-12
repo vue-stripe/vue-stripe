@@ -56,6 +56,7 @@ export type {
   StripeElementType,
   StripeElementsOptions,
   StripeElementChangeEvent,
+  ReleaseTrain,
   PaymentIntent,
   SetupIntent,
   ConfirmPaymentData,
@@ -169,5 +170,6 @@ export {
 // Export plugin
 export { createVueStripe } from './plugin'
 
-// Re-export Stripe.js for convenience
-export { loadStripe } from '@stripe/stripe-js'
+// Re-export Stripe.js for convenience. The pure entry (the same loadStripe plus
+// setLoadParameters) keeps importing the library free of a Stripe.js <script>.
+export { loadStripe } from '@stripe/stripe-js/pure'

@@ -24,7 +24,14 @@ export default /* @__PURE__ */ defineComponent({
     locale: { type: String as PropType<string | undefined>, default: undefined },
     /** Stripe beta flags, e.g. the Tax ID Element's beta (forwarded to `loadStripe`). */
     betas: { type: Array as PropType<string[] | undefined>, default: undefined },
-    /** Any `loadStripe()` option (`stripeAccount`, `apiVersion`, `locale`, `betas`, ...). Explicit props win. */
+    /** Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }` (forwarded to `loadStripe`). */
+    developerTools: {
+      type: Object as PropType<StripeConstructorOptions['developerTools']>,
+      default: undefined
+    },
+    /** `false` loads Stripe.js without advanced fraud signals (Radar). Read once, before Stripe.js loads. */
+    advancedFraudSignals: { type: Boolean, default: true },
+    /** Any `loadStripe()` option (`stripeAccount`, `apiVersion`, `locale`, `betas`, `developerTools`). Explicit props win. */
     options: { type: Object as PropType<StripeConstructorOptions | undefined>, default: undefined }
   },
   emits: ['load', 'error'],
@@ -54,11 +61,12 @@ export default /* @__PURE__ */ defineComponent({
         // Start from every loadStripe() option given in `options`; explicit props win.
         const options: StripeConstructorOptions = { ...props.options }
         if (props.betas?.length) options.betas = props.betas
+        if (props.developerTools) options.developerTools = props.developerTools
         if (stripeAccount) options.stripeAccount = stripeAccount
         if (apiVersion) options.apiVersion = apiVersion
         if (locale) options.locale = locale as NonNullable<StripeConstructorOptions['locale']>
 
-        stripe.value = await loadStripeInstance(key, options)
+        stripe.value = await loadStripeInstance(key, options, props.advancedFraudSignals)
         emit('load', stripe.value)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load Stripe'

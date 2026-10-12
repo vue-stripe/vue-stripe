@@ -61,7 +61,7 @@ describe('VueStripeElements', () => {
 
   it('should render error state when elements creation fails', async () => {
     // Mock the elements method to throw an error
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => {
         throw new Error('Elements creation failed')
@@ -94,7 +94,7 @@ describe('VueStripeElements', () => {
       }))
     }))
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: mockElements,
       confirmPayment: vi.fn(),
@@ -122,7 +122,7 @@ describe('VueStripeElements', () => {
       }))
     }))
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: mockElements,
       confirmPayment: vi.fn(),
@@ -160,7 +160,7 @@ describe('VueStripeElements', () => {
       }))
     }))
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: mockElements,
       confirmPayment: vi.fn(),
@@ -232,7 +232,7 @@ describe('VueStripeElements', () => {
       }))
     }))
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValue({
       elements: mockElements,
       confirmPayment: vi.fn(),
@@ -281,7 +281,7 @@ describe('VueStripeElements', () => {
   })
 
   it('should render default error message when no error slot provided', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => {
         throw new Error('Test error')
@@ -314,7 +314,7 @@ describe('VueStripeElements options and reactivity', () => {
     const elementsInstance = makeMockElements()
     const stripe = makeMockStripe()
     stripe.elements.mockReturnValue(elementsInstance)
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
     const props = ref<Record<string, unknown>>(initial)
     const wrapper = mount(VueStripeProvider, {
@@ -375,7 +375,7 @@ describe('VueStripeElements and Stripe.js 10 (Endive)', () => {
   it('never forwards paymentMethodTypes (removed from stripe.elements() in Endive)', async () => {
     const { makeMockStripe } = await import('../setup')
     const stripe = makeMockStripe()
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
     mount(VueStripeProvider, {
       props: { publishableKey: 'pk_test_123' },
@@ -409,7 +409,7 @@ describe('VueStripeElements and Stripe.js Dahlia elements.update()', () => {
     elementsInstance.update.mockRejectedValueOnce(new Error('bad appearance'))
     const stripe = makeMockStripe()
     stripe.elements.mockReturnValue(elementsInstance)
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
 
     const props = ref<Record<string, unknown>>({

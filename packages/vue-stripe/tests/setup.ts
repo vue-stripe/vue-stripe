@@ -268,11 +268,17 @@ export function makeMockStripe(): MockStripe {
   }
 }
 
-// Global default mock for @stripe/stripe-js (happy path), built from the
-// canonical factory so it can never drift from the per-test helpers.
-vi.mock('@stripe/stripe-js', () => ({
-  loadStripe: vi.fn(() => Promise.resolve(makeMockStripe()))
+// Global default mock for the loader (happy path), built from the canonical
+// factory so it can never drift from the per-test helpers. The library loads
+// Stripe.js only through the side-effect-free `@stripe/stripe-js/pure` entry;
+// the default entry shares the same mock so nothing can inject a real script.
+vi.mock('@stripe/stripe-js/pure', () => ({
+  loadStripe: Object.assign(
+    vi.fn(() => Promise.resolve(makeMockStripe())),
+    { setLoadParameters: vi.fn() }
+  )
 }))
+vi.mock('@stripe/stripe-js', () => import('@stripe/stripe-js/pure'))
 
 // Configure Vue Test Utils (Vue 2 / Vue 3 via vue-demi)
 if (isVue2) {

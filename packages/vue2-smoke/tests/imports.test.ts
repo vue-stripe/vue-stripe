@@ -22,3 +22,17 @@ it('the published ESM bundle only imports vue-demi names that the Vue 2.7 build 
   const missing = imported.filter((name) => !available.has(name))
   expect(missing, `Vue-3-only imports in dist: ${missing.join(', ')}`).toEqual([])
 })
+
+it('the published bundles load Stripe.js only through the side-effect-free pure entry', () => {
+  // The default @stripe/stripe-js entry injects a Stripe.js <script> as soon as it
+  // is imported, before advancedFraudSignals: false could reach setLoadParameters().
+  const cjs = require.resolve('@vue-stripe/vue-stripe')
+  for (const entry of [cjs, cjs.replace(/cjs[\\/]index\.js$/, 'es/index.js')]) {
+    const bundle = readFileSync(entry, 'utf8')
+    const specifiers = [
+      ...bundle.matchAll(/(?:from\s*|require\()\s*['"](@stripe\/stripe-js[^'"]*)['"]/g)
+    ].map((match) => match[1])
+    expect(specifiers.length, entry).toBeGreaterThan(0)
+    expect(new Set(specifiers), entry).toEqual(new Set(['@stripe/stripe-js/pure']))
+  }
+})

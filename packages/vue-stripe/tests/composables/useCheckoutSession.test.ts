@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, provide, ref, shallowRef } from 'vue-demi'
-import { loadStripe } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js/pure'
 import { useCheckoutSession } from '../../src/composables/useCheckoutSession'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
 import VueStripeCheckoutElementsProvider from '../../src/components/VueStripeCheckoutElementsProvider'

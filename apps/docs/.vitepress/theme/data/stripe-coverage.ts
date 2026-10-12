@@ -49,6 +49,25 @@ export const coverage: CoverageCategory[] = [
         status: 'covered',
         artifact: 'VueStripeProvider'
       },
+      {
+        name: 'Developer tools option',
+        api: 'loadStripe(key, { developerTools })',
+        status: 'covered',
+        artifact: 'VueStripeProvider'
+      },
+      {
+        name: 'Advanced fraud signals opt-out',
+        api: 'loadStripe.setLoadParameters({ advancedFraudSignals })',
+        status: 'covered',
+        artifact: 'VueStripeProvider'
+      },
+      {
+        // A type: re-exported from the package, documented on the provider page.
+        name: 'Release train',
+        api: "ReleaseTrain ('endive')",
+        status: 'covered',
+        artifact: 'VueStripeProvider'
+      },
       { name: 'Plugin', api: 'createVueStripe()', status: 'covered', artifact: 'createVueStripe' },
       {
         name: 'Elements group',

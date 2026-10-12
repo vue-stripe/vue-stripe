@@ -127,6 +127,15 @@ describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
     expect(byApi('stripe.confirm<Method>Payment/Setup()')).toEqual([])
   })
 
+  it('covers every loadStripe() option, the load parameters and the release train', () => {
+    for (const needle of ['developerTools', 'setLoadParameters', 'ReleaseTrain']) {
+      expect(byApi(needle)[0], needle).toMatchObject({
+        status: 'covered',
+        artifact: 'VueStripeProvider'
+      })
+    }
+  })
+
   it('planned rows point at open v6 milestone issues', () => {
     const v6Issues = new Set([473, 492, 493, 494, 495, 496, 497, 503, 504, 505, 506, 507, 508])
     for (const item of items.filter((i) => i.status === 'planned')) {

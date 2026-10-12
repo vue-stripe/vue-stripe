@@ -29,7 +29,7 @@ describe('integration: Provider > Elements > PaymentElement + composables', () =
       Promise.resolve({ setupIntent: { id: 'seti_1', status: 'succeeded' } })
     )
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({ create: vi.fn(() => mockElement), submit })),
       confirmPayment,
@@ -126,7 +126,7 @@ describe('integration: Provider > Elements > PaymentElement + composables', () =
   })
 
   it('propagates a Stripe load failure to the provider error state', async () => {
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce(null as any)
 
     const wrapper = mount(VueStripeProvider, {

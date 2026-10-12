@@ -23,6 +23,12 @@ export const stripe = {
   confirmCardPayment: vi.fn()
 }
 
-vi.mock('@stripe/stripe-js', () => ({ loadStripe: vi.fn(() => Promise.resolve(stripe)) }))
+// The library loads Stripe.js through the side-effect-free pure entry only.
+vi.mock('@stripe/stripe-js/pure', () => ({
+  loadStripe: Object.assign(
+    vi.fn(() => Promise.resolve(stripe)),
+    { setLoadParameters: vi.fn() }
+  )
+}))
 
 export const flush = () => new Promise((resolve) => setTimeout(resolve, 0))

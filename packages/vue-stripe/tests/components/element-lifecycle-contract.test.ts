@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, ref, type Component } from 'vue-demi'
-import { loadStripe } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js/pure'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
 import VueStripeElements from '../../src/components/VueStripeElements'
 import VueStripeCardElement from '../../src/components/VueStripeCardElement'

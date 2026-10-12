@@ -90,7 +90,7 @@ describe('usePaymentIntent', () => {
       resolvePayment = resolve
     })
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => ({
@@ -138,7 +138,7 @@ describe('usePaymentIntent', () => {
       })
     )
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => ({
@@ -184,7 +184,7 @@ describe('usePaymentIntent', () => {
       })
     )
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => ({
@@ -220,7 +220,7 @@ describe('usePaymentIntent', () => {
       })
     )
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => ({
@@ -251,7 +251,7 @@ describe('usePaymentIntent', () => {
   it('should handle exception during payment confirmation', async () => {
     const mockConfirmPayment = vi.fn(() => Promise.reject(new Error('Network error')))
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => ({
@@ -297,7 +297,7 @@ describe('usePaymentIntent', () => {
     })
 
     // Create a mock where loadStripe returns null
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce(null)
 
     mount(VueStripeProvider, {
@@ -330,7 +330,7 @@ describe('usePaymentIntent', () => {
       })
     )
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
         create: vi.fn(() => ({
@@ -377,7 +377,7 @@ describe('usePaymentIntent', () => {
       submit: vi.fn(() => Promise.resolve({}))
     }
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => mockElements),
       confirmPayment: mockConfirmPayment,
@@ -420,7 +420,7 @@ describe('usePaymentIntent', () => {
 
     const customElements = { custom: true, submit: vi.fn(() => Promise.resolve({})) } as any
 
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => mockElements),
       confirmPayment: mockConfirmPayment,

@@ -94,6 +94,12 @@ interface VueStripeOptions {
 
   /** Locale for Stripe elements (optional) */
   locale?: StripeConstructorOptions['locale']
+
+  /** Stripe.js developer tooling (optional) */
+  developerTools?: StripeConstructorOptions['developerTools']
+
+  /** false: no advanced fraud signals (optional, default true) */
+  advancedFraudSignals?: boolean
 }
 ```
 
@@ -103,8 +109,10 @@ interface VueStripeOptions {
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect (`acct_...`) |
 | `apiVersion` | `string` | No | Stripe API version (e.g., `'2023-10-16'`) |
 | `locale` | `StripeConstructorOptions['locale']` | No | Locale for Stripe Elements UI — a constrained union of Stripe-supported locales (`'auto'`, `'en'`, `'fr'`, `'de'`, etc.) |
+| `developerTools` | `StripeConstructorOptions['developerTools']` | No | Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }` |
+| `advancedFraudSignals` | `boolean` | No | Default `true`. `false` loads Stripe.js without advanced fraud signals, as on [`VueStripeProvider`](/api/components/stripe-provider#advanced-fraud-signals) |
 
-The options are passed to `loadStripe(publishableKey, { stripeAccount, apiVersion, locale })`. For `betas` or other `loadStripe()` options, use a `VueStripeProvider` with its `options` prop.
+The options are passed to `loadStripe(publishableKey, { stripeAccount, apiVersion, locale, developerTools })`. With `advancedFraudSignals: false`, the plugin first calls `loadStripe.setLoadParameters({ advancedFraudSignals: false })` from `@stripe/stripe-js/pure`; read the [trade-off and requirements](/api/components/stripe-provider#advanced-fraud-signals) before you turn the signals off. For `betas`, use a `VueStripeProvider` with its `betas` prop.
 
 ## Provided Values
 
@@ -248,7 +256,8 @@ const { stripe, loading, error, initialize } = useStripe()
 | Wrapper component needed | No | Yes |
 | Multiple accounts | One default; add providers for others | Yes (one provider per account) |
 | Runtime key changes | No | Yes (remount the provider) |
-| `betas` / extra `loadStripe()` options | No | Yes (`betas`, `options` props) |
+| `developerTools` / `advancedFraudSignals` | Yes | Yes |
+| `betas` / `options` object | No | Yes (`betas`, `options` props) |
 | Loading / error UI | `useStripe()` state, `VueStripeElements` slots | `#loading` / `#error` slots |
 | `load` / `error` events | No | Yes |
 | SSR | Never loads on the server | Loads in `onMounted` (client only) |

@@ -11,7 +11,7 @@ const composables = confirmComposables as unknown as Record<string, () => Record
 // Mount Provider > <component calling `useComposable`>; returns its value and the stripe mock.
 async function mountWith(useComposable: () => Record<string, any>) {
   const stripe = makeMockStripe()
-  const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+  const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
   mockLoadStripe.mockResolvedValueOnce(stripe as any)
 
   let api!: Record<string, any>

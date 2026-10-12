@@ -33,6 +33,8 @@ export type {
   StripeElementType,
   StripeElementsOptions,
   StripeElementChangeEvent,
+  // The Stripe.js release train this @stripe/stripe-js major loads ('endive' for v10)
+  ReleaseTrain,
   PaymentIntent,
   SetupIntent,
   ConfirmPaymentData,
@@ -111,6 +113,10 @@ export interface VueStripeOptions {
   stripeAccount?: string
   apiVersion?: string
   locale?: StripeConstructorOptions['locale']
+  /** Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }`. */
+  developerTools?: StripeConstructorOptions['developerTools']
+  /** `false` loads Stripe.js without advanced fraud signals (Radar). Default `true`. */
+  advancedFraudSignals?: boolean
 }
 
 // Vue-specific element interface
@@ -127,6 +133,10 @@ export interface VueStripeProviderProps {
   stripeAccount?: string
   apiVersion?: string
   locale?: string
+  betas?: string[]
+  developerTools?: StripeConstructorOptions['developerTools']
+  advancedFraudSignals?: boolean
+  options?: StripeConstructorOptions
 }
 
 /**

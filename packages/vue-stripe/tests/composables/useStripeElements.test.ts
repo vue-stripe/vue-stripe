@@ -221,7 +221,7 @@ describe('useStripeElements().fetchUpdates', () => {
     elementsInstance.fetchUpdates.mockResolvedValueOnce({})
     const stripe = makeMockStripe()
     stripe.elements.mockReturnValue(elementsInstance)
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
 
     let api!: ReturnType<typeof useStripeElements>

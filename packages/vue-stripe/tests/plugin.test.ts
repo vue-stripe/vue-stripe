@@ -114,7 +114,7 @@ describe('createVueStripe as a global provider (#424)', () => {
   })
 
   it('does not load Stripe.js at install time', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     const app = createApp({ render: () => h('div') })
     app.use(createVueStripe({ publishableKey: 'pk_test_123' }))
     app.mount(document.createElement('div'))
@@ -125,7 +125,7 @@ describe('createVueStripe as a global provider (#424)', () => {
   })
 
   it('resolves useStripe() under the plugin alone, without VueStripeProvider', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     const wrapper = mount(StripeConsumer, {
       global: {
         plugins: [
@@ -157,8 +157,33 @@ describe('createVueStripe as a global provider (#424)', () => {
     )
   })
 
+  it('forwards developerTools and advancedFraudSignals to the loader', async () => {
+    const { loadStripe } = vi.mocked(await import('@stripe/stripe-js/pure'))
+    const wrapper = mount(StripeConsumer, {
+      global: {
+        plugins: [
+          createVueStripe({
+            publishableKey: 'pk_test_123',
+            developerTools: { assistant: { enabled: false } },
+            advancedFraudSignals: false
+          })
+        ]
+      }
+    })
+    expect(wrapper.vm.ctx.loading.value).toBe(true)
+    await flushPromises()
+
+    expect(loadStripe.setLoadParameters).toHaveBeenCalledWith({ advancedFraudSignals: false })
+    expect(loadStripe).toHaveBeenCalledWith('pk_test_123', {
+      developerTools: { assistant: { enabled: false } }
+    })
+    expect(loadStripe.setLoadParameters.mock.invocationCallOrder[0]).toBeLessThan(
+      loadStripe.mock.invocationCallOrder[0] ?? 0
+    )
+  })
+
   it('loads Stripe once for every consumer in the app', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     const wrapper = mount(
       { render: () => h('div', [h(StripeConsumer), h(StripeConsumer)]) },
       { global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] } }
@@ -181,7 +206,7 @@ describe('createVueStripe as a global provider (#424)', () => {
 
     const element = wrapper.findComponent(VueStripePaymentElement)
     expect(element.exists()).toBe(true)
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     const stripe = (await vi.mocked(loadStripe).mock.results[0]?.value) as MockStripe
     expect(stripe.elements).toHaveBeenCalledWith(
       expect.objectContaining({ clientSecret: 'pi_123_secret_456' })
@@ -191,7 +216,7 @@ describe('createVueStripe as a global provider (#424)', () => {
   })
 
   it('lets a nested VueStripeProvider win over the plugin', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     const wrapper = mount(VueStripeProvider, {
       props: { publishableKey: 'pk_test_provider' },
       slots: { default: () => h(StripeConsumer) },
@@ -209,7 +234,7 @@ describe('createVueStripe as a global provider (#424)', () => {
   })
 
   it('reports a load failure through the error ref', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
@@ -226,7 +251,7 @@ describe('createVueStripe as a global provider (#424)', () => {
   })
 
   it('shows a plugin load failure in VueStripeElements and the Checkout provider', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
@@ -248,7 +273,7 @@ describe('createVueStripe as a global provider (#424)', () => {
   })
 
   it('reports loadStripe resolving null as an error', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     vi.mocked(loadStripe).mockResolvedValueOnce(null)
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
@@ -275,7 +300,7 @@ describe('createVueStripe lazy loading', () => {
   })
 
   it('never loads Stripe.js on the server, and loads once in the browser', async () => {
-    const { loadStripe } = await import('@stripe/stripe-js')
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
     const instance = installInto()
 
     vi.stubGlobal('window', undefined)

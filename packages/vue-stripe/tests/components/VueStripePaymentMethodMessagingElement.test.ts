@@ -12,7 +12,7 @@ describe('VueStripePaymentMethodMessagingElement (v5.5)', () => {
   const mountWith = async (options: Record<string, unknown> = {}) => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
-    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({ create: mockCreate, submit: vi.fn() })),
       confirmPayment: vi.fn(),
