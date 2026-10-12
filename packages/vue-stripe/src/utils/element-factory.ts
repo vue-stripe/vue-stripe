@@ -163,15 +163,25 @@ export function createStripeElement<
         },
         { deep: true }
       )
-      watch(() => elementsCtx?.elements.value ?? checkoutCtx?.checkout.value, create)
-      onMounted(create)
-      onUnmounted(() => {
+      const teardown = () => {
         const el = element.value
         if (!el) return
         for (const name of events) el.off?.(name, handlers[name])
         el.destroy()
         element.value = null
-      })
+      }
+
+      // VueStripeElements builds a new group when the Intent or the deferred-Intent
+      // parameters change; an element left on the old group is invisible to confirm().
+      watch(
+        () => elementsCtx?.elements.value ?? checkoutCtx?.checkout.value,
+        (next, prev) => {
+          if (next !== prev) teardown()
+          create()
+        }
+      )
+      onMounted(create)
+      onUnmounted(teardown)
 
       expose({
         element,

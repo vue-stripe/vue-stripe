@@ -187,3 +187,58 @@ describe.each(ELEMENTS)('%s lifecycle contract', (_name, Element, elementType) =
     errorSpy.mockRestore()
   })
 })
+
+// VueStripeElements builds a new Elements group when the Intent (clientSecret) or the
+// deferred-Intent parameters change. Mounted elements must move to the new group:
+// an element left on the old group is invisible to confirmPayment({ elements }).
+describe.each(ELEMENTS)('%s follows a new Elements group', (_name, Element, elementType) => {
+  it('destroys the old element and mounts one from the new group', async () => {
+    const first = makeMockElement()
+    const second = makeMockElement()
+    const groupA = makeMockElements()
+    const groupB = makeMockElements()
+    groupA.create.mockImplementation(() => first)
+    groupB.create.mockImplementation(() => second)
+    const stripe = makeMockStripe()
+    stripe.elements.mockReturnValueOnce(groupA).mockReturnValueOnce(groupB)
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+
+    const clientSecret = ref('pi_1_secret_a')
+    const options = elementType === 'address' ? { mode: 'shipping' } : {}
+    const ready = vi.fn()
+    mount(
+      defineComponent({
+        setup: () => () =>
+          h(
+            VueStripeProvider,
+            { publishableKey: 'pk_test_123' },
+            {
+              default: () =>
+                h(
+                  VueStripeElements,
+                  { clientSecret: clientSecret.value },
+                  { default: () => h(Element, { options, onReady: ready }) }
+                )
+            }
+          )
+      })
+    )
+    await flushPromises()
+    await flushPromises()
+    expect(groupA.create).toHaveBeenCalledTimes(1)
+    expect(first.mount).toHaveBeenCalledTimes(1)
+
+    clientSecret.value = 'pi_2_secret_b'
+    await flushPromises()
+    await flushPromises()
+
+    expect(stripe.elements).toHaveBeenCalledTimes(2)
+    // Every handler attached to the old element is detached before it is destroyed.
+    for (const [name, handler] of first.on.mock.calls) {
+      expect(first.off).toHaveBeenCalledWith(name, handler)
+    }
+    expect(first.destroy).toHaveBeenCalledTimes(1)
+    expect(groupB.create).toHaveBeenCalledWith(elementType, expect.objectContaining(options))
+    expect(second.mount).toHaveBeenCalledTimes(1)
+  })
+})
