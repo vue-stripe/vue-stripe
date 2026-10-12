@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Vue Stripe (`@vue-stripe/vue-stripe`) — a Vue library wrapping Stripe.js Elements and Checkout via components and composables. Vue 3-first, but compiled for **Vue 2 + 3 compatibility** through `vue-demi`. This is a pnpm + Turborepo monorepo.
+Vue Stripe (`@vue-stripe/vue-stripe`) — a Vue library wrapping Stripe.js 10 (Endive) Elements and Checkout via components and composables. Every component is a render function built for **Vue 2.7 and Vue 3** through `vue-demi`; `packages/vue2-smoke` proves it in CI. This is a pnpm + Turborepo monorepo.
 
 ## Commands
 
@@ -54,26 +54,34 @@ The library lives in `packages/vue-stripe/src`. Everything else (`apps/docs`, `a
 
 ### Provide/inject context chain
 
-State flows through three typed injection keys defined in `src/utils/injection-keys.ts` (`Symbol`-based, never string keys):
+State flows through typed injection keys defined in `src/utils/injection-keys.ts` (`Symbol`-based, never string keys):
 
 1. **`VueStripeProvider`** loads Stripe via `loadStripe`, then `provide`s `stripeInjectionKey` (the `Stripe` instance + loading/error refs) and `stripeConfigInjectionKey`. It renders loading/error/default slots and only mounts children once Stripe is ready.
-2. **`VueStripeElements`** creates a `StripeElements` instance and `provide`s `stripeElementsInjectionKey`.
-3. **Element components** and **composables** `inject` these keys. Injection failure throws a typed error (`VueStripeElementsError` / `VueStripeProviderError`) telling the user which wrapper is missing.
+2. **`VueStripeElements`** creates a `StripeElements` instance (`stripe.elements()`) and `provide`s `stripeElementsInjectionKey`.
+3. **`VueStripeCheckoutElementsProvider`** (alias `VueStripeCheckoutProvider`) calls `stripe.initCheckoutElementsSdk()` synchronously, renders children immediately, and `provide`s `stripeCheckoutInjectionKey` (`checkout`, `actions` after `loadActions()`, `session`, loading/error).
+4. **Element components** and **composables** `inject` these keys. Injection failure throws a typed error (`VueStripeElementsError` / `VueStripeProviderError` / `VueStripeCheckoutError`) telling the user which wrapper is missing.
 
-Composables (`useStripe`, `useStripeElements`, `usePaymentIntent`, `useSetupIntent`, `useStripeCheckout`) are thin `inject`-and-wrap functions. Note: `usePaymentIntent`/`useSetupIntent` automatically call `elements.submit()` before confirming (required by Stripe's Payment Element flow) unless `skipSubmit: true` is passed.
+Composables (`useStripe`, `useStripeElements`, `usePaymentIntent`, `useSetupIntent`, `useCheckoutSession`, ...) are thin `inject`-and-wrap functions. `usePaymentIntent`/`useSetupIntent` automatically call `elements.submit()` before confirming (required by Stripe's Payment Element flow) unless `skipSubmit: true` is passed. `useStripeCheckout` needs no provider (hosted Checkout is a `session.url` redirect).
 
-### Two element-component patterns — keep them consistent
+### One element pattern: factory definitions
 
-- **Factory** (`src/utils/element-factory.ts`): `createStripeElement({ elementType, componentName })` builds simple elements (split-card number/expiry/cvc, etc.) with a render function. Use this for elements that only need the standard `ready`/`change`/`focus`/`blur`/`escape` lifecycle.
-- **Standalone `.vue` SFC** (e.g. `VueStripePaymentElement.vue`): used when an element needs extra events or markup (Payment Element adds `loaderstart`/`loaderstop`/`loaderror`).
+Every element component is a `.ts` file calling `createStripeElement({ elementType, componentName, events, defaultOptions?, checkout?, expose?, updateOptions?, className?, ... })` from `src/utils/element-factory.ts` (types in `element-types.ts`, markup in `element-render.ts`). Mark the call `/* @__PURE__ */` so unused components tree-shake. The factory:
 
-Both follow the same lifecycle contract: create the element from the injected `elements` instance, attach **named** event handlers (so they can be detached), `mount`, `watch(props.options)` to call `element.update()`, and on `onUnmounted` detach every handler and `destroy()`. `defineExpose`/`expose` exposes `{ element, loading, error, focus, blur, clear }` for parent access. When adding or changing an element, mirror this exact pattern.
+- creates the element from the nearest **Elements** context (`elements.create(type)`), or from the **Checkout** context via the definition's `checkout(sdk, options)` creator (use `pick()` to pass only the option subset the Checkout SDK accepts); an Elements context always wins;
+- attaches **named** handlers for exactly the definition's `events` (the Stripe.js 10 union for that element; `tests/conventions.test.ts` checks them against the installed `.d.ts`), re-emits them, tracks `loading` / `error`, and detaches them + `destroy()`s on unmount;
+- calls `element.update()` only when `options` really change (inline objects re-render), dropping keys from `updateOptions`;
+- exposes `{ element, loading, error, focus, blur, clear }` plus `expose()` extras, renders uniform `#loading` / `#error` slots and `vue-stripe-element-*` classes.
 
-### Vue 2/3 compatibility (vue-demi)
+Type parameters give the public surface (`options` type, element type, extra exposed members, event payloads). Providers and non-element components (`VueStripeProvider`, `VueStripeElements`, `VueStripeCheckoutElementsProvider`, `VueStripeCheckout`, `VueStripePricingTable`) are hand-written render functions using `hx()` and `statusShell()`.
 
-- All Vue imports in source come from `vue-demi`, never `vue`.
-- `vite.config.ts` aliases `vue` → `vue-demi` and externalizes `vue-demi` + `@stripe/stripe-js`. Do not externalize `vue` directly — the alias is what makes compiled SFC templates Vue-2 safe.
-- Build emits ES, CJS, and UMD formats plus `.d.ts` types.
+There are **no `.vue` files** in `packages/vue-stripe/src`. Styles live in `src/styles.css`, built to `dist/vue-stripe.css` and exported as `@vue-stripe/vue-stripe/style.css` (apps must import it).
+
+### Vue 2.7 / Vue 3 compatibility (vue-demi)
+
+- All Vue imports in source come from `vue-demi`, never `vue` (lint + conventions test).
+- Render functions go through `hx()` (`src/utils/h.ts`), which translates flat Vue 3 props into Vue 2's `{ class, style, ref, attrs, on }`. Template refs are string refs (`$refs['mount']`). Stripe objects live in `shallowRef` / `markRaw`.
+- `vite.config.ts` externalizes `vue-demi` + `@stripe/stripe-js`; there is no SFC tooling. Build emits ES, CJS, UMD, `.d.ts` (via `tsc`) and the stylesheet.
+- `packages/vue2-smoke` mounts the built `dist/` on Vue 2.7.16 and asserts the bundle imports only names Vue 2.7's vue-demi exports (CI job "Vue 2.7 compatibility"). Peer range: `vue ^2.7.0 || ^3.0.0`.
 
 ### Tests
 

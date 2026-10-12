@@ -19,8 +19,18 @@ yarn add @vue-stripe/vue-stripe @stripe/stripe-js
 :::
 
 ::: tip Requirements
-Vue Stripe requires `@stripe/stripe-js` `^7.5.0 || ^8.5.3` and Vue 2.6+/2.7+ or Vue 3.
+Vue Stripe 6 requires `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive) and **Vue 2.7 or Vue 3**. Vue 2.6 is not supported (it is end-of-life and lacks the APIs the components use).
 :::
+
+### Import the stylesheet
+
+The components ship their styles as a separate file. Import it once, e.g. in `main.ts`:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
+Every element renders `.vue-stripe-element` with `-mount`, `-error` and `-loader` parts, next to its own `.vue-stripe-<type>-element` classes, so you can restyle all elements at once or one at a time.
 
 ## Get Your API Keys
 
@@ -44,7 +54,8 @@ The most common modern Vue setup.
 
 Create a `.env.local` file in your project root:
 
-```bashVITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bash
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```
 
 #### 2. Basic Usage
@@ -83,6 +94,79 @@ import type {
 
 ---
 
+### Vue 2.7
+
+Vue Stripe runs on Vue 2.7 through [vue-demi](https://github.com/vueuse/vue-demi). Every component is a plain `defineComponent` render function, so templates, `h()` and the Options API all work.
+
+```bash
+npm install @vue-stripe/vue-stripe @stripe/stripe-js vue@^2.7
+```
+
+vue-demi picks the Vue 2.7 build in its `postinstall` script. **pnpm 10+ does not run dependency build scripts by default**, so allow vue-demi's (or switch it manually):
+
+::: code-group
+```json [pnpm 10 (package.json)]
+{
+  "pnpm": {
+    "onlyBuiltDependencies": ["vue-demi"]
+  }
+}
+```
+
+```yaml [pnpm 11+ (pnpm-workspace.yaml)]
+allowBuilds:
+  vue-demi: true
+```
+
+```bash [any package manager]
+npx vue-demi-switch 2.7
+```
+:::
+
+```js
+// main.js
+import Vue from 'vue'
+import App from './App.vue'
+import '@vue-stripe/vue-stripe/style.css'
+
+// <stripe-pricing-table> is Stripe's web component, not a Vue component.
+Vue.config.ignoredElements = ['stripe-pricing-table']
+
+new Vue({ render: (h) => h(App) }).$mount('#app')
+```
+
+```vue
+<script>
+import { VueStripeProvider, VueStripeElements, VueStripeCardElement } from '@vue-stripe/vue-stripe'
+
+export default {
+  components: { VueStripeProvider, VueStripeElements, VueStripeCardElement },
+  data: () => ({
+    publishableKey: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY,
+    clientSecret: '',
+    complete: false
+  }),
+  methods: {
+    onChange(event) {
+      this.complete = event.complete
+    }
+  }
+}
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripeCardElement @change="onChange" />
+    </VueStripeElements>
+  </VueStripeProvider>
+</template>
+```
+
+::: info Tested on Vue 2.7
+The `Vue 2.7 compatibility` CI job mounts the published bundle on Vue 2.7.16 for every change.
+:::
+
 ### Nuxt 3
 
 Nuxt 3 requires special handling for client-side only components since Stripe.js cannot run on the server.
@@ -91,7 +175,8 @@ Nuxt 3 requires special handling for client-side only components since Stripe.js
 
 Add to your `.env` file:
 
-```bashNUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bash
+NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```
 
 Update `nuxt.config.ts` to expose the variable:
@@ -198,7 +283,8 @@ For projects using Vue CLI or Webpack-based setups.
 
 Create a `.env.local` file:
 
-```bashVUE_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bash
+VUE_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```
 
 #### 2. Usage
@@ -233,7 +319,8 @@ Quasar works with both Vite and Webpack modes.
 
 Same as standard Vite setup. Add to `.env`:
 
-```bashVITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bash
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```
 
 #### 2. Webpack Mode
@@ -280,7 +367,8 @@ For Laravel applications using Inertia.js with Vue.
 
 Add to your `.env`:
 
-```bashVITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+```bash
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 STRIPE_SECRET_KEY=sk_test_your_key_here
 ```
 

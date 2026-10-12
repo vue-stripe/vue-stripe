@@ -63,7 +63,7 @@
   ],
   "peerDependencies": {
     "@stripe/stripe-js": "^10.0.0",
-    "vue": "^2.6.0 || ^3.0.0"
+    "vue": "^2.7.0 || ^3.0.0"
   },
   "dependencies": {
     "vue-demi": "^0.14.10"
