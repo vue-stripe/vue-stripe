@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
-import VueStripeAddressElement from '../../src/components/VueStripeAddressElement.vue'
+import VueStripeAddressElement from '../../src/components/VueStripeAddressElement'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
@@ -53,7 +53,7 @@ describe('VueStripeAddressElement', () => {
     expect(addressComponent.exists()).toBe(true)
   })
 
-  it('emits loadError instead of throwing when element creation fails (#407a)', async () => {
+  it('emits loaderror instead of throwing when element creation fails (#407a, #407)', async () => {
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({
@@ -69,9 +69,13 @@ describe('VueStripeAddressElement', () => {
     const wrapper = await mountWithProviders()
 
     const addressComponent = wrapper.findComponent(VueStripeAddressElement)
-    const emitted = addressComponent.emitted('loadError')
+    const emitted = addressComponent.emitted('loaderror')
     expect(emitted).toBeTruthy()
-    expect(emitted![0][0]).toMatchObject({ elementType: 'address', error: 'create boom' })
+    expect(emitted![0][0]).toMatchObject({
+      elementType: 'address',
+      error: { message: 'create boom' }
+    })
+    expect(addressComponent.emitted('loadError')).toBeUndefined()
   })
 
   it('should mount Stripe address element on the DOM', async () => {
@@ -333,7 +337,7 @@ describe('VueStripeAddressElement', () => {
     expect(addressComponent.emitted('escape')).toBeTruthy()
   })
 
-  it('should emit loadError event', async () => {
+  it('should emit loaderror (lowercase, like every other element) on Stripe loaderror', async () => {
     let loadErrorCallback: Function | null = null
     const mockElement = {
       ...createMockElement(),
@@ -358,7 +362,7 @@ describe('VueStripeAddressElement', () => {
 
     const errorEvent = {
       elementType: 'address',
-      error: 'Failed to load address element'
+      error: { message: 'Failed to load address element' }
     }
 
     if (loadErrorCallback) {
@@ -368,9 +372,10 @@ describe('VueStripeAddressElement', () => {
     await nextTick()
 
     const addressComponent = wrapper.findComponent(VueStripeAddressElement)
-    const emitted = addressComponent.emitted('loadError')
+    const emitted = addressComponent.emitted('loaderror')
     expect(emitted).toBeTruthy()
     expect(emitted![0][0]).toEqual(errorEvent)
+    expect(wrapper.text()).toContain('Failed to load address element')
   })
 
   it('should destroy element on unmount', async () => {

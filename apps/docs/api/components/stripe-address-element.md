@@ -131,7 +131,8 @@ interface StripeAddressElementOptions {
 | `@focus` | - | Emitted when any field gains focus |
 | `@blur` | - | Emitted when any field loses focus |
 | `@escape` | - | Emitted when the escape key is pressed |
-| `@loadError` | `{ elementType: 'address', error: string }` | Emitted if the element fails to load (templates may also bind `@load-error`) |
+| `@loaderstart` | `{ elementType: 'address' }` | Emitted when the element starts loading |
+| `@loaderror` | `{ elementType: 'address'; error: { message: string } }` | Emitted if the element fails to load (renamed from `@loadError` in v6) |
 
 ### Change Event
 

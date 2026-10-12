@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import { h } from 'vue-demi'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
-import VueStripePaymentMethodMessagingElement from '../../src/components/VueStripePaymentMethodMessagingElement.vue'
+import VueStripePaymentMethodMessagingElement from '../../src/components/VueStripePaymentMethodMessagingElement'
 import { flushPromises, createMockElement } from '../setup'
 
 describe('VueStripePaymentMethodMessagingElement (v5.5)', () => {

@@ -25,36 +25,29 @@ const here = dirname(fileURLToPath(import.meta.url))
 const COMPONENTS_DIR = resolve(here, '../src/components')
 const FACTORY = resolve(here, '../src/utils/element-factory.ts')
 const DOCS_DIR = resolve(here, '../../../apps/docs/api/components')
+const factorySource = existsSync(FACTORY) ? readFileSync(FACTORY, 'utf8') : ''
 
-/** Component file -> API doc page. Factory-based split-card share one page. */
-const MAP: Array<{ component: string; doc: string; viaFactory?: boolean }> = [
+/** Component file -> API doc page. The split card elements share one page. */
+const MAP: Array<{ component: string; doc: string }> = [
   { component: 'VueStripeProvider.vue', doc: 'stripe-provider.md' },
   { component: 'VueStripeElements.vue', doc: 'stripe-elements.md' },
-  { component: 'VueStripePaymentElement.vue', doc: 'stripe-payment-element.md' },
-  { component: 'VueStripeExpressCheckoutElement.vue', doc: 'stripe-express-checkout-element.md' },
-  { component: 'VueStripeCardElement.vue', doc: 'stripe-card-element.md' },
+  { component: 'VueStripePaymentElement.ts', doc: 'stripe-payment-element.md' },
+  { component: 'VueStripeExpressCheckoutElement.ts', doc: 'stripe-express-checkout-element.md' },
+  { component: 'VueStripeCardElement.ts', doc: 'stripe-card-element.md' },
+  { component: 'VueStripeCardNumberElement.ts', doc: 'stripe-split-card-elements.md' },
+  { component: 'VueStripeCardExpiryElement.ts', doc: 'stripe-split-card-elements.md' },
+  { component: 'VueStripeCardCvcElement.ts', doc: 'stripe-split-card-elements.md' },
   {
-    component: 'VueStripeCardNumberElement.vue',
-    doc: 'stripe-split-card-elements.md',
-    viaFactory: true
-  },
-  {
-    component: 'VueStripeCardExpiryElement.vue',
-    doc: 'stripe-split-card-elements.md',
-    viaFactory: true
-  },
-  {
-    component: 'VueStripeCardCvcElement.vue',
-    doc: 'stripe-split-card-elements.md',
-    viaFactory: true
-  },
-  {
-    component: 'VueStripeLinkAuthenticationElement.vue',
+    component: 'VueStripeLinkAuthenticationElement.ts',
     doc: 'stripe-link-authentication-element.md'
   },
-  { component: 'VueStripeAddressElement.vue', doc: 'stripe-address-element.md' },
-  { component: 'VueStripeIbanElement.vue', doc: 'stripe-iban-element.md' },
-  { component: 'VueStripeAuBankAccountElement.vue', doc: 'stripe-au-bank-account-element.md' },
+  { component: 'VueStripeAddressElement.ts', doc: 'stripe-address-element.md' },
+  { component: 'VueStripeIbanElement.ts', doc: 'stripe-iban-element.md' },
+  { component: 'VueStripeAuBankAccountElement.ts', doc: 'stripe-au-bank-account-element.md' },
+  {
+    component: 'VueStripePaymentMethodMessagingElement.ts',
+    doc: 'stripe-payment-method-messaging-element.md'
+  },
   { component: 'VueStripeCheckout.vue', doc: 'stripe-checkout.md' },
   { component: 'VueStripeCheckoutProvider.vue', doc: 'stripe-checkout-provider.md' },
   { component: 'VueStripePricingTable.vue', doc: 'stripe-pricing-table.md' }
@@ -63,14 +56,37 @@ const MAP: Array<{ component: string; doc: string; viaFactory?: boolean }> = [
 /** Normalize an event name for naming-style-insensitive comparison. */
 const canon = (name: string) => name.toLowerCase().replace(/-/g, '')
 
-/** Extract emitted event names from a component (or the factory). */
+const quoted = (list: string) => [...list.matchAll(/['"]([\w-]+)['"]/g)].map((m) => m[1] as string)
+
+/** BASE_EVENTS as declared in the element factory. */
+function baseEvents(): string[] {
+  const decl = factorySource.match(/BASE_EVENTS\s*=\s*\[([^\]]*)\]/)
+  return decl ? quoted(decl[1] as string) : []
+}
+
+/**
+ * Extract the emitted event names of a component: the `events:` list of a factory
+ * definition (`...BASE_EVENTS` expanded; no list means BASE_EVENTS), or the
+ * `defineEmits` / `emits` declarations of a component with its own setup.
+ */
 function extractEmits(source: string): string[] {
   const names = new Set<string>()
-  // setup() / interface form: `(e: 'ready', ...)`
-  for (const m of source.matchAll(/\(\s*e:\s*['"]([\w-]+)['"]/g)) names.add(m[1])
+  if (source.includes('createStripeElement(')) {
+    const list = source.match(/events:\s*\[([^\]]*)\]/)
+    if (!list || (list[1] as string).includes('...BASE_EVENTS'))
+      baseEvents().forEach((e) => names.add(e))
+    if (list) quoted(list[1] as string).forEach((e) => names.add(e))
+    return [...names]
+  }
+  // setup() / interface form: `(e: 'ready', ...)` and tuple form `ready: [...]` in defineEmits<{}>
+  for (const m of source.matchAll(/\(\s*e:\s*['"]([\w-]+)['"]/g)) names.add(m[1] as string)
+  const typed = source.match(/defineEmits<\{([\s\S]*?)\}>/)
+  if (typed)
+    for (const m of (typed[1] as string).matchAll(/^\s*['"]?([\w-]+)['"]?\s*:/gm))
+      names.add(m[1] as string)
   // array form: `emits: ['ready', 'change', ...]`
   const arr = source.match(/emits:\s*\[([^\]]*)\]/)
-  if (arr) for (const m of arr[1].matchAll(/['"]([\w-]+)['"]/g)) names.add(m[1])
+  if (arr) quoted(arr[1] as string).forEach((e) => names.add(e))
   return [...names]
 }
 
@@ -81,21 +97,19 @@ function documentedEvents(doc: string): Set<string> {
   return set
 }
 
-const factorySource = existsSync(FACTORY) ? readFileSync(FACTORY, 'utf8') : ''
-
 describe('docs/API contract: component events', () => {
   it('source and docs directories exist', () => {
     expect(existsSync(COMPONENTS_DIR)).toBe(true)
     expect(existsSync(DOCS_DIR)).toBe(true)
   })
 
-  it.each(MAP)('$component events are documented in $doc', ({ component, doc, viaFactory }) => {
+  it.each(MAP)('$component events are documented in $doc', ({ component, doc }) => {
     const componentPath = resolve(COMPONENTS_DIR, component)
     const docPath = resolve(DOCS_DIR, doc)
     expect(existsSync(componentPath), `missing component ${component}`).toBe(true)
     expect(existsSync(docPath), `missing doc page ${doc}`).toBe(true)
 
-    const source = viaFactory ? factorySource : readFileSync(componentPath, 'utf8')
+    const source = readFileSync(componentPath, 'utf8')
     const emits = extractEmits(source)
     const documented = documentedEvents(readFileSync(docPath, 'utf8'))
 
@@ -112,8 +126,7 @@ describe('docs/API contract: component events', () => {
       }
     }
 
-    // Always assert extraction worked (the component declares >= 0 events and
-    // the page was parsed) so the harness itself is verified.
-    expect(Array.isArray(emits)).toBe(true)
+    // The harness itself must have found the component's events.
+    expect(emits.length, `no events extracted from ${component}`).toBeGreaterThan(0)
   })
 })

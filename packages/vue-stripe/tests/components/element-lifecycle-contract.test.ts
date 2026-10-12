@@ -4,13 +4,13 @@ import { defineComponent, h, ref, type Component } from 'vue-demi'
 import { loadStripe } from '@stripe/stripe-js'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
-import VueStripeCardElement from '../../src/components/VueStripeCardElement.vue'
-import VueStripeIbanElement from '../../src/components/VueStripeIbanElement.vue'
-import VueStripeAuBankAccountElement from '../../src/components/VueStripeAuBankAccountElement.vue'
-import VueStripeLinkAuthenticationElement from '../../src/components/VueStripeLinkAuthenticationElement.vue'
-import VueStripeAddressElement from '../../src/components/VueStripeAddressElement.vue'
-import VueStripePaymentElement from '../../src/components/VueStripePaymentElement.vue'
-import VueStripeExpressCheckoutElement from '../../src/components/VueStripeExpressCheckoutElement.vue'
+import VueStripeCardElement from '../../src/components/VueStripeCardElement'
+import VueStripeIbanElement from '../../src/components/VueStripeIbanElement'
+import VueStripeAuBankAccountElement from '../../src/components/VueStripeAuBankAccountElement'
+import VueStripeLinkAuthenticationElement from '../../src/components/VueStripeLinkAuthenticationElement'
+import VueStripeAddressElement from '../../src/components/VueStripeAddressElement'
+import VueStripePaymentElement from '../../src/components/VueStripePaymentElement'
+import VueStripeExpressCheckoutElement from '../../src/components/VueStripeExpressCheckoutElement'
 import {
   flushPromises,
   makeMockElement,
@@ -32,17 +32,6 @@ const ELEMENTS: Array<[string, Component, string]> = [
   ['VueStripePaymentElement', VueStripePaymentElement, 'payment'],
   ['VueStripeExpressCheckoutElement', VueStripeExpressCheckoutElement, 'expressCheckout']
 ]
-
-// Divergences from the contract in the v5 SFCs. They are asserted with
-// `it.fails` so they cannot regress silently and so the Phase 3 factory
-// rewrite (#479), which makes every element uniform, has to remove them here.
-type Gap = 'change-error' | 'expose' | 'create-error'
-const KNOWN_GAPS: Record<string, Gap[]> = {
-  VueStripeAddressElement: ['change-error', 'expose', 'create-error'],
-  VueStripePaymentElement: ['change-error', 'expose'],
-  VueStripeLinkAuthenticationElement: ['change-error'],
-  VueStripeExpressCheckoutElement: ['expose']
-}
 
 async function mountElement(Element: Component, elementType: string) {
   const element = makeMockElement()
@@ -93,9 +82,7 @@ async function mountElement(Element: Component, elementType: string) {
 const emittedNames = (wrapper: ReturnType<typeof mount>, Element: Component) =>
   Object.keys(wrapper.findComponent(Element).emitted()).map((n) => n.toLowerCase())
 
-describe.each(ELEMENTS)('%s lifecycle contract', (name, Element, elementType) => {
-  const itContract = (gap: Gap) => (KNOWN_GAPS[name]?.includes(gap) ? it.fails : it)
-
+describe.each(ELEMENTS)('%s lifecycle contract', (_name, Element, elementType) => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -116,25 +103,22 @@ describe.each(ELEMENTS)('%s lifecycle contract', (name, Element, elementType) =>
     }
   })
 
-  itContract('change-error')(
-    'shows the change-event error and clears it on the next valid change',
-    async () => {
-      const { wrapper, handlers } = await mountElement(Element, elementType)
-      const change = handlers.get('change')
-      if (!change) return // elements without a change event (e.g. Express Checkout)
-      change({
-        elementType,
-        complete: false,
-        empty: false,
-        error: { message: 'Your card number is incomplete.' }
-      })
-      await flushPromises()
-      expect(wrapper.text()).toContain('Your card number is incomplete.')
-      change({ elementType, complete: true, empty: false })
-      await flushPromises()
-      expect(wrapper.text()).not.toContain('Your card number is incomplete.')
-    }
-  )
+  it('shows the change-event error and clears it on the next valid change', async () => {
+    const { wrapper, handlers } = await mountElement(Element, elementType)
+    const change = handlers.get('change')
+    if (!change) return // elements without a change event (e.g. Express Checkout)
+    change({
+      elementType,
+      complete: false,
+      empty: false,
+      error: { message: 'Your card number is incomplete.' }
+    })
+    await flushPromises()
+    expect(wrapper.text()).toContain('Your card number is incomplete.')
+    change({ elementType, complete: true, empty: false })
+    await flushPromises()
+    expect(wrapper.text()).not.toContain('Your card number is incomplete.')
+  })
 
   it('calls element.update() when options change', async () => {
     const { element, options } = await mountElement(Element, elementType)
@@ -143,7 +127,7 @@ describe.each(ELEMENTS)('%s lifecycle contract', (name, Element, elementType) =>
     expect(element.update).toHaveBeenCalledWith(expect.objectContaining({ disabled: true }))
   })
 
-  itContract('expose')('exposes focus/blur/clear that proxy to the Stripe element', async () => {
+  it('exposes focus/blur/clear that proxy to the Stripe element', async () => {
     const { child, element } = await mountElement(Element, elementType)
     const exposed = child.value as unknown as {
       focus: () => void
@@ -168,7 +152,7 @@ describe.each(ELEMENTS)('%s lifecycle contract', (name, Element, elementType) =>
     expect(element.destroy).toHaveBeenCalledTimes(1)
   })
 
-  itContract('create-error')('surfaces element creation failures as an error', async () => {
+  it('surfaces element creation failures as an error', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const element: MockStripeElement = makeMockElement()
     const elements = makeMockElements()

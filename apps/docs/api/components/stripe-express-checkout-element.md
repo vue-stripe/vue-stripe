@@ -145,6 +145,10 @@ interface StripeExpressCheckoutElementOptions {
 | `@shippingaddresschange` | `StripeExpressCheckoutElementShippingAddressChangeEvent` | Emitted when shipping address changes. Call `event.resolve()` with updated line items/shipping rates, or `event.reject()` if the address is unsupported |
 | `@shippingratechange` | `StripeExpressCheckoutElementShippingRateChangeEvent` | Emitted when shipping rate changes. Call `event.resolve()` with updated line items, or `event.reject()` if the rate is unsupported |
 | `@loaderror` | `{ elementType: 'expressCheckout', error: StripeError }` | Emitted when the element fails to load |
+| `@availablepaymentmethodschange` | `StripeExpressCheckoutElementAvailablePaymentMethodsChangeEvent` | Emitted when the wallets that can be shown change |
+| `@focus` | - | Emitted when a button gains focus |
+| `@blur` | - | Emitted when a button loses focus |
+| `@escape` | - | Emitted when the escape key is pressed |
 
 ### Ready Event
 

@@ -162,8 +162,13 @@ interface StripePaymentElementOptions {
 | `@blur` | - | Emitted when the element loses focus |
 | `@escape` | - | Emitted when the escape key is pressed |
 | `@loaderstart` | - | Emitted when the element starts loading |
-| `@loaderstop` | - | Emitted when the element finishes loading |
 | `@loaderror` | `{ elementType: 'payment'; error: StripeError }` | Emitted when the element fails to load |
+| `@availablepaymentmethodschange` | `StripePaymentElementAvailablePaymentMethodsChangeEvent` | Emitted when the set of payment methods shown changes |
+| `@carddetailschange` | `StripePaymentElementCardDetailsChangeEvent` | Emitted when the entered card's brand or details change |
+| `@savedpaymentmethodupdate` | `StripePaymentElementSavedPaymentMethodUpdateEvent` | Emitted when a saved payment method is updated |
+| `@savedpaymentmethodremove` | `StripePaymentElementSavedPaymentMethodRemoveEvent` | Emitted when a saved payment method is removed |
+
+There is no `@loaderstop` event: Stripe.js never emits one (v5 listed it by mistake). The element is loaded when `@ready` fires.
 
 ### Change Event
 

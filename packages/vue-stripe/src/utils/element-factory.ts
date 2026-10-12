@@ -1,201 +1,201 @@
-import { defineComponent, ref, inject, onMounted, onUnmounted, watch, h } from 'vue-demi'
-import type { StripeElementChangeEvent } from '@stripe/stripe-js'
-import { stripeElementsInjectionKey } from './injection-keys'
+import {
+  defineComponent,
+  getCurrentInstance,
+  inject,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  watch,
+  type PropType,
+  type Ref
+} from 'vue-demi'
+import type { StripeCheckoutElementsSdk } from '@stripe/stripe-js'
+import { stripeCheckoutInjectionKey, stripeElementsInjectionKey } from './injection-keys'
 import { VueStripeElementsError } from './errors'
+import { hx } from './h'
 
-// Stripe element types that can be created
-export type StripeElementType =
-  | 'card'
-  | 'cardNumber'
-  | 'cardExpiry'
-  | 'cardCvc'
-  | 'payment'
-  | 'address'
-  | 'expressCheckout'
-  | 'linkAuthentication'
-  | 'paymentMethodMessaging'
+/** Keep only the keys a narrower Stripe option type accepts (Checkout SDK creators). */
+export const pick = (options: Record<string, unknown>, keys: string[]) =>
+  Object.fromEntries(Object.entries(options).filter(([key]) => keys.includes(key)))
 
-export interface ElementFactoryOptions {
-  elementType: StripeElementType
-  componentName: string
-}
-
-// Generic element interface for our factory - Stripe elements have these common methods
-interface StripeElementLike {
+/** The Stripe element methods the factory relies on. */
+export interface StripeElementLike {
   mount(domElement: HTMLElement | string): void
-  unmount(): void
   destroy(): void
-  on(eventType: string, handler: (...args: unknown[]) => void): void
-  off?(eventType: string, handler?: (...args: unknown[]) => void): void
-  update?(options: Record<string, unknown>): void
+  on(eventType: string, handler: (...args: unknown[]) => void): unknown
+  off?(eventType: string, handler?: (...args: unknown[]) => void): unknown
+  update?(options: Record<string, unknown>): unknown
   focus?(): void
   blur?(): void
   clear?(): void
+  getValue?(...args: unknown[]): Promise<unknown>
 }
 
-export function createStripeElement({ elementType, componentName }: ElementFactoryOptions) {
+export const BASE_EVENTS = ['ready', 'change', 'focus', 'blur', 'escape'] as const
+
+export interface ElementDefinition {
+  /** `elements.create()` type, e.g. 'card' or 'payment'. */
+  elementType: string
+  componentName: string
+  /** Stripe events re-emitted as Vue events (exact Stripe.js 10 union). Defaults to BASE_EVENTS. */
+  events?: readonly string[]
+  /** Options merged under `props.options` (e.g. IBAN supportedCountries). */
+  defaultOptions?: () => Record<string, unknown>
+  /** Creator inside VueStripeCheckoutElementsProvider; omit when Checkout Sessions lack the element. */
+  checkout?: (sdk: StripeCheckoutElementsSdk, options: Record<string, unknown>) => StripeElementLike
+  /** Extra members for the component's public instance (e.g. getValue). */
+  expose?: (element: Ref<StripeElementLike | null>) => Record<string, unknown>
+  loadingText?: string
+  /** What `ready` emits: the Stripe element (default) or Stripe's ready event (Express Checkout). */
+  readyPayload?: 'element' | 'event'
+  /** Root CSS class; `-error`, `-mount`, `-loader` are derived from it. */
+  className?: string
+}
+
+export function createStripeElement(def: ElementDefinition) {
+  const { elementType, componentName, events = BASE_EVENTS } = def
+  const loadingText = def.loadingText ?? `Loading ${elementType}...`
+  const className = def.className ?? `vue-stripe-${elementType}-element`
+
   return defineComponent({
     name: componentName,
     props: {
-      options: {
-        type: Object,
-        default: () => ({})
-      }
+      options: { type: Object as PropType<Record<string, unknown>>, default: () => ({}) }
     },
-    emits: ['ready', 'change', 'focus', 'blur', 'escape'],
-    setup(props, { emit, expose }) {
-      const elementRef = ref<HTMLDivElement>()
-      const element = ref<StripeElementLike | null>(null)
+    emits: [...events],
+    setup(props, { emit, expose, slots }) {
+      // shallowRef: Vue must never walk into Stripe's element object.
+      const element = shallowRef<StripeElementLike | null>(null)
       const loading = ref(true)
       const error = ref<string | null>(null)
+      const instance = getCurrentInstance()
 
-      const elementsInstance = inject(stripeElementsInjectionKey)
-
-      if (!elementsInstance) {
-        throw new VueStripeElementsError(`${componentName} must be used within VueStripeElements`)
+      // An Elements context always wins: inject() returns the nearest provider of each key,
+      // so a VueStripeElements nested inside a Checkout provider drives its own children.
+      const elementsCtx = inject(stripeElementsInjectionKey, null)
+      const checkoutCtx = inject(stripeCheckoutInjectionKey, null)
+      if (!elementsCtx && !checkoutCtx) {
+        throw new VueStripeElementsError(
+          `${componentName} must be used within VueStripeElements or VueStripeCheckoutElementsProvider`
+        )
       }
 
-      // Named handlers so listeners can be detached with .off() on teardown.
-      const handleReady = () => {
-        loading.value = false
-        emit('ready', element.value!)
+      // String template ref: resolves the same way on Vue 2 and Vue 3.
+      const mountPoint = () =>
+        (instance?.proxy as { $refs: Record<string, HTMLElement | undefined> } | null)?.$refs[
+          'mount'
+        ] ?? null
+
+      const handlers: Record<string, (...args: unknown[]) => void> = {}
+      for (const name of events) {
+        handlers[name] = (...args: unknown[]) => {
+          const event = args[0] as { error?: { message?: string } } | undefined
+          if (name === 'ready') loading.value = false
+          if (name === 'change') error.value = event?.error?.message ?? null
+          if (name === 'loaderror') {
+            error.value = event?.error?.message ?? 'Element failed to load'
+            loading.value = false
+          }
+          if (name === 'ready' && def.readyPayload !== 'event') emit(name, element.value)
+          else emit(name, ...args)
+        }
       }
-      const handleChange = (event: unknown) => {
-        const changeEvent = event as StripeElementChangeEvent
-        // Update error state from Stripe
-        if (changeEvent.error) {
-          error.value = changeEvent.error.message
-        } else {
-          error.value = null
+
+      const createRaw = (options: Record<string, unknown>): StripeElementLike | null => {
+        const elements = elementsCtx?.elements.value as
+          | { create: (type: string, options: Record<string, unknown>) => StripeElementLike }
+          | null
+          | undefined
+        if (elements) return elements.create(elementType, options)
+        const sdk = checkoutCtx?.checkout.value
+        if (!sdk) return null
+        if (!def.checkout) {
+          throw new VueStripeElementsError(
+            `${componentName} is not available inside Checkout Sessions; use it within VueStripeElements`
+          )
         }
-        emit('change', changeEvent)
+        return def.checkout(sdk, options)
       }
-      const handleFocus = () => emit('focus')
-      const handleBlur = () => emit('blur')
-      const handleEscape = () => emit('escape')
 
-      const createElement = () => {
-        if (!elementsInstance.elements.value) {
-          error.value = 'Elements instance not available'
-          loading.value = false
-          return
-        }
-
-        if (!elementRef.value) {
-          error.value = 'Mount point not available'
-          loading.value = false
-          return
-        }
-
+      const create = () => {
+        const target = mountPoint()
+        if (element.value || !target) return
         try {
           error.value = null
+          const created = createRaw({ ...def.defaultOptions?.(), ...props.options })
+          if (!created) return
           loading.value = true
-
-          // elements.create() is overloaded per element type; this factory is generic over them.
-          const elements = elementsInstance.elements.value as unknown as {
-            create: (
-              type: StripeElementType,
-              options?: Record<string, unknown>
-            ) => StripeElementLike
-          }
-          const createdElement = elements.create(elementType, props.options)
-          element.value = createdElement
-
-          // Set up event listeners (named handlers, removed in onUnmounted)
-          createdElement.on('ready', handleReady)
-          createdElement.on('change', handleChange)
-          createdElement.on('focus', handleFocus)
-          createdElement.on('blur', handleBlur)
-          createdElement.on('escape', handleEscape)
-
-          // Mount the element
-          createdElement.mount(elementRef.value)
+          element.value = created
+          for (const name of events) created.on(name, handlers[name] as never)
+          created.mount(target)
         } catch (err) {
-          const errorMessage =
+          error.value =
             err instanceof Error ? err.message : `Failed to create ${elementType} element`
-          error.value = errorMessage
           loading.value = false
-          console.error(`[Vue Stripe] ${componentName} creation error:`, errorMessage)
+          console.error(`[Vue Stripe] ${componentName} creation error:`, error.value)
+          // Same payload shape as Stripe's own loaderror event.
+          if (events.includes('loaderror')) {
+            emit('loaderror', { elementType, error: { message: error.value } })
+          }
         }
       }
 
-      // Watch for options changes
       watch(
         () => props.options,
-        (newOptions) => {
-          if (element.value?.update && newOptions) {
-            element.value.update(newOptions as Record<string, unknown>)
-          }
+        (next) => {
+          if (next) element.value?.update?.({ ...next })
         },
         { deep: true }
       )
-
-      // Watch for elements instance to become available
-      watch(
-        () => elementsInstance.elements.value,
-        (newElements) => {
-          if (newElements && elementRef.value && !element.value) {
-            createElement()
-          }
-        },
-        { immediate: true }
-      )
-
-      onMounted(() => {
-        if (elementsInstance.elements.value && elementRef.value && !element.value) {
-          createElement()
-        }
-      })
-
+      watch(() => elementsCtx?.elements.value ?? checkoutCtx?.checkout.value, create)
+      onMounted(create)
       onUnmounted(() => {
-        if (element.value) {
-          element.value.off?.('ready', handleReady)
-          element.value.off?.('change', handleChange)
-          element.value.off?.('focus', handleFocus)
-          element.value.off?.('blur', handleBlur)
-          element.value.off?.('escape', handleEscape)
-          element.value.destroy()
-          element.value = null
-        }
+        const el = element.value
+        if (!el) return
+        for (const name of events) el.off?.(name, handlers[name])
+        el.destroy()
+        element.value = null
       })
 
-      // Expose element and methods for parent access
       expose({
         element,
         loading,
         error,
-        focus: () => {
-          element.value?.focus?.()
-        },
-        blur: () => {
-          element.value?.blur?.()
-        },
-        clear: () => {
-          element.value?.clear?.()
-        }
+        focus: () => element.value?.focus?.(),
+        blur: () => element.value?.blur?.(),
+        clear: () => element.value?.clear?.(),
+        ...def.expose?.(element)
       })
 
-      return () => {
-        const className = `vue-stripe-${elementType}-element`
-
-        return h('div', { class: className }, [
+      return () =>
+        hx('div', { class: [className, 'vue-stripe-element'] }, [
           error.value &&
-            h('div', { class: `${className}-error` }, [
-              h('div', { class: 'vue-stripe-error-message' }, error.value)
-            ]),
-          h('div', {
-            ref: elementRef,
+            hx(
+              'div',
+              { class: [`${className}-error`, 'vue-stripe-element-error'] },
+              slots['error']?.({ error: error.value }) ?? [
+                hx('div', { class: 'vue-stripe-error-message' }, error.value)
+              ]
+            ),
+          hx('div', {
+            ref: 'mount',
             class: {
               [`${className}-mount`]: true,
-              [`${className}-loading`]: loading.value
+              'vue-stripe-element-mount': true,
+              [`${className}-loading`]: loading.value,
+              'vue-stripe-element-loading': loading.value
             }
           }),
           loading.value &&
-            h('div', { class: `${className}-loader` }, [
-              h('div', { class: 'vue-stripe-loading-message' }, `Loading ${elementType}...`)
-            ])
+            hx(
+              'div',
+              { class: [`${className}-loader`, 'vue-stripe-element-loader'] },
+              slots['loading']?.() ?? [
+                hx('div', { class: 'vue-stripe-loading-message' }, loadingText)
+              ]
+            )
         ])
-      }
     }
   })
 }

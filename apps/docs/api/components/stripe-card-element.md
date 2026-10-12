@@ -134,6 +134,8 @@ interface StripeElementStyle {
 | `@focus` | - | Emitted when the element gains focus |
 | `@blur` | - | Emitted when the element loses focus |
 | `@escape` | - | Emitted when the escape key is pressed |
+| `@networkschange` | `{ elementType: 'card' }` | Emitted when the card networks available for the entered number change (co-badged cards) |
+| `@loaderror` | `{ elementType: 'card'; error: StripeError }` | Emitted when the element fails to load |
 
 ### Change Event
 

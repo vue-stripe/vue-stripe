@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, ref, nextTick } from 'vue-demi'
-import VueStripeCardElement from '../../src/components/VueStripeCardElement.vue'
+import VueStripeCardElement from '../../src/components/VueStripeCardElement'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
@@ -66,7 +66,7 @@ describe('VueStripeCardElement', () => {
 
     await mountWithProviders()
 
-    expect(mockCreate).toHaveBeenCalledWith('card', undefined)
+    expect(mockCreate).toHaveBeenCalledWith('card', {})
     expect(mockElement.mount).toHaveBeenCalled()
   })
 

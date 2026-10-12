@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
-import VueStripeExpressCheckoutElement from '../../src/components/VueStripeExpressCheckoutElement.vue'
+import VueStripeExpressCheckoutElement from '../../src/components/VueStripeExpressCheckoutElement'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
@@ -66,7 +66,7 @@ describe('VueStripeExpressCheckoutElement', () => {
 
     await mountWithProviders()
 
-    expect(mockCreate).toHaveBeenCalledWith('expressCheckout', undefined)
+    expect(mockCreate).toHaveBeenCalledWith('expressCheckout', {})
     expect(mockElement.mount).toHaveBeenCalled()
   })
 
@@ -509,7 +509,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       const expressCheckoutComponent = wrapper.findComponent(VueStripeExpressCheckoutElement)
 
       // Element is created and mounted on the DOM
-      expect(mockCreate).toHaveBeenCalledWith('expressCheckout', undefined)
+      expect(mockCreate).toHaveBeenCalledWith('expressCheckout', {})
       expect(mockElement.mount).toHaveBeenCalled()
       // The element property is exposed on the component (can check it exists via defineExpose)
       expect(expressCheckoutComponent.exists()).toBe(true)

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick, defineComponent, ref } from 'vue-demi'
-import VueStripeAuBankAccountElement from '../../src/components/VueStripeAuBankAccountElement.vue'
+import VueStripeAuBankAccountElement from '../../src/components/VueStripeAuBankAccountElement'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
@@ -66,7 +66,7 @@ describe('VueStripeAuBankAccountElement', () => {
 
     await mountWithProviders()
 
-    expect(mockCreate).toHaveBeenCalledWith('auBankAccount', undefined)
+    expect(mockCreate).toHaveBeenCalledWith('auBankAccount', {})
     expect(mockElement.mount).toHaveBeenCalled()
   })
 

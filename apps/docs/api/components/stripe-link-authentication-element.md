@@ -117,6 +117,8 @@ interface StripeLinkAuthenticationElementOptions {
 | `@focus` | `void` | Emitted when the element gains focus |
 | `@blur` | `void` | Emitted when the element loses focus |
 | `@escape` | `void` | Emitted when the user presses the Escape key |
+| `@loaderstart` | `{ elementType: 'linkAuthentication' }` | Emitted when the element starts loading |
+| `@loaderror` | `{ elementType: 'linkAuthentication'; error: StripeError }` | Emitted when the element fails to load |
 
 ### Change Event
 

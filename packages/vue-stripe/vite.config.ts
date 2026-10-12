@@ -23,6 +23,7 @@ export default defineConfig({
     lib: {
       entry: resolve(import.meta.dirname, 'src/index.ts'),
       name: 'VueStripe',
+      cssFileName: 'vue-stripe',
       formats: ['es', 'cjs', 'umd'],
       fileName: (format) => {
         switch (format) {

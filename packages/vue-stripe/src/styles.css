@@ -1,0 +1,452 @@
+/*
+ * Vue Stripe component styles. Import once in your app:
+ *   import '@vue-stripe/vue-stripe/style.css'
+ *
+ * Every element renders .vue-stripe-element > .vue-stripe-element-mount (+ -error, -loader)
+ * next to its own .vue-stripe-<type>-element classes, so you can theme all elements
+ * at once or one by one.
+ */
+
+/* Shared element parts */
+.vue-stripe-element {
+  position: relative;
+}
+
+.vue-stripe-element-error {
+  color: #dc3545;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-element-loader {
+  color: #6c757d;
+  text-align: center;
+}
+
+.vue-stripe-au-bank-account-element {
+  position: relative;
+}
+
+.vue-stripe-au-bank-account-element-mount {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: white;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.vue-stripe-au-bank-account-element-mount:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vue-stripe-au-bank-account-element-loading {
+  opacity: 0.5;
+}
+
+.vue-stripe-au-bank-account-element-error {
+  color: #dc3545;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-au-bank-account-element-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  text-align: center;
+}
+
+.vue-stripe-error-message,
+.vue-stripe-loading-message {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.vue-stripe-cardCvc-element {
+  position: relative;
+}
+
+.vue-stripe-cardCvc-element-mount {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: white;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.vue-stripe-cardCvc-element-mount:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vue-stripe-cardCvc-element-loading {
+  opacity: 0.5;
+}
+
+.vue-stripe-cardCvc-element-error {
+  color: #dc3545;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-cardCvc-element-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  text-align: center;
+}
+
+.vue-stripe-card-element {
+  position: relative;
+}
+
+.vue-stripe-card-element-mount {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: white;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.vue-stripe-card-element-mount:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vue-stripe-card-element-loading {
+  opacity: 0.5;
+}
+
+.vue-stripe-card-element-error {
+  color: #dc3545;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-card-element-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  text-align: center;
+}
+
+.vue-stripe-cardExpiry-element {
+  position: relative;
+}
+
+.vue-stripe-cardExpiry-element-mount {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: white;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.vue-stripe-cardExpiry-element-mount:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vue-stripe-cardExpiry-element-loading {
+  opacity: 0.5;
+}
+
+.vue-stripe-cardExpiry-element-error {
+  color: #dc3545;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-cardExpiry-element-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  text-align: center;
+}
+
+.vue-stripe-cardNumber-element {
+  position: relative;
+}
+
+.vue-stripe-cardNumber-element-mount {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: white;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.vue-stripe-cardNumber-element-mount:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vue-stripe-cardNumber-element-loading {
+  opacity: 0.5;
+}
+
+.vue-stripe-cardNumber-element-error {
+  color: #dc3545;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-cardNumber-element-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  text-align: center;
+}
+
+.vue-stripe-checkout-wrapper {
+  display: contents;
+}
+
+.vue-stripe-checkout-button {
+  background-color: #635bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vue-stripe-checkout-button:hover:not(:disabled) {
+  background-color: #5a52e8;
+}
+
+.vue-stripe-checkout-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.vue-stripe-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: vue-stripe-spin 1s linear infinite;
+}
+
+@keyframes vue-stripe-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.vue-stripe-checkout-error {
+  color: #dc3545;
+  padding: 1rem;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  background-color: #f8d7da;
+}
+
+.vue-stripe-checkout-loading {
+  color: #6c757d;
+  padding: 1rem;
+  text-align: center;
+}
+
+.vue-stripe-elements-error {
+  color: #dc3545;
+  padding: 1rem;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  background-color: #f8d7da;
+}
+
+.vue-stripe-elements-loading {
+  color: #6c757d;
+  padding: 1rem;
+  text-align: center;
+}
+
+.vue-stripe-express-checkout-element {
+  position: relative;
+}
+
+.vue-stripe-express-checkout-element-mount {
+  min-height: 60px;
+  transition: opacity 0.3s ease;
+}
+
+.vue-stripe-express-checkout-element-loading {
+  opacity: 0.5;
+}
+
+.vue-stripe-express-checkout-element-error {
+  color: #dc3545;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  background-color: #f8d7da;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-express-checkout-element-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  text-align: center;
+}
+
+.vue-stripe-iban-element {
+  position: relative;
+}
+
+.vue-stripe-iban-element-mount {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: white;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.vue-stripe-iban-element-mount:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vue-stripe-iban-element-loading {
+  opacity: 0.5;
+}
+
+.vue-stripe-iban-element-error {
+  color: #dc3545;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-iban-element-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  text-align: center;
+}
+
+.vue-stripe-link-auth-mount {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.vue-stripe-link-auth-mount:focus-within {
+  border-color: #635bff;
+  box-shadow: 0 0 0 1px #635bff;
+}
+
+.vue-stripe-link-auth-error {
+  color: #dc3545;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  background-color: #f8d7da;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-link-auth-loader {
+  color: #6c757d;
+  padding: 0.5rem 0;
+  text-align: center;
+}
+
+.vue-stripe-payment-element {
+  position: relative;
+}
+
+.vue-stripe-payment-element-mount {
+  min-height: 300px;
+  transition: opacity 0.3s ease;
+}
+
+.vue-stripe-payment-element-loading {
+  opacity: 0.5;
+}
+
+.vue-stripe-payment-element-error {
+  color: #dc3545;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  background-color: #f8d7da;
+  font-size: 0.875rem;
+}
+
+.vue-stripe-payment-element-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  text-align: center;
+}
+
+.vue-stripe-pricing-table {
+  width: 100%;
+}
+
+.vue-stripe-pricing-table-loading {
+  color: #6c757d;
+  padding: 1rem;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.vue-stripe-pricing-table-error {
+  color: #dc3545;
+  padding: 1rem;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  background-color: #f8d7da;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.vue-stripe-error {
+  color: #dc3545;
+  padding: 1rem;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  background-color: #f8d7da;
+}
+
+.vue-stripe-loading {
+  color: #6c757d;
+  padding: 1rem;
+  text-align: center;
+}

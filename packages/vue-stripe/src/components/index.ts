@@ -3,26 +3,26 @@ export { default as VueStripeProvider } from './VueStripeProvider.vue'
 export { default as VueStripeElements } from './VueStripeElements.vue'
 
 // Payment Elements
-export { default as VueStripePaymentElement } from './VueStripePaymentElement.vue'
-export { default as VueStripeExpressCheckoutElement } from './VueStripeExpressCheckoutElement.vue'
+export { default as VueStripePaymentElement } from './VueStripePaymentElement'
+export { default as VueStripeExpressCheckoutElement } from './VueStripeExpressCheckoutElement'
 
 // Card Elements
-export { default as VueStripeCardElement } from './VueStripeCardElement.vue'
-export { default as VueStripeCardNumberElement } from './VueStripeCardNumberElement.vue'
-export { default as VueStripeCardExpiryElement } from './VueStripeCardExpiryElement.vue'
-export { default as VueStripeCardCvcElement } from './VueStripeCardCvcElement.vue'
+export { default as VueStripeCardElement } from './VueStripeCardElement'
+export { default as VueStripeCardNumberElement } from './VueStripeCardNumberElement'
+export { default as VueStripeCardExpiryElement } from './VueStripeCardExpiryElement'
+export { default as VueStripeCardCvcElement } from './VueStripeCardCvcElement'
 
 // Other Elements
-export { default as VueStripeLinkAuthenticationElement } from './VueStripeLinkAuthenticationElement.vue'
-export { default as VueStripeAddressElement } from './VueStripeAddressElement.vue'
+export { default as VueStripeLinkAuthenticationElement } from './VueStripeLinkAuthenticationElement'
+export { default as VueStripeAddressElement } from './VueStripeAddressElement'
 
 // Regional elements. The standalone iDEAL, P24, EPS and FPX elements were
 // removed by Stripe in Stripe.js 8 (Clover); use the Payment Element for them.
-export { default as VueStripeIbanElement } from './VueStripeIbanElement.vue'
-export { default as VueStripeAuBankAccountElement } from './VueStripeAuBankAccountElement.vue'
+export { default as VueStripeIbanElement } from './VueStripeIbanElement'
+export { default as VueStripeAuBankAccountElement } from './VueStripeAuBankAccountElement'
 
 // Messaging Element (v5.5.0)
-export { default as VueStripePaymentMethodMessagingElement } from './VueStripePaymentMethodMessagingElement.vue'
+export { default as VueStripePaymentMethodMessagingElement } from './VueStripePaymentMethodMessagingElement'
 
 // Checkout
 export { default as VueStripeCheckout } from './VueStripeCheckout.vue'

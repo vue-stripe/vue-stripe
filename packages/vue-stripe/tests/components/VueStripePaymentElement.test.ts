@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue-demi'
-import VueStripePaymentElement from '../../src/components/VueStripePaymentElement.vue'
+import VueStripePaymentElement from '../../src/components/VueStripePaymentElement'
 import VueStripeElements from '../../src/components/VueStripeElements.vue'
 import VueStripeProvider from '../../src/components/VueStripeProvider.vue'
 import { flushPromises, createMockElement } from '../setup'
@@ -68,7 +68,7 @@ describe('VueStripePaymentElement', () => {
 
     await mountWithProviders()
 
-    expect(mockCreate).toHaveBeenCalledWith('payment', undefined)
+    expect(mockCreate).toHaveBeenCalledWith('payment', {})
     expect(mockElement.mount).toHaveBeenCalled()
   })
 
@@ -144,7 +144,9 @@ describe('VueStripePaymentElement', () => {
 
     // Check that loader event listeners were set up
     expect(mockElement.on).toHaveBeenCalledWith('loaderstart', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('loaderstop', expect.any(Function))
+    expect(mockElement.on).toHaveBeenCalledWith('loaderror', expect.any(Function))
+    // Stripe.js has no `loaderstop` event (the v5 component listened for one that never fired).
+    expect(mockElement.on).not.toHaveBeenCalledWith('loaderstop', expect.any(Function))
   })
 
   it('should emit ready event when payment element is ready', async () => {
@@ -359,37 +361,47 @@ describe('VueStripePaymentElement', () => {
     expect(paymentComponent.emitted('loaderstart')).toBeTruthy()
   })
 
-  it('should emit loaderstop event', async () => {
-    let loaderStopCallback: Function | null = null
+  it('re-emits the Stripe.js 10 Payment Element events', async () => {
+    const handlers: Record<string, Function> = {}
     const mockElement = {
       ...createMockElement(),
       on: vi.fn((event: string, callback: Function) => {
-        if (event === 'loaderstop') {
-          loaderStopCallback = callback
-        }
+        handlers[event] = callback
       })
     }
-
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
-      elements: vi.fn(() => ({
-        create: vi.fn(() => mockElement)
-      })),
-      confirmPayment: vi.fn(),
-      confirmCardSetup: vi.fn(),
+      elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
       registerAppInfo: vi.fn()
     } as any)
 
     const wrapper = await mountWithProviders()
-
-    if (loaderStopCallback) {
-      loaderStopCallback()
-    }
-
+    const names = [
+      'availablepaymentmethodschange',
+      'carddetailschange',
+      'savedpaymentmethodupdate',
+      'savedpaymentmethodremove'
+    ]
+    for (const name of names) handlers[name]?.({ elementType: 'payment' })
     await nextTick()
 
     const paymentComponent = wrapper.findComponent(VueStripePaymentElement)
-    expect(paymentComponent.emitted('loaderstop')).toBeTruthy()
+    for (const name of names) {
+      expect(paymentComponent.emitted(name)?.[0], name).toEqual([{ elementType: 'payment' }])
+    }
+  })
+
+  it('exposes collapse() which proxies element.collapse()', async () => {
+    const mockElement = { ...createMockElement(), collapse: vi.fn() }
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+    ;(wrapper.findComponent(VueStripePaymentElement).vm as any).collapse()
+    expect(mockElement.collapse).toHaveBeenCalled()
   })
 
   it('should emit loaderror event with the failure payload (#406)', async () => {

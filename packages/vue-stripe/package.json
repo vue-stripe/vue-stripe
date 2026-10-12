@@ -16,13 +16,17 @@
   "types": "./dist/types/index.d.ts",
   "unpkg": "./dist/umd/index.js",
   "jsdelivr": "./dist/umd/index.js",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/es/index.js",
       "require": "./dist/cjs/index.js"
-    }
+    },
+    "./style.css": "./dist/vue-stripe.css",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
