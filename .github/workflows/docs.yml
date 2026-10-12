@@ -2,9 +2,11 @@ name: Deploy Docs to GitHub Pages
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - 'apps/docs/**'
+      # Library changes redeploy the live demos.
+      - 'packages/vue-stripe/**'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
