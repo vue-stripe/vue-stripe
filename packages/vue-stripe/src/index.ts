@@ -46,6 +46,10 @@ export type {
   CollectBankAccountTokenResult,
   UseIdentityReturn,
   VerifyIdentityResult,
+  UsePaymentRequestReturn,
+  PaymentRequestEventMap,
+  PaymentRequestEventType,
+  PaymentRequestEventHandler,
   PaymentElementType,
   ExpressCheckoutType,
   VueStripeError,
@@ -127,7 +131,22 @@ export type {
   StripeCheckoutFormOptions,
   StripeCheckoutFormChangeEvent,
   StripeCheckoutFormConfirmEvent,
-  StripeCheckoutFormValue
+  StripeCheckoutFormValue,
+  PaymentRequest,
+  PaymentRequestOptions,
+  PaymentRequestUpdateOptions,
+  PaymentRequestItem,
+  PaymentRequestShippingOption,
+  PaymentRequestShippingAddress,
+  PaymentRequestWallet,
+  PaymentRequestCompleteStatus,
+  PaymentRequestUpdateDetails,
+  CanMakePaymentResult,
+  PaymentRequestTokenEvent,
+  PaymentRequestPaymentMethodEvent,
+  PaymentRequestSourceEvent,
+  PaymentRequestShippingAddressEvent,
+  PaymentRequestShippingOptionEvent
 } from './types'
 
 // Export checkout composable types (defined alongside useStripeCheckout)

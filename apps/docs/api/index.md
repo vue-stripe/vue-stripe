@@ -62,6 +62,7 @@ Legal text rendered by Stripe.js (React Stripe.js 7 parity):
 - [useVerifyMicrodepositsForSetup](/api/composables/use-verify-microdeposits-for-setup) - Verify a bank account with micro-deposits (SetupIntent)
 - [useRadarSession](/api/composables/use-radar-session) - Create a Radar Session for fraud signals
 - [useEphemeralKeyNonce](/api/composables/use-ephemeral-key-nonce) - Create the nonce for Stripe Issuing card elements
+- [usePaymentRequest](/api/composables/use-payment-request) - Payment Request API (`stripe.paymentRequest()`) behind your own button
 - [useStripeCheckout](/api/composables/use-stripe-checkout) - Redirect to Stripe Checkout (alias: `useCheckout`)
 - [useCheckoutSession](/api/composables/use-checkout-session) - Drive a Checkout Session inside `VueStripeCheckoutElementsProvider`
 - [useCheckoutForm](/api/composables/use-checkout-form) - Confirm the Checkout Form and drive its session inside `VueStripeCheckoutFormProvider` (beta)
@@ -114,6 +115,10 @@ import type {
   HandleNextActionOptions,
   UseFinancialConnectionsReturn,
   UseIdentityReturn,
+  UsePaymentRequestReturn,
+  PaymentRequestEventMap,
+  PaymentRequestEventType,
+  PaymentRequestEventHandler,
   CollectFinancialConnectionsAccountsOptions,
   CollectBankAccountForPaymentOptions,
   CollectBankAccountForSetupOptions,
@@ -187,7 +192,23 @@ import type {
   StripeCheckoutFormOptions,
   StripeCheckoutFormChangeEvent,
   StripeCheckoutFormConfirmEvent,
-  StripeCheckoutFormValue
+  StripeCheckoutFormValue,
+  // Re-exported Stripe.js Payment Request API types
+  PaymentRequest,
+  PaymentRequestOptions,
+  PaymentRequestUpdateOptions,
+  PaymentRequestItem,
+  PaymentRequestShippingOption,
+  PaymentRequestShippingAddress,
+  PaymentRequestWallet,
+  PaymentRequestCompleteStatus,
+  PaymentRequestUpdateDetails,
+  CanMakePaymentResult,
+  PaymentRequestTokenEvent,
+  PaymentRequestPaymentMethodEvent,
+  PaymentRequestSourceEvent,
+  PaymentRequestShippingAddressEvent,
+  PaymentRequestShippingOptionEvent
 } from '@vue-stripe/vue-stripe'
 ```
 

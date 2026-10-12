@@ -15,7 +15,11 @@ import type {
   VerifyIdentityResult,
   ReleaseTrain,
   CreateConfirmationTokenOptions,
-  UseCreateConfirmationTokenReturn
+  UseCreateConfirmationTokenReturn,
+  UsePaymentRequestReturn,
+  PaymentRequestEventHandler,
+  PaymentRequestOptions,
+  CanMakePaymentResult
 } from '../src'
 
 describe('public API exports', () => {
@@ -36,6 +40,7 @@ describe('public API exports', () => {
     expect(typeof VueStripe.useCheckoutSession).toBe('function')
     expect(typeof VueStripe.useFinancialConnections).toBe('function')
     expect(typeof VueStripe.useIdentity).toBe('function')
+    expect(typeof VueStripe.usePaymentRequest).toBe('function')
   })
 
   it('exports the token and other Stripe method composables', () => {
@@ -151,5 +156,20 @@ describe('public API exports', () => {
 
     VueStripe.loadStripe.setLoadParameters({ advancedFraudSignals: false })
     expect(pure.setLoadParameters).toHaveBeenCalledWith({ advancedFraudSignals: false })
+  })
+
+  it('exports the Payment Request types (compile-time check)', () => {
+    // Type-only usage: fails `vue-tsc` if any of these are not exported.
+    const options: PaymentRequestOptions = {
+      country: 'US',
+      currency: 'usd',
+      total: { label: 'Total', amount: 1099 }
+    }
+    const onPaymentMethod: PaymentRequestEventHandler<'paymentmethod'> = (event) =>
+      event.complete('success')
+    const wallets: CanMakePaymentResult = { applePay: false, googlePay: true }
+    const returns: UsePaymentRequestReturn | null = null
+
+    expect([options, onPaymentMethod, wallets, returns]).toHaveLength(4)
   })
 })

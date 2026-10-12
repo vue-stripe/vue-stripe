@@ -83,7 +83,10 @@ describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
   })
 
   it('lists the APIs that survive in 10.x and the newly wrapped ones', () => {
-    expect(byApi('stripe.paymentRequest()')[0]?.status).toBe('accessible')
+    expect(byApi('stripe.paymentRequest()')[0]).toMatchObject({
+      status: 'covered',
+      artifact: 'usePaymentRequest'
+    })
     expect(byApi('elements.fetchUpdates()')[0]).toMatchObject({
       status: 'covered',
       artifact: 'useStripeElements'

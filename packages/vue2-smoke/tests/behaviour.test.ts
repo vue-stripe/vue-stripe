@@ -6,11 +6,12 @@ import {
   VueStripePricingTable,
   VueStripeProvider,
   useConfirmCardPayment,
-  useCreateConfirmationToken
+  useCreateConfirmationToken,
+  usePaymentRequest
 } from '@vue-stripe/vue-stripe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { CreateElement } from 'vue'
-import { element, elements, flush, stripe } from './setup'
+import { element, elements, flush, paymentRequest, stripe } from './setup'
 
 const settle = async () => {
   await flush()
@@ -173,4 +174,37 @@ it('creates a ConfirmationToken from the injected Elements under Vue 2', async (
   expect(stripe.createConfirmationToken).toHaveBeenCalledWith({ elements })
   expect(api.loading.value).toBe(false)
   expect(api.error.value).toBe(null)
+})
+
+it('runs usePaymentRequest under Vue 2 and detaches its handlers on destroy', async () => {
+  const options = { country: 'US', currency: 'usd', total: { label: 'Total', amount: 1099 } }
+  let api!: ReturnType<typeof usePaymentRequest>
+  const wrapper = mount({
+    render(h: CreateElement) {
+      return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+        h({
+          setup() {
+            api = usePaymentRequest(options)
+            return {}
+          },
+          render: (h2: CreateElement) => h2('div')
+        })
+      ])
+    }
+  })
+  await settle()
+
+  expect(stripe.paymentRequest).toHaveBeenCalledWith(options)
+  expect(api.paymentRequest.value).toBe(paymentRequest)
+  expect(api.canMakePayment.value).toEqual({ googlePay: true })
+  expect(api.loading.value).toBe(false)
+
+  const onPaymentMethod = vi.fn()
+  api.on('paymentmethod', onPaymentMethod)
+  expect(paymentRequest.on).toHaveBeenCalledWith('paymentmethod', onPaymentMethod)
+  api.show()
+  expect(paymentRequest.show).toHaveBeenCalled()
+
+  wrapper.destroy()
+  expect(paymentRequest.off).toHaveBeenCalledWith('paymentmethod', onPaymentMethod)
 })

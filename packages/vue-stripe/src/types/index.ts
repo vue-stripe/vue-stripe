@@ -23,7 +23,15 @@ import type {
   PaymentMethodResult,
   PaymentIntentOrSetupIntentResult,
   ConfirmationTokenResult,
-  CreateConfirmationToken
+  CreateConfirmationToken,
+  PaymentRequest,
+  PaymentRequestUpdateOptions,
+  CanMakePaymentResult,
+  PaymentRequestTokenEvent,
+  PaymentRequestPaymentMethodEvent,
+  PaymentRequestSourceEvent,
+  PaymentRequestShippingAddressEvent,
+  PaymentRequestShippingOptionEvent
 } from '@stripe/stripe-js'
 
 // Re-export commonly used Stripe.js types with their original names
@@ -106,7 +114,23 @@ export type {
   StripeCheckoutFormOptions,
   StripeCheckoutFormChangeEvent,
   StripeCheckoutFormConfirmEvent,
-  StripeCheckoutFormValue
+  StripeCheckoutFormValue,
+  // Payment Request API (stripe.paymentRequest())
+  PaymentRequest,
+  PaymentRequestOptions,
+  PaymentRequestUpdateOptions,
+  PaymentRequestItem,
+  PaymentRequestShippingOption,
+  PaymentRequestShippingAddress,
+  PaymentRequestWallet,
+  PaymentRequestCompleteStatus,
+  PaymentRequestUpdateDetails,
+  CanMakePaymentResult,
+  PaymentRequestTokenEvent,
+  PaymentRequestPaymentMethodEvent,
+  PaymentRequestSourceEvent,
+  PaymentRequestShippingAddressEvent,
+  PaymentRequestShippingOptionEvent
 } from '@stripe/stripe-js'
 
 // Vue-specific plugin configuration
@@ -552,6 +576,56 @@ export interface UseIdentityReturn {
   /** Opens the Stripe Identity modal for a VerificationSession client secret. */
   verifyIdentity: (clientSecret: string) => Promise<VerifyIdentityResult>
   /** True while the Identity modal is open. */
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+}
+
+/** Payload of each `PaymentRequest` event (`cancel` has none). */
+export interface PaymentRequestEventMap {
+  token: PaymentRequestTokenEvent
+  paymentmethod: PaymentRequestPaymentMethodEvent
+  source: PaymentRequestSourceEvent
+  cancel: undefined
+  shippingaddresschange: PaymentRequestShippingAddressEvent
+  shippingoptionchange: PaymentRequestShippingOptionEvent
+}
+
+/** An event `stripe.paymentRequest()` objects emit. */
+export type PaymentRequestEventType = keyof PaymentRequestEventMap
+
+/** Handler for a `PaymentRequest` event. */
+export type PaymentRequestEventHandler<K extends PaymentRequestEventType> = (
+  event: PaymentRequestEventMap[K]
+) => unknown
+
+export interface UsePaymentRequestReturn {
+  /** The `PaymentRequest` from `stripe.paymentRequest(options)`, or `null` until Stripe.js loads. */
+  paymentRequest: Readonly<Ref<PaymentRequest | null>>
+  /** Result of `canMakePayment()`: the available wallets, or `null` while checking or when none is. */
+  canMakePayment: Readonly<Ref<CanMakePaymentResult | null>>
+  /** Opens the browser's payment interface. Call it from a click handler. */
+  show: () => void
+  /** Updates the request (total, items, shipping options). Not allowed while the interface shows. */
+  update: (options: PaymentRequestUpdateOptions) => void
+  /** Closes the browser's payment interface. */
+  abort: () => void
+  /** True while the browser's payment interface is showing. */
+  isShowing: () => boolean
+  /**
+   * Listens for a `PaymentRequest` event. Handlers registered before Stripe.js loads are
+   * attached once the request exists, and all are detached when the calling scope is disposed.
+   * Returns a function that removes the handler.
+   */
+  on: <K extends PaymentRequestEventType>(
+    event: K,
+    handler: PaymentRequestEventHandler<K>
+  ) => () => void
+  /** Removes a handler registered with `on`, or all of them for `event` when `handler` is omitted. */
+  off: <K extends PaymentRequestEventType>(
+    event: K,
+    handler?: PaymentRequestEventHandler<K>
+  ) => void
+  /** True while `canMakePayment()` is pending. */
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
 }

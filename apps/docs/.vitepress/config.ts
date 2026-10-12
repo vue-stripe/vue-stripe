@@ -344,7 +344,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
               text: 'useFinancialConnections',
               link: '/api/composables/use-financial-connections'
             },
-            { text: 'useIdentity', link: '/api/composables/use-identity' }
+            { text: 'useIdentity', link: '/api/composables/use-identity' },
+            { text: 'usePaymentRequest', link: '/api/composables/use-payment-request' }
           ]
         },
         {

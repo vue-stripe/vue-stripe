@@ -16,8 +16,18 @@ export const elements = {
   submit: vi.fn(),
   update: vi.fn(() => Promise.resolve())
 }
+export const paymentRequest = {
+  canMakePayment: vi.fn(() => Promise.resolve({ googlePay: true })),
+  show: vi.fn(),
+  abort: vi.fn(),
+  isShowing: vi.fn(() => false),
+  update: vi.fn(),
+  on: vi.fn(),
+  off: vi.fn()
+}
 export const stripe = {
   elements: vi.fn(() => elements),
+  paymentRequest: vi.fn(() => paymentRequest),
   registerAppInfo: vi.fn(),
   initCheckoutElementsSdk: vi.fn(),
   confirmCardPayment: vi.fn(),

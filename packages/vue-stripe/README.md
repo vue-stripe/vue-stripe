@@ -160,6 +160,7 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements; the Payment Elem
 | `useHandleNextAction()` | Finish 3D Secure and other next actions |
 | `useFinancialConnections()` | Financial Connections and ACH bank account collection |
 | `useIdentity()` | Stripe Identity verification modal |
+| `usePaymentRequest()` | Payment Request API behind your own button (prefer the Express Checkout Element for new integrations) |
 | `useCheckoutSession()` | Session state and actions inside `VueStripeCheckoutElementsProvider` |
 | `useStripeCheckout()` | Redirect to a hosted Checkout Session URL |
 

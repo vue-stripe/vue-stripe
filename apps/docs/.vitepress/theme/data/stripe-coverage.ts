@@ -123,7 +123,14 @@ export const coverage: CoverageCategory[] = [
         api: "create('paymentRequestButton')",
         status: 'deprecated'
       },
-      { name: 'Payment Request API', api: 'stripe.paymentRequest()', status: 'accessible' }
+      {
+        // The API object survives the button element's removal; Stripe recommends
+        // the Express Checkout Element for new integrations.
+        name: 'Payment Request API',
+        api: 'stripe.paymentRequest()',
+        status: 'covered',
+        artifact: 'usePaymentRequest'
+      }
     ]
   },
   {

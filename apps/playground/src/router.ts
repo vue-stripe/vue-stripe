@@ -36,6 +36,8 @@ import PluginProviderView from './views/PluginProviderView.vue'
 import FinancialConnectionsIdentityView from './views/FinancialConnectionsIdentityView.vue'
 // Checkout Form SDK, Stripe beta (#493)
 import CheckoutFormView from './views/CheckoutFormView.vue'
+// Payment Request API composable (#505)
+import PaymentRequestView from './views/PaymentRequestView.vue'
 
 // Route metadata for SEO (typed via vue-router module augmentation)
 declare module 'vue-router' {
@@ -146,6 +148,16 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Express Checkout Element - Vue Stripe',
       description: 'Add Apple Pay, Google Pay, and other express checkout options'
+    }
+  },
+  {
+    path: '/use-payment-request',
+    name: 'PaymentRequest',
+    component: PaymentRequestView,
+    meta: {
+      title: 'usePaymentRequest - Vue Stripe',
+      description:
+        'Payment Request API (stripe.paymentRequest()): wallet check, show() and events behind your own button'
     }
   },
   {

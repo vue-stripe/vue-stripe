@@ -220,6 +220,7 @@ const navGroups = computed(() => {
     PaymentElement: Wallet,
     Checkout: CheckSquare,
     ExpressCheckout: Wallet,
+    PaymentRequest: Wallet,
     SetupIntent: KeyRound,
     LinkAuthentication: Link2,
     AddressElement: MapPin,
