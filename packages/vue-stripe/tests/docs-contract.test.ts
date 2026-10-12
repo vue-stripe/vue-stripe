@@ -88,8 +88,7 @@ function baseEvents(): string[] {
 
 /**
  * Extract the emitted event names of a component: the `events:` list of a factory
- * definition (`...BASE_EVENTS` expanded; no list means BASE_EVENTS), the `emits` of
- * the disclosure builder for a `createStripeDisclosure` definition, or the
+ * definition (`...BASE_EVENTS` expanded; no list means BASE_EVENTS), or the
  * `defineEmits` / `emits` declarations of a component with its own setup.
  */
 function extractEmits(source: string): string[] {
@@ -101,7 +100,6 @@ function extractEmits(source: string): string[] {
     if (list) quoted(list[1] as string).forEach((e) => names.add(e))
     return [...names]
   }
-  if (/createStripeDisclosure[<(]/.test(source)) source = disclosureSource
   // setup() / interface form: `(e: 'ready', ...)` and tuple form `ready: [...]` in defineEmits<{}>
   for (const m of source.matchAll(/\(\s*e:\s*['"]([\w-]+)['"]/g)) names.add(m[1] as string)
   const typed = source.match(/defineEmits<\{([\s\S]*?)\}>/)
@@ -246,7 +244,12 @@ const read = (component: string, doc: string) => {
   const docPath = resolve(DOCS_DIR, doc)
   expect(existsSync(componentPath), `missing component ${component}`).toBe(true)
   expect(existsSync(docPath), `missing doc page ${doc}`).toBe(true)
-  return { source: readFileSync(componentPath, 'utf8'), page: readFileSync(docPath, 'utf8') }
+  const source = readFileSync(componentPath, 'utf8')
+  // A disclosure definition's props, emits and exposed members live in the shared builder.
+  return {
+    source: /createStripeDisclosure[<(]/.test(source) ? disclosureSource : source,
+    page: readFileSync(docPath, 'utf8')
+  }
 }
 
 describe('docs/API contract: component events', () => {
