@@ -12,7 +12,7 @@
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "format": "prettier --write .",
-    "format:check": "turbo run format:check && prettier --check '*.{js,json,yml,yaml}' '.github/**/*.{yml,yaml}' 'scripts/**/*.json' 'tools/**/*.json'",
+    "format:check": "turbo run format:check && prettier --check '*.{js,json,yml,yaml}' '.github/**/*.{yml,yaml}' 'scripts/**/*.{json,mjs}' 'tools/**/*.json'",
     "typecheck": "turbo run typecheck",
     "type-check": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules",

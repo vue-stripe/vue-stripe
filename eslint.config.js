@@ -118,6 +118,9 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.node } }
   },
 
+  // Repo scripts (seeding, CI helpers) report progress on stdout.
+  { files: ['scripts/**'], rules: { 'no-console': 'off' } },
+
   ...scopeToBackend(nextVitals),
   // Let @next/eslint-plugin-next find the app when ESLint runs from the repo root (lint-staged).
   { files: [`${BACKEND}/**`], settings: { next: { rootDir: BACKEND } } },

@@ -52,11 +52,13 @@ jobs:
       - name: Test (coverage thresholds + doc-contract)
         run: pnpm --filter @vue-stripe/vue-stripe test:coverage
 
+      # Plain-text summary (no third-party action, no emoji), one comment updated in place.
       - name: Coverage summary on the PR
-        if: always() && matrix.node == 24 && github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
-        with:
-          working-directory: packages/vue-stripe
+        if: always() && matrix.node == 24 && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: node scripts/coverage-comment.mjs packages/vue-stripe/coverage/coverage-summary.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Upload coverage
         if: always() && matrix.node == 24
