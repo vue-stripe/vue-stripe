@@ -16,11 +16,11 @@ Complete API documentation for Vue Stripe components and composables.
 - [VueStripeAddressElement](/api/components/stripe-address-element) - Address collection
 - [VueStripeLinkAuthenticationElement](/api/components/stripe-link-authentication-element) - Link authentication
 
-### European Payment Elements
+### Regional Payment Elements
 - [VueStripeIbanElement](/api/components/stripe-iban-element) - IBAN collection for SEPA payments
-- [VueStripeIdealBankElement](/api/components/stripe-ideal-bank-element) - iDEAL bank selector (Netherlands)
-- [VueStripeP24BankElement](/api/components/stripe-p24-bank-element) - Przelewy24 bank selector (Poland)
-- [VueStripeEpsBankElement](/api/components/stripe-eps-bank-element) - EPS bank selector (Austria)
+- [VueStripeAuBankAccountElement](/api/components/stripe-au-bank-account-element) - BECS Direct Debit (Australia)
+
+Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clover (8.0); collect these payment methods with the [Payment Element](/api/components/stripe-payment-element).
 
 ### Checkout
 - [VueStripeCheckout](/api/components/stripe-checkout) - Embedded Stripe Checkout

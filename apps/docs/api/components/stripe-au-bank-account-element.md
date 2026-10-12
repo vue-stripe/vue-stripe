@@ -465,5 +465,5 @@ switch (event.type) {
 - [VueStripeElements](/api/components/stripe-elements) - Parent container component
 - [useStripeElements](/api/composables/use-stripe-elements) - Access elements in child components
 - [AU Bank Account Element Guide](/guide/au-bank-account-element) - Step-by-step implementation
-- [VueStripeFpxBankElement](/api/components/stripe-fpx-bank-element) - Malaysian payments
+- [VueStripePaymentElement](/api/components/stripe-payment-element) - FPX and other payment methods
 - [VueStripeIbanElement](/api/components/stripe-iban-element) - SEPA payments

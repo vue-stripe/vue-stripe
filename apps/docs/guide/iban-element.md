@@ -403,7 +403,5 @@ Use these test IBANs in test mode:
 
 ## Next Steps
 
-- [iDEAL Bank Element](/guide/ideal-bank-element) — Dutch bank payments
-- [P24 Bank Element](/guide/p24-bank-element) — Polish bank payments
-- [EPS Bank Element](/guide/eps-bank-element) — Austrian bank payments
+- [Payment Element](/guide/payment-element) — iDEAL, P24, EPS and other bank payments. Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clover (8.0); collect these payment methods with the [Payment Element](/guide/payment-element).
 - [API Reference](/api/components/stripe-iban-element) — Full props, events, and options

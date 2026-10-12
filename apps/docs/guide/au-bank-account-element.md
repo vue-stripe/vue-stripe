@@ -3,7 +3,7 @@
 The AU Bank Account Element collects Australian bank account details (BSB and account number) for BECS Direct Debit payments. BECS (Bulk Electronic Clearing System) is Australia's primary direct debit payment system.
 
 ::: tip Australia Only
-BECS Direct Debit is exclusively for Australian bank accounts. For other APAC countries, see [FPX Bank Element](/guide/fpx-bank-element) (Malaysia). For European options, see [IBAN Element](/guide/iban-element) (SEPA).
+BECS Direct Debit is exclusively for Australian bank accounts. For FPX (Malaysia) and other methods, use the [Payment Element](/guide/payment-element); Stripe removed the standalone FPX element in Stripe.js Clover. For European options, see [IBAN Element](/guide/iban-element) (SEPA).
 :::
 
 ## Why Use BECS Direct Debit?
@@ -488,7 +488,7 @@ button:disabled {
 
 ## Next Steps
 
-- [FPX Bank Element](/guide/fpx-bank-element) — Malaysian bank payments
+- [Payment Element](/guide/payment-element) — FPX and other payment methods
 - [IBAN Element](/guide/iban-element) — SEPA Direct Debit for EU
 - [Payment Element](/guide/payment-element) — Unified payment method selector
 - [API Reference](/api/components/stripe-au-bank-account-element) — Full props, events, and options

@@ -31,6 +31,10 @@ The Payment Element is Stripe's modern, all-in-one solution. It automatically sh
 
 **Best for:** Most e-commerce, SaaS, and marketplace applications.
 
+::: info Bank-redirect methods
+Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clover (8.0); collect these payment methods with the Payment Element.
+:::
+
 [Learn more about Payment Element →](/guide/payment-element)
 
 ## Card Element
