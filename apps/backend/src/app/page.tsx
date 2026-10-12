@@ -22,7 +22,7 @@ const generators = [
   {
     title: 'Checkout Session',
     description:
-      "Create a Checkout Session for Stripe's hosted checkout page. Returns a URL and session ID.",
+      'Create a Checkout Session. Hosted sessions return a URL; elements, embedded_page and form sessions return a client secret.',
     href: '/checkout-session',
     icon: ShoppingCart,
     color: 'bg-vue-stripe-yellow'

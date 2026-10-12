@@ -21,7 +21,20 @@ interface CreateCheckoutSessionBody {
   cancelUrl?: string
   customerEmail?: string
   metadata?: Stripe.MetadataParam
+  /**
+   * `hosted` (default) returns a Stripe-hosted `url`. `elements` (Checkout Elements SDK),
+   * `embedded_page` and `form` return a `clientSecret` and use `returnUrl` instead of
+   * `successUrl`/`cancelUrl`.
+   */
+  uiMode?: UiMode
+  /** Return URL for non-hosted sessions. `{CHECKOUT_SESSION_ID}` is substituted by Stripe. */
+  returnUrl?: string
+  /** Collect the customer's tax ID during checkout. */
+  taxIdCollection?: boolean
 }
+
+type UiMode = 'hosted' | 'elements' | 'embedded_page' | 'form'
+const UI_MODES: readonly UiMode[] = ['hosted', 'elements', 'embedded_page', 'form']
 
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3001'
 
@@ -63,18 +76,35 @@ export async function POST(request: Request) {
       ]
     }
 
+    const uiMode = body.uiMode ?? 'hosted'
+    if (!UI_MODES.includes(uiMode)) {
+      return NextResponse.json(
+        { error: `uiMode must be one of: ${UI_MODES.join(', ')}` },
+        { status: 400 }
+      )
+    }
+    const returnUrl =
+      body.returnUrl ||
+      `${FRONTEND_URL}/custom-checkout?result=success&session_id={CHECKOUT_SESSION_ID}`
+
     const session = await stripe.checkout.sessions.create({
       line_items: lineItems,
       mode: body.mode || 'payment',
-      success_url: body.successUrl || `${FRONTEND_URL}/stripe-checkout?result=success`,
-      cancel_url: body.cancelUrl || `${FRONTEND_URL}/stripe-checkout?result=cancel`,
+      ...(uiMode === 'hosted'
+        ? {
+            success_url: body.successUrl || `${FRONTEND_URL}/stripe-checkout?result=success`,
+            cancel_url: body.cancelUrl || `${FRONTEND_URL}/stripe-checkout?result=cancel`
+          }
+        : { ui_mode: uiMode, return_url: returnUrl }),
       ...(body.customerEmail && { customer_email: body.customerEmail }),
+      ...(body.taxIdCollection && { tax_id_collection: { enabled: true } }),
       ...(body.metadata && { metadata: body.metadata })
     })
 
     return NextResponse.json({
       url: session.url,
-      sessionId: session.id
+      sessionId: session.id,
+      clientSecret: session.client_secret
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
@@ -86,7 +116,7 @@ export async function POST(request: Request) {
 export function GET() {
   return NextResponse.json({
     endpoint: 'POST /api/checkout-session',
-    description: 'Create a Checkout Session and return URL',
+    description: 'Create a Checkout Session and return its URL (hosted) or client secret',
     parameters: {
       priceId: 'string (existing Stripe price ID - preferred for subscriptions)',
       amount: 'number (in cents, default: 1000, ignored if priceId provided)',
@@ -99,7 +129,10 @@ export function GET() {
       successUrl: 'string (optional)',
       cancelUrl: 'string (optional)',
       customerEmail: 'string (optional)',
-      metadata: 'object (optional)'
+      metadata: 'object (optional)',
+      uiMode: 'hosted | elements | embedded_page | form (default: hosted)',
+      returnUrl: 'string (non-hosted ui modes; default: <frontend>/custom-checkout)',
+      taxIdCollection: 'boolean (optional, enables tax ID collection)'
     }
   })
 }

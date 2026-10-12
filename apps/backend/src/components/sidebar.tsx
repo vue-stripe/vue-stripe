@@ -32,7 +32,7 @@ const generators = [
     name: 'Checkout Session',
     href: '/checkout-session',
     icon: ShoppingCart,
-    description: 'Hosted checkout'
+    description: 'Hosted or Elements checkout'
   }
 ]
 
@@ -47,24 +47,6 @@ const catalog = [
 
 const euPayments = [
   {
-    name: 'iDEAL (Netherlands)',
-    href: '/ideal-intent',
-    icon: Landmark,
-    description: 'Dutch bank payments'
-  },
-  {
-    name: 'EPS (Austria)',
-    href: '/eps-intent',
-    icon: Landmark,
-    description: 'Austrian bank payments'
-  },
-  {
-    name: 'P24 (Poland)',
-    href: '/p24-intent',
-    icon: Landmark,
-    description: 'Polish bank payments'
-  },
-  {
     name: 'SEPA Debit',
     href: '/sepa-debit-intent',
     icon: Landmark,
@@ -73,12 +55,6 @@ const euPayments = [
 ]
 
 const apacPayments = [
-  {
-    name: 'FPX (Malaysia)',
-    href: '/fpx-intent',
-    icon: Landmark,
-    description: 'Malaysian bank payments'
-  },
   {
     name: 'BECS (Australia)',
     href: '/becs-intent',
