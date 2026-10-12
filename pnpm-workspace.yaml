@@ -7,3 +7,8 @@ allowBuilds:
   sharp: false
   unrs-resolver: false
   vue-demi: true
+peerDependencyRules:
+  allowedVersions:
+    # eslint-config-next 16 pulls eslint-plugin-{import,jsx-a11y,react}, which
+    # work on ESLint 10 but have not widened their peer range yet.
+    eslint: '10'

@@ -73,20 +73,17 @@ export async function POST(request: Request) {
       payment_settings: {
         save_default_payment_method: 'on_subscription'
       },
-      expand: ['latest_invoice.payment_intent'],
+      // Since API version Basil the first invoice exposes its PaymentIntent
+      // client secret as `confirmation_secret` (invoice.payment_intent was removed).
+      expand: ['latest_invoice.confirmation_secret'],
       ...(body.metadata && { metadata: body.metadata })
     })
 
-    // Extract the client secret from the payment intent
     const invoice = subscription.latest_invoice
-    let clientSecret = null
-
-    if (invoice && typeof invoice !== 'string' && invoice.payment_intent) {
-      const paymentIntent = invoice.payment_intent
-      if (typeof paymentIntent !== 'string') {
-        clientSecret = paymentIntent.client_secret
-      }
-    }
+    const clientSecret =
+      invoice && typeof invoice !== 'string'
+        ? (invoice.confirmation_secret?.client_secret ?? null)
+        : null
 
     return NextResponse.json({
       subscriptionId: subscription.id,

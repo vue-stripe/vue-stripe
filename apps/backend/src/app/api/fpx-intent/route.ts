@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency: 'myr', // FPX only supports MYR (Malaysian Ringgit)
-      payment_method_types: ['fpx'],
+      allowed_payment_method_types: ['fpx'],
       ...(body.description && { description: body.description }),
       ...(body.metadata && { metadata: body.metadata })
     })

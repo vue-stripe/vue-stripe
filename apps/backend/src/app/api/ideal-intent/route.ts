@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: body.amount || 1000,
       currency: 'eur', // iDEAL only supports EUR
-      payment_method_types: ['ideal'],
+      allowed_payment_method_types: ['ideal'],
       ...(body.description && { description: body.description }),
       ...(body.metadata && { metadata: body.metadata })
     })

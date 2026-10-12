@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: body.amount || 1000,
       currency: body.currency || 'eur', // P24 supports EUR and PLN
-      payment_method_types: ['p24'],
+      allowed_payment_method_types: ['p24'],
       ...(body.description && { description: body.description }),
       ...(body.metadata && { metadata: body.metadata })
     })

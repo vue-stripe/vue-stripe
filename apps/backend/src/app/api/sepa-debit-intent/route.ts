@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: body.amount || 1000,
       currency: 'eur', // SEPA only supports EUR
-      payment_method_types: ['sepa_debit'],
+      allowed_payment_method_types: ['sepa_debit'],
       ...(body.description && { description: body.description }),
       ...(body.metadata && { metadata: body.metadata }),
       // SEPA mandate options

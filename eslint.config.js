@@ -119,6 +119,8 @@ export default tseslint.config(
   },
 
   ...scopeToBackend(nextVitals),
+  // Let @next/eslint-plugin-next find the app when ESLint runs from the repo root (lint-staged).
+  { files: [`${BACKEND}/**`], settings: { next: { rootDir: BACKEND } } },
 
   // eslint-config-next parses plain JS with its Babel parser, whose scope manager makes
   // typescript-eslint's no-unused-vars report every value as type-only; use the core rule.

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency: 'aud', // BECS Direct Debit only supports AUD (Australian Dollar)
-      payment_method_types: ['au_becs_debit'],
+      allowed_payment_method_types: ['au_becs_debit'],
       ...(body.description && { description: body.description }),
       ...(body.metadata && { metadata: body.metadata }),
       // BECS Direct Debit requires a mandate for recurring payments
