@@ -295,3 +295,60 @@ describe('VueStripeElements', () => {
     }
   })
 })
+
+describe('VueStripeElements options and reactivity', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  const setup = async (initial: Record<string, unknown>) => {
+    const { makeMockStripe, makeMockElements } = await import('../setup')
+    const elementsInstance = makeMockElements()
+    const stripe = makeMockStripe()
+    stripe.elements.mockReturnValue(elementsInstance)
+    const { loadStripe } = await import('@stripe/stripe-js')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+    const props = ref<Record<string, unknown>>(initial)
+    const wrapper = mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: { default: () => h(VueStripeElements, props.value) }
+    })
+    await flushPromises()
+    return { wrapper, stripe, elementsInstance, props }
+  }
+
+  it('forwards the deferred-intent props to stripe.elements()', async () => {
+    const { stripe } = await setup({
+      mode: 'payment',
+      currency: 'usd',
+      amount: 0,
+      setupFutureUsage: 'off_session',
+      captureMethod: 'manual'
+    })
+    expect(stripe.elements).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: 'payment',
+        currency: 'usd',
+        amount: 0,
+        setupFutureUsage: 'off_session',
+        captureMethod: 'manual'
+      })
+    )
+  })
+
+  it('re-creates Elements when a deferred-intent prop changes', async () => {
+    const { stripe, props } = await setup({ mode: 'payment', currency: 'usd', amount: 1000 })
+    props.value = { mode: 'payment', currency: 'usd', amount: 2500 }
+    await flushPromises()
+    expect(stripe.elements).toHaveBeenCalledTimes(2)
+    expect(stripe.elements).toHaveBeenLastCalledWith(expect.objectContaining({ amount: 2500 }))
+  })
+
+  it('applies appearance and locale changes through elements.update() without re-creating', async () => {
+    const { stripe, elementsInstance, props } = await setup({ clientSecret: 'pi_1_secret_2', appearance: { theme: 'stripe' } })
+    props.value = { clientSecret: 'pi_1_secret_2', appearance: { theme: 'night' }, locale: 'fr' }
+    await flushPromises()
+    expect(elementsInstance.update).toHaveBeenCalledWith({ appearance: { theme: 'night' }, locale: 'fr' })
+    expect(stripe.elements).toHaveBeenCalledTimes(1)
+  })
+})

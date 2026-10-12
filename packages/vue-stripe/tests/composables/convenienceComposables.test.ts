@@ -135,6 +135,26 @@ describe('useHandleNextAction', () => {
     expect(handleNextAction).toHaveBeenCalledWith({ clientSecret: 'pi_test_secret_123' })
     expect(result.paymentIntent.status).toBe('succeeded')
   })
+
+  it('surfaces a Stripe error result on the error ref and resets loading', async () => {
+    const handleNextAction = vi.fn(() => Promise.resolve({ error: { message: 'Authentication failed' } }))
+    const { api } = await mountWith({ handleNextAction }, () => useHandleNextAction())
+
+    const result = await api().handleNextAction({ clientSecret: 'pi_test_secret_123' })
+    expect(result.error.message).toBe('Authentication failed')
+    expect(api().error.value).toBe('Authentication failed')
+    expect(api().loading.value).toBe(false)
+  })
+
+  it('turns a thrown error into an error result', async () => {
+    const handleNextAction = vi.fn(() => Promise.reject(new Error('Network down')))
+    const { api } = await mountWith({ handleNextAction }, () => useHandleNextAction())
+
+    const result = await api().handleNextAction({ clientSecret: 'pi_test_secret_123' })
+    expect(result).toEqual({ error: { message: 'Network down' } })
+    expect(api().error.value).toBe('Network down')
+    expect(api().loading.value).toBe(false)
+  })
 })
 
 describe('usePaymentIntent.retrievePaymentIntent', () => {
