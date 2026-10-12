@@ -89,6 +89,8 @@ Vitest + `@vue/test-utils` in a `jsdom` environment; setup in `tests/setup.ts`. 
 
 `tests/docs-contract.test.ts` is a guard test: it extracts each component's real `defineEmits` surface and fails if `apps/docs/api/components/*.md` doesn't document those events. **When you add/remove a component event, update the matching docs page** or this test fails (set `DOCS_CONTRACT_STRICT=0` only to temporarily downgrade to warnings).
 
+`tests/stripe-surface.test.ts` is the Stripe.js surface guard: it parses the installed `@stripe/stripe-js` `.d.ts` (every member of `Stripe`, `StripeElements`, the Checkout Elements / Form SDKs and their actions, `StripeEmbeddedCheckout`, `PaymentRequest` and element instances, `loadStripe` / `setLoadParameters`, and every `StripeElementType`) and fails unless each one is listed in exactly one row's `surface` in `apps/docs/.vitepress/theme/data/stripe-coverage.ts` with status `covered` or `deprecated`. It also fails when a `surface` key no longer exists in the types, and when any row is `accessible` / `planned` (the coverage tracker must read 100%). **When you bump `@stripe/stripe-js` or add a wrapper, classify the new surface in the matrix** (keys are `<declaring type>.<member>`, e.g. `Stripe.confirmPayment`, `StripeElementType.card`). `tests/coverage-matrix.test.ts` checks that every `covered` row's `artifact` is a real export.
+
 ## Conventions
 
 - Public API surface is `src/index.ts` — new components/composables/types must be exported there (and components also via `src/components/index.ts`). `tests/public-exports.test.ts` guards this.

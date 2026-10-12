@@ -168,6 +168,17 @@ describe('useCheckoutForm (Checkout Form SDK actions, beta)', () => {
     ])
   })
 
+  it('getForm and getCurrencySelectorElement return the SDK instance elements', async () => {
+    const checkoutForm = makeMockCheckoutForm()
+    const form = { id: 'form' }
+    const selector = { id: 'currencySelector' }
+    checkoutForm.getForm.mockReturnValue(form)
+    checkoutForm.getCurrencySelectorElement.mockReturnValue(selector)
+    const { api } = await mountWith(checkoutForm)
+    expect(api().getForm()).toBe(form)
+    expect(api().getCurrencySelectorElement()).toBe(selector)
+  })
+
   it('returns the not-ready sentinel before loadActions() resolves', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const api = mountWithContext({
@@ -185,6 +196,8 @@ describe('useCheckoutForm (Checkout Form SDK actions, beta)', () => {
     expect(api.getSession()).toBe(null)
     expect(() => api.changeAppearance({ theme: 'night' })).not.toThrow()
     expect(() => api.loadFonts([])).not.toThrow()
+    expect(api.getForm()).toBe(null)
+    expect(api.getCurrencySelectorElement()).toBe(null)
     expect(warnSpy).toHaveBeenCalledWith(
       '[Vue Stripe] changeAppearance called before the Checkout Form is ready'
     )

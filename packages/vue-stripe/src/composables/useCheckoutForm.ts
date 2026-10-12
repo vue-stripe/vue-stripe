@@ -95,6 +95,11 @@ export function useCheckoutForm(): UseCheckoutFormReturn {
       withCheckout('changeAppearance', () => ctx.checkout.value?.changeAppearance(appearance)),
     /** Load additional fonts into the form. */
     loadFonts: (fonts: Array<CssFontSource | CustomFontSource>): void =>
-      withCheckout('loadFonts', () => ctx.checkout.value?.loadFonts(fonts))
+      withCheckout('loadFonts', () => ctx.checkout.value?.loadFonts(fonts)),
+
+    /** The form created on this SDK (`checkoutFormSdk.getForm()`); null until it exists. */
+    getForm: () => ctx.checkout.value?.getForm() ?? null,
+    /** The Currency Selector created on this SDK; null until it exists. */
+    getCurrencySelectorElement: () => ctx.checkout.value?.getCurrencySelectorElement() ?? null
   } satisfies UseCheckoutFormReturn
 }

@@ -424,6 +424,15 @@ export interface UseCheckoutSessionReturn {
   removeOptionalLineItem: StripeCheckoutLoadActionsSuccess['removeOptionalLineItem']
   changeAppearance: StripeCheckoutElementsSdk['changeAppearance']
   loadFonts: StripeCheckoutElementsSdk['loadFonts']
+  /** Elements created on the SDK, `null` when absent or before it initializes. */
+  getPaymentElement: StripeCheckoutElementsSdk['getPaymentElement']
+  getBillingAddressElement: StripeCheckoutElementsSdk['getBillingAddressElement']
+  getShippingAddressElement: StripeCheckoutElementsSdk['getShippingAddressElement']
+  getExpressCheckoutElement: StripeCheckoutElementsSdk['getExpressCheckoutElement']
+  getCurrencySelectorElement: StripeCheckoutElementsSdk['getCurrencySelectorElement']
+  getTaxIdElement: StripeCheckoutElementsSdk['getTaxIdElement']
+  getTermsElement: StripeCheckoutElementsSdk['getTermsElement']
+  getLinkSignupElement: StripeCheckoutElementsSdk['getLinkSignupElement']
 }
 
 /**
@@ -455,6 +464,9 @@ export interface UseCheckoutFormReturn {
   removeOptionalLineItem: StripeCheckoutFormLoadActionsSuccess['removeOptionalLineItem']
   changeAppearance: StripeCheckoutFormSdk['changeAppearance']
   loadFonts: StripeCheckoutFormSdk['loadFonts']
+  /** Elements created on the SDK, `null` when absent or before it initializes. */
+  getForm: StripeCheckoutFormSdk['getForm']
+  getCurrencySelectorElement: StripeCheckoutFormSdk['getCurrencySelectorElement']
 }
 
 /**

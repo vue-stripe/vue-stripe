@@ -139,6 +139,28 @@ describe('useCheckoutSession (Checkout Elements SDK actions)', () => {
     ])
   })
 
+  it('element getters return the elements created on the SDK instance', async () => {
+    const checkout = makeMockCheckout()
+    const payment = { id: 'payment' }
+    checkout.getPaymentElement.mockReturnValue(payment)
+    const { api } = await mountWith(checkout)
+    expect(api().getPaymentElement()).toBe(payment)
+    const getters = [
+      'getBillingAddressElement',
+      'getShippingAddressElement',
+      'getExpressCheckoutElement',
+      'getCurrencySelectorElement',
+      'getTaxIdElement',
+      'getTermsElement',
+      'getLinkSignupElement'
+    ] as const
+    for (const getter of getters) {
+      const element = { id: getter }
+      checkout[getter].mockReturnValue(element)
+      expect(api()[getter](), getter).toBe(element)
+    }
+  })
+
   it('returns the not-ready sentinel before loadActions() resolves', async () => {
     const api = mountWithContext({
       checkout: shallowRef(null),
@@ -154,5 +176,7 @@ describe('useCheckoutSession (Checkout Elements SDK actions)', () => {
     await expect(api.updateEmail('x@y.z')).resolves.toMatchObject({ type: 'error' })
     expect(api.getSession()).toBe(null)
     expect(() => api.changeAppearance({ theme: 'night' })).not.toThrow()
+    expect(api.getPaymentElement()).toBe(null)
+    expect(api.getTaxIdElement()).toBe(null)
   })
 })

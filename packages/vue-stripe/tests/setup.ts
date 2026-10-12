@@ -70,6 +70,14 @@ export interface MockStripeCheckout {
   createContactDetailsElement: MockFn
   createTermsElement: MockFn
   createLinkSignupElement: MockFn
+  getPaymentElement: MockFn
+  getBillingAddressElement: MockFn
+  getShippingAddressElement: MockFn
+  getExpressCheckoutElement: MockFn
+  getCurrencySelectorElement: MockFn
+  getTaxIdElement: MockFn
+  getTermsElement: MockFn
+  getLinkSignupElement: MockFn
 }
 
 // Stripe.js 10 Checkout Form SDK handle (`stripe.initCheckoutFormSdk()`, beta).
@@ -158,7 +166,15 @@ export function makeMockCheckout(actions = makeMockCheckoutActions()): MockStrip
     createTaxIdElement: vi.fn(() => makeMockElement()),
     createContactDetailsElement: vi.fn(() => makeMockElement()),
     createTermsElement: vi.fn(() => makeMockElement()),
-    createLinkSignupElement: vi.fn(() => makeMockElement())
+    createLinkSignupElement: vi.fn(() => makeMockElement()),
+    getPaymentElement: vi.fn(() => null),
+    getBillingAddressElement: vi.fn(() => null),
+    getShippingAddressElement: vi.fn(() => null),
+    getExpressCheckoutElement: vi.fn(() => null),
+    getCurrencySelectorElement: vi.fn(() => null),
+    getTaxIdElement: vi.fn(() => null),
+    getTermsElement: vi.fn(() => null),
+    getLinkSignupElement: vi.fn(() => null)
   }
 }
 

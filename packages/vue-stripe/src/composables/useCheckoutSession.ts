@@ -3,6 +3,7 @@ import type {
   Appearance,
   CssFontSource,
   CustomFontSource,
+  StripeCheckoutElementsSdk,
   StripeCheckoutLoadActionsSuccess,
   StripeCheckoutSession
 } from '@stripe/stripe-js'
@@ -10,11 +11,14 @@ import type { UseCheckoutSessionReturn } from '../types'
 import { stripeCheckoutInjectionKey } from '../utils/injection-keys'
 import { VueStripeCheckoutError } from '../utils/errors'
 
+type ElementGetter = Extract<keyof StripeCheckoutElementsSdk, `get${string}Element`>
+
 /**
  * Drive an Elements-with-Checkout-Sessions integration (Stripe.js Checkout Elements SDK).
  *
  * Exposes the reactive session plus every session action (`confirm`,
- * `applyPromotionCode`, `updateEmail`, `validateElements`, ...). Must be used
+ * `applyPromotionCode`, `updateEmail`, `validateElements`, ...) and the SDK's
+ * element getters (`getPaymentElement`, ...). Must be used
  * within `<VueStripeCheckoutElementsProvider>`.
  *
  * @example
@@ -66,6 +70,10 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
     run()
   }
 
+  // Element getters also live on the SDK handle; null until it exists.
+  const getter = <K extends ElementGetter>(name: K) =>
+    (() => ctx.checkout.value?.[name]() ?? null) as StripeCheckoutElementsSdk[K]
+
   return {
     // Casts bridge Vue's DeepReadonly<Ref<...>> to the interface's Readonly<Ref<...>>.
     checkout: readonly(ctx.checkout) as UseCheckoutSessionReturn['checkout'],
@@ -97,6 +105,16 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
       withCheckout('changeAppearance', () => ctx.checkout.value?.changeAppearance(appearance)),
     /** Load additional fonts into the Checkout elements. */
     loadFonts: (fonts: Array<CssFontSource | CustomFontSource>): void =>
-      withCheckout('loadFonts', () => ctx.checkout.value?.loadFonts(fonts))
+      withCheckout('loadFonts', () => ctx.checkout.value?.loadFonts(fonts)),
+
+    /** Elements created on this Checkout session (`checkout.get*Element()`). */
+    getPaymentElement: getter('getPaymentElement'),
+    getBillingAddressElement: getter('getBillingAddressElement'),
+    getShippingAddressElement: getter('getShippingAddressElement'),
+    getExpressCheckoutElement: getter('getExpressCheckoutElement'),
+    getCurrencySelectorElement: getter('getCurrencySelectorElement'),
+    getTaxIdElement: getter('getTaxIdElement'),
+    getTermsElement: getter('getTermsElement'),
+    getLinkSignupElement: getter('getLinkSignupElement')
   } satisfies UseCheckoutSessionReturn
 }

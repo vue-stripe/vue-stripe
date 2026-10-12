@@ -1,6 +1,6 @@
 # useCheckoutSession
 
-Drives an **Elements with Checkout Sessions** integration from inside a [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider). Returns the reactive session state, every session action (`confirm`, `applyPromotionCode`, `updateEmail`, …) and the SDK's `changeAppearance` / `loadFonts`.
+Drives an **Elements with Checkout Sessions** integration from inside a [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider). Returns the reactive session state, every session action (`confirm`, `applyPromotionCode`, `updateEmail`, …) and the SDK's `changeAppearance` / `loadFonts` and element getters (`getPaymentElement`, ...).
 
 ::: tip Usage context
 Must be called within a `VueStripeCheckoutElementsProvider` (or its deprecated alias `VueStripeCheckoutProvider`), which itself must be inside a `VueStripeProvider`. Calling it elsewhere throws `VueStripeCheckoutError`.
@@ -66,6 +66,14 @@ interface UseCheckoutSessionReturn {
   // On the SDK handle
   changeAppearance: StripeCheckoutElementsSdk['changeAppearance']
   loadFonts: StripeCheckoutElementsSdk['loadFonts']
+  getPaymentElement: StripeCheckoutElementsSdk['getPaymentElement']
+  getBillingAddressElement: StripeCheckoutElementsSdk['getBillingAddressElement']
+  getShippingAddressElement: StripeCheckoutElementsSdk['getShippingAddressElement']
+  getExpressCheckoutElement: StripeCheckoutElementsSdk['getExpressCheckoutElement']
+  getCurrencySelectorElement: StripeCheckoutElementsSdk['getCurrencySelectorElement']
+  getTaxIdElement: StripeCheckoutElementsSdk['getTaxIdElement']
+  getTermsElement: StripeCheckoutElementsSdk['getTermsElement']
+  getLinkSignupElement: StripeCheckoutElementsSdk['getLinkSignupElement']
 }
 ```
 
@@ -103,8 +111,13 @@ Each action is forwarded to `actions` (Stripe's `StripeCheckoutLoadActionsSucces
 |--------|-------------|
 | `changeAppearance(appearance)` | Restyle every Checkout element at runtime |
 | `loadFonts(fonts)` | Load additional fonts into the Checkout elements |
+| `getPaymentElement()` | The Payment Element created on this session, or `null` |
+| `getBillingAddressElement()` / `getShippingAddressElement()` | The billing / shipping Address Element, or `null` |
+| `getExpressCheckoutElement()` | The Express Checkout Element, or `null` |
+| `getCurrencySelectorElement()` / `getTaxIdElement()` | The Currency Selector / Tax ID Element, or `null` |
+| `getTermsElement()` / `getLinkSignupElement()` | The Terms / Link Signup Element (Stripe beta), or `null` |
 
-These two call the SDK handle, which exists before the actions load. Called before the SDK exists, they log a `[Vue Stripe]` warning and do nothing.
+These call the SDK handle, which exists before the actions load. Called before the SDK exists, `changeAppearance` and `loadFonts` log a `[Vue Stripe]` warning and do nothing, and the getters return `null`. Inside a component you can also take the element from the component's exposed `element` ref.
 
 ::: info Result shape
 The actions resolve to Stripe's discriminated result: `{ type: 'success'; session }` on success or `{ type: 'error'; error }` on failure — always branch on `result.type`.

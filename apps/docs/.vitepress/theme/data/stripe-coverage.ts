@@ -5,6 +5,12 @@
 // every `covered` entry's `artifact` is a real export of @vue-stripe/vue-stripe,
 // so the numbers here cannot drift above what actually ships.
 //
+// A second guard (packages/vue-stripe/tests/stripe-surface.test.ts) parses the
+// installed @stripe/stripe-js type definitions: every method and element type
+// must be listed in exactly one row's `surface` with status `covered` or
+// `deprecated`, and every `surface` key must still exist in the types. A
+// Stripe.js upgrade that adds surface fails the build until it is classified here.
+//
 // status:
 //   covered    – a dedicated Vue component or composable wraps it
 //   accessible – no wrapper, but reachable via the raw stripe / elements instance
@@ -24,6 +30,12 @@ export interface CoverageItem {
   artifact?: string
   /** Roadmap issue number (when status === 'planned'). */
   issue?: number
+  /**
+   * The @stripe/stripe-js type members this row accounts for, as
+   * `<declaring type>.<member>` (`Stripe.confirmPayment`, `StripeElementType.card`,
+   * `StripePaymentElement.collapse`). Checked by tests/stripe-surface.test.ts.
+   */
+  surface?: string[]
 }
 
 export interface CoverageCategory {
@@ -36,7 +48,8 @@ const confirmer = (name: string, method: string): CoverageItem => ({
   name,
   api: `stripe.${method}()`,
   status: 'covered',
-  artifact: `use${method.charAt(0).toUpperCase()}${method.slice(1)}`
+  artifact: `use${method.charAt(0).toUpperCase()}${method.slice(1)}`,
+  surface: [`Stripe.${method}`]
 })
 
 export const coverage: CoverageCategory[] = [
@@ -47,7 +60,16 @@ export const coverage: CoverageCategory[] = [
         name: 'Stripe Provider',
         api: 'loadStripe()',
         status: 'covered',
-        artifact: 'VueStripeProvider'
+        artifact: 'VueStripeProvider',
+        surface: ['loadStripe']
+      },
+      {
+        // The provider and createVueStripe() register Vue Stripe as the wrapper library.
+        name: 'Wrapper library registration',
+        api: 'stripe.registerAppInfo()',
+        status: 'covered',
+        artifact: 'VueStripeProvider',
+        surface: ['Stripe.registerAppInfo']
       },
       {
         name: 'Developer tools option',
@@ -59,7 +81,8 @@ export const coverage: CoverageCategory[] = [
         name: 'Advanced fraud signals opt-out',
         api: 'loadStripe.setLoadParameters({ advancedFraudSignals })',
         status: 'covered',
-        artifact: 'VueStripeProvider'
+        artifact: 'VueStripeProvider',
+        surface: ['loadStripe.setLoadParameters']
       },
       {
         // A type: re-exported from the package, documented on the provider page.
@@ -73,32 +96,61 @@ export const coverage: CoverageCategory[] = [
         name: 'Elements group',
         api: 'stripe.elements()',
         status: 'covered',
-        artifact: 'VueStripeElements'
+        artifact: 'VueStripeElements',
+        // The appearance / locale props are applied with elements.update().
+        surface: ['Stripe.elements', 'StripeElements.update']
       },
       { name: 'useStripe', api: 'Stripe instance', status: 'covered', artifact: 'useStripe' },
       {
         name: 'useStripeElements',
         api: 'elements + submit()',
         status: 'covered',
-        artifact: 'useStripeElements'
+        artifact: 'useStripeElements',
+        surface: ['StripeElements.submit']
       },
       {
         name: 'Elements fetchUpdates',
         api: 'elements.fetchUpdates()',
         status: 'covered',
-        artifact: 'useStripeElements'
+        artifact: 'useStripeElements',
+        surface: ['StripeElements.fetchUpdates']
       },
       {
         name: 'Elements getElement',
         api: 'elements.getElement()',
         status: 'covered',
-        artifact: 'useStripeElements'
+        artifact: 'useStripeElements',
+        surface: ['StripeElements.getElement']
       },
       {
         name: 'Elements update-end event',
         api: "elements.on('update-end')",
         status: 'covered',
-        artifact: 'VueStripeElements'
+        artifact: 'VueStripeElements',
+        surface: ['StripeElements.on']
+      },
+      {
+        // Every element component (createStripeElement) creates, mounts, listens, updates
+        // and destroys its element and exposes focus / blur / clear; the Payment Element
+        // stands for all of them. Unmounting the component (v-if) is element.unmount();
+        // Vue's `.once` event modifier is element.once().
+        name: 'Element lifecycle, events and updates',
+        api: 'elements.create() / element.mount() / on() / update() / destroy()',
+        status: 'covered',
+        artifact: 'VueStripePaymentElement',
+        surface: [
+          'StripeElements.create',
+          'StripeElementBase.mount',
+          'StripeElementBase.unmount',
+          'StripeElementBase.destroy',
+          'StripeElementBase.focus',
+          'StripeElementBase.blur',
+          'StripeElementBase.clear',
+          'StripeElement.on',
+          'StripeElement.once',
+          'StripeElement.off',
+          'StripeElement.update'
+        ]
       }
     ]
   },
@@ -109,13 +161,22 @@ export const coverage: CoverageCategory[] = [
         name: 'Payment Element',
         api: "create('payment')",
         status: 'covered',
-        artifact: 'VueStripePaymentElement'
+        artifact: 'VueStripePaymentElement',
+        surface: [
+          'StripeElementType.payment',
+          'StripeCheckoutElementsSdk.createPaymentElement',
+          'StripePaymentElement.collapse'
+        ]
       },
       {
         name: 'Express Checkout Element',
         api: "create('expressCheckout')",
         status: 'covered',
-        artifact: 'VueStripeExpressCheckoutElement'
+        artifact: 'VueStripeExpressCheckoutElement',
+        surface: [
+          'StripeElementType.expressCheckout',
+          'StripeCheckoutElementsSdk.createExpressCheckoutElement'
+        ]
       },
       {
         // Removed in Endive; the Express Checkout Element replaces it.
@@ -129,7 +190,18 @@ export const coverage: CoverageCategory[] = [
         name: 'Payment Request API',
         api: 'stripe.paymentRequest()',
         status: 'covered',
-        artifact: 'usePaymentRequest'
+        artifact: 'usePaymentRequest',
+        surface: [
+          'Stripe.paymentRequest',
+          'PaymentRequest.canMakePayment',
+          'PaymentRequest.show',
+          'PaymentRequest.abort',
+          'PaymentRequest.isShowing',
+          'PaymentRequest.update',
+          'PaymentRequest.on',
+          'PaymentRequest.once',
+          'PaymentRequest.off'
+        ]
       }
     ]
   },
@@ -140,25 +212,29 @@ export const coverage: CoverageCategory[] = [
         name: 'Card Element',
         api: "create('card')",
         status: 'covered',
-        artifact: 'VueStripeCardElement'
+        artifact: 'VueStripeCardElement',
+        surface: ['StripeElementType.card']
       },
       {
         name: 'Card Number',
         api: "create('cardNumber')",
         status: 'covered',
-        artifact: 'VueStripeCardNumberElement'
+        artifact: 'VueStripeCardNumberElement',
+        surface: ['StripeElementType.cardNumber']
       },
       {
         name: 'Card Expiry',
         api: "create('cardExpiry')",
         status: 'covered',
-        artifact: 'VueStripeCardExpiryElement'
+        artifact: 'VueStripeCardExpiryElement',
+        surface: ['StripeElementType.cardExpiry']
       },
       {
         name: 'Card CVC',
         api: "create('cardCvc')",
         status: 'covered',
-        artifact: 'VueStripeCardCvcElement'
+        artifact: 'VueStripeCardCvcElement',
+        surface: ['StripeElementType.cardCvc']
       }
     ]
   },
@@ -169,7 +245,8 @@ export const coverage: CoverageCategory[] = [
         name: 'IBAN Element',
         api: "create('iban')",
         status: 'covered',
-        artifact: 'VueStripeIbanElement'
+        artifact: 'VueStripeIbanElement',
+        surface: ['StripeElementType.iban']
       },
       {
         // Removed in Clover; collect these methods with the Payment Element.
@@ -181,7 +258,8 @@ export const coverage: CoverageCategory[] = [
         name: 'AU Bank Account',
         api: "create('auBankAccount')",
         status: 'covered',
-        artifact: 'VueStripeAuBankAccountElement'
+        artifact: 'VueStripeAuBankAccountElement',
+        surface: ['StripeElementType.auBankAccount']
       }
     ]
   },
@@ -192,34 +270,56 @@ export const coverage: CoverageCategory[] = [
         name: 'Address Element',
         api: "create('address')",
         status: 'covered',
-        artifact: 'VueStripeAddressElement'
+        artifact: 'VueStripeAddressElement',
+        surface: [
+          'StripeElementType.address',
+          'StripeCheckoutElementsSdk.createBillingAddressElement',
+          'StripeCheckoutElementsSdk.createShippingAddressElement',
+          'StripeAddressElement.getValue'
+        ]
       },
       {
         name: 'Link Authentication',
         api: "create('linkAuthentication')",
         status: 'covered',
-        artifact: 'VueStripeLinkAuthenticationElement'
+        artifact: 'VueStripeLinkAuthenticationElement',
+        surface: ['StripeElementType.linkAuthentication']
       },
-      { name: 'Shipping Address', api: "create('shippingAddress')", status: 'deprecated' },
+      {
+        // Superseded by the Address Element in shipping mode.
+        name: 'Shipping Address',
+        api: "create('shippingAddress')",
+        status: 'deprecated',
+        surface: ['StripeElementType.shippingAddress']
+      },
       {
         name: 'Contact Details',
         api: "checkout.createContactDetailsElement() / create('contactDetails')",
         status: 'covered',
-        artifact: 'VueStripeContactDetailsElement'
+        artifact: 'VueStripeContactDetailsElement',
+        surface: [
+          'StripeElementType.contactDetails',
+          'StripeCheckoutElementsSdk.createContactDetailsElement'
+        ]
       },
       {
         // Stripe beta.
         name: 'Link Signup',
         api: "checkout.createLinkSignupElement() / create('linkSignup')",
         status: 'covered',
-        artifact: 'VueStripeLinkSignupElement'
+        artifact: 'VueStripeLinkSignupElement',
+        surface: [
+          'StripeElementType.linkSignup',
+          'StripeCheckoutElementsSdk.createLinkSignupElement'
+        ]
       },
       {
         // Stripe beta.
         name: 'Terms',
         api: "checkout.createTermsElement() / create('terms')",
         status: 'covered',
-        artifact: 'VueStripeTermsElement'
+        artifact: 'VueStripeTermsElement',
+        surface: ['StripeElementType.terms', 'StripeCheckoutElementsSdk.createTermsElement']
       }
     ]
   },
@@ -230,7 +330,8 @@ export const coverage: CoverageCategory[] = [
         name: 'Payment Method Messaging (BNPL)',
         api: "create('paymentMethodMessaging')",
         status: 'covered',
-        artifact: 'VueStripePaymentMethodMessagingElement'
+        artifact: 'VueStripePaymentMethodMessagingElement',
+        surface: ['StripeElementType.paymentMethodMessaging']
       },
       {
         // Removed in Clover; use the Payment Method Messaging Element.
@@ -253,7 +354,13 @@ export const coverage: CoverageCategory[] = [
         name: 'Checkout Form element',
         api: 'checkoutFormSdk.createForm()',
         status: 'covered',
-        artifact: 'VueStripeCheckoutForm'
+        artifact: 'VueStripeCheckoutForm',
+        surface: [
+          'StripeElementType.paymentForm',
+          'StripeCheckoutFormSdk.createForm',
+          'StripeCheckoutForm.getValue',
+          'StripeCheckoutForm.setView'
+        ]
       },
       // Checkout Elements SDK elements; Tax ID and Currency Selector also exist on
       // elements.create() behind a Stripe beta.
@@ -261,13 +368,23 @@ export const coverage: CoverageCategory[] = [
         name: 'Currency Selector',
         api: "checkout.createCurrencySelectorElement() / create('currencySelector')",
         status: 'covered',
-        artifact: 'VueStripeCurrencySelectorElement'
+        artifact: 'VueStripeCurrencySelectorElement',
+        surface: [
+          'StripeElementType.currencySelector',
+          'StripeCheckoutElementsSdk.createCurrencySelectorElement',
+          'StripeCheckoutFormSdk.createCurrencySelectorElement'
+        ]
       },
       {
         name: 'Tax ID',
         api: "checkout.createTaxIdElement() / create('taxId')",
         status: 'covered',
-        artifact: 'VueStripeTaxIdElement'
+        artifact: 'VueStripeTaxIdElement',
+        surface: [
+          'StripeElementType.taxId',
+          'StripeCheckoutElementsSdk.createTaxIdElement',
+          'StripeTaxIdElement.getValue'
+        ]
       }
     ]
   },
@@ -278,38 +395,44 @@ export const coverage: CoverageCategory[] = [
         name: 'Card Number Display',
         api: "create('issuingCardNumberDisplay')",
         status: 'covered',
-        artifact: 'VueStripeIssuingCardNumberDisplayElement'
+        artifact: 'VueStripeIssuingCardNumberDisplayElement',
+        surface: ['StripeElementType.issuingCardNumberDisplay']
       },
       {
         name: 'Card CVC Display',
         api: "create('issuingCardCvcDisplay')",
         status: 'covered',
-        artifact: 'VueStripeIssuingCardCvcDisplayElement'
+        artifact: 'VueStripeIssuingCardCvcDisplayElement',
+        surface: ['StripeElementType.issuingCardCvcDisplay']
       },
       {
         name: 'Card Expiry Display',
         api: "create('issuingCardExpiryDisplay')",
         status: 'covered',
-        artifact: 'VueStripeIssuingCardExpiryDisplayElement'
+        artifact: 'VueStripeIssuingCardExpiryDisplayElement',
+        surface: ['StripeElementType.issuingCardExpiryDisplay']
       },
       {
         name: 'Card PIN Display',
         api: "create('issuingCardPinDisplay')",
         status: 'covered',
-        artifact: 'VueStripeIssuingCardPinDisplayElement'
+        artifact: 'VueStripeIssuingCardPinDisplayElement',
+        surface: ['StripeElementType.issuingCardPinDisplay']
       },
       {
         name: 'Card Copy Button',
         api: "create('issuingCardCopyButton')",
         status: 'covered',
-        artifact: 'VueStripeIssuingCardCopyButtonElement'
+        artifact: 'VueStripeIssuingCardCopyButtonElement',
+        surface: ['StripeElementType.issuingCardCopyButton']
       },
       {
         // No typed elements.create() overload in Stripe.js 10.0.0; created by type string.
         name: 'Add to Wallet (Issuing)',
         api: "create('issuingAddToWalletButton')",
         status: 'covered',
-        artifact: 'VueStripeIssuingAddToWalletButtonElement'
+        artifact: 'VueStripeIssuingAddToWalletButtonElement',
+        surface: ['StripeElementType.issuingAddToWalletButton']
       }
     ]
   },
@@ -368,20 +491,90 @@ export const coverage: CoverageCategory[] = [
         name: 'Embedded Checkout',
         api: 'stripe.createEmbeddedCheckoutPage()',
         status: 'covered',
-        artifact: 'VueStripeEmbeddedCheckout'
+        artifact: 'VueStripeEmbeddedCheckout',
+        surface: [
+          'Stripe.createEmbeddedCheckoutPage',
+          'StripeEmbeddedCheckout.mount',
+          'StripeEmbeddedCheckout.unmount',
+          'StripeEmbeddedCheckout.destroy'
+        ]
       },
       {
         name: 'Elements with Checkout Sessions',
         api: 'stripe.initCheckoutElementsSdk()',
         status: 'covered',
-        artifact: 'VueStripeCheckoutElementsProvider'
+        artifact: 'VueStripeCheckoutElementsProvider',
+        surface: [
+          'Stripe.initCheckoutElementsSdk',
+          'StripeCheckoutElementsSdk.on',
+          'StripeCheckoutElementsSdk.loadActions'
+        ]
+      },
+      {
+        // The Checkout Form SDK's actions are a subset of these (same type, minus five).
+        name: 'Checkout session actions',
+        api: 'actions.confirm() / applyPromotionCode() / update*() / changeAppearance()',
+        status: 'covered',
+        artifact: 'useCheckoutSession',
+        surface: [
+          'StripeCheckoutLoadActionsSuccess.confirm',
+          'StripeCheckoutLoadActionsSuccess.getSession',
+          'StripeCheckoutLoadActionsSuccess.applyPromotionCode',
+          'StripeCheckoutLoadActionsSuccess.removePromotionCode',
+          'StripeCheckoutLoadActionsSuccess.updateEmail',
+          'StripeCheckoutLoadActionsSuccess.updatePhoneNumber',
+          'StripeCheckoutLoadActionsSuccess.updateBillingAddress',
+          'StripeCheckoutLoadActionsSuccess.updateShippingAddress',
+          'StripeCheckoutLoadActionsSuccess.updateLineItemQuantity',
+          'StripeCheckoutLoadActionsSuccess.updateShippingOption',
+          'StripeCheckoutLoadActionsSuccess.updateTaxIdInfo',
+          'StripeCheckoutLoadActionsSuccess.runServerUpdate',
+          'StripeCheckoutLoadActionsSuccess.validateElements',
+          'StripeCheckoutLoadActionsSuccess.addOptionalLineItem',
+          'StripeCheckoutLoadActionsSuccess.removeOptionalLineItem',
+          'StripeCheckoutElementsSdk.changeAppearance',
+          'StripeCheckoutElementsSdk.loadFonts'
+        ]
+      },
+      {
+        name: 'Checkout element getters',
+        api: 'checkout.getPaymentElement() / get*Element()',
+        status: 'covered',
+        artifact: 'useCheckoutSession',
+        surface: [
+          'StripeCheckoutElementsSdk.getPaymentElement',
+          'StripeCheckoutElementsSdk.getBillingAddressElement',
+          'StripeCheckoutElementsSdk.getShippingAddressElement',
+          'StripeCheckoutElementsSdk.getExpressCheckoutElement',
+          'StripeCheckoutElementsSdk.getCurrencySelectorElement',
+          'StripeCheckoutElementsSdk.getTaxIdElement',
+          'StripeCheckoutElementsSdk.getTermsElement',
+          'StripeCheckoutElementsSdk.getLinkSignupElement'
+        ]
       },
       {
         // Stripe beta: the account needs Checkout Form access.
         name: 'Checkout Form',
         api: 'stripe.initCheckoutFormSdk()',
         status: 'covered',
-        artifact: 'VueStripeCheckoutFormProvider'
+        artifact: 'VueStripeCheckoutFormProvider',
+        surface: [
+          'Stripe.initCheckoutFormSdk',
+          'StripeCheckoutFormSdk.on',
+          'StripeCheckoutFormSdk.loadActions'
+        ]
+      },
+      {
+        name: 'Checkout Form SDK methods',
+        api: 'checkoutFormSdk.getForm() / changeAppearance() / loadFonts()',
+        status: 'covered',
+        artifact: 'useCheckoutForm',
+        surface: [
+          'StripeCheckoutFormSdk.getForm',
+          'StripeCheckoutFormSdk.getCurrencySelectorElement',
+          'StripeCheckoutFormSdk.changeAppearance',
+          'StripeCheckoutFormSdk.loadFonts'
+        ]
       }
     ]
   },
@@ -392,79 +585,99 @@ export const coverage: CoverageCategory[] = [
         name: 'Confirm Payment',
         api: 'stripe.confirmPayment()',
         status: 'covered',
-        artifact: 'usePaymentIntent'
+        artifact: 'usePaymentIntent',
+        surface: ['Stripe.confirmPayment']
       },
       {
         name: 'Confirm Setup',
         api: 'stripe.confirmSetup()',
         status: 'covered',
-        artifact: 'useSetupIntent'
+        artifact: 'useSetupIntent',
+        surface: ['Stripe.confirmSetup']
       },
       {
         name: 'Create Payment Method',
         api: 'stripe.createPaymentMethod()',
         status: 'covered',
-        artifact: 'useCreatePaymentMethod'
+        artifact: 'useCreatePaymentMethod',
+        surface: ['Stripe.createPaymentMethod']
       },
       {
         name: 'Handle Next Action',
         api: 'stripe.handleNextAction()',
         status: 'covered',
-        artifact: 'useHandleNextAction'
+        artifact: 'useHandleNextAction',
+        surface: ['Stripe.handleNextAction']
       },
       {
         name: 'Retrieve Payment Intent',
         api: 'stripe.retrievePaymentIntent()',
         status: 'covered',
-        artifact: 'usePaymentIntent'
+        artifact: 'usePaymentIntent',
+        surface: ['Stripe.retrievePaymentIntent']
       },
       {
         name: 'Retrieve Setup Intent',
         api: 'stripe.retrieveSetupIntent()',
         status: 'covered',
-        artifact: 'useSetupIntent'
+        artifact: 'useSetupIntent',
+        surface: ['Stripe.retrieveSetupIntent']
       },
       {
         name: 'Create Token',
         api: 'stripe.createToken()',
         status: 'covered',
-        artifact: 'useCreateToken'
+        artifact: 'useCreateToken',
+        surface: ['Stripe.createToken']
       },
       {
         name: 'Create Confirmation Token',
         api: 'stripe.createConfirmationToken()',
         status: 'covered',
-        artifact: 'useCreateConfirmationToken'
+        artifact: 'useCreateConfirmationToken',
+        surface: ['Stripe.createConfirmationToken']
       },
       {
         name: 'Handle Card Action',
         api: 'stripe.handleCardAction()',
         status: 'covered',
-        artifact: 'useHandleCardAction'
+        artifact: 'useHandleCardAction',
+        surface: ['Stripe.handleCardAction']
       },
       {
         name: 'Verify micro-deposits (payment)',
         api: 'stripe.verifyMicrodepositsForPayment()',
         status: 'covered',
-        artifact: 'useVerifyMicrodepositsForPayment'
+        artifact: 'useVerifyMicrodepositsForPayment',
+        surface: ['Stripe.verifyMicrodepositsForPayment']
       },
       {
         name: 'Verify micro-deposits (setup)',
         api: 'stripe.verifyMicrodepositsForSetup()',
         status: 'covered',
-        artifact: 'useVerifyMicrodepositsForSetup'
+        artifact: 'useVerifyMicrodepositsForSetup',
+        surface: ['Stripe.verifyMicrodepositsForSetup']
       },
       {
         name: 'Radar Session',
         api: 'stripe.createRadarSession()',
         status: 'covered',
-        artifact: 'useRadarSession'
+        artifact: 'useRadarSession',
+        surface: ['Stripe.createRadarSession']
       },
       {
         name: 'Ephemeral Key Nonce (Issuing)',
         api: 'stripe.createEphemeralKeyNonce()',
         status: 'covered',
-        artifact: 'useEphemeralKeyNonce'
+        artifact: 'useEphemeralKeyNonce',
+        surface: ['Stripe.createEphemeralKeyNonce']
+      },
+      {
+        // Stripe discontinued the Orders API; the methods remain in the types.
+        name: 'Orders',
+        api: 'stripe.processOrder() / retrieveOrder()',
+        status: 'deprecated',
+        surface: ['Stripe.processOrder', 'Stripe.retrieveOrder']
       }
     ]
   },
@@ -527,19 +740,26 @@ export const coverage: CoverageCategory[] = [
         name: 'Financial Connections',
         api: 'stripe.collectFinancialConnectionsAccounts()',
         status: 'covered',
-        artifact: 'useFinancialConnections'
+        artifact: 'useFinancialConnections',
+        surface: ['Stripe.collectFinancialConnectionsAccounts']
       },
       {
         name: 'Identity Verification',
         api: 'stripe.verifyIdentity()',
         status: 'covered',
-        artifact: 'useIdentity'
+        artifact: 'useIdentity',
+        surface: ['Stripe.verifyIdentity']
       },
       {
         name: 'Bank Account Collection / Token',
         api: 'stripe.collectBankAccountForPayment/Setup(), collectBankAccountToken()',
         status: 'covered',
-        artifact: 'useFinancialConnections'
+        artifact: 'useFinancialConnections',
+        surface: [
+          'Stripe.collectBankAccountForPayment',
+          'Stripe.collectBankAccountForSetup',
+          'Stripe.collectBankAccountToken'
+        ]
       }
     ]
   }

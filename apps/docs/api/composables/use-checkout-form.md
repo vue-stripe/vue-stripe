@@ -1,6 +1,6 @@
 # useCheckoutForm
 
-Drives a **Checkout Form** integration from inside a [`VueStripeCheckoutFormProvider`](/api/components/stripe-checkout-form-provider). Returns the reactive session state, the Form SDK's actions (`confirm`, `applyPromotionCode`, `updateLineItemQuantity`, ...) and the SDK's `changeAppearance` / `loadFonts`.
+Drives a **Checkout Form** integration from inside a [`VueStripeCheckoutFormProvider`](/api/components/stripe-checkout-form-provider). Returns the reactive session state, the Form SDK's actions (`confirm`, `applyPromotionCode`, `updateLineItemQuantity`, ...) and the SDK's `changeAppearance` / `loadFonts` / `getForm`.
 
 ::: warning Beta: requires Stripe access
 The Checkout Form SDK (`stripe.initCheckoutFormSdk()`, `ui_mode: 'form'`) is a Stripe beta. Your Stripe account needs access.
@@ -57,6 +57,8 @@ interface UseCheckoutFormReturn {
   // On the SDK handle
   changeAppearance: StripeCheckoutFormSdk['changeAppearance']
   loadFonts: StripeCheckoutFormSdk['loadFonts']
+  getForm: StripeCheckoutFormSdk['getForm']
+  getCurrencySelectorElement: StripeCheckoutFormSdk['getCurrencySelectorElement']
 }
 ```
 
@@ -93,8 +95,10 @@ The form collects the email, phone number, addresses and tax ID itself, so the F
 |--------|-------------|
 | `changeAppearance(appearance)` | Restyle the form at runtime (`Appearance` without `rules`) |
 | `loadFonts(fonts)` | Load additional fonts into the form |
+| `getForm()` | The form created by `VueStripeCheckoutForm`, or `null` |
+| `getCurrencySelectorElement()` | The Currency Selector created on this SDK, or `null` |
 
-These two call the SDK handle, which exists before the actions load. Called before the SDK exists, they log a `[Vue Stripe]` warning and do nothing.
+These call the SDK handle, which exists before the actions load. Called before the SDK exists, `changeAppearance` and `loadFonts` log a `[Vue Stripe]` warning and do nothing, and the getters return `null`.
 
 ::: warning Before the actions load
 Until `loadActions()` resolves (`loading.value === true`), every action resolves to:
