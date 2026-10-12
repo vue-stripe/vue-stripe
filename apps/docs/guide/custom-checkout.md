@@ -7,6 +7,7 @@ Custom Checkout puts Stripe Elements on your own page while a **Checkout Session
 | Approach | Where the customer pays | Who renders the page | Order data lives in |
 |----------|------------------------|----------------------|---------------------|
 | [Stripe Checkout](/guide/checkout) | `checkout.stripe.com` | Stripe | Checkout Session |
+| [Embedded Checkout](/guide/embedded-checkout) | Your page (Stripe iframe) | Stripe | Checkout Session |
 | **Custom Checkout** | Your page | You, with Stripe Elements | Checkout Session |
 | [Payment Element](/guide/payment-element) | Your page | You, with Stripe Elements | Your server (PaymentIntent) |
 

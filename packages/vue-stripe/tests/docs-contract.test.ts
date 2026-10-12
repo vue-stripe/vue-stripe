@@ -57,7 +57,8 @@ const MAP: Array<{ component: string; doc: string }> = [
   },
   { component: 'VueStripeCheckout.ts', doc: 'stripe-checkout.md' },
   { component: 'VueStripeCheckoutElementsProvider.ts', doc: 'stripe-checkout-provider.md' },
-  { component: 'VueStripePricingTable.ts', doc: 'stripe-pricing-table.md' }
+  { component: 'VueStripePricingTable.ts', doc: 'stripe-pricing-table.md' },
+  { component: 'VueStripeEmbeddedCheckout.ts', doc: 'stripe-embedded-checkout.md' }
 ]
 
 /** Normalize an event name for naming-style-insensitive comparison. */

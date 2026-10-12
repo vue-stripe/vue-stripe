@@ -23,6 +23,7 @@ export type {
   VueStripeCheckoutProviderProps,
   VueStripeCheckoutElementsProviderProps,
   VueStripePricingTableProps,
+  VueStripeEmbeddedCheckoutProps,
   ElementsSubmitResult,
   UseCheckoutSessionReturn,
   VueStripeErrorResult,
@@ -75,7 +76,12 @@ export type {
   StripeCheckoutSession,
   StripeCheckoutContact,
   StripeCheckoutLineItem,
-  StripeCheckoutConfirmResult
+  StripeCheckoutConfirmResult,
+  // Embedded Checkout types
+  StripeEmbeddedCheckout,
+  StripeEmbeddedCheckoutOptions,
+  StripeEmbeddedCheckoutAnalyticsEventUnion,
+  StripeEmbeddedCheckoutLineItemsChangeEvent
 } from './types'
 
 // Export checkout composable types (defined alongside useStripeCheckout)

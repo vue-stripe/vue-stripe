@@ -25,6 +25,8 @@ import PaymentMethodMessagingView from './views/PaymentMethodMessagingView.vue'
 import ConvenienceComposablesView from './views/ConvenienceComposablesView.vue'
 // Custom Checkout (#388)
 import CustomCheckoutView from './views/CustomCheckoutView.vue'
+// Embedded Checkout (#492)
+import EmbeddedCheckoutView from './views/EmbeddedCheckoutView.vue'
 
 // Route metadata for SEO (typed via vue-router module augmentation)
 declare module 'vue-router' {
@@ -219,6 +221,16 @@ export const routes: RouteRecordRaw[] = [
       title: 'Custom Checkout - Vue Stripe',
       description:
         'Checkout Session with ui_mode elements: VueStripeCheckoutElementsProvider, useCheckoutSession, Payment, billing Address, Currency Selector and Tax ID elements'
+    }
+  },
+  {
+    path: '/embedded-checkout',
+    name: 'EmbeddedCheckout',
+    component: EmbeddedCheckoutView,
+    meta: {
+      title: 'Embedded Checkout - Vue Stripe',
+      description:
+        'Checkout Session with ui_mode embedded_page: VueStripeEmbeddedCheckout over stripe.createEmbeddedCheckoutPage'
     }
   }
 ]

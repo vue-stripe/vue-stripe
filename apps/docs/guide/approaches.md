@@ -10,6 +10,7 @@ Stripe offers several ways to collect payments. Here's how to choose the right o
 | **Card Element** | Card-only payments | Highest | Medium |
 | **Express Checkout** | Quick payments | Low | Easy |
 | **Checkout (Hosted)** | Fastest launch | Low | Easiest |
+| **Embedded Checkout** | Stripe's Checkout form on your own page | Low | Easiest |
 | **Elements with Checkout Sessions** | Own page, Stripe-managed totals/tax/discounts | High | Medium |
 
 ## Payment Element (Recommended)
@@ -130,6 +131,27 @@ const handleBuy = async () => {
 
 No `VueStripeProvider` is needed for the redirect. [Learn more about Stripe Checkout →](/guide/checkout)
 
+## Embedded Checkout
+
+Stripe's prebuilt Checkout page in an iframe on your own page. Create the session with `ui_mode: 'embedded_page'` and pass its client secret:
+
+```vue
+<VueStripeProvider :publishable-key="key">
+  <VueStripeEmbeddedCheckout :client-secret="clientSecret" />
+</VueStripeProvider>
+```
+
+**Pros:**
+- Customers stay on your site
+- Stripe builds the whole form: payment methods, addresses, tax, promotion codes
+- One component, no form code
+
+**Cons:**
+- Limited customization (Dashboard branding only)
+- One Embedded Checkout per page
+
+[Learn more about Embedded Checkout →](/guide/embedded-checkout)
+
 ## Elements with Checkout Sessions
 
 Keep Checkout Sessions on the server (Stripe computes line items, tax, discounts and shipping) but render the payment UI on your own page with Stripe Elements. Create the session with `ui_mode: 'elements'` and pass its client secret:
@@ -159,7 +181,8 @@ Keep Checkout Sessions on the server (Stripe computes line items, tax, discounts
 ```
 Do you need custom UI?
 │
-├─ No → Use Stripe Checkout (Hosted)
+├─ No → Use Stripe Checkout (Hosted),
+│        or Embedded Checkout to keep customers on your site
 │
 └─ Yes → Do you need multiple payment methods?
           │

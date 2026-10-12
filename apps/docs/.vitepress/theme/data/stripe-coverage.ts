@@ -262,8 +262,8 @@ export const coverage: CoverageCategory[] = [
       {
         name: 'Embedded Checkout',
         api: 'stripe.createEmbeddedCheckoutPage()',
-        status: 'planned',
-        issue: 492
+        status: 'covered',
+        artifact: 'VueStripeEmbeddedCheckout'
       },
       {
         name: 'Elements with Checkout Sessions',

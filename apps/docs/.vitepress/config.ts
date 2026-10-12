@@ -188,6 +188,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           items: [
             { text: 'Saving Payment Methods', link: '/guide/setup-intent' },
             { text: 'Checkout', link: '/guide/checkout' },
+            { text: 'Embedded Checkout', link: '/guide/embedded-checkout' },
             { text: 'Custom Checkout', link: '/guide/custom-checkout' }
           ]
         }
@@ -245,6 +246,10 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           items: [
             { text: 'VueStripeCheckout', link: '/api/components/stripe-checkout' },
             {
+              text: 'VueStripeEmbeddedCheckout',
+              link: '/api/components/stripe-embedded-checkout'
+            },
+            {
               text: 'VueStripeCheckoutElementsProvider',
               link: '/api/components/stripe-checkout-provider'
             },
@@ -279,6 +284,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           items: [
             { text: 'Stripe Checkout', link: '/live-demo/checkout-redirect' },
             { text: 'Payment Element', link: '/live-demo/payment-element' },
+            { text: 'Embedded Checkout', link: '/live-demo/embedded-checkout' },
             { text: 'Custom Checkout', link: '/live-demo/custom-checkout' },
             { text: 'Card Element', link: '/live-demo/card-element' },
             { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },

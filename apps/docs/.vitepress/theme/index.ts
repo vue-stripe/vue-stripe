@@ -16,6 +16,7 @@ import ClientSecretInput from './components/examples/ClientSecretInput.vue'
 import PaymentStatus from './components/examples/PaymentStatus.vue'
 import PaymentElementExample from './components/examples/PaymentElementExample.vue'
 import CustomCheckoutExample from './components/examples/CustomCheckoutExample.vue'
+import EmbeddedCheckoutExample from './components/examples/EmbeddedCheckoutExample.vue'
 import SubscriptionCheckoutExample from './components/examples/SubscriptionCheckoutExample.vue'
 import SubscriptionEmbeddedExample from './components/examples/SubscriptionEmbeddedExample.vue'
 import CheckoutRedirectExample from './components/examples/CheckoutRedirectExample.vue'
@@ -99,6 +100,7 @@ export default {
     app.component('PaymentStatus', PaymentStatus)
     app.component('PaymentElementExample', PaymentElementExample)
     app.component('CustomCheckoutExample', CustomCheckoutExample)
+    app.component('EmbeddedCheckoutExample', EmbeddedCheckoutExample)
     app.component('SubscriptionCheckoutExample', SubscriptionCheckoutExample)
     app.component('SubscriptionEmbeddedExample', SubscriptionEmbeddedExample)
     app.component('CheckoutRedirectExample', CheckoutRedirectExample)

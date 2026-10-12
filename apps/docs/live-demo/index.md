@@ -20,6 +20,11 @@ Test Vue Stripe components with real Stripe integrations. These live demos conne
     <p>Accept cards, wallets, and bank payments with the universal Payment Element.</p>
   </a>
 
+  <a href="/live-demo/embedded-checkout" class="example-card">
+    <h3>Embedded Checkout</h3>
+    <p>Stripe's prebuilt Checkout page inside your page, from a Checkout Session.</p>
+  </a>
+
   <a href="/live-demo/custom-checkout" class="example-card">
     <h3>Custom Checkout</h3>
     <p>Your own checkout page on a Checkout Session: Payment Element, billing address, and session totals.</p>

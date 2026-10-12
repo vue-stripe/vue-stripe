@@ -27,6 +27,7 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clov
 
 ### Checkout
 - [VueStripeCheckout](/api/components/stripe-checkout) - Redirect to hosted Stripe Checkout (session URL)
+- [VueStripeEmbeddedCheckout](/api/components/stripe-embedded-checkout) - Stripe's Checkout page embedded in your page (`stripe.createEmbeddedCheckoutPage()`). Walkthrough: [Embedded Checkout guide](/guide/embedded-checkout)
 - [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Elements with Checkout Sessions (`VueStripeCheckoutProvider` is a deprecated alias). Walkthrough: [Custom Checkout guide](/guide/custom-checkout)
 - [VueStripePricingTable](/api/components/stripe-pricing-table) - Embedded Stripe pricing table
 
@@ -58,6 +59,7 @@ import type {
   VueStripeCheckoutElementsProviderProps,
   VueStripeCheckoutProviderProps, // deprecated alias name
   VueStripePricingTableProps,
+  VueStripeEmbeddedCheckoutProps,
 
   // Composable return values and options
   UseStripeReturn,
@@ -102,7 +104,13 @@ import type {
   StripeCheckoutSession,
   StripeCheckoutContact,
   StripeCheckoutLineItem,
-  StripeCheckoutConfirmResult
+  StripeCheckoutConfirmResult,
+
+  // Re-exported Stripe.js Embedded Checkout types
+  StripeEmbeddedCheckout,
+  StripeEmbeddedCheckoutOptions,
+  StripeEmbeddedCheckoutAnalyticsEventUnion,
+  StripeEmbeddedCheckoutLineItemsChangeEvent
 } from '@vue-stripe/vue-stripe'
 ```
 

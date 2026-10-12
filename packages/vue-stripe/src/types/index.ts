@@ -14,6 +14,7 @@ import type {
   StripeCheckoutLoadActionsSuccess,
   StripeCheckoutSession,
   StripeCheckoutElementsOptions,
+  StripeEmbeddedCheckoutOptions,
   PaymentIntentResult,
   SetupIntentResult,
   PaymentMethodResult,
@@ -62,7 +63,12 @@ export type {
   StripeCheckoutSession,
   StripeCheckoutContact,
   StripeCheckoutLineItem,
-  StripeCheckoutConfirmResult
+  StripeCheckoutConfirmResult,
+  // Embedded Checkout types
+  StripeEmbeddedCheckout,
+  StripeEmbeddedCheckoutOptions,
+  StripeEmbeddedCheckoutAnalyticsEventUnion,
+  StripeEmbeddedCheckoutLineItemsChangeEvent
 } from '@stripe/stripe-js'
 
 // Vue-specific plugin configuration
@@ -172,6 +178,20 @@ export interface VueStripeCheckoutProviderProps {
 
 /** Props of `VueStripeCheckoutElementsProvider` (same as the deprecated `VueStripeCheckoutProvider`). */
 export type VueStripeCheckoutElementsProviderProps = VueStripeCheckoutProviderProps
+
+/** Props of `VueStripeEmbeddedCheckout` (`stripe.createEmbeddedCheckoutPage()`). */
+export interface VueStripeEmbeddedCheckoutProps {
+  /** Client secret of a Checkout Session created with `ui_mode: 'embedded_page'`. */
+  clientSecret?: string | undefined
+  /** Alternative to `clientSecret`: a function resolving to the client secret. */
+  fetchClientSecret?: (() => Promise<string>) | undefined
+  /**
+   * Called when the customer changes line items; resolve `{ type: 'accept' }` or
+   * `{ type: 'reject', errorMessage }`. Required when the session sets
+   * `permissions.update.line_items: 'server_only'`.
+   */
+  onLineItemsChange?: StripeEmbeddedCheckoutOptions['onLineItemsChange'] | undefined
+}
 
 /**
  * Props for VueStripePricingTable component.

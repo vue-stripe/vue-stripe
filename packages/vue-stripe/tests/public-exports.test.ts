@@ -30,6 +30,10 @@ describe('public API exports', () => {
     expect(VueStripe.VueStripeCheckoutProvider).toBe(VueStripe.VueStripeCheckoutElementsProvider)
   })
 
+  it('exports VueStripeEmbeddedCheckout', () => {
+    expect(VueStripe.VueStripeEmbeddedCheckout).toBeTruthy()
+  })
+
   it('does not export elements removed in Stripe.js 8+ (Clover)', () => {
     const removed = [
       'VueStripeIdealBankElement',
