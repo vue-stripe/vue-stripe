@@ -389,7 +389,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
   cleanUrls: true,
 
   // Ignore dead links while building docs
-  ignoreDeadLinks: true,
+  ignoreDeadLinks: false,
 
   // Add fallback OG image for pages without dynamic images
   transformHead({ pageData }) {

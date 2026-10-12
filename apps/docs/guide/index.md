@@ -27,8 +27,8 @@ We recommend following these pages in order:
 
 Each component and composable has detailed API documentation:
 
-- [Components](/api/components) - StripeProvider, VueStripeElements, element components
-- [Composables](/api/composables) - useStripe, useStripeElements, usePaymentIntent
+- [Components](/api/#components) - StripeProvider, VueStripeElements, element components
+- [Composables](/api/#composables) - useStripe, useStripeElements, usePaymentIntent
 
 ## Quick Links
 
@@ -50,6 +50,6 @@ Before using Vue Stripe, you should:
 
 ## Getting Help
 
-- Check the [API Reference](/api) for detailed documentation
-- Look at the [Examples](/examples) for complete code samples
+- Check the [API Reference](/api/) for detailed documentation
+- Look at the [Live Demos](/live-demo/) for complete code samples
 - Report issues on [GitHub](https://github.com/vue-stripe/vue-stripe/issues)

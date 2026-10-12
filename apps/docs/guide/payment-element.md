@@ -324,6 +324,6 @@ button:disabled {
 ## Next Steps
 
 - [Express Checkout](/guide/express-checkout) — Add Apple Pay and Google Pay
-- [Customization](/guide/customization) — Theme and style your payment form
-- [Error Handling](/guide/error-handling) — Handle all error cases
+- [Appearance API](/api/components/stripe-elements#appearance-api) — Theme and style your payment form
+- [Error Handling](/api/composables/use-payment-intent#error-handling) — Handle all error cases
 - [API Reference](/api/components/stripe-payment-element) — Full props, events, and options

@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-tooling:
+        dependency-type: development
+      apps:
+        patterns:
+          - next
+          - 'react*'
+          - stripe
+          - vue-router
+          - 'vitepress*'
+          - reka-ui
+          - '@vueuse/*'
+          - '@unhead/*'
+    ignore:
+      # Stripe.js majors are release trains that need a planned library release.
+      - dependency-name: '@stripe/stripe-js'
+        update-types: ['version-update:semver-major']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

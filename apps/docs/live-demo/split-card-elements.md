@@ -10,5 +10,5 @@ Use separate elements for card number, expiry date, and CVC for full control ove
 <SplitCardElementExample />
 
 ::: tip See Also
-For implementation details, see the [Split Card Elements Guide](/guide/split-card-elements) and [API Reference](/api/components/stripe-card-number-element).
+For implementation details, see the [Card Element Guide](/guide/card-element) and the [Split Card Elements API Reference](/api/components/stripe-split-card-elements).
 :::

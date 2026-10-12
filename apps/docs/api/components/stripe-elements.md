@@ -378,4 +378,4 @@ const appearance: Appearance = {
 
 - [useStripeElements](/api/composables/use-stripe-elements) - Access Elements in child components
 - [StripeProvider](/api/components/stripe-provider) - Parent provider component
-- [Customization Guide](/guide/customization) - Full appearance customization guide
+- [Appearance API](#appearance-api) - Themes, variables, rules and fonts

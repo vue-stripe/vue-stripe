@@ -7,6 +7,34 @@ allowBuilds:
   sharp: false
   unrs-resolver: false
   vue-demi: true
+overrides:
+  '@humanfs/node@<0.16.8': ^0.16.8
+  ajv@>=7.0.0-alpha.0 <8.18.0: ^8.18.0
+  baseline-browser-mapping@>=2.0.0 <2.11.0: ^2.11.0
+  brace-expansion@<1.1.21: ^1.1.21
+  brace-expansion@>=3.0.0 <5.0.7: ^5.0.7
+  brace-expansion@>=4.0.0 <5.0.12: ^5.0.12
+  browserslist@<=4.28.6: ^4.28.7
+  defu@<=6.1.4: ^6.1.5
+  dompurify@<=3.4.15: ^3.4.16
+  esbuild@<=0.24.2: ^0.25.0
+  js-yaml@<3.15.0: ^3.15.0
+  js-yaml@>=3.0.0 <3.15.2: ^3.15.2
+  katex@>=0.11.0 <0.18.2: ^0.18.2
+  lodash-es@<=4.17.23: ^4.18.1
+  lodash@<=4.17.23: ^4.18.1
+  mdast-util-to-hast@>=13.0.0 <13.2.1: ^13.2.1
+  mermaid@>=11.0.0-alpha.1 <11.16.1: ^11.16.1
+  minimatch@<3.1.4: ^3.1.4
+  nanoid@<3.3.18: ^3.3.18
+  picomatch@<2.3.2: ^2.3.2
+  picomatch@>=4.0.0 <4.0.4: ^4.0.4
+  postcss-selector-parser@<7.1.6: ^7.1.6
+  postcss@<=8.5.22: ^8.5.23
+  preact@>=10.27.0 <10.27.3: ^10.27.3
+  rollup@>=4.0.0 <4.59.0: ^4.59.0
+  source-map-js@>=1.0.0 <1.2.2: ^1.2.2
+  uuid@<11.1.1: ^11.1.1
 peerDependencyRules:
   allowedVersions:
     # eslint-config-next 16 pulls eslint-plugin-{import,jsx-a11y,react}, which
@@ -14,5 +42,6 @@ peerDependencyRules:
     eslint: '10'
     # @vercel/analytics 2 only uses the router's public API, which vue-router 5 keeps.
     '@vercel/analytics>vue-router': '5'
-    # Vite 8 transforms with Oxc; esbuild is an optional peer used only for custom esbuild options.
-    'vite>esbuild': '0.21'
+    # Vite 8 transforms with Oxc; esbuild is an optional peer used only for custom esbuild options
+    # (the audit override below lifts the shared esbuild to 0.25).
+    'vite>esbuild': '0.25'

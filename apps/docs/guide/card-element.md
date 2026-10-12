@@ -345,5 +345,5 @@ button:disabled {
 
 - [Payment Element](/guide/payment-element) — For multi-method support
 - [Express Checkout](/guide/express-checkout) — Add Apple Pay and Google Pay
-- [Customization](/guide/customization) — Style your elements
+- [Appearance API](/api/components/stripe-elements#appearance-api) — Style your elements
 - [API Reference](/api/components/stripe-card-element) — Full props, events, and options

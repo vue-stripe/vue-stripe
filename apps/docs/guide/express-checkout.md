@@ -352,6 +352,6 @@ const handleSubmit = async () => {
 ## Next Steps
 
 - [Payment Element](/guide/payment-element) — The full payment form
-- [Customization](/guide/customization) — Style your checkout
-- [Error Handling](/guide/error-handling) — Handle edge cases
+- [Appearance API](/api/components/stripe-elements#appearance-api) — Style your checkout
+- [Error Handling](/api/composables/use-payment-intent#error-handling) — Handle edge cases
 - [API Reference](/api/components/stripe-express-checkout-element) — Full props, events, and options
