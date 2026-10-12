@@ -167,7 +167,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Card Element', link: '/guide/card-element' },
             { text: 'Address Element', link: '/guide/address-element' },
             { text: 'Link Authentication', link: '/guide/link-authentication' },
-            { text: 'Express Checkout', link: '/guide/express-checkout' }
+            { text: 'Express Checkout', link: '/guide/express-checkout' },
+            { text: 'Payment Method Messaging', link: '/guide/payment-method-messaging' }
           ]
         },
         {
@@ -185,7 +186,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           text: 'Advanced',
           items: [
             { text: 'Saving Payment Methods', link: '/guide/setup-intent' },
-            { text: 'Checkout', link: '/guide/checkout' }
+            { text: 'Checkout', link: '/guide/checkout' },
+            { text: 'Custom Checkout', link: '/guide/custom-checkout' }
           ]
         }
       ],
@@ -219,6 +221,11 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             {
               text: 'VueStripePaymentMethodMessagingElement (BNPL)',
               link: '/api/components/stripe-payment-method-messaging-element'
+            },
+            { text: 'VueStripeTaxIdElement', link: '/api/components/stripe-tax-id-element' },
+            {
+              text: 'VueStripeCurrencySelectorElement',
+              link: '/api/components/stripe-currency-selector-element'
             }
           ]
         },
@@ -271,6 +278,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           items: [
             { text: 'Stripe Checkout', link: '/live-demo/checkout-redirect' },
             { text: 'Payment Element', link: '/live-demo/payment-element' },
+            { text: 'Custom Checkout', link: '/live-demo/custom-checkout' },
             { text: 'Card Element', link: '/live-demo/card-element' },
             { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },
             { text: 'Link Authentication', link: '/live-demo/link-authentication' },

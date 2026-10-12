@@ -8,7 +8,7 @@ import {
 
 const props = defineProps<{
   product?: Product | null
-  intentType?: 'payment' | 'ideal' | 'sepa' | 'p24' | 'eps'
+  intentType?: 'payment' | 'sepa'
   autoGenerate?: boolean
 }>()
 
@@ -16,7 +16,7 @@ const emit = defineEmits<{
   generated: [result: PaymentIntentResult]
 }>()
 
-const { createPaymentIntent, createIdealIntent, formatPrice, loading, error } = useBackendApi()
+const { createPaymentIntent, formatPrice, loading, error } = useBackendApi()
 
 const result = ref<PaymentIntentResult | null>(null)
 const copied = ref(false)
@@ -24,14 +24,8 @@ const generateError = ref<string | null>(null)
 
 const intentTypeLabel = computed(() => {
   switch (props.intentType) {
-    case 'ideal':
-      return 'iDEAL'
     case 'sepa':
       return 'SEPA Debit'
-    case 'p24':
-      return 'Przelewy24'
-    case 'eps':
-      return 'EPS'
     default:
       return 'Payment'
   }
@@ -53,13 +47,7 @@ async function generate() {
       }
     }
 
-    let response: PaymentIntentResult
-
-    if (props.intentType === 'ideal') {
-      response = await createIdealIntent(options)
-    } else {
-      response = await createPaymentIntent(options)
-    }
+    const response = await createPaymentIntent(options)
 
     result.value = response
     emit('generated', response)

@@ -27,7 +27,7 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clov
 
 ### Checkout
 - [VueStripeCheckout](/api/components/stripe-checkout) - Redirect to hosted Stripe Checkout (session URL)
-- [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Elements with Checkout Sessions (`VueStripeCheckoutProvider` is a deprecated alias)
+- [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Elements with Checkout Sessions (`VueStripeCheckoutProvider` is a deprecated alias). Walkthrough: [Custom Checkout guide](/guide/custom-checkout)
 - [VueStripePricingTable](/api/components/stripe-pricing-table) - Embedded Stripe pricing table
 
 ## Composables

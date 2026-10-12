@@ -12,12 +12,17 @@ Test Vue Stripe components with real Stripe integrations. These live demos conne
 <div class="examples-grid">
   <a href="/live-demo/checkout-redirect" class="example-card">
     <h3>Stripe Checkout</h3>
-    <p>Redirect to Stripe's hosted checkout page. v8.x compatible with URL redirect.</p>
+    <p>Redirect to Stripe's hosted checkout page using the session URL.</p>
   </a>
 
   <a href="/live-demo/payment-element" class="example-card">
     <h3>Payment Element</h3>
     <p>Accept cards, wallets, and bank payments with the universal Payment Element.</p>
+  </a>
+
+  <a href="/live-demo/custom-checkout" class="example-card">
+    <h3>Custom Checkout</h3>
+    <p>Your own checkout page on a Checkout Session: Payment Element, billing address, and session totals.</p>
   </a>
 
   <a href="/live-demo/card-element" class="example-card">

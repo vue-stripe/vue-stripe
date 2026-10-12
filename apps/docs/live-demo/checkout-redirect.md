@@ -1,11 +1,11 @@
 ---
 title: Stripe Checkout (URL Redirect)
-description: One-time payments using Stripe Checkout with v8.x compatible URL redirect
+description: One-time payments by redirecting to the Stripe Checkout session URL
 ---
 
 # Stripe Checkout (URL Redirect)
 
-Accept one-time payments by redirecting customers to Stripe's hosted checkout page. This approach is fully compatible with `@stripe/stripe-js v8.x` which removed the `redirectToCheckout()` method.
+Accept one-time payments by redirecting customers to Stripe's hosted checkout page. The server creates the session and returns its URL; Stripe.js removed `redirectToCheckout()` in Clover (8.0), so the redirect is a plain URL change.
 
 <CheckoutRedirectExample />
 

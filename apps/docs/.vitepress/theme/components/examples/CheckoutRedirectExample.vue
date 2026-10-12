@@ -199,7 +199,7 @@ function onBeforeRedirect() {
                   </div>
 
                   <VueStripeCheckout
-                    :session-url="sessionResult.url"
+                    :session-url="sessionResult.url ?? undefined"
                     button-text="Pay with Stripe Checkout"
                     loading-text="Redirecting..."
                     button-class="checkout-btn"
