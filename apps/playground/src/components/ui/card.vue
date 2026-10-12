@@ -9,7 +9,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const cardClass = computed(() =>
-  cn('rounded-lg border bg-card text-card-foreground shadow-sm', props.class)
+  cn('rounded-lg border bg-card text-card-foreground shadow-xs', props.class)
 )
 </script>
 

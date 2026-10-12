@@ -284,7 +284,7 @@ const onAppearanceCardReady = () => {
                 </div>
               </template>
 
-              <div class="text-center py-8 bg-card rounded-lg shadow-sm">
+              <div class="text-center py-8 bg-card rounded-lg shadow-xs">
                 <CircleCheck class="size-10 mx-auto mb-4 text-success" />
                 <strong class="block text-lg mb-2">StripeElements Ready!</strong>
                 <p class="text-muted-foreground">
@@ -309,7 +309,7 @@ const onAppearanceCardReady = () => {
                 </div>
               </template>
 
-              <div class="text-center py-8 bg-card rounded-lg shadow-sm">
+              <div class="text-center py-8 bg-card rounded-lg shadow-xs">
                 <CircleCheck class="size-10 mx-auto mb-4 text-success" />
                 <strong class="block text-lg mb-2">StripeElements with Options</strong>
                 <p class="text-muted-foreground">
@@ -326,7 +326,7 @@ const onAppearanceCardReady = () => {
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
             <VueStripeElements :appearance="appearanceOptions" :fonts="customFonts" locale="en">
               <div
-                class="text-center py-8 bg-card rounded-lg shadow-sm"
+                class="text-center py-8 bg-card rounded-lg shadow-xs"
                 data-test="appearance-scenario"
               >
                 <Palette class="size-10 mx-auto mb-4" />
@@ -365,7 +365,7 @@ const onAppearanceCardReady = () => {
         >
           <VueStripeProvider :publishable-key="stripeConfig.publishableKey">
             <VueStripeElements :appearance="darkAppearance">
-              <div class="text-center py-8 bg-slate-800 rounded-lg shadow-sm">
+              <div class="text-center py-8 bg-slate-800 rounded-lg shadow-xs">
                 <Moon class="size-10 mx-auto mb-4" />
                 <strong class="block text-lg mb-2">Dark Theme (first-class prop)</strong>
                 <p class="text-slate-400">
@@ -392,7 +392,7 @@ const onAppearanceCardReady = () => {
               :appearance="updateAppearance"
               @update-end="onUpdateEnd"
             >
-              <div class="bg-card rounded-lg shadow-sm p-5">
+              <div class="bg-card rounded-lg shadow-xs p-5">
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                   <Button size="sm" data-test="toggle-theme" @click="toggleUpdateTheme">
                     Toggle theme ({{ updateTheme }})

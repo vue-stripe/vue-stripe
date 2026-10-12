@@ -106,7 +106,7 @@ watch(testScenario, (scenario) => {
             @load="onLoad"
             @error="onError"
           >
-            <div class="text-center py-8 bg-card rounded-lg shadow-sm">
+            <div class="text-center py-8 bg-card rounded-lg shadow-xs">
               <CircleCheck class="size-10 mx-auto mb-4 text-success" />
               <strong class="block text-lg mb-2">Stripe Loaded Successfully!</strong>
               <p class="text-muted-foreground">
@@ -138,7 +138,7 @@ watch(testScenario, (scenario) => {
               </div>
             </template>
 
-            <div class="text-center py-8 bg-card rounded-lg shadow-sm">
+            <div class="text-center py-8 bg-card rounded-lg shadow-xs">
               <CircleCheck class="size-10 mx-auto mb-4 text-success" />
               <strong class="block text-lg">Stripe Ready (Custom Loading Used)</strong>
             </div>

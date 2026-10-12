@@ -279,7 +279,8 @@ const isFormValid = computed(() => {
         <CardTitle class="text-lg">Key Insights</CardTitle>
       </CardHeader>
       <CardContent class="prose prose-sm max-w-none">
-        <ul class="space-y-2 text-muted-foreground">
+        <!-- Not space-y-2: in Tailwind 4 the prose list-item margins would override it. -->
+        <ul class="text-muted-foreground [&>li+li]:mt-2 [&>li+li]:mb-0">
           <li>
             <strong class="text-foreground">No Backend Required:</strong>
             Pricing tables are configured entirely in the Stripe Dashboard.

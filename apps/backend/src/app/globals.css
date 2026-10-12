@@ -1,6 +1,53 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Utilities read the color tokens below, so the `.dark` overrides apply. */
+@theme inline {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@theme {
+  /* Vue Stripe brand colors */
+  --color-stripe-purple: #635bff;
+  --color-stripe-purple-light: #7c6dff;
+  --color-stripe-purple-dark: #5046e5;
+
+  --color-vue-green: #42b883;
+  --color-vue-green-light: #42d392;
+
+  --color-vue-stripe-yellow: #fed968;
+  --color-vue-stripe-yellow-light: #fde047;
+}
 
 @layer base {
   :root {
@@ -75,11 +122,45 @@
 }
 
 @layer base {
-  * {
+  /* Tailwind 3 preflight defaults that Tailwind 4 changed (border color, placeholder color,
+     button cursor, form control background), kept so the apps look and behave as before. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
     @apply border-border;
   }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Tailwind 4 also makes text fields and selects transparent and square; Tailwind 3 kept the
+     browser's own background and corners. */
+  input:where(:not([type='button'], [type='reset'], [type='submit'])),
+  select,
+  textarea {
+    background-color: revert-layer;
+    border-radius: revert-layer;
+  }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Tailwind 4 spaces space-y-* children with a bottom margin, which an inline <label> ignores.
+   Tailwind 3 put the gap on top of the next child; keep that for a label heading a space-y group. */
+@utility space-y-* {
+  & > label:first-child + * {
+    margin-top: --spacing(--value(number));
   }
 }
 

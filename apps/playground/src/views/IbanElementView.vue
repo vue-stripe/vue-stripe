@@ -437,7 +437,7 @@ const cleanClientSecret = computed(() => clientSecretInput.value.trim() || undef
                 </div>
               </template>
 
-              <div class="bg-card rounded-lg p-6 shadow-sm">
+              <div class="bg-card rounded-lg p-6 shadow-xs">
                 <Label class="mb-2 block">IBAN (International Bank Account Number)</Label>
                 <div class="stripe-element-wrapper">
                   <VueStripeIbanElement

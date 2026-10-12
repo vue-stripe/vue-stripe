@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
 const separatorClass = computed(() =>
   cn(
     'shrink-0 bg-border',
-    props.orientation === 'horizontal' ? 'h-[1px] w-full' : 'h-full w-[1px]',
+    props.orientation === 'horizontal' ? 'h-px w-full' : 'h-full w-px',
     props.class
   )
 )

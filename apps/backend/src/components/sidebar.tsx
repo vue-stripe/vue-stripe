@@ -119,7 +119,7 @@ export function Sidebar() {
           )
         })}
 
-        <p className="mb-2 mt-4 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Catalog
         </p>
         {catalog.map((item) => {
@@ -144,7 +144,7 @@ export function Sidebar() {
           )
         })}
 
-        <p className="mb-2 mt-4 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           EU Payments
         </p>
         {euPayments.map((item) => {
@@ -169,7 +169,7 @@ export function Sidebar() {
           )
         })}
 
-        <p className="mb-2 mt-4 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           APAC Payments
         </p>
         {apacPayments.map((item) => {

@@ -48,7 +48,7 @@ export default function Home() {
           >
             <CardHeader>
               <div
-                className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${generator.color}`}
+                className={`mb-4.5 flex h-10 w-10 items-center justify-center rounded-lg ${generator.color}`}
               >
                 <generator.icon className="h-5 w-5 text-white" />
               </div>

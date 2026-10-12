@@ -273,7 +273,7 @@ const onShippingRateChange = (event: unknown) => {
           <div v-for="(entry, index) in eventLog" :key="index" class="flex gap-3 py-1 text-sm">
             <span class="text-muted-foreground">{{ entry.time }}</span>
             <span class="font-medium text-primary">{{ entry.event }}</span>
-            <span v-if="entry.data" class="text-muted-foreground break-words">{{
+            <span v-if="entry.data" class="text-muted-foreground wrap-break-word">{{
               entry.data
             }}</span>
           </div>

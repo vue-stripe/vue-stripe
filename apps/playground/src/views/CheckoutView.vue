@@ -134,10 +134,10 @@ const clearResult = () => {
     <!-- Checkout Result Banner -->
     <div
       v-if="checkoutResult === 'success'"
-      class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-gradient-to-r from-green-100 to-green-50 border border-success"
+      class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-linear-to-r from-green-100 to-green-50 border border-success"
     >
       <div
-        class="w-12 h-12 rounded-full bg-success text-white flex items-center justify-center text-2xl font-bold flex-shrink-0"
+        class="w-12 h-12 rounded-full bg-success text-white flex items-center justify-center text-2xl font-bold shrink-0"
       >
         ✓
       </div>
@@ -150,10 +150,10 @@ const clearResult = () => {
 
     <div
       v-if="checkoutResult === 'cancel'"
-      class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-gradient-to-r from-yellow-100 to-yellow-50 border border-warning"
+      class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-linear-to-r from-yellow-100 to-yellow-50 border border-warning"
     >
       <div
-        class="w-12 h-12 rounded-full bg-warning text-yellow-800 flex items-center justify-center text-2xl font-bold flex-shrink-0"
+        class="w-12 h-12 rounded-full bg-warning text-yellow-800 flex items-center justify-center text-2xl font-bold shrink-0"
       >
         ✕
       </div>
