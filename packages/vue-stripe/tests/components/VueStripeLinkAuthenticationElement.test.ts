@@ -4,7 +4,7 @@ import { h, nextTick } from 'vue-demi'
 import VueStripeLinkAuthenticationElement from '../../src/components/VueStripeLinkAuthenticationElement'
 import VueStripeElements from '../../src/components/VueStripeElements'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
-import { flushPromises, createMockElement } from '../setup'
+import { flushPromises, makeMockElement } from '../setup'
 
 describe('VueStripeLinkAuthenticationElement', () => {
   beforeEach(() => {
@@ -55,7 +55,7 @@ describe('VueStripeLinkAuthenticationElement', () => {
   })
 
   it('should mount Stripe link authentication element on the DOM', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -75,7 +75,7 @@ describe('VueStripeLinkAuthenticationElement', () => {
   })
 
   it('should pass options to link authentication element', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -102,7 +102,7 @@ describe('VueStripeLinkAuthenticationElement', () => {
   })
 
   it('should set up event listeners on link authentication element', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -128,7 +128,7 @@ describe('VueStripeLinkAuthenticationElement', () => {
   it('emits focus, blur and escape events (#381)', async () => {
     const handlers: Record<string, Function> = {}
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         handlers[event] = callback
       })
@@ -157,7 +157,7 @@ describe('VueStripeLinkAuthenticationElement', () => {
   it('exposes loading state that flips to false on ready (#381)', async () => {
     let readyCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'ready') readyCallback = callback
       })
@@ -203,7 +203,7 @@ describe('VueStripeLinkAuthenticationElement', () => {
   it('should emit ready event when element is ready', async () => {
     let readyCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'ready') {
           readyCallback = callback
@@ -238,7 +238,7 @@ describe('VueStripeLinkAuthenticationElement', () => {
   it('should emit change event with email data', async () => {
     let changeCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'change') {
           changeCallback = callback
@@ -281,7 +281,7 @@ describe('VueStripeLinkAuthenticationElement', () => {
   it('should emit change event when email is incomplete', async () => {
     let changeCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'change') {
           changeCallback = callback
@@ -322,7 +322,7 @@ describe('VueStripeLinkAuthenticationElement', () => {
   })
 
   it('should destroy element on unmount', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe

@@ -17,7 +17,7 @@ type AddressEvents = BaseElementEvents<StripeAddressElement, StripeAddressElemen
  * Sessions accept only `contacts`, `display` and `fields`, and `mode` picks the billing or
  * shipping element.
  */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeAddressElementOptions,
   StripeAddressElement,
   { getValue: StripeAddressElement['getValue'] },

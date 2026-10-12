@@ -17,7 +17,7 @@ type TaxIdEvents = BaseElementEvents<StripeTaxIdElement, StripeTaxIdElementChang
  * pass `betas` on `<VueStripeProvider>`), or within `<VueStripeElements>` with Stripe beta access.
  * @see https://docs.stripe.com/tax/advanced/tax-ids?payment-ui=embedded-components
  */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeTaxIdElementOptions,
   StripeTaxIdElement,
   { getValue: StripeTaxIdElement['getValue'] },

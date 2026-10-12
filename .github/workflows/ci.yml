@@ -99,6 +99,62 @@ jobs:
       - name: Vue 2.7 smoke test
         run: pnpm --filter @vue-stripe/vue2-smoke test
 
+  size:
+    name: Bundle size and dead code
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build library
+        run: pnpm --filter @vue-stripe/vue-stripe build
+
+      # Fails when an entry exceeds its budget in packages/vue-stripe/.size-limit.json.
+      - name: Size budgets
+        run: pnpm --filter @vue-stripe/vue-stripe exec size-limit --json > /tmp/size-current.json
+
+      - name: Unused files, exports and dependencies (knip)
+        run: pnpm knip
+
+      - name: Advisories report (non-blocking)
+        continue-on-error: true
+        run: pnpm audit --audit-level critical --prod
+
+      # Size of the PR's base, for the diff in the PR comment.
+      - name: Base size
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: |
+          git worktree add /tmp/base ${{ github.event.pull_request.base.sha }}
+          cd /tmp/base
+          pnpm install --frozen-lockfile
+          pnpm --filter @vue-stripe/vue-stripe build
+          pnpm --filter @vue-stripe/vue-stripe exec size-limit --json > /tmp/size-base.json
+
+      - name: Size comment on the PR
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: node scripts/size-comment.mjs /tmp/size-current.json /tmp/size-base.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
   commits:
     name: Conventional commits
     if: github.event_name == 'pull_request'

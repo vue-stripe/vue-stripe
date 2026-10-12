@@ -2,7 +2,7 @@ import Stripe from 'stripe'
 
 // Stripe.js 10 is the Endive release train; pin the server to the same train
 // so both sides speak the same API shapes.
-export const STRIPE_API_VERSION = '2026-09-30.endive'
+const STRIPE_API_VERSION = '2026-09-30.endive'
 
 let stripeInstance: Stripe | null = null
 

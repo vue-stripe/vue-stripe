@@ -12,7 +12,7 @@ type CardNumberEvents = BaseElementEvents<
 >
 
 /** Split card cardNumber input. Use within `<VueStripeElements>` next to the other split card elements. */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeCardNumberElementOptions,
   StripeCardNumberElement,
   Record<never, never>,

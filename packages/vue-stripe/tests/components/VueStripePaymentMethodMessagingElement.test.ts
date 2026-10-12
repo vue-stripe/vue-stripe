@@ -4,13 +4,13 @@ import { h } from 'vue-demi'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
 import VueStripeElements from '../../src/components/VueStripeElements'
 import VueStripePaymentMethodMessagingElement from '../../src/components/VueStripePaymentMethodMessagingElement'
-import { flushPromises, createMockElement } from '../setup'
+import { flushPromises, makeMockElement } from '../setup'
 
 describe('VueStripePaymentMethodMessagingElement (v5.5)', () => {
   beforeEach(() => vi.clearAllMocks())
 
   const mountWith = async (options: Record<string, unknown> = {}) => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({

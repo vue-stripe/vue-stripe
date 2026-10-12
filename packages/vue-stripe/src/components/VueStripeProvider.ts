@@ -13,7 +13,7 @@ import { statusShell } from '../utils/status-shell'
  * Loads Stripe.js and provides the Stripe instance to everything inside it.
  * Children render once Stripe is ready; `#loading` and `#error` slots cover the rest.
  */
-export default defineComponent({
+export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeProvider',
   props: {
     publishableKey: { type: String as PropType<string | undefined>, default: undefined },

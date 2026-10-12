@@ -1,0 +1,25 @@
+[
+  {
+    "name": "ESM bundle (dist/es/index.js)",
+    "path": "dist/es/index.js",
+    "ignore": ["vue-demi", "@stripe/stripe-js"],
+    "limit": "6.65 kB",
+    "gzip": true
+  },
+  {
+    "name": "Tree-shaken: import { VueStripeCardElement }",
+    "path": "dist/es/index.js",
+    "import": "{ VueStripeCardElement }",
+    "ignore": ["vue-demi", "@stripe/stripe-js"],
+    "limit": "1.72 kB",
+    "gzip": true
+  },
+  {
+    "name": "Tree-shaken: import { useStripe }",
+    "path": "dist/es/index.js",
+    "import": "{ useStripe }",
+    "ignore": ["vue-demi", "@stripe/stripe-js"],
+    "limit": "310 B",
+    "gzip": true
+  }
+]

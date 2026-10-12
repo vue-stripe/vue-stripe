@@ -9,7 +9,7 @@ import { createStripeElement } from '../utils/element-factory'
 type CardCvcEvents = BaseElementEvents<StripeCardCvcElement, StripeCardCvcElementChangeEvent>
 
 /** Split card cardCvc input. Use within `<VueStripeElements>` next to the other split card elements. */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeCardCvcElementOptions,
   StripeCardCvcElement,
   Record<never, never>,

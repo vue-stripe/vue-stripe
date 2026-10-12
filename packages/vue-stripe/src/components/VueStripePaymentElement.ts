@@ -23,7 +23,7 @@ type PaymentEvents = BaseElementEvents<StripePaymentElement, StripePaymentElemen
  * Payment Element: every payment method in one UI. Works within `<VueStripeElements>`
  * and `<VueStripeCheckoutElementsProvider>` (Checkout Sessions accept a subset of options).
  */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripePaymentElementOptions,
   StripePaymentElement,
   { collapse: () => void },

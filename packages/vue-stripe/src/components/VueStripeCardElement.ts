@@ -12,7 +12,7 @@ type CardEvents = BaseElementEvents<StripeCardElement, StripeCardElementChangeEv
 }
 
 /** Single-line card input (number, expiry, CVC, postal code). Use within `<VueStripeElements>`. */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeCardElementOptions,
   StripeCardElement,
   Record<never, never>,

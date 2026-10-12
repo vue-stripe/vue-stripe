@@ -4,7 +4,7 @@ import { h, nextTick, defineComponent, ref } from 'vue-demi'
 import VueStripeAuBankAccountElement from '../../src/components/VueStripeAuBankAccountElement'
 import VueStripeElements from '../../src/components/VueStripeElements'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
-import { flushPromises, createMockElement } from '../setup'
+import { flushPromises, makeMockElement } from '../setup'
 
 describe('VueStripeAuBankAccountElement', () => {
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('VueStripeAuBankAccountElement', () => {
   })
 
   it('should mount Stripe AU Bank Account element on the DOM', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -71,7 +71,7 @@ describe('VueStripeAuBankAccountElement', () => {
   })
 
   it('should pass options to AU Bank Account element', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -103,7 +103,7 @@ describe('VueStripeAuBankAccountElement', () => {
   })
 
   it('should set up event listeners on AU Bank Account element', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -128,7 +128,7 @@ describe('VueStripeAuBankAccountElement', () => {
   it('should emit ready event when AU Bank Account element is ready', async () => {
     let readyCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'ready') {
           readyCallback = callback
@@ -162,7 +162,7 @@ describe('VueStripeAuBankAccountElement', () => {
   it('should emit change event with BSB and account data', async () => {
     let changeCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'change') {
           changeCallback = callback
@@ -205,7 +205,7 @@ describe('VueStripeAuBankAccountElement', () => {
   it('should update error state from change event', async () => {
     let changeCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'change') {
           changeCallback = callback
@@ -244,7 +244,7 @@ describe('VueStripeAuBankAccountElement', () => {
   })
 
   it('detaches listeners with .off() before destroy on unmount (#376)', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
@@ -268,7 +268,7 @@ describe('VueStripeAuBankAccountElement', () => {
   })
 
   it('should expose element and methods via defineExpose', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
@@ -324,7 +324,7 @@ describe('VueStripeAuBankAccountElement', () => {
   })
 
   it('should handle iconStyle option', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -352,7 +352,7 @@ describe('VueStripeAuBankAccountElement', () => {
   })
 
   it('should handle hideIcon option', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe

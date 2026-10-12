@@ -9,7 +9,7 @@ import { createStripeElement } from '../utils/element-factory'
 type IbanEvents = BaseElementEvents<StripeIbanElement, StripeIbanElementChangeEvent>
 
 /** IBAN input for SEPA Direct Debit. Use within `<VueStripeElements>`. */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeIbanElementOptions,
   StripeIbanElement,
   Record<never, never>,

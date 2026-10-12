@@ -7,7 +7,7 @@ import { hx } from '../utils/h'
  * Stripe.js removed `redirectToCheckout` (sessionId / priceId) in Clover; no
  * `<VueStripeProvider>` is needed.
  */
-export default defineComponent({
+export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeCheckout',
   props: {
     /** Hosted Checkout Session URL (`session.url`) created on your server. */

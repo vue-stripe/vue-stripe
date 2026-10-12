@@ -16,7 +16,7 @@ type CurrencySelectorEvents = {
  * Stripe beta access. It has no `change` event: the chosen currency arrives on the session
  * (`useCheckoutSession().session.value.currency`).
  */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   Record<string, never>,
   StripeCurrencySelectorElement,
   Record<never, never>,

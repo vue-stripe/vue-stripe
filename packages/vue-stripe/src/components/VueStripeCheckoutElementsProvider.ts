@@ -27,7 +27,7 @@ import { statusShell } from '../utils/status-shell'
  * Children render as soon as the SDK exists so elements can mount early; session
  * actions arrive once `loadActions()` resolves (`useCheckoutSession()`, `@ready`).
  */
-export default defineComponent({
+export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeCheckoutElementsProvider',
   props: {
     /** Client secret of a Checkout Session (`ui_mode: 'elements'`), or a Promise resolving to it. */

@@ -4,7 +4,7 @@ import { h, nextTick } from 'vue-demi'
 import VueStripeExpressCheckoutElement from '../../src/components/VueStripeExpressCheckoutElement'
 import VueStripeElements from '../../src/components/VueStripeElements'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
-import { flushPromises, createMockElement } from '../setup'
+import { flushPromises, makeMockElement } from '../setup'
 
 describe('VueStripeExpressCheckoutElement', () => {
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   })
 
   it('should mount Stripe express checkout element on the DOM', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -71,7 +71,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   })
 
   it('should pass options to express checkout element', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -107,7 +107,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   })
 
   it('should set up event listeners on express checkout element', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -134,7 +134,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   it('should emit ready event when express checkout element is ready', async () => {
     let readyCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'ready') {
           readyCallback = callback
@@ -178,7 +178,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   it('should emit click event when a wallet button is clicked', async () => {
     let clickCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'click') {
           clickCallback = callback
@@ -219,7 +219,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   it('should emit confirm event when payment is confirmed', async () => {
     let confirmCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'confirm') {
           confirmCallback = callback
@@ -264,7 +264,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   it('forwards resolve()/reject() on the shippingaddresschange payload (#405)', async () => {
     let shippingCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'shippingaddresschange') {
           shippingCallback = callback
@@ -312,7 +312,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   it('should emit loaderror event with the failure payload (#406)', async () => {
     let loaderErrorCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'loaderror') {
           loaderErrorCallback = callback
@@ -348,7 +348,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   it('should emit cancel event when user cancels payment', async () => {
     let cancelCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'cancel') {
           cancelCallback = callback
@@ -381,7 +381,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   it('should emit shippingaddresschange event', async () => {
     let shippingAddressCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'shippingaddresschange') {
           shippingAddressCallback = callback
@@ -427,7 +427,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   it('should emit shippingratechange event', async () => {
     let shippingRateCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'shippingratechange') {
           shippingRateCallback = callback
@@ -468,7 +468,7 @@ describe('VueStripeExpressCheckoutElement', () => {
   })
 
   it('should destroy element on unmount', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -491,7 +491,7 @@ describe('VueStripeExpressCheckoutElement', () => {
 
   describe('exposed properties', () => {
     it('should expose element property', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -516,7 +516,7 @@ describe('VueStripeExpressCheckoutElement', () => {
     })
 
     it('should expose loading state', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -539,7 +539,7 @@ describe('VueStripeExpressCheckoutElement', () => {
     })
 
     it('should expose error state', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -564,7 +564,7 @@ describe('VueStripeExpressCheckoutElement', () => {
 
   describe('options reactivity', () => {
     it('should call update when options change', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe

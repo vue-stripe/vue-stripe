@@ -4,7 +4,7 @@ import { h, ref, nextTick } from 'vue-demi'
 import VueStripeCardElement from '../../src/components/VueStripeCardElement'
 import VueStripeElements from '../../src/components/VueStripeElements'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
-import { flushPromises, createMockElement } from '../setup'
+import { flushPromises, makeMockElement } from '../setup'
 
 describe('VueStripeCardElement', () => {
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('VueStripeCardElement', () => {
   })
 
   it('should mount Stripe card element on the DOM', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -71,7 +71,7 @@ describe('VueStripeCardElement', () => {
   })
 
   it('should pass options to card element', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -102,7 +102,7 @@ describe('VueStripeCardElement', () => {
   })
 
   it('should set up event listeners on card element', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -128,7 +128,7 @@ describe('VueStripeCardElement', () => {
   it('should emit ready event when card element is ready', async () => {
     let readyCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'ready') {
           readyCallback = callback
@@ -164,7 +164,7 @@ describe('VueStripeCardElement', () => {
   it('should emit change event when card element changes', async () => {
     let changeCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'change') {
           changeCallback = callback
@@ -207,7 +207,7 @@ describe('VueStripeCardElement', () => {
   it('should emit focus event', async () => {
     let focusCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'focus') {
           focusCallback = callback
@@ -240,7 +240,7 @@ describe('VueStripeCardElement', () => {
   it('should emit blur event', async () => {
     let blurCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'blur') {
           blurCallback = callback
@@ -273,7 +273,7 @@ describe('VueStripeCardElement', () => {
   it('should emit escape event', async () => {
     let escapeCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'escape') {
           escapeCallback = callback
@@ -306,7 +306,7 @@ describe('VueStripeCardElement', () => {
   it('should update error state from change event', async () => {
     let changeCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'change') {
           changeCallback = callback
@@ -347,7 +347,7 @@ describe('VueStripeCardElement', () => {
   })
 
   it('should update options when props change', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -402,7 +402,7 @@ describe('VueStripeCardElement', () => {
   })
 
   it('should destroy element on unmount', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -424,7 +424,7 @@ describe('VueStripeCardElement', () => {
   })
 
   it('detaches listeners with .off() before destroy on unmount (#376)', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
       elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
@@ -444,7 +444,7 @@ describe('VueStripeCardElement', () => {
   })
 
   it('should expose element methods via defineExpose', async () => {
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)
 
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -488,7 +488,7 @@ describe('VueStripeCardElement', () => {
   it('should render custom error slot', async () => {
     let changeCallback: Function | null = null
     const mockElement = {
-      ...createMockElement(),
+      ...makeMockElement(),
       on: vi.fn((event: string, callback: Function) => {
         if (event === 'change') {
           changeCallback = callback

@@ -24,7 +24,7 @@ const loadPricingTableScript = (): Promise<void> =>
  * Stripe's no-code `<stripe-pricing-table>`. Rendered from a render function, so the
  * custom element is never resolved as a Vue component (no "Failed to resolve component").
  */
-export default defineComponent({
+export default /* @__PURE__ */ defineComponent({
   name: 'VueStripePricingTable',
   props: {
     pricingTableId: { type: String, required: true },

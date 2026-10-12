@@ -27,7 +27,9 @@
     "stripe:seed:reset": "bash scripts/seed-stripe.sh --clean --force",
     "stripe:clean": "bash scripts/seed-stripe.sh --clean-only",
     "prepare": "husky",
-    "lint:commits": "commitlint --from origin/main --to HEAD --verbose"
+    "lint:commits": "commitlint --from origin/main --to HEAD --verbose",
+    "size": "pnpm --filter @vue-stripe/vue-stripe size",
+    "knip": "knip"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
@@ -40,15 +42,14 @@
     "eslint-plugin-vue": "^10.11.1",
     "globals": "^17.13.0",
     "husky": "^9.1.7",
+    "knip": "^6.41.0",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
-    "prettier-plugin-organize-imports": "^4.3.0",
     "turbo": "^2.11.7",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.71.1",
     "vite": "^8.3.4",
-    "vitest": "^5.0.3",
-    "vue-tsc": "^3.3.13"
+    "vitest": "^5.0.3"
   },
   "engines": {
     "node": ">=22",

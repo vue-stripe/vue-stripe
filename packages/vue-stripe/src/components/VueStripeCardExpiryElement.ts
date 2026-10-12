@@ -12,7 +12,7 @@ type CardExpiryEvents = BaseElementEvents<
 >
 
 /** Split card cardExpiry input. Use within `<VueStripeElements>` next to the other split card elements. */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeCardExpiryElementOptions,
   StripeCardExpiryElement,
   Record<never, never>,

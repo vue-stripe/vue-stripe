@@ -1,8 +1,3 @@
-export interface AnalyticsEvent {
-  event: string
-  [key: string]: unknown
-}
-
 export interface SearchEvent {
   search_term: string
   search_results?: number | undefined

@@ -8,7 +8,7 @@ import { useStripe } from '../../src/composables/useStripe'
 import { useStripeElements } from '../../src/composables/useStripeElements'
 import { usePaymentIntent } from '../../src/composables/usePaymentIntent'
 import { useSetupIntent } from '../../src/composables/useSetupIntent'
-import { flushPromises, createMockElement } from '../setup'
+import { flushPromises, makeMockElement } from '../setup'
 
 /**
  * Integration tests (#386): exercise the full provider-based hierarchy
@@ -20,7 +20,7 @@ describe('integration: Provider > Elements > PaymentElement + composables', () =
 
   const stubStripe = async (overrides: Record<string, unknown> = {}) => {
     const submit = vi.fn(() => Promise.resolve({ error: null }))
-    const mockElement = createMockElement()
+    const mockElement = makeMockElement()
     const confirmPayment = vi.fn(() =>
       Promise.resolve({ paymentIntent: { id: 'pi_1', status: 'succeeded' } })
     )

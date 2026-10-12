@@ -210,12 +210,6 @@ if (isVue2) {
   config.global.stubs = {}
 }
 
-// ---------------------------------------------------------------------------
-// Backwards-compatible aliases (kept so existing tests import unchanged).
-// ---------------------------------------------------------------------------
-export const createMockStripe = makeMockStripe
-export const createMockElement = makeMockElement
-
 export const waitForStripeLoad = () => new Promise((resolve) => setTimeout(resolve, 100))
 
 // Flush all pending promises - useful for waiting on async operations

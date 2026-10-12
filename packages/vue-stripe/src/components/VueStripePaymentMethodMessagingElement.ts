@@ -12,7 +12,7 @@ type PaymentMethodMessagingEvents = { ready: [element: StripePaymentMethodMessag
  * `:options="{ amount: 1099, currency: 'usd', paymentMethodTypes: ['klarna'], countryCode: 'US' }"`.
  * @see https://docs.stripe.com/js/element/payment_method_messaging_element
  */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripePaymentMethodMessagingElementOptions,
   StripePaymentMethodMessagingElement,
   Record<never, never>,

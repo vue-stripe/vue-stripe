@@ -25,7 +25,7 @@ import { statusShell } from '../utils/status-shell'
  * element components inside. Use `clientSecret` (Intent-based) or
  * `mode` + `currency` + `amount` (deferred Intent).
  */
-export default defineComponent({
+export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeElements',
   props: {
     /** Client secret of a PaymentIntent or SetupIntent (Intent-based flow). */

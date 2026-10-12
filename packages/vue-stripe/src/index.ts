@@ -22,6 +22,8 @@ export type {
   HandleNextActionOptions,
   VueStripeCheckoutProviderProps,
   VueStripeCheckoutElementsProviderProps,
+  VueStripePricingTableProps,
+  ElementsSubmitResult,
   UseCheckoutSessionReturn,
   VueStripeErrorResult,
   ConfirmPaymentResult,
@@ -81,6 +83,13 @@ export type {
   UseStripeCheckoutReturn,
   CheckoutRedirectOptions
 } from './composables/useStripeCheckout'
+
+// Public types of the element components (template refs, InstanceType, custom elements)
+export type {
+  StripeElementComponent,
+  StripeElementExposed,
+  BaseElementEvents
+} from './utils/element-types'
 
 // Export all components
 export * from './components'

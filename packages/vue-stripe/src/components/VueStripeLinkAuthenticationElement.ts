@@ -15,7 +15,7 @@ type LinkAuthenticationEvents = BaseElementEvents<
 }
 
 /** Email input that authenticates returning Link customers. Use within `<VueStripeElements>`. */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeLinkAuthenticationElementOptions,
   StripeLinkAuthenticationElement,
   Record<never, never>,

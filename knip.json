@@ -1,0 +1,23 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": ["postcss-load-config", "vue"],
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.mjs"]
+    },
+    "packages/vue-stripe": {
+      "entry": ["tests/**/*.ts"]
+    },
+    "packages/vue2-smoke": {
+      "entry": ["tests/**/*.ts"]
+    },
+    "apps/playground": {
+      "ignore": ["src/components/ui/**"]
+    },
+    "apps/backend": {
+      "ignore": ["src/components/ui/**"]
+    },
+    "apps/docs": {}
+  }
+}

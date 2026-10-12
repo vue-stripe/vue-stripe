@@ -6,7 +6,7 @@ import VueStripeCardExpiryElement from '../../src/components/VueStripeCardExpiry
 import VueStripeCardCvcElement from '../../src/components/VueStripeCardCvcElement'
 import VueStripeElements from '../../src/components/VueStripeElements'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
-import { flushPromises, createMockElement } from '../setup'
+import { flushPromises, makeMockElement } from '../setup'
 
 describe('Split Card Elements', () => {
   beforeEach(() => {
@@ -58,7 +58,7 @@ describe('Split Card Elements', () => {
     })
 
     it('should create cardNumber type element', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -78,7 +78,7 @@ describe('Split Card Elements', () => {
     })
 
     it('should pass options to card number element', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -106,7 +106,7 @@ describe('Split Card Elements', () => {
     it('should emit change event with brand information', async () => {
       let changeCallback: Function | null = null
       const mockElement = {
-        ...createMockElement(),
+        ...makeMockElement(),
         on: vi.fn((event: string, callback: Function) => {
           if (event === 'change') {
             changeCallback = callback
@@ -146,7 +146,7 @@ describe('Split Card Elements', () => {
     })
 
     it('should set up all event listeners', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -186,7 +186,7 @@ describe('Split Card Elements', () => {
     })
 
     it('should create cardExpiry type element', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -208,7 +208,7 @@ describe('Split Card Elements', () => {
     it('should emit ready event', async () => {
       let readyCallback: Function | null = null
       const mockElement = {
-        ...createMockElement(),
+        ...makeMockElement(),
         on: vi.fn((event: string, callback: Function) => {
           if (event === 'ready') {
             readyCallback = callback
@@ -241,7 +241,7 @@ describe('Split Card Elements', () => {
     it('should emit change event with completion status', async () => {
       let changeCallback: Function | null = null
       const mockElement = {
-        ...createMockElement(),
+        ...makeMockElement(),
         on: vi.fn((event: string, callback: Function) => {
           if (event === 'change') {
             changeCallback = callback
@@ -297,7 +297,7 @@ describe('Split Card Elements', () => {
     })
 
     it('should create cardCvc type element', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -320,7 +320,7 @@ describe('Split Card Elements', () => {
       let focusCallback: Function | null = null
       let blurCallback: Function | null = null
       const mockElement = {
-        ...createMockElement(),
+        ...makeMockElement(),
         on: vi.fn((event: string, callback: Function) => {
           if (event === 'focus') focusCallback = callback
           if (event === 'blur') blurCallback = callback
@@ -353,7 +353,7 @@ describe('Split Card Elements', () => {
     it('should display error from change event', async () => {
       let changeCallback: Function | null = null
       const mockElement = {
-        ...createMockElement(),
+        ...makeMockElement(),
         on: vi.fn((event: string, callback: Function) => {
           if (event === 'change') {
             changeCallback = callback
@@ -394,7 +394,7 @@ describe('Split Card Elements', () => {
 
   describe('Split Elements Together', () => {
     it('should allow mounting all three split elements in same Elements container', async () => {
-      const mockElement = createMockElement()
+      const mockElement = makeMockElement()
       const mockCreate = vi.fn(() => mockElement)
 
       const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js')).loadStripe
@@ -438,7 +438,7 @@ describe('Split Card Elements', () => {
     })
 
     it('should destroy all elements on unmount', async () => {
-      const mockElements = [createMockElement(), createMockElement(), createMockElement()]
+      const mockElements = [makeMockElement(), makeMockElement(), makeMockElement()]
       let elementIndex = 0
       const mockCreate = vi.fn(() => mockElements[elementIndex++])
 

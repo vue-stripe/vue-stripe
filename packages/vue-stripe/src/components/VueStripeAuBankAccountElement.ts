@@ -12,7 +12,7 @@ type AuBankAccountEvents = BaseElementEvents<
 >
 
 /** Australian bank account (BSB + account number) for BECS Direct Debit. Use within `<VueStripeElements>`. */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeAuBankAccountElementOptions,
   StripeAuBankAccountElement,
   Record<never, never>,

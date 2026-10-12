@@ -32,7 +32,7 @@ type ExpressCheckoutEvents = {
  * `<VueStripeElements>` and `<VueStripeCheckoutElementsProvider>`. Under Checkout Sessions
  * the `click`, `shippingaddresschange` and `shippingratechange` events never fire.
  */
-export default createStripeElement<
+export default /* @__PURE__ */ createStripeElement<
   StripeExpressCheckoutElementOptions,
   StripeExpressCheckoutElement,
   Record<never, never>,
