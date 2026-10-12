@@ -46,6 +46,12 @@ export type {
   StripeTaxIdElement,
   StripeTaxIdElementOptions,
   StripeCurrencySelectorElement,
+  StripeContactDetailsElement,
+  StripeContactDetailsElementOptions,
+  StripeTermsElement,
+  StripeTermsElementOptions,
+  StripeLinkSignupElement,
+  StripeLinkSignupElementOptions,
   // Event types
   StripeCardElementChangeEvent,
   StripePaymentElementChangeEvent,
@@ -54,6 +60,7 @@ export type {
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementClickEvent,
   StripeTaxIdElementChangeEvent,
+  StripeContactDetailsElementChangeEvent,
   // Elements with Checkout Sessions (Checkout Elements SDK) types
   StripeCheckoutElementsSdk,
   StripeCheckoutElementsSdkOptions,

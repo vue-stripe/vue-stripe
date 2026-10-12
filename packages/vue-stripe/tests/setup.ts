@@ -64,6 +64,9 @@ export interface MockStripeCheckout {
   createExpressCheckoutElement: MockFn
   createCurrencySelectorElement: MockFn
   createTaxIdElement: MockFn
+  createContactDetailsElement: MockFn
+  createTermsElement: MockFn
+  createLinkSignupElement: MockFn
 }
 
 export interface MockStripe {
@@ -125,7 +128,10 @@ export function makeMockCheckout(actions = makeMockCheckoutActions()): MockStrip
     createShippingAddressElement: vi.fn(() => makeMockElement()),
     createExpressCheckoutElement: vi.fn(() => makeMockElement()),
     createCurrencySelectorElement: vi.fn(() => makeMockElement()),
-    createTaxIdElement: vi.fn(() => makeMockElement())
+    createTaxIdElement: vi.fn(() => makeMockElement()),
+    createContactDetailsElement: vi.fn(() => makeMockElement()),
+    createTermsElement: vi.fn(() => makeMockElement()),
+    createLinkSignupElement: vi.fn(() => makeMockElement())
   }
 }
 

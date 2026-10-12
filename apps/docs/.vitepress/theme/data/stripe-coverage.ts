@@ -155,9 +155,26 @@ export const coverage: CoverageCategory[] = [
         artifact: 'VueStripeLinkAuthenticationElement'
       },
       { name: 'Shipping Address', api: "create('shippingAddress')", status: 'deprecated' },
-      { name: 'Contact Details', api: "create('contactDetails')", status: 'planned', issue: 494 },
-      { name: 'Link Signup', api: "create('linkSignup')", status: 'planned', issue: 494 },
-      { name: 'Terms', api: "create('terms')", status: 'planned', issue: 494 }
+      {
+        name: 'Contact Details',
+        api: "checkout.createContactDetailsElement() / create('contactDetails')",
+        status: 'covered',
+        artifact: 'VueStripeContactDetailsElement'
+      },
+      {
+        // Stripe beta.
+        name: 'Link Signup',
+        api: "checkout.createLinkSignupElement() / create('linkSignup')",
+        status: 'covered',
+        artifact: 'VueStripeLinkSignupElement'
+      },
+      {
+        // Stripe beta.
+        name: 'Terms',
+        api: "checkout.createTermsElement() / create('terms')",
+        status: 'covered',
+        artifact: 'VueStripeTermsElement'
+      }
     ]
   },
   {
@@ -223,12 +240,30 @@ export const coverage: CoverageCategory[] = [
         api: "create('issuingAddToWalletButton')",
         status: 'planned',
         issue: 495
+      }
+    ]
+  },
+  {
+    // Legal text rendered by Stripe.js (React Stripe.js 7 parity components).
+    group: 'Disclosures',
+    items: [
+      {
+        name: 'Financial Account Disclosure',
+        api: 'stripe.createFinancialAccountDisclosure()',
+        status: 'covered',
+        artifact: 'VueStripeFinancialAccountDisclosure'
       },
       {
-        name: 'Disclosures (Financial Account / Issuing / Treasury)',
-        api: 'legal text components (React Stripe.js parity)',
-        status: 'planned',
-        issue: 494
+        name: 'Issuing Disclosure',
+        api: 'stripe.createIssuingDisclosure()',
+        status: 'covered',
+        artifact: 'VueStripeIssuingDisclosure'
+      },
+      {
+        name: 'Treasury Disclosure',
+        api: 'stripe.createTreasuryDisclosure()',
+        status: 'covered',
+        artifact: 'VueStripeTreasuryDisclosure'
       }
     ]
   },

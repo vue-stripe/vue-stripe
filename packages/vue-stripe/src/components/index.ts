@@ -38,6 +38,14 @@ export { default as VueStripeEmbeddedCheckout } from './VueStripeEmbeddedCheckou
 // Elements for Checkout Sessions (Stripe.js 10)
 export { default as VueStripeTaxIdElement } from './VueStripeTaxIdElement'
 export { default as VueStripeCurrencySelectorElement } from './VueStripeCurrencySelectorElement'
+export { default as VueStripeContactDetailsElement } from './VueStripeContactDetailsElement'
+export { default as VueStripeTermsElement } from './VueStripeTermsElement'
+export { default as VueStripeLinkSignupElement } from './VueStripeLinkSignupElement'
+
+// Disclosures (React Stripe.js 7 parity): legal text rendered by Stripe.js
+export { default as VueStripeFinancialAccountDisclosure } from './VueStripeFinancialAccountDisclosure'
+export { default as VueStripeIssuingDisclosure } from './VueStripeIssuingDisclosure'
+export { default as VueStripeTreasuryDisclosure } from './VueStripeTreasuryDisclosure'
 
 // Pricing Table (v5.3.0)
 export { default as VueStripePricingTable } from './VueStripePricingTable'

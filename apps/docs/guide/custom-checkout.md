@@ -185,6 +185,21 @@ Business customers can enter a VAT/GST number. Create the session with `tax_id_c
 
 The Tax ID element is a Stripe beta; your account needs access. See the [Tax ID API](/api/components/stripe-tax-id-element).
 
+### Contact Details
+
+`VueStripeContactDetailsElement` collects the customer's email and writes it to the session (`session.value.email`), in place of your own input plus `updateEmail()`. No beta is needed. See the [Contact Details API](/api/components/stripe-contact-details-element).
+
+```vue
+<VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+  <VueStripeContactDetailsElement />
+  <VueStripePaymentElement />
+</VueStripeCheckoutElementsProvider>
+```
+
+### Terms and Link Signup (Stripe betas)
+
+`VueStripeTermsElement` shows the terms the customer accepts by paying, and `VueStripeLinkSignupElement` offers to save their details with Link. Both are Stripe betas: the Terms element needs access on your account, the Link Signup element also needs a beta flag on `VueStripeProvider`. See the [Terms API](/api/components/stripe-terms-element) and the [Link Signup API](/api/components/stripe-link-signup-element).
+
 ### Express Checkout
 
 `VueStripeExpressCheckoutElement` also works inside the provider. Confirm from its `confirm` event with `confirm({ expressCheckoutConfirmEvent: event })`. See the [Express Checkout guide](/guide/express-checkout).

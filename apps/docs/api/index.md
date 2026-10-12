@@ -18,6 +18,9 @@ Complete API documentation for Vue Stripe components and composables.
 - [VueStripePaymentMethodMessagingElement](/api/components/stripe-payment-method-messaging-element) - Buy Now, Pay Later messaging
 - [VueStripeTaxIdElement](/api/components/stripe-tax-id-element) - Business name and tax ID (Checkout Sessions, beta)
 - [VueStripeCurrencySelectorElement](/api/components/stripe-currency-selector-element) - Currency picker (Checkout Sessions, Adaptive Pricing)
+- [VueStripeContactDetailsElement](/api/components/stripe-contact-details-element) - Customer email (Checkout Sessions or Elements)
+- [VueStripeTermsElement](/api/components/stripe-terms-element) - Terms the customer accepts (Stripe beta)
+- [VueStripeLinkSignupElement](/api/components/stripe-link-signup-element) - Save details to Link (Stripe beta)
 
 ### Regional Payment Elements
 - [VueStripeIbanElement](/api/components/stripe-iban-element) - IBAN collection for SEPA payments
@@ -30,6 +33,12 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clov
 - [VueStripeEmbeddedCheckout](/api/components/stripe-embedded-checkout) - Stripe's Checkout page embedded in your page (`stripe.createEmbeddedCheckoutPage()`). Walkthrough: [Embedded Checkout guide](/guide/embedded-checkout)
 - [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Elements with Checkout Sessions (`VueStripeCheckoutProvider` is a deprecated alias). Walkthrough: [Custom Checkout guide](/guide/custom-checkout)
 - [VueStripePricingTable](/api/components/stripe-pricing-table) - Embedded Stripe pricing table
+
+### Disclosures
+Legal text rendered by Stripe.js (React Stripe.js 7 parity):
+- [VueStripeFinancialAccountDisclosure](/api/components/stripe-financial-account-disclosure) - Financial Accounts for platforms
+- [VueStripeIssuingDisclosure](/api/components/stripe-issuing-disclosure) - Issuing card programs
+- [VueStripeTreasuryDisclosure](/api/components/stripe-treasury-disclosure) - Treasury financial accounts
 
 ## Composables
 
@@ -94,6 +103,21 @@ import type {
   StripeTaxIdElementOptions,
   StripeTaxIdElementChangeEvent,
   StripeCurrencySelectorElement,
+  StripeContactDetailsElement,
+  StripeContactDetailsElementOptions,
+  StripeContactDetailsElementChangeEvent,
+  StripeTermsElement,
+  StripeTermsElementOptions,
+  StripeLinkSignupElement,
+  StripeLinkSignupElementOptions,
+
+  // Disclosure components
+  StripeDisclosureComponent,
+  DisclosureStripeProp,
+  DisclosureError,
+  FinancialAccountDisclosureOptions,
+  IssuingDisclosureOptions,
+  TreasuryDisclosureOptions,
 
   // Re-exported Stripe.js Checkout Elements SDK types
   StripeCheckoutElementsSdk,

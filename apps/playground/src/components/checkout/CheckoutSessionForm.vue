@@ -8,13 +8,23 @@ import {
   VueStripeExpressCheckoutElement,
   VueStripeCurrencySelectorElement,
   VueStripeTaxIdElement,
-  useCheckoutSession
+  VueStripeContactDetailsElement,
+  VueStripeTermsElement,
+  VueStripeLinkSignupElement,
+  useCheckoutSession,
+  type StripeContactDetailsElementChangeEvent
 } from '@vue-stripe/vue-stripe'
 import { Button, Input, Label, Badge } from '@/components/ui'
 
 const props = defineProps<{
   /** Render the Tax ID element (needs the Tax ID beta on the Stripe instance). */
   taxId: boolean
+  /** Collect the email with the Contact Details element instead of updateEmail(). */
+  contactDetails?: boolean
+  /** Render the Terms element (Stripe beta, gated on the account). */
+  terms?: boolean
+  /** Render the Link Signup element (Stripe beta flag on the Stripe instance). */
+  linkSignup?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -50,6 +60,17 @@ const onApplyPromo = async () => {
   result.value = res.type === 'error' ? `Error: ${res.error.message}` : 'Promotion code applied'
   emit('log', 'applyPromotionCode', res.type)
 }
+
+const onContactDetailsChange = (event: StripeContactDetailsElementChangeEvent) =>
+  emit(
+    'log',
+    'contactDetails change',
+    `${event.value.email || '(empty)'}, complete ${event.complete}`
+  )
+
+// Stripe's loaderror payload: { elementType, error: { message } }.
+const onLoadError = (event: { elementType: string; error: { message?: string } }) =>
+  emit('log', `${event.elementType} loaderror`, event.error.message)
 
 // No returnUrl: the session was created with return_url, and Stripe rejects a second one.
 // redirect: 'if_required' keeps card payments on this page.
@@ -104,7 +125,16 @@ const onConfirm = async () => {
       <VueStripeExpressCheckoutElement />
     </div>
 
-    <div>
+    <div v-if="props.contactDetails" data-test="contact-details-element">
+      <Label class="mb-2 block">Contact details</Label>
+      <VueStripeContactDetailsElement
+        @ready="emit('log', 'contactDetails ready')"
+        @change="onContactDetailsChange"
+        @loaderror="onLoadError"
+      />
+    </div>
+
+    <div v-else>
       <Label for="cs-email" class="mb-2 block">Email</Label>
       <div class="flex gap-2">
         <Input
@@ -135,12 +165,24 @@ const onConfirm = async () => {
       <VueStripePaymentElement />
     </div>
 
+    <div v-if="props.linkSignup" data-test="link-signup-element">
+      <Label class="mb-2 block">Link signup</Label>
+      <VueStripeLinkSignupElement
+        @ready="emit('log', 'linkSignup ready')"
+        @loaderror="onLoadError"
+      />
+    </div>
+
     <div>
       <Label for="cs-promo" class="mb-2 block">Promotion code</Label>
       <div class="flex gap-2">
         <Input id="cs-promo" v-model="promo" placeholder="PROMO CODE" class="flex-1" />
         <Button variant="outline" @click="onApplyPromo">Apply</Button>
       </div>
+    </div>
+
+    <div v-if="props.terms" data-test="terms-element">
+      <VueStripeTermsElement @ready="emit('log', 'terms ready')" @loaderror="onLoadError" />
     </div>
 
     <Button

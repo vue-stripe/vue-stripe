@@ -83,8 +83,19 @@ describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
       status: 'covered',
       artifact: 'useStripeElements'
     })
-    for (const element of ["'contactDetails'", "'terms'", "'linkSignup'"]) {
-      expect(byApi(element)[0], element).toMatchObject({ status: 'planned', issue: 494 })
+    const checkoutSessionElements = {
+      "'contactDetails'": 'VueStripeContactDetailsElement',
+      "'terms'": 'VueStripeTermsElement',
+      "'linkSignup'": 'VueStripeLinkSignupElement'
+    }
+    for (const [element, artifact] of Object.entries(checkoutSessionElements)) {
+      expect(byApi(element)[0], element).toMatchObject({ status: 'covered', artifact })
+    }
+    for (const name of ['FinancialAccount', 'Issuing', 'Treasury']) {
+      expect(byApi(`stripe.create${name}Disclosure()`)[0], name).toMatchObject({
+        status: 'covered',
+        artifact: `VueStripe${name}Disclosure`
+      })
     }
     expect(byApi("'issuingAddToWalletButton'")[0]).toMatchObject({ status: 'planned', issue: 495 })
   })

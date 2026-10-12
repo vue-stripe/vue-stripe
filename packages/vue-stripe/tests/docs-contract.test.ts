@@ -27,7 +27,9 @@ const here = dirname(fileURLToPath(import.meta.url))
 const COMPONENTS_DIR = resolve(here, '../src/components')
 const FACTORY = resolve(here, '../src/utils/element-factory.ts')
 const DOCS_DIR = resolve(here, '../../../apps/docs/api/components')
+const DISCLOSURE = resolve(here, '../src/utils/disclosure.ts')
 const factorySource = existsSync(FACTORY) ? readFileSync(FACTORY, 'utf8') : ''
+const disclosureSource = existsSync(DISCLOSURE) ? readFileSync(DISCLOSURE, 'utf8') : ''
 
 /** Component file -> API doc page. The split card elements share one page. */
 const MAP: Array<{ component: string; doc: string }> = [
@@ -55,6 +57,18 @@ const MAP: Array<{ component: string; doc: string }> = [
     component: 'VueStripeCurrencySelectorElement.ts',
     doc: 'stripe-currency-selector-element.md'
   },
+  {
+    component: 'VueStripeContactDetailsElement.ts',
+    doc: 'stripe-contact-details-element.md'
+  },
+  { component: 'VueStripeTermsElement.ts', doc: 'stripe-terms-element.md' },
+  { component: 'VueStripeLinkSignupElement.ts', doc: 'stripe-link-signup-element.md' },
+  {
+    component: 'VueStripeFinancialAccountDisclosure.ts',
+    doc: 'stripe-financial-account-disclosure.md'
+  },
+  { component: 'VueStripeIssuingDisclosure.ts', doc: 'stripe-issuing-disclosure.md' },
+  { component: 'VueStripeTreasuryDisclosure.ts', doc: 'stripe-treasury-disclosure.md' },
   { component: 'VueStripeCheckout.ts', doc: 'stripe-checkout.md' },
   { component: 'VueStripeCheckoutElementsProvider.ts', doc: 'stripe-checkout-provider.md' },
   { component: 'VueStripePricingTable.ts', doc: 'stripe-pricing-table.md' },
@@ -74,7 +88,8 @@ function baseEvents(): string[] {
 
 /**
  * Extract the emitted event names of a component: the `events:` list of a factory
- * definition (`...BASE_EVENTS` expanded; no list means BASE_EVENTS), or the
+ * definition (`...BASE_EVENTS` expanded; no list means BASE_EVENTS), the `emits` of
+ * the disclosure builder for a `createStripeDisclosure` definition, or the
  * `defineEmits` / `emits` declarations of a component with its own setup.
  */
 function extractEmits(source: string): string[] {
@@ -86,6 +101,7 @@ function extractEmits(source: string): string[] {
     if (list) quoted(list[1] as string).forEach((e) => names.add(e))
     return [...names]
   }
+  if (/createStripeDisclosure[<(]/.test(source)) source = disclosureSource
   // setup() / interface form: `(e: 'ready', ...)` and tuple form `ready: [...]` in defineEmits<{}>
   for (const m of source.matchAll(/\(\s*e:\s*['"]([\w-]+)['"]/g)) names.add(m[1] as string)
   const typed = source.match(/defineEmits<\{([\s\S]*?)\}>/)

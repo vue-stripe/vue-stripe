@@ -23,8 +23,18 @@ const publishableKey = computed(() => stripeConfig?.publishableKey || '')
 // Options for the session and the Stripe instance.
 const useTaxId = ref(false)
 const useAdaptivePricing = ref(true)
-// Tax ID is a Stripe beta: the flag goes on the Stripe instance (VueStripeProvider `betas`).
-const betas = computed(() => (useTaxId.value ? ['custom_checkout_tax_id_1'] : undefined))
+const useContactDetails = ref(false)
+const useTerms = ref(false)
+const useLinkSignup = ref(false)
+// Tax ID and Link Signup are Stripe betas: the flags go on the Stripe instance
+// (VueStripeProvider `betas`). The Terms element is gated on the Stripe account instead.
+const betas = computed(() => {
+  const flags = [
+    ...(useTaxId.value ? ['custom_checkout_tax_id_1'] : []),
+    ...(useLinkSignup.value ? ['elements_link_signup_beta_1'] : [])
+  ]
+  return flags.length ? flags : undefined
+})
 
 // What the provider gets: a Promise from the backend, or a pasted client secret.
 const clientSecret = ref<string | Promise<string> | null>(null)
@@ -125,6 +135,19 @@ const reset = () => {
               <input v-model="useTaxId" type="checkbox" data-test="use-tax-id" />
               Tax ID element (Stripe beta; your account needs access)
             </label>
+            <label class="flex items-center gap-2">
+              <input v-model="useContactDetails" type="checkbox" data-test="use-contact-details" />
+              Contact Details element (replaces the email input)
+            </label>
+            <label class="flex items-center gap-2">
+              <input v-model="useTerms" type="checkbox" data-test="use-terms" />
+              Terms element (Stripe beta; your account needs access)
+            </label>
+            <label class="flex items-center gap-2">
+              <input v-model="useLinkSignup" type="checkbox" data-test="use-link-signup" />
+              Link Signup element (Stripe beta; adds the <code>elements_link_signup_beta_1</code>
+              flag)
+            </label>
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
@@ -178,7 +201,13 @@ const reset = () => {
               <template #error="{ error }">
                 <p class="text-destructive">{{ error }}</p>
               </template>
-              <CheckoutSessionForm :tax-id="useTaxId" @log="logEvent" />
+              <CheckoutSessionForm
+                :tax-id="useTaxId"
+                :contact-details="useContactDetails"
+                :terms="useTerms"
+                :link-signup="useLinkSignup"
+                @log="logEvent"
+              />
             </VueStripeCheckoutElementsProvider>
           </VueStripeProvider>
         </div>

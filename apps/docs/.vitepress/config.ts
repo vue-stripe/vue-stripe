@@ -228,6 +228,15 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             {
               text: 'VueStripeCurrencySelectorElement',
               link: '/api/components/stripe-currency-selector-element'
+            },
+            {
+              text: 'VueStripeContactDetailsElement',
+              link: '/api/components/stripe-contact-details-element'
+            },
+            { text: 'VueStripeTermsElement (beta)', link: '/api/components/stripe-terms-element' },
+            {
+              text: 'VueStripeLinkSignupElement (beta)',
+              link: '/api/components/stripe-link-signup-element'
             }
           ]
         },
@@ -254,6 +263,23 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
               link: '/api/components/stripe-checkout-provider'
             },
             { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' }
+          ]
+        },
+        {
+          text: 'Disclosures',
+          items: [
+            {
+              text: 'VueStripeFinancialAccountDisclosure',
+              link: '/api/components/stripe-financial-account-disclosure'
+            },
+            {
+              text: 'VueStripeIssuingDisclosure',
+              link: '/api/components/stripe-issuing-disclosure'
+            },
+            {
+              text: 'VueStripeTreasuryDisclosure',
+              link: '/api/components/stripe-treasury-disclosure'
+            }
           ]
         },
         {

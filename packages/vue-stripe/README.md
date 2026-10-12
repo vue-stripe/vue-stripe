@@ -127,6 +127,9 @@ const pay = () =>
 | `VueStripeAuBankAccountElement` | BECS Direct Debit (Australia) |
 | `VueStripeTaxIdElement` | Business tax ID (Checkout Sessions, Stripe beta) |
 | `VueStripeCurrencySelectorElement` | Local currency selection (Checkout Sessions, Adaptive Pricing) |
+| `VueStripeContactDetailsElement` | Customer email (Checkout Sessions or Elements) |
+| `VueStripeTermsElement` | Terms the customer accepts (Stripe beta) |
+| `VueStripeLinkSignupElement` | Save details to Link (Stripe beta) |
 
 Stripe removed the standalone iDEAL, P24, EPS and FPX elements; the Payment Element collects these payment methods.
 
@@ -136,6 +139,12 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements; the Payment Elem
 |-----------|-------------|
 | `VueStripeCheckout` | Button that redirects to a hosted Checkout Session URL |
 | `VueStripePricingTable` | Embeds a pricing table configured in the Stripe Dashboard |
+
+### Disclosures
+
+| Component | Description |
+|-----------|-------------|
+| `VueStripeFinancialAccountDisclosure`, `VueStripeIssuingDisclosure`, `VueStripeTreasuryDisclosure` | Legal text rendered by Stripe.js (React Stripe.js 7 parity) |
 
 ## Composables
 
