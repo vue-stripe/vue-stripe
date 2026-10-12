@@ -1,4 +1,4 @@
-// Stripe.js feature coverage matrix for Vue Stripe.
+// Stripe.js 10 (Endive) feature coverage matrix for Vue Stripe.
 //
 // This is the single source of truth for the home-page coverage tracker.
 // A guard test (packages/vue-stripe/tests/coverage-matrix.test.ts) verifies that
@@ -54,6 +54,12 @@ export const coverage: CoverageCategory[] = [
         api: 'elements + submit()',
         status: 'covered',
         artifact: 'useStripeElements'
+      },
+      {
+        name: 'Elements fetchUpdates / update-end',
+        api: "elements.fetchUpdates(), on('update-end')",
+        status: 'covered',
+        artifact: 'useStripeElements'
       }
     ]
   },
@@ -73,10 +79,12 @@ export const coverage: CoverageCategory[] = [
         artifact: 'VueStripeExpressCheckoutElement'
       },
       {
+        // Removed in Endive; the Express Checkout Element replaces it.
         name: 'Payment Request Button',
         api: "create('paymentRequestButton')",
-        status: 'accessible'
-      }
+        status: 'deprecated'
+      },
+      { name: 'Payment Request API', api: 'stripe.paymentRequest()', status: 'accessible' }
     ]
   },
   {
@@ -118,6 +126,7 @@ export const coverage: CoverageCategory[] = [
         artifact: 'VueStripeIbanElement'
       },
       {
+        // Removed in Clover; collect these methods with the Payment Element.
         name: 'iDEAL / P24 / EPS / FPX bank elements',
         api: "create('idealBank' | 'p24Bank' | 'epsBank' | 'fpxBank')",
         status: 'deprecated'
@@ -145,7 +154,10 @@ export const coverage: CoverageCategory[] = [
         status: 'covered',
         artifact: 'VueStripeLinkAuthenticationElement'
       },
-      { name: 'Shipping Address', api: "create('shippingAddress')", status: 'deprecated' }
+      { name: 'Shipping Address', api: "create('shippingAddress')", status: 'deprecated' },
+      { name: 'Contact Details', api: "create('contactDetails')", status: 'planned', issue: 494 },
+      { name: 'Link Signup', api: "create('linkSignup')", status: 'planned', issue: 494 },
+      { name: 'Terms', api: "create('terms')", status: 'planned', issue: 494 }
     ]
   },
   {
@@ -157,26 +169,36 @@ export const coverage: CoverageCategory[] = [
         status: 'covered',
         artifact: 'VueStripePaymentMethodMessagingElement'
       },
-      { name: 'Affirm Message', api: "create('affirmMessage')", status: 'accessible' },
+      {
+        // Removed in Clover; use the Payment Method Messaging Element.
+        name: 'Affirm Message',
+        api: "create('affirmMessage')",
+        status: 'deprecated'
+      },
       {
         name: 'Afterpay/Clearpay Message',
         api: "create('afterpayClearpayMessage')",
-        status: 'accessible'
+        status: 'deprecated'
       }
     ]
   },
   {
-    group: 'Other Elements',
+    group: 'Checkout Session Elements',
     items: [
-      // Currency Selector and Tax ID are Custom Checkout elements (require
-      // stripe.initCheckout), not standard elements.create — blocked on #388.
+      // Checkout Elements SDK elements; Tax ID and Currency Selector also exist on
+      // elements.create() behind a Stripe beta.
       {
         name: 'Currency Selector',
-        api: 'checkout.createCurrencySelectorElement()',
+        api: "checkout.createCurrencySelectorElement() / create('currencySelector')",
         status: 'planned',
-        issue: 382
+        issue: 473
       },
-      { name: 'Tax ID', api: 'checkout.createTaxIdElement()', status: 'planned', issue: 383 }
+      {
+        name: 'Tax ID',
+        api: "checkout.createTaxIdElement() / create('taxId')",
+        status: 'planned',
+        issue: 473
+      }
     ]
   },
   {
@@ -194,23 +216,42 @@ export const coverage: CoverageCategory[] = [
         status: 'accessible'
       },
       { name: 'Card PIN Display', api: "create('issuingCardPinDisplay')", status: 'accessible' },
-      { name: 'Card Copy Button', api: "create('issuingCardCopyButton')", status: 'accessible' }
+      { name: 'Card Copy Button', api: "create('issuingCardCopyButton')", status: 'accessible' },
+      {
+        // No typed elements.create() overload in Stripe.js 10.0.0.
+        name: 'Add to Wallet (Issuing)',
+        api: "create('issuingAddToWalletButton')",
+        status: 'planned',
+        issue: 495
+      },
+      {
+        name: 'Disclosures (Financial Account / Issuing / Treasury)',
+        api: 'legal text components (React Stripe.js parity)',
+        status: 'planned',
+        issue: 494
+      }
     ]
   },
   {
     group: 'Checkout',
     items: [
       {
-        name: 'Redirect to Checkout',
-        api: 'stripe.redirectToCheckout()',
+        name: 'Hosted Checkout redirect',
+        api: 'session.url redirect',
         status: 'covered',
         artifact: 'VueStripeCheckout'
       },
       {
-        name: 'Checkout composable',
-        api: 'redirect helpers',
+        name: 'Checkout redirect composable',
+        api: 'redirectToCheckout({ url }) / redirectToUrl()',
         status: 'covered',
         artifact: 'useStripeCheckout'
+      },
+      {
+        // Removed in Clover (sessionId / lineItems client-side redirect).
+        name: 'Client-side redirectToCheckout',
+        api: 'stripe.redirectToCheckout()',
+        status: 'deprecated'
       },
       {
         name: 'Pricing Table',
@@ -220,15 +261,21 @@ export const coverage: CoverageCategory[] = [
       },
       {
         name: 'Embedded Checkout',
-        api: 'stripe.initEmbeddedCheckout()',
+        api: 'stripe.createEmbeddedCheckoutPage()',
         status: 'planned',
-        issue: 379
+        issue: 492
       },
       {
-        name: 'Custom Checkout',
-        api: 'stripe.initCheckout()',
+        name: 'Elements with Checkout Sessions',
+        api: 'stripe.initCheckoutElementsSdk()',
         status: 'covered',
-        artifact: 'VueStripeCheckoutProvider'
+        artifact: 'VueStripeCheckoutElementsProvider'
+      },
+      {
+        name: 'Checkout Form',
+        api: 'stripe.initCheckoutFormSdk()',
+        status: 'planned',
+        issue: 493
       }
     ]
   },
@@ -271,12 +318,22 @@ export const coverage: CoverageCategory[] = [
         status: 'covered',
         artifact: 'useSetupIntent'
       },
-      { name: 'Confirm Card Payment', api: 'stripe.confirmCardPayment()', status: 'accessible' },
-      { name: 'Confirm Card Setup', api: 'stripe.confirmCardSetup()', status: 'accessible' },
+      {
+        // ~50 confirmers incl. confirmCardPayment, confirmAmazonPaySetup, confirmBlikSetup,
+        // confirmPayByBankPayment. Dedicated composables are planned in #503.
+        name: 'Method-specific confirm*',
+        api: 'stripe.confirm<Method>Payment/Setup()',
+        status: 'accessible'
+      },
       { name: 'Create Token', api: 'stripe.createToken()', status: 'accessible' },
       {
         name: 'Create Confirmation Token',
         api: 'stripe.createConfirmationToken()',
+        status: 'accessible'
+      },
+      {
+        name: 'Radar session / ephemeral key nonce',
+        api: 'stripe.createRadarSession(), createEphemeralKeyNonce()',
         status: 'accessible'
       }
     ]
@@ -288,18 +345,19 @@ export const coverage: CoverageCategory[] = [
         name: 'Financial Connections',
         api: 'stripe.collectFinancialConnectionsAccounts()',
         status: 'planned',
-        issue: 393
+        issue: 496
       },
       {
         name: 'Identity Verification',
         api: 'stripe.verifyIdentity()',
         status: 'planned',
-        issue: 393
+        issue: 496
       },
       {
-        name: 'Bank Account Collection',
-        api: 'stripe.collectBankAccountForPayment()',
-        status: 'accessible'
+        name: 'Bank Account Collection / Token',
+        api: 'stripe.collectBankAccountForPayment(), collectBankAccountToken()',
+        status: 'planned',
+        issue: 496
       }
     ]
   }

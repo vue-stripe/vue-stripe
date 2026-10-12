@@ -38,3 +38,61 @@ describe('docs coverage matrix', () => {
     }
   })
 })
+
+describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
+  const items = coverage.flatMap((c) => c.items)
+  const byApi = (needle: string) => items.filter((i) => i.api.includes(needle))
+
+  it('APIs removed from Stripe.js are only listed as deprecated', () => {
+    const removed = [
+      "'paymentRequestButton'",
+      "'affirmMessage'",
+      "'afterpayClearpayMessage'",
+      "'idealBank'",
+      'stripe.redirectToCheckout',
+      'initCheckout()',
+      'initEmbeddedCheckout'
+    ]
+    for (const needle of removed) {
+      for (const item of byApi(needle)) {
+        expect(item.status, `"${item.name}" (${item.api}) was removed from Stripe.js`).toBe(
+          'deprecated'
+        )
+      }
+    }
+  })
+
+  it('uses the Stripe.js 10 names for the Checkout APIs', () => {
+    expect(byApi('stripe.initCheckoutElementsSdk()')[0]).toMatchObject({
+      status: 'covered',
+      artifact: 'VueStripeCheckoutElementsProvider'
+    })
+    expect(byApi('stripe.createEmbeddedCheckoutPage()')[0]).toMatchObject({
+      status: 'planned',
+      issue: 492
+    })
+    expect(byApi('stripe.initCheckoutFormSdk()')[0]).toMatchObject({
+      status: 'planned',
+      issue: 493
+    })
+  })
+
+  it('lists the APIs that survive in 10.x and the newly wrapped ones', () => {
+    expect(byApi('stripe.paymentRequest()')[0]?.status).toBe('accessible')
+    expect(byApi('elements.fetchUpdates()')[0]).toMatchObject({
+      status: 'covered',
+      artifact: 'useStripeElements'
+    })
+    for (const element of ["'contactDetails'", "'terms'", "'linkSignup'"]) {
+      expect(byApi(element)[0], element).toMatchObject({ status: 'planned', issue: 494 })
+    }
+    expect(byApi("'issuingAddToWalletButton'")[0]).toMatchObject({ status: 'planned', issue: 495 })
+  })
+
+  it('planned rows point at open v6 milestone issues', () => {
+    const v6Issues = new Set([473, 492, 493, 494, 495, 496, 497, 503, 504, 505, 506, 507, 508])
+    for (const item of items.filter((i) => i.status === 'planned')) {
+      expect(v6Issues.has(item.issue!), `"${item.name}" points at #${item.issue}`).toBe(true)
+    }
+  })
+})
