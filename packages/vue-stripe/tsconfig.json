@@ -2,7 +2,8 @@
   "extends": "@vue-stripe/typescript-config/vue.json",
   "compilerOptions": {
     "outDir": "dist/types",
-    "declarationDir": "dist/types"
+    "declarationDir": "dist/types",
+    "incremental": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
