@@ -9,7 +9,7 @@ gh api -X POST repos/vue-stripe/vue-stripe/rulesets --input .github/rulesets/rel
 
 To change a ruleset later, edit the JSON and `PUT` it to `repos/vue-stripe/vue-stripe/rulesets/<id>` (list the ids with `gh api repos/vue-stripe/vue-stripe/rulesets`).
 
-- `main`: pull request with one code-owner approval, required checks (both Node legs of CI, Conventional commits, Conventional PR title), no force pushes, no deletion. Repository admins may bypass only through a pull request. Add `Vue 2.7 compatibility` to the required checks once that job exists (#477).
+- `main`: pull request with one code-owner approval, required checks (both Node legs of CI, Vue 2.7 compatibility, Conventional commits, Conventional PR title), no force pushes, no deletion. Repository admins may bypass only through a pull request.
 - `release tags`: only repository admins can create, move or delete `v*` tags, so only the maintainer can trigger `publish.yml`.
 
 `actor_id: 5` is GitHub's built-in Admin repository role.

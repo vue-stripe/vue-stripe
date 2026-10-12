@@ -145,6 +145,50 @@ describe('createStripeElement', () => {
     expect(element.update).toHaveBeenCalledWith({ style: { base: { color: 'blue' } } })
   })
 
+  it('does not call update() when the parent re-renders with equal options', async () => {
+    const Comp = createStripeElement({ elementType: 'x', componentName: 'X' })
+    const { element, options } = mountUnder(Comp, { props: { layout: 'tabs' } })
+    await flushPromises()
+    options.value = { layout: 'tabs' }
+    await flushPromises()
+    options.value = { layout: 'tabs' }
+    await flushPromises()
+    expect(element.update).not.toHaveBeenCalled()
+    options.value = { layout: 'accordion' }
+    await flushPromises()
+    expect(element.update).toHaveBeenCalledTimes(1)
+  })
+
+  it('strips keys Stripe cannot update via updateOptions()', async () => {
+    const Comp = createStripeElement({
+      elementType: 'address',
+      componentName: 'X',
+      updateOptions: ({ mode: _mode, ...rest }) => rest
+    })
+    const { element, options } = mountUnder(Comp, { props: { mode: 'billing' } })
+    await flushPromises()
+    options.value = { mode: 'billing', display: { name: 'split' } }
+    await flushPromises()
+    expect(element.update).toHaveBeenCalledWith({ display: { name: 'split' } })
+  })
+
+  it('logs an update() failure instead of throwing from the watcher', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const Comp = createStripeElement({ elementType: 'x', componentName: 'VueStripeX' })
+    const { element, options } = mountUnder(Comp, { props: { a: 1 } })
+    await flushPromises()
+    element.update.mockImplementation(() => {
+      throw new Error('Mode cannot be updated.')
+    })
+    options.value = { a: 2 }
+    await flushPromises()
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[Vue Stripe] VueStripeX update error:',
+      'Mode cannot be updated.'
+    )
+    errorSpy.mockRestore()
+  })
+
   it('exposes element/loading/error/focus/blur/clear plus expose() extras', async () => {
     const Comp = createStripeElement({
       elementType: 'x',

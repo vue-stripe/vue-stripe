@@ -7,98 +7,34 @@ import {
   ref,
   shallowRef,
   watch,
-  type ComponentOptionsMixin,
-  type DefineComponent,
-  type PropType,
-  type Ref,
-  type ShallowRef
+  type PropType
 } from 'vue-demi'
-import type { StripeCheckoutElementsSdk, StripeError } from '@stripe/stripe-js'
+import type {
+  ElementDefinition,
+  ElementEvents,
+  StripeElementComponent,
+  StripeElementLike
+} from './element-types'
 import { stripeCheckoutInjectionKey, stripeElementsInjectionKey } from './injection-keys'
 import { VueStripeElementsError } from './errors'
-import { hx } from './h'
+import { renderElement } from './element-render'
+
+export type * from './element-types'
+
+/** Stable snapshot used to skip `update()` when re-rendered options are deep-equal. */
+const snapshot = (value: unknown): string => {
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return String(Math.random())
+  }
+}
 
 /** Keep only the keys a narrower Stripe option type accepts (Checkout SDK creators). */
 export const pick = (options: Record<string, unknown>, keys: string[]) =>
   Object.fromEntries(Object.entries(options).filter(([key]) => keys.includes(key)))
 
-/** The Stripe element methods the factory relies on. */
-export interface StripeElementLike {
-  mount(domElement: HTMLElement | string): void
-  destroy(): void
-  on(eventType: string, handler: (...args: unknown[]) => void): unknown
-  off?(eventType: string, handler?: (...args: unknown[]) => void): unknown
-  update?(options: Record<string, unknown>): unknown
-  focus?(): void
-  blur?(): void
-  clear?(): void
-  getValue?(...args: unknown[]): Promise<unknown>
-}
-
 export const BASE_EVENTS = ['ready', 'change', 'focus', 'blur', 'escape'] as const
-
-export interface ElementDefinition {
-  /** `elements.create()` type, e.g. 'card' or 'payment'. */
-  elementType: string
-  componentName: string
-  /** Stripe events re-emitted as Vue events (exact Stripe.js 10 union). Defaults to BASE_EVENTS. */
-  events?: readonly string[]
-  /** Options merged under `props.options` (e.g. IBAN supportedCountries). */
-  defaultOptions?: () => Record<string, unknown>
-  /** Creator inside VueStripeCheckoutElementsProvider; omit when Checkout Sessions lack the element. */
-  checkout?: (sdk: StripeCheckoutElementsSdk, options: Record<string, unknown>) => StripeElementLike
-  /** Extra members for the component's public instance (e.g. getValue). */
-  expose?: (element: Ref<StripeElementLike | null>) => Record<string, unknown>
-  loadingText?: string
-  /** What `ready` emits: the Stripe element (default) or Stripe's ready event (Express Checkout). */
-  readyPayload?: 'element' | 'event'
-  /** Root CSS class; `-error`, `-mount`, `-loader` are derived from it. */
-  className?: string
-}
-
-/** Members every element component exposes (template ref / `InstanceType`). */
-export interface StripeElementExposed<TElement> {
-  /** The Stripe element instance (null until created). */
-  element: ShallowRef<TElement | null>
-  loading: Ref<boolean>
-  error: Ref<string | null>
-  focus: () => void
-  blur: () => void
-  clear: () => void
-}
-
-/** Event name -> payload tuple, used to type a component's listeners (`@change`, ...). */
-export type ElementEvents = Record<string, unknown[]>
-
-/** Payloads of the events most elements share. */
-export type BaseElementEvents<TElement, TChange> = {
-  ready: [element: TElement]
-  change: [event: TChange]
-  focus: []
-  blur: []
-  escape: []
-}
-
-/** Payload of `loaderstart` / `loaderror` for an element type. */
-export type LoadStartEvent<T extends string> = [event: { elementType: T }]
-export type LoadErrorEvent<T extends string> = [event: { elementType: T; error: StripeError }]
-
-/** Public type of a factory-built element component. */
-export type StripeElementComponent<
-  TOptions extends object,
-  TElement,
-  TExtra extends object = Record<never, never>,
-  TEvents extends ElementEvents = ElementEvents
-> = DefineComponent<
-  { options?: TOptions | undefined },
-  StripeElementExposed<TElement> & TExtra,
-  Record<never, never>,
-  Record<never, never>,
-  Record<never, never>,
-  ComponentOptionsMixin,
-  ComponentOptionsMixin,
-  { [K in keyof TEvents]: (...args: TEvents[K]) => void }
->
 
 /**
  * Builds an element component from a definition. Type parameters describe the public
@@ -158,6 +94,11 @@ export function createStripeElement<
         }
       }
 
+      const updatable = (options: Record<string, unknown>) =>
+        def.updateOptions ? def.updateOptions({ ...options }) : { ...options }
+      // Last options applied to the element, so equal re-renders do not call update().
+      let applied = ''
+
       const createRaw = (options: Record<string, unknown>): StripeElementLike | null => {
         const elements = elementsCtx?.elements.value as
           | { create: (type: string, options: Record<string, unknown>) => StripeElementLike }
@@ -181,6 +122,7 @@ export function createStripeElement<
           error.value = null
           const created = createRaw({ ...def.defaultOptions?.(), ...props.options })
           if (!created) return
+          applied = snapshot(updatable(props.options))
           loading.value = true
           element.value = created
           for (const name of events) created.on(name, handlers[name] as never)
@@ -197,10 +139,27 @@ export function createStripeElement<
         }
       }
 
+      // Templates often pass inline objects, so a re-render hands over a new but equal
+      // object; only real changes reach element.update().
       watch(
         () => props.options,
         (next) => {
-          if (next) element.value?.update?.({ ...next })
+          const el = element.value
+          if (!next || !el?.update) return
+          const options = updatable(next)
+          const key = snapshot(options)
+          if (key === applied) return
+          applied = key
+          const report = (err: unknown) =>
+            console.error(
+              `[Vue Stripe] ${componentName} update error:`,
+              err instanceof Error ? err.message : String(err)
+            )
+          try {
+            Promise.resolve(el.update(options)).catch(report)
+          } catch (err) {
+            report(err)
+          }
         },
         { deep: true }
       )
@@ -225,33 +184,7 @@ export function createStripeElement<
       })
 
       return () =>
-        hx('div', { class: [className, 'vue-stripe-element'] }, [
-          error.value &&
-            hx(
-              'div',
-              { class: [`${className}-error`, 'vue-stripe-element-error'] },
-              slots['error']?.({ error: error.value }) ?? [
-                hx('div', { class: 'vue-stripe-error-message' }, error.value)
-              ]
-            ),
-          hx('div', {
-            ref: 'mount',
-            class: {
-              [`${className}-mount`]: true,
-              'vue-stripe-element-mount': true,
-              [`${className}-loading`]: loading.value,
-              'vue-stripe-element-loading': loading.value
-            }
-          }),
-          loading.value &&
-            hx(
-              'div',
-              { class: [`${className}-loader`, 'vue-stripe-element-loader'] },
-              slots['loading']?.() ?? [
-                hx('div', { class: 'vue-stripe-loading-message' }, loadingText)
-              ]
-            )
-        ])
+        renderElement(className, { error: error.value, loading: loading.value }, slots, loadingText)
     }
   })
   // The runtime component is typed loosely; callers get the precise public type.

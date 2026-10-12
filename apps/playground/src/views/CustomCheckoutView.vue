@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, inject, computed, defineComponent, h, watch, onBeforeUnmount } from 'vue'
+import { ref, inject, computed, defineComponent, h } from 'vue'
 import {
   VueStripeProvider,
   VueStripeCheckoutElementsProvider,
+  VueStripePaymentElement,
+  VueStripeAddressElement,
+  VueStripeExpressCheckoutElement,
   useCheckoutSession
 } from '@vue-stripe/vue-stripe'
-import type { StripePaymentElement } from '@stripe/stripe-js'
 
 const stripeConfig = inject<{ publishableKey: string }>('stripeConfig')
 
@@ -23,29 +25,11 @@ const start = () => {
 const CheckoutDemo = defineComponent({
   name: 'CheckoutDemo',
   setup() {
-    const { checkout, session, confirm, updateEmail, applyPromotionCode, loading, error } =
+    const { session, confirm, updateEmail, applyPromotionCode, loading, error } =
       useCheckoutSession()
-    const paymentMountRef = ref<HTMLDivElement>()
     const email = ref('')
     const promo = ref('')
     const message = ref<string | null>(null)
-    let paymentElement: StripePaymentElement | null = null
-
-    // Mount the Payment Element created from the checkout instance.
-    watch(
-      [() => checkout.value, paymentMountRef],
-      ([c, el]) => {
-        if (c && el && !paymentElement) {
-          paymentElement = c.createPaymentElement()
-          paymentElement.mount(el)
-        }
-      },
-      { immediate: true }
-    )
-
-    onBeforeUnmount(() => {
-      paymentElement?.destroy()
-    })
 
     const onUpdateEmail = async () => {
       const res = await updateEmail(email.value)
@@ -81,9 +65,18 @@ const CheckoutDemo = defineComponent({
             h('li', [h('strong', 'canConfirm: '), String(session.value?.canConfirm ?? false)])
           ])
         ]),
-        h('div', { class: 'pe' }, [
+        // The element components detect the Checkout provider and use the Checkout SDK creators.
+        h('div', { class: 'pe', 'data-test': 'express-checkout-element' }, [
+          h('label', 'Express Checkout Element'),
+          h(VueStripeExpressCheckoutElement)
+        ]),
+        h('div', { class: 'pe', 'data-test': 'address-element' }, [
+          h('label', 'Billing address'),
+          h(VueStripeAddressElement, { options: { mode: 'billing' } })
+        ]),
+        h('div', { class: 'pe', 'data-test': 'payment-element' }, [
           h('label', 'Payment Element'),
-          h('div', { ref: paymentMountRef, 'data-test': 'payment-element' })
+          h(VueStripePaymentElement)
         ]),
         h('div', { class: 'row' }, [
           h('input', {
