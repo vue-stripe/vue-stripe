@@ -90,6 +90,44 @@ The Card Element needs no client secret. For the Payment Element, pass `client-s
 
 The composables (`usePaymentIntent`, `useStripe`, ...) work in Vue 2.7's `setup()` and `<script setup>`, inside a component rendered within the providers.
 
+With the Options API, call the composables in `setup()` and return what the methods need; the element's exposed members are on its template ref:
+
+```vue
+<!-- CardPayForm.vue, rendered inside VueStripeElements -->
+<script>
+import { VueStripeCardElement, useConfirmCardPayment } from '@vue-stripe/vue-stripe'
+
+export default {
+  components: { VueStripeCardElement },
+  props: { clientSecret: { type: String, required: true } },
+  setup() {
+    // What setup() returns is available as this.confirmCardPayment, this.loading, ...
+    const { confirmCardPayment, loading, error } = useConfirmCardPayment()
+    return { confirmCardPayment, loading, error }
+  },
+  data: () => ({ status: '' }),
+  methods: {
+    async pay() {
+      const card = this.$refs.card.element
+      const { paymentIntent } = await this.confirmCardPayment(this.clientSecret, {
+        payment_method: { card }
+      })
+      this.status = paymentIntent ? paymentIntent.status : ''
+    }
+  }
+}
+</script>
+
+<template>
+  <div>
+    <VueStripeCardElement ref="card" />
+    <button :disabled="loading" @click="pay">Pay</button>
+    <p v-if="error">{{ error }}</p>
+    <p v-if="status">Payment {{ status }}</p>
+  </div>
+</template>
+```
+
 ## 5. Optional: install the plugin
 
 On Vue 2.7 the plugin installs with `Vue.use()`:
