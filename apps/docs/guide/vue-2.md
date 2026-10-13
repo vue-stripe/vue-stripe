@@ -6,7 +6,13 @@ description: "Use Vue Stripe in a Vue 2.7 app: install the packages, let vue-dem
 
 Run Vue Stripe in a Vue 2.7 app. The library ships one build for Vue 2.7 and Vue 3 through [vue-demi](https://github.com/vueuse/vue-demi); every component is a render function, so templates, `h()` and the Options API all work.
 
-Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not supported; upgrade to 2.7 first. The samples assume Vite with `@vitejs/plugin-vue2`; on Vue CLI 5, read the key from `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, as in [Add your publishable key](/guide/installation#_3-add-your-publishable-key).
+Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not supported; upgrade to 2.7 first.
+
+::: info What Vue 2.7 support covers
+- **Client-side apps.** Vue Stripe is tested on Vue 2.7 in CI (the built package is mounted on Vue 2.7.16 and its types are checked) and with a complete client-side app built from these docs. Server rendering is tested on Nuxt 4 only; Nuxt 2 and other Vue 2 SSR setups are not tested.
+- **Samples are written for Vue 3.** The other pages show Vue 3 code; [step 6](#_6-adapt-samples-from-the-other-pages) lists the three changes Vue 2.7 needs.
+- **Vue 2 is end-of-life.** The Vue team ended Vue 2 support on 31 December 2023. Vue Stripe supports 2.7 for apps that are still migrating; start new projects on Vue 3.
+::: The samples assume Vite with `@vitejs/plugin-vue2`; on Vue CLI 5, read the key from `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, as in [Add your publishable key](/guide/installation#_3-add-your-publishable-key).
 
 ## 1. Install the packages
 

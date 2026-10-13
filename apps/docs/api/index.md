@@ -10,7 +10,7 @@ Every export of `@vue-stripe/vue-stripe`: components, composables, the plugin an
 
 | Requirement | Supported |
 |-------------|-----------|
-| Vue | `^2.7.0 \|\| ^3.0.0` (peer dependency) |
+| Vue | `^2.7.0 \|\| ^3.0.0` (peer dependency). Vue 2.7 is tested in client-side apps; see [Use Vue Stripe on Vue 2.7](/guide/vue-2) |
 | Stripe.js | `@stripe/stripe-js` `^10.0.0`, Stripe.js Endive (peer dependency) |
 | Rendering | Client and server. Stripe.js loads only in the browser; during server rendering, components render their loading state and hydrate without mismatches. `<ClientOnly>` is optional. See [Use Vue Stripe with Nuxt and SSR](/guide/ssr) |
 | Module formats | ES, CommonJS and UMD builds; TypeScript declarations included |
