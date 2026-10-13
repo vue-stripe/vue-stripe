@@ -1,6 +1,6 @@
 # useFinancialConnections
 
-Collect bank accounts with [Stripe Financial Connections](https://docs.stripe.com/financial-connections) and the [ACH Direct Debit](https://docs.stripe.com/payments/ach-direct-debit) bank account flows. Wraps four Stripe.js methods, each of which opens Stripe's modal and resolves when the customer finishes or closes it:
+Collect bank accounts with [Stripe Financial Connections](https://docs.stripe.com/financial-connections) and the [ACH Direct Debit](https://docs.stripe.com/payments/ach-direct-debit) bank account flows. Wraps four Stripe.js methods, each of which opens Stripe's modal and resolves when the customer finishes or closes it. [Accept ACH Direct Debit](/guide/ach-debit) walks through the payment flow:
 
 | Method | Wraps Stripe.js | Resolves to |
 |--------|-----------------|-------------|
@@ -181,4 +181,5 @@ All result types are Stripe's result for that method widened with `VueStripeErro
 - [Bank debit confirmers](/api/composables/confirm/bank-debits#useconfirmusbankaccountpayment) - Confirm the ACH payment after collecting the account
 - [useVerifyMicrodepositsForPayment](/api/composables/use-verify-microdeposits-for-payment) - Verify a manually entered account
 - [Payment methods that settle later](/guide/confirming-payments#payment-methods-that-settle-later)
+- [Accept ACH Direct Debit](/guide/ach-debit) - Link the account, confirm, verify micro-deposits
 - [Live demo](/live-demo/ach-debit)

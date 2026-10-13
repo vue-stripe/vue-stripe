@@ -124,7 +124,7 @@ The promise never rejects. Every failure resolves to `{ error }` and sets `error
 - `{ error: { message: 'Stripe not initialized' } }` when Stripe.js has not loaded yet;
 - `{ error: { message } }` when the Stripe call throws.
 
-So one `if (result.error)` check covers every failure. Outside a provider, `usePaymentIntent()` itself throws a `VueStripeProviderError`. The [method confirmers overview](/api/composables/confirm/#return-value) lists which composables resolve `{ error }` and which reject.
+So one `if (result.error)` check covers every failure. Outside a provider, `usePaymentIntent()` itself throws a `VueStripeProviderError`. The [method confirmers overview](/api/composables/confirm/#return-value) lists which composables resolve `{ error }` and which reject. [Handle errors and declines](/guide/error-handling#_3-handle-confirmation-errors) shows how to branch on the error type, decline codes included.
 
 ## TypeScript
 
@@ -152,3 +152,5 @@ const pay = async (options: ConfirmPaymentOptions) => {
 - [useSetupIntent](/api/composables/use-setup-intent) - Save a payment method without charging
 - [Accept a payment with the Payment Element](/guide/payment-element) - Step-by-step guide
 - [How confirming works](/guide/confirming-payments) - Redirects, next actions and payments that settle later
+- [Handle errors and declines](/guide/error-handling) - Show validation, confirmation and decline errors
+- [Collect payment details before creating an Intent](/guide/deferred-intent) - Confirm with `skipSubmit` after creating the Intent

@@ -41,7 +41,7 @@ const { submit } = useStripeElements()
 const { error } = await submit()
 ```
 
-`usePaymentIntent`, `useSetupIntent`, `useCreatePaymentMethod` and `useCreateConfirmationToken` call it automatically before they call Stripe (`useCreatePaymentMethod` only in its Elements flow). Call it yourself only when you need to do something between validating and confirming (for example, create the Intent once the form is valid), and then pass `skipSubmit: true` to the confirming composable so it does not submit again.
+`usePaymentIntent`, `useSetupIntent`, `useCreatePaymentMethod` and `useCreateConfirmationToken` call it automatically before they call Stripe (`useCreatePaymentMethod` only in its Elements flow). Call it yourself only when you need to do something between validating and confirming (for example, create the Intent once the form is valid), and then pass `skipSubmit: true` to the confirming composable so it does not submit again. [Collect payment details before creating an Intent](/guide/deferred-intent#_2-validate-create-the-intent-then-confirm) walks through that flow.
 
 ### getElement
 
@@ -100,4 +100,5 @@ const paymentElement: StripePaymentElement | null = getElement('payment')
 - [useStripe](/api/composables/use-stripe) - Access the Stripe instance
 - [usePaymentIntent](/api/composables/use-payment-intent) - Confirm a PaymentIntent with this group
 - [Accept a payment with the Payment Element](/guide/payment-element)
+- [Collect payment details before creating an Intent](/guide/deferred-intent) - `submit()`, then create the Intent, then confirm
 - [How confirming works](/guide/confirming-payments#why-the-payment-element-is-submitted-first) - Why the Payment Element is submitted first

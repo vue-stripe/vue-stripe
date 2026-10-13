@@ -35,7 +35,7 @@ All return values are **readonly refs** - you can read their `.value` but cannot
 
 ## Behaviour
 
-- **Throws outside a provider.** Called outside `VueStripeProvider` in an app that does not install `createVueStripe()`, `useStripe()` throws a `VueStripeProviderError`: `useStripe must be called within a VueStripeProvider component or an app using createVueStripe()`. Calling it in the same component that renders the provider counts as outside: call it in a child component.
+- **Throws outside a provider.** Called outside `VueStripeProvider` in an app that does not install `createVueStripe()`, `useStripe()` throws a `VueStripeProviderError`: `useStripe must be called within a VueStripeProvider component or an app using createVueStripe()`. Calling it in the same component that renders the provider counts as outside: call it in a child component. [Troubleshoot common problems](/guide/troubleshooting#providers-and-composables) shows the fix.
 - **Calling Stripe.js.** Every Stripe.js method has a wrapping composable ([`usePaymentIntent`](/api/composables/use-payment-intent), [`useSetupIntent`](/api/composables/use-setup-intent), [`useCreatePaymentMethod`](/api/composables/use-create-payment-method), the [`useConfirm*` composables](/api/composables/confirm/), ...). They inject the same instance, track `loading` / `error`, and handle the not-yet-loaded case, so use `useStripe()` for readiness and state rather than for calling `stripe.value.<method>()` yourself.
 
 ## TypeScript
@@ -56,3 +56,4 @@ const { stripe, loading, error }: UseStripeReturn = useStripe()
 - [useStripeElements](/api/composables/use-stripe-elements) - Access the Elements instance
 - [How Vue Stripe works](/guide/architecture) - The provider chain
 - [How Stripe.js is loaded](/guide/stripe-js-loading) - When the instance becomes available
+- [Troubleshoot common problems](/guide/troubleshooting#providers-and-composables) - Provider and composable errors

@@ -204,3 +204,5 @@ const onLoad = (stripe: Stripe) => {
 - [How Stripe.js is loaded](/guide/stripe-js-loading) - Lazy loading, shared loads, fraud signals, release trains
 - [How Vue Stripe works](/guide/architecture) - The provider chain
 - [Choosing an integration](/guide/approaches#plugin-or-provider) - The plugin and the provider compared
+- [Handle errors and declines](/guide/error-handling#_1-show-stripe-js-load-failures) - Show Stripe.js load failures
+- [Use Vue Stripe with Nuxt and SSR](/guide/ssr) - Server-rendered apps

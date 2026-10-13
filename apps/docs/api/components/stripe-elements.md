@@ -26,7 +26,7 @@ const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 </script>
 ```
 
-Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret`:
+Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret` ([Collect payment details before creating an Intent](/guide/deferred-intent) walks through this flow):
 
 ```vue
 <VueStripeElements mode="payment" currency="usd" :amount="1099">
@@ -49,7 +49,7 @@ Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret`
 | `locale` | `string` | No | Locale to display Elements in (e.g. `'en'`, `'fr'`, `'auto'`). Convenience prop — equivalent to `options.locale`. Changes are applied live with `elements.update()` |
 | `options` | `StripeElementsOptions` | No | Any other option passed to `stripe.elements()` (e.g. `allowedPaymentMethodTypes` in the mode-based flow, `loader`) |
 
-\* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation.
+\* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation; see [Collect payment details before creating an Intent](/guide/deferred-intent).
 
 A new `clientSecret`, `mode`, `currency`, `amount` or `setupFutureUsage` calls `stripe.elements()` again to create a new Elements group. Changes to the `appearance` and `locale` props are applied to the existing group with `elements.update()`, so mounted elements keep what the customer typed (keys inside `options` are read when the group is created).
 
@@ -133,7 +133,7 @@ Custom fonts load through `fonts` (or `options.fonts`): pass `{ cssSrc }` for a 
 >
 ```
 
-Changes to `appearance` are applied to the mounted elements with `elements.update()`. Pass a stable object (a `ref` or `computed`), not a new inline object on every render, if the parent re-renders often.
+Changes to `appearance` are applied to the mounted elements with `elements.update()`. Pass a stable object (a `ref` or `computed`), not a new inline object on every render, if the parent re-renders often. [Style elements](/guide/styling#_2-theme-the-fields-with-the-appearance-api) has full theme examples, including [switching themes at runtime](/guide/styling#switch-themes-at-runtime).
 
 ## Events
 
@@ -271,6 +271,7 @@ function onReady(elements: StripeElements) {
 
 ## See Also
 
+- [Style elements](/guide/styling) - Appearance API examples, the stylesheet and the wrapper markup
 - [useStripeElements](/api/composables/use-stripe-elements) - Access Elements in child components
 - [VueStripeProvider](/api/components/stripe-provider) - Parent provider component
 - [createVueStripe](/api/plugin) - App-wide alternative to the provider

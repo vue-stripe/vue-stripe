@@ -78,7 +78,7 @@ frame-src https://js.stripe.com;
 | `@load` | - | Emitted when the pricing table script loads successfully |
 | `@error` | `Error` | Emitted when the script fails to load (network error, CSP blocking). The message is also shown through the `#error` slot |
 
-`@error` reports only script load failures. An invalid or deleted pricing table ID is handled by Stripe's web component, not by `@error`.
+`@error` reports only script load failures. An invalid or deleted pricing table ID is handled by Stripe's web component, not by `@error`. To retry after a load error, remount the component by changing its `key`; [Handle errors and declines](/guide/error-handling#_5-handle-checkout-errors) shows how.
 
 ## Slots
 
@@ -126,13 +126,13 @@ const isLoading = () => pricingTableRef.value?.loading ?? true
 
 The component renders Stripe's `<stripe-pricing-table>` web component from a render function, so Vue never tries to resolve it as a Vue component: **no `isCustomElement` / `compilerOptions` setup is needed** in Vue 3, and there is no "Failed to resolve component" warning.
 
-- **Vue 2.7:** Vue 2 still checks unknown elements at runtime. Add this once in `main.js`:
+- **Vue 2.7:** Vue 2 still checks unknown elements at runtime. Add this once in `main.js` (see [Use Vue Stripe on Vue 2.7](/guide/vue-2#_3-import-the-stylesheet)):
 
   ```js
   Vue.config.ignoredElements = ['stripe-pricing-table']
   ```
 
-- **Nuxt and other SSR apps:** server rendering emits only the loading markup, and the pricing table script loads in the browser on mount, so the component needs no client-only wrapper. `<ClientOnly>` or a `.client.vue` component is optional, for example to skip the loading markup on the server (see [Installation: Nuxt 3](/guide/installation#nuxt-3)).
+- **Nuxt and other SSR apps:** server rendering emits only the loading markup, and the pricing table script loads in the browser on mount, so the component needs no client-only wrapper. `<ClientOnly>` or a `.client.vue` component is optional, for example to skip the loading markup on the server (see [Use Vue Stripe with Nuxt and SSR](/guide/ssr#nuxt-3)).
 
 ## Styling
 
@@ -177,6 +177,8 @@ const handleError = (error: Error): void => {
 ## See Also
 
 - [Embed a pricing table](/guide/pricing-table) - Add a pricing table to a page
+- [Start a subscription](/guide/subscriptions) - The other ways to subscribe a customer
+- [Keep access in sync with webhooks](/guide/subscriptions#keep-access-in-sync-with-webhooks) - React to subscription events
 - [VueStripeProvider](/api/components/stripe-provider) - Provides the publishable key
 - [VueStripeCheckout](/api/components/stripe-checkout) - Redirect to Checkout for one-time payments
 - [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) - Pricing tables and the other Checkout options compared

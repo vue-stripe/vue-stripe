@@ -54,4 +54,5 @@ verifyMicrodepositsForSetup(
 - [useVerifyMicrodepositsForPayment](/api/composables/use-verify-microdeposits-for-payment) - The PaymentIntent variant
 - [useFinancialConnections](/api/composables/use-financial-connections) - Collect the bank account
 - [Payment methods that settle later](/guide/confirming-payments#payment-methods-that-settle-later)
+- [Accept ACH Direct Debit](/guide/ach-debit#_4-verify-with-micro-deposits) - Verify with micro-deposits
 - [Live demo](/live-demo/ach-debit)

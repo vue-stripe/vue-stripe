@@ -174,7 +174,7 @@ The default styles for these classes ship in the package stylesheet. Import it o
 import '@vue-stripe/vue-stripe/style.css'
 ```
 
-Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-iban-element*` for this one.
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-iban-element*` for this one. [Style elements](/guide/styling#_4-style-the-wrapper-markup) covers the markup and the Appearance API.
 
 ## TypeScript
 
@@ -206,4 +206,7 @@ const iban = (): StripeIbanElement | null => ibanRef.value?.element ?? null
 - [Bank debit confirmers](/api/composables/confirm/bank-debits) - `useConfirmSepaDebitPayment` and `useConfirmSepaDebitSetup`
 - [VueStripeElements](/api/components/stripe-elements) - Required parent
 - [VueStripePaymentElement](/api/components/stripe-payment-element) - SEPA, iDEAL, P24, EPS and other bank payments in one element (Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Clover)
+- [Style elements](/guide/styling#_3-style-the-card-iban-and-becs-elements) - The `style` option and wrapper CSS
+- [Test your integration](/guide/testing#sepa-direct-debit-iban) - Test IBANs
+- [Fulfil orders with webhooks](/guide/webhooks) - SEPA payments settle days later
 - [Live demo](/live-demo/iban-element)
