@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { defineComponent, h, provide, ref, shallowRef } from 'vue-demi'
+import { loadStripe } from '@stripe/stripe-js/pure'
 import VueStripeCurrencySelectorElement from '../../src/components/VueStripeCurrencySelectorElement'
-import { flushPromises } from '../setup'
+import VueStripeCheckoutForm from '../../src/components/VueStripeCheckoutForm'
+import VueStripeCheckoutFormProvider from '../../src/components/VueStripeCheckoutFormProvider'
+import VueStripeProvider from '../../src/components/VueStripeProvider'
+import { flushPromises, makeMockCheckoutForm, makeMockStripe } from '../setup'
+import { stripeCheckoutFormInjectionKey } from '../../src/utils/injection-keys'
 import { mountLeaf } from './checkout-session-elements.helpers'
 
 describe('VueStripeCurrencySelectorElement', () => {
@@ -75,5 +82,52 @@ describe('VueStripeCurrencySelectorElement', () => {
     await flushPromises()
     expect(element.off).toHaveBeenCalledTimes(5)
     expect(element.destroy).toHaveBeenCalledTimes(1)
+  })
+
+  // #667: Stripe.js throws an uncaught TypeError when the currency selector is created
+  // before the form, so a selector placed above VueStripeCheckoutForm is created after it.
+  it('is created after a VueStripeCheckoutForm rendered after it', async () => {
+    const form = makeMockCheckoutForm()
+    const stripe = makeMockStripe()
+    stripe.initCheckoutFormSdk.mockReturnValue(form)
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+    mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: {
+        default: () =>
+          h(VueStripeCheckoutFormProvider, { clientSecret: 'cs_test_1_secret_2' }, () => [
+            h(VueStripeCurrencySelectorElement),
+            h(VueStripeCheckoutForm)
+          ])
+      }
+    })
+    for (let i = 0; i < 4; i++) await flushPromises()
+
+    expect(form.createForm).toHaveBeenCalledTimes(1)
+    expect(form.createCurrencySelectorElement).toHaveBeenCalledTimes(1)
+    expect(form.createForm.mock.invocationCallOrder[0]).toBeLessThan(
+      form.createCurrencySelectorElement.mock.invocationCallOrder[0]!
+    )
+  })
+
+  it('is not created when unmounted before its deferred creation', async () => {
+    const form = makeMockCheckoutForm()
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          provide(stripeCheckoutFormInjectionKey, {
+            checkout: shallowRef(form as never),
+            actions: shallowRef(null),
+            session: shallowRef(null),
+            loading: ref(true),
+            error: ref(null)
+          })
+          return () => h(VueStripeCurrencySelectorElement)
+        }
+      })
+    )
+    wrapper.unmount()
+    await flushPromises()
+    expect(form.createCurrencySelectorElement).not.toHaveBeenCalled()
   })
 })

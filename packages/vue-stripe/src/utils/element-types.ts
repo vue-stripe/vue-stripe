@@ -50,6 +50,11 @@ export interface ElementDefinition {
    * `#error` instead.
    */
   needsIntent?: string
+  /**
+   * `true` to create the element a tick after mount, once the elements rendered after it
+   * exist: Stripe.js throws when the Currency Selector is created before the Checkout Form.
+   */
+  createLast?: boolean
   /** Extra members for the component's public instance (e.g. getValue). */
   expose?: (element: Ref<StripeElementLike | null>) => Record<string, unknown>
   loadingText?: string

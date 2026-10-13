@@ -2,6 +2,7 @@ import {
   defineComponent,
   getCurrentInstance,
   inject,
+  nextTick,
   onMounted,
   onUnmounted,
   ref,
@@ -237,7 +238,7 @@ export function createStripeElement<
           create()
         }
       )
-      onMounted(create)
+      onMounted(def.createLast ? () => nextTick(create) : create)
       onUnmounted(teardown)
 
       expose({

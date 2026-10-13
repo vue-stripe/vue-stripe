@@ -159,6 +159,8 @@ With [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-prici
 </VueStripeCheckoutFormProvider>
 ```
 
+The selector can go above or below the form. Stripe.js expects the form to exist first, so the selector waits a tick after it mounts and is created after a `VueStripeCheckoutForm` rendered in the same update. If you show the form later (for example behind a `v-if`), render the selector with it or after it.
+
 No other element component works inside `VueStripeCheckoutFormProvider`: the form already contains them.
 
 ## Change the order
