@@ -174,6 +174,10 @@ const readTaxId = () => taxIdRef.value?.getValue()
 
 <template>
   <VueStripeTaxIdElement ref="taxIdRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
+  <button type="button" @click="readTaxId">Read tax id</button>
 </template>
 ```
 
@@ -183,12 +187,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-tax-id-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-tax-id-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-tax-id-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-tax-id-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-tax-id-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-tax-id-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-tax-id-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading tax ID form...</div>
+  </div>
 </div>
 ```
 
@@ -202,10 +210,10 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ta
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeTaxIdElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripeTaxIdElement,
   StripeTaxIdElementOptions,
   StripeTaxIdElementChangeEvent
 } from '@stripe/stripe-js'
@@ -218,6 +226,14 @@ const handleChange = (event: StripeTaxIdElementChangeEvent) => {
   console.log('Complete:', event.complete)
   console.log('Tax ID:', event.value.taxId)
 }
+</script>
+
+<template>
+  <VueStripeTaxIdElement
+    :options="options"
+    @change="handleChange"
+  />
+</template>
 ```
 
 ## See Also

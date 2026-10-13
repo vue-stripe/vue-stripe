@@ -37,11 +37,7 @@ import PayForm from './PayForm.vue'
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // From your backend: stripe.checkout.sessions.create({ ui_mode: 'form', ... })
-const clientSecret = fetch('/api/checkout-session', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ uiMode: 'form' })
-})
+const clientSecret = fetch('/api/checkout-form-session', { method: 'POST' })
   .then((res) => res.json())
   .then((data) => data.clientSecret)
 </script>
@@ -96,6 +92,8 @@ interface DefaultValues {
 }
 ```
 
+The defaults go to the session as on [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider#defaultvalues), so Stripe refuses the same ones: `email` on a session that already has the customer's email, and `phoneNumber` unless the session was created with `phone_number_collection: { enabled: true }`.
+
 ## Events
 
 | Event | Payload | Description |
@@ -146,14 +144,16 @@ The provider uses its own injection key, so `useCheckoutSession()` does not work
 
 The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots).
 
-```ts
+```vue
+<script setup lang="ts">
+import { VueStripeCheckoutFormProvider, VueStripeCheckoutForm } from '@vue-stripe/vue-stripe'
 import type {
   StripeCheckoutFormLoadActionsSuccess,
   StripeCheckoutSession,
   VueStripeCheckoutFormProviderProps
 } from '@vue-stripe/vue-stripe'
 
-const props: VueStripeCheckoutFormProviderProps = {
+const config: VueStripeCheckoutFormProviderProps = {
   clientSecret: 'cs_test_..._secret_...',
   appearance: { theme: 'stripe' },
   savedPaymentMethod: { enableSave: 'never' }
@@ -166,6 +166,13 @@ const onReady = (actions: StripeCheckoutFormLoadActionsSuccess) => {
 const onChange = (session: StripeCheckoutSession) => {
   console.log('Status:', session.status.type)
 }
+</script>
+
+<template>
+  <VueStripeCheckoutFormProvider v-bind="config" @ready="onReady" @change="onChange">
+    <VueStripeCheckoutForm />
+  </VueStripeCheckoutFormProvider>
+</template>
 ```
 
 ## See Also

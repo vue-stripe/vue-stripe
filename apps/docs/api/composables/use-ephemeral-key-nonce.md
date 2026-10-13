@@ -29,6 +29,11 @@ const reveal = async () => {
   return { issuingCard: props.issuingCard, nonce, ephemeralKeySecret }
 }
 </script>
+
+<template>
+  <button :disabled="loading" @click="reveal">Show card details</button>
+  <p v-if="error">{{ error }}</p>
+</template>
 ```
 
 ## Return Value

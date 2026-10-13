@@ -243,6 +243,10 @@ const collapse = () => paymentRef.value?.collapse()
 
 <template>
   <VueStripePaymentElement ref="paymentRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
+  <button type="button" @click="collapse">Collapse</button>
 </template>
 ```
 
@@ -252,12 +256,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-payment-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-payment-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-payment-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-payment-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-payment-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-payment-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-payment-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading payment form...</div>
+  </div>
 </div>
 ```
 
@@ -271,7 +279,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-pa
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -302,6 +311,17 @@ const handleChange = (event: StripePaymentElementChangeEvent) => {
 
 // Template ref
 const paymentRef = ref<InstanceType<typeof VueStripePaymentElement> | null>(null)
+</script>
+
+<template>
+  <VueStripePaymentElement
+    ref="paymentRef"
+    :options="options"
+    @ready="handleReady"
+    @change="handleChange"
+  />
+  <button type="button" @click="paymentRef?.focus()">Focus</button>
+</template>
 ```
 
 ## See Also

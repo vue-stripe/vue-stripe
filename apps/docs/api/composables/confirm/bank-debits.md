@@ -6,7 +6,7 @@ description: "Vue composables that confirm bank debit payments and setups with S
 
 Confirm a PaymentIntent or SetupIntent that debits a bank account: Canadian pre-authorized debits (ACSS), Australian BECS, UK Bacs, SEPA Direct Debit and US bank accounts (ACH). ACSS opens a Stripe modal that collects and verifies the account; SEPA and BECS take the account from [`VueStripeIbanElement`](/api/components/stripe-iban-element) / [`VueStripeAuBankAccountElement`](/api/components/stripe-au-bank-account-element).
 
-Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider).
+Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider). [What each method needs](/api/composables/confirm/#what-each-method-needs) lists the Intent currency and the `data` each method requires, and [Test your integration](/guide/testing) gives the test accounts for each method.
 
 ## When to use
 

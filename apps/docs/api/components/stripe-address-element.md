@@ -208,6 +208,10 @@ const readAddress = () => addressRef.value?.getValue({ format: 'localized' })
 
 <template>
   <VueStripeAddressElement ref="addressRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
+  <button type="button" @click="readAddress">Read address</button>
 </template>
 ```
 
@@ -225,12 +229,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-address-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-address-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-address-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-address-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-address-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-address-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-address-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading address form...</div>
+  </div>
 </div>
 ```
 
@@ -244,7 +252,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ad
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeAddressElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -281,6 +290,17 @@ const validateAddress = async () => {
     console.log(`${line1}, ${city}, ${state} ${postal_code}, ${country}`)
   }
 }
+</script>
+
+<template>
+  <VueStripeAddressElement
+    ref="addressRef"
+    :options="options"
+    @ready="handleReady"
+    @change="handleChange"
+  />
+  <button type="button" @click="validateAddress">Validate address</button>
+</template>
 ```
 
 ## See Also

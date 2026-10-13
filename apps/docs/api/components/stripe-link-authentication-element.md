@@ -145,6 +145,9 @@ const stripeElement = (): StripeLinkAuthenticationElement | null => linkAuthRef.
 
 <template>
   <VueStripeLinkAuthenticationElement ref="linkAuthRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -154,12 +157,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-link-auth vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-link-auth-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-link-auth-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-link-auth-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-link-auth-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-link-auth-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-link-auth-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading...</div>
+  </div>
 </div>
 ```
 
@@ -173,7 +180,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-li
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeLinkAuthenticationElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -205,6 +213,17 @@ const linkAuthRef = ref<InstanceType<typeof VueStripeLinkAuthenticationElement> 
 const focusEmail = () => {
   linkAuthRef.value?.focus()
 }
+</script>
+
+<template>
+  <VueStripeLinkAuthenticationElement
+    ref="linkAuthRef"
+    :options="options"
+    @ready="handleReady"
+    @change="handleChange"
+  />
+  <button type="button" @click="focusEmail">Focus email</button>
+</template>
 ```
 
 ## See Also

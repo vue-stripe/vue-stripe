@@ -114,6 +114,7 @@ const stripeElement = (): StripeContactDetailsElement | null => contactRef.value
 
 <template>
   <VueStripeContactDetailsElement ref="contactRef" />
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -123,12 +124,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-contact-details-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-contact-details-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-contact-details-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-contact-details-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-contact-details-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-contact-details-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-contact-details-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading contact details...</div>
+  </div>
 </div>
 ```
 
@@ -136,10 +141,10 @@ The default styles ship in the package stylesheet (`import '@vue-stripe/vue-stri
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeContactDetailsElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripeContactDetailsElement,
   StripeContactDetailsElementOptions,
   StripeContactDetailsElementChangeEvent
 } from '@stripe/stripe-js'
@@ -151,6 +156,14 @@ const options: StripeContactDetailsElementOptions = {
 const handleChange = (event: StripeContactDetailsElementChangeEvent) => {
   if (event.complete) console.log('Email:', event.value.email)
 }
+</script>
+
+<template>
+  <VueStripeContactDetailsElement
+    :options="options"
+    @change="handleChange"
+  />
+</template>
 ```
 
 ## See Also

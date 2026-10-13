@@ -7,7 +7,7 @@ description: "VueStripeLinkSignupElement reference (beta): offer customers to sa
 Offers customers to save their details with [Link](https://stripe.com/payments/link) for faster checkout next time. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createLinkSignupElement(options)`), or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('linkSignup', options)`).
 
 ::: danger Stripe beta
-The Link Signup Element requires beta access: contact [Stripe support](https://support.stripe.com/). Stripe.js also needs a beta flag on the Stripe instance; without it, creating the element throws (reported through `@loaderror` and the `#error` slot). At the time of writing Stripe.js names the flag in that error: `elements_link_signup_beta_1`. Pass it with the [`betas`](/api/components/stripe-provider#props) prop:
+The Link Signup Element requires beta access: contact [Stripe support](https://support.stripe.com/). Stripe.js also needs the `elements_link_signup_beta_1` flag on the Stripe instance. Without it, creating the element throws, reported through `@loaderror` and the `#error` slot. The error does not name the flag; Stripe.js 10 reports an unknown element type: "A valid Element name must be provided. Valid Elements are: card, cardNumber, ... ; you passed: linkSignup." That message means the flag is missing. Pass it with the [`betas`](/api/components/stripe-provider#props) prop:
 
 ```vue
 <VueStripeProvider
@@ -135,6 +135,7 @@ const stripeElement = (): StripeLinkSignupElement | null => linkSignupRef.value?
 
 <template>
   <VueStripeLinkSignupElement ref="linkSignupRef" />
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -144,12 +145,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-link-signup-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-link-signup-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-link-signup-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-link-signup-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-link-signup-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-link-signup-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-link-signup-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading Link signup...</div>
+  </div>
 </div>
 ```
 
@@ -157,7 +162,8 @@ The default styles ship in the package stylesheet (`import '@vue-stripe/vue-stri
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeLinkSignupElement } from '@vue-stripe/vue-stripe'
 import type { StripeLinkSignupElement, StripeLinkSignupElementOptions } from '@stripe/stripe-js'
 
@@ -166,6 +172,14 @@ const options: StripeLinkSignupElementOptions = {
 }
 
 const handleReady = (element: StripeLinkSignupElement) => console.log('ready', element)
+</script>
+
+<template>
+  <VueStripeLinkSignupElement
+    :options="options"
+    @ready="handleReady"
+  />
+</template>
 ```
 
 ## See Also

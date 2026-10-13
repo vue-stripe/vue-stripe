@@ -222,6 +222,9 @@ const cardNumber = (): StripeCardNumberElement | null => numberRef.value?.elemen
   <VueStripeCardNumberElement ref="numberRef" />
   <VueStripeCardExpiryElement ref="expiryRef" />
   <VueStripeCardCvcElement ref="cvcRef" />
+  <button type="button" @click="focusNumber">Focus number</button>
+  <button type="button" @click="clearAll">Clear all</button>
+  <p v-if="cardNumber()">The Stripe element exists</p>
 </template>
 ```
 
@@ -231,14 +234,20 @@ Each component renders this markup around Stripe's iframe (`<type>` is `cardNumb
 
 ```html
 <div class="vue-stripe-<type>-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-<type>-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-<type>-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus -loading classes while loading -->
   <div class="vue-stripe-<type>-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-<type>-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-<type>-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading card number...</div>
+  </div>
 </div>
 ```
+
+The default loading text is "Loading card number...", "Loading card expiry..." or "Loading card CVC...".
 
 The default styles for these classes ship in the package stylesheet. Import it once in your app:
 
@@ -250,7 +259,8 @@ Target `.vue-stripe-element*` to style every element at once, or e.g. `.vue-stri
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import {
   VueStripeCardNumberElement,
@@ -258,7 +268,6 @@ import {
   VueStripeCardCvcElement
 } from '@vue-stripe/vue-stripe'
 import type {
-  StripeCardNumberElement,
   StripeCardNumberElementChangeEvent,
   StripeCardNumberElementOptions
 } from '@stripe/stripe-js'
@@ -281,6 +290,20 @@ const handleNumberChange = (event: StripeCardNumberElementChangeEvent) => {
 const numberRef = ref<InstanceType<typeof VueStripeCardNumberElement> | null>(null)
 const expiryRef = ref<InstanceType<typeof VueStripeCardExpiryElement> | null>(null)
 const cvcRef = ref<InstanceType<typeof VueStripeCardCvcElement> | null>(null)
+
+const clearAll = () => {
+  numberRef.value?.clear()
+  expiryRef.value?.clear()
+  cvcRef.value?.clear()
+}
+</script>
+
+<template>
+  <VueStripeCardNumberElement ref="numberRef" :options="options" @change="handleNumberChange" />
+  <VueStripeCardExpiryElement ref="expiryRef" />
+  <VueStripeCardCvcElement ref="cvcRef" />
+  <button type="button" @click="clearAll">Clear</button>
+</template>
 ```
 
 ## See Also

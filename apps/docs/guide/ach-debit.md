@@ -10,6 +10,12 @@ Vue Stripe covers the browser side with two composables: `collectBankAccountForP
 
 Before you start, enable ACH Direct Debit under **Settings > Payment methods** in the Stripe Dashboard. ACH charges are in USD only.
 
+Stripe's bank modal also needs `minimum-scale=1` in your page's viewport meta tag; without it Stripe.js logs a warning each time the modal opens. The Vite, Vue CLI, Quasar and Nuxt templates leave it out, so add it to `index.html` (`public/index.html` with Vue CLI; `app.head.viewport` in `nuxt.config.ts`):
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+```
+
 ::: tip Using the Payment Element?
 The Payment Element offers US bank accounts among its methods, and `usePaymentIntent` confirms them like any other method. Follow this guide when you want a bank-only flow without Elements.
 :::

@@ -196,6 +196,9 @@ const stripeElement = (): StripeCardElement | null => cardRef.value?.element ?? 
 
 <template>
   <VueStripeCardElement ref="cardRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -205,12 +208,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-card-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-card-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-card-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-card-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-card-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-card-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-card-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading card form...</div>
+  </div>
 </div>
 ```
 
@@ -224,7 +231,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ca
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCardElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -255,6 +263,17 @@ const handleChange = (event: StripeCardElementChangeEvent) => {
 
 // Template ref
 const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
+</script>
+
+<template>
+  <VueStripeCardElement
+    ref="cardRef"
+    :options="options"
+    @ready="handleReady"
+    @change="handleChange"
+  />
+  <button type="button" @click="cardRef?.focus()">Focus</button>
+</template>
 ```
 
 ## See Also
