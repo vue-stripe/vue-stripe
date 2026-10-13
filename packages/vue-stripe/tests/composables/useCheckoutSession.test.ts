@@ -161,6 +161,21 @@ describe('useCheckoutSession (Checkout Elements SDK actions)', () => {
     }
   })
 
+  it('element getters return null where Stripe throws for an element the account cannot use (#635)', async () => {
+    const checkout = makeMockCheckout()
+    checkout.getTermsElement.mockImplementation(() => {
+      throw new Error(
+        'You cannot use the Terms Element without being gated into this functionality.'
+      )
+    })
+    checkout.getLinkSignupElement.mockImplementation(() => {
+      throw new Error('A valid Element name must be provided.')
+    })
+    const { api } = await mountWith(checkout)
+    expect(api().getTermsElement()).toBeNull()
+    expect(api().getLinkSignupElement()).toBeNull()
+  })
+
   it('resolves { type: "error" } when Stripe throws an integration error (#579)', async () => {
     const { api, checkout } = await mountWith()
     const actions = (await checkout.loadActions.mock.results[0]!.value).actions

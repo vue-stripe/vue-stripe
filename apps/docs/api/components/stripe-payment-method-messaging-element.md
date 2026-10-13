@@ -54,7 +54,7 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 |--------|------|-------------|
 | `amount` | `number` | Required. Price in the smallest currency unit |
 | `currency` | `'USD' \| 'EUR' \| 'GBP' \| ...` | Required. Upper-case ISO currency code (`AUD`, `CAD`, `CHF`, `CZK`, `DKK`, `EUR`, `GBP`, `NOK`, `NZD`, `PLN`, `SEK`, `USD`) |
-| `countryCode` | `'US' \| 'GB' \| 'DE' \| ...` | The customer's country. Decides which providers can be offered |
+| `countryCode` | `'US' \| 'GB' \| 'DE' \| ...` | The customer's country. Decides which providers can be offered. Optional, but pass it: without it Stripe uses the visitor's location, and for a country it doesn't support the element fails to load (`@loaderror`) |
 | `paymentMethodTypes` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | The providers to show. Optional in Stripe's types, but with Stripe.js Endive the element renders nothing without it |
 | `paymentMethodOrder` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | Fixed display order. By default Stripe orders them per customer |
 | `paymentMethods` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | Deprecated by Stripe; use `paymentMethodTypes` |
@@ -68,15 +68,16 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@ready` | `StripePaymentMethodMessagingElement` | Emitted when the element is mounted and ready |
+| `@loaderror` | `{ elementType: 'paymentMethodMessaging', error }` | Emitted when the messaging fails to load, for example without `countryCode` for a visitor in a country Stripe doesn't support, or when the element can't be created. Ends the loading state and shows the `#error` slot |
 
-This is the only event: the element is display-only, so it has no `@change`, `@focus`, `@blur` or `@escape`.
+The element is display-only, so it has no `@change`, `@focus`, `@blur` or `@escape`. Stripe.js 10's types declare only `ready` for this element, but Stripe.js emits `loaderror` at runtime and then destroys the element itself; the component listens for it, and unmounts cleanly afterwards. Stripe's load error carries no message, so `error` reads "Element failed to load".
 
 ## Slots
 
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
 | `#loading` | - | Rendered while the element is loading (default: "Loading payment method messaging...") |
-| `#error` | `{ error: string }` | Rendered when the element has an error: a creation error |
+| `#error` | `{ error: string }` | Rendered when the element has an error: a creation error or a load error (`@loaderror`) |
 
 ```vue
 <VueStripePaymentMethodMessagingElement>
@@ -97,8 +98,8 @@ Access these via a template ref:
 | Member | Type | Description |
 |--------|------|-------------|
 | `element` | `ShallowRef<StripePaymentMethodMessagingElement \| null>` | The Stripe element instance (`null` until created) |
-| `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
-| `error` | `Ref<string \| null>` | Current creation error message |
+| `loading` | `Ref<boolean>` | `true` until the element emits `ready` or `loaderror` |
+| `error` | `Ref<string \| null>` | Current creation or load error message |
 | `focus()` | `() => void` | Focus the element |
 | `blur()` | `() => void` | Blur the element |
 | `clear()` | `() => void` | Clear the element's value |

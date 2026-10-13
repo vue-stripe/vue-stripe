@@ -18,6 +18,7 @@ import { stripeCheckoutFormInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
 import { hx } from '../utils/h'
 import { statusShell } from '../utils/status-shell'
+import { errorLogger } from '../utils/report'
 import type { VueStripeComponent } from '../utils/element-types'
 
 const checkoutFormProviderProps = {
@@ -91,10 +92,11 @@ export default /* @__PURE__ */ defineComponent({
     // callbacks (and an in-flight loadActions) bail out after teardown.
     let unmounted = false
 
+    const logError = errorLogger(slots)
     const fail = (message: string) => {
       error.value = message
       loading.value = false
-      console.error('[Vue Stripe] Checkout Form init error:', message)
+      logError('Checkout Form init error', message)
       emit('error', message)
     }
 

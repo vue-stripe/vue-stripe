@@ -152,9 +152,9 @@ describe('createVueStripe as a global provider (#424)', () => {
     await flushPromises()
 
     expect(loadStripe).toHaveBeenCalledTimes(1)
+    // apiVersion is dropped: versioned Stripe.js refuses it (#597).
     expect(loadStripe).toHaveBeenCalledWith('pk_test_123', {
       stripeAccount: 'acct_123',
-      apiVersion: '2023-10-16',
       locale: 'fr'
     })
     expect(loading.value).toBe(false)

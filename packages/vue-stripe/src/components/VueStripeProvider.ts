@@ -8,6 +8,7 @@ import {
 import { VueStripeProviderError } from '../utils/errors'
 import { loadStripeInstance } from '../utils/load-stripe'
 import { statusShell } from '../utils/status-shell'
+import { errorLogger } from '../utils/report'
 import type { VueStripeComponent } from '../utils/element-types'
 
 const providerProps = {
@@ -15,7 +16,7 @@ const providerProps = {
   /** @deprecated v4 alias of `publishableKey`. */
   stripeKey: { type: String as PropType<string | undefined>, default: undefined },
   stripeAccount: { type: String as PropType<string | undefined>, default: undefined },
-  /** @deprecated Versioned Stripe.js (Endive) always uses its release train's API version and ignores this; it is still forwarded to `loadStripe()`. */
+  /** @deprecated Ignored: versioned Stripe.js (Endive) refuses `apiVersion`, so it is not passed to `loadStripe()`. */
   apiVersion: { type: String as PropType<string | undefined>, default: undefined },
   locale: { type: String as PropType<string | undefined>, default: undefined },
   /** Stripe beta flags, e.g. the Tax ID Element's beta (forwarded to `loadStripe`). */
@@ -61,6 +62,8 @@ export default /* @__PURE__ */ defineComponent({
     const apiVersion = props.apiVersion || props.options?.apiVersion
     const locale = props.locale || props.options?.locale
 
+    const logError = errorLogger(slots)
+
     const config: VueStripeConfig = { publishableKey: key, stripeAccount, apiVersion, locale }
 
     const initialize = async () => {
@@ -81,7 +84,7 @@ export default /* @__PURE__ */ defineComponent({
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load Stripe'
         error.value = errorMessage
-        console.error('[Vue Stripe] Initialization error:', errorMessage)
+        logError('Initialization error', errorMessage)
         emit('error', err instanceof Error ? err : new Error(errorMessage))
       } finally {
         loading.value = false

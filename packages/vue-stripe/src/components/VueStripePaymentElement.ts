@@ -7,7 +7,12 @@ import type {
   StripePaymentElementSavedPaymentMethodRemoveEvent,
   StripePaymentElementSavedPaymentMethodUpdateEvent
 } from '@stripe/stripe-js'
-import type { BaseElementEvents, LoadStartEvent, LoadErrorEvent } from '../utils/element-factory'
+import type {
+  BaseElementEvents,
+  CreateOnly,
+  LoadStartEvent,
+  LoadErrorEvent
+} from '../utils/element-factory'
 import { BASE_EVENTS, createStripeElement, pick } from '../utils/element-factory'
 
 type PaymentEvents = BaseElementEvents<StripePaymentElement, StripePaymentElementChangeEvent> & {
@@ -41,6 +46,10 @@ export default /* @__PURE__ */ createStripeElement<
     'savedpaymentmethodupdate',
     'savedpaymentmethodremove'
   ],
+  createOnly: { wallets: true } satisfies CreateOnly<
+    StripePaymentElementOptions,
+    StripePaymentElement
+  >,
   checkout: (sdk, options) =>
     sdk.createPaymentElement(
       pick(options, [

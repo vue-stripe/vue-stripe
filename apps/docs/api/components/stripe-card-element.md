@@ -66,6 +66,8 @@ const pay = async () => {
 
 ::: info Updating options
 Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+
+`disableLink` and `preferredNetwork` are read when the element is created and never passed to `update()`, because Stripe.js doesn't accept them there. To change one, re-mount the component (e.g. with a `:key`).
 :::
 
 ### Options Object

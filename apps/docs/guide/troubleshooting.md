@@ -4,7 +4,7 @@ description: "Fixes for common Vue Stripe problems: missing keys, provider error
 
 # Troubleshoot common problems
 
-Find the message or symptom you see, then apply the fix. Errors that Vue Stripe throws start with the component or composable name; console messages from the library start with `[Vue Stripe]`.
+Find the message or symptom you see, then apply the fix. Errors that Vue Stripe throws start with the component or composable name; console messages from the library start with `[Vue Stripe]`. A load or creation failure is logged only when the app doesn't handle it with an error listener or an `#error` slot.
 
 ## Setup
 
@@ -159,6 +159,6 @@ Wallets need HTTPS, a registered domain and a browser with a saved card. See [Te
 
 ## Still stuck
 
-- Check the browser console for `[Vue Stripe]` messages and Stripe.js warnings.
+- Check the browser console for `[Vue Stripe]` messages and Stripe.js warnings. A failure your app handles through `@error`, `@loaderror` or an `#error` slot isn't logged by the library, so log the event payload in your handler while you debug.
 - Compare with the matching [live demo](/live-demo/), which runs the same components in test mode.
 - Search or open an issue on [GitHub](https://github.com/vue-stripe/vue-stripe/issues) with the message, your Vue and Vue Stripe versions, and a minimal reproduction.

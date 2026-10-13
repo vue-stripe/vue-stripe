@@ -6,26 +6,32 @@ import type { Stripe, StripeConstructorOptions } from '@stripe/stripe-js'
 import { VueStripeProviderError } from './errors'
 import { STRIPE_PARTNER_DETAILS } from './constants'
 
-let inFlight: Promise<Stripe | null> | null = null
+// The Stripe.js script load in progress (not any caller's Stripe() result).
+let inFlight: Promise<unknown> | null = null
 
 /**
  * The pure `loadStripe()` (with `setLoadParameters`), except that calls made
  * while Stripe.js is loading share that load. The pure entry of
  * @stripe/stripe-js 10.0.0 does not memoize it: a second call during the load
  * re-injects the script and drops the first call's listeners, so the first call
- * never settles. Waiting calls run once the load settles (resolving from
- * `window.Stripe`, or rejecting with the same error); later calls go straight
- * to the pure loader.
+ * never settles. Waiting calls run once the script settles: each creates its own
+ * instance from `window.Stripe`, so an argument `Stripe()` rejects (a secret key)
+ * fails only its own call, while a script that fails to load fails them all.
+ * Later calls go straight to the pure loader.
  */
 export const loadStripe: typeof pureLoadStripe = /* @__PURE__ */ Object.assign(
   (...args: Parameters<typeof pureLoadStripe>) => {
     if (inFlight) return inFlight.then(() => pureLoadStripe(...args))
     const load = pureLoadStripe(...args)
+    const script = load.catch((err: unknown) => {
+      // window.Stripe is set: the script loaded and only this call's Stripe() threw.
+      if (!(globalThis as { Stripe?: unknown }).Stripe) throw err
+    })
     const settle = () => {
-      if (inFlight === load) inFlight = null
+      if (inFlight === script) inFlight = null
     }
-    inFlight = load
-    load.then(settle, settle)
+    inFlight = script
+    script.then(settle, settle)
     return load
   },
   {
@@ -34,16 +40,48 @@ export const loadStripe: typeof pureLoadStripe = /* @__PURE__ */ Object.assign(
   }
 )
 
+// One instance per distinct loadStripeInstance() arguments: every Stripe() call adds a
+// controller iframe that outlives the instance, so remounted providers reuse theirs.
+const instances = new Map<string, Promise<Stripe>>()
+let apiVersionWarned = false
+
+/** Test helper: forget the reused instances. */
+export const clearStripeInstances = () => instances.clear()
+
 /**
  * `loadStripe()` plus what every Vue Stripe loader does with the result:
  * reject a `null` instance and register the library's partner details.
  * `advancedFraudSignals: false` loads Stripe.js without Stripe's advanced
- * fraud detection signals (`?advancedFraudSignals=false`).
+ * fraud detection signals (`?advancedFraudSignals=false`). Calls with the same
+ * key, options and `advancedFraudSignals` share one instance; a failed one is
+ * dropped so the next call tries again. `apiVersion` is dropped: versioned
+ * Stripe.js fixes the API version and refuses the option.
  */
-export async function loadStripeInstance(
+export function loadStripeInstance(
+  key: string,
+  { apiVersion, ...options }: StripeConstructorOptions,
+  advancedFraudSignals = true
+): Promise<Stripe> {
+  if (apiVersion && !apiVersionWarned) {
+    apiVersionWarned = true
+    console.warn(
+      `[Vue Stripe] apiVersion "${apiVersion}" is ignored: versioned Stripe.js uses its release train's API version`
+    )
+  }
+  const id = JSON.stringify([key, options, advancedFraudSignals])
+  let instance = instances.get(id)
+  if (!instance) {
+    instance = createInstance(key, options, advancedFraudSignals)
+    instances.set(id, instance)
+    instance.catch(() => instances.delete(id))
+  }
+  return instance
+}
+
+async function createInstance(
   key: string,
   options: StripeConstructorOptions,
-  advancedFraudSignals = true
+  advancedFraudSignals: boolean
 ): Promise<Stripe> {
   if (!advancedFraudSignals) {
     try {

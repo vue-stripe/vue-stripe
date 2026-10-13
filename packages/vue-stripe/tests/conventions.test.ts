@@ -145,6 +145,13 @@ const stripeEventUnion = (elementType: string): Set<string> | null => {
   )
 }
 const BASE_EVENTS = ['ready', 'change', 'focus', 'blur', 'escape']
+/**
+ * Events Stripe.js emits at runtime but its `.d.ts` omits. Each entry needs a review and the
+ * evidence: the Payment Method Messaging Element emits `loaderror` (#645).
+ */
+const UNDECLARED_STRIPE_EVENTS: Record<string, string[]> = {
+  paymentMethodMessaging: ['loaderror']
+}
 const eventsMatchStripe = (
   s: Source,
   union: (type: string) => Set<string> | null = stripeEventUnion
@@ -163,7 +170,7 @@ const eventsMatchStripe = (
   const allowed = union(type)
   if (!allowed) return [`${s.path}: no Stripe.js type definitions for '${type}'`]
   return events
-    .filter((e) => !allowed.has(e))
+    .filter((e) => !allowed.has(e) && !UNDECLARED_STRIPE_EVENTS[type]?.includes(e))
     .map((e) => `${s.path}: '${e}' is not a Stripe.js '${type}' event`)
 }
 

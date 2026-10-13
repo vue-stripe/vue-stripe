@@ -93,6 +93,8 @@ const onConfirm = async (event) => {
 
 ::: info Updating options
 Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+
+`update()` only accepts some options. `applePay`, `business`, `buttonTheme`, `buttonType`, `lineItems`, `paymentMethods`, `shippingRates` and `wallets` are read when the element is created and never passed to `update()`; to change one, re-mount the component (e.g. with a `:key`). `business`, `lineItems`, `shippingRates` and `applePay` can also be set per payment, with `event.resolve()` in `@click`.
 :::
 
 ### Options Object

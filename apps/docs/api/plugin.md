@@ -56,7 +56,7 @@ interface VueStripeOptions {
   /** Connected account ID for Stripe Connect (optional) */
   stripeAccount?: string
 
-  /** Forwarded to loadStripe(); Stripe.js Endive does not support overriding the API version */
+  /** @deprecated Ignored: Stripe.js Endive refuses apiVersion, so it is not passed to loadStripe() */
   apiVersion?: string
 
   /** Locale for Stripe elements (optional) */
@@ -74,12 +74,12 @@ interface VueStripeOptions {
 |--------|------|----------|-------------|
 | `publishableKey` | `string` | Yes | Your Stripe publishable key (`pk_test_...` or `pk_live_...`) |
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect (`acct_...`) |
-| `apiVersion` | `string` | No | Forwarded to `loadStripe()`. Stripe.js Endive uses the Endive API version and does not support overriding it; see [API version](/api/components/stripe-provider#api-version) |
+| `apiVersion` | `string` | No | Deprecated and ignored: not passed to `loadStripe()`, because Stripe.js Endive refuses it. Logs one `[Vue Stripe]` warning; see [API version](/api/components/stripe-provider#api-version) |
 | `locale` | `StripeConstructorOptions['locale']` | No | Locale for Stripe.js: one of Stripe's supported locales (`'auto'`, `'en'`, `'fr'`, `'de'`, ...) |
 | `developerTools` | `StripeConstructorOptions['developerTools']` | No | Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }` |
 | `advancedFraudSignals` | `boolean` | No | Default `true`. `false` loads Stripe.js without advanced fraud signals, as on [`VueStripeProvider`](/api/components/stripe-provider#advanced-fraud-signals) |
 
-The options are passed to `loadStripe(publishableKey, { stripeAccount, apiVersion, locale, developerTools })`. With `advancedFraudSignals: false`, the plugin first calls `loadStripe.setLoadParameters({ advancedFraudSignals: false })` from `@stripe/stripe-js/pure`; the [requirements](/api/components/stripe-provider#advanced-fraud-signals) are the same as on the provider. The plugin has no `betas` or `options`; for those, use a `VueStripeProvider` with its `betas` or `options` prop.
+The options are passed to `loadStripe(publishableKey, { stripeAccount, locale, developerTools })`. A `VueStripeProvider` with the same key and options shares the plugin's `Stripe` instance. With `advancedFraudSignals: false`, the plugin first calls `loadStripe.setLoadParameters({ advancedFraudSignals: false })` from `@stripe/stripe-js/pure`; the [requirements](/api/components/stripe-provider#advanced-fraud-signals) are the same as on the provider. The plugin has no `betas` or `options`; for those, use a `VueStripeProvider` with its `betas` or `options` prop.
 
 ## Provided values
 
@@ -90,7 +90,7 @@ The plugin provides two values app-wide, under the same injection keys `VueStrip
 {
   publishableKey: '...',
   stripeAccount: '...', // optional
-  apiVersion: '...',    // optional
+  apiVersion: '...',    // optional, as given (ignored)
   locale: '...'         // optional
 }
 
@@ -106,7 +106,7 @@ The plugin provides two values app-wide, under the same injection keys `VueStrip
 
 - **Loads on first use.** Stripe.js loads the first time a component or composable reads the Stripe context: when `useStripe()`, any other Stripe composable (`usePaymentIntent()`, `useRadarSession()`, ...), `VueStripeElements` or a Checkout provider runs in `setup()`. An app that installs the plugin but renders no Stripe UI loads nothing. One plugin object loads one Stripe instance, even when it is installed into more than one app.
 - **Composable calls wait for the load.** A composable method called while Stripe.js is still loading waits for the load, then runs. If the load fails, the call ends the way it does when Stripe is missing: `{ error: { message: 'Stripe not initialized' } }`, or a rejected `VueStripeProviderError` ("Stripe.js is not loaded yet") for the method confirmers.
-- **No wrapper slots.** Children render at once. Until Stripe.js has loaded, `useStripe()` reports `loading: true`, and `VueStripeElements` (and `VueStripeCheckoutElementsProvider`) render their `#loading` slot, or their `#error` slot if the load fails. There are no `load` / `error` events.
+- **No wrapper slots.** Children render at once. Until Stripe.js has loaded, `useStripe()` reports `loading: true`, and `VueStripeElements` (and `VueStripeCheckoutElementsProvider`) render their `#loading` slot, or their `#error` slot if the load fails. There are no `load` / `error` events, so a load failure is always logged as a `[Vue Stripe]` console error.
 - **A nested provider wins.** A `VueStripeProvider` inside the app provides its own Stripe instance to its subtree, for example for a connected account. It does not inherit the plugin's options: give it its own `publishable-key` and any other options it needs. On Vue 2.7 the plugin provides through a global mixin that only runs on root instances, so it never overrides a nested provider.
 - **SSR.** `install()` only provides; the plugin never calls `loadStripe()` on the server. During server rendering `useStripe()` reports `loading: true`. In the browser, the first consumer starts the load.
 

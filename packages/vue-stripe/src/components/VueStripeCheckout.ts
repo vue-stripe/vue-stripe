@@ -1,6 +1,7 @@
 import { defineComponent, ref, type PropType, type Ref } from 'vue-demi'
 import { VueStripeCheckoutError } from '../utils/errors'
 import { hx } from '../utils/h'
+import { errorLogger } from '../utils/report'
 import type { VueStripeComponent } from '../utils/element-types'
 
 const checkoutProps = {
@@ -39,6 +40,7 @@ export default /* @__PURE__ */ defineComponent({
   emits: ['checkout', 'before-redirect', 'success', 'error'] satisfies Array<keyof CheckoutEvents>,
   setup(props, { emit, expose, slots }) {
     const loading = ref(false)
+    const logError = errorLogger(slots)
 
     const checkout = () => {
       if (loading.value || props.disabled) return
@@ -48,7 +50,7 @@ export default /* @__PURE__ */ defineComponent({
         const error = new VueStripeCheckoutError(
           'VueStripeCheckout: `sessionUrl` is required (create the Checkout Session on your server)'
         )
-        console.error('[Vue Stripe] Checkout error:', error.message)
+        logError('Checkout error', error.message)
         emit('error', error)
         return
       }

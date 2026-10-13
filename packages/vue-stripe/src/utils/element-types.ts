@@ -46,13 +46,22 @@ export interface ElementDefinition {
   /** Extra members for the component's public instance (e.g. getValue). */
   expose?: (element: Ref<StripeElementLike | null>) => Record<string, unknown>
   loadingText?: string
-  /** Drop option keys Stripe refuses in `element.update()` (e.g. the Address Element's `mode`). */
-  updateOptions?: (options: Record<string, unknown>) => Record<string, unknown>
+  /**
+   * Option keys `element.update()` refuses (Stripe.js warns or throws), kept out of updates:
+   * the keys of the element's options type missing from its update type ({@link CreateOnly}).
+   */
+  createOnly?: Record<string, true>
   /** What `ready` emits: the Stripe element (default) or Stripe's ready event (Express Checkout). */
   readyPayload?: 'element' | 'event'
   /** Root CSS class; `-error`, `-mount`, `-loader` are derived from it. */
   className?: string
 }
+
+/** The create-only keys of an element: in its create options, not in what its `update()` takes. */
+export type CreateOnly<TOptions, TElement extends { update(options: never): unknown }> = Record<
+  Exclude<keyof TOptions, keyof Parameters<TElement['update']>[0]>,
+  true
+>
 
 /** Members every element component exposes (template ref / `InstanceType`). */
 export interface StripeElementExposed<TElement> {

@@ -2,6 +2,7 @@ import { defineComponent, inject, onMounted, ref, type PropType, type Ref } from
 import { stripeConfigInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 import { hx } from '../utils/h'
+import { errorLogger } from '../utils/report'
 import type { VueStripeComponent } from '../utils/element-types'
 
 const PRICING_TABLE_SCRIPT_URL = 'https://js.stripe.com/v3/pricing-table.js'
@@ -87,6 +88,7 @@ export default /* @__PURE__ */ defineComponent({
     const publishableKey = config.publishableKey
     const loading = ref(true)
     const error = ref<string | null>(null)
+    const logError = errorLogger(slots)
 
     onMounted(async () => {
       try {
@@ -100,7 +102,7 @@ export default /* @__PURE__ */ defineComponent({
         error.value = errorMessage
         loading.value = false
         emit('error', err instanceof Error ? err : new Error(errorMessage))
-        console.error('[Vue Stripe] Pricing table error:', errorMessage)
+        logError('Pricing table error', errorMessage)
       }
     })
 

@@ -23,6 +23,7 @@ import {
 } from './injection-keys'
 import { VueStripeElementsError } from './errors'
 import { renderElement } from './element-render'
+import { errorLogger, listenerCheck } from './report'
 
 export type * from './element-types'
 
@@ -99,17 +100,10 @@ export function createStripeElement<
           'mount'
         ] ?? null
 
-      // Vue 3 keeps listeners for declared emits in the vnode props (onClick, onClickOnce);
-      // Vue 2.7 keeps them in $listeners. Read when the element is created.
-      const subscribes = (name: string) => {
-        if (!def.listenerOnlyEvents?.includes(name)) return true
-        const key = `on${name[0]!.toUpperCase()}${name.slice(1)}`
-        const vnodeProps = (
-          instance?.vnode as { props?: Record<string, unknown> | null } | undefined
-        )?.props
-        const proxy = instance?.proxy as { $listeners?: Record<string, unknown> } | null | undefined
-        return !!(vnodeProps?.[key] || vnodeProps?.[`${key}Once`] || proxy?.$listeners?.[name])
-      }
+      // Read when the element is created.
+      const listens = listenerCheck()
+      const subscribes = (name: string) => !def.listenerOnlyEvents?.includes(name) || listens(name)
+      const logError = errorLogger(slots, 'loaderror')
 
       const handlers: Record<string, (...args: unknown[]) => void> = {}
       for (const name of events) {
@@ -126,8 +120,12 @@ export function createStripeElement<
         }
       }
 
-      const updatable = (options: Record<string, unknown>) =>
-        def.updateOptions ? def.updateOptions({ ...options }) : { ...options }
+      // Create-only keys stay out of update(); changing one needs a re-mount (`:key`).
+      const updatable = (options: Record<string, unknown>) => {
+        const update = { ...options }
+        for (const key in def.createOnly) delete update[key]
+        return update
+      }
       // Last options applied to the element, so equal re-renders do not call update().
       let applied = ''
 
@@ -181,7 +179,7 @@ export function createStripeElement<
           error.value =
             err instanceof Error ? err.message : `Failed to create ${elementType} element`
           loading.value = false
-          console.error(`[Vue Stripe] ${componentName} creation error:`, error.value)
+          logError(`${componentName} creation error`, error.value)
           // Same payload shape as Stripe's own loaderror event.
           if (events.includes('loaderror')) {
             emit('loaderror', { elementType, error: { message: error.value } })
@@ -216,9 +214,13 @@ export function createStripeElement<
       const teardown = () => {
         const el = element.value
         if (!el) return
-        for (const name of events) el.off?.(name, handlers[name])
-        el.destroy()
         element.value = null
+        for (const name of events) el.off?.(name, handlers[name])
+        try {
+          el.destroy()
+        } catch {
+          // Stripe already destroyed it (the Payment Method Messaging Element after loaderror).
+        }
       }
 
       // VueStripeElements builds a new group when the Intent or the deferred-Intent

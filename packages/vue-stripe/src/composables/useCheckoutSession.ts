@@ -59,9 +59,16 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
     run()
   }
 
-  // Element getters also live on the SDK handle; null until it exists.
+  // Element getters also live on the SDK handle; null until it exists. Stripe throws
+  // instead of returning null for an element behind a beta the account lacks.
   const getter = <K extends ElementGetter>(name: K) =>
-    (() => ctx.checkout.value?.[name]() ?? null) as StripeCheckoutElementsSdk[K]
+    (() => {
+      try {
+        return ctx.checkout.value?.[name]() ?? null
+      } catch {
+        return null
+      }
+    }) as StripeCheckoutElementsSdk[K]
 
   return {
     // computed, not readonly(): Vue 2.7's readonly() copies plain objects, so Stripe's

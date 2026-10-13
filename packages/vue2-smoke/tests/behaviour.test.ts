@@ -272,3 +272,36 @@ it('keeps the node Stripe mounted into as the mount div when an error appears (#
   expect(host.className).toContain('vue-stripe-element-mount')
   expect(root.querySelector('.vue-stripe-element-error')).toBe(null)
 })
+
+describe('console output for a handled load failure (#651)', () => {
+  const failingProvider = async (key: string, data: Record<string, unknown>) => {
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
+    vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Failed to load Stripe.js'))
+    const wrapper = mount({
+      render(h: CreateElement) {
+        return h(VueStripeProvider as never, { props: { publishableKey: key }, ...data })
+      }
+    })
+    await settle()
+    return wrapper
+  }
+  const logged = (spy: { mock: { calls: unknown[][] } }) =>
+    spy.mock.calls.filter(([m]) => /^\[Vue Stripe\] Initialization error/.test(String(m)))
+
+  it('logs when nothing handles it, not with a Vue 2 @error listener or #error slot', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const onError = vi.fn()
+
+    await failingProvider('pk_test_651_none', {})
+    expect(logged(error)).toHaveLength(1)
+
+    await failingProvider('pk_test_651_listener', { on: { error: onError } })
+    expect(onError).toHaveBeenCalledTimes(1)
+    const slotted = await failingProvider('pk_test_651_slot', {
+      scopedSlots: { error: ({ error: message }: { error: string }) => `Custom: ${message}` }
+    })
+    expect(slotted.text()).toBe('Custom: Failed to load Stripe.js')
+    expect(logged(error)).toHaveLength(1)
+    error.mockRestore()
+  })
+})

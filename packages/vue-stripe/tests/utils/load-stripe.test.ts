@@ -12,14 +12,26 @@ const stripeScripts = () =>
 
 const finishScriptLoad = () => {
   const instance = { registerAppInfo: vi.fn() }
-  const StripeConstructor = Object.assign(
-    vi.fn(() => instance),
-    { version: 'endive' }
-  )
-  ;(window as unknown as { Stripe: unknown }).Stripe = StripeConstructor
-  for (const script of stripeScripts()) script.dispatchEvent(new Event('load'))
+  defineStripe(vi.fn(() => instance))
   return instance
 }
+
+/** Defines window.Stripe as `construct` and fires the script's load event. */
+const defineStripe = (construct: (...args: unknown[]) => unknown) => {
+  const StripeConstructor = Object.assign(construct, { version: 'endive' })
+  ;(window as unknown as { Stripe: unknown }).Stripe = StripeConstructor
+  for (const script of stripeScripts()) script.dispatchEvent(new Event('load'))
+  return StripeConstructor
+}
+
+/** Like Stripe(): a new instance per call, and an IntegrationError for a secret key. */
+const strictStripe = () =>
+  vi.fn((key: unknown) => {
+    if (String(key).startsWith('sk_')) {
+      throw new Error('You should not use your secret key with Stripe.js.')
+    }
+    return { key, registerAppInfo: vi.fn() }
+  })
 
 /** Resolves to 'pending' when `promise` has not settled after the microtask queue drains. */
 const settled = <T>(promise: Promise<T>) =>
@@ -143,6 +155,106 @@ describe(
       const instance = finishScriptLoad()
       expect(await settled(retry)).toBe(instance)
     })
+
+    it('fails only the caller whose arguments Stripe() rejects, in either order (#596)', async () => {
+      for (const order of [
+        ['sk_test_bad', 'pk_test_good'],
+        ['pk_test_good', 'sk_test_bad']
+      ]) {
+        for (const script of stripeScripts()) script.remove()
+        delete (window as unknown as { Stripe?: unknown }).Stripe
+        const { loadStripeInstance } = await freshLoader()
+
+        const [first, second] = order.map((key) => loadStripeInstance(key!, {}))
+        first!.catch(() => {})
+        second!.catch(() => {})
+        await settled(Promise.resolve())
+        defineStripe(strictStripe())
+
+        const results = await Promise.allSettled([first!, second!])
+        const byKey = Object.fromEntries(order.map((key, i) => [key, results[i]!]))
+        expect(byKey['sk_test_bad']).toMatchObject({
+          status: 'rejected',
+          reason: { message: 'You should not use your secret key with Stripe.js.' }
+        })
+        expect(byKey['pk_test_good']).toMatchObject({
+          status: 'fulfilled',
+          value: { key: 'pk_test_good' }
+        })
+      }
+    })
+
+    it('reuses one instance for identical arguments, and creates one per distinct set (#618)', async () => {
+      const { loadStripeInstance } = await freshLoader()
+
+      const first = loadStripeInstance('pk_test_a', { locale: 'fr' })
+      await settled(Promise.resolve())
+      const construct = defineStripe(strictStripe())
+      const instance = await settled(first)
+
+      // Same key and options, later (a provider remounted after client-side navigation).
+      expect(await loadStripeInstance('pk_test_a', { locale: 'fr' })).toBe(instance)
+      expect(construct).toHaveBeenCalledTimes(1)
+      expect(
+        (instance as { registerAppInfo: ReturnType<typeof vi.fn> }).registerAppInfo
+      ).toHaveBeenCalledTimes(1)
+
+      // Any difference in the arguments gets its own instance.
+      const others = await Promise.all([
+        loadStripeInstance('pk_test_b', { locale: 'fr' }),
+        loadStripeInstance('pk_test_a', { locale: 'de' }),
+        loadStripeInstance('pk_test_a', { locale: 'fr', stripeAccount: 'acct_1' }),
+        loadStripeInstance('pk_test_a', { locale: 'fr' }, false)
+      ])
+      expect(new Set([instance, ...others]).size).toBe(5)
+      expect(construct).toHaveBeenCalledTimes(5)
+    })
+
+    it('does not keep a failed instance, so the next identical call tries again (#618)', async () => {
+      const { loadStripeInstance } = await freshLoader()
+      let fail = true
+      const first = loadStripeInstance('pk_test_retry', {})
+      first.catch(() => {})
+      await settled(Promise.resolve())
+      defineStripe(
+        vi.fn(() => {
+          if (fail) throw new Error('boom')
+          return { registerAppInfo: vi.fn() }
+        })
+      )
+      await expect(first).rejects.toThrow('boom')
+
+      fail = false
+      await expect(loadStripeInstance('pk_test_retry', {})).resolves.toBeTruthy()
+    })
+
+    it('drops apiVersion, which versioned Stripe.js rejects, and warns once (#597)', async () => {
+      const { loadStripeInstance } = await freshLoader()
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      const first = loadStripeInstance('pk_test_api', { apiVersion: '2026-09-30.endive' })
+      await settled(Promise.resolve())
+      const construct = defineStripe(
+        vi.fn((_key: unknown, options?: { apiVersion?: string }) => {
+          if (options?.apiVersion) {
+            throw new Error(
+              'Unsupported on version [endive]: Can not provide apiVersion to Stripe()'
+            )
+          }
+          return { registerAppInfo: vi.fn() }
+        })
+      )
+      const instance = await first
+      await loadStripeInstance('pk_test_api2', { apiVersion: '2020-08-27', locale: 'fr' })
+
+      expect(construct).toHaveBeenNthCalledWith(1, 'pk_test_api', {})
+      expect(construct).toHaveBeenNthCalledWith(2, 'pk_test_api2', { locale: 'fr' })
+      // Ignored, so the same arguments without it share the instance.
+      expect(await loadStripeInstance('pk_test_api', {})).toBe(instance)
+      const notices = warn.mock.calls.filter(([m]) => /^\[Vue Stripe\] apiVersion/.test(String(m)))
+      expect(notices).toHaveLength(1)
+      warn.mockRestore()
+    })
   }
 )
 
@@ -186,6 +298,36 @@ describe(
         'provider c ready'
       ])
       wrapper.unmount()
+    })
+
+    it('keeps a valid provider working when a provider mounted with it fails (#596)', async () => {
+      vi.resetModules()
+      const { mount } = await import('@vue/test-utils')
+      const { h } = await import('vue-demi')
+      const { default: VueStripeProvider } = await import('../../src/components/VueStripeProvider')
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const wrapper = mount({
+        render: () =>
+          h(
+            'div',
+            ['sk_test_a', 'pk_test_b'].map((key) =>
+              h(VueStripeProvider, { key, publishableKey: key }, () =>
+                h('p', { class: 'ready' }, `${key} ready`)
+              )
+            )
+          )
+      })
+      await tick()
+      defineStripe(strictStripe())
+      for (let i = 0; i < 5; i++) await tick()
+
+      expect(wrapper.findAll('.vue-stripe-error').map((e) => e.text())).toEqual([
+        'You should not use your secret key with Stripe.js.'
+      ])
+      expect(wrapper.findAll('.ready').map((p) => p.text())).toEqual(['pk_test_b ready'])
+      wrapper.unmount()
+      error.mockRestore()
     })
   }
 )

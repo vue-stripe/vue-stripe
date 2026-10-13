@@ -8,7 +8,7 @@ import type {
   StripeExpressCheckoutElementShippingAddressChangeEvent,
   StripeExpressCheckoutElementShippingRateChangeEvent
 } from '@stripe/stripe-js'
-import type { LoadErrorEvent } from '../utils/element-factory'
+import type { CreateOnly, LoadErrorEvent } from '../utils/element-factory'
 import { createStripeElement, pick } from '../utils/element-factory'
 
 type ExpressCheckoutEvents = {
@@ -63,6 +63,16 @@ export default /* @__PURE__ */ createStripeElement<
   className: 'vue-stripe-express-checkout-element',
   // `ready` carries availablePaymentMethods, which wallet UIs need.
   readyPayload: 'event',
+  createOnly: {
+    applePay: true,
+    business: true,
+    buttonTheme: true,
+    buttonType: true,
+    lineItems: true,
+    paymentMethods: true,
+    shippingRates: true,
+    wallets: true
+  } satisfies CreateOnly<StripeExpressCheckoutElementOptions, StripeExpressCheckoutElement>,
   checkout: (sdk, options) =>
     sdk.createExpressCheckoutElement(
       pick(options, [
