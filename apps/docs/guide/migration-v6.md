@@ -15,7 +15,7 @@ npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 ```
 
 ::: tip v6 is in beta
-Until 6.0.0 is released, v6 is published under the `next` tag: `npm install @vue-stripe/vue-stripe@next @stripe/stripe-js@^10`.
+Until 6.0.0 is released, v6 is published under the `beta` tag: `npm install @vue-stripe/vue-stripe@beta @stripe/stripe-js@^10`.
 :::
 
 ```ts

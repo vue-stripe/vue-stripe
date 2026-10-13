@@ -50,13 +50,15 @@ jobs:
       - name: Bundle size budgets
         run: pnpm --filter @vue-stripe/vue-stripe size
 
-      # A version with a pre-release suffix (6.1.0-rc.0) goes to the `next` dist-tag, so
-      # `npm install @vue-stripe/vue-stripe` keeps resolving to the latest stable release.
+      # A pre-release version goes to the dist-tag named by its identifier (6.0.0-beta.0 ->
+      # `beta`, 6.0.0-rc.1 -> `rc`), so `npm install @vue-stripe/vue-stripe` keeps resolving
+      # to the latest stable release.
       - name: Publish to npm
         working-directory: packages/vue-stripe
         run: |
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then
-            npm publish --access public --provenance --tag next
+            dist_tag=$(echo "$GITHUB_REF_NAME" | sed -E 's/^v[0-9.]+-([A-Za-z]+).*/\1/')
+            npm publish --access public --provenance --tag "$dist_tag"
           else
             npm publish --access public --provenance
           fi
