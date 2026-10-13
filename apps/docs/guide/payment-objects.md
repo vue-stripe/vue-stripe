@@ -13,6 +13,9 @@ A Stripe integration passes a few kinds of objects between your server, the brow
 | ConfirmationToken | `ctoken_` | The browser | A one-time snapshot of what the customer entered, for your server to confirm with |
 | Token | `tok_` | The browser | The older single-use object for card and bank details, and for Connect account and person data |
 | Customer | `cus_` | Your server | The person or business you charge, holding their saved PaymentMethods |
+| Radar Session | `rse_` | The browser | Stripe's fraud signals for a payment whose details Stripe.js didn't collect |
+
+The browser-side objects each have a composable: `useCreatePaymentMethod()`, `useCreateConfirmationToken()`, `useCreateToken()` and `useRadarSession()`. [PaymentMethods, ConfirmationTokens and Tokens](#paymentmethods-confirmationtokens-and-tokens) explains when to use which.
 
 Your server creates the objects that decide how much is charged, using your secret key. The browser creates the objects that carry what the customer typed, using your publishable key. This split is the basis of Stripe's security model. [What runs where](/guide/security) explains it.
 
@@ -65,7 +68,7 @@ When to use which:
 
 - **Charge now**: a PaymentIntent, with `usePaymentIntent()`.
 - **Charge now and save for next time**: a PaymentIntent with `setup_future_usage`. One step, one authentication. `VueStripeElements` takes a `setupFutureUsage` prop for the deferred flow.
-- **Save now, charge later or never**: a SetupIntent, with `useSetupIntent()`. Examples are a card on file, a free trial that converts later, or metered billing at the end of a period.
+- **Save now, charge later or never**: a SetupIntent, with `useSetupIntent()`. Examples are a card on file in the customer's account, a free trial that converts to a paid plan when it ends, a subscription that starts on a later date, or metered billing at the end of a period.
 - **Authorize now, capture later**: a PaymentIntent with manual capture, not a SetupIntent. The amount is held on the card.
 
 Subscriptions use both objects behind the scenes. A subscription's first invoice carries a PaymentIntent, or a SetupIntent when there's nothing to charge yet, as in a free trial. The browser confirms whichever one the server sends back.
@@ -99,11 +102,25 @@ A **Radar Session** (`useRadarSession()`) is related but holds no payment detail
 
 A card network answers within seconds, so a card payment is decided by the time confirmation returns. Bank debits don't work that way. A SEPA, BECS or ACH debit is a request to pull money from an account, sent through the banking network in batches. The bank answers days later, after it has checked the account, the balance and the mandate. During that time the PaymentIntent is `processing`. It ends `succeeded`, or goes back to `requires_payment_method` if the debit fails.
 
+How long that takes, and how long the customer can reverse it afterwards, depends on the scheme. These figures are from Stripe's documentation for each payment method, for standard settlement:
+
+| | Cards | SEPA Direct Debit | BECS Direct Debit | ACH Direct Debit |
+|---|---|---|---|---|
+| Currency | Many | EUR | AUD | USD |
+| Status after confirming | `succeeded` (after any 3D Secure) | `processing` | `processing` | `processing` |
+| Outcome known | Within seconds | Most failures within 6 business days; Stripe advises waiting 6 business days before treating it as paid | Up to 3 business days | Up to 4 business days |
+| Mandate needed | No | Yes | Yes (a Direct Debit Request) | Yes |
+| Customer can dispute | Under card network rules | Up to 8 weeks with no questions asked, up to 13 months if unauthorized | Up to 7 years with no questions asked | 60 calendar days for personal accounts, 2 business days for business accounts |
+
+Stripe's guides for [SEPA](https://docs.stripe.com/payments/sepa-debit), [BECS](https://docs.stripe.com/payments/au-becs-debit) and [ACH](https://docs.stripe.com/payments/ach-direct-debit) have the current figures, including faster settlement options.
+
+So bank debits trade speed for other things. They often cost less than cards, which matters for large amounts such as rent or tuition. Bank accounts don't expire the way cards do, which suits recurring billing. And many customers in these regions, especially businesses, prefer paying by debit. They fit poorly when you deliver goods right after checkout, and when disputes would hurt, because the schemes favour the customer and their disputes can't be appealed.
+
 Because of this:
 
 - The browser can't show "paid" when confirmation returns. Show "payment submitted" instead.
 - The outcome reaches your server by webhook (`payment_intent.succeeded` or `payment_intent.payment_failed`). Fulfil orders there, not on the return page.
-- Even a succeeded debit isn't final the way a card capture is. Customers can dispute a bank debit with their bank for weeks afterwards, under the rules of each scheme.
+- Even a succeeded debit isn't final. The customer can still dispute it for the period shown above, and a late failure from the bank shows up as a dispute.
 
 Debits also need a **mandate**: the customer's permission for you to debit the account, shown as text at the time of collection and recorded by Stripe when you confirm. The SEPA, BECS and ACH guides show where the mandate text goes. Saving a bank account for later use goes through a SetupIntent, so the mandate covers future debits too.
 
