@@ -121,7 +121,7 @@ const SaveCardForm = defineComponent({
       <!-- Step 3 -->
       <div v-else class="step success">
         <span class="success-icon"><DocIcon name="check" :size="28" :stroke-width="2.5" /></span>
-        <h4>Card saved!</h4>
+        <h3>Card saved!</h3>
         <p v-if="setupIntentId" class="id">
           SetupIntent: <code>{{ setupIntentId }}</code>
         </p>
@@ -252,7 +252,7 @@ const SaveCardForm = defineComponent({
   border-radius: 50%;
   font-size: 1.75rem;
 }
-.success h4 {
+.success h3 {
   margin: 0.5rem 0 0;
 }
 .id code {

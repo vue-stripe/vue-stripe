@@ -23,7 +23,7 @@ function reset() {
 
     <template v-else>
       <div v-if="!verificationSessionId" class="step-section">
-        <h4>Verify your identity</h4>
+        <h3>Verify your identity</h3>
         <p class="intro">
           Stripe's modal asks for a photo ID and a selfie. In test mode, pick an outcome under
           Complete with test data and click Submit; no real document is needed.
@@ -35,7 +35,7 @@ function reset() {
 
       <div v-else class="success-state" data-test="identity-submitted">
         <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
-        <h4>Verification Submitted</h4>
+        <h3>Verification Submitted</h3>
         <p>
           Stripe processes the verification and reports the outcome to the server with the
           <code>identity.verification_session.*</code> webhooks.
@@ -76,7 +76,7 @@ function reset() {
   background: var(--vp-c-bg-soft);
   border-radius: 8px;
 }
-.step-section h4 {
+.step-section h3 {
   margin: 0 0 0.5rem;
   font-size: 1rem;
   font-weight: 600;
@@ -102,7 +102,7 @@ function reset() {
   font-size: 2rem;
   margin-bottom: 1rem;
 }
-.success-state h4 {
+.success-state h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
 }

@@ -147,7 +147,7 @@ function reset() {
       <div v-else-if="step === 'payment'" class="step-content">
         <div class="step-section">
           <div class="step-header">
-            <h4>BECS Direct Debit (Australia)</h4>
+            <h3>BECS Direct Debit (Australia)</h3>
             <button class="change-btn" @click="reset">Change Product</button>
           </div>
 
@@ -247,7 +247,7 @@ function reset() {
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
           <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
-          <h4>Payment Initiated!</h4>
+          <h3>Payment Initiated!</h3>
           <p>Thank you for your purchase of {{ selectedProduct?.name }}.</p>
           <p class="note">BECS Direct Debit payments typically settle in 3-4 business days.</p>
           <p v-if="paymentIntentId" class="payment-id">
@@ -390,7 +390,7 @@ function reset() {
   justify-content: space-between;
   margin-bottom: 1rem;
 }
-.step-header h4 {
+.step-header h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
@@ -570,7 +570,7 @@ function reset() {
   font-size: 2rem;
   margin-bottom: 1rem;
 }
-.success-state h4 {
+.success-state h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
 }

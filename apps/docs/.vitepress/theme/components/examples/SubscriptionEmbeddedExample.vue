@@ -148,7 +148,7 @@ function reset() {
       <div v-else-if="step === 'email'" class="step-content">
         <div class="step-header">
           <span class="step-number">2</span>
-          <h4>Enter Your Email</h4>
+          <h3>Enter Your Email</h3>
         </div>
 
         <div class="selected-plan">
@@ -194,7 +194,7 @@ function reset() {
       <div v-else-if="step === 'payment'" class="step-content">
         <div class="step-header">
           <span class="step-number">3</span>
-          <h4>Complete Payment</h4>
+          <h3>Complete Payment</h3>
           <span class="badge frontend">Frontend</span>
         </div>
 
@@ -247,7 +247,7 @@ function reset() {
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
           <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
-          <h4>Subscription Active!</h4>
+          <h3>Subscription Active!</h3>
           <p>Thank you for subscribing to {{ selectedProduct?.name }}.</p>
           <p v-if="subscriptionResult" class="subscription-id">
             Subscription ID: <code>{{ subscriptionResult.subscriptionId }}</code>
@@ -380,7 +380,7 @@ function reset() {
   font-weight: 600;
 }
 
-.step-header h4 {
+.step-header h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
@@ -597,7 +597,7 @@ function reset() {
   margin-bottom: 1rem;
 }
 
-.success-state h4 {
+.success-state h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
 }

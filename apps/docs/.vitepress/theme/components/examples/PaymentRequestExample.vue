@@ -19,7 +19,7 @@ const paymentIntentId = ref<string | null>(null)
 
     <template v-else>
       <div v-if="!paymentIntentId" class="step-section">
-        <h4>Pay with the browser's payment sheet</h4>
+        <h3>Pay with the browser's payment sheet</h3>
         <VueStripeProvider :publishable-key="publishableKey">
           <PaymentRequestPanel @success="(id: string) => (paymentIntentId = id)" />
         </VueStripeProvider>
@@ -27,7 +27,7 @@ const paymentIntentId = ref<string | null>(null)
 
       <div v-else class="success-state">
         <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
-        <h4>Payment Successful</h4>
+        <h3>Payment Successful</h3>
         <p class="payment-id">
           Payment ID: <code>{{ paymentIntentId }}</code>
         </p>
@@ -64,7 +64,7 @@ const paymentIntentId = ref<string | null>(null)
   background: var(--vp-c-bg-soft);
   border-radius: 8px;
 }
-.step-section h4 {
+.step-section h3 {
   margin: 0 0 1rem;
   font-size: 1rem;
   font-weight: 600;
@@ -85,7 +85,7 @@ const paymentIntentId = ref<string | null>(null)
   font-size: 2rem;
   margin-bottom: 1rem;
 }
-.success-state h4 {
+.success-state h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
 }

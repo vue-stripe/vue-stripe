@@ -63,7 +63,7 @@ defineExpose({
   <div class="client-secret-input">
     <div class="step-header">
       <span class="step-number">2</span>
-      <h4>Client Secret</h4>
+      <h3>Client Secret</h3>
       <span class="badge frontend">Frontend</span>
     </div>
 
@@ -116,7 +116,7 @@ defineExpose({
   font-weight: 600;
 }
 
-.step-header h4 {
+.step-header h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;

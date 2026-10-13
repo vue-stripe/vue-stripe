@@ -143,7 +143,7 @@ function onBeforeRedirect() {
       <div v-else-if="step === 'checkout'" class="step-content">
         <div class="step-section">
           <div class="step-header">
-            <h4>Checkout with Stripe</h4>
+            <h3>Checkout with Stripe</h3>
             <button class="change-btn" @click="step = 'select'">Change Product</button>
           </div>
 
@@ -163,7 +163,7 @@ function onBeforeRedirect() {
           <div class="checkout-content">
             <div class="product-summary">
               <div class="product-info">
-                <h5>{{ selectedProduct?.name }}</h5>
+                <h4>{{ selectedProduct?.name }}</h4>
                 <p v-if="selectedProduct?.description">{{ selectedProduct.description }}</p>
               </div>
               <div class="product-price">
@@ -235,7 +235,7 @@ function onBeforeRedirect() {
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
           <div class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></div>
-          <h4>Checkout Session Created!</h4>
+          <h3>Checkout Session Created!</h3>
           <p v-if="sessionResult">Session ID: {{ sessionResult.sessionId }}</p>
           <button class="reset-btn" @click="reset">Start Over</button>
         </div>
@@ -376,7 +376,7 @@ function onBeforeRedirect() {
   margin-bottom: 1rem;
 }
 
-.step-header h4 {
+.step-header h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
@@ -442,7 +442,7 @@ function onBeforeRedirect() {
   border-bottom: 1px solid var(--vp-c-divider);
 }
 
-.product-info h5 {
+.product-info h4 {
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
 }
@@ -564,7 +564,7 @@ function onBeforeRedirect() {
   margin-bottom: 1rem;
 }
 
-.success-state h4 {
+.success-state h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
 }
