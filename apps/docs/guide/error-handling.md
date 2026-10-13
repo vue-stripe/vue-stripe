@@ -137,6 +137,48 @@ const pay = async () => {
 
 Stripe documents every [error code](https://docs.stripe.com/error-codes) and [decline code](https://docs.stripe.com/declines/codes).
 
+To use your own wording, branch on `code`. The same check works for `confirmSetup()` when you save a card:
+
+```vue
+<!-- SaveCardButton.vue: rendered inside <VueStripeElements> -->
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useSetupIntent } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
+const { confirmSetup, loading } = useSetupIntent()
+const message = ref('')
+
+const messages: Record<string, string> = {
+  card_declined: 'Your card was declined. Please try another card.',
+  expired_card: 'Your card has expired.',
+  incorrect_cvc: 'The security code is incorrect.',
+  setup_intent_authentication_failure: 'Authentication failed. Please try again.'
+}
+
+const save = async () => {
+  message.value = ''
+  const { error } = await confirmSetup({
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: `${window.location.origin}/account/cards` },
+    redirect: 'if_required'
+  })
+  if (!error) {
+    message.value = 'Card saved.'
+    return
+  }
+  // Stripe errors carry a `code`; the composable's own errors only a `message`
+  const code = 'code' in error ? error.code : undefined
+  message.value = (code && messages[code]) || error.message || 'The card could not be saved.'
+}
+</script>
+
+<template>
+  <button :disabled="loading" @click="save">Save card</button>
+  <p v-if="message" role="alert">{{ message }}</p>
+</template>
+```
+
 ## 4. Check the result on the return page
 
 Payment methods that redirect (and `redirect: 'always'`) send the customer to your `return_url` with `payment_intent_client_secret` and `redirect_status` in the query string. Read the outcome there with `retrievePaymentIntent()`:
@@ -182,6 +224,39 @@ For a SetupIntent, read `setup_intent_client_secret` and call `retrieveSetupInte
 | `VueStripePricingTable` | Stripe's pricing table script failed to load | `@error` with an `Error`, `#error` slot |
 
 Problems with a hosted Checkout Session itself (expired, already paid) are shown by Stripe on its page. What remains for you is your own endpoint that creates the session: check `response.ok` before you render the button or the provider, and show your own message when it fails.
+
+```vue
+<script setup>
+import { onMounted, ref } from 'vue'
+import { VueStripeCheckout } from '@vue-stripe/vue-stripe'
+
+const sessionUrl = ref('')
+const failed = ref(false)
+
+onMounted(async () => {
+  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+  if (!response.ok) {
+    failed.value = true
+    return
+  }
+  sessionUrl.value = (await response.json()).url
+})
+
+// VueStripeCheckoutError: clicked before the session URL arrived
+const onCheckoutError = (error) => console.error(error.message)
+</script>
+
+<template>
+  <p v-if="failed">Checkout is unavailable right now. Please try again.</p>
+  <VueStripeCheckout
+    v-else
+    :session-url="sessionUrl"
+    :disabled="!sessionUrl"
+    @error="onCheckoutError"
+  />
+</template>
+```
+
 
 To retry the pricing table after a load error, remount it by changing its `key`:
 

@@ -97,25 +97,58 @@ const appearance = computed(
 
 ## 3. Style the Card, IBAN and BECS elements
 
-The Card Element, the split card elements (`VueStripeCardNumberElement`, `VueStripeCardExpiryElement`, `VueStripeCardCvcElement`), `VueStripeIbanElement` and `VueStripeAuBankAccountElement` predate the Appearance API and ignore it. Style their text with the `style` option of each element:
+The Card Element, the split card elements (`VueStripeCardNumberElement`, `VueStripeCardExpiryElement`, `VueStripeCardCvcElement`), `VueStripeIbanElement` and `VueStripeAuBankAccountElement` predate the Appearance API and ignore it. Style their text with the `style` option of each element. `base` applies always; `complete`, `empty` and `invalid` override it in those states:
 
 ```vue
-<VueStripeCardElement
-  :options="{
-    style: {
-      base: {
-        color: '#30313d',
-        fontFamily: 'Inter, system-ui, sans-serif',
-        fontSize: '16px',
-        '::placeholder': { color: '#9ca3af' }
-      },
-      invalid: { color: '#df1b41', iconColor: '#df1b41' }
-    }
-  }"
-/>
+<script setup lang="ts">
+import { VueStripeCardElement } from '@vue-stripe/vue-stripe'
+
+const style = {
+  base: {
+    color: '#30313d',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    fontSize: '16px',
+    '::placeholder': { color: '#9ca3af' }
+  },
+  invalid: { color: '#df1b41', iconColor: '#df1b41' }
+}
+</script>
+
+<template>
+  <VueStripeCardElement :options="{ style, hidePostalCode: true }" />
+</template>
 ```
 
-The box around these fields (border, padding, focus ring) is Vue Stripe's wrapper; style it with the classes in step 4.
+Pass the same `style` object to the IBAN and BECS elements. A font in `fontFamily` must be loaded into the iframe with the `fonts` prop of `VueStripeElements`, as in step 2.
+
+Each of these elements has a few more display options:
+
+| Element | Option | Values |
+|---------|--------|--------|
+| Card, IBAN, BECS | `iconStyle` | `'default'` or `'solid'` (the brand or bank icon) |
+| Card, IBAN, BECS | `hideIcon` | `true` hides the icon |
+| Card, IBAN, BECS | `disabled` | `true` makes the field read-only |
+| Card | `hidePostalCode` | `true` drops the postal code field (collect the address elsewhere) |
+| IBAN | `supportedCountries` | `['SEPA']`, required |
+| IBAN | `placeholderCountry` | A country code; the placeholder shows that country's IBAN format, for example `DE00 0000 0000 0000 0000 00` for `'DE'` and `NL00 AAAA 0000 0000 00` for `'NL'` |
+
+```vue
+<VueStripeIbanElement
+  :options="{ supportedCountries: ['SEPA'], placeholderCountry: 'DE', style }"
+/>
+
+<VueStripeAuBankAccountElement :options="{ style, iconStyle: 'solid' }" />
+```
+
+Stripe also adds state classes to the node it mounts into (Vue Stripe's `-mount` div): `StripeElement--focus`, `StripeElement--invalid`, `StripeElement--complete` and `StripeElement--empty`. Use them for borders that follow the field state:
+
+```css
+.vue-stripe-card-element-mount.StripeElement--invalid {
+  border-color: #df1b41;
+}
+```
+
+The `classes` option renames them if they clash with your CSS. The box itself (border, padding, focus ring) is Vue Stripe's wrapper markup, covered next.
 
 ## 4. Style the wrapper markup
 
@@ -160,6 +193,25 @@ Target the shared classes to restyle every element, or the specific ones for a s
   min-height: 200px;
 }
 ```
+
+In a component with `<style scoped>`, the element's markup belongs to the child component, so reach it with `:deep()`:
+
+```vue
+<style scoped>
+.card-field :deep(.vue-stripe-card-element-mount) {
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  padding: 12px;
+  background: white;
+}
+.card-field :deep(.vue-stripe-card-element-mount:focus-within) {
+  border-color: #5469d4;
+  box-shadow: 0 0 0 1px #5469d4;
+}
+</style>
+```
+
+Put the border on the `-mount` part, as the default stylesheet does, not on the outer `vue-stripe-card-element`; otherwise the field gets two borders.
 
 The providers render `vue-stripe-loading` / `vue-stripe-error` (`VueStripeProvider`) and `vue-stripe-elements-loading` / `vue-stripe-elements-error` (`VueStripeElements`) while they load or fail.
 

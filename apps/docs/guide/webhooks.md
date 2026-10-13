@@ -44,7 +44,7 @@ In other frameworks, pass the unparsed body to `constructEvent()`: `await reques
 Listen for the events that match how you take payments:
 
 - **Checkout Sessions** ([hosted](/guide/checkout), [embedded](/guide/embedded-checkout), [your own page](/guide/custom-checkout), [Checkout Form](/guide/checkout-form), [pricing table](/guide/pricing-table)): fulfil on `checkout.session.completed` when the session's `payment_status` is `paid` or `no_payment_required`. Payment methods that settle later send `checkout.session.async_payment_succeeded` or `checkout.session.async_payment_failed` afterwards.
-- **PaymentIntents** ([Payment Element](/guide/payment-element), [card](/guide/card-element), [SEPA](/guide/iban-element), [BECS](/guide/au-bank-account-element), [ACH](/guide/ach-debit)): fulfil on `payment_intent.succeeded`. Bank debits send `payment_intent.processing` first (tell the customer the payment is pending); failures send `payment_intent.payment_failed`.
+- **PaymentIntents** ([Payment Element](/guide/payment-element), [card](/guide/card-element), [SEPA](/guide/iban-element), [BECS](/guide/au-bank-account-element), [ACH](/guide/ach-debit)): fulfil on `payment_intent.succeeded`. Bank debits send `payment_intent.processing` first (tell the customer the payment is pending) and settle days later: SEPA within a few business days, BECS in three to four, ACH within four. Failures send `payment_intent.payment_failed`.
 - **[Saved payment methods](/guide/setup-intent)**: `setup_intent.succeeded`, or `setup_intent.setup_failed`.
 - **[Subscriptions](/guide/subscriptions)**: grant access on `invoice.paid`; handle `invoice.payment_failed` and `customer.subscription.deleted`.
 - **[Identity](/guide/identity)**: `identity.verification_session.verified`, or `identity.verification_session.requires_input`.
@@ -106,6 +106,20 @@ For bank debits, the delayed test accounts in [Test your integration](/guide/tes
 ## 5. Register the endpoint for production
 
 In the Stripe Dashboard, add a webhook endpoint (an event destination) with your public URL, for example `https://example.com/webhook`, and select the events from step 2. Each endpoint has its own signing secret: put the live one in `STRIPE_WEBHOOK_SECRET` on your production server.
+
+## 6. Show the outcome on the return page
+
+The webhook does the work; the page the customer returns to only reports it. For Checkout, put the session ID in the success URL and read the session on your server:
+
+```js
+// success_url: 'https://example.com/success?session_id={CHECKOUT_SESSION_ID}'
+app.get('/api/checkout-status', async (req, res) => {
+  const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+  res.json({ status: session.status, paymentStatus: session.payment_status })
+})
+```
+
+If your `fulfilOrder()` is idempotent (step 3), you can also call it here when `payment_status` is `paid`: the customer sees the result without waiting for the webhook, and the webhook still covers closed tabs and delayed payments. For PaymentIntents, read the status in the browser with `retrievePaymentIntent()`, as shown in [Handle errors and declines](/guide/error-handling#_4-check-the-result-on-the-return-page).
 
 ## Result
 

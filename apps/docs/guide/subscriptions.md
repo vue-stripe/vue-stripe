@@ -1,12 +1,13 @@
 # Start a subscription
 
-Sign a customer up for a recurring price and collect the first payment. There are three ways to do it with Vue Stripe; pick one:
+Sign a customer up for a recurring price and collect the first payment. There are four ways to do it with Vue Stripe; pick one:
 
 | Way | You build | Guide |
 |-----|-----------|-------|
 | Stripe Checkout in subscription mode | A button; Stripe hosts the page | Option A below |
 | A pricing table | Nothing but the embed; Stripe hosts the plans and the checkout | [Embed a pricing table](/guide/pricing-table) |
 | The Payment Element on your page | Your own page; your server creates the subscription | Option B below |
+| Save a card first, then subscribe | Your own page; the subscription starts after the card is saved | Option C below |
 
 For the trade-offs, see [Choosing an integration](/guide/approaches).
 
@@ -168,6 +169,93 @@ To show the Payment Element before the subscription exists, render `VueStripeEle
 ### Subscriptions with a free trial
 
 With a trial, the first invoice is for $0 and has no payment to confirm. Add `'pending_setup_intent'` to `expand`, return `subscription.pending_setup_intent.client_secret`, and confirm it with `confirmSetup()` from [`useSetupIntent`](/api/composables/use-setup-intent) instead.
+
+## Option C: save a card, then subscribe
+
+Use this when the card is collected before the plan is final, for example in an onboarding flow where the customer picks the plan on a later step.
+
+### 1. Create a SetupIntent for the customer
+
+```js
+// POST /api/setup-intent (Node, stripe-node)
+app.post('/api/setup-intent', async (req, res) => {
+  const setupIntent = await stripe.setupIntents.create({
+    customer: req.user.stripeCustomerId, // the signed-in customer
+    automatic_payment_methods: { enabled: true },
+    usage: 'off_session'
+  })
+  res.json({ clientSecret: setupIntent.client_secret })
+})
+```
+
+Render the Payment Element with this client secret, as in [Save a payment method for later](/guide/setup-intent).
+
+### 2. Save the card, then start the subscription
+
+```vue
+<!-- SubscribeWithSavedCard.vue: rendered inside <VueStripeElements> -->
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useSetupIntent, useHandleNextAction } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string; priceId: string }>()
+const { confirmSetup, loading } = useSetupIntent()
+const { handleNextAction } = useHandleNextAction()
+const message = ref('')
+
+const subscribe = async () => {
+  // 1. Validate the form and save the card
+  const { setupIntent, error } = await confirmSetup({
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: `${window.location.origin}/welcome` },
+    redirect: 'if_required'
+  })
+  if (error || !setupIntent) {
+    message.value = error?.message ?? 'The card could not be saved.'
+    return
+  }
+
+  // 2. Start the subscription with the saved payment method
+  const response = await fetch('/api/create-subscription', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paymentMethodId: setupIntent.payment_method, priceId: props.priceId })
+  })
+  const subscription: { status: string; clientSecret?: string } = await response.json()
+
+  // 3. The bank asked for authentication on the first payment
+  if (subscription.status === 'incomplete' && subscription.clientSecret) {
+    const { error: actionError } = await handleNextAction({ clientSecret: subscription.clientSecret })
+    message.value = actionError ? (actionError.message ?? 'Authentication failed.') : 'Subscription started.'
+    return
+  }
+  message.value = subscription.status === 'active' ? 'Subscription started.' : 'The first payment failed.'
+}
+</script>
+
+<template>
+  <button :disabled="loading" @click="subscribe">Subscribe</button>
+  <p v-if="message">{{ message }}</p>
+</template>
+```
+
+```js
+// POST /api/create-subscription (Node, stripe-node)
+app.post('/api/create-subscription', async (req, res) => {
+  const subscription = await stripe.subscriptions.create({
+    customer: req.user.stripeCustomerId,
+    items: [{ price: req.body.priceId }], // check it is one of your plans
+    default_payment_method: req.body.paymentMethodId,
+    expand: ['latest_invoice.confirmation_secret']
+  })
+  res.json({
+    status: subscription.status,
+    clientSecret: subscription.latest_invoice.confirmation_secret?.client_secret
+  })
+})
+```
+
+The SetupIntent attaches the card to the customer because it was created with `customer`. The subscription charges the first invoice right away; it is `active` when that succeeds, and `incomplete` when the payment needs authentication (finished in the browser by `useHandleNextAction`) or fails.
 
 ## Keep access in sync with webhooks
 

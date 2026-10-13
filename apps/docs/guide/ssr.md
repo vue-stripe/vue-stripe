@@ -4,18 +4,7 @@ Render pages that use Vue Stripe on the server: Nuxt 3, Quasar SSR, VitePress or
 
 Stripe.js only runs in the browser. Vue Stripe never loads it on the server: `VueStripeProvider` loads Stripe.js in `onMounted`, and the [plugin](/guide/plugin) loads it the first time a component reads it in the browser. During server rendering every provider renders its `#loading` slot, and the browser's first render matches it, so hydration does not mismatch. After hydration Stripe.js loads and the elements mount.
 
-What you need to do is make sure your server bundle can import the package, and keep your secret key on the server.
-
-## Bundle the package for the server
-
-Tell your SSR bundler to bundle `@vue-stripe/vue-stripe` instead of loading it from `node_modules` at runtime. Its ES build imports `@stripe/stripe-js/pure`, a directory path that Node's own ES module loader does not resolve; without this setting the server can fail with `ERR_UNSUPPORTED_DIR_IMPORT`.
-
-| Framework | Setting |
-|-----------|---------|
-| Nuxt 3 | `build: { transpile: ['@vue-stripe/vue-stripe'] }` in `nuxt.config.ts` |
-| VitePress | `vite: { ssr: { noExternal: ['@vue-stripe/vue-stripe'] } }` in `.vitepress/config.ts` |
-| Quasar SSR | `build.extendViteConf(viteConf)` in `quasar.config.js`: add `'@vue-stripe/vue-stripe'` to `viteConf.ssr.noExternal` |
-| Vite SSR (custom) | `ssr: { noExternal: ['@vue-stripe/vue-stripe'] }` in `vite.config.ts` |
+No bundler setting is needed: the package loads in Node as it is. What you set up is where the keys live, and where the client secret is fetched.
 
 ## Nuxt 3
 
@@ -25,9 +14,6 @@ Tell your SSR bundler to bundle `@vue-stripe/vue-stripe` instead of loading it f
 // nuxt.config.ts
 export default defineNuxtConfig({
   css: ['@vue-stripe/vue-stripe/style.css'],
-  build: {
-    transpile: ['@vue-stripe/vue-stripe']
-  },
   runtimeConfig: {
     // Server only
     stripeSecretKey: '',
@@ -120,7 +106,7 @@ You don't have to, but if you prefer to send no Stripe markup from the server, w
 
 ## Quasar SSR
 
-Add the bundling setting from the table above, then use the components as in any Vue app. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
+Use the components as in any Vue app. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
 
 ```vue
 <template>
@@ -136,10 +122,18 @@ Add the bundling setting from the table above, then use the components as in any
 
 ## VitePress
 
-Add the `ssr.noExternal` setting from the table to `.vitepress/config.ts` and import the stylesheet in `.vitepress/theme/index.ts`. Components can then be used directly in Markdown pages or theme components; they render their loading state while VitePress builds the static HTML. This documentation site runs its live demos this way.
+Import the stylesheet in `.vitepress/theme/index.ts`. Components can then be used directly in Markdown pages or theme components; they render their loading state while VitePress builds the static HTML. This documentation site runs its live demos this way.
+
+## If something goes wrong
+
+### The server fails with `ERR_UNSUPPORTED_DIR_IMPORT`
+
+Version `6.0.0-beta.0` imports `@stripe/stripe-js/pure` as a directory, which Node's ES module loader rejects when the server loads the package from `node_modules`. Update to a later version, or bundle the package for the server: `build.transpile: ['@vue-stripe/vue-stripe']` in Nuxt, `ssr.noExternal: ['@vue-stripe/vue-stripe']` in Vite (`vite.ssr.noExternal` in VitePress).
+
+### Hydration mismatch warnings
+
+If you see a hydration mismatch, look for your own code that reads browser-only values (`window`, `localStorage`, the current time) during render, and move it into `onMounted`.
 
 ## Result
 
 The server renders the page, including the providers' loading state, without loading Stripe.js. In the browser the page hydrates, Stripe.js loads once, and the elements appear.
-
-If you see a hydration mismatch, look for your own code that reads browser-only values (`window`, `localStorage`, the current time) during render, and move it into `onMounted`.
