@@ -174,14 +174,14 @@ import GitHubStarsCTA from '../GitHubStarsCTA.vue'
     border-color 0.15s;
 }
 
-/* Brand fill with the page background as text: white on blurple, dark on the dark-mode yellow */
 .hero-btn.is-brand {
-  background: var(--vp-c-brand-1);
-  color: var(--vp-c-bg);
+  background: var(--vp-button-brand-bg);
+  color: var(--vp-button-brand-text);
 }
 
 .hero-btn.is-brand:hover {
-  background: var(--vp-c-brand-2);
+  background: var(--vp-button-brand-hover-bg);
+  color: var(--vp-button-brand-hover-text);
 }
 
 .hero-btn.is-alt {

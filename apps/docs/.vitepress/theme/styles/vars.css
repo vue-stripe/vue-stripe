@@ -9,6 +9,17 @@
   --vp-c-brand-3: #a396ff;
   --vp-c-brand-soft: rgba(99, 91, 255, 0.14);
 
+  /* Brand buttons: solid Stripe purple with white text (VitePress defaults to the pale brand-3) */
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-text: #fff;
+  --vp-button-brand-bg: #635bff;
+  --vp-button-brand-hover-border: transparent;
+  --vp-button-brand-hover-text: #fff;
+  --vp-button-brand-hover-bg: #5046e5;
+  --vp-button-brand-active-border: transparent;
+  --vp-button-brand-active-text: #fff;
+  --vp-button-brand-active-bg: #4338ca;
+
   /* Vue Stripe yellow accent */
   --vp-c-yellow-1: #fed968;
   --vp-c-yellow-2: #fde047;
