@@ -201,10 +201,10 @@ onMounted(async () => {
 
 ## Build the page on a Checkout Session instead
 
-For `VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`, as the [CheckoutPage.vue sample](/guide/ssr#fetch-client-secrets-in-the-browser) does. Don't use a Promise created at the top of `<script setup>`: on the server, the relative `fetch('/api/checkout-session')` rejects with "Failed to parse URL", and Node exits on the unhandled rejection. Add the session route to `server.js` next to the PaymentIntent route:
+For `VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`, as the [CheckoutPage.vue sample](/guide/ssr#fetch-client-secrets-in-the-browser) does. Don't use a Promise created at the top of `<script setup>`: on the server, the relative `fetch('/api/checkout-elements-session')` rejects with "Failed to parse URL", and Node exits on the unhandled rejection. Add the session route to `server.js` next to the PaymentIntent route:
 
 ```js
-app.post('/api/checkout-session', async (req, res) => {
+app.post('/api/checkout-elements-session', async (req, res) => {
   const session = await stripe.checkout.sessions.create({
     ui_mode: 'elements',
     mode: 'payment',

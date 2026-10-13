@@ -18,7 +18,7 @@ From 6.0.0-beta.1 no bundler setting is needed: the package loads in Node as it 
 
 ### Fetch client secrets in the browser
 
-`setup()` and `<script setup>` also run on the server. A request started there runs on every server render, and a relative URL such as `fetch('/api/checkout-session')` has no origin on the server, so Node's `fetch` rejects with "Failed to parse URL". When nothing handles that rejection, Node exits: one page view stops a Vite SSR or Quasar SSR server, in development and in production. Nuxt catches the rejection and logs it.
+`setup()` and `<script setup>` also run on the server. A request started there runs on every server render, and a relative URL such as `fetch('/api/checkout-elements-session')` has no origin on the server, so Node's `fetch` rejects with "Failed to parse URL". When nothing handles that rejection, Node exits: one page view stops a Vite SSR or Quasar SSR server, in development and in production. Nuxt catches the rejection and logs it.
 
 - **`VueStripeElements`:** fetch the client secret in `onMounted`, which runs only in the browser, as [the Payment Element guide](/guide/payment-element#_2-load-stripe-and-create-the-elements-group) does. In Nuxt, `useFetch(..., { server: false })` does the same.
 - **`VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`:** don't pass a Promise created at the top of `<script setup>` in `client-secret`. Pass a function in `fetch-client-secret`. The provider calls it in the browser only, once Stripe.js has loaded:
@@ -33,7 +33,7 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // Called by the provider in the browser only, once Stripe.js has loaded.
 const fetchClientSecret = () =>
-  fetch('/api/checkout-session', { method: 'POST' })
+  fetch('/api/checkout-elements-session', { method: 'POST' })
     .then((response) => response.json())
     .then((data: { clientSecret: string }) => data.clientSecret)
 </script>
@@ -227,7 +227,7 @@ With the plugin, render `<PaymentStatus />` without the provider. Use this page 
 1. Create the session in a server route. Checking `client_secret` gives the page a `string`, and catches a session created without `ui_mode: 'elements'`:
 
    ```ts
-   // server/api/checkout-session.post.ts
+   // server/api/checkout-elements-session.post.ts
    import Stripe from 'stripe'
 
    export default defineEventHandler(async (event) => {
@@ -258,7 +258,7 @@ With the plugin, render `<PaymentStatus />` without the provider. Use this page 
 
    // Called by the provider in the browser only, once Stripe.js has loaded.
    const fetchClientSecret = () =>
-     $fetch('/api/checkout-session', { method: 'POST' }).then((data) => data.clientSecret)
+     $fetch('/api/checkout-elements-session', { method: 'POST' }).then((data) => data.clientSecret)
    </script>
 
    <template>
@@ -276,18 +276,20 @@ With the plugin, render `<PaymentStatus />` without the provider. Use this page 
 
    `CheckoutForm` is the form from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form). `VueStripeCheckoutFormProvider` and [`VueStripeEmbeddedCheckout`](/api/components/stripe-embedded-checkout) take the same `fetch-client-secret` prop.
 
-3. Check the session on the return page. Stripe redirects to the session's `return_url`, `/checkout/complete?session_id=...`. Read the session on the server:
+3. Check the session on the return page. Stripe redirects to the session's `return_url`, `/checkout/complete?session_id=...`. Read the session on the server, with the same route as [Embed Stripe Checkout](/guide/embedded-checkout#_3-handle-completion):
 
    ```ts
-   // server/api/checkout-session/[id].get.ts
+   // server/api/checkout-status.get.ts
    import Stripe from 'stripe'
 
    export default defineEventHandler(async (event) => {
      const stripe = new Stripe(useRuntimeConfig().stripeSecretKey)
-     const id = getRouterParam(event, 'id')
-     if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing session ID' })
+     const { session_id } = getQuery(event)
+     if (typeof session_id !== 'string') {
+       throw createError({ statusCode: 400, statusMessage: 'Missing session_id' })
+     }
 
-     const session = await stripe.checkout.sessions.retrieve(id)
+     const session = await stripe.checkout.sessions.retrieve(session_id)
      return { status: session.status, paymentStatus: session.payment_status }
    })
    ```
@@ -296,7 +298,9 @@ With the plugin, render `<PaymentStatus />` without the provider. Use this page 
    <!-- app/pages/checkout/complete.vue -->
    <script setup lang="ts">
    const route = useRoute()
-   const { data } = await useFetch(`/api/checkout-session/${route.query.session_id}`)
+   const { data } = await useFetch('/api/checkout-status', {
+     query: { session_id: route.query.session_id }
+   })
    </script>
 
    <template>
