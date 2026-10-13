@@ -243,7 +243,7 @@ Access these via a template ref:
 | `error` | `Ref<string \| null>` | Current load or creation error message |
 | `focus()` | `() => void` | Focus the element |
 | `blur()` | `() => void` | Blur the element |
-| `clear()` | `() => void` | Clear the element's value |
+| `clear()` | `() => void` | Not supported by this element: Stripe.js throws `IntegrationError: clear() is not supported by the Express Checkout Element.` Exposed only because every element component shares it |
 
 The component owns the element's lifecycle: it creates, mounts and destroys the element. Removing the component (for example with `v-if`) destroys the element, which takes the place of Stripe's `element.unmount()`; for a one-time listener use Vue's `.once` modifier (`@ready.once`) instead of `element.once()`.
 
@@ -258,7 +258,6 @@ import type { StripeExpressCheckoutElement } from '@stripe/stripe-js'
 const expressRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement> | null>(null)
 
 const focus = () => expressRef.value?.focus()
-const clear = () => expressRef.value?.clear()
 const stripeElement = (): StripeExpressCheckoutElement | null => expressRef.value?.element ?? null
 </script>
 
