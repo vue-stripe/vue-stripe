@@ -41,7 +41,43 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 app.use(express.json()) // your other routes come after the webhook route
 ```
 
-In other frameworks, pass the unparsed body to `constructEvent()`: `await request.text()` in a Next.js route handler, `await readRawBody(event)` in a Nuxt server route.
+In other frameworks, pass the unparsed body to `constructEvent()`: `await request.text()` in a Next.js route handler, `await readRawBody(event)` in a Nuxt server route. In Laravel, use `$request->getContent()` and make sure CSRF middleware does not reject the webhook before it reaches signature verification. For a route in `routes/web.php`, Laravel 11+ lets you exclude the endpoint in `bootstrap/app.php`:
+
+```php
+// bootstrap/app.php
+use Illuminate\Foundation\Configuration\Middleware;
+
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->validateCsrfTokens(except: [
+        'webhook',
+    ]);
+})
+```
+
+Then verify the raw body in the route before handling the event:
+
+```php
+// routes/web.php
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Stripe\Exception\SignatureVerificationException;
+use Stripe\Webhook;
+
+Route::post('/webhook', function (Request $request) {
+    try {
+        $event = Webhook::constructEvent(
+            $request->getContent(),
+            $request->header('Stripe-Signature'),
+            config('services.stripe.webhook_secret'),
+        );
+    } catch (\UnexpectedValueException|SignatureVerificationException $error) {
+        return response('Webhook signature check failed.', 400);
+    }
+
+    handleEvent($event);
+    return response()->json(['received' => true]);
+});
+```
 
 ## 2. Handle the events for your integration
 
