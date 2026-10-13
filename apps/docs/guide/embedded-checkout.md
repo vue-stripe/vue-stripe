@@ -141,7 +141,7 @@ The embedded page can't ask your server to approve a line item change: Stripe's 
 
 ## Track the checkout funnel
 
-`@analytics` forwards Stripe's analytics events (`rendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed`), so you can track the funnel without reaching into the iframe:
+`@analytics` forwards Stripe's analytics events (`checkoutRendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed`), so you can track the funnel without reaching into the iframe:
 
 ```vue
 <VueStripeEmbeddedCheckout
