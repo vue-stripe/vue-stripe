@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "format:check": "prettier --check . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore",
     "format": "prettier --write . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "seed:products": "node scripts/seed-products.mjs"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.16",

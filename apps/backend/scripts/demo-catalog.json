@@ -1,0 +1,86 @@
+[
+  {
+    "key": "gym-team-t-shirt",
+    "name": "Gym Team T-Shirt",
+    "description": "Official climbing gym team shirt. Moisture-wicking fabric, relaxed fit for full range of motion. Available in all sizes.",
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xT0lIcU1JeDJWYjY2ZWFLfGZsX3Rlc3RfdFdQM3ZZdjh5VzJ2Y3haRE5SeTFwTW03009W8hhJci"
+    ],
+    "amount": 3500,
+    "currency": "usd"
+  },
+  {
+    "key": "climber-starter-kit",
+    "name": "Climber Starter Kit",
+    "description": "Everything a new climber needs. Quality climbing shoes, chalk bag with chalk ball, finger tape, and a technique guidebook.",
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xT0lIcU1JeDJWYjY2ZWFLfGZsX3Rlc3RfOUg3c0tLQmRKSktldWFlbXh6NlFBN2pm0094wkcLzz"
+    ],
+    "amount": 14900,
+    "currency": "usd"
+  },
+  {
+    "key": "lifetime-founding-member",
+    "name": "Lifetime Founding Member",
+    "description": "One-time payment for lifetime unlimited access. Includes all future gym expansions, exclusive founding member events, and legacy benefits.",
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xT0lIcU1JeDJWYjY2ZWFLfGZsX3Rlc3RfQ0pibFZOcFFOZDB5T3dRS1o1Snl2MVFF00tNt91cjc"
+    ],
+    "amount": 299900,
+    "currency": "usd"
+  },
+  {
+    "key": "day-pass-credits",
+    "name": "Day Pass Credits",
+    "description": "Flexible day passes for drop-in climbing. Buy credits and use them anytime. Perfect for irregular schedules or visiting climbers.",
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xT0lIcU1JeDJWYjY2ZWFLfGZsX3Rlc3RfYjA1QUg1Qzh4SER6UFkxYlY1Ulp1UnhM00QiK9kyph"
+    ],
+    "amount": 2500,
+    "currency": "usd",
+    "interval": "month"
+  },
+  {
+    "key": "private-coaching-session",
+    "name": "Private Coaching Session",
+    "description": "One-on-one session with a professional climbing coach. Video analysis, technique correction, and personalized training plan.",
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xT0lIcU1JeDJWYjY2ZWFLfGZsX3Rlc3Rfb284aDFYTjdURVdsNjJDYXFOakZSN1hX00Kq8TTatC"
+    ],
+    "amount": 12500,
+    "currency": "usd"
+  },
+  {
+    "key": "pro-climber-pass",
+    "name": "Pro Climber Pass",
+    "description": "Elite membership for serious climbers. Personal coaching, competition training, nutrition planning, and access to all partner gyms.",
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xT0lIcU1JeDJWYjY2ZWFLfGZsX3Rlc3Rfcmd3ZnlrVml5a0k0WnpNVmJLVVFjWmI000ejCd9ll9"
+    ],
+    "amount": 149000,
+    "currency": "usd",
+    "interval": "year"
+  },
+  {
+    "key": "crusher-pass",
+    "name": "Crusher Pass",
+    "description": "For dedicated climbers pushing their grade. 24/7 gym access, gear rentals, monthly technique clinics, and training board access.",
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xT0lIcU1JeDJWYjY2ZWFLfGZsX3Rlc3RfSmdocUJzYXZ1NUxveXh5SjhseWVtNjdN00M7ND0Jda"
+    ],
+    "amount": 89000,
+    "currency": "usd",
+    "interval": "year"
+  },
+  {
+    "key": "sender-pass",
+    "name": "Sender Pass",
+    "description": "Perfect for casual climbers. Unlimited gym access during off-peak hours, locker rental, and access to beginner routes.",
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xT0lIcU1JeDJWYjY2ZWFLfGZsX3Rlc3Rfc21mdUNkU2k0SExQSkQ0R1puZGE3Q0J400GzaaExYf"
+    ],
+    "amount": 49000,
+    "currency": "usd",
+    "interval": "year"
+  }
+]

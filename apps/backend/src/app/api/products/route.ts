@@ -6,16 +6,19 @@ export async function GET() {
     const stripe = getStripe()
 
     // Fetch all active products with their default prices expanded
-    const products = await stripe.products.list({
-      active: true,
-      expand: ['data.default_price']
-    })
+    // Page through everything: list() returns 10 per page by default.
+    const products = {
+      data: await stripe.products
+        .list({ active: true, limit: 100, expand: ['data.default_price'] })
+        .autoPagingToArray({ limit: 1000 })
+    }
 
     // Fetch all active prices to get complete price information
-    const prices = await stripe.prices.list({
-      active: true,
-      expand: ['data.product']
-    })
+    const prices = {
+      data: await stripe.prices
+        .list({ active: true, limit: 100, expand: ['data.product'] })
+        .autoPagingToArray({ limit: 1000 })
+    }
 
     // Build a map of product ID to prices for quick lookup
     const pricesByProduct = new Map<string, typeof prices.data>()
