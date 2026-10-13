@@ -96,6 +96,8 @@ interface DefaultValues {
 }
 ```
 
+The defaults go to the session as on [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider#defaultvalues), so Stripe refuses the same ones: `email` on a session that already has the customer's email, and `phoneNumber` unless the session was created with `phone_number_collection: { enabled: true }`.
+
 ## Events
 
 | Event | Payload | Description |

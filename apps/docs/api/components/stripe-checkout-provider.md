@@ -111,7 +111,10 @@ interface DefaultValues {
 }
 ```
 
-Stripe refuses a default the session already sets: `email` on a session created with `customer_email` (or a `customer` with an email) makes `loadActions()` fail, and the provider reports it through `@error` and the `#error` slot.
+Stripe refuses a default the session cannot take, and `loadActions()` fails; the provider reports it through `@error` and the `#error` slot, and the checkout does not render:
+
+- `email` on a session created with `customer_email` (or a `customer` with an email), which already sets it.
+- `phoneNumber` on a session created without `phone_number_collection: { enabled: true }`: "You cannot update the phone number unless phone_number_collection.enabled is set to `true`."
 
 ## Events
 
