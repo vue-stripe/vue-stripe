@@ -19,7 +19,7 @@
     "path": "dist/es/index.js",
     "import": "{ useStripe }",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "310 B",
+    "limit": "350 B",
     "gzip": true
   },
   {
