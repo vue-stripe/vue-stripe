@@ -10,7 +10,7 @@ import {
 import type {
   StripeAuBankAccountElement as StripeAuBankAccountElementType,
   StripeAuBankAccountElementChangeEvent
-} from '@stripe/stripe-js'
+} from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,

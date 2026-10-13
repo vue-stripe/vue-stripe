@@ -8,7 +8,7 @@ import {
 import type {
   StripeAddressElementChangeEvent,
   StripeAddressElementOptions
-} from '@stripe/stripe-js'
+} from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,

@@ -11,7 +11,7 @@ import {
 import type {
   StripeIbanElement as StripeIbanElementType,
   StripeIbanElementChangeEvent
-} from '@stripe/stripe-js'
+} from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,

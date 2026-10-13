@@ -15,7 +15,7 @@ import type {
   StripeCardExpiryElementChangeEvent,
   StripeCardNumberElement as StripeCardNumberElementType,
   StripeCardNumberElementChangeEvent
-} from '@stripe/stripe-js'
+} from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
