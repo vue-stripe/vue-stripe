@@ -27,6 +27,13 @@ const verify = async () => {
   return paymentIntent?.status // 'processing' once verified
 }
 </script>
+
+<template>
+  <input v-model.number="first" type="number" />
+  <input v-model.number="second" type="number" />
+  <button :disabled="loading" @click="verify">Verify</button>
+  <p v-if="error">{{ error }}</p>
+</template>
 ```
 
 ## Return Value

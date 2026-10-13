@@ -6,7 +6,7 @@ description: "Vue composables that confirm cash voucher payments with Stripe.js:
 
 Confirm a PaymentIntent with a cash voucher: Boleto (Brazil), Konbini (Japan) and OXXO (Mexico). By default Stripe.js displays the voucher to the customer (pass `{ handleActions: false }` to render it yourself from `paymentIntent.next_action`). The PaymentIntent stays `requires_action` until the customer pays, so confirm the payment from your webhook.
 
-Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider).
+Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider). [What each method needs](/api/composables/confirm/#what-each-method-needs) lists the Intent currency and the `data` each method requires, and [Test your integration](/guide/testing#redirects-qr-codes-bnpl-and-vouchers) what each method does in test mode.
 
 ## When to use
 

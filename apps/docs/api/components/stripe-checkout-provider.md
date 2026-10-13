@@ -33,11 +33,7 @@ import CheckoutForm from './CheckoutForm.vue'
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // From your backend: stripe.checkout.sessions.create({ ui_mode: 'elements', ... })
-const clientSecret = fetch('/api/checkout-session', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ uiMode: 'elements' })
-})
+const clientSecret = fetch('/api/checkout-elements-session', { method: 'POST' })
   .then((res) => res.json())
   .then((data) => data.clientSecret)
 </script>
@@ -111,7 +107,10 @@ interface DefaultValues {
 }
 ```
 
-Stripe refuses a default the session already sets: `email` on a session created with `customer_email` (or a `customer` with an email) makes `loadActions()` fail, and the provider reports it through `@error` and the `#error` slot.
+Stripe refuses a default the session cannot take, and `loadActions()` fails; the provider reports it through `@error` and the `#error` slot, and the checkout does not render:
+
+- `email` on a session created with `customer_email` (or a `customer` with an email), which already sets it.
+- `phoneNumber` on a session created without `phone_number_collection: { enabled: true }`: "You cannot update the phone number unless phone_number_collection.enabled is set to `true`."
 
 ## Events
 
@@ -129,16 +128,16 @@ Stripe refuses a default the session already sets: `email` on a session created 
 | `loading` | — | Until the Checkout SDK exists (Stripe.js still loading) |
 | `error` | `{ error }` | Initialization failed |
 
-The default slot renders early so element components can mount while the session actions are still loading. Its `loading` prop (and `useCheckoutSession().loading`) stays `true` until `loadActions()` resolves; `actions` and `session` are `null` until then.
+The default slot renders early so element components can mount while the session actions are still loading. Its `loading` prop (and `useCheckoutSession().loading`) stays `true` until `loadActions()` resolves; `actions` and `session` are `null` until then. Their types include `null`, so test them, not `loading`, before reading a member.
 
 ```vue
 <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
   <template #loading><div>Preparing checkout...</div></template>
   <template #error="{ error }"><div class="error">{{ error }}</div></template>
 
-  <template #default="{ session, loading }">
+  <template #default="{ session }">
     <VueStripePaymentElement />
-    <p v-if="!loading">Total: {{ session.total.total.amount }}</p>
+    <p v-if="session">Total: {{ session.total.total.amount }}</p>
   </template>
 </VueStripeCheckoutElementsProvider>
 ```
@@ -159,12 +158,15 @@ Element components placed inside the provider are created with the Checkout SDK'
 | [VueStripePaymentElement](/api/components/stripe-payment-element) | `createPaymentElement()` | `layout`, `paymentMethodOrder`, `readOnly`, `terms`, `fields`, `wallets`, `walletOptions` |
 | [VueStripeAddressElement](/api/components/stripe-address-element) | `createBillingAddressElement()` / `createShippingAddressElement()` (picked by `options.mode`: `'billing'` or `'shipping'`, default `'shipping'`) | `contacts`, `display`, `fields` |
 | [VueStripeExpressCheckoutElement](/api/components/stripe-express-checkout-element) | `createExpressCheckoutElement()` | `buttonHeight`, `buttonTheme`, `buttonType`, `layout`, `paymentMethods`, `paymentMethodOrder` |
-| [VueStripeTaxIdElement](/api/components/stripe-tax-id-element) | `createTaxIdElement()` | All Tax ID options (needs the Tax ID beta on `VueStripeProvider`) |
+| [VueStripeTaxIdElement](/api/components/stripe-tax-id-element) | `createTaxIdElement()` | All Tax ID options |
+| [VueStripeContactDetailsElement](/api/components/stripe-contact-details-element) | `createContactDetailsElement()` | None |
 | [VueStripeCurrencySelectorElement](/api/components/stripe-currency-selector-element) | `createCurrencySelectorElement()` | None |
+| [VueStripeTermsElement](/api/components/stripe-terms-element) | `createTermsElement()` (Stripe beta) | None |
+| [VueStripeLinkSignupElement](/api/components/stripe-link-signup-element) | `createLinkSignupElement()` (Stripe beta) | `defaultValues` |
 
 The Checkout SDK accepts only these option subsets; other keys you pass are dropped. Appearance and fonts are not element options here: set them with `elementsOptions`, or change them later with `useCheckoutSession().changeAppearance()` / `loadFonts()`.
 
-The Card, split card (number / expiry / CVC), IBAN, AU bank account and Link Authentication elements are **not** available with Checkout Sessions; rendering one inside this provider sets its error state and logs an error. A `VueStripeElements` nested inside the provider takes over for its own children.
+The Card, split card (number / expiry / CVC), IBAN, AU bank account, Link Authentication, Payment Method Messaging and Issuing elements are **not** available with Checkout Sessions; rendering one inside this provider sets its error state and logs an error. A `VueStripeElements` nested inside the provider takes over for its own children.
 
 ::: warning Express Checkout events under Checkout Sessions
 With Checkout Sessions, Express Checkout's `@click`, `@shippingaddresschange` and `@shippingratechange` never fire: Stripe handles them from the session. Confirm from `@confirm` with `useCheckoutSession().confirm({ expressCheckoutConfirmEvent: event })`.
@@ -198,15 +200,18 @@ Access these via [`useCheckoutSession()`](/api/composables/use-checkout-session)
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots). The props type is exported as `VueStripeCheckoutElementsProviderProps`.
 
-```ts
+```vue
+<script setup lang="ts">
+import { VueStripeCheckoutElementsProvider, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 import type {
   StripeCheckoutElementsOptions,
   StripeCheckoutLoadActionsSuccess,
-  StripeCheckoutSession,
-  VueStripeCheckoutElementsProviderProps
+  StripeCheckoutSession
 } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
 
 const elementsOptions: StripeCheckoutElementsOptions = {
   appearance: { theme: 'stripe' },
@@ -220,6 +225,18 @@ const onReady = (actions: StripeCheckoutLoadActionsSuccess) => {
 const onChange = (session: StripeCheckoutSession) => {
   console.log('Can confirm:', session.canConfirm)
 }
+</script>
+
+<template>
+  <VueStripeCheckoutElementsProvider
+    :client-secret="props.clientSecret"
+    :elements-options="elementsOptions"
+    @ready="onReady"
+    @change="onChange"
+  >
+    <VueStripePaymentElement />
+  </VueStripeCheckoutElementsProvider>
+</template>
 ```
 
 ## See Also

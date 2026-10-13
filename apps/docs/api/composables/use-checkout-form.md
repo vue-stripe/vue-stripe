@@ -138,8 +138,9 @@ When the Checkout Session was created with `return_url`, do not pass `returnUrl`
 
 ## TypeScript
 
-```ts
-import { useCheckoutForm } from '@vue-stripe/vue-stripe'
+```vue
+<script setup lang="ts">
+import { VueStripeCheckoutForm, useCheckoutForm } from '@vue-stripe/vue-stripe'
 import type {
   StripeCheckoutConfirmResult,
   StripeCheckoutFormConfirmEvent,
@@ -150,6 +151,11 @@ const form: UseCheckoutFormReturn = useCheckoutForm()
 
 const pay = (event: StripeCheckoutFormConfirmEvent): Promise<StripeCheckoutConfirmResult> =>
   form.confirm({ formConfirmEvent: event })
+</script>
+
+<template>
+  <VueStripeCheckoutForm @confirm="pay" />
+</template>
 ```
 
 ## See Also

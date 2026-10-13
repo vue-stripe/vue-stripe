@@ -46,12 +46,13 @@ export interface CoverageCategory {
 }
 
 // A `stripe.confirm<Method>Payment/Setup()` row, covered by its `useConfirm<Method>...` composable.
-const confirmer = (name: string, method: string): CoverageItem => ({
+const confirmer = (name: string, method: string, note?: string): CoverageItem => ({
   name,
   api: `stripe.${method}()`,
   status: 'covered',
   artifact: `use${method.charAt(0).toUpperCase()}${method.slice(1)}`,
-  surface: [`Stripe.${method}`]
+  surface: [`Stripe.${method}`],
+  ...(note ? { note } : {})
 })
 
 export const coverage: CoverageCategory[] = [
@@ -712,7 +713,11 @@ export const coverage: CoverageCategory[] = [
       confirmer('Bacs Debit setup', 'confirmBacsDebitSetup'),
       confirmer('Bancontact payment', 'confirmBancontactPayment'),
       confirmer('Bancontact setup', 'confirmBancontactSetup'),
-      confirmer('Billie payment', 'confirmBilliePayment'),
+      confirmer(
+        'Billie payment',
+        'confirmBilliePayment',
+        'Stripe beta: needs a betas flag on VueStripeProvider.'
+      ),
       confirmer('BLIK payment', 'confirmBlikPayment'),
       confirmer('BLIK setup', 'confirmBlikSetup'),
       confirmer('Boleto payment', 'confirmBoletoPayment'),
@@ -723,7 +728,11 @@ export const coverage: CoverageCategory[] = [
       confirmer('Customer balance payment', 'confirmCustomerBalancePayment'),
       confirmer('EPS payment', 'confirmEpsPayment'),
       confirmer('FPX payment', 'confirmFpxPayment'),
-      confirmer('giropay payment', 'confirmGiropayPayment'),
+      confirmer(
+        'giropay payment',
+        'confirmGiropayPayment',
+        'Deprecated by Stripe: confirming returns payment_method_not_available.'
+      ),
       confirmer('GrabPay payment', 'confirmGrabPayPayment'),
       confirmer('iDEAL payment', 'confirmIdealPayment'),
       confirmer('iDEAL setup', 'confirmIdealSetup'),
@@ -741,8 +750,16 @@ export const coverage: CoverageCategory[] = [
       confirmer('PromptPay payment', 'confirmPromptPayPayment'),
       confirmer('SEPA Debit payment', 'confirmSepaDebitPayment'),
       confirmer('SEPA Debit setup', 'confirmSepaDebitSetup'),
-      confirmer('Sofort payment', 'confirmSofortPayment'),
-      confirmer('Sofort setup', 'confirmSofortSetup'),
+      confirmer(
+        'Sofort payment',
+        'confirmSofortPayment',
+        'Deprecated by Stripe: confirming returns payment_method_not_available.'
+      ),
+      confirmer(
+        'Sofort setup',
+        'confirmSofortSetup',
+        'Deprecated by Stripe, though a sandbox still redirected in October 2026.'
+      ),
       confirmer('TWINT payment', 'confirmTwintPayment'),
       confirmer('US bank account payment', 'confirmUsBankAccountPayment'),
       confirmer('US bank account setup', 'confirmUsBankAccountSetup'),

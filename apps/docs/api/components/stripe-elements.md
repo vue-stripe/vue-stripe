@@ -95,6 +95,7 @@ With neither `clientSecret` nor `mode`, Stripe.js Endive throws "Unable to selec
 The `options` prop takes Stripe's `StripeElementsOptions` (also accepted: a plain object of `stripe.elements()` options). `appearance` is typed as Stripe's `Appearance`, and `fonts` as an array of `CssFontSource | CustomFontSource`. All of these are re-exported from the package:
 
 ```ts
+// Listing of the exported option types, not a sample
 import type {
   Appearance,
   CssFontSource,
@@ -262,14 +263,14 @@ The fields inside Stripe's iframes are styled with the [Appearance API](#appeara
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots). The props type is exported as `VueStripeElementsProps`.
 
-```ts
-import type {
-  VueStripeElementsProps,
-  Appearance,
-  StripeElements
-} from '@vue-stripe/vue-stripe'
+```vue
+<script setup lang="ts">
+import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+import type { Appearance, StripeElements } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
 
 const appearance: Appearance = {
   theme: 'stripe',
@@ -278,9 +279,17 @@ const appearance: Appearance = {
   }
 }
 
-function onReady(elements: StripeElements) {
+const onReady = (elements: StripeElements) => {
   // elements is fully typed
+  console.log(elements.getElement('payment'))
 }
+</script>
+
+<template>
+  <VueStripeElements :client-secret="props.clientSecret" :appearance="appearance" @ready="onReady">
+    <VueStripePaymentElement />
+  </VueStripeElements>
+</template>
 ```
 
 ::: warning vue-tsc and `//` in a `v-if` element

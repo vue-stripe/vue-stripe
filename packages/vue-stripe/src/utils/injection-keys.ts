@@ -19,6 +19,8 @@ export interface StripeElementsInstance {
   elements: Ref<StripeElements | null>
   loading: Ref<boolean>
   error: Ref<string | null>
+  /** Whether the group is created with a `clientSecret` or a `mode` (deferred Intent). */
+  hasIntent?: () => boolean
 }
 
 export interface StripeCheckoutInstance {

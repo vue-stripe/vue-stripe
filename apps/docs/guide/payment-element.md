@@ -49,10 +49,10 @@ const errorMessage = ref('')
 onMounted(async () => {
   try {
     const response = await fetch('/api/create-payment-intent', { method: 'POST' })
-    const data = await response.json()
-    clientSecret.value = data.clientSecret
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    clientSecret.value = (await response.json()).clientSecret
   } catch {
-    errorMessage.value = 'Failed to initialize payment'
+    errorMessage.value = 'Could not start the payment. Please reload the page.'
   }
 })
 </script>
@@ -85,7 +85,6 @@ const isComplete = ref(false)
 
 const handleChange = (event: { complete: boolean }) => {
   isComplete.value = event.complete
-  errorMessage.value = ''
 }
 
 const handleSubmit = async () => {
@@ -117,7 +116,7 @@ const handleSubmit = async () => {
 </template>
 ```
 
-The customer is sent to `return_url` after a successful payment. Read the result there from the `payment_intent_client_secret` query parameter with `retrievePaymentIntent()` from the same composable.
+The error message stays until the customer clicks Pay again; `handleChange` only tracks whether the form is complete, because Stripe sends a `change` event right after a decline. The customer is sent to `return_url` after a successful payment. Read the result there from the `payment_intent_client_secret` query parameter with `retrievePaymentIntent()` from the same composable.
 
 ## Stay on the page when no redirect is needed
 

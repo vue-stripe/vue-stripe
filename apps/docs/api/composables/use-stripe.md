@@ -45,13 +45,20 @@ All return values are **readonly refs** - you can read their `.value` but cannot
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { useStripe } from '@vue-stripe/vue-stripe'
 import type { UseStripeReturn } from '@vue-stripe/vue-stripe'
 
-const { stripe, loading, error }: UseStripeReturn = useStripe()
-
 // stripe.value is typed as Stripe | null
+const { stripe, loading, error }: UseStripeReturn = useStripe()
+</script>
+
+<template>
+  <p v-if="loading">Loading Stripe...</p>
+  <p v-else-if="error">{{ error }}</p>
+  <p v-else-if="stripe">Stripe.js is ready</p>
+</template>
 ```
 
 ## See Also

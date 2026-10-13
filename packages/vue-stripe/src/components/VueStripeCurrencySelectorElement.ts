@@ -31,6 +31,9 @@ export default /* @__PURE__ */ createStripeElement<
   elements: false,
   checkout: (sdk) => sdk.createCurrencySelectorElement(),
   checkoutForm: (sdk) => sdk.createCurrencySelectorElement(),
+  // Stripe.js logs an uncaught TypeError when the selector is created before the Checkout
+  // Form; a selector placed above VueStripeCheckoutForm waits for it (#667).
+  createLast: true,
   className: 'vue-stripe-currency-selector-element',
   loadingText: 'Loading currency selector...'
 })

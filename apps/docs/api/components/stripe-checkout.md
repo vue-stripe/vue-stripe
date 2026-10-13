@@ -62,13 +62,24 @@ To create the session only when the customer clicks, use [useStripeCheckout](/ap
 | `@success` | - | Emitted once the redirect has been started |
 | `@error` | `VueStripeCheckoutError` | Emitted when `sessionUrl` is missing |
 
-```ts
-import { VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VueStripeCheckout, VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ sessionUrl: string }>()
+const message = ref('')
 
 const onError = (error: VueStripeCheckoutError) => {
   // "VueStripeCheckout: `sessionUrl` is required (create the Checkout Session on your server)"
-  console.error(error.message)
+  message.value = error.message
 }
+</script>
+
+<template>
+  <VueStripeCheckout :session-url="props.sessionUrl" @error="onError" />
+  <p v-if="message">{{ message }}</p>
+</template>
 ```
 
 Errors from Stripe itself (an expired or invalid session) are shown on Stripe's hosted page, not emitted by the component.
@@ -149,15 +160,16 @@ Pass `button-class` to use your own class instead:
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots).
 
 `InstanceType<typeof VueStripeCheckout>` also includes the exposed members. A template ref unwraps their refs, so `checkoutRef.value?.loading` is a `boolean`.
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCheckout, VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
 
-const sessionUrl = ref<string>('')
+const props = defineProps<{ sessionUrl: string }>()
 const checkoutRef = ref<InstanceType<typeof VueStripeCheckout> | null>(null)
 
 const handleBeforeRedirect = ({ url }: { url: string }) => {
@@ -167,6 +179,17 @@ const handleBeforeRedirect = ({ url }: { url: string }) => {
 const handleError = (error: VueStripeCheckoutError) => {
   console.error('Checkout failed:', error.message)
 }
+</script>
+
+<template>
+  <VueStripeCheckout
+    ref="checkoutRef"
+    :session-url="props.sessionUrl"
+    @before-redirect="handleBeforeRedirect"
+    @error="handleError"
+  />
+  <p v-if="checkoutRef?.loading">Redirecting to Stripe...</p>
+</template>
 ```
 
 ## Migrating from v5

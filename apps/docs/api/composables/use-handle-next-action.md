@@ -40,7 +40,7 @@ type HandleNextActionResult = PaymentIntentOrSetupIntentResult | VueStripeErrorR
 | Property | Type | Description |
 |----------|------|-------------|
 | `handleNextAction` | `(options: HandleNextActionOptions) => Promise<HandleNextActionResult>` | Runs the next action; resolves to Stripe's result (`{ paymentIntent }` / `{ setupIntent }` or `{ error }`). |
-| `loading` | `Readonly<Ref<boolean>>` | `true` while the action is in progress. |
+| `loading` | `Readonly<Ref<boolean>>` | `true` while an action is in progress (until the last of overlapping calls settles). |
 | `error` | `Readonly<Ref<string \| null>>` | The error message if the action failed. |
 
 When Stripe.js is not available (the plugin's load failed, for example; a call made while it loads waits for it), or the Stripe call throws, `handleNextAction` does not reject: it resolves to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`), so one `if (result.error)` check covers every failure.
@@ -74,12 +74,17 @@ await handleNextAction({ hashedValue: tokenHashedValue })
 import { useHandleNextAction } from '@vue-stripe/vue-stripe'
 import type { HandleNextActionOptions, HandleNextActionResult } from '@vue-stripe/vue-stripe'
 
-const { handleNextAction } = useHandleNextAction()
+// useNextAction.ts: call useNextAction() in a component's setup
+export function useNextAction() {
+  const { handleNextAction } = useHandleNextAction()
 
-const run = async (options: HandleNextActionOptions): Promise<HandleNextActionResult> => {
-  const result = await handleNextAction(options)
-  if (result.error) console.error(result.error.message)
-  return result
+  const run = async (options: HandleNextActionOptions): Promise<HandleNextActionResult> => {
+    const result = await handleNextAction(options)
+    if (result.error) console.error(result.error.message)
+    return result
+  }
+
+  return { run }
 }
 ```
 

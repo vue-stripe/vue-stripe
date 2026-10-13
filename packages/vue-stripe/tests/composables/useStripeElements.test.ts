@@ -272,6 +272,44 @@ describe('useStripeElements().fetchUpdates', () => {
       error: { message: 'Elements not initialized' }
     })
   })
+
+  // #658: Stripe.js throws an IntegrationError on a deferred (mode) group.
+  it('resolves { error } when Stripe throws instead of rejecting', async () => {
+    const { provide, shallowRef, ref: vref } = await import('vue-demi')
+    const { stripeElementsInjectionKey } = await import('../../src/utils/injection-keys')
+    const { makeMockElements } = await import('../setup')
+    const message =
+      'In order to call fetchUpdates, you must pass a valid PaymentIntent or SetupIntent client secret when creating the Elements group.'
+    const group = makeMockElements()
+    let api!: ReturnType<typeof useStripeElements>
+    mount(
+      defineComponent({
+        setup() {
+          provide(stripeElementsInjectionKey, {
+            elements: shallowRef(group as never),
+            loading: vref(false),
+            error: vref(null)
+          })
+          return () =>
+            h(
+              defineComponent({
+                setup() {
+                  api = useStripeElements()
+                  return () => h('div')
+                }
+              })
+            )
+        }
+      })
+    )
+
+    group.fetchUpdates.mockImplementationOnce(() => {
+      throw new Error(message)
+    })
+    await expect(api.fetchUpdates()).resolves.toEqual({ error: { message } })
+    group.fetchUpdates.mockRejectedValueOnce(new Error(message))
+    await expect(api.fetchUpdates()).resolves.toEqual({ error: { message } })
+  })
 })
 
 describe('useStripeElements().getElement', () => {

@@ -558,3 +558,49 @@ describe('VueStripeElements @update-end', () => {
     wrapper.unmount()
   })
 })
+
+// #657: one failed stripe.elements() call is reported once (fixed in 244723c).
+describe('VueStripeElements creation failure is reported once', () => {
+  const failingStripe = async () => {
+    const { makeMockStripe } = await import('../setup')
+    const stripe = makeMockStripe()
+    stripe.elements.mockImplementation(() => {
+      throw new Error('`allowedPaymentMethodTypes` is only applicable when a `mode` is set.')
+    })
+    return stripe
+  }
+
+  it('under VueStripeProvider', async () => {
+    const stripe = await failingStripe()
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+    const onError = vi.fn()
+    mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: {
+        default: () =>
+          h(VueStripeElements, { clientSecret: 'pi_1_secret_2', onError }, () => h('p'))
+      }
+    })
+    for (let i = 0; i < 4; i++) await flushPromises()
+
+    expect(stripe.elements).toHaveBeenCalledTimes(1)
+    expect(onError).toHaveBeenCalledTimes(1)
+  })
+
+  it('under createVueStripe()', async () => {
+    const stripe = await failingStripe()
+    const { loadStripe } = await import('@stripe/stripe-js/pure')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+    const { createVueStripe } = await import('../../src/plugin')
+    const onError = vi.fn()
+    mount(VueStripeElements, {
+      props: { clientSecret: 'pi_1_secret_2', onError } as never,
+      global: { plugins: [createVueStripe({ publishableKey: 'pk_test_657' })] }
+    })
+    for (let i = 0; i < 4; i++) await flushPromises()
+
+    expect(stripe.elements).toHaveBeenCalledTimes(1)
+    expect(onError).toHaveBeenCalledTimes(1)
+  })
+})

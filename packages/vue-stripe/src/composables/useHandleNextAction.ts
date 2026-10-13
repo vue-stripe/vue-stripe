@@ -25,7 +25,9 @@ import { injectStripe, whenStripeLoaded } from '../utils/inject-stripe'
 export function useHandleNextAction(): UseHandleNextActionReturn {
   const stripeInstance = injectStripe('useHandleNextAction')
 
+  // Overlapping calls: stay loading until the last one settles.
   const loading = ref(false)
+  let pending = 0
   const error = ref<string | null>(null)
 
   const handleNextAction = async (options: HandleNextActionOptions) => {
@@ -35,6 +37,7 @@ export function useHandleNextAction(): UseHandleNextActionReturn {
       return { error: { message: 'Stripe not initialized' } }
     }
 
+    pending++
     loading.value = true
     error.value = null
 
@@ -55,7 +58,7 @@ export function useHandleNextAction(): UseHandleNextActionReturn {
       error.value = errorMessage
       return { error: { message: errorMessage } }
     } finally {
-      loading.value = false
+      loading.value = --pending > 0
     }
   }
 

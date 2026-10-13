@@ -92,7 +92,7 @@ interface UseSetupIntentReturn {
 |----------|------|-------------|
 | `confirmSetup` | `(options: ConfirmSetupOptions) => Promise<ConfirmSetupResult>` | Confirm a setup intent |
 | `retrieveSetupIntent` | `(clientSecret: string) => Promise<ConfirmSetupResult>` | Look up a SetupIntent by its client secret |
-| `loading` | `Readonly<Ref<boolean>>` | Whether a confirm or retrieve is in progress |
+| `loading` | `Readonly<Ref<boolean>>` | `true` while a confirm or retrieve is in flight (until the last of overlapping calls settles) |
 | `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirm or retrieve attempt |
 
 ### retrieveSetupIntent
@@ -114,7 +114,7 @@ if (clientSecret) {
 `confirmSetup` and `retrieveSetupIntent` resolve to a `ConfirmSetupResult`, exported from the package:
 
 ```ts
-import type { ConfirmSetupResult, VueStripeErrorResult } from '@vue-stripe/vue-stripe'
+// Declarations, for reference, not a sample: import the types from '@vue-stripe/vue-stripe'
 
 // Stripe's own result, or the composable's error result
 type ConfirmSetupResult = SetupIntentResult | VueStripeErrorResult
@@ -151,12 +151,18 @@ import type {
   UseSetupIntentReturn
 } from '@vue-stripe/vue-stripe'
 
-const { confirmSetup }: UseSetupIntentReturn = useSetupIntent()
+// useSave.ts: call useSave() in a component's setup
+export function useSave() {
+  const { confirmSetup }: UseSetupIntentReturn = useSetupIntent()
 
-const save = async (options: ConfirmSetupOptions) => {
-  const result: ConfirmSetupResult = await confirmSetup(options)
-  // result.setupIntent is SetupIntent | undefined
-  // result.error is StripeError | { message: string } | undefined
+  const save = async (options: ConfirmSetupOptions): Promise<ConfirmSetupResult> => {
+    const result = await confirmSetup(options)
+    // result.setupIntent is SetupIntent | undefined
+    // result.error is StripeError | { message: string } | undefined
+    return result
+  }
+
+  return { save }
 }
 ```
 

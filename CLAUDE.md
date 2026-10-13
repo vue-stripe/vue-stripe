@@ -109,6 +109,6 @@ Each rule fails the build with `file:line`; each also has a negative fixture in 
 5. Only the typed error classes from `src/utils/errors.ts` are thrown.
 6. No `as any`, no `@ts-ignore`; `@ts-expect-error` only with a trailing `-- reason`.
 7. Every component and composable module is exported from its `index.ts`.
-8. An element definition's `events` list only contains events the installed `@stripe/stripe-js` `.d.ts` declares for that element type.
+8. An element definition's `events` list matches the events the installed `@stripe/stripe-js` `.d.ts` declares for that element type: every declared event is forwarded, and nothing else is (bar the test's reviewed exceptions).
 9. Every exported component and composable has an API page under `apps/docs/api/`.
 10. **No emoji anywhere** in docs, the playground, the backend UI, library source or READMEs (maintainer rule). Write words instead: "Yes" / "No" in tables, "Correct" / "Wrong" in code comments, text labels for status. Do not propose emoji in docs or UI copy.

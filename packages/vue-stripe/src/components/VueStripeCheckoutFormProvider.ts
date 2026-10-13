@@ -16,10 +16,9 @@ import type {
 } from '@stripe/stripe-js'
 import { stripeCheckoutFormInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
-import { hx } from '../utils/h'
 import { statusShell } from '../utils/status-shell'
 import { errorLogger } from '../utils/report'
-import type { VueStripeComponent } from '../utils/element-types'
+import type { ScopedSlot, StatusSlots, VueStripeComponent } from '../utils/element-types'
 
 const checkoutFormProviderProps = {
   /** Client secret of a Checkout Session (`ui_mode: 'form'`), or a Promise resolving to it. */
@@ -57,6 +56,16 @@ const checkoutFormProviderProps = {
     type: Object as PropType<StripeCheckoutFormSdkOptions['defaultValues'] | undefined>,
     default: undefined
   }
+}
+
+/** Slot name -> the slot's props. `actions` and `session` are null until the actions load. */
+type CheckoutFormProviderSlots = StatusSlots & {
+  default?: ScopedSlot<{
+    checkout: StripeCheckoutFormSdk
+    actions: StripeCheckoutFormLoadActionsSuccess | null
+    session: StripeCheckoutSession | null
+    loading: boolean
+  }>
 }
 
 /** Event name -> payload. */
@@ -177,27 +186,22 @@ export default /* @__PURE__ */ defineComponent({
     provide(stripeCheckoutFormInjectionKey, { checkout, actions, session, loading, error })
 
     return () =>
-      error.value || !checkout.value
-        ? statusShell(
-            'vue-stripe-checkout',
-            { error: error.value, loading: true },
-            slots,
-            {},
-            'Initializing Checkout Form...'
-          )
-        : hx(
-            'div',
-            {},
-            slots['default']?.({
-              checkout: checkout.value,
-              actions: actions.value,
-              session: session.value,
-              loading: loading.value
-            })
-          )
+      statusShell(
+        'vue-stripe-checkout',
+        { error: error.value, loading: !checkout.value },
+        slots,
+        {
+          checkout: checkout.value,
+          actions: actions.value,
+          session: session.value,
+          loading: loading.value
+        },
+        'Initializing Checkout Form...'
+      )
   }
 }) as unknown as VueStripeComponent<
   typeof checkoutFormProviderProps,
   Record<never, never>,
-  CheckoutFormProviderEvents
+  CheckoutFormProviderEvents,
+  CheckoutFormProviderSlots
 >

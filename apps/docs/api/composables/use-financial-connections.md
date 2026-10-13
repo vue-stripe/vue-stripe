@@ -17,6 +17,20 @@ Each method has the same name as the `stripe.*` method it wraps.
 
 Must be called within a `<VueStripeProvider>` or an app using [`createVueStripe()`](/api/plugin). No `<VueStripeElements>` is needed. Create the Financial Connections Session, PaymentIntent or SetupIntent on your server and pass its client secret.
 
+Stripe's Financial Connections flow needs `minimum-scale=1` in the page's viewport meta tag. Without it, opening the modal logs `[Stripe.js] The Financial Connections authentication flow requires "minimum-scale=1" to be set in your page's viewport meta tag.` The default templates of Vite, Vue CLI, Quasar and Nuxt leave it out. Set it in `index.html` (`public/index.html` with Vue CLI):
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+```
+
+In Nuxt, set it in `nuxt.config.ts`:
+
+```ts
+export default defineNuxtConfig({
+  app: { head: { viewport: 'width=device-width, initial-scale=1, minimum-scale=1' } }
+})
+```
+
 ::: tip Live demo
 The [ACH Direct Debit demo](/live-demo/ach-debit) links a test bank account with `collectBankAccountForPayment()` and confirms with `useConfirmUsBankAccountPayment()`.
 :::
@@ -126,7 +140,7 @@ interface UseFinancialConnectionsReturn {
 | `collectBankAccountForPayment` | `(options) => Promise<CollectBankAccountForPaymentResult>` | Collects a US bank account and attaches it to a PaymentIntent. |
 | `collectBankAccountForSetup` | `(options) => Promise<CollectBankAccountForSetupResult>` | Collects a US bank account and attaches it to a SetupIntent. |
 | `collectBankAccountToken` | `(options) => Promise<CollectBankAccountTokenResult>` | Opens the Financial Connections modal and returns a bank account token. |
-| `loading` | `Readonly<Ref<boolean>>` | `true` while any of the four calls is in progress (the modal is open). |
+| `loading` | `Readonly<Ref<boolean>>` | `true` while any of the four calls is in progress (the modal is open), until the last of overlapping calls settles. |
 | `error` | `Readonly<Ref<string \| null>>` | The error message of the last call, or `null`. Cleared when a new call starts. |
 
 When Stripe.js is not available (the plugin's load failed, for example; a call made while it loads waits for it), or the Stripe call throws, the methods do not reject: they resolve to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`), so one `if (result.error)` check covers every failure.
@@ -163,18 +177,22 @@ type CollectBankAccountForSetupOptions = Parameters<Stripe['collectBankAccountFo
 import { useFinancialConnections } from '@vue-stripe/vue-stripe'
 import type {
   CollectFinancialConnectionsAccountsOptions,
-  CollectFinancialConnectionsAccountsResult,
-  PreCollectedConsent
+  CollectFinancialConnectionsAccountsResult
 } from '@vue-stripe/vue-stripe'
 
-const { collectFinancialConnectionsAccounts } = useFinancialConnections()
+// useLinkAccounts.ts: call useLinkAccounts() in a component's setup
+export function useLinkAccounts() {
+  const { collectFinancialConnectionsAccounts } = useFinancialConnections()
 
-const link = async (
-  options: CollectFinancialConnectionsAccountsOptions
-): Promise<CollectFinancialConnectionsAccountsResult> => {
-  const result = await collectFinancialConnectionsAccounts(options)
-  if (result.error) console.error(result.error.message)
-  return result
+  const link = async (
+    options: CollectFinancialConnectionsAccountsOptions
+  ): Promise<CollectFinancialConnectionsAccountsResult> => {
+    const result = await collectFinancialConnectionsAccounts(options)
+    if (result.error) console.error(result.error.message)
+    return result
+  }
+
+  return { link }
 }
 ```
 

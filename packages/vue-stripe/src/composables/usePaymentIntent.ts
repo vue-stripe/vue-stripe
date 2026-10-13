@@ -36,7 +36,9 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
   const stripeInstance = injectStripe('usePaymentIntent')
   const elementsInstance = inject(stripeElementsInjectionKey, null)
 
+  // Overlapping calls: stay loading until the last one settles.
   const loading = ref(false)
+  let pending = 0
   const error = ref<string | null>(null)
 
   const confirmPayment = async (options: ConfirmPaymentOptions) => {
@@ -46,6 +48,7 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
       return { error: { message: 'Stripe not initialized' } }
     }
 
+    pending++
     loading.value = true
     error.value = null
 
@@ -90,7 +93,7 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
       error.value = errorMessage
       return { error: { message: errorMessage } }
     } finally {
-      loading.value = false
+      loading.value = --pending > 0
     }
   }
 
@@ -101,6 +104,7 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
       return { error: { message: 'Stripe not initialized' } }
     }
 
+    pending++
     loading.value = true
     error.value = null
 
@@ -115,7 +119,7 @@ export function usePaymentIntent(): UsePaymentIntentReturn {
       error.value = errorMessage
       return { error: { message: errorMessage } }
     } finally {
-      loading.value = false
+      loading.value = --pending > 0
     }
   }
 

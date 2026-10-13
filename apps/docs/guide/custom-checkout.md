@@ -19,7 +19,7 @@ sequenceDiagram
     participant Browser
     participant Server
     participant Stripe
-    Browser->>Server: POST /checkout-session
+    Browser->>Server: POST /api/checkout-elements-session
     Server->>Stripe: checkout.sessions.create({ ui_mode: 'elements' })
     Stripe-->>Server: session.client_secret
     Server-->>Browser: clientSecret
@@ -30,7 +30,7 @@ sequenceDiagram
 
 ## 1. Create the session on your server
 
-Create the session with `ui_mode: 'elements'` and a `return_url`, and send `client_secret` to the browser. There is no `success_url` or `cancel_url` because the customer never leaves your page unless a payment method needs a redirect.
+Create the session with `ui_mode: 'elements'` and a `return_url`, and send `client_secret` to the browser. There is no `success_url` or `cancel_url` because the customer never leaves your page unless a payment method needs a redirect. The route has its own path because the other Checkout guides create sessions with a different `ui_mode`, so one app can follow several of them.
 
 ```js
 // Node.js (Express-style handler)
@@ -38,7 +38,7 @@ import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
-app.post('/api/checkout-session', async (req, res) => {
+app.post('/api/checkout-elements-session', async (req, res) => {
   const session = await stripe.checkout.sessions.create({
     ui_mode: 'elements',
     mode: 'payment',
@@ -54,7 +54,7 @@ Stripe replaces `{CHECKOUT_SESSION_ID}` with the session ID when it redirects.
 
 ## 2. Wrap the page in the provider
 
-`VueStripeCheckoutElementsProvider` calls `stripe.initCheckoutElementsSdk()` and makes the session available to the components inside it. `client-secret` accepts a string or a **Promise**. Pass the Promise from your request so the elements can mount while the session is being created.
+`VueStripeCheckoutElementsProvider` calls `stripe.initCheckoutElementsSdk()` and makes the session available to the components inside it. `client-secret` accepts a string or a **Promise**. Pass the Promise from your request so the elements can mount while the session is being created. If the page is rendered on a server (Nuxt, Vite SSR, Quasar SSR), don't create this Promise at the top of `<script setup>`: the request starts during server rendering and stops a plain Node SSR server, so pass `fetch-client-secret` instead, as in [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser).
 
 ```vue
 <!-- CheckoutPage.vue -->
@@ -65,7 +65,7 @@ import CheckoutForm from './CheckoutForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
-const clientSecret = fetch('/api/checkout-session', { method: 'POST' })
+const clientSecret = fetch('/api/checkout-elements-session', { method: 'POST' })
   .then((response) => response.json())
   .then((data) => data.clientSecret)
 </script>
@@ -90,7 +90,7 @@ Inside the provider, element components are created from the Checkout session (`
 
 ```vue
 <!-- CheckoutForm.vue -->
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import {
   VueStripePaymentElement,

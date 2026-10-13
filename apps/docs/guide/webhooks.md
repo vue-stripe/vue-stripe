@@ -41,7 +41,11 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 app.use(express.json()) // your other routes come after the webhook route
 ```
 
-In other frameworks, pass the unparsed body to `constructEvent()`: `await request.text()` in a Next.js route handler, `await readRawBody(event)` in a Nuxt server route.
+In other frameworks, pass the unparsed body to `constructEvent()`: `await request.text()` in a Next.js route handler, `await readRawBody(event)` in a Nuxt server route, `$request->getContent()` in Laravel.
+
+::: tip Laravel
+Laravel's CSRF check answers Stripe's POST with 419 before your code runs, so exempt the webhook route in `bootstrap/app.php` (or put it in `routes/api.php`). [Receive webhooks](/guide/laravel#_6-receive-webhooks) in the Laravel guide has the route and a controller with `\Stripe\Webhook::constructEvent()`.
+:::
 
 ## 2. Handle the events for your integration
 

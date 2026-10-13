@@ -83,10 +83,11 @@ The options are passed to `loadStripe(publishableKey, { stripeAccount, locale, d
 
 ## Provided values
 
-The plugin provides two values app-wide, under the same injection keys `VueStripeProvider` uses:
+The plugin provides two values app-wide, the same two `VueStripeProvider` [provides](/api/components/stripe-provider#provides):
 
 ```ts
-// Config (stripeConfigInjectionKey), read by VueStripePricingTable
+// Config (VueStripeConfig) under the exported stripeConfigInjectionKey,
+// read by VueStripePricingTable and by inject(stripeConfigInjectionKey)
 {
   publishableKey: '...',
   stripeAccount: '...', // optional
@@ -94,7 +95,7 @@ The plugin provides two values app-wide, under the same injection keys `VueStrip
   locale: '...'         // optional
 }
 
-// Stripe context (stripeInjectionKey), read by useStripe(), VueStripeElements, ...
+// Stripe context (internal key), read by useStripe(), VueStripeElements, ...
 {
   stripe: Ref<Stripe | null>,  // null until Stripe.js has loaded
   loading: Ref<boolean>,       // true until loadStripe() settles
@@ -113,8 +114,11 @@ The plugin provides two values app-wide, under the same injection keys `VueStrip
 ## TypeScript
 
 ```ts
+// main.ts
+import { createApp } from 'vue'
 import { createVueStripe } from '@vue-stripe/vue-stripe'
 import type { VueStripeOptions } from '@vue-stripe/vue-stripe'
+import App from './App.vue'
 
 const options: VueStripeOptions = {
   publishableKey: 'pk_test_...',
@@ -122,14 +126,22 @@ const options: VueStripeOptions = {
   locale: 'en'
 }
 
-app.use(createVueStripe(options))
+createApp(App).use(createVueStripe(options)).mount('#app')
 ```
 
-```ts
+```vue
+<script setup lang="ts">
 import { useStripe } from '@vue-stripe/vue-stripe'
 
 // stripe is Readonly<Ref<Stripe | null>>, from the nearest VueStripeProvider or the plugin
-const { stripe, loading, error, initialize } = useStripe()
+const { stripe, loading, error } = useStripe()
+</script>
+
+<template>
+  <p v-if="loading">Loading Stripe...</p>
+  <p v-else-if="error">{{ error }}</p>
+  <p v-else-if="stripe">Stripe.js is ready</p>
+</template>
 ```
 
 ## See Also

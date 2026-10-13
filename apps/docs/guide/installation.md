@@ -38,6 +38,8 @@ The components ship their styles as a separate file. Import it once, in your app
 import '@vue-stripe/vue-stripe/style.css'
 ```
 
+A Quasar app has no `main.ts`; import it in a boot file, as in [Use Vue Stripe with Quasar](/guide/quasar#_3-load-the-stylesheet-and-the-plugin-in-a-boot-file). In Laravel with Inertia, the entry is `resources/js/app.ts`.
+
 To change how the elements look, see [Style elements](/guide/styling).
 
 ## 3. Add your publishable key
@@ -50,9 +52,11 @@ Store the publishable key in an environment variable that your build tool expose
 
 | Build tool | File | Variable | Read it with |
 |------------|------|----------|--------------|
-| Vite (also Quasar in Vite mode, Laravel with Vite) | `.env.local` | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
+| Vite | `.env.local` | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
 | Vue CLI / webpack | `.env.local` | `VUE_APP_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` |
+| Quasar in Vite mode (`@quasar/app-vite`) | `.env` | `QCLI_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY` |
 | Quasar in webpack mode | `.env` plus `build.env` in `quasar.config.js` | `STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.STRIPE_PUBLISHABLE_KEY` |
+| Laravel with Vite | `.env` (not `.env.local`) | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
 
 For Quasar in webpack mode, forward the variable in `quasar.config.js`:
 
@@ -64,7 +68,11 @@ build: {
 }
 ```
 
-In Laravel with Inertia, keep `STRIPE_SECRET_KEY` in Laravel's `.env` for your controllers and expose only `VITE_STRIPE_PUBLISHABLE_KEY` to the Vue side.
+Quasar in Vite mode passes only `QCLI_` variables to the browser, so a `VITE_` variable is `undefined` there. In Laravel, keep `STRIPE_SECRET_KEY` and `VITE_STRIPE_PUBLISHABLE_KEY` in the same `.env`, and don't create a `.env.local`: with `APP_ENV=local`, Laravel loads it instead of `.env`, and every request fails. [Use Vue Stripe with Quasar](/guide/quasar) and [Use Vue Stripe with Laravel and Inertia](/guide/laravel) cover the rest of those setups.
+
+::: tip Samples use Vite's variables
+Every sample in these docs reads the key as `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, write `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, and in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY`. Webpack compiles `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` to `undefined` without a warning, so a pasted sample builds and then fails in the browser.
+:::
 
 ## 4. Check that Stripe.js loads
 
@@ -72,10 +80,10 @@ Render a `VueStripeProvider` with your key. It loads Stripe.js, shows its `#load
 
 ```vue
 <!-- StripeCheck.vue -->
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY // Vue CLI: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
 </script>
 
 <template>
@@ -91,7 +99,7 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </template>
 ```
 
-When the page shows "Stripe is ready.", the installation works. If it shows the error message instead, see [Troubleshoot common problems](/guide/troubleshooting).
+When the page shows "Stripe is ready.", the installation works. If it shows the error message instead, see [Troubleshoot common problems](/guide/troubleshooting). If the page stays blank and the console shows `VueStripeProviderError: publishableKey or stripeKey is required`, the key did not reach the browser: check the variable's prefix and how you read it (step 3). A missing key throws during setup, so the `#error` slot does not render.
 
 ## 5. Send API requests to your server
 
@@ -121,7 +129,10 @@ module.exports = {
 ```
 :::
 
-Vite restarts by itself when its config changes; restart `vue-cli-service serve` yourself. Nuxt server routes (`server/api/`), Laravel and other setups that serve the app and its API from one origin need nothing here. In production, serve the API on the app's origin too, for example behind the same reverse proxy, or call it by its full URL and allow the app's origin with CORS on the server.
+Vite restarts by itself when its config changes; restart `vue-cli-service serve` yourself. Nuxt server routes (`server/api/`) and other setups that serve the app and its API from one origin need nothing here. In production, serve the API on the app's origin too, for example behind the same reverse proxy, or call it by its full URL and allow the app's origin with CORS on the server.
+
+- **Quasar** has no `vite.config.ts`: set the proxy in `devServer.proxy` of `quasar.config.ts`, as in [Use Vue Stripe with Quasar](/guide/quasar#_5-send-api-requests-to-your-server-in-development).
+- **Laravel** serves the app and its API from one origin, so it needs no proxy. But a `fetch` POST to a route in `routes/web.php` fails with 419 (CSRF): put the routes in `routes/api.php`, or send the CSRF token, as in [Use Vue Stripe with Laravel and Inertia](/guide/laravel#_4-create-the-api-routes).
 
 ## Other setups
 
@@ -131,7 +142,15 @@ Vue 2.7 needs one extra step so that vue-demi picks the Vue 2 build. See [Use Vu
 
 ### Nuxt
 
-Nuxt, Quasar SSR, VitePress and other server-rendered apps are covered in [Use Vue Stripe with Nuxt and SSR](/guide/ssr).
+Nuxt, VitePress and other server-rendered apps are covered in [Use Vue Stripe with Nuxt and SSR](/guide/ssr).
+
+### Quasar
+
+Quasar apps, in SPA and SSR mode, need a few changes: see [Use Vue Stripe with Quasar](/guide/quasar).
+
+### Laravel and Inertia
+
+See [Use Vue Stripe with Laravel and Inertia](/guide/laravel) for the plugin in `createInertiaApp`, the stripe-php routes and webhooks.
 
 ### App-wide plugin
 

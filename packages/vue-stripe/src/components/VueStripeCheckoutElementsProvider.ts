@@ -17,10 +17,9 @@ import type {
 } from '@stripe/stripe-js'
 import { stripeCheckoutInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
-import { hx } from '../utils/h'
 import { statusShell } from '../utils/status-shell'
 import { errorLogger } from '../utils/report'
-import type { VueStripeComponent } from '../utils/element-types'
+import type { ScopedSlot, StatusSlots, VueStripeComponent } from '../utils/element-types'
 
 const checkoutElementsProviderProps = {
   /** Client secret of a Checkout Session (`ui_mode: 'elements'`), or a Promise resolving to it. */
@@ -48,6 +47,16 @@ const checkoutElementsProviderProps = {
     type: Object as PropType<StripeCheckoutElementsSdkOptions['defaultValues'] | undefined>,
     default: undefined
   }
+}
+
+/** Slot name -> the slot's props. `actions` and `session` are null until the actions load. */
+type CheckoutElementsProviderSlots = StatusSlots & {
+  default?: ScopedSlot<{
+    checkout: StripeCheckoutElementsSdk
+    actions: StripeCheckoutLoadActionsSuccess | null
+    session: StripeCheckoutSession | null
+    loading: boolean
+  }>
 }
 
 /** Event name -> payload. */
@@ -164,31 +173,24 @@ export default /* @__PURE__ */ defineComponent({
 
     provide(stripeCheckoutInjectionKey, { checkout, actions, session, loading, error })
 
-    return () => {
-      // Without a VueStripeProvider (createVueStripe() only), nothing else shows a Stripe load failure.
-      const shownError = error.value ?? stripeInstance.error.value
-      return shownError || !checkout.value
-        ? statusShell(
-            'vue-stripe-checkout',
-            { error: shownError, loading: true },
-            slots,
-            {},
-            'Initializing Checkout...'
-          )
-        : hx(
-            'div',
-            {},
-            slots['default']?.({
-              checkout: checkout.value,
-              actions: actions.value,
-              session: session.value,
-              loading: loading.value
-            })
-          )
-    }
+    return () =>
+      statusShell(
+        'vue-stripe-checkout',
+        // Without a VueStripeProvider (createVueStripe() only), nothing else shows a Stripe load failure.
+        { error: error.value ?? stripeInstance.error.value, loading: !checkout.value },
+        slots,
+        {
+          checkout: checkout.value,
+          actions: actions.value,
+          session: session.value,
+          loading: loading.value
+        },
+        'Initializing Checkout...'
+      )
   }
 }) as unknown as VueStripeComponent<
   typeof checkoutElementsProviderProps,
   Record<never, never>,
-  CheckoutElementsProviderEvents
+  CheckoutElementsProviderEvents,
+  CheckoutElementsProviderSlots
 >

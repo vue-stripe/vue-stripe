@@ -50,7 +50,7 @@ type CreatePaymentMethodResult = PaymentMethodResult | VueStripeErrorResult
 | Property | Type | Description |
 |----------|------|-------------|
 | `createPaymentMethod` | `(options?: CreatePaymentMethodOptions) => Promise<CreatePaymentMethodResult>` | Creates a PaymentMethod; resolves to Stripe's `createPaymentMethod` result (`{ paymentMethod }` or `{ error }`). |
-| `loading` | `Readonly<Ref<boolean>>` | `true` while the request is in flight. |
+| `loading` | `Readonly<Ref<boolean>>` | `true` while a request is in flight (until the last of overlapping calls settles). |
 | `error` | `Readonly<Ref<string \| null>>` | The error message if creation failed. |
 
 When Stripe.js is not available (the plugin's load failed, for example; a call made while it loads waits for it), or the Stripe call throws, `createPaymentMethod` does not reject: it resolves to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`). A failed `elements.submit()` resolves to `{ error }` with Stripe's submit error.
@@ -70,20 +70,30 @@ In the Elements flow, `elements.submit()` runs first (as Stripe requires); the m
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useCreatePaymentMethod, VueStripeCardElement } from '@vue-stripe/vue-stripe'
 import type { CreatePaymentMethodResult } from '@vue-stripe/vue-stripe'
 
 const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
+const paymentMethodId = ref<string | null>(null)
 const { createPaymentMethod } = useCreatePaymentMethod()
 
 const create = async (): Promise<string | null> => {
   const card = cardRef.value?.element
   if (!card) return null
   const result: CreatePaymentMethodResult = await createPaymentMethod({ type: 'card', card })
-  return result.paymentMethod?.id ?? null
+  paymentMethodId.value = result.paymentMethod?.id ?? null
+  return paymentMethodId.value
 }
+</script>
+
+<template>
+  <VueStripeCardElement ref="cardRef" />
+  <button type="button" @click="create">Save card</button>
+  <p v-if="paymentMethodId">Created {{ paymentMethodId }}</p>
+</template>
 ```
 
 ## See Also

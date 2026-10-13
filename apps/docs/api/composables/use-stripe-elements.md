@@ -4,7 +4,7 @@ description: "useStripeElements reference: get the nearest Stripe Elements group
 
 # useStripeElements
 
-Returns the `StripeElements` group created by the nearest [`VueStripeElements`](/api/components/stripe-elements), with `submit`, `fetchUpdates` and `getElement`. Call it in a component rendered inside `VueStripeElements`. To confirm a payment or setup, use [`usePaymentIntent`](/api/composables/use-payment-intent) or [`useSetupIntent`](/api/composables/use-setup-intent): they use the same group and call `submit()` for you.
+Returns the `StripeElements` group created by the nearest [`VueStripeElements`](/api/components/stripe-elements), with `submit`, `fetchUpdates` and `getElement`. Call it in a component rendered inside `VueStripeElements`. It is also exported as `useElements`, the same function under its v5 name. To confirm a payment or setup, use [`usePaymentIntent`](/api/composables/use-payment-intent) or [`useSetupIntent`](/api/composables/use-setup-intent): they use the same group and call `submit()` for you.
 
 ## Usage
 
@@ -33,7 +33,7 @@ const { elements, loading, error } = useStripeElements()
 | `loading` | `Readonly<Ref<boolean>>` | True while Elements is initializing |
 | `error` | `Readonly<Ref<string \| null>>` | Error message if initialization failed |
 
-The `elements`, `loading` and `error` return values are **readonly refs**; `submit`, `fetchUpdates` and `getElement` are functions. Called before the Elements group exists, `submit` and `fetchUpdates` resolve to `{ error: { message: 'Elements not initialized' } }` and `getElement` returns `null`, instead of throwing.
+The `elements`, `loading` and `error` return values are **readonly refs**; `submit`, `fetchUpdates` and `getElement` are functions. Called before the Elements group exists, `submit` and `fetchUpdates` resolve to `{ error: { message: 'Elements not initialized' } }` and `getElement` returns `null`, instead of throwing. Where Stripe.js throws from `elements.fetchUpdates()`, `fetchUpdates` also resolves to `{ error: { message } }`.
 
 ### submit
 
@@ -67,7 +67,7 @@ In the component that renders an element, prefer its exposed `element` through a
 
 ### fetchUpdates
 
-When your server changes the PaymentIntent (amount, currency, payment method options, ...) after the Payment Element has mounted, call `fetchUpdates()` so the mounted elements reflect it:
+When your server changes the PaymentIntent (amount, currency, payment method options, ...) after the Payment Element has mounted, call `fetchUpdates()` so the mounted elements reflect it. It applies only to a group created with a `clientSecret`. On a deferred group (`mode`, `amount`, `currency`), Stripe.js refuses the call and `fetchUpdates()` resolves to `{ error }`; change the `amount` or `currency` prop of `VueStripeElements` instead.
 
 ```ts
 const { fetchUpdates } = useStripeElements()
@@ -87,17 +87,34 @@ Called outside `VueStripeElements`, `useStripeElements()` throws a `VueStripeEle
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
 import { useStripeElements } from '@vue-stripe/vue-stripe'
 import type { UseStripeElementsReturn, ElementsSubmitResult } from '@vue-stripe/vue-stripe'
 import type { StripePaymentElement } from '@stripe/stripe-js'
 
 const { submit, getElement }: UseStripeElementsReturn = useStripeElements()
+const message = ref('')
 
-const validate = async (): Promise<ElementsSubmitResult> => submit()
+const validate = async (): Promise<ElementsSubmitResult> => {
+  const result = await submit()
+  message.value = result.error?.message ?? 'The form is complete'
+  return result
+}
 
 // Typed through Stripe's getElement overloads
-const paymentElement: StripePaymentElement | null = getElement('payment')
+const collapse = () => {
+  const paymentElement: StripePaymentElement | null = getElement('payment')
+  paymentElement?.collapse()
+}
+</script>
+
+<template>
+  <button type="button" @click="validate">Check the form</button>
+  <button type="button" @click="collapse">Collapse</button>
+  <p v-if="message">{{ message }}</p>
+</template>
 ```
 
 ## See Also

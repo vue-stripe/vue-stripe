@@ -8,6 +8,7 @@ description: "TypeScript types and error classes exported by @vue-stripe/vue-str
 The TypeScript types and error classes that `@vue-stripe/vue-stripe` exports. Import every type from the package, not from `@stripe/stripe-js`: the Stripe.js types below are re-exported under their original names, so one import covers both.
 
 ```ts
+// Listing: how to import types, not a complete sample
 import type { UsePaymentIntentReturn, StripePaymentElementOptions } from '@vue-stripe/vue-stripe'
 ```
 
@@ -20,6 +21,7 @@ Types defined by Vue Stripe.
 | Type | Description |
 |------|-------------|
 | `VueStripeOptions` | Options of [`createVueStripe()`](/api/plugin) |
+| `VueStripeConfig` | The resolved config (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`) that the provider and the plugin [provide](/api/components/stripe-provider#provides) under `stripeConfigInjectionKey` |
 | `VueStripeProviderProps` | Props of [`VueStripeProvider`](/api/components/stripe-provider) |
 | `VueStripeElementsProps` | Props of [`VueStripeElements`](/api/components/stripe-elements) |
 | `VueStripeCheckoutElementsProviderProps` | Props of [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider) |
@@ -71,6 +73,7 @@ Types defined by Vue Stripe.
 These come from `@stripe/stripe-js` 10 unchanged. Stripe documents them in the [Stripe.js reference](https://docs.stripe.com/js).
 
 ```ts
+// Listing of the re-exported Stripe.js types, not a sample
 import type {
   // Core
   Stripe,
@@ -222,6 +225,7 @@ The package's `src/index.ts` is the source of this list.
 ## Error classes
 
 ```ts
+// Listing of the error classes, not a sample
 import {
   VueStripeProviderError,
   VueStripeElementsError,

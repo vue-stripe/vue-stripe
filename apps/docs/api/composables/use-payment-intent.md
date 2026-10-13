@@ -75,7 +75,7 @@ interface UsePaymentIntentReturn {
 |----------|------|-------------|
 | `confirmPayment` | `(options: ConfirmPaymentOptions) => Promise<ConfirmPaymentResult>` | Confirm a payment |
 | `retrievePaymentIntent` | `(clientSecret: string) => Promise<ConfirmPaymentResult>` | Look up a PaymentIntent by its client secret |
-| `loading` | `Readonly<Ref<boolean>>` | Whether a confirm or retrieve is in progress |
+| `loading` | `Readonly<Ref<boolean>>` | `true` while a confirm or retrieve is in flight (until the last of overlapping calls settles) |
 | `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirm or retrieve attempt |
 
 ### retrievePaymentIntent
@@ -97,7 +97,7 @@ if (clientSecret) {
 `confirmPayment` and `retrievePaymentIntent` resolve to a `ConfirmPaymentResult`, exported from the package:
 
 ```ts
-import type { ConfirmPaymentResult, VueStripeErrorResult } from '@vue-stripe/vue-stripe'
+// Declarations, for reference, not a sample: import the types from '@vue-stripe/vue-stripe'
 
 // Stripe's own result, or the composable's error result
 type ConfirmPaymentResult = PaymentIntentResult | VueStripeErrorResult
@@ -141,12 +141,18 @@ import type {
   UsePaymentIntentReturn
 } from '@vue-stripe/vue-stripe'
 
-const { confirmPayment }: UsePaymentIntentReturn = usePaymentIntent()
+// usePay.ts: call usePay() in a component's setup
+export function usePay() {
+  const { confirmPayment }: UsePaymentIntentReturn = usePaymentIntent()
 
-const pay = async (options: ConfirmPaymentOptions) => {
-  const result: ConfirmPaymentResult = await confirmPayment(options)
-  // result.paymentIntent is PaymentIntent | undefined
-  // result.error is StripeError | { message: string } | undefined
+  const pay = async (options: ConfirmPaymentOptions): Promise<ConfirmPaymentResult> => {
+    const result = await confirmPayment(options)
+    // result.paymentIntent is PaymentIntent | undefined
+    // result.error is StripeError | { message: string } | undefined
+    return result
+  }
+
+  return { pay }
 }
 ```
 

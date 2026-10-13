@@ -129,7 +129,7 @@ const exportedFromIndex = (
     .filter((name) => name !== 'index' && !index.includes(`'./${name}'`))
     .map((name) => `src/${dir}/${name}.ts is not exported from src/${dir}/index.ts`)
 
-/** 8. Element `events` are a subset of the Stripe.js `.d.ts` union for that element type. */
+/** 8. Element `events` are exactly the Stripe.js `.d.ts` union for that element type. */
 const kebab = (s: string) => s.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase())
 /** Element types whose `.d.ts` is not named after them. */
 const DTS_FILE: Record<string, string> = { checkoutForm: 'payment-form' }
@@ -169,9 +169,15 @@ const eventsMatchStripe = (
         ]
   const allowed = union(type)
   if (!allowed) return [`${s.path}: no Stripe.js type definitions for '${type}'`]
-  return events
-    .filter((e) => !allowed.has(e) && !UNDECLARED_STRIPE_EVENTS[type]?.includes(e))
-    .map((e) => `${s.path}: '${e}' is not a Stripe.js '${type}' event`)
+  return [
+    ...events
+      .filter((e) => !allowed.has(e) && !UNDECLARED_STRIPE_EVENTS[type]?.includes(e))
+      .map((e) => `${s.path}: '${e}' is not a Stripe.js '${type}' event`),
+    // And every declared event is forwarded (#661: cardNumber dropped networkschange / loaderror).
+    ...[...allowed]
+      .filter((e) => !events.includes(e))
+      .map((e) => `${s.path}: Stripe.js '${type}' event '${e}' is not forwarded`)
+  ]
 }
 
 /** 9. Every exported component and composable has an API page. */
@@ -294,7 +300,7 @@ describe('conventions (enforced by tests/conventions.test.ts)', () => {
     expect(stripeEventUnion('issuingCardCvcDisplay')).toEqual(new Set())
   })
 
-  it('8. element events are a subset of the installed Stripe.js .d.ts unions', () => {
+  it('8. element events match the installed Stripe.js .d.ts unions', () => {
     expect(
       listFiles(join(SRC, 'components'), ['.ts'])
         .map(read)
@@ -384,10 +390,23 @@ describe('conventions: each rule rejects a violating fixture', () => {
     const union = () => new Set(['ready', 'change'])
     expect(
       eventsMatchStripe(
-        fixture("createStripeElement({ elementType: 'card', events: ['ready', 'loaderstop'] })"),
+        fixture(
+          "createStripeElement({ elementType: 'card', events: ['ready', 'change', 'loaderstop'] })"
+        ),
         union
       )
     ).toEqual(["packages/vue-stripe/src/fixture.ts: 'loaderstop' is not a Stripe.js 'card' event"])
+  })
+  it('8. flags a Stripe.js event the element does not forward', () => {
+    const union = () => new Set(['ready', 'change', 'networkschange'])
+    expect(
+      eventsMatchStripe(
+        fixture("createStripeElement({ elementType: 'cardNumber', events: ['ready', 'change'] })"),
+        union
+      )
+    ).toEqual([
+      "packages/vue-stripe/src/fixture.ts: Stripe.js 'cardNumber' event 'networkschange' is not forwarded"
+    ])
   })
   it('9. flags an export without an API page', () => {
     expect(documented(['VueStripeFooElement', 'useFoo'], 'components', () => false)).toHaveLength(2)

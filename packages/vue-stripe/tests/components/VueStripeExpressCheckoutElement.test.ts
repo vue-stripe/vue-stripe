@@ -694,4 +694,60 @@ describe('VueStripeExpressCheckoutElement', () => {
       consoleError.mockRestore()
     })
   })
+
+  // #662: Stripe.js creates it on a bare group, then throws 'Unable to select session'
+  // asynchronously and never emits ready or loaderror, so the loader stayed up.
+  describe('inside VueStripeElements without a clientSecret or mode', () => {
+    const mountIn = async (elementsProps: Record<string, unknown>) => {
+      const { makeMockStripe, makeMockElements } = await import('../setup')
+      const group = makeMockElements()
+      const stripe = makeMockStripe()
+      stripe.elements.mockReturnValue(group)
+      vi.mocked((await import('@stripe/stripe-js/pure')).loadStripe).mockResolvedValueOnce(
+        stripe as never
+      )
+      const onLoaderror = vi.fn()
+      const wrapper = mount(VueStripeProvider, {
+        props: { publishableKey: 'pk_test_123' },
+        slots: {
+          default: () =>
+            h(VueStripeElements, elementsProps, () =>
+              h(
+                VueStripeExpressCheckoutElement,
+                { onLoaderror },
+                { error: ({ error }: { error: string }) => h('p', { class: 'mine' }, error) }
+              )
+            )
+        }
+      })
+      await flushPromises()
+      await nextTick()
+      return { wrapper, group, onLoaderror }
+    }
+
+    it('reports it through @loaderror and #error instead of creating the element', async () => {
+      const { wrapper, group, onLoaderror } = await mountIn({})
+      const message =
+        'VueStripeExpressCheckoutElement needs a VueStripeElements with a clientSecret or a mode'
+
+      expect(group.create).not.toHaveBeenCalled()
+      expect(onLoaderror).toHaveBeenCalledWith({
+        elementType: 'expressCheckout',
+        error: { message }
+      })
+      expect(wrapper.find('.mine').text()).toBe(message)
+      expect(wrapper.find('.vue-stripe-express-checkout-element-loader').exists()).toBe(false)
+    })
+
+    it.each([
+      ['a clientSecret prop', { clientSecret: 'pi_1_secret_2' }],
+      ['a mode prop', { mode: 'payment', amount: 1099, currency: 'usd' }],
+      ['options.clientSecret', { options: { clientSecret: 'pi_1_secret_2' } }],
+      ['options.mode', { options: { mode: 'setup', currency: 'usd' } }]
+    ])('creates the element with %s', async (_, elementsProps) => {
+      const { group, onLoaderror } = await mountIn(elementsProps)
+      expect(group.create).toHaveBeenCalledWith('expressCheckout', expect.anything())
+      expect(onLoaderror).not.toHaveBeenCalled()
+    })
+  })
 })

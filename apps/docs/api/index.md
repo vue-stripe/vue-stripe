@@ -14,7 +14,7 @@ Every export of `@vue-stripe/vue-stripe`: components, composables, the plugin an
 | Vue | `^2.7.0 \|\| ^3.0.0` (peer dependency). Vue 2.7 is tested in client-side apps; see [Use Vue Stripe on Vue 2.7](/guide/vue-2) |
 | Stripe.js | `@stripe/stripe-js` `^10.0.0`, Stripe.js Endive (peer dependency) |
 | Rendering | Client and server. Stripe.js loads only in the browser; during server rendering, components render their loading state and hydrate without mismatches. `<ClientOnly>` is optional. See [Use Vue Stripe with Nuxt and SSR](/guide/ssr) |
-| Module formats | ES, CommonJS and UMD builds; TypeScript declarations included |
+| Module formats | ES, CommonJS and UMD builds; TypeScript declarations for ES module and CommonJS consumers, with `moduleResolution` `bundler`, `node16`, `nodenext` or `node` |
 | TypeScript | 5.0 or later for the declarations (they use `export type *`). Vue 3.5's own declarations need 5.4 when `skipLibCheck` is `false`, and vue-tsc 3 needs 5.0 |
 | Stylesheet | `@vue-stripe/vue-stripe/style.css`, imported once per app |
 
@@ -83,7 +83,7 @@ Stripe.js Clover (8.0) removed the standalone iDEAL, P24, EPS and FPX elements. 
 | Composable | Description |
 |------------|-------------|
 | [useStripe](/api/composables/use-stripe) | The `Stripe` instance and its loading and error state |
-| [useStripeElements](/api/composables/use-stripe-elements) | The `StripeElements` instance, `getElement`, `submit` and `fetchUpdates` |
+| [useStripeElements](/api/composables/use-stripe-elements) | The `StripeElements` instance, `getElement`, `submit` and `fetchUpdates` (alias: `useElements`) |
 | [usePaymentIntent](/api/composables/use-payment-intent) | `stripe.confirmPayment()` with the Elements group; runs `elements.submit()` first |
 | [useSetupIntent](/api/composables/use-setup-intent) | `stripe.confirmSetup()` with the Elements group; runs `elements.submit()` first |
 | [useStripeCheckout](/api/composables/use-stripe-checkout) | Redirects to Stripe Checkout (alias: `useCheckout`) |

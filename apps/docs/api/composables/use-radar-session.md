@@ -31,6 +31,11 @@ const checkout = async () => {
   })
 }
 </script>
+
+<template>
+  <button :disabled="loading" @click="checkout">Pay</button>
+  <p v-if="error">{{ error }}</p>
+</template>
 ```
 
 ## Return Value
