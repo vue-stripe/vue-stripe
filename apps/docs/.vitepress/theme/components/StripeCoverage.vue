@@ -307,7 +307,8 @@ const reset = () => {
 }
 
 .cov-filter-count {
-  color: var(--vp-c-text-3);
+  /* text-2: the pressed chip's tint is too dark for text-3 */
+  color: var(--vp-c-text-2);
   font-variant-numeric: tabular-nums;
 }
 

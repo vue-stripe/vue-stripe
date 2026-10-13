@@ -1,4 +1,5 @@
 ---
+title: "useStripe: access the Stripe.js instance"
 description: "useStripe reference: get the Stripe instance and its loading and error state in any Vue component under VueStripeProvider or the createVueStripe plugin."
 ---
 

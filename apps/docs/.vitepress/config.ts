@@ -1,4 +1,4 @@
-import { defineConfigWithTheme, loadEnv, type DefaultTheme } from 'vitepress'
+import { defineConfigWithTheme, loadEnv, type DefaultTheme, type HeadConfig } from 'vitepress'
 import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
 import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -7,12 +7,14 @@ import {
   NPM_URL,
   REPOSITORY_URL,
   SITE_URL,
+  finishOgTags,
   maintainer,
-  restoreArticleOgType,
+  ogImageAlt,
+  sectionOf,
   seoHead,
   type DocSection
 } from './seo'
-import { coverageMarkdown, writeLlmsFiles } from './llms'
+import { coverageMarkdown, parseFrontmatter, writeLlmsFiles } from './llms'
 
 // Build the "Stripe.js Coverage NN%" nav label from the single coverage data source,
 // so the toolbar stays in sync with the /coverage page automatically.
@@ -59,8 +61,12 @@ const pkg = JSON.parse(
 // A sidebar link to a page that does not exist fails the build with the link in the message,
 // instead of the OG image step's bare ENOENT (it reads every linked file).
 const docsRoot = fileURLToPath(new URL('../', import.meta.url))
-const pageExists = (link: string) =>
-  existsSync(`${docsRoot}${link.slice(1)}${link.endsWith('/') ? 'index' : ''}.md`)
+const pageFile = (link: string) =>
+  `${docsRoot}${link.replace(/^\//, '')}${link === '' || link.endsWith('/') ? 'index' : ''}.md`
+const pageExists = (link: string) => existsSync(pageFile(link))
+// A page with `canonical:` frontmatter repeats another page, so the sitemap lists only that one.
+const canonicalElsewhere = (link: string) =>
+  pageExists(link) && 'canonical' in parseFrontmatter(readFileSync(pageFile(link), 'utf8')).data
 const requirePages = (items: DefaultTheme.SidebarItem[]): DefaultTheme.SidebarItem[] =>
   items.map((item) => {
     if (item.link && !pageExists(item.link)) {
@@ -180,7 +186,7 @@ const referenceSidebar: DefaultTheme.SidebarItem[] = requirePages([
   {
     text: 'Reference',
     items: [
-      { text: 'Overview', link: '/api/' },
+      { text: 'Reference overview', link: '/api/' },
       { text: 'Stripe.js coverage', link: '/coverage' },
       { text: 'Types and errors', link: '/api/types' }
     ]
@@ -324,7 +330,7 @@ const referenceSidebar: DefaultTheme.SidebarItem[] = requirePages([
 const liveDemoSidebar: DefaultTheme.SidebarItem[] = requirePages([
   {
     text: 'Live Demo',
-    items: [{ text: 'Overview', link: '/live-demo/' }]
+    items: [{ text: 'All live demos', link: '/live-demo/' }]
   },
   {
     text: 'One-Time Payments',
@@ -369,11 +375,22 @@ const liveDemoSidebar: DefaultTheme.SidebarItem[] = requirePages([
   {
     text: 'Subscriptions',
     items: [
-      { text: 'Stripe Checkout', link: '/live-demo/subscription-checkout' },
-      { text: 'Embedded Elements', link: '/live-demo/subscription-embedded' }
+      { text: 'Subscribe with Stripe Checkout', link: '/live-demo/subscription-checkout' },
+      { text: 'Subscribe with Elements', link: '/live-demo/subscription-embedded' }
     ]
   }
 ])
+
+const sidebars = [guideSidebar, referenceSidebar, liveDemoSidebar]
+
+// Each page's share card (made by the OG image plugin in buildEnd) shows its sidebar label
+// under its Diataxis section.
+const flattenLinks = (items: DefaultTheme.SidebarItem[]): DefaultTheme.SidebarItem[] =>
+  items.flatMap((item) => [...(item.link ? [item] : []), ...flattenLinks(item.items ?? [])])
+const sidebarLabels = new Map(
+  sidebars.flatMap(flattenLinks).map((item) => [item.link!, item.text ?? ''])
+)
+const ogCategory = (route: string) => sectionOf(route, docSections)?.name
 
 // The text under the H1 of /llms.txt and /llms-full.txt.
 const llmsHeader = `> Vue Stripe (${pkg.name}) is a Vue library for the browser side of a Stripe integration. It wraps Stripe.js 10 (Endive) Elements, embedded Checkout and the Stripe.js methods in Vue components and composables. One build runs on Vue 3 and Vue 2.7.
@@ -407,31 +424,18 @@ const getEnv = (key: string): string => {
 // Google Analytics Measurement ID
 const GA_MEASUREMENT_ID = getEnv('VITE_GA_MEASUREMENT_ID')
 
-// Default theme config plus the live-demo Stripe settings exposed through `useData().theme`.
-interface ThemeConfig extends DefaultTheme.Config {
-  stripeConfig: {
-    publishableKey: string
-    apiUrl: string
-  }
-}
-
-export default defineConfigWithTheme<ThemeConfig>({
-  title: 'Vue Stripe',
-  description:
-    'Vue components and composables for Stripe.js 10 Elements, Checkout and payment methods, for Vue 3 and Vue 2.7.',
-  lang: 'en-US',
-  base: '/',
-
-  head: [
-    // Google Analytics with Enhanced Measurement
-    [
-      'script',
-      { async: '', src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}` }
-    ],
-    [
-      'script',
-      {},
-      `window.dataLayer = window.dataLayer || [];
+// Google Analytics with Enhanced Measurement. A build without a measurement ID (local and
+// preview builds) loads nothing, instead of a gtag.js install that measures nothing.
+const googleAnalytics: HeadConfig[] = GA_MEASUREMENT_ID
+  ? [
+      [
+        'script',
+        { async: '', src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}` }
+      ],
+      [
+        'script',
+        {},
+        `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 
@@ -467,7 +471,28 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     debug_mode: true
   });
 }`
-    ],
+      ]
+    ]
+  : []
+
+// Default theme config plus the live-demo Stripe settings exposed through `useData().theme`.
+interface ThemeConfig extends DefaultTheme.Config {
+  stripeConfig: {
+    publishableKey: string
+    apiUrl: string
+  }
+}
+
+export default defineConfigWithTheme<ThemeConfig>({
+  title: 'Vue Stripe',
+  description:
+    'Vue components and composables for Stripe.js 10 Elements, Checkout and payment methods, for Vue 3 and Vue 2.7.',
+  lang: 'en-US',
+  base: '/',
+
+  head: [
+    // Google Analytics, only when a measurement ID is set (the deploy sets one).
+    ...googleAnalytics,
 
     // Favicon
     ['link', { rel: 'icon', href: '/favicon.ico' }],
@@ -489,11 +514,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     // Open Graph and Twitter Card, site-wide parts
     ['meta', { property: 'og:site_name', content: 'Vue Stripe' }],
     ['meta', { property: 'og:locale', content: 'en_US' }],
-    ['meta', { name: 'twitter:card', content: 'summary_large_image' }]
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:creator', content: maintainer.x }]
   ],
 
   sitemap: {
-    hostname: 'https://vuestripe.com'
+    hostname: 'https://vuestripe.com',
+    transformItems: (items) => items.filter((item) => !canonicalElsewhere(item.url))
   },
 
   lastUpdated: true,
@@ -548,7 +575,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
 
   markdown: {
     theme: {
-      light: 'github-light',
+      // The high-contrast variant: github-light's orange, red and green tokens are under 4.5:1.
+      light: 'github-light-high-contrast',
       dark: 'github-dark'
     }
   },
@@ -582,26 +610,46 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
   // Ignore dead links while building docs
   ignoreDeadLinks: false,
 
+  // VitePress leaves the #app of 404.html empty, so without JavaScript (and until the app has
+  // booted) a missing URL shows a blank page. Fill it with the server-rendered not-found page
+  // (theme/components/NotFound.vue) and give it a real description.
+  transformHtml(html, _id, { page, content }) {
+    if (page !== '404.md') return
+    return html
+      .replace('<div id="app"></div>', () => `<div id="app">${content}</div>`)
+      .replace(
+        '<meta name="description" content="Not Found">',
+        '<meta name="description" content="This page does not exist. Find the Vue Stripe tutorials, how-to guides, reference, explanation and live demos from here.">'
+      )
+  },
+
   // Canonical URL, robots, Open Graph / Twitter tags and JSON-LD for each page (./seo.ts).
   transformHead(context) {
-    return seoHead(context, { sections: docSections, pkg })
+    return seoHead(context, { sections: docSections, pkg, sidebars })
   },
 
   // Generate OG images at build time
   async buildEnd(siteConfig) {
     await buildEndGenerateOpenGraphImages({
       baseUrl: 'https://vuestripe.com',
+      // The label above the title: the page's section ("How-to guides", "Reference").
       category: {
-        byLevel: 2
+        byCustomGetter: (page) => (page.link ? ogCategory(page.link) : undefined),
+        fallbackWithFrontmatter: false
       },
+      // At the template's 64px, 22 characters of a mixed-case label fit beside the margins.
+      maxCharactersPerLine: 22,
       templateSvgPath: './public/og-template.svg'
     })(siteConfig)
-    restoreArticleOgType(siteConfig.outDir)
+    finishOgTags(siteConfig.outDir, (route) => {
+      const title = sidebarLabels.get(route)
+      return title ? ogImageAlt({ title, category: ogCategory(route) }) : undefined
+    })
 
     // /llms.txt, /llms-full.txt and a .md copy of every page (./llms.ts).
     writeLlmsFiles(siteConfig, {
       sections: docSections,
-      sidebars: [guideSidebar, referenceSidebar, liveDemoSidebar],
+      sidebars,
       header: llmsHeader,
       components: { StripeCoverage: coverageMarkdown(coverage) }
     })

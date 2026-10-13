@@ -18,7 +18,7 @@ const { publishableKey } = useStripeConfig()
 
     <VueStripeProvider v-else :publishable-key="publishableKey">
       <section class="demo-section">
-        <h4>ConfirmationToken <span class="tag">useCreateConfirmationToken</span></h4>
+        <h3>ConfirmationToken <span class="tag">useCreateConfirmationToken</span></h3>
         <p class="intro">
           The Payment Element runs without an Intent (<code>mode</code>, <code>amount</code> and
           <code>currency</code> on <code>VueStripeElements</code>). The token carries what the
@@ -30,7 +30,7 @@ const { publishableKey } = useStripeConfig()
       </section>
 
       <section class="demo-section">
-        <h4>Card Token (legacy) <span class="tag">useCreateToken</span></h4>
+        <h3>Card Token (legacy) <span class="tag">useCreateToken</span></h3>
         <p class="intro">
           A single-use Token from the Card Element, for Charges or Connect integrations. New
           integrations use a PaymentMethod or a ConfirmationToken instead.
@@ -41,7 +41,7 @@ const { publishableKey } = useStripeConfig()
       </section>
 
       <section class="demo-section">
-        <h4>Radar Session <span class="tag">useRadarSession</span></h4>
+        <h3>Radar Session <span class="tag">useRadarSession</span></h3>
         <p class="intro">
           Device signals for Radar when you collect payment details outside Stripe.js. Pass the ID
           as <code>radar_options.session</code> on your server.
@@ -85,7 +85,7 @@ const { publishableKey } = useStripeConfig()
 .demo-section + .demo-section {
   margin-top: 1.5rem;
 }
-.demo-section h4 {
+.demo-section h3 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

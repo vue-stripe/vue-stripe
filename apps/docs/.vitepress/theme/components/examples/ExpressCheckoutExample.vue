@@ -134,7 +134,7 @@ const ExpressForm = defineComponent({
 
       <div v-else class="step success">
         <span class="success-icon"><DocIcon name="check" :size="28" :stroke-width="2.5" /></span>
-        <h4>Payment successful!</h4>
+        <h3>Payment successful!</h3>
         <button class="link-btn" @click="reset">Start over</button>
       </div>
     </template>
@@ -247,7 +247,7 @@ const ExpressForm = defineComponent({
   border-radius: 50%;
   font-size: 1.75rem;
 }
-.success h4 {
+.success h3 {
   margin: 0.5rem 0 0;
 }
 .spinner {

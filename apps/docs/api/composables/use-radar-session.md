@@ -1,4 +1,5 @@
 ---
+title: "useRadarSession: Stripe Radar Sessions in Vue"
 description: "useRadarSession reference: create a Stripe Radar Session in Vue to send device signals for fraud scoring when you collect payment details outside Stripe.js."
 ---
 

@@ -151,7 +151,7 @@ const PayForm = defineComponent({
 
       <div v-else class="step success">
         <span class="success-icon"><DocIcon name="check" :size="28" :stroke-width="2.5" /></span>
-        <h4>Debit submitted!</h4>
+        <h3>Debit submitted!</h3>
         <p>
           SEPA payments process asynchronously — the PaymentIntent is now <code>processing</code>.
         </p>
@@ -291,7 +291,7 @@ const PayForm = defineComponent({
   border-radius: 50%;
   font-size: 1.75rem;
 }
-.success h4 {
+.success h3 {
   margin: 0.5rem 0 0;
 }
 .id code,

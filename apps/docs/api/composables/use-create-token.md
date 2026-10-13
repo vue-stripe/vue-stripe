@@ -1,4 +1,5 @@
 ---
+title: "useCreateToken: create Stripe Tokens in Vue"
 description: "useCreateToken reference: create single-use Stripe Tokens in Vue for cards, bank accounts, PII, CVC recollection and Connect account or person data."
 ---
 

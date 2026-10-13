@@ -15,6 +15,9 @@ const { getProducts, formatPrice, loading, error } = useBackendApi()
 const products = ref<Product[]>([])
 const selected = ref<Product | null>(null)
 const fetchError = ref<string | null>(null)
+// False until the first fetch settles, so the prerendered page (and the first paint) shows
+// the loading state instead of an empty list that is not true.
+const loaded = ref(false)
 
 const filteredProducts = computed(() => {
   if (!props.filter || props.filter === 'all') {
@@ -29,6 +32,8 @@ async function loadProducts() {
     products.value = await getProducts()
   } catch (err) {
     fetchError.value = err instanceof Error ? err.message : 'Failed to load products'
+  } finally {
+    loaded.value = true
   }
 }
 
@@ -51,12 +56,12 @@ defineExpose({
   <div class="product-selector">
     <div class="step-header">
       <span class="step-number">0</span>
-      <h4>Select a Product</h4>
+      <h3>Select a Product</h3>
     </div>
 
-    <div v-if="loading" class="loading">
+    <div v-if="loading || !loaded" class="loading">
       <span class="spinner"></span>
-      Loading products...
+      Loading test products...
     </div>
 
     <div v-else-if="fetchError || error" class="error-box">
@@ -89,7 +94,7 @@ defineExpose({
         <span class="badge" :class="product.type">
           {{ product.type === 'recurring' ? 'Subscription' : 'One-time' }}
         </span>
-        <h5>{{ product.name }}</h5>
+        <h4>{{ product.name }}</h4>
         <p v-if="product.description" class="description">{{ product.description }}</p>
         <p class="price">
           {{ formatPrice(product.price.amount, product.price.currency) }}
@@ -127,7 +132,7 @@ defineExpose({
   font-weight: 600;
 }
 
-.step-header h4 {
+.step-header h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
@@ -229,7 +234,7 @@ defineExpose({
   display: inline-block;
   margin-bottom: 0.375rem;
   padding: 0.0625rem 0.375rem;
-  font-size: 0.5625rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -238,6 +243,11 @@ defineExpose({
 
 .badge.one_time {
   background: var(--vp-c-green-soft);
+  /* --vp-c-green-1 is 2.1:1 on its own soft background */
+  color: #1f6f4f;
+}
+
+.dark .badge.one_time {
   color: var(--vp-c-green-1);
 }
 
@@ -260,7 +270,7 @@ defineExpose({
   object-fit: cover;
 }
 
-.product-card h5 {
+.product-card h4 {
   margin: 0 0 0.25rem 0;
   font-size: 0.875rem;
   font-weight: 600;

@@ -1,4 +1,5 @@
 ---
+title: "usePaymentIntent: confirm a PaymentIntent"
 description: "usePaymentIntent reference: confirm a PaymentIntent from the Payment Element in Vue, with the automatic elements.submit() call and loading and error refs."
 ---
 

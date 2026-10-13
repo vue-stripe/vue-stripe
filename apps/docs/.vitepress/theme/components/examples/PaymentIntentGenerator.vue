@@ -103,7 +103,7 @@ defineExpose({
   <div class="payment-intent-generator">
     <div class="step-header">
       <span class="step-number">1</span>
-      <h4>Generate {{ intentTypeLabel }} Payment Intent</h4>
+      <h3>Generate {{ intentTypeLabel }} Payment Intent</h3>
       <span class="badge backend">Backend</span>
     </div>
 
@@ -189,7 +189,7 @@ defineExpose({
   font-weight: 600;
 }
 
-.step-header h4 {
+.step-header h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;

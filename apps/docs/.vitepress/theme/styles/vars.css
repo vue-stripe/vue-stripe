@@ -3,9 +3,11 @@
  */
 
 :root {
-  /* Stripe purple (primary) */
-  --vp-c-brand-1: #635bff;
-  --vp-c-brand-2: #7c6dff;
+  /* Stripe purple (primary). Text in brand-1 sits on white and on light tints (inline code,
+     tip boxes, the sidebar), where #635bff is under the 4.5:1 WCAG AA minimum, so text uses a
+     darker shade (4.9:1 or more on every tint) and #635bff stays for fills (buttons). */
+  --vp-c-brand-1: #5146e5;
+  --vp-c-brand-2: #635bff;
   --vp-c-brand-3: #a396ff;
   --vp-c-brand-soft: rgba(99, 91, 255, 0.14);
 
@@ -44,16 +46,21 @@
   --vp-c-bg-elv: #ffffff;
   --vp-c-bg-soft: #f6f8fa;
 
-  /* Text colors */
+  /* Text colors. text-3 is darker than VitePress's 0.56 so muted text (the footer, the
+     coverage table, code block language labels) still meets 4.5:1 on the soft backgrounds. */
   --vp-c-text-1: rgba(60, 60, 67);
   --vp-c-text-2: rgba(60, 60, 67, 0.78);
-  --vp-c-text-3: rgba(60, 60, 67, 0.56);
+  --vp-c-text-3: rgba(60, 60, 67, 0.74);
 
   /* Border colors */
   --vp-c-divider: rgba(60, 60, 67, 0.29);
   --vp-c-border: rgba(60, 60, 67, 0.23);
 
   /* Custom component colors */
+  --vp-code-lang-color: var(--vp-c-text-2);
+  /* Highlighted code lines: a light yellow tint keeps every light-theme token, comments
+     included, at 4.5:1 or more (the default grey tint drops comments to 4.3:1). */
+  --vp-code-line-highlight-color: rgba(254, 217, 104, 0.22);
   --vp-code-block-bg: rgba(125, 125, 125, 0.04);
   --vp-code-tab-divider: rgba(125, 125, 125, 0.3);
   --vp-code-copy-code-border-color: rgba(125, 125, 125, 0.3);
@@ -75,6 +82,7 @@
   --vp-c-border: rgba(82, 82, 89, 0.68);
 
   --vp-code-block-bg: rgba(0, 0, 0, 0.2);
+  --vp-code-line-highlight-color: var(--vp-c-default-soft);
 }
 
 /**
@@ -142,4 +150,9 @@
 }
 .coverage-page .VPDoc .content-container {
   max-width: 100% !important;
+}
+
+/* The search button's "K" key, drawn like VitePress's "Ctrl" (see SearchKeyHint.vue). */
+.vs-css-key .DocSearch-Button-Key + .DocSearch-Button-Key::after {
+  content: 'K';
 }

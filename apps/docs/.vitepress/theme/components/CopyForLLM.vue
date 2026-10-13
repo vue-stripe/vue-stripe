@@ -77,8 +77,8 @@ async function copyMarkdown() {
       class="copy-button"
       :class="{ copied }"
       :disabled="loading"
-      :aria-label="copied ? 'Copied!' : 'Copy page as markdown for LLMs'"
-      :title="copied ? 'Copied!' : 'Copy page as markdown for LLMs'"
+      :aria-label="copied ? 'Copied!' : 'Copy for LLMs: copy this page as Markdown'"
+      :title="copied ? 'Copied!' : 'Copy this page as Markdown for LLMs'"
       @click="copyMarkdown"
     >
       <svg
