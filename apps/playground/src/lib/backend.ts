@@ -34,3 +34,25 @@ export async function createCheckoutSession(
   if (!response.ok) throw new Error(data.error || `Backend returned ${response.status}`)
   return data
 }
+
+export interface PaymentIntentResult {
+  clientSecret: string
+  paymentIntentId: string
+  amount: number
+  currency: string
+}
+
+/** `POST /api/payment-intent` on the test-data backend (automatic payment methods). */
+export async function createPaymentIntent(body: {
+  amount?: number
+  currency?: string
+}): Promise<PaymentIntentResult> {
+  const response = await fetch(`${apiUrl}/api/payment-intent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+  const data = (await response.json()) as PaymentIntentResult & { error?: string }
+  if (!response.ok) throw new Error(data.error || `Backend returned ${response.status}`)
+  return data
+}

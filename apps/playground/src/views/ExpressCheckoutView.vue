@@ -6,10 +6,13 @@ import {
   VueStripeExpressCheckoutElement
 } from '@vue-stripe/vue-stripe'
 import type {
+  ConfirmPaymentResult,
   StripeExpressCheckoutElementReadyEvent,
   StripeExpressCheckoutElementClickEvent,
   StripeExpressCheckoutElementConfirmEvent
-} from '@stripe/stripe-js'
+} from '@vue-stripe/vue-stripe'
+import PaymentActions from '@/components/docs/PaymentActions.vue'
+import { createPaymentIntent } from '@/lib/backend'
 import {
   Card,
   CardHeader,
@@ -34,6 +37,12 @@ const publishableKey = computed(() => stripeConfig?.publishableKey || '')
 const localClientSecret = ref('')
 const clientSecret = computed(() => localClientSecret.value.trim())
 const showSecretForm = computed(() => publishableKey.value && !clientSecret.value)
+
+const clearSecret = () => {
+  localClientSecret.value = ''
+  paymentStatus.value = null
+  paymentMessage.value = ''
+}
 
 // Track available wallets
 const availableWallets = ref<string[]>([])
@@ -86,9 +95,45 @@ const onClick = (event: StripeExpressCheckoutElementClickEvent) => {
   event.resolve({})
 }
 
-const onConfirm = (event: StripeExpressCheckoutElementConfirmEvent) => {
+// Create a $10.00 PaymentIntent on the test-data backend (POST /api/payment-intent).
+const creatingIntent = ref(false)
+const intentError = ref<string | null>(null)
+const createIntent = async () => {
+  creatingIntent.value = true
+  intentError.value = null
+  try {
+    const result = await createPaymentIntent({ amount: 1000, currency: 'usd' })
+    localClientSecret.value = result.clientSecret
+    logEvent('intent-created', result.paymentIntentId)
+  } catch (err) {
+    intentError.value = err instanceof Error ? err.message : 'Failed to create PaymentIntent'
+  } finally {
+    creatingIntent.value = false
+  }
+}
+
+// Payment result shown under the element
+const paymentStatus = ref<'succeeded' | 'error' | null>(null)
+const paymentMessage = ref('')
+
+// PaymentActions' slot `confirm`: usePaymentIntent().confirmPayment, which runs
+// elements.submit() on the injected Elements before stripe.confirmPayment().
+type Confirm = (returnUrl: string) => Promise<ConfirmPaymentResult>
+
+const onConfirm = async (event: StripeExpressCheckoutElementConfirmEvent, confirm: Confirm) => {
   logEvent('confirm', `Payment type: ${event.expressPaymentType}`)
-  // In a real app, you would confirm the payment here
+  const { error, paymentIntent } = await confirm(window.location.href)
+  if (error) {
+    // Close the wallet sheet with a failure; the message shows below the element.
+    event.paymentFailed()
+    paymentStatus.value = 'error'
+    paymentMessage.value = error.message || 'Payment failed'
+    logEvent('confirm-error', paymentMessage.value)
+  } else {
+    paymentStatus.value = 'succeeded'
+    paymentMessage.value = `PaymentIntent ${paymentIntent?.id} ${paymentIntent?.status}`
+    logEvent('confirm-result', paymentMessage.value)
+  }
 }
 
 const onCancel = () => {
@@ -134,6 +179,16 @@ const onShippingRateChange = (event: unknown) => {
           <p class="text-muted-foreground text-sm mb-4">
             The Express Checkout Element requires a <code>clientSecret</code> from a PaymentIntent.
           </p>
+
+          <div class="flex items-center gap-3 mb-4 flex-wrap">
+            <Button data-test="create-intent" :disabled="creatingIntent" @click="createIntent">
+              {{ creatingIntent ? 'Creating...' : 'Create a $10.00 PaymentIntent on the backend' }}
+            </Button>
+            <span class="text-muted-foreground text-sm">or paste one below</span>
+          </div>
+          <Alert v-if="intentError" variant="destructive" class="mb-4">
+            <AlertDescription>{{ intentError }}</AlertDescription>
+          </Alert>
 
           <div class="mb-4">
             <Label class="mb-2">Client Secret</Label>
@@ -203,12 +258,7 @@ const onShippingRateChange = (event: unknown) => {
           <code class="font-mono text-xs bg-card px-2 py-0.5 rounded"
             >{{ clientSecret.slice(0, 15) }}...{{ clientSecret.slice(-8) }}</code
           >
-          <Button
-            size="sm"
-            variant="ghost"
-            title="Clear and enter new secret"
-            @click="localClientSecret = ''"
-          >
+          <Button size="sm" variant="ghost" title="Clear and enter new secret" @click="clearSecret">
             Clear
           </Button>
         </div>
@@ -216,20 +266,31 @@ const onShippingRateChange = (event: unknown) => {
         <div class="bg-secondary rounded-lg p-6">
           <VueStripeProvider :publishable-key="publishableKey">
             <VueStripeElements :client-secret="clientSecret">
-              <div class="bg-card rounded-md p-4 border min-h-[60px]">
-                <VueStripeExpressCheckoutElement
-                  :options="expressCheckoutOptions"
-                  @ready="onReady"
-                  @click="onClick"
-                  @confirm="onConfirm"
-                  @cancel="onCancel"
-                  @shippingaddresschange="onShippingAddressChange"
-                  @shippingratechange="onShippingRateChange"
-                />
-              </div>
+              <PaymentActions v-slot="{ confirm }" :client-secret="clientSecret">
+                <div class="bg-card rounded-md p-4 border min-h-[60px]">
+                  <VueStripeExpressCheckoutElement
+                    :options="expressCheckoutOptions"
+                    @ready="onReady"
+                    @click="onClick"
+                    @confirm="(event) => onConfirm(event, confirm)"
+                    @cancel="onCancel"
+                    @shippingaddresschange="onShippingAddressChange"
+                    @shippingratechange="onShippingRateChange"
+                  />
+                </div>
+              </PaymentActions>
             </VueStripeElements>
           </VueStripeProvider>
         </div>
+
+        <Alert
+          v-if="paymentStatus"
+          :variant="paymentStatus === 'succeeded' ? 'success' : 'destructive'"
+          class="mt-4"
+          data-test="payment-result"
+        >
+          <AlertDescription>{{ paymentMessage }}</AlertDescription>
+        </Alert>
 
         <!-- Available Wallets Display -->
         <div class="bg-secondary rounded-lg p-4 mt-4">
