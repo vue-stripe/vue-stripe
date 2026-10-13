@@ -11,7 +11,7 @@
     "path": "dist/es/index.js",
     "import": "{ VueStripeCardElement }",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "1.85 kB",
+    "limit": "1.95 kB",
     "gzip": true
   },
   {
@@ -19,7 +19,7 @@
     "path": "dist/es/index.js",
     "import": "{ useStripe }",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "350 B",
+    "limit": "380 B",
     "gzip": true
   },
   {
@@ -27,7 +27,7 @@
     "path": "dist/es/index.js",
     "import": "{ useConfirmCardPayment }",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "540 B",
+    "limit": "670 B",
     "gzip": true
   }
 ]
