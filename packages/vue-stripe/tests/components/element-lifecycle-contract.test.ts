@@ -134,12 +134,16 @@ describe.each(ELEMENTS)('%s lifecycle contract', (_name, Element, elementType) =
       blur: () => void
       clear: () => void
     }
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     exposed.focus()
     exposed.blur()
     exposed.clear()
     expect(element.focus).toHaveBeenCalled()
     expect(element.blur).toHaveBeenCalled()
-    expect(element.clear).toHaveBeenCalled()
+    // Stripe.js throws on clear() for Express Checkout, so that element keeps it local (#574).
+    if (elementType === 'expressCheckout') expect(element.clear).not.toHaveBeenCalled()
+    else expect(element.clear).toHaveBeenCalled()
+    warn.mockRestore()
   })
 
   it('detaches every handler and destroys the element on unmount', async () => {
