@@ -43,6 +43,13 @@ export interface ElementDefinition {
    * Selector): Elements contexts are skipped, and one alone reports the element unavailable.
    */
   elements?: boolean
+  /**
+   * Set when `elements.create()` needs a group with a `clientSecret` or `mode`: Stripe.js
+   * builds the element on a bare group, then fails asynchronously without `ready` or
+   * `loaderror`. On a bare group the factory reports this message through `loaderror` /
+   * `#error` instead.
+   */
+  needsIntent?: string
   /** Extra members for the component's public instance (e.g. getValue). */
   expose?: (element: Ref<StripeElementLike | null>) => Record<string, unknown>
   loadingText?: string

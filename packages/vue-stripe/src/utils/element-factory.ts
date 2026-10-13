@@ -134,7 +134,12 @@ export function createStripeElement<
           | { create: (type: string, options: Record<string, unknown>) => StripeElementLike }
           | null
           | undefined
-        if (elements) return elements.create(elementType, options)
+        if (elements) {
+          if (def.needsIntent && elementsCtx?.hasIntent?.() === false) {
+            throw new VueStripeElementsError(def.needsIntent)
+          }
+          return elements.create(elementType, options)
+        }
         const sdk = checkoutCtx?.checkout.value
         if (sdk) {
           if (def.checkout) return def.checkout(sdk, options)

@@ -198,7 +198,18 @@ export default /* @__PURE__ */ defineComponent({
       detachUpdateEnd = null
     })
 
-    provide(stripeElementsInjectionKey, { elements, loading, error })
+    provide(stripeElementsInjectionKey, {
+      elements,
+      loading,
+      error,
+      hasIntent: () =>
+        Boolean(
+          props.clientSecret ||
+          props.mode ||
+          props.options?.['clientSecret'] ||
+          props.options?.['mode']
+        )
+    })
 
     return () =>
       statusShell(
