@@ -50,15 +50,23 @@ import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 const props = defineProps<{ cardId: string }>()
 const { createEphemeralKeyNonce } = useEphemeralKeyNonce()
 const card = ref<{ issuingCard: string; nonce: string; ephemeralKeySecret: string } | null>(null)
+const loadError = ref('')
 
 onMounted(async () => {
   const { nonce, error } = await createEphemeralKeyNonce({ issuingCard: props.cardId })
-  if (error) throw error
+  if (error) {
+    loadError.value = error.message ?? 'Could not create the nonce'
+    return
+  }
   const response = await fetch('/api/issuing/ephemeral-keys', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cardId: props.cardId, nonce })
   })
+  if (!response.ok) {
+    loadError.value = `Could not load the card (HTTP ${response.status})`
+    return
+  }
   const { ephemeralKeySecret } = await response.json()
   card.value = { issuingCard: props.cardId, nonce: nonce!, ephemeralKeySecret }
 })
@@ -67,7 +75,8 @@ const style = { base: { color: '#ffffff', fontSize: '16px' } }
 </script>
 
 <template>
-  <VueStripeElements v-if="card">
+  <p v-if="loadError">{{ loadError }}</p>
+  <VueStripeElements v-else-if="card">
     <div class="card-row">
       <VueStripeIssuingCardNumberDisplayElement :options="{ ...card, style }" />
       <div class="copy-icon">
@@ -163,7 +172,14 @@ The CVC, expiry and PIN displays emit no events.
 | `#loading` | - | Rendered while the element is loading. Only the number display waits for `ready`; the others are shown once mounted |
 | `#error` | `{ error: string }` | Rendered when the element could not be created (for example inside a Checkout Session) |
 
-The `#error` slot shows errors thrown by `elements.create()`, such as "Issuing card ic_... has not been retrieved." Once a display is mounted, Stripe.js fetches the card inside its iframe; a failed fetch (wrong or expired ephemeral key, unknown card) is only logged to the browser console, because Stripe.js 10 declares no error event for these elements.
+The `#error` slot shows errors thrown by `elements.create()`:
+
+| Message | Cause |
+|---------|-------|
+| "You must set the nonce and ephemeralKeySecret options to use this Element." | `nonce` or `ephemeralKeySecret` is missing from `options`, typically because the ephemeral key request failed |
+| "Issuing card ic_... has not been retrieved." | `stripe.retrieveIssuingCard()` was not called, or did not succeed, for this nonce and key |
+
+On an account without Issuing, or for a card the account does not own, the server's `stripe.ephemeralKeys.create()` fails with "No such issuing card: 'ic_...'" (HTTP 400, `resource_missing`) before any element is created. Once a display is mounted, Stripe.js fetches the card inside its iframe; a failed fetch (wrong or expired ephemeral key, unknown card) is only logged to the browser console, because Stripe.js 10 declares no error event for these elements.
 
 ## Exposed Methods & Properties
 

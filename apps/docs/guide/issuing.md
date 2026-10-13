@@ -87,6 +87,8 @@ async function loadIssuingCard(cardId: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cardId, nonce })
   })
+  // Without this check a failed request renders the elements with no key
+  if (!response.ok) throw new Error(`Could not load the card (HTTP ${response.status})`)
   const { ephemeralKeySecret } = await response.json()
   return { issuingCard: cardId, nonce: nonce!, ephemeralKeySecret: ephemeralKeySecret as string }
 }
@@ -135,12 +137,17 @@ import {
 
 const props = defineProps<{ cardId: string }>()
 const card = ref<{ issuingCard: string; nonce: string; ephemeralKeySecret: string } | null>(null)
+const loadError = ref('')
 const copied = ref(false)
 
 onMounted(async () => {
-  const loaded = await loadIssuingCard(props.cardId)
-  await retrieveIssuingCard(loaded)
-  card.value = loaded
+  try {
+    const loaded = await loadIssuingCard(props.cardId)
+    await retrieveIssuingCard(loaded)
+    card.value = loaded
+  } catch (error) {
+    loadError.value = error instanceof Error ? error.message : 'Could not load the card'
+  }
 })
 
 const style = { base: { color: '#ffffff', fontSize: '18px', letterSpacing: '0.08em' } }
@@ -152,7 +159,8 @@ const onCopied = () => {
 </script>
 
 <template>
-  <p v-if="!card">Loading card...</p>
+  <p v-if="loadError">{{ loadError }}</p>
+  <p v-else-if="!card">Loading card...</p>
   <VueStripeElements v-else>
     <div class="issued-card">
       <div class="number">
@@ -206,12 +214,23 @@ Ephemeral keys expire after 15 minutes. For longer sessions, run steps 2 and 3 a
 import { onUnmounted } from 'vue'
 
 const timer = setInterval(async () => {
-  const fresh = await loadIssuingCard(props.cardId)
-  await retrieveIssuingCard(fresh)
-  card.value = fresh
+  try {
+    const fresh = await loadIssuingCard(props.cardId)
+    await retrieveIssuingCard(fresh)
+    card.value = fresh
+  } catch (error) {
+    loadError.value = error instanceof Error ? error.message : 'Could not refresh the card'
+  }
 }, 14 * 60 * 1000)
 onUnmounted(() => clearInterval(timer))
 ```
+
+## If the card does not load
+
+- **No Issuing on the account, or a card it does not own**: step 2's `createEphemeralKeyNonce()` still succeeds, but `stripe.ephemeralKeys.create()` on your server fails with `No such issuing card: 'ic_...'` (HTTP 400, code `resource_missing`). `loadIssuingCard()` throws, and the page shows the error instead of "Loading card...".
+- **The elements get no key**: if the components render with `nonce` or `ephemeralKeySecret` missing, for example because the key request was not checked, each one shows "You must set the nonce and ephemeralKeySecret options to use this Element." in its `#error` slot. Look at the key request, not the options.
+- **The card was not retrieved**: when the elements get a nonce and key but `retrieveIssuingCard()` (step 3) was skipped or did not succeed for them, each one shows "Issuing card ic_... has not been retrieved." in its `#error` slot.
+- **A wrong or expired key** for a card the account owns: the elements are created, and Stripe.js logs the failed fetch to the browser console only. Run steps 2 and 3 again ([Refresh the key](#refresh-the-key)).
 
 ## Show the PIN
 
