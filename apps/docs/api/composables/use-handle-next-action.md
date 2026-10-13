@@ -43,7 +43,7 @@ type HandleNextActionResult = PaymentIntentOrSetupIntentResult | VueStripeErrorR
 | `loading` | `Readonly<Ref<boolean>>` | `true` while the action is in progress. |
 | `error` | `Readonly<Ref<string \| null>>` | The error message if the action failed. |
 
-When Stripe.js has not loaded yet, or the Stripe call throws, `handleNextAction` does not reject: it resolves to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`), so one `if (result.error)` check covers every failure.
+When Stripe.js is not available (the plugin's load failed, for example; a call made while it loads waits for it), or the Stripe call throws, `handleNextAction` does not reject: it resolves to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`), so one `if (result.error)` check covers every failure.
 
 ## Options
 

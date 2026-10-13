@@ -15,7 +15,7 @@ Collect bank accounts with [Stripe Financial Connections](https://docs.stripe.co
 
 Each method has the same name as the `stripe.*` method it wraps.
 
-Must be called within a `<VueStripeProvider>`. No `<VueStripeElements>` is needed. Create the Financial Connections Session, PaymentIntent or SetupIntent on your server and pass its client secret.
+Must be called within a `<VueStripeProvider>` or an app using [`createVueStripe()`](/api/plugin). No `<VueStripeElements>` is needed. Create the Financial Connections Session, PaymentIntent or SetupIntent on your server and pass its client secret.
 
 ::: tip Live demo
 The [ACH Direct Debit demo](/live-demo/ach-debit) links a test bank account with `collectBankAccountForPayment()` and confirms with `useConfirmUsBankAccountPayment()`.
@@ -129,7 +129,7 @@ interface UseFinancialConnectionsReturn {
 | `loading` | `Readonly<Ref<boolean>>` | `true` while any of the four calls is in progress (the modal is open). |
 | `error` | `Readonly<Ref<string \| null>>` | The error message of the last call, or `null`. Cleared when a new call starts. |
 
-When Stripe.js has not loaded yet, or the Stripe call throws, the methods do not reject: they resolve to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`), so one `if (result.error)` check covers every failure.
+When Stripe.js is not available (the plugin's load failed, for example; a call made while it loads waits for it), or the Stripe call throws, the methods do not reject: they resolve to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`), so one `if (result.error)` check covers every failure.
 
 ## Options
 

@@ -6,7 +6,7 @@ description: "useIdentity reference: open Stripe Identity's verification modal f
 
 Verify a customer's identity with [Stripe Identity](https://docs.stripe.com/identity). Wraps [`stripe.verifyIdentity()`](https://docs.stripe.com/js/identity/modal), which opens Stripe's Identity modal for a VerificationSession and resolves when the customer submits or closes it. [Verify a customer's identity](/guide/identity) shows the server and client steps.
 
-Must be called within a `<VueStripeProvider>`. No `<VueStripeElements>` is needed. Create the [VerificationSession](https://docs.stripe.com/api/identity/verification_sessions) on your server and pass its client secret.
+Must be called within a `<VueStripeProvider>` or an app using [`createVueStripe()`](/api/plugin). No `<VueStripeElements>` is needed. Create the [VerificationSession](https://docs.stripe.com/api/identity/verification_sessions) on your server and pass its client secret.
 
 ::: tip Live demo
 The [Identity Verification demo](/live-demo/identity) opens the verification modal with a server-created VerificationSession.
@@ -65,7 +65,7 @@ type VerifyIdentityResult = VerificationSessionResult | VueStripeErrorResult
 | `loading` | `Readonly<Ref<boolean>>` | `true` while the modal is open. |
 | `error` | `Readonly<Ref<string \| null>>` | The error message of the last call, or `null`. Cleared when a new call starts. |
 
-When Stripe.js has not loaded yet, or the Stripe call throws, `verifyIdentity` does not reject: it resolves to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`), so one `if (result.error)` check covers every failure.
+When Stripe.js is not available (the plugin's load failed, for example; a call made while it loads waits for it), or the Stripe call throws, `verifyIdentity` does not reject: it resolves to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`), so one `if (result.error)` check covers every failure.
 
 ## TypeScript
 

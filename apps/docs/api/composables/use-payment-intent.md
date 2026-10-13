@@ -125,7 +125,7 @@ The promise never rejects. Every failure resolves to `{ error }` and sets `error
 
 - a validation error from `elements.submit()`;
 - Stripe's error (`StripeError`, with `type`, `code` and `decline_code`), for example a declined card;
-- `{ error: { message: 'Stripe not initialized' } }` when Stripe.js has not loaded yet;
+- `{ error: { message: 'Stripe not initialized' } }` when Stripe.js is not available (outside a loaded provider, or the plugin's load failed; under the plugin a call made while Stripe.js loads waits for it);
 - `{ error: { message } }` when the Stripe call throws.
 
 So one `if (result.error)` check covers every failure. Outside a provider, `usePaymentIntent()` itself throws a `VueStripeProviderError`. The [method confirmers overview](/api/composables/confirm/#return-value) lists which composables resolve `{ error }` and which reject. [Handle errors and declines](/guide/error-handling#_3-handle-confirmation-errors) shows how to branch on the error type, decline codes included.

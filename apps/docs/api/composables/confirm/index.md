@@ -59,7 +59,7 @@ Calling a composable outside a `VueStripeProvider` throws `VueStripeProviderErro
 
 ### Resolve or reject
 
-Every composable that calls Stripe.js reports a Stripe error result (a decline, a validation error) as a resolved `{ error }` and also sets its `error` ref. They differ when Stripe.js has not loaded yet or when the Stripe.js call throws:
+Every composable that calls Stripe.js reports a Stripe error result (a decline, a validation error) as a resolved `{ error }` and also sets its `error` ref. They differ when Stripe.js is not available (no loaded provider, or the plugin's load failed; under the plugin a call made while Stripe.js loads waits for it) or when the Stripe.js call throws:
 
 | Composable | Stripe.js not loaded, or the Stripe.js call throws |
 |------------|-----------------------------------------------------|
