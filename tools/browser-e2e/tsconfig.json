@@ -1,0 +1,13 @@
+{
+  "extends": "@vue-stripe/typescript-config/base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": true,
+    "types": ["node"],
+    "incremental": false
+  },
+  "include": ["*.ts", "src/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts"]
+}
