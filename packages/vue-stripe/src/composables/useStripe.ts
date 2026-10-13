@@ -9,20 +9,16 @@ import { VueStripeProviderError } from '../utils/errors'
  *
  * @example
  * ```vue
- * <script setup>
+ * <script setup lang="ts">
  * import { useStripe } from '@vue-stripe/vue-stripe'
  *
  * const { stripe, loading, error } = useStripe()
  *
- * const handlePayment = async () => {
+ * // For Stripe.js calls without a Vue Stripe composable, e.g. on a return page:
+ * const checkStatus = async (clientSecret: string) => {
  *   if (!stripe.value) return
- *
- *   const result = await stripe.value.confirmPayment({
- *     elements,
- *     confirmParams: {
- *       return_url: 'https://example.com/checkout/complete',
- *     },
- *   })
+ *   const { paymentIntent } = await stripe.value.retrievePaymentIntent(clientSecret)
+ *   return paymentIntent?.status
  * }
  * </script>
  * ```

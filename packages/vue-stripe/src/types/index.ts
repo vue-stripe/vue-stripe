@@ -186,6 +186,7 @@ export type {
 export interface VueStripeOptions {
   publishableKey: string
   stripeAccount?: string
+  /** @deprecated Versioned Stripe.js (Endive) always uses its release train's API version and ignores this; it is still forwarded to `loadStripe()`. */
   apiVersion?: string
   locale?: StripeConstructorOptions['locale']
   /** Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }`. */
@@ -206,6 +207,7 @@ export interface VueStripeElement {
 export interface VueStripeProviderProps {
   publishableKey: string
   stripeAccount?: string
+  /** @deprecated Versioned Stripe.js (Endive) always uses its release train's API version and ignores this; it is still forwarded to `loadStripe()`. */
   apiVersion?: string
   locale?: string
   betas?: string[]

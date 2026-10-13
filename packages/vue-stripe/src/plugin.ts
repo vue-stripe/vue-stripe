@@ -80,7 +80,6 @@ function createLazyStripeInstance(options: VueStripeOptions): StripeInstance {
  * app.use(createVueStripe({
  *   publishableKey: 'pk_test_...',
  *   stripeAccount: 'acct_...', // optional
- *   apiVersion: '2023-10-16', // optional
  *   locale: 'en' // optional
  * }))
  * ```
