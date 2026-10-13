@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
+import { runInNewContext } from 'node:vm'
 import { expect, it } from 'vitest'
 // Aliased to vue-demi/lib/v2.7/index.mjs by vitest.config.ts. The allowlist comes
 // from vue-demi (not vue) because the bundle legitimately imports vue-demi-only
@@ -10,12 +11,14 @@ import { expect, it } from 'vitest'
 import * as VueDemi27 from 'vue-demi'
 
 const require = createRequire(import.meta.url)
+// require.resolve() follows the package's "require" condition: the CommonJS entry.
+const cjsEntry = require.resolve('@vue-stripe/vue-stripe')
+const distDir = dirname(dirname(cjsEntry))
+const esEntry = `${distDir}/es/index.js`
+const umdEntry = `${distDir}/umd/index.js`
 
 it('the published ESM bundle only imports vue-demi names that the Vue 2.7 build exports', () => {
-  const entry = require
-    .resolve('@vue-stripe/vue-stripe')
-    .replace(/cjs[\\/]index\.js$/, 'es/index.js')
-  const bundle = readFileSync(entry, 'utf8')
+  const bundle = readFileSync(esEntry, 'utf8')
   const imported = [...bundle.matchAll(/import\s*\{([^}]+)\}\s*from\s*['"]vue-demi['"]/g)]
     .flatMap((match) => (match[1] ?? '').split(','))
     .map((name) => name.trim().split(/\s+as\s+/)[0] ?? '')
@@ -29,8 +32,7 @@ it('the published ESM bundle only imports vue-demi names that the Vue 2.7 build 
 it('the published bundles load Stripe.js only through the side-effect-free pure entry', () => {
   // The default @stripe/stripe-js entry injects a Stripe.js <script> as soon as it
   // is imported, before advancedFraudSignals: false could reach setLoadParameters().
-  const cjs = require.resolve('@vue-stripe/vue-stripe')
-  for (const entry of [cjs, cjs.replace(/cjs[\\/]index\.js$/, 'es/index.js')]) {
+  for (const entry of [cjsEntry, esEntry]) {
     const bundle = readFileSync(entry, 'utf8')
     const specifiers = [
       ...bundle.matchAll(/(?:from\s*|require\()\s*['"](@stripe\/stripe-js[^'"]*)['"]/g)
@@ -38,9 +40,8 @@ it('the published bundles load Stripe.js only through the side-effect-free pure 
     expect(specifiers.length, entry).toBeGreaterThan(0)
     // The ES build names the file: @stripe/stripe-js has no "exports" map, and Node's ESM
     // loader rejects the bare directory import '@stripe/stripe-js/pure'.
-    const expected = entry.includes('cjs')
-      ? '@stripe/stripe-js/pure'
-      : '@stripe/stripe-js/pure/index.mjs'
+    const expected =
+      entry === cjsEntry ? '@stripe/stripe-js/pure' : '@stripe/stripe-js/pure/index.mjs'
     expect(new Set(specifiers), entry).toEqual(new Set([expected]))
   }
 })
@@ -48,13 +49,41 @@ it('the published bundles load Stripe.js only through the side-effect-free pure 
 it('the ESM bundle imports in plain Node, as SSR without bundling does', () => {
   // Vite SSR externals, Nuxt dev (vite-node) and Nitro load the package with Node's own ESM
   // loader. Run that import in a separate Node process from the library's own directory.
-  const entry = require
-    .resolve('@vue-stripe/vue-stripe')
-    .replace(/cjs[\\/]index\.js$/, 'es/index.js')
-  const script = `const m = await import(${JSON.stringify(pathToFileURL(entry).href)}); console.log(typeof m.VueStripeProvider)`
+  const script = `const m = await import(${JSON.stringify(pathToFileURL(esEntry).href)}); console.log(typeof m.VueStripeProvider)`
   const out = execFileSync(process.execPath, ['--input-type=module', '-e', script], {
-    cwd: dirname(entry),
+    cwd: dirname(esEntry),
     encoding: 'utf8'
   })
   expect(out.trim()).toBe('object')
+})
+
+it('require() in plain Node returns the same exports as import() (#595)', () => {
+  // A CommonJS consumer (SSR server bundle built as CJS, ts-node, a Node script) loads the
+  // package through its "require" condition. In a "type": "module" package a .js file is ES,
+  // so the CJS entry must be a .cjs file, or require() returns an empty namespace.
+  const script = `
+    const required = require('@vue-stripe/vue-stripe')
+    import('@vue-stripe/vue-stripe').then((imported) => console.log(JSON.stringify({
+      required: Object.keys(required).sort(),
+      imported: Object.keys(imported).sort(),
+      provider: typeof required.VueStripeProvider
+    })))`
+  const out = execFileSync(process.execPath, ['-e', script], {
+    cwd: dirname(require.resolve('../package.json')),
+    encoding: 'utf8'
+  })
+  const { required, imported, provider } = JSON.parse(out) as Record<string, unknown>
+  expect(provider).toBe('object')
+  expect((imported as string[]).length).toBeGreaterThan(50)
+  expect(required).toEqual(imported)
+})
+
+it('the UMD bundle defines window.VueStripe from the VueDemi and Stripe globals', () => {
+  // A <script> tag from unpkg/jsDelivr: no module system, only globals.
+  const sandbox: Record<string, unknown> = { VueDemi: VueDemi27, Stripe: {} }
+  sandbox.self = sandbox
+  runInNewContext(readFileSync(umdEntry, 'utf8'), sandbox)
+  const umd = sandbox.VueStripe as Record<string, unknown>
+  expect(typeof umd.VueStripeProvider).toBe('object')
+  expect(typeof umd.useStripe).toBe('function')
 })

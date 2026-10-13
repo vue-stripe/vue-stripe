@@ -29,7 +29,7 @@ export default defineConfig({
           case 'es':
             return 'es/index.js'
           case 'cjs':
-            return 'cjs/index.js'
+            return 'cjs/index.cjs'
           case 'umd':
             return 'umd/index.js'
           default:
