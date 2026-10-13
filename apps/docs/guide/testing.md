@@ -6,7 +6,7 @@ Before you start, switch your app to test-mode keys: a `pk_test_...` publishable
 
 ## Cards
 
-For every card below, use any future expiry date (for example `12/34`), any 3-digit CVC (4 digits for American Express) and any postal code.
+For every card below, use any future expiry date (for example `12/34`), any 3-digit CVC (4 digits for American Express) and any postal code. The cards work in every element that takes cards (Payment, Card, split card, Express Checkout through Link) and on Stripe's hosted and embedded Checkout pages.
 
 ### Successful payments
 
@@ -38,7 +38,14 @@ Stripe.js shows a test authentication page in a modal over your page. Complete i
 | `4000 0000 0000 0127` | `incorrect_cvc` | |
 | `4000 0000 0000 0119` | `processing_error` | |
 
-`4000 0000 0000 0341` behaves differently: saving it to a customer succeeds, and every later charge on it fails with `card_declined`. Use it to test failed renewals and off-session charges.
+### Saving cards
+
+When you save a card with a SetupIntent (see [Save a payment method for later](/guide/setup-intent)):
+
+- `4242 4242 4242 4242` saves without authentication.
+- `4000 0025 0000 3155` asks for authentication once, during setup; later off-session charges on it go through without it.
+- `4000 0000 0000 0002` fails the setup with `card_declined`.
+- `4000 0000 0000 0341` saves without error, and every later charge on it fails with `card_declined`. Use it to test failed renewals and off-session charges.
 
 How to show these errors to the customer is covered in [Handle errors and declines](/guide/error-handling).
 
@@ -97,7 +104,7 @@ Wallet buttons in the [Express Checkout Element](/guide/express-checkout) and th
 - The domain is registered in the Dashboard under **Settings > Payment method domains**, in test mode as well as in live mode.
 - The browser supports the wallet (Safari or an iOS browser for Apple Pay; Chrome and most browsers for Google Pay) and has a card saved in it.
 
-In test mode you can pay with a real card saved in the wallet: Stripe swaps it for a test card and nothing is charged.
+In test mode you can pay with a real card saved in the wallet: Stripe swaps it for a test card and nothing is charged. Link is not tied to a device: its button appears in most browsers once the customer has, or creates, a Link account (see [Link](#link) above).
 
 To test from your development server, open it through an HTTPS tunnel such as [ngrok](https://ngrok.com) or [localhost.run](https://localhost.run), and register the tunnel's domain:
 
