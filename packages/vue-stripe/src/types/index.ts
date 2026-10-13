@@ -34,6 +34,52 @@ import type {
   PaymentRequestShippingOptionEvent
 } from '@stripe/stripe-js'
 
+// Stripe.js types that appear in the public signatures of the components and composables
+// (element options, element instances, event payloads, provider options). Apps import
+// them from '@vue-stripe/vue-stripe' instead of '@stripe/stripe-js'; tests/public-exports
+// fails if a type used in src/components or src/composables is not re-exported.
+export type {
+  Appearance,
+  ConfirmSetupData,
+  ConfirmationTokenResult,
+  CreatePaymentMethodData,
+  CreatePaymentMethodFromElements,
+  CssFontSource,
+  CustomFontSource,
+  StripeAddressElementOptions,
+  StripeAuBankAccountElement,
+  StripeAuBankAccountElementChangeEvent,
+  StripeAuBankAccountElementOptions,
+  StripeCardCvcElementChangeEvent,
+  StripeCardCvcElementOptions,
+  StripeCardElementOptions,
+  StripeCardExpiryElementChangeEvent,
+  StripeCardExpiryElementOptions,
+  StripeCardNumberElementChangeEvent,
+  StripeCardNumberElementOptions,
+  StripeConstructorOptions,
+  StripeElementsOptionsClientSecret,
+  StripeElementsOptionsMode,
+  StripeElementsUpdateOptions,
+  StripeError,
+  StripeExpressCheckoutElementAvailablePaymentMethodsChangeEvent,
+  StripeExpressCheckoutElementOptions,
+  StripeExpressCheckoutElementReadyEvent,
+  StripeExpressCheckoutElementShippingAddressChangeEvent,
+  StripeExpressCheckoutElementShippingRateChangeEvent,
+  StripeIbanElement,
+  StripeIbanElementChangeEvent,
+  StripeIbanElementOptions,
+  StripeLinkAuthenticationElementOptions,
+  StripePaymentElementAvailablePaymentMethodsChangeEvent,
+  StripePaymentElementCardDetailsChangeEvent,
+  StripePaymentElementOptions,
+  StripePaymentElementSavedPaymentMethodRemoveEvent,
+  StripePaymentElementSavedPaymentMethodUpdateEvent,
+  StripePaymentMethodMessagingElement,
+  StripePaymentMethodMessagingElementOptions
+} from '@stripe/stripe-js'
+
 // Re-export commonly used Stripe.js types with their original names
 // Since our Vue components now use VueStripe* prefix, there's no conflict
 export type {

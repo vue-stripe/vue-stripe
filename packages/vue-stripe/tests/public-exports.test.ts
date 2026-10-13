@@ -1,4 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
+import { readFileSync, readdirSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import * as VueStripe from '../src'
 import { STRIPE_CONFIRMERS, composableName } from './stripe-confirmers'
 import type {
@@ -171,5 +174,44 @@ describe('public API exports', () => {
     const returns: UsePaymentRequestReturn | null = null
 
     expect([options, onPaymentMethod, wallets, returns]).toHaveLength(4)
+  })
+})
+
+// Apps should never need '@stripe/stripe-js' for a type that a component or composable puts
+// in its public signature (options, element instances, event payloads, results).
+describe('Stripe.js types used by the library are re-exported', () => {
+  const src = resolve(dirname(fileURLToPath(import.meta.url)), '../src')
+  const files = (dir: string): string[] =>
+    readdirSync(resolve(src, dir), { withFileTypes: true }).flatMap((entry) =>
+      entry.isDirectory()
+        ? files(`${dir}/${entry.name}`)
+        : entry.name.endsWith('.ts')
+          ? [`${dir}/${entry.name}`]
+          : []
+    )
+  const used = new Set<string>()
+  for (const file of [...files('components'), ...files('composables'), ...files('utils')]) {
+    const code = readFileSync(resolve(src, file), 'utf8')
+    for (const match of code.matchAll(
+      /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+'@stripe\/stripe-js(?:\/pure)?'/g
+    )) {
+      for (const raw of (match[1] as string).split(',')) {
+        const name =
+          raw
+            .replace(/^\s*type\s+/, '')
+            .split(/\s+as\s+/)[0]
+            ?.trim() ?? ''
+        if (/^[A-Z]/.test(name)) used.add(name)
+      }
+    }
+  }
+  const index = readFileSync(resolve(src, 'index.ts'), 'utf8')
+
+  it('finds the Stripe.js types the sources use', () => {
+    expect(used.size).toBeGreaterThan(50)
+  })
+
+  it.each([...used].sort())('%s is exported from src/index.ts', (name) => {
+    expect(index).toMatch(new RegExp(`\\b${name}\\b`))
   })
 })

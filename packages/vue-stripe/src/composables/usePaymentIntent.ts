@@ -34,7 +34,7 @@ import { VueStripeProviderError } from '../utils/errors'
  */
 export function usePaymentIntent(): UsePaymentIntentReturn {
   const stripeInstance = inject(stripeInjectionKey)
-  const elementsInstance = inject(stripeElementsInjectionKey)
+  const elementsInstance = inject(stripeElementsInjectionKey, null)
 
   if (!stripeInstance) {
     throw new VueStripeProviderError(
