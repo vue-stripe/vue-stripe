@@ -1,4 +1,5 @@
 ---
+title: "API reference: components and composables"
 description: "API reference for @vue-stripe/vue-stripe: every component, composable, plugin option and type, with compatibility for Vue 3, Vue 2.7 and Stripe.js 10."
 ---
 

@@ -1,4 +1,5 @@
 ---
+title: "useCheckoutForm: Checkout Form state (beta)"
 description: "useCheckoutForm reference (beta): read the Checkout Session state and call confirm, promotion code and line item actions from a Vue Checkout Form."
 ---
 

@@ -1,4 +1,5 @@
 ---
+title: Style Stripe Elements in Vue
 description: "Style Stripe Elements in Vue: the Appearance API for the fields inside the iframes, and CSS classes and slots for the Vue Stripe wrapper around them."
 ---
 

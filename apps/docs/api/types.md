@@ -1,4 +1,5 @@
 ---
+title: "Types and errors: TypeScript reference"
 description: "TypeScript types and error classes exported by @vue-stripe/vue-stripe, including the re-exported Stripe.js types and the typed Vue Stripe errors."
 ---
 

@@ -1,4 +1,5 @@
 ---
+title: "Issuing Elements: show issued card details"
 description: "Issuing Elements reference: six Vue components that show an issued card's number, CVC, expiry and PIN in Stripe iframes, copy them or add it to a wallet."
 ---
 

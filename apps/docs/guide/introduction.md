@@ -1,4 +1,5 @@
 ---
+title: "About Vue Stripe: Stripe for Vue 3 and Vue 2.7"
 description: "About Vue Stripe: a Vue 3 and Vue 2.7 library that wraps Stripe.js 10 Elements, Checkout and methods in components and composables, and why."
 ---
 

@@ -1,4 +1,5 @@
 ---
+title: "useIdentity: Stripe Identity verification"
 description: "useIdentity reference: open Stripe Identity's verification modal for a VerificationSession from a Vue component and read the result."
 ---
 

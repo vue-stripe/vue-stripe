@@ -1,4 +1,5 @@
 ---
+title: "useSetupIntent: confirm a SetupIntent"
 description: "useSetupIntent reference: confirm a SetupIntent from the Payment Element in Vue to save a payment method for later, with loading and error refs."
 ---
 

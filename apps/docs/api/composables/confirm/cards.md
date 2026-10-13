@@ -1,4 +1,5 @@
 ---
+title: "Card confirmers: confirm card payments in Vue"
 description: "useConfirmCardPayment and useConfirmCardSetup reference: Vue composables that confirm a PaymentIntent or SetupIntent with card details and 3D Secure."
 ---
 
