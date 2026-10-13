@@ -5,6 +5,9 @@ titleTemplate: Stripe Elements and Checkout for Vue
 description: Vue components and composables for every Stripe.js 10 element and method. Vue 3 and Vue 2.7, typed, Stripe Verified Partner.
 ---
 
+<!-- layout: page has no main landmark of its own -->
+<main id="main-content">
+
 <HomeHero>
 <template #checkout>
 
@@ -98,10 +101,10 @@ createServer(async (req, res) => {
 
 <HomeIntegrations />
 
-
 <HomeSection id="try-it" title="Try it with a test card" lede="This live demo runs in Stripe test mode against our demo backend. Pay with 4242 4242 4242 4242, any future expiry date and any CVC.">
 
 <PaymentElementExample />
 
 </HomeSection>
 
+</main>

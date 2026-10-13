@@ -8,6 +8,7 @@ import CopyForLLM from './components/CopyForLLM.vue'
 import StripeCoverage from './components/StripeCoverage.vue'
 import DocIcon from './components/DocIcon.vue'
 import SiteFooter from './components/SiteFooter.vue'
+import NotFound from './components/NotFound.vue'
 import HomeHero from './components/home/HomeHero.vue'
 import HomeFeatures from './components/home/HomeFeatures.vue'
 import HomeIntegrations from './components/home/HomeIntegrations.vue'
@@ -94,7 +95,9 @@ export default {
       // Analytics tracking (invisible component)
       'layout-top': () => h(AnalyticsWrapper),
       // Site footer on every page (replaces the default two-line footer)
-      'layout-bottom': () => h(SiteFooter)
+      'layout-bottom': () => h(SiteFooter),
+      // The 404 page, with a main landmark and links to every section
+      'not-found': () => h(NotFound)
       // Carbon Ads placeholder - will be injected when you have the actual code
       // 'aside-ads-before': () => h('div', { id: 'carbon-ads-container' })
     })
