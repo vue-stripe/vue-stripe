@@ -105,6 +105,62 @@ Check `data?.clientSecret`, not only `data`. `useFetch` takes its type from the 
 
 `ref`, `useFetch` and the other Nuxt and Vue functions are auto-imported. Import the Vue Stripe components yourself, or register them in a plugin.
 
+### Build the page on a Checkout Session instead
+
+[`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider) and [`VueStripeCheckoutFormProvider`](/api/components/stripe-checkout-form-provider) take the client secret as a string or a Promise. In Nuxt, don't create that Promise at the top of `<script setup>`: setup also runs on the server, where every render would start the request, and a relative `fetch('/api/...')` there rejects with "Failed to parse URL". Pass a function in `fetch-client-secret` instead. The provider calls it in the browser only, once Stripe.js has loaded.
+
+1. Create the session in a server route. Checking `client_secret` gives the page a `string`, and catches a session created without `ui_mode: 'elements'`:
+
+   ```ts
+   // server/api/checkout-session.post.ts
+   import Stripe from 'stripe'
+
+   export default defineEventHandler(async (event) => {
+     const stripe = new Stripe(useRuntimeConfig().stripeSecretKey)
+
+     const session = await stripe.checkout.sessions.create({
+       ui_mode: 'elements',
+       mode: 'payment',
+       line_items: [{ price: 'price_123', quantity: 1 }],
+       return_url: `${getRequestURL(event).origin}/checkout/complete?session_id={CHECKOUT_SESSION_ID}`
+     })
+
+     if (!session.client_secret) {
+       throw createError({ statusCode: 500, statusMessage: 'Checkout Session has no client secret' })
+     }
+     return { clientSecret: session.client_secret }
+   })
+   ```
+
+2. Pass the request as a function:
+
+   ```vue
+   <!-- app/pages/custom-checkout.vue -->
+   <script setup lang="ts">
+   import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
+
+   const config = useRuntimeConfig()
+
+   // Called by the provider in the browser only, once Stripe.js has loaded.
+   const fetchClientSecret = () =>
+     $fetch('/api/checkout-session', { method: 'POST' }).then((data) => data.clientSecret)
+   </script>
+
+   <template>
+     <VueStripeProvider :publishable-key="config.public.stripePublishableKey">
+       <VueStripeCheckoutElementsProvider :fetch-client-secret="fetchClientSecret">
+         <!-- app/components/CheckoutForm.vue uses useCheckoutSession() -->
+         <CheckoutForm />
+
+         <template #loading>Loading checkout...</template>
+         <template #error="{ error }">Checkout could not load: {{ error }}</template>
+       </VueStripeCheckoutElementsProvider>
+     </VueStripeProvider>
+   </template>
+   ```
+
+`CheckoutForm` is the form from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form). The server renders the providers' loading state, and the browser creates one session per visit. `VueStripeCheckoutFormProvider` and [`VueStripeEmbeddedCheckout`](/api/components/stripe-embedded-checkout) take the same `fetch-client-secret` prop.
+
 ### Render on the client only
 
 You don't have to, but if you prefer to send no Stripe markup from the server, wrap the form in `<ClientOnly>` (with a `#fallback` template) or move it into a component named `*.client.vue`.
