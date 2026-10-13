@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, computed, defineComponent, h, onMounted, type PropType } from 'vue'
+import { CircleCheck, CircleX } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import {
   VueStripeProvider,
@@ -400,6 +401,11 @@ const cleanClientSecret = computed(() => clientSecretInput.value.trim() || undef
             'bg-secondary text-muted-foreground': clientSecretStatus.type === 'none'
           }"
         >
+          <CircleCheck v-if="clientSecretStatus.valid" class="inline size-4 -mt-0.5 mr-1" />
+          <CircleX
+            v-else-if="clientSecretStatus.type === 'invalid'"
+            class="inline size-4 -mt-0.5 mr-1"
+          />
           {{ clientSecretStatus.message }}
           <span v-if="clientSecretStatus.valid" class="font-medium ml-1">
             ({{ clientSecretStatus.type === 'payment_intent' ? 'PaymentIntent' : 'SetupIntent' }})
@@ -449,7 +455,12 @@ const cleanClientSecret = computed(() => clientSecretInput.value.trim() || undef
                 <div class="flex flex-wrap gap-4 mt-4 p-3 bg-secondary rounded-md text-sm">
                   <div class="flex gap-2">
                     <span class="text-muted-foreground">Complete:</span>
-                    <span :class="ibanState.complete ? 'text-success' : ''">
+                    <span
+                      class="inline-flex items-center gap-1"
+                      :class="ibanState.complete ? 'text-success' : ''"
+                    >
+                      <CircleCheck v-if="ibanState.complete" class="size-4" />
+                      <CircleX v-else class="size-4" />
                       {{ ibanState.complete ? 'Yes' : 'No' }}
                     </span>
                   </div>

@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 import PaymentRequestPanel from './PaymentRequestPanel.vue'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 
@@ -12,7 +13,7 @@ const paymentIntentId = ref<string | null>(null)
 <template>
   <div class="payment-request-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -25,7 +26,7 @@ const paymentIntentId = ref<string | null>(null)
       </div>
 
       <div v-else class="success-state">
-        <span class="success-icon">&#10003;</span>
+        <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
         <h4>Payment Successful</h4>
         <p class="payment-id">
           Payment ID: <code>{{ paymentIntentId }}</code>

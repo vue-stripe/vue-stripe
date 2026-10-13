@@ -5,6 +5,7 @@ import ProductSelector from './ProductSelector.vue'
 import AchDebitPanel from './AchDebitPanel.vue'
 import { useBackendApi, type Product } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 const { createAchIntent, formatPrice, loading } = useBackendApi()
@@ -58,7 +59,7 @@ function reset() {
 <template>
   <div class="ach-debit-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -122,7 +123,7 @@ function reset() {
       <!-- Step 3: Complete -->
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
-          <span class="success-icon">&#10003;</span>
+          <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
           <h4>Payment Submitted</h4>
           <p>
             ACH Direct Debit payments take a few business days. The PaymentIntent is

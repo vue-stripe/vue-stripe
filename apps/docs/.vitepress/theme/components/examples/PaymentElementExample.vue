@@ -10,6 +10,7 @@ import PaymentStatus from './PaymentStatus.vue'
 import ConfirmPaymentButton from './ConfirmPaymentButton.vue'
 import { useBackendApi, type Product } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 const { createPaymentIntent, formatPrice, loading, error } = useBackendApi()
@@ -61,7 +62,7 @@ function reset() {
 <template>
   <div class="payment-element-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -87,7 +88,7 @@ function reset() {
         </div>
         <div class="progress-line" :class="{ completed: step === 'complete' }"></div>
         <div class="progress-step" :class="{ active: step === 'complete' }">
-          <span class="step-dot">✓</span>
+          <span class="step-dot"><DocIcon name="check" :size="16" :stroke-width="3" /></span>
           <span class="step-label">Complete</span>
         </div>
       </div>
@@ -128,10 +129,10 @@ function reset() {
 
                 <div class="ready-indicators">
                   <span :class="['indicator', { ready: elementsReady }]"
-                    >{{ elementsReady ? '✓' : '○' }} Elements</span
+                    ><DocIcon :name="elementsReady ? 'circle-check' : 'circle'" /> Elements</span
                   >
                   <span :class="['indicator', { ready: paymentReady }]"
-                    >{{ paymentReady ? '✓' : '○' }} Payment</span
+                    ><DocIcon :name="paymentReady ? 'circle-check' : 'circle'" /> Payment</span
                   >
                 </div>
 
@@ -159,7 +160,7 @@ function reset() {
       <!-- Step 3: Complete -->
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
-          <span class="success-icon">✓</span>
+          <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
           <h4>Payment Successful!</h4>
           <p>Thank you for your purchase of {{ selectedProduct?.name }}.</p>
           <p v-if="paymentIntentId" class="payment-id">

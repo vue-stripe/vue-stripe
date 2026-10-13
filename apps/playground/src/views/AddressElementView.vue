@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, computed, watch } from 'vue'
+import { CircleCheck, CircleX, Hourglass } from 'lucide-vue-next'
 import {
   VueStripeProvider,
   VueStripeElements,
@@ -314,7 +315,9 @@ const handleClear = () => {
         <div class="bg-secondary rounded-lg p-4 mt-4">
           <h4 class="font-semibold text-sm mb-3">Collected Address Data</h4>
           <div class="flex gap-2 mb-3">
-            <Badge :variant="addressData.complete ? 'success' : 'warning'">
+            <Badge :variant="addressData.complete ? 'success' : 'warning'" class="gap-1">
+              <CircleCheck v-if="addressData.complete" class="size-3" />
+              <Hourglass v-else class="size-3" />
               {{ addressData.complete ? 'Complete' : 'Incomplete' }}
             </Badge>
             <Badge v-if="addressData.isNewAddress" variant="info">New Address</Badge>
@@ -370,7 +373,9 @@ const handleClear = () => {
 
           <div v-else-if="getValueResult" class="bg-card rounded-md p-3 border">
             <div class="flex gap-2 mb-3">
-              <Badge :variant="getValueResult.complete ? 'success' : 'destructive'">
+              <Badge :variant="getValueResult.complete ? 'success' : 'destructive'" class="gap-1">
+                <CircleCheck v-if="getValueResult.complete" class="size-3" />
+                <CircleX v-else class="size-3" />
                 {{ getValueResult.complete ? 'Valid' : 'Incomplete' }}
               </Badge>
               <Badge v-if="getValueResult.isNewAddress" variant="info">New Address</Badge>

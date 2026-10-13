@@ -7,6 +7,7 @@ import {
   type StripeAddressElementChangeEvent
 } from '@vue-stripe/vue-stripe'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 
@@ -24,7 +25,7 @@ function onChange(event: StripeAddressElementChangeEvent) {
 <template>
   <div class="address-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -45,7 +46,9 @@ function onChange(event: StripeAddressElementChangeEvent) {
       </div>
 
       <div class="stripe-container">
-        <span :class="['indicator', { ready }]">{{ ready ? '✓' : '○' }} Address element</span>
+        <span :class="['indicator', { ready }]"
+          ><DocIcon :name="ready ? 'circle-check' : 'circle'" /> Address element</span
+        >
         <VueStripeProvider :publishable-key="publishableKey">
           <!-- No Intent here: mode/currency/amount give Elements a session (Stripe.js Endive
                rejects a bare stripe.elements() for the Address Element). -->

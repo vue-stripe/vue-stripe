@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, computed, watch } from 'vue'
+import { CircleCheck, Hourglass } from 'lucide-vue-next'
 import {
   VueStripeProvider,
   VueStripeElements,
@@ -266,7 +267,9 @@ const handleClear = () => {
         <div class="bg-secondary rounded-lg p-4 mt-4">
           <h4 class="font-semibold text-sm mb-3">Collected Data</h4>
           <div class="flex gap-2 mb-3">
-            <Badge :variant="authData.complete ? 'success' : 'warning'">
+            <Badge :variant="authData.complete ? 'success' : 'warning'" class="gap-1">
+              <CircleCheck v-if="authData.complete" class="size-3" />
+              <Hourglass v-else class="size-3" />
               {{ authData.complete ? 'Complete' : 'Incomplete' }}
             </Badge>
           </div>

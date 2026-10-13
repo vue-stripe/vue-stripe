@@ -9,6 +9,7 @@ import {
   type CheckoutSessionResult
 } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 
@@ -101,7 +102,7 @@ function onBeforeRedirect() {
   <div class="checkout-redirect-example">
     <!-- Check for publishable key -->
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -128,7 +129,7 @@ function onBeforeRedirect() {
         </div>
         <div class="progress-line" :class="{ completed: step === 'complete' }"></div>
         <div class="progress-step" :class="{ active: step === 'complete' }">
-          <span class="step-dot">✓</span>
+          <span class="step-dot"><DocIcon name="check" :size="16" :stroke-width="3" /></span>
           <span class="step-label">Complete</span>
         </div>
       </div>
@@ -192,7 +193,7 @@ function onBeforeRedirect() {
 
                 <div v-else class="session-ready">
                   <div class="session-info">
-                    <span class="check">✓</span>
+                    <DocIcon name="circle-check" />
                     <span
                       >Session created:
                       <code>{{ sessionResult.sessionId.slice(0, 20) }}...</code></span
@@ -233,7 +234,7 @@ function onBeforeRedirect() {
       <!-- Step 3: Complete -->
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
-          <div class="success-icon">✓</div>
+          <div class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></div>
           <h4>Checkout Session Created!</h4>
           <p v-if="sessionResult">Session ID: {{ sessionResult.sessionId }}</p>
           <button class="reset-btn" @click="reset">Start Over</button>
@@ -473,10 +474,6 @@ function onBeforeRedirect() {
   border-radius: 6px;
   font-size: 0.875rem;
   color: var(--vp-c-green-darker);
-}
-
-.session-info .check {
-  font-weight: bold;
 }
 
 .session-info code {

@@ -3,18 +3,19 @@
 // Exercises the auto-inject path: createPaymentMethod() with no args, which
 // calls elements.submit() before stripe.createPaymentMethod({ elements }).
 import { ref } from 'vue'
+import { CircleCheck, CircleX } from 'lucide-vue-next'
 import { VueStripePaymentElement, useCreatePaymentMethod } from '@vue-stripe/vue-stripe'
 import { Button } from '@/components/ui'
 
 const { createPaymentMethod, loading } = useCreatePaymentMethod()
-const result = ref<string | null>(null)
+const result = ref<{ ok: boolean; text: string } | null>(null)
 
 const onCreate = async () => {
   result.value = null
   const res = await createPaymentMethod() // zero-arg → Payment Element flow
   result.value = res?.paymentMethod
-    ? `Created ${res.paymentMethod.id}`
-    : `Failed: ${res?.error?.message || 'failed'}`
+    ? { ok: true, text: `Created ${res.paymentMethod.id}` }
+    : { ok: false, text: `Failed: ${res?.error?.message || 'failed'}` }
 }
 </script>
 
@@ -28,9 +29,12 @@ const onCreate = async () => {
     </Button>
     <code
       v-if="result"
-      class="block text-sm p-3 rounded bg-secondary"
+      class="flex items-center gap-2 text-sm p-3 rounded bg-secondary"
       data-test="pm-element-result"
-      >{{ result }}</code
+      ><CircleCheck v-if="result.ok" class="size-4 shrink-0 text-success" /><CircleX
+        v-else
+        class="size-4 shrink-0 text-destructive"
+      />{{ result.text }}</code
     >
   </div>
 </template>

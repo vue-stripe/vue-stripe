@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import DocIcon from '../DocIcon.vue'
 const status = ref<'succeeded' | 'failed' | 'processing' | 'canceled' | null>(null)
 const paymentIntentId = ref<string | null>(null)
 const setupIntentId = ref<string | null>(null)
@@ -91,10 +92,15 @@ defineExpose({
   <div v-if="visible" class="payment-status" :class="status">
     <div class="status-content">
       <span class="status-icon">
-        <template v-if="status === 'succeeded'">✓</template>
-        <template v-else-if="status === 'processing'">…</template>
-        <template v-else-if="status === 'failed'">✕</template>
-        <template v-else-if="status === 'canceled'">⊘</template>
+        <DocIcon v-if="status === 'succeeded'" name="check" :size="16" :stroke-width="3" />
+        <DocIcon
+          v-else-if="status === 'processing'"
+          name="hourglass"
+          :size="16"
+          :stroke-width="2.5"
+        />
+        <DocIcon v-else-if="status === 'failed'" name="x" :size="16" :stroke-width="3" />
+        <DocIcon v-else-if="status === 'canceled'" name="ban" :size="16" :stroke-width="2.5" />
       </span>
 
       <div class="status-text">
@@ -107,7 +113,9 @@ defineExpose({
         </p>
       </div>
 
-      <button class="dismiss-btn" aria-label="Dismiss" @click="dismiss">×</button>
+      <button class="dismiss-btn" aria-label="Dismiss" @click="dismiss">
+        <DocIcon name="x" :size="16" />
+      </button>
     </div>
   </div>
 </template>
@@ -217,6 +225,9 @@ defineExpose({
 }
 
 .dismiss-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
   width: 1.5rem;
   height: 1.5rem;

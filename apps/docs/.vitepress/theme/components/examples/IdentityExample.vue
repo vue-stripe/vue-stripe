@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 import IdentityVerifyButton from './IdentityVerifyButton.vue'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 
@@ -16,7 +17,7 @@ function reset() {
 <template>
   <div class="identity-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -33,7 +34,7 @@ function reset() {
       </div>
 
       <div v-else class="success-state" data-test="identity-submitted">
-        <span class="success-icon">&#10003;</span>
+        <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
         <h4>Verification Submitted</h4>
         <p>
           Stripe processes the verification and reports the outcome to the server with the

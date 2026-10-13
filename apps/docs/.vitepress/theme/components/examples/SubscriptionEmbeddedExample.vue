@@ -14,6 +14,7 @@ import {
   type SubscriptionResult
 } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 
@@ -97,7 +98,7 @@ function reset() {
   <div class="subscription-embedded-example">
     <!-- Check for publishable key -->
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -245,7 +246,7 @@ function reset() {
       <!-- Step 4: Complete -->
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
-          <span class="success-icon">✓</span>
+          <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
           <h4>Subscription Active!</h4>
           <p>Thank you for subscribing to {{ selectedProduct?.name }}.</p>
           <p v-if="subscriptionResult" class="subscription-id">

@@ -11,6 +11,7 @@ import PaymentStatus from './PaymentStatus.vue'
 import ConfirmLinkButton from './ConfirmLinkButton.vue'
 import { useBackendApi, type Product } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 const { createPaymentIntent, formatPrice, loading, error } = useBackendApi()
@@ -64,7 +65,7 @@ function reset() {
 <template>
   <div class="link-auth-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -90,7 +91,7 @@ function reset() {
         </div>
         <div class="progress-line" :class="{ completed: step === 'complete' }"></div>
         <div class="progress-step" :class="{ active: step === 'complete' }">
-          <span class="step-dot">✓</span>
+          <span class="step-dot"><DocIcon name="check" :size="16" :stroke-width="3" /></span>
           <span class="step-label">Complete</span>
         </div>
       </div>
@@ -137,7 +138,7 @@ function reset() {
                       />
                     </div>
                     <div v-if="email" class="email-detected">
-                      <span class="icon">✓</span> Email: {{ email }}
+                      <DocIcon name="circle-check" /> Email: {{ email }}
                     </div>
                   </div>
 
@@ -151,10 +152,10 @@ function reset() {
 
                 <div class="ready-indicators">
                   <span :class="['indicator', { ready: linkReady }]"
-                    >{{ linkReady ? '✓' : '○' }} Link Auth</span
+                    ><DocIcon :name="linkReady ? 'circle-check' : 'circle'" /> Link Auth</span
                   >
                   <span :class="['indicator', { ready: paymentReady }]"
-                    >{{ paymentReady ? '✓' : '○' }} Payment</span
+                    ><DocIcon :name="paymentReady ? 'circle-check' : 'circle'" /> Payment</span
                   >
                 </div>
 
@@ -182,7 +183,7 @@ function reset() {
       <!-- Step 3: Complete -->
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
-          <span class="success-icon">✓</span>
+          <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
           <h4>Payment Successful!</h4>
           <p>Thank you for your purchase of {{ selectedProduct?.name }}.</p>
           <p v-if="paymentIntentId" class="payment-id">
@@ -392,10 +393,6 @@ function reset() {
   font-size: 0.75rem;
   color: var(--vp-c-green-darker);
 }
-.email-detected .icon {
-  font-weight: bold;
-}
-
 .ready-indicators {
   display: flex;
   gap: 1rem;

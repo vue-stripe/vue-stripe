@@ -8,7 +8,7 @@ import {
   VueStripeCardCvcElement,
   useConfirmCardPayment
 } from '@vue-stripe/vue-stripe'
-import { CreditCard } from 'lucide-vue-next'
+import { Circle, CircleCheck, CreditCard } from 'lucide-vue-next'
 import type {
   PaymentIntent,
   StripeCardCvcElementChangeEvent,
@@ -341,27 +341,33 @@ const resetPaymentState = () => {
               <div class="flex gap-4 justify-center bg-card rounded-md p-3 mt-4">
                 <span
                   :class="[
-                    'text-sm',
+                    'text-sm inline-flex items-center gap-1',
                     cardNumberComplete ? 'text-green-600 font-medium' : 'text-muted-foreground'
                   ]"
                 >
-                  Number {{ cardNumberComplete ? '✓' : '○' }}
+                  Number
+                  <CircleCheck v-if="cardNumberComplete" class="size-4" />
+                  <Circle v-else class="size-4" />
                 </span>
                 <span
                   :class="[
-                    'text-sm',
+                    'text-sm inline-flex items-center gap-1',
                     cardExpiryComplete ? 'text-green-600 font-medium' : 'text-muted-foreground'
                   ]"
                 >
-                  Expiry {{ cardExpiryComplete ? '✓' : '○' }}
+                  Expiry
+                  <CircleCheck v-if="cardExpiryComplete" class="size-4" />
+                  <Circle v-else class="size-4" />
                 </span>
                 <span
                   :class="[
-                    'text-sm',
+                    'text-sm inline-flex items-center gap-1',
                     cardCvcComplete ? 'text-green-600 font-medium' : 'text-muted-foreground'
                   ]"
                 >
-                  CVC {{ cardCvcComplete ? '✓' : '○' }}
+                  CVC
+                  <CircleCheck v-if="cardCvcComplete" class="size-4" />
+                  <Circle v-else class="size-4" />
                 </span>
               </div>
 

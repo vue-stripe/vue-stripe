@@ -4,6 +4,7 @@ import ConfirmationTokenPanel from './ConfirmationTokenPanel.vue'
 import CardTokenPanel from './CardTokenPanel.vue'
 import RadarSessionPanel from './RadarSessionPanel.vue'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 </script>
@@ -11,7 +12,7 @@ const { publishableKey } = useStripeConfig()
 <template>
   <div class="tokens-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 

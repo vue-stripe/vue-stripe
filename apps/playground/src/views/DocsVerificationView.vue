@@ -6,6 +6,7 @@
  * to ensure they work correctly when users copy them.
  */
 import { ref, computed, inject } from 'vue'
+import { BookOpen, CircleCheck, Hourglass, Search } from 'lucide-vue-next'
 import {
   VueStripeProvider,
   VueStripeElements,
@@ -108,7 +109,7 @@ const addressOptions = {
 
 <template>
   <div class="docs-verification">
-    <h2>Documentation Code Verification</h2>
+    <h2><BookOpen class="icon" /> Documentation Code Verification</h2>
     <p class="subtitle">Testing exact code examples from the documentation</p>
 
     <!-- No key configured -->
@@ -150,7 +151,7 @@ const addressOptions = {
            From: guide/first-payment.md - Complete Example section
            ============================================================ -->
       <div v-if="selectedExample === 'first-payment' && clientSecret" class="example-box">
-        <h3>First Payment Example</h3>
+        <h3><CircleCheck class="icon" /> First Payment Example</h3>
         <p class="source">Source: guide/first-payment.md - Complete Example</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
@@ -173,9 +174,13 @@ const addressOptions = {
 
         <div class="status">
           <span :class="stripeLoaded ? 'success' : 'pending'">
+            <CircleCheck v-if="stripeLoaded" class="icon" />
+            <Hourglass v-else class="icon" />
             Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsReady ? 'success' : 'pending'">
+            <CircleCheck v-if="elementsReady" class="icon" />
+            <Hourglass v-else class="icon" />
             Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
         </div>
@@ -186,7 +191,7 @@ const addressOptions = {
            From: guide/payment-element.md - Basic Setup
            ============================================================ -->
       <div v-if="selectedExample === 'payment-element' && clientSecret" class="example-box">
-        <h3>Payment Element Example</h3>
+        <h3><CircleCheck class="icon" /> Payment Element Example</h3>
         <p class="source">Source: guide/payment-element.md - Basic Setup</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
@@ -204,9 +209,13 @@ const addressOptions = {
 
         <div class="status">
           <span :class="stripeLoaded ? 'success' : 'pending'">
+            <CircleCheck v-if="stripeLoaded" class="icon" />
+            <Hourglass v-else class="icon" />
             Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsReady ? 'success' : 'pending'">
+            <CircleCheck v-if="elementsReady" class="icon" />
+            <Hourglass v-else class="icon" />
             Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
         </div>
@@ -217,7 +226,7 @@ const addressOptions = {
            From: guide/card-element.md - Single Card Element
            ============================================================ -->
       <div v-if="selectedExample === 'card-element'" class="example-box">
-        <h3>Card Element Example</h3>
+        <h3><CircleCheck class="icon" /> Card Element Example</h3>
         <p class="source">Source: guide/card-element.md - Single Card Element</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
@@ -236,9 +245,13 @@ const addressOptions = {
 
         <div class="status">
           <span :class="stripeLoaded ? 'success' : 'pending'">
+            <CircleCheck v-if="stripeLoaded" class="icon" />
+            <Hourglass v-else class="icon" />
             Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsReady ? 'success' : 'pending'">
+            <CircleCheck v-if="elementsReady" class="icon" />
+            <Hourglass v-else class="icon" />
             Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
         </div>
@@ -249,7 +262,7 @@ const addressOptions = {
            From: guide/address-element.md - Basic Usage
            ============================================================ -->
       <div v-if="selectedExample === 'address-element'" class="example-box">
-        <h3>Address Element Example</h3>
+        <h3><CircleCheck class="icon" /> Address Element Example</h3>
         <p class="source">Source: guide/address-element.md - Basic Usage</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
@@ -261,12 +274,18 @@ const addressOptions = {
 
         <div class="status">
           <span :class="stripeLoaded ? 'success' : 'pending'">
+            <CircleCheck v-if="stripeLoaded" class="icon" />
+            <Hourglass v-else class="icon" />
             Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsReady ? 'success' : 'pending'">
+            <CircleCheck v-if="elementsReady" class="icon" />
+            <Hourglass v-else class="icon" />
             Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
           <span :class="addressComplete ? 'success' : 'pending'">
+            <CircleCheck v-if="addressComplete" class="icon" />
+            <Hourglass v-else class="icon" />
             Address: {{ addressComplete ? 'Complete' : 'Incomplete' }}
           </span>
         </div>
@@ -277,7 +296,7 @@ const addressOptions = {
            From: guide/express-checkout.md - Basic Setup
            ============================================================ -->
       <div v-if="selectedExample === 'express-checkout' && clientSecret" class="example-box">
-        <h3>Express Checkout Example</h3>
+        <h3><CircleCheck class="icon" /> Express Checkout Example</h3>
         <p class="source">Source: guide/express-checkout.md - Basic Setup</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
@@ -290,9 +309,13 @@ const addressOptions = {
 
         <div class="status">
           <span :class="stripeLoaded ? 'success' : 'pending'">
+            <CircleCheck v-if="stripeLoaded" class="icon" />
+            <Hourglass v-else class="icon" />
             Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
           <span :class="elementsReady ? 'success' : 'pending'">
+            <CircleCheck v-if="elementsReady" class="icon" />
+            <Hourglass v-else class="icon" />
             Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
         </div>
@@ -305,7 +328,7 @@ const addressOptions = {
 
     <!-- Debug Panel -->
     <div class="debug-panel">
-      <h4>Debug Info</h4>
+      <h4><Search class="icon" /> Debug Info</h4>
       <ul>
         <li>Selected: {{ selectedExample }}</li>
         <li>Client Secret Set: {{ !!clientSecret }}</li>
@@ -448,6 +471,14 @@ h2 {
   font-size: 12px;
   color: #888;
   margin-top: 12px;
+}
+
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 4px;
+  vertical-align: -0.125em;
 }
 
 .status {

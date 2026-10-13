@@ -48,7 +48,8 @@ async function copyMarkdown() {
       return
     }
 
-    const content = (await loader()) as string
+    // DocIcon tags are visual only; the word next to each one carries the meaning.
+    const content = ((await loader()) as string).replace(/<DocIcon\b[^>]*\/>\s?/g, '')
     await navigator.clipboard.writeText(content)
 
     // Track the copy event in Google Analytics

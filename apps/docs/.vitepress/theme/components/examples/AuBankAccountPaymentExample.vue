@@ -11,6 +11,7 @@ import PaymentStatus from './PaymentStatus.vue'
 import ConfirmBecsButton from './ConfirmBecsButton.vue'
 import { useBackendApi, type Product } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 const { createBecsIntent, loading, error } = useBackendApi()
@@ -89,7 +90,7 @@ function reset() {
 <template>
   <div class="au-bank-payment-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -97,7 +98,7 @@ function reset() {
       <PaymentStatus />
 
       <div class="account-note">
-        <strong>Requires an Australian Stripe account.</strong>
+        <strong><DocIcon name="warning" /> Requires an Australian Stripe account.</strong>
         <p>
           BECS Direct Debit (<code>au_becs_debit</code>) is only available to Stripe accounts based
           in Australia. This public demo's account is in the US, so creating the PaymentIntent
@@ -126,7 +127,7 @@ function reset() {
         </div>
         <div class="progress-line" :class="{ completed: step === 'complete' }"></div>
         <div class="progress-step" :class="{ active: step === 'complete' }">
-          <span class="step-dot">✓</span>
+          <span class="step-dot"><DocIcon name="check" :size="16" :stroke-width="3" /></span>
           <span class="step-label">Complete</span>
         </div>
       </div>
@@ -195,6 +196,7 @@ function reset() {
                 </div>
 
                 <div v-if="bankName" class="bank-info">
+                  <DocIcon name="landmark" :size="18" />
                   <div class="bank-details">
                     <strong>{{ bankName }}</strong>
                     <span v-if="branchName"> - {{ branchName }}</span>
@@ -244,7 +246,7 @@ function reset() {
       <!-- Step 3: Complete -->
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
-          <span class="success-icon">✓</span>
+          <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
           <h4>Payment Initiated!</h4>
           <p>Thank you for your purchase of {{ selectedProduct?.name }}.</p>
           <p class="note">BECS Direct Debit payments typically settle in 3-4 business days.</p>

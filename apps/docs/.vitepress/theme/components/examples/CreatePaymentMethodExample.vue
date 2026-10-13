@@ -8,6 +8,7 @@ import {
   type StripeCardElement
 } from '@vue-stripe/vue-stripe'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 
@@ -19,7 +20,7 @@ const Demo = defineComponent({
     // The card element instance, handed over by the component's `ready` event.
     const card = shallowRef<StripeCardElement | null>(null)
     const cardReady = ref(false)
-    const result = ref<string | null>(null)
+    const result = ref<{ ok: boolean; text: string } | null>(null)
 
     async function onCreate() {
       result.value = null
@@ -27,8 +28,8 @@ const Demo = defineComponent({
         card.value ? { type: 'card', card: card.value } : {}
       )
       result.value = paymentMethod
-        ? `✓ ${paymentMethod.id}`
-        : `✗ ${createError?.message || 'failed'}`
+        ? { ok: true, text: paymentMethod.id }
+        : { ok: false, text: createError?.message || 'failed' }
     }
 
     return () =>
@@ -51,7 +52,11 @@ const Demo = defineComponent({
           loading.value ? 'Creating…' : 'Create Payment Method'
         ),
         result.value
-          ? h('code', { class: ['result', { ok: result.value.startsWith('✓') }] }, result.value)
+          ? h('code', { class: ['result', { ok: result.value.ok }] }, [
+              h(DocIcon, { name: result.value.ok ? 'circle-check' : 'circle-x' }),
+              ' ',
+              result.value.text
+            ])
           : null,
         error.value ? h('p', { class: 'err' }, error.value) : null
       ])
@@ -62,7 +67,7 @@ const Demo = defineComponent({
 <template>
   <div class="cpm-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
