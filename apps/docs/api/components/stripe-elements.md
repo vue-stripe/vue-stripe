@@ -77,7 +77,7 @@ Stripe.js Endive rejects `paymentMethodTypes` on `stripe.elements()` as an integ
 :::
 
 ::: tip No Intent yet? Pass `mode`
-With neither `clientSecret` nor `mode`, Stripe.js Endive logs "Unable to select session" inside its iframe for some elements (verified with the Address Element). When you do not have an Intent yet, pass `mode` / `currency` / `amount` so Elements has a session to work with.
+With neither `clientSecret` nor `mode`, Stripe.js Endive throws "Unable to select session" from its iframe for some elements (verified with the Address Element); error monitoring reports it as an uncaught error. When you do not have an Intent yet, pass `mode` / `currency` / `amount` so Elements has a session to work with.
 :::
 
 ::: tip Convenience props vs. `options`
