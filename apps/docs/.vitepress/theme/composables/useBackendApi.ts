@@ -47,6 +47,11 @@ export interface SetupIntentResult {
   setupIntentId: string
 }
 
+export interface IdentitySessionResult {
+  clientSecret: string
+  verificationSessionId: string
+}
+
 /** Error body returned by the backend on non-2xx responses. */
 interface ApiErrorResponse {
   error?: string
@@ -133,11 +138,11 @@ export function useBackendApi() {
   }
 
   /**
-   * Create a regional PaymentIntent (SEPA Direct Debit / BECS).
-   * Both backend routes share the same request/response shape.
+   * Create a regional PaymentIntent (SEPA Direct Debit / BECS / ACH Direct Debit).
+   * The backend routes share the same request/response shape.
    */
   async function createRegionalIntent(
-    path: 'sepa-debit-intent' | 'becs-intent',
+    path: 'sepa-debit-intent' | 'becs-intent' | 'ach-debit-intent',
     options: {
       amount?: number
       currency?: string
@@ -174,6 +179,10 @@ export function useBackendApi() {
   const createBecsIntent = (
     options: { amount?: number; description?: string; metadata?: Record<string, string> } = {}
   ) => createRegionalIntent('becs-intent', options)
+  // ACH Direct Debit (USD only - United States), bank account linked with Financial Connections
+  const createAchIntent = (
+    options: { amount?: number; description?: string; metadata?: Record<string, string> } = {}
+  ) => createRegionalIntent('ach-debit-intent', options)
 
   /**
    * Create a checkout session for Stripe hosted checkout
@@ -288,6 +297,33 @@ export function useBackendApi() {
   }
 
   /**
+   * Create a Stripe Identity VerificationSession (document check)
+   */
+  async function createIdentitySession(): Promise<IdentitySessionResult> {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await fetch(`${apiUrl.value}/api/identity-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      })
+
+      if (!response.ok) {
+        await throwApiError(response)
+      }
+
+      return await parseJson<IdentitySessionResult>(response)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to create verification session'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
    * Format price for display
    */
   function formatPrice(amount: number | null, currency: string): string {
@@ -310,9 +346,11 @@ export function useBackendApi() {
     createPaymentIntent,
     createSepaIntent,
     createBecsIntent,
+    createAchIntent,
     createCheckoutSession,
     createSubscription,
     createSetupIntent,
+    createIdentitySession,
 
     // Helpers
     formatPrice

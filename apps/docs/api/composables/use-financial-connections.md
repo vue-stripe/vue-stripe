@@ -13,6 +13,10 @@ Each method has the same name as the `stripe.*` method it wraps.
 
 Must be called within a `<VueStripeProvider>`. No `<VueStripeElements>` is needed. Create the Financial Connections Session, PaymentIntent or SetupIntent on your server and pass its client secret.
 
+::: tip Live demo
+The [ACH Direct Debit demo](/live-demo/ach-debit) links a test bank account with `collectBankAccountForPayment()` and confirms with `useConfirmUsBankAccountPayment()`.
+:::
+
 ## Usage
 
 ### Link financial accounts

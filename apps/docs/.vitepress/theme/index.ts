@@ -17,6 +17,7 @@ import PaymentStatus from './components/examples/PaymentStatus.vue'
 import PaymentElementExample from './components/examples/PaymentElementExample.vue'
 import CustomCheckoutExample from './components/examples/CustomCheckoutExample.vue'
 import EmbeddedCheckoutExample from './components/examples/EmbeddedCheckoutExample.vue'
+import CheckoutFormExample from './components/examples/CheckoutFormExample.vue'
 import SubscriptionCheckoutExample from './components/examples/SubscriptionCheckoutExample.vue'
 import SubscriptionEmbeddedExample from './components/examples/SubscriptionEmbeddedExample.vue'
 import CheckoutRedirectExample from './components/examples/CheckoutRedirectExample.vue'
@@ -30,6 +31,10 @@ import SetupIntentExample from './components/examples/SetupIntentExample.vue'
 import IbanElementExample from './components/examples/IbanElementExample.vue'
 import ExpressCheckoutExample from './components/examples/ExpressCheckoutExample.vue'
 import AuBankAccountPaymentExample from './components/examples/AuBankAccountPaymentExample.vue'
+import AchDebitExample from './components/examples/AchDebitExample.vue'
+import IdentityExample from './components/examples/IdentityExample.vue'
+import TokensExample from './components/examples/TokensExample.vue'
+import PaymentRequestExample from './components/examples/PaymentRequestExample.vue'
 
 // Analytics composables
 import { useScrollTracking } from './composables/useScrollTracking'
@@ -101,6 +106,7 @@ export default {
     app.component('PaymentElementExample', PaymentElementExample)
     app.component('CustomCheckoutExample', CustomCheckoutExample)
     app.component('EmbeddedCheckoutExample', EmbeddedCheckoutExample)
+    app.component('CheckoutFormExample', CheckoutFormExample)
     app.component('SubscriptionCheckoutExample', SubscriptionCheckoutExample)
     app.component('SubscriptionEmbeddedExample', SubscriptionEmbeddedExample)
     app.component('CheckoutRedirectExample', CheckoutRedirectExample)
@@ -115,5 +121,9 @@ export default {
     app.component('ExpressCheckoutExample', ExpressCheckoutExample)
     app.component('StripeCoverage', StripeCoverage)
     app.component('AuBankAccountPaymentExample', AuBankAccountPaymentExample)
+    app.component('AchDebitExample', AchDebitExample)
+    app.component('IdentityExample', IdentityExample)
+    app.component('TokensExample', TokensExample)
+    app.component('PaymentRequestExample', PaymentRequestExample)
   }
 } satisfies Theme

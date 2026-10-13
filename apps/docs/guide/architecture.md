@@ -19,6 +19,14 @@ StripeProvider (loads Stripe.js)
 
 Let's understand each layer.
 
+::: info Other trees
+The same pattern has a few variants:
+
+- **Checkout Sessions**: `VueStripeCheckoutElementsProvider` takes the place of `VueStripeElements` for a session created with `ui_mode: 'elements'` ([Custom Checkout](/guide/custom-checkout)); `VueStripeCheckoutFormProvider` wraps `VueStripeCheckoutForm` for `ui_mode: 'form'` ([Checkout Form](/guide/checkout-form)); `VueStripeEmbeddedCheckout` sits directly in `VueStripeProvider` ([Embedded Checkout](/guide/embedded-checkout)).
+- **No Elements at all**: composables that only need Stripe.js, such as the [method confirmers](/api/composables/confirm/), [`useFinancialConnections`](/api/composables/use-financial-connections), [`useIdentity`](/api/composables/use-identity) and [`usePaymentRequest`](/api/composables/use-payment-request), work anywhere inside `VueStripeProvider`.
+- **No provider component**: the [`createVueStripe()`](/api/plugin) plugin provides Stripe to the whole app, so `VueStripeElements` and the composables work without a `VueStripeProvider` around them.
+:::
+
 ## VueStripeProvider: The Foundation
 
 `VueStripeProvider` is always the outermost component. Its job is to:

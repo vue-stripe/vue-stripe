@@ -111,6 +111,9 @@ const pay = () =>
 | `VueStripeProvider` | Loads Stripe.js and provides the Stripe instance |
 | `VueStripeElements` | Creates an Elements group (client secret or mode/currency/amount) |
 | `VueStripeCheckoutElementsProvider` | Elements with Checkout Sessions (`ui_mode: 'elements'`); `VueStripeCheckoutProvider` is a deprecated alias |
+| `VueStripeCheckoutFormProvider` | Checkout Form SDK for a Checkout Session with `ui_mode: 'form'` (Stripe beta) |
+
+Or install the `createVueStripe()` plugin to provide Stripe to the whole app without a `VueStripeProvider`.
 
 ### Elements
 
@@ -140,6 +143,8 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements; the Payment Elem
 | Component | Description |
 |-----------|-------------|
 | `VueStripeCheckout` | Button that redirects to a hosted Checkout Session URL |
+| `VueStripeEmbeddedCheckout` | Stripe's Checkout page embedded in your page (`ui_mode: 'embedded_page'`) |
+| `VueStripeCheckoutForm` | Stripe's complete checkout form as one element, inside `VueStripeCheckoutFormProvider` (Stripe beta) |
 | `VueStripePricingTable` | Embeds a pricing table configured in the Stripe Dashboard |
 
 ### Disclosures
@@ -156,12 +161,20 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements; the Payment Elem
 | `useStripeElements()` | The Elements group, `submit()`, `fetchUpdates()` and `getElement()` |
 | `usePaymentIntent()` | Confirm and retrieve PaymentIntents |
 | `useSetupIntent()` | Confirm and retrieve SetupIntents |
+| `useConfirmCardPayment()`, `useConfirmSepaDebitSetup()`, ... | One composable per Stripe.js `confirm<Method>Payment` / `confirm<Method>Setup` method (46 in Stripe.js 10) |
 | `useCreatePaymentMethod()` | Create a PaymentMethod from Elements |
+| `useCreateConfirmationToken()` | Create a ConfirmationToken to confirm on your server |
+| `useCreateToken()` | Create a Token (card, bank account, PII, Connect account / person) |
 | `useHandleNextAction()` | Finish 3D Secure and other next actions |
+| `useHandleCardAction()` | 3D Secure for manually confirmed PaymentIntents (legacy) |
+| `useVerifyMicrodepositsForPayment()`, `useVerifyMicrodepositsForSetup()` | Verify a bank account with micro-deposits |
+| `useRadarSession()` | Create a Radar Session for fraud signals |
+| `useEphemeralKeyNonce()` | Create the nonce for the Issuing Elements |
 | `useFinancialConnections()` | Financial Connections and ACH bank account collection |
 | `useIdentity()` | Stripe Identity verification modal |
 | `usePaymentRequest()` | Payment Request API behind your own button (prefer the Express Checkout Element for new integrations) |
 | `useCheckoutSession()` | Session state and actions inside `VueStripeCheckoutElementsProvider` |
+| `useCheckoutForm()` | Confirm the Checkout Form and drive its session inside `VueStripeCheckoutFormProvider` (Stripe beta) |
 | `useStripeCheckout()` | Redirect to a hosted Checkout Session URL |
 
 ## TypeScript

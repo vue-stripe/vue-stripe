@@ -21,6 +21,10 @@ If you collect payment details with the [Payment Element](/api/components/stripe
 
 Some payment methods must be enabled on your Stripe account first, and a few are only offered in certain countries or currencies; see the Stripe guide linked from each method.
 
+::: tip Guide and live demo
+The [Confirming Payments guide](/guide/confirming-payments) compares the confirmers with `usePaymentIntent`, the Checkout composables and server-side confirmation. The [ACH Direct Debit demo](/live-demo/ach-debit) confirms with `useConfirmUsBankAccountPayment`.
+:::
+
 ## Families
 
 | Page | Composables | Includes |

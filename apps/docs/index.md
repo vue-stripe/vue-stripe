@@ -14,14 +14,22 @@ hero:
       link: /guide/introduction
 
 features:
-  - title: Vue 3 Ready
-    details: Built for Vue 3 with full Composition API support and modern Vue patterns.
+  - title: Vue 3 and Vue 2.7
+    details: One build for both, with the Composition API and render-function components, tested on each in CI.
   - title: All Stripe Elements
-    details: Payment Element, Card Element, Express Checkout, and more - all wrapped in Vue components.
+    details: Payment, Express Checkout, Card, Address, Link, IBAN, BECS, Tax ID, Currency Selector, Contact Details, Issuing and more - all wrapped in Vue components.
+  - title: Every Checkout
+    details: Hosted Checkout, Embedded Checkout, Custom Checkout on a Checkout Session, the Checkout Form and the Pricing Table.
+    link: /guide/approaches
+    linkText: Choose your approach
+  - title: Composables for Every Method
+    details: usePaymentIntent, a useConfirm composable per payment method, tokens, Financial Connections, Identity and more. Your code never needs the raw stripe object.
   - title: Type-Safe
     details: Full TypeScript support with proper type definitions for all components and composables.
-  - title: Reactive by Design
-    details: Leverage Vue's reactivity system with composables like useStripe() and useStripeElements().
+  - title: 100% Stripe.js Coverage
+    details: Every Stripe.js 10 element and method has a wrapper, tracked on the coverage page.
+    link: /coverage
+    linkText: See the coverage
 ---
 
 <div class="vp-doc">

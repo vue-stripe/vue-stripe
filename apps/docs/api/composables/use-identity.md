@@ -4,6 +4,10 @@ Verify a customer's identity with [Stripe Identity](https://docs.stripe.com/iden
 
 Must be called within a `<VueStripeProvider>`. No `<VueStripeElements>` is needed. Create the [VerificationSession](https://docs.stripe.com/api/identity/verification_sessions) on your server and pass its client secret.
 
+::: tip Live demo
+The [Identity Verification demo](/live-demo/identity) opens the verification modal with a server-created VerificationSession.
+:::
+
 ## Usage
 
 ```vue

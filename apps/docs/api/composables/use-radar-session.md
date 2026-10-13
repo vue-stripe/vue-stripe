@@ -4,6 +4,10 @@ Create a [Radar Session](https://docs.stripe.com/radar/radar-session): a snapsho
 
 Use it when you collect payment details outside Stripe.js (for example, a server-side or third-party vault) or when saving card details, and still want Radar's device signals. Send `radarSession.id` to your server and pass it as `radar_options.session` when you create the PaymentIntent, SetupIntent or PaymentMethod. Must be called within a `<VueStripeProvider>` or an app that installs [`createVueStripe()`](/api/plugin).
 
+::: tip Live demo
+The [Tokens demo](/live-demo/tokens) creates a Radar Session.
+:::
+
 ## Usage
 
 ```vue

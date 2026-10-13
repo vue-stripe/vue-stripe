@@ -8,6 +8,10 @@ Stripe recommends the [Express Checkout Element](/api/components/stripe-express-
 
 Must be called within a `<VueStripeProvider>` (or an app using `createVueStripe()`). No `<VueStripeElements>` is needed.
 
+::: tip Live demo
+The [Payment Request demo](/live-demo/payment-request) shows the `canMakePayment` result and pays through the browser sheet when a wallet is available.
+:::
+
 ## Usage
 
 ```vue

@@ -169,6 +169,8 @@ confirmUsBankAccountPayment(
 ): Promise<PaymentIntentResult>
 ```
 
+Try it in the [ACH Direct Debit demo](/live-demo/ach-debit): `useFinancialConnections().collectBankAccountForPayment()` links the account, then this composable confirms.
+
 ### useConfirmUsBankAccountSetup
 
 Wraps [`stripe.confirmUsBankAccountSetup()`](https://docs.stripe.com/js/setup_intents/confirm_us_bank_account_setup). Use `stripe.confirmUsBankAccountSetup` in the [Save bank details](https://docs.stripe.com/payments/ach-debit/set-up-payment) flow for the [ACH Direct Debit payment](https://docs.stripe.com/payments/ach-debit) method to record the customer’s authorization for future payments. When you confirm a [SetupIntent](https://docs.stripe.com/api/setup_intents), it needs to have an attached PaymentMethod.

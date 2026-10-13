@@ -12,6 +12,10 @@ The Checkout Form SDK is a Stripe beta (`ui_mode: 'form'`). Your Stripe account 
 - **[`VueStripeCheckout`](/api/components/stripe-checkout)**: redirect to Stripe's hosted Checkout page.
 :::
 
+::: tip Live demo
+The [Checkout Form demo](/live-demo/checkout-form) pays a Checkout Session with this provider, `VueStripeCheckoutForm` and `useCheckoutForm()`.
+:::
+
 ## Requirements
 
 - Must be used **inside** [`VueStripeProvider`](/api/components/stripe-provider), or in an app that installs the [`createVueStripe()`](/api/plugin) plugin.

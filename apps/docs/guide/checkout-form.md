@@ -168,4 +168,5 @@ The form collects the email, phone number, addresses and tax ID itself, so `useC
 - [VueStripeCheckoutFormProvider API](/api/components/stripe-checkout-form-provider)
 - [VueStripeCheckoutForm API](/api/components/stripe-checkout-form)
 - [useCheckoutForm API](/api/composables/use-checkout-form)
+- [Live demo](/live-demo/checkout-form): pay with the Checkout Form in this site's sandbox
 - [Custom Checkout](/guide/custom-checkout): build the form from individual elements instead
