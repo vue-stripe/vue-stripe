@@ -4,7 +4,7 @@ description: "Stripe test cards, bank accounts, wallets and webhooks for testing
 
 # Test your integration
 
-Run every payment flow end to end with Stripe's test data before you go live: test cards, bank accounts, wallets and webhooks. This page is the single list of test numbers used across these docs. The numbers come from Stripe's [testing documentation](https://docs.stripe.com/testing), which has the complete set.
+Run every payment flow end to end with Stripe's test data before you go live: test cards, bank accounts, redirect and voucher methods, wallets and webhooks. This page is the single list of test numbers used across these docs. The numbers come from Stripe's [testing documentation](https://docs.stripe.com/testing), which has the complete set.
 
 Before you start, switch your app to test-mode keys: a `pk_test_...` publishable key in the browser and an `sk_test_...` secret key on your server (or the keys of a [sandbox](https://docs.stripe.com/sandboxes)). Test data only works with test keys, and real payment details never work with them.
 
@@ -62,13 +62,13 @@ Enter these in [`VueStripeIbanElement`](/guide/iban-element) or the Payment Elem
 | `DE89 3704 0044 0532 0130 00` | `processing`, then `succeeded` |
 | `DE08 3704 0044 0532 0130 03` | `processing`, then `succeeded` after at least 3 minutes |
 | `DE62 3704 0044 0532 0130 01` | `processing`, then `requires_payment_method` (failed) |
-| `DE35 3704 0044 0532 0130 02` | `succeeded`, then a dispute is opened |
+| `DE35 3704 0044 0532 0130 02` | `processing`, then `succeeded`, then a dispute is opened |
 
 Successful IBANs from other countries: `FR14 2004 1010 0505 0001 3M02 606` (France), `NL39 RABO 0300 0652 64` (Netherlands), `AT61 1904 3002 3457 3201` (Austria), `BE62 5100 0754 7061` (Belgium). Stripe lists failing and disputed IBANs for every SEPA country. Some IBANs that look like samples are failure cases there: `NL91 ABNA 0417 1643 00` and `ES91 2100 0418 4502 0005 1332` both end in `requires_payment_method`.
 
 ## BECS Direct Debit (Australia)
 
-Enter these in [`VueStripeAuBankAccountElement`](/guide/au-bank-account-element). Use BSB `000-000` with:
+Enter these in [`VueStripeAuBankAccountElement`](/guide/au-bank-account-element). Every account confirms to `processing`; the outcome arrives a few minutes later. Use BSB `000-000` with:
 
 | Account number | Outcome |
 |----------------|---------|
@@ -76,7 +76,7 @@ Enter these in [`VueStripeAuBankAccountElement`](/guide/au-bank-account-element)
 | `900123456` | `processing`, then `succeeded` after about 3 minutes |
 | `111111113` | `processing`, then fails with `account_closed` |
 | `222222227` | `processing`, then fails with `refer_to_customer` |
-| `666666660` | `succeeded`, then a dispute is opened |
+| `666666660` | `processing`, then `succeeded`, then a dispute (`debit_not_authorized`) is opened |
 
 ## ACH Direct Debit (US)
 
@@ -91,6 +91,53 @@ To test entering account details by hand, use manual entry. The modal only offer
 | `000111111113` | Fails, account closed |
 
 Manually entered accounts are verified with micro-deposits. Verify them with the amounts `32` and `45`, or with the descriptor code `SM11AA`; see [Accept ACH Direct Debit](/guide/ach-debit#_4-verify-with-micro-deposits).
+
+## Bacs Direct Debit (UK)
+
+Save a Bacs account with [`useConfirmBacsDebitSetup`](/api/composables/confirm/bank-debits) (Stripe requires approval for your own Bacs form; otherwise use Checkout). Use sort code `108800` with:
+
+| Account number | Outcome of later payments |
+|----------------|---------------------------|
+| `00012345` | `processing`, then `succeeded` |
+| `90012345` | `processing`, then `succeeded` after three minutes |
+| `22222227` | `processing`, then fails with `insufficient_funds` |
+| `33333335` | `processing`, then fails with `debit_not_authorized`; the mandate becomes inactive |
+| `55555559` | `succeeded` after three minutes, then a dispute is opened |
+
+Stripe's [Bacs guide](https://docs.stripe.com/payments/bacs-debit/save-bank-details) lists the rest.
+
+## ACSS Debit (Canada)
+
+`confirmAcssDebitPayment()` and `confirmAcssDebitSetup()` open Stripe's modal to collect and verify the account. In test mode, agree to the terms, choose **Simulate successful verification**, then agree to the mandate. The payment confirms to `processing` and succeeds a few minutes later.
+
+## BLIK
+
+Any six-digit code succeeds in a sandbox, for example `777123`. The payment is `requires_action` (`blik_authorize`) until the simulated approval, a few seconds later. To simulate a failure, keep any code and set `payment_method.billing_details.email` to one of Stripe's patterns:
+
+| Email | Outcome |
+|-------|---------|
+| `invalid_code@example.com` | Fails at once: `payment_method_invalid_parameter`, decline code `code_invalid` |
+| `expired_code@example.com` | Fails at once: decline code `code_expired` |
+| `customer_declined@example.com` | Fails after a few seconds: `payment_method_provider_decline`, decline code `customer_declined` |
+| `insufficient_funds@example.com` | Fails after a few seconds: decline code `insufficient_funds` |
+| `customer_timeout@example.com` | Fails after 60 seconds: `payment_method_provider_timeout` |
+
+Stripe's [BLIK guide](https://docs.stripe.com/payments/blik/accept-a-payment?payment-ui=direct-api) lists the other patterns.
+
+## Redirects, QR codes, BNPL and vouchers
+
+These methods take no test numbers: in test mode Stripe stands in for the bank, wallet or provider. Confirm them with the [method confirmers](/api/composables/confirm/) or the Payment Element. [What each method needs](/api/composables/confirm/#what-each-method-needs) lists the currency and fields each confirmer requires.
+
+| Methods | What happens in test mode | Outcome |
+|---------|---------------------------|---------|
+| iDEAL, Bancontact, EPS, Przelewy24, FPX, Alipay, Affirm, Afterpay / Clearpay, Amazon Pay, and in the Payment Element Zip, Scalapay and Satispay | Stripe redirects to its test page with **Authorize Test Payment** and **Fail Test Payment** | Authorize: back on your `return_url` with `redirect_status=succeeded`. Fail: `redirect_status=failed`, and the PaymentIntent returns to `requires_payment_method` |
+| Pay by Bank | A bank picker, then **Continue** and **Continue on Web**, then the same test page | As above |
+| Cash App Pay, WeChat Pay, Pix | Stripe.js shows a QR code in a modal with **Simulate scan**; Cash App Pay opens its test page in a new tab | The confirmer resolves when the simulated scan completes |
+| OXXO, Multibanco | Stripe.js shows the voucher details | The PaymentIntent stays `requires_action`, then succeeds by itself a few minutes later |
+| Customer balance (bank transfer) | Stripe.js shows the transfer instructions | The PaymentIntent stays `requires_action` until the customer's cash balance is funded: in the Dashboard, or with the API's `POST /v1/test_helpers/customers/{id}/fund_cash_balance` |
+| Klarna | Klarna's own test playground on klarna.com asks for a phone number and a one-time code | Use the test data in Stripe's [Klarna guide](https://docs.stripe.com/payments/klarna/accept-a-payment#test-integration) |
+
+Stripe's [non-card payments testing](https://docs.stripe.com/testing#non-card-payments) page covers the rest.
 
 ## Link
 
