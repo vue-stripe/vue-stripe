@@ -1,8 +1,9 @@
-import { defineConfigWithTheme, loadEnv, type DefaultTheme, type HeadConfig } from 'vitepress'
+import { defineConfigWithTheme, loadEnv, type DefaultTheme } from 'vitepress'
 import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { coverage } from './theme/data/stripe-coverage'
+import { maintainer, restoreArticleOgType, seoHead, type DocSection } from './seo'
 
 // Build the "Stripe.js Coverage NN%" nav label from the single coverage data source,
 // so the toolbar stays in sync with the /coverage page automatically.
@@ -30,6 +31,21 @@ const tutorialMatch = `^/guide/(${tutorialSlugs.join('|')})`
 const explanationMatch = `^/guide/(${explanationSlugs.join('|')})$`
 // Every other /guide/ page, the documentation overview at /guide/ included, is a how-to guide.
 const howToMatch = `^/guide/(?!(${tutorialSlugs.join('|')}|(${explanationSlugs.join('|')})$))`
+
+// The sections in nav order. The nav, the breadcrumbs in each page's JSON-LD and the groups
+// of /llms.txt all come from this list.
+const docSections: DocSection[] = [
+  { name: 'Tutorials', link: '/guide/first-payment', match: tutorialMatch },
+  { name: 'How-to guides', link: '/guide/', match: howToMatch },
+  { name: 'Reference', link: '/api/', match: '^/(api|coverage)(/|$)' },
+  { name: 'Explanation', link: '/guide/introduction', match: explanationMatch },
+  { name: 'Live demos', link: '/live-demo/', match: '^/live-demo/' }
+]
+
+// Package facts for the home page's structured data and /llms.txt, read from the library.
+const pkg = JSON.parse(
+  readFileSync(new URL('../../../packages/vue-stripe/package.json', import.meta.url), 'utf8')
+) as { name: string; version: string; license: string; peerDependencies: Record<string, string> }
 
 // A sidebar link to a page that does not exist fails the build with the link in the message,
 // instead of the OG image step's bare ENOENT (it reads every linked file).
@@ -292,6 +308,60 @@ const referenceSidebar: DefaultTheme.SidebarItem[] = requirePages([
   }
 ])
 
+const liveDemoSidebar: DefaultTheme.SidebarItem[] = requirePages([
+  {
+    text: 'Live Demo',
+    items: [{ text: 'Overview', link: '/live-demo/' }]
+  },
+  {
+    text: 'One-Time Payments',
+    items: [
+      { text: 'Stripe Checkout', link: '/live-demo/checkout-redirect' },
+      { text: 'Payment Element', link: '/live-demo/payment-element' },
+      { text: 'Embedded Checkout', link: '/live-demo/embedded-checkout' },
+      { text: 'Custom Checkout', link: '/live-demo/custom-checkout' },
+      { text: 'Checkout Form (beta)', link: '/live-demo/checkout-form' },
+      { text: 'Card Element', link: '/live-demo/card-element' },
+      { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },
+      { text: 'Link Authentication', link: '/live-demo/link-authentication' },
+      { text: 'Express Checkout', link: '/live-demo/express-checkout' },
+      { text: 'Payment Request', link: '/live-demo/payment-request' },
+      { text: 'Address Element', link: '/live-demo/address-element' }
+    ]
+  },
+  {
+    text: 'Saving Cards and Tokens',
+    items: [
+      { text: 'Save a Card (SetupIntent)', link: '/live-demo/setup-intent' },
+      { text: 'Create Payment Method', link: '/live-demo/create-payment-method' },
+      { text: 'Tokens', link: '/live-demo/tokens' }
+    ]
+  },
+  {
+    text: 'Buy Now, Pay Later',
+    items: [{ text: 'Payment Method Messaging', link: '/live-demo/payment-method-messaging' }]
+  },
+  {
+    text: 'Regional Payment Methods',
+    items: [
+      { text: 'SEPA Direct Debit', link: '/live-demo/iban-element' },
+      { text: 'BECS Direct Debit (Australia)', link: '/live-demo/becs-payment' },
+      { text: 'ACH Direct Debit (US)', link: '/live-demo/ach-debit' }
+    ]
+  },
+  {
+    text: 'Identity',
+    items: [{ text: 'Identity Verification', link: '/live-demo/identity' }]
+  },
+  {
+    text: 'Subscriptions',
+    items: [
+      { text: 'Stripe Checkout', link: '/live-demo/subscription-checkout' },
+      { text: 'Embedded Elements', link: '/live-demo/subscription-embedded' }
+    ]
+  }
+])
+
 // Load environment variables from .env files (for local dev)
 const envFromFile = loadEnv('', process.cwd())
 
@@ -317,7 +387,8 @@ interface ThemeConfig extends DefaultTheme.Config {
 
 export default defineConfigWithTheme<ThemeConfig>({
   title: 'Vue Stripe',
-  description: 'Stripe Elements for Vue.js',
+  description:
+    'Vue components and composables for Stripe.js 10 Elements, Checkout and payment methods, for Vue 3 and Vue 2.7.',
   lang: 'en-US',
   base: '/',
 
@@ -370,31 +441,24 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
 
     // Favicon
     ['link', { rel: 'icon', href: '/favicon.ico' }],
-    ['link', { rel: 'canonical', href: 'https://vuestripe.com/' }],
 
-    // Basic meta
+    // Basic meta. The canonical URL, robots, Open Graph and Twitter title / description / URL
+    // and the JSON-LD differ per page, so transformHead adds them (see ./seo.ts).
     ['meta', { name: 'theme-color', content: '#635bff' }],
-    ['meta', { name: 'author', content: 'Vue Stripe Contributors' }],
+    ['meta', { name: 'author', content: maintainer.name }],
     [
       'meta',
       {
         name: 'keywords',
         content:
-          'vue, stripe, payment, checkout, vue.js, vue 3, stripe elements, payment element, card element'
+          'Vue Stripe, Stripe Vue, Vue.js Stripe, Stripe Elements, Stripe Checkout, Payment Element, Stripe.js, Vue 3, Vue 2.7, Nuxt, TypeScript, payments'
       }
     ],
 
-    // Open Graph
-    ['meta', { property: 'og:type', content: 'website' }],
+    // Open Graph and Twitter Card, site-wide parts
     ['meta', { property: 'og:site_name', content: 'Vue Stripe' }],
-    ['meta', { property: 'og:title', content: 'Vue Stripe' }],
-    ['meta', { property: 'og:description', content: 'Stripe Checkout & Elements for Vue.js' }],
-    ['meta', { property: 'og:url', content: 'https://vuestripe.com/' }],
-
-    // Twitter Card
-    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-    ['meta', { name: 'twitter:title', content: 'Vue Stripe' }],
-    ['meta', { name: 'twitter:description', content: 'Stripe Checkout & Elements for Vue.js' }]
+    ['meta', { property: 'og:locale', content: 'en_US' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }]
   ],
 
   sitemap: {
@@ -413,11 +477,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     },
 
     nav: [
-      { text: 'Tutorials', link: '/guide/first-payment', activeMatch: tutorialMatch },
-      { text: 'How-to guides', link: '/guide/', activeMatch: howToMatch },
-      { text: 'Reference', link: '/api/', activeMatch: '^/(api|coverage)(/|$)' },
-      { text: 'Explanation', link: '/guide/introduction', activeMatch: explanationMatch },
-      { text: 'Live demos', link: '/live-demo/', activeMatch: '^/live-demo/' },
+      ...docSections.map((s) => ({ text: s.name, link: s.link, activeMatch: s.match })),
       { text: coverageNavLabel, link: '/coverage' },
       {
         text: 'Links',
@@ -435,59 +495,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
       '/guide/': guideSidebar,
       '/api/': referenceSidebar,
       '/coverage': referenceSidebar,
-      '/live-demo/': [
-        {
-          text: 'Live Demo',
-          items: [{ text: 'Overview', link: '/live-demo/' }]
-        },
-        {
-          text: 'One-Time Payments',
-          items: [
-            { text: 'Stripe Checkout', link: '/live-demo/checkout-redirect' },
-            { text: 'Payment Element', link: '/live-demo/payment-element' },
-            { text: 'Embedded Checkout', link: '/live-demo/embedded-checkout' },
-            { text: 'Custom Checkout', link: '/live-demo/custom-checkout' },
-            { text: 'Checkout Form (beta)', link: '/live-demo/checkout-form' },
-            { text: 'Card Element', link: '/live-demo/card-element' },
-            { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },
-            { text: 'Link Authentication', link: '/live-demo/link-authentication' },
-            { text: 'Express Checkout', link: '/live-demo/express-checkout' },
-            { text: 'Payment Request', link: '/live-demo/payment-request' },
-            { text: 'Address Element', link: '/live-demo/address-element' }
-          ]
-        },
-        {
-          text: 'Saving Cards and Tokens',
-          items: [
-            { text: 'Save a Card (SetupIntent)', link: '/live-demo/setup-intent' },
-            { text: 'Create Payment Method', link: '/live-demo/create-payment-method' },
-            { text: 'Tokens', link: '/live-demo/tokens' }
-          ]
-        },
-        {
-          text: 'Buy Now, Pay Later',
-          items: [{ text: 'Payment Method Messaging', link: '/live-demo/payment-method-messaging' }]
-        },
-        {
-          text: 'Regional Payment Methods',
-          items: [
-            { text: 'SEPA Direct Debit', link: '/live-demo/iban-element' },
-            { text: 'BECS Direct Debit (Australia)', link: '/live-demo/becs-payment' },
-            { text: 'ACH Direct Debit (US)', link: '/live-demo/ach-debit' }
-          ]
-        },
-        {
-          text: 'Identity',
-          items: [{ text: 'Identity Verification', link: '/live-demo/identity' }]
-        },
-        {
-          text: 'Subscriptions',
-          items: [
-            { text: 'Stripe Checkout', link: '/live-demo/subscription-checkout' },
-            { text: 'Embedded Elements', link: '/live-demo/subscription-embedded' }
-          ]
-        }
-      ]
+      '/live-demo/': liveDemoSidebar
     },
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/vue-stripe/vue-stripe' }],
@@ -543,26 +551,9 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
   // Ignore dead links while building docs
   ignoreDeadLinks: false,
 
-  // Add fallback OG image for pages without dynamic images
-  transformHead({ pageData }) {
-    // Pages that don't have dynamic OG images generated (not in sidebar)
-    const pagesWithoutDynamicOG = ['index.md', '404.md']
-    const head: HeadConfig[] = []
-
-    if (
-      pagesWithoutDynamicOG.some(
-        (page) => pageData.relativePath === page || pageData.relativePath === ''
-      )
-    ) {
-      head.push(
-        ['meta', { property: 'og:image', content: 'https://vuestripe.com/og-image.png' }],
-        ['meta', { property: 'og:image:width', content: '1200' }],
-        ['meta', { property: 'og:image:height', content: '630' }],
-        ['meta', { name: 'twitter:image', content: 'https://vuestripe.com/og-image.png' }]
-      )
-    }
-
-    return head
+  // Canonical URL, robots, Open Graph / Twitter tags and JSON-LD for each page (./seo.ts).
+  transformHead(context) {
+    return seoHead(context, { sections: docSections, pkg })
   },
 
   // Generate OG images at build time
@@ -574,5 +565,6 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
       },
       templateSvgPath: './public/og-template.svg'
     })(siteConfig)
+    restoreArticleOgType(siteConfig.outDir)
   }
 })
