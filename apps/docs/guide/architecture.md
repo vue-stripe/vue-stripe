@@ -1,323 +1,109 @@
-# Understanding the Architecture
+# How Vue Stripe works
 
-Vue Stripe uses a **Provider + Composable** pattern that mirrors Vue's own provide/inject system. Understanding this pattern will help you use the library effectively.
+Vue Stripe passes Stripe's objects down the component tree with Vue's provide/inject. Providers create the objects, and components and composables inject them. This page follows that chain, explains when each part renders, and explains why a composable only works below the provider it needs.
 
-## The Component Hierarchy
+## The provider chain
 
-Every payment form follows this structure:
+A payment form built on Elements has three layers, one per Stripe object: the `Stripe` instance, an Elements group, and the elements in it. Each line shows the Stripe.js call, or the composable, behind it:
 
-```
-StripeProvider (loads Stripe.js)
-    │
-    └── StripeElements (creates Elements instance)
-            │
-            ├── StripePaymentElement
-            ├── StripeCardElement
-            ├── StripeExpressCheckoutElement
-            └── ... other elements
+```text
+VueStripeProvider                 loadStripe()
+└─ VueStripeElements              stripe.elements()
+   ├─ VueStripePaymentElement     elements.create('payment')
+   ├─ VueStripeAddressElement     elements.create('address')
+   └─ PayButton                   usePaymentIntent()
 ```
 
-Let's understand each layer.
-
-::: info Other trees
-The same pattern has a few variants:
-
-- **Checkout Sessions**: `VueStripeCheckoutElementsProvider` takes the place of `VueStripeElements` for a session created with `ui_mode: 'elements'` ([Custom Checkout](/guide/custom-checkout)); `VueStripeCheckoutFormProvider` wraps `VueStripeCheckoutForm` for `ui_mode: 'form'` ([Checkout Form](/guide/checkout-form)); `VueStripeEmbeddedCheckout` sits directly in `VueStripeProvider` ([Embedded Checkout](/guide/embedded-checkout)).
-- **No Elements at all**: composables that only need Stripe.js, such as the [method confirmers](/api/composables/confirm/), [`useFinancialConnections`](/api/composables/use-financial-connections), [`useIdentity`](/api/composables/use-identity) and [`usePaymentRequest`](/api/composables/use-payment-request), work anywhere inside `VueStripeProvider`.
-- **No provider component**: the [`createVueStripe()`](/api/plugin) plugin provides Stripe to the whole app, so `VueStripeElements` and the composables work without a `VueStripeProvider` around them.
-:::
-
-## VueStripeProvider: The Foundation
-
-`VueStripeProvider` is always the outermost component. Its job is to:
-
-1. **Load Stripe.js** asynchronously from Stripe's CDN
-2. **Initialize the Stripe instance** with your publishable key
-3. **Provide the instance** to all descendant components
-
-```vue
-<VueStripeProvider :publishable-key="pk_test_...">
-  <!-- Everything inside can access Stripe -->
-</VueStripeProvider>
-```
-
-### Loading States
-
-StripeProvider manages three states:
-
-| State | Description |
-|-------|-------------|
-| `loading` | Stripe.js is being loaded |
-| `ready` | Stripe instance is available |
-| `error` | Failed to load (invalid key, network issue) |
-
-You can customize what's shown in each state using slots:
-
-```vue
-<VueStripeProvider :publishable-key="key">
-  <!-- Default slot: shown when ready -->
-  <PaymentForm />
-
-  <!-- Loading slot: shown while loading -->
-  <template #loading>
-    <MySpinner />
-  </template>
-
-  <!-- Error slot: shown on failure -->
-  <template #error="{ error }">
-    <p>Failed to load: {{ error }}</p>
-  </template>
-</VueStripeProvider>
-```
-
-### Events
-
-You can also listen for lifecycle events:
-
-```vue
-<VueStripeProvider
-  :publishable-key="key"
-  @load="onStripeReady"
-  @error="onStripeError"
->
-  ...
-</VueStripeProvider>
-
-<script setup>
-const onStripeReady = (stripe) => {
-  console.log('Stripe loaded!', stripe)
-}
-
-const onStripeError = (error) => {
-  console.error('Failed to load Stripe:', error)
-}
-</script>
-```
-
-## VueStripeElements: The Elements Container
-
-`VueStripeElements` creates a Stripe Elements instance. This is required for any Stripe element components.
-
-```vue
-<VueStripeProvider :publishable-key="key">
-  <VueStripeElements :client-secret="clientSecret">
-    <!-- Element components go here -->
-  </VueStripeElements>
-</VueStripeProvider>
-```
-
-### Why is `clientSecret` needed?
-
-The `clientSecret` connects the Elements instance to a specific PaymentIntent or SetupIntent on Stripe's servers. This enables:
-
-- **Secure payment confirmation** - Stripe knows which payment to process
-- **Payment method detection** - Show relevant payment methods for the amount/currency
-- **Fraud prevention** - Stripe's risk assessment kicks in
-
-::: tip Getting a clientSecret
-Create a PaymentIntent on your server and pass its `client_secret` to the frontend. See [Stripe's docs](https://stripe.com/docs/payments/accept-a-payment?platform=web&ui=elements#web-create-intent).
-:::
-
-## Accessing Instances with Composables
-
-The real power comes from the composables. Inside any descendant component, you can access the Stripe and Elements instances:
-
-### useStripe()
-
-```vue
-<script setup>
-import { useStripe } from '@vue-stripe/vue-stripe'
-
-// Must be called inside a component that's within StripeProvider
-const { stripe, loading, error } = useStripe()
-
-// stripe.value is the Stripe instance (or null while loading)
-// loading.value is true while Stripe.js loads
-// error.value contains any error message
-</script>
-```
-
-### useStripeElements()
-
-```vue
-<script setup>
-import { useStripeElements } from '@vue-stripe/vue-stripe'
-
-// Must be called inside a component that's within StripeElements
-const { elements, loading, error } = useStripeElements()
-
-// elements.value is the Elements instance
-</script>
-```
-
-### Key Points About Composables
-
-1. **They're reactive** - Values update automatically when state changes
-2. **They're readonly** - You can't accidentally overwrite the instances
-3. **They throw if misused** - Clear error messages if called outside the provider
-
-```js
-// All values are reactive refs
-const { stripe, loading, error } = useStripe()
-
-// You can watch them
-watch(stripe, (newStripe) => {
-  if (newStripe) {
-    console.log('Stripe is now available!')
-  }
-})
-
-// Or use them in computed properties
-const isReady = computed(() => !loading.value && !error.value)
-```
-
-## Three Ways to Access Stripe
-
-Depending on your use case, there are three patterns:
-
-### Pattern 1: Event-Based
-
-Best for: One-time notifications like logging or analytics
-
-```vue
-<VueStripeProvider
-  :publishable-key="key"
-  @load="(stripe) => analytics.track('stripe_loaded')"
->
-  ...
-</VueStripeProvider>
-```
-
-### Pattern 2: Composable (Recommended)
-
-Best for: Payment handling, conditional rendering, any reactive UI
-
-```vue
-<script setup>
-import { usePaymentIntent } from '@vue-stripe/vue-stripe'
-
-// Injects the Stripe and Elements instances from the providers above
-const { confirmPayment, loading, error } = usePaymentIntent()
-
-const handlePayment = async () => {
-  await confirmPayment({ clientSecret, confirmParams: { ... } })
-}
-</script>
-```
-
-### Pattern 3: Automatic (Child Components)
-
-Best for: Using pre-built element components
-
-```vue
-<VueStripeProvider :publishable-key="key">
-  <VueStripeElements :client-secret="secret">
-    <!-- These automatically inject what they need -->
-    <VueStripePaymentElement />
-    <VueStripeCardElement />
-  </VueStripeElements>
-</VueStripeProvider>
-```
-
-## Data Flow Diagram
+Each layer provides one object under its own injection key, a `Symbol`, so two libraries or two Stripe accounts never collide:
 
 ```mermaid
 flowchart TD
     subgraph Provider["VueStripeProvider"]
-        P1["<b>provides:</b><br/>stripe, loading, error"]
+        P1["<b>provides</b> stripeInjectionKey<br/>{ stripe, loading, error }"]
     end
 
     subgraph Elements["VueStripeElements"]
-        E1["<b>injects:</b> stripe"]
-        E2["<b>provides:</b><br/>elements, loading, error"]
+        E1["<b>injects</b> stripe"]
+        E2["<b>provides</b> stripeElementsInjectionKey<br/>{ elements, loading, error }"]
         E1 --> E2
     end
 
-    subgraph Components["Element Components"]
-        PE["<b>PaymentElement</b><br/>injects: elements"]
-        CE["<b>CardElement</b><br/>injects: elements"]
-        EC["<b>ExpressCheckout</b><br/>injects: elements"]
+    subgraph Leaves["Element components and composables"]
+        PE["VueStripePaymentElement<br/>injects elements"]
+        AE["VueStripeAddressElement<br/>injects elements"]
+        PI["usePaymentIntent()<br/>injects stripe and elements"]
     end
 
     P1 --> E1
     E2 --> PE
-    E2 --> CE
-    E2 --> EC
+    E2 --> AE
+    E2 --> PI
 ```
 
-## Common Mistakes
+The layers follow Stripe's own scoping rules. An element belongs to the Elements group that created it. `stripe.confirmPayment({ elements })` confirms what that group collected, and `elements.submit()` validates every element in it. Collecting with one group and confirming with another doesn't work, so Vue Stripe makes the nearest group the default everywhere. An element component creates itself in the nearest `VueStripeElements`. `usePaymentIntent()` confirms with that same group.
 
-### 1. Using composables outside providers
+The values are refs. `stripe` is `null` until Stripe.js has loaded, and `elements` is `null` until the group exists. Each layer also exposes `loading` and `error` refs, so any descendant can show the state of the layer above it.
 
-```vue
-<!-- Wrong - useStripe() called outside StripeProvider -->
-<script setup>
-const { stripe } = useStripe() // Throws error!
-</script>
+### Other trees
 
-<template>
-  <VueStripeProvider :publishable-key="key">
-    ...
-  </VueStripeProvider>
-</template>
-```
+The same chain has a few variants. Each swaps one layer for a different Stripe object:
 
-```vue
-<!-- Correct - create a child component -->
-<!-- PaymentForm.vue -->
-<script setup>
-const { stripe } = useStripe() // Works!
-</script>
+- **Elements with Checkout Sessions.** `VueStripeCheckoutElementsProvider` takes the place of `VueStripeElements`. It calls `stripe.initCheckoutElementsSdk()` for a session created with `ui_mode: 'elements'` and provides the SDK, its session actions and the current session. Element components inside it are created by the SDK instead of an Elements group ([Custom Checkout](/guide/custom-checkout)).
+- **Checkout Form.** `VueStripeCheckoutFormProvider` does the same with `stripe.initCheckoutFormSdk()` for `ui_mode: 'form'`, and `VueStripeCheckoutForm` renders inside it ([Checkout Form](/guide/checkout-form)).
+- **Embedded Checkout.** `VueStripeEmbeddedCheckout` needs only the `Stripe` instance and sits directly in `VueStripeProvider` ([Embedded Checkout](/guide/embedded-checkout)).
+- **No Elements at all.** The [method confirmers](/api/composables/confirm/), [`useFinancialConnections`](/api/composables/use-financial-connections), [`useIdentity`](/api/composables/use-identity) and [`usePaymentRequest`](/api/composables/use-payment-request) need only the `Stripe` instance, so they work anywhere inside `VueStripeProvider`.
+- **No provider component.** The [`createVueStripe()`](/api/plugin) plugin provides the `Stripe` instance under the same key for the whole app, so `VueStripeElements` and the composables work without a `VueStripeProvider` above them.
 
-<!-- Parent.vue -->
-<template>
-  <VueStripeProvider :publishable-key="key">
-    <PaymentForm />
-  </VueStripeProvider>
-</template>
-```
+An Elements context always wins. If a `VueStripeElements` sits inside a Checkout provider, the element components inside it use the Elements group, because `inject()` returns the nearest provider of each key and the element factory checks for an Elements group first.
 
-### 2. Using elements without StripeElements
+## When each layer renders its children
 
-```vue
-<!-- Wrong - StripePaymentElement needs StripeElements parent -->
-<VueStripeProvider :publishable-key="key">
-  <VueStripePaymentElement /> <!-- Throws error! -->
-</VueStripeProvider>
+The layers differ in when they render the slot content below them. That timing decides what a child component can rely on.
 
-<!-- Correct -->
-<VueStripeProvider :publishable-key="key">
-  <VueStripeElements :client-secret="secret">
-    <VueStripePaymentElement />
-  </VueStripeElements>
-</VueStripeProvider>
-```
+`VueStripeProvider` starts loading Stripe.js in `onMounted`. Until the load settles it renders its `#loading` slot, and if the load fails it renders `#error`. It renders its default slot only once Stripe.js is ready. As a result, every component inside a `VueStripeProvider` is created after `stripe` has a value. A Pay button there never sees a missing Stripe instance.
 
-### 3. Forgetting to wait for loading
+`VueStripeElements` waits the same way. It creates the group as soon as `stripe` has a value, then renders its children. When the client secret or the deferred-Intent parameters change (`mode`, `currency`, `amount`, `setupFutureUsage`), it creates a new group. Each element component tears its element down and recreates it in the new group. Without that step, an element left on the old group would not be confirmed by the new one. Appearance and locale changes are different: they go through `elements.update()`, so the mounted elements keep what the customer typed.
 
-```vue
-<!-- Wrong - runs during setup, Stripe.js might still be loading -->
-<script setup>
-const { confirmPayment } = usePaymentIntent()
-confirmPayment({ ... }) // Resolves to { error: { message: 'Stripe not initialized' } }
-</script>
+`VueStripeCheckoutElementsProvider` renders its children immediately. Since Stripe.js Clover, `initCheckoutElementsSdk()` returns synchronously, so the elements can mount and show Stripe's skeleton loaders while the session loads. The session actions arrive later, once `loadActions()` resolves. `useCheckoutSession()` therefore returns a "not ready yet" error result if a call comes in before then, rather than throwing.
 
-<!-- Correct - confirm on a user action, once Stripe is ready -->
-<script setup>
-const { stripe } = useStripe()
-const { confirmPayment, loading } = usePaymentIntent()
+With the plugin, nothing waits. Stripe.js starts loading the first time something reads the Stripe context, and components render straight away with `loading` set to `true`. `VueStripeElements` shows its own `#loading` slot until the instance arrives. A composable called before then fails the way its reference page describes: `usePaymentIntent()` resolves to an `{ error }` result, and a method confirmer rejects.
 
-const pay = () => confirmPayment({ ... })
-</script>
+The provider's slots and events are listed in the [`VueStripeProvider` reference](/api/components/stripe-provider).
 
-<template>
-  <button :disabled="!stripe || loading" @click="pay">Pay</button>
-</template>
-```
+## Why composables must run inside the providers
 
-## Next Steps
+A composable is a thin `inject()` call plus some state. `inject()` reads from the component's **ancestors**. It cannot see what the same component provides, or what a child component it renders provides.
 
-Now that you understand the architecture:
+So this doesn't work: a page component that renders `<VueStripeProvider>` in its template and calls `useStripe()` in its own `setup()`. The provider in the template is the page component's child, not its ancestor. `useStripe()` finds no Stripe context and throws `VueStripeProviderError`, with a message naming the provider it looked for. `useStripeElements()` and the element components throw `VueStripeElementsError` the same way when no Elements group is above them. `useCheckoutSession()` throws `VueStripeCheckoutError` when no Checkout provider is above it.
 
-- [Choosing Your Approach](/guide/approaches) - Payment Element vs Card Element vs Checkout
-- [StripeProvider Reference](/api/components/stripe-provider) - Full API documentation
+That is why the guides put the provider in a parent component and the form, with its composables, in a child component. Errors at call time are a different case. A failed Stripe call is reported when the call runs, through the composable's `error` ref and its result, never thrown from `setup()`. [How confirming works](/guide/confirming-payments#two-error-styles) explains which calls resolve and which reject.
+
+The common mistakes this causes, and how to fix them, are collected in the troubleshooting how-to guide.
+
+## One factory for every element
+
+Every element component is built by the same factory, `createStripeElement()`, from a short definition: the Stripe element type, the events Stripe declares for it, and any extra methods to expose. That is why the Payment, Card, IBAN, Address and other element components behave alike:
+
+- The element is created in `onMounted`, from the nearest Elements group or Checkout SDK, and mounted into the component's own DOM node.
+- The factory attaches a listener for each event Stripe.js 10 declares for that element type, re-emits it as a Vue event, and detaches it on unmount before calling `destroy()`.
+- `loading` stays `true` until Stripe's `ready` event. `error` follows the latest `change` or `loaderror` event, and the `#loading` and `#error` slots render from these two refs.
+- A change to the `options` prop reaches `element.update()` only when the options are different. Templates often pass a new but equal inline object on every render, and those renders don't call `update()`.
+- Every element exposes `element`, `loading`, `error`, `focus()`, `blur()` and `clear()` on its template ref. Some add their own methods, such as `getValue()` on the Address Element.
+
+The rendered markup is the same for every element, so one stylesheet covers them all. The event lists are checked against the installed `@stripe/stripe-js` type declarations in the library's tests, so a component never emits an event Stripe doesn't send.
+
+## Stripe objects and Vue reactivity
+
+Stripe's objects hold internal state and are compared by identity: Stripe expects back the exact element it created. Vue Stripe keeps them in `shallowRef` (or marks them with `markRaw`) so Vue never wraps them in reactive proxies. The ref changes when the object changes, but Vue never looks inside the object.
+
+The composables return these objects through `computed()`. On Vue 2.7, `readonly()` would copy a plain object, and Stripe would receive a copy instead of its own object. The `loading` and `error` refs, which hold plain values, are returned as `readonly()`.
+
+## Vue 2.7 and Vue 3
+
+The components are render functions, not single-file components, and every Vue API comes from `vue-demi`. A small helper turns Vue 3 style props into the `{ attrs, on, class, style }` shape Vue 2 expects, and template refs are string refs, which resolve the same way on both. The plugin provides through `app.provide()` on Vue 3. On Vue 2.7 it uses a global mixin that applies only to root instances, so a nested `VueStripeProvider` still wins. See [Installation](/guide/installation#vue-2-7) for the setup.
+
+## Related pages
+
+- [Choosing an integration](/guide/approaches): which tree to build.
+- [How Stripe.js is loaded](/guide/stripe-js-loading): what happens before `stripe` gets a value.
+- [VueStripeProvider](/api/components/stripe-provider) and [VueStripeElements](/api/components/stripe-elements): props, events and slots.

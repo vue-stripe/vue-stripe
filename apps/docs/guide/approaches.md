@@ -1,268 +1,123 @@
-# Choosing Your Approach
+# Choosing an integration
 
-Stripe offers several ways to collect payments. Here's how to choose the right one for your use case.
+Stripe offers several ways to take a payment in the browser, and Vue Stripe wraps all of them. They differ along two lines: who lays out the payment form, and where the order data (line items, tax, discounts, shipping) is computed. This page compares the options, and the smaller choices inside them, so you can pick one before you open a how-to guide.
 
-## Quick Comparison
+## Two questions decide most of it
 
-| Approach | Best For | Customization | Implementation |
-|----------|----------|---------------|----------------|
-| **Payment Element** | Most use cases | High | Medium |
-| **Card Element** | Card-only payments | Highest | Medium |
-| **Express Checkout** | Quick payments | Low | Easy |
-| **Checkout (Hosted)** | Fastest launch | Low | Easiest |
-| **Embedded Checkout** | Stripe's Checkout form on your own page | Low | Easiest |
-| **Elements with Checkout Sessions** | Own page, Stripe-managed totals/tax/discounts | High | Medium |
-| **Checkout Form** (beta) | Stripe's complete form as one element on your page | Low | Easy |
+**Who lays out the form?** Stripe can render the whole checkout, either on its own domain or inside your page. You can also place Stripe's individual elements (payment details, address, contact details) in your own layout. In every option, the card number and other sensitive fields are rendered by Stripe inside Stripe-hosted frames. The choice is about layout and control, not about who handles card data. See [What runs where](/guide/security).
 
-## Payment Element (Recommended)
+**Where does the order live?** A **Checkout Session** keeps the order on Stripe. Your server creates the session from prices or line items, and Stripe computes totals, tax, discounts, shipping options and currency conversion. With a **PaymentIntent** your server computes the amount itself and asks Stripe to collect exactly that. The Intent has no line items, tax or promotion codes unless your code adds them. [Payment objects](/guide/payment-objects) explains both objects.
 
-The Payment Element is Stripe's modern, all-in-one solution. It automatically shows the best payment methods for your customer.
+## The options side by side
 
-```vue
-<VueStripePaymentElement />
+| Option | Where the customer pays | Who lays out the form | Order computed by |
+|--------|------------------------|-----------------------|-------------------|
+| [Hosted Checkout](/guide/checkout) | `checkout.stripe.com` | Stripe | Checkout Session |
+| [Embedded Checkout](/guide/embedded-checkout) | Your page, inside a Stripe iframe | Stripe | Checkout Session |
+| [Checkout Form](/guide/checkout-form) (beta) | Your page | Stripe, as one element | Checkout Session |
+| [Custom Checkout](/guide/custom-checkout) | Your page | You, with individual elements | Checkout Session |
+| [Payment Element](/guide/payment-element) | Your page | You, with individual elements | Your server |
+| [Card Element](/guide/card-element) | Your page | You, card fields only | Your server |
+
+What each option asks of your server, and which Vue Stripe pieces it uses:
+
+| Option | Your server creates | Vue Stripe pieces |
+|--------|---------------------|-------------------|
+| Hosted Checkout | A session; sends its `url` | `VueStripeCheckout` or `useStripeCheckout()`, no provider needed |
+| Embedded Checkout | A session with `ui_mode: 'embedded_page'`; sends its client secret | `VueStripeEmbeddedCheckout` |
+| Checkout Form | A session with `ui_mode: 'form'` | `VueStripeCheckoutFormProvider`, `VueStripeCheckoutForm`, `useCheckoutForm()` |
+| Custom Checkout | A session with `ui_mode: 'elements'` | `VueStripeCheckoutElementsProvider`, element components, `useCheckoutSession()` |
+| Payment Element | A PaymentIntent or SetupIntent, before or after the customer fills the form | `VueStripeElements`, `VueStripePaymentElement`, `usePaymentIntent()` |
+| Card Element | A PaymentIntent or SetupIntent | `VueStripeElements`, `VueStripeCardElement` (or the split card fields), `useConfirmCardPayment()` |
+
+The [Express Checkout Element](/guide/express-checkout) is not a separate row. It adds wallet buttons (Apple Pay, Google Pay, Link and others) to the Payment Element or Custom Checkout options. See [Express Checkout and the Payment Element](#express-checkout-and-the-payment-element).
+
+## Choosing among the Checkout options
+
+All four Checkout options start from the same Checkout Session on your server. So they share what the session gives you: line items, automatic tax, promotion codes, shipping rates, Adaptive Pricing, subscriptions and saved payment methods, with no extra client code. They differ in how much of the page you own.
+
+**Hosted Checkout** is the least code. The browser only follows `session.url`, and Stripe.js isn't loaded at all, which is why the redirect needs no `VueStripeProvider`. The cost is that the customer leaves your domain, and you can change the page only through the Dashboard's branding settings. Choose it when launch speed matters more than the look of the payment step.
+
+**Embedded Checkout** shows the same Stripe-built page inside an iframe on your page. The customer stays on your domain, and you still write no form code. Stripe allows one Embedded Checkout on a page at a time, and the form looks like hosted Checkout, because it is hosted Checkout. Choose it when you want Checkout's completeness without the redirect.
+
+**Checkout Form** (a Stripe beta) renders the whole form as one element in your own page layout. That covers contact details, addresses, wallets, the payment method, the total and the Pay button. You control the page around the form, while Stripe controls the fields and their order. Your account needs access to `ui_mode: 'form'`. Choose it when Embedded Checkout's iframe page doesn't fit your layout but you don't want to assemble the form yourself.
+
+**Custom Checkout** (Elements with Checkout Sessions) gives you the individual elements and the session's actions: apply a promotion code, change the shipping option, update the email, confirm. You build the layout and the Pay button. Stripe still recomputes totals, tax and discounts as the session changes, and `useCheckoutSession()` exposes the updated session for your summary. Only the elements the Checkout SDK supports are available: Payment, Address, Express Checkout, Contact Details, Tax ID, Currency Selector, Terms and Link Signup. Choose it when you want your own UI but don't want to compute tax, discounts or shipping yourself.
+
+For subscriptions sold from a fixed list of plans, Stripe's no-code [Pricing Table](/guide/pricing-table) is a fifth option. It renders the plans and starts a hosted Checkout Session itself, so your server creates nothing until the webhooks arrive.
+
+## Checkout Session or PaymentIntent
+
+The bottom two rows of the table use Elements directly against a PaymentIntent or SetupIntent, with no Checkout Session. Your server decides the amount, and the browser collects and confirms. This costs more code than Custom Checkout, because tax, discounts and shipping are yours to compute. In return you get full control: the amount can come from any pricing logic, you can confirm on your server ([Confirm payments on your server](/guide/tokens)), and every Stripe.js method confirmer is available.
+
+A common path is to start with Hosted Checkout and move to Custom Checkout or the Payment Element when the design needs it. Moving between the Checkout options mostly changes the client and one `ui_mode` value on the server. Moving from a Checkout Session to a PaymentIntent also moves order computation onto your server, so it is the larger change.
+
+## Payment Element or Card Element
+
+The **Payment Element** is one element for every payment method your account offers: cards, wallets, bank debits, bank redirects, buy now pay later and vouchers. Stripe chooses which methods to show for the amount, currency and customer location, and adds new ones without a code change. One `confirmPayment()` call confirms whatever method the customer picked, including redirects and next actions. It needs an Intent's client secret, or `mode`, `amount` and `currency` on `VueStripeElements` so the Intent can be created at submit time.
+
+The **Card Element** collects cards and nothing else. It comes as one combined field (`VueStripeCardElement`) or as three separate fields for number, expiry and CVC (`VueStripeCardNumberElement`, `VueStripeCardExpiryElement`, `VueStripeCardCvcElement`). The split fields let you place each input in your own grid, label each one, and show an error under the field it belongs to. The combined field takes one line and shows one error. Card Elements need no client secret on `VueStripeElements`. You confirm with `useConfirmCardPayment()` and the Intent's client secret, or create a PaymentMethod with `useCreatePaymentMethod()` first. Wallets aren't part of the Card Element, so add the Express Checkout Element if you want them.
+
+Choose the Payment Element unless you have a reason to accept only cards: an existing card-only integration, a point-of-sale style screen, or a design that needs each card field placed by hand. Moving from the Card Element to the Payment Element is mostly a client change. The server keeps creating PaymentIntents, though it should then let Stripe choose the payment methods.
+
+Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clover. The Payment Element collects those methods now. [Stripe.js versions](/guide/stripe-js-versions) explains the change.
+
+## Express Checkout and the Payment Element
+
+The Express Checkout Element and the Payment Element are not alternatives. The Express Checkout Element shows one-tap wallet buttons for customers who have a wallet set up. The Payment Element is the full form for everyone else, and it can show wallets too. Most checkouts put the Express Checkout buttons at the top, above an "or pay another way" divider, with the Payment Element below it. Both elements live in the same Elements group or Checkout Session, so the order and the amount are shared.
+
+On its own, the Express Checkout Element only serves customers with a wallet, and wallets appear only on HTTPS pages and on devices and browsers that support them. So it rarely works as the only way to pay.
+
+## PaymentIntent or SetupIntent
+
+Use a PaymentIntent to charge now and a SetupIntent to save a payment method for later without charging. A PaymentIntent with `setup_future_usage` does both: it charges now and saves the method. In Vue Stripe the choice changes the composable (`usePaymentIntent()` or `useSetupIntent()`) and, in the deferred flow, `mode` on `VueStripeElements`. [Payment objects](/guide/payment-objects#paymentintent-or-setupintent) covers when each one fits, including free trials and "authorize now, capture later".
+
+## Confirm in the browser or on your server
+
+By default the browser confirms the Intent, through `usePaymentIntent()`, `useSetupIntent()`, a method confirmer or `useCheckoutSession().confirm()`. Confirming on your server instead lets you run your own checks, or call other services, between collecting the details and charging. The browser creates a ConfirmationToken, your server confirms with it, and the browser finishes any next action. [How confirming works](/guide/confirming-payments) explains both flows.
+
+## Plugin or provider
+
+`VueStripeProvider` and the `createVueStripe()` plugin both provide the `Stripe` instance under the same injection key. They differ in scope and in when Stripe.js loads.
+
+| | `VueStripeProvider` | `createVueStripe()` plugin |
+|---|---|---|
+| Scope | The subtree inside it | The whole app |
+| Stripe.js loads | When the provider mounts | The first time a component or composable needs it |
+| Children render | Once Stripe.js is ready (`#loading` and `#error` slots until then) | Immediately; show loading from `useStripe()` or `VueStripeElements`' slots |
+| Different keys or connected accounts | One provider per key or account | One default; add a provider where a subtree needs another |
+| `betas` and other `loadStripe()` options | Yes | Not supported; use a provider |
+| `load` and `error` events | Yes | No |
+
+Use the plugin when Stripe appears on many unrelated pages with one key, so you don't repeat a wrapper on each. Use a provider when the key or connected account is known only at runtime, when a page needs `betas`, or when you want the provider's own loading and error slots. The two mix well: install the plugin for the common case and add a provider where one subtree needs something different. The nearest provider wins inside its subtree. [How Stripe.js is loaded](/guide/stripe-js-loading#where-to-mount-the-provider) covers where to put either one.
+
+## The Checkout redirect: component or composable
+
+`VueStripeCheckout` and `useStripeCheckout()` both send the browser to a hosted Checkout Session's `url`. The component renders a ready-made button (or your slot content) for a URL you already have. The composable fits when the session is created on click, for example after a cart form submits or at the end of a multi-step flow. Both need only the URL. Stripe.js removed client-side session creation, so neither one takes a price or a session ID anymore.
+
+## A decision path
+
+```mermaid
+flowchart TD
+    A{"Should Stripe lay out<br/>the whole checkout?"} -->|Yes| B{"Can the customer<br/>leave your site?"}
+    B -->|Yes| H["Hosted Checkout"]
+    B -->|No| C{"Stripe's page in an iframe,<br/>or one form element in your layout?"}
+    C -->|Iframe page| E["Embedded Checkout"]
+    C -->|Form element| F["Checkout Form (beta)"]
+    A -->|No, I lay out the form| D{"Should Stripe compute<br/>tax, discounts and shipping?"}
+    D -->|Yes| CC["Custom Checkout<br/>(Elements with Checkout Sessions)"]
+    D -->|No, my server sets the amount| G{"Cards only?"}
+    G -->|No| PE["Payment Element"]
+    G -->|Yes| CE["Card Element"]
+    CC -.-> X["Add Express Checkout<br/>for wallet buttons"]
+    PE -.-> X
 ```
 
-**Pros:**
-- Supports 40+ payment methods automatically
-- Adapts to customer's location and device
-- Handles complex flows (authentication, redirects)
-- Constantly updated by Stripe
+## Without a form
 
-**Cons:**
-- Less control over individual fields
-- Needs an Intent: a `clientSecret`, or `mode` / `currency` / `amount` on `VueStripeElements` and an Intent created at submit time (backend integration either way)
+Some flows need no payment form, only a composable inside `VueStripeProvider`:
 
-**Best for:** Most e-commerce, SaaS, and marketplace applications.
-
-::: info Bank-redirect methods
-Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clover (8.0); collect these payment methods with the Payment Element.
-:::
-
-[Learn more about Payment Element →](/guide/payment-element)
-
-## Card Element
-
-The Card Element gives you more control over the card input experience.
-
-```vue
-<!-- Single unified input -->
-<VueStripeCardElement />
-
-<!-- Or split into separate fields -->
-<VueStripeCardNumberElement />
-<VueStripeCardExpiryElement />
-<VueStripeCardCvcElement />
-```
-
-**Pros:**
-- Maximum layout control
-- Split fields for custom designs
-- Lightweight (card-only)
-
-**Cons:**
-- Only supports card payments
-- You handle other payment methods separately
-- More work to add new payment types
-
-**Best for:** Card-only checkouts, custom payment forms, POS-style interfaces.
-
-[Learn more about Card Element →](/guide/card-element)
-
-## Express Checkout Element
-
-Shows Apple Pay, Google Pay, and Link buttons for one-tap payments.
-
-```vue
-<VueStripeExpressCheckoutElement @click="onExpressClick" />
-```
-
-**Pros:**
-- One-tap payments
-- High conversion for returning customers
-- Works alongside other elements
-
-**Cons:**
-- Not all customers have wallets set up
-- Limited to supported payment methods
-- Requires HTTPS (even in development)
-
-**Best for:** Adding wallet payments to any checkout flow.
-
-[Learn more about Express Checkout →](/guide/express-checkout)
-
-## Stripe Checkout (Hosted Page)
-
-Redirect customers to Stripe's hosted payment page. No payment UI to build.
-
-```vue
-<script setup>
-import { useStripeCheckout } from '@vue-stripe/vue-stripe'
-
-const { redirectToUrl, loading, error } = useStripeCheckout()
-
-const handleBuy = async () => {
-  // Create a Checkout Session on your server; it returns session.url
-  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
-  const { url } = await response.json()
-
-  // Redirect to the hosted Checkout page
-  redirectToUrl(url)
-  // Or: await redirectToCheckout({ url })
-}
-</script>
-
-<template>
-  <button :disabled="loading" @click="handleBuy">Buy Now</button>
-  <p v-if="error">{{ error }}</p>
-</template>
-```
-
-**Pros:**
-- Zero payment UI to build
-- PCI compliance handled by Stripe
-- Built-in features (coupons, shipping, tax)
-- Mobile-optimized
-
-**Cons:**
-- Customers leave your site
-- Limited customization
-- Less control over the experience
-
-**Best for:** Quick launches, simple products, subscription sign-ups.
-
-No `VueStripeProvider` is needed for the redirect. [Learn more about Stripe Checkout →](/guide/checkout)
-
-## Embedded Checkout
-
-Stripe's prebuilt Checkout page in an iframe on your own page. Create the session with `ui_mode: 'embedded_page'` and pass its client secret:
-
-```vue
-<VueStripeProvider :publishable-key="key">
-  <VueStripeEmbeddedCheckout :client-secret="clientSecret" />
-</VueStripeProvider>
-```
-
-**Pros:**
-- Customers stay on your site
-- Stripe builds the whole form: payment methods, addresses, tax, promotion codes
-- One component, no form code
-
-**Cons:**
-- Limited customization (Dashboard branding only)
-- One Embedded Checkout per page
-
-[Learn more about Embedded Checkout →](/guide/embedded-checkout)
-
-## Elements with Checkout Sessions
-
-Keep Checkout Sessions on the server (Stripe computes line items, tax, discounts and shipping) but render the payment UI on your own page with Stripe Elements. Create the session with `ui_mode: 'elements'` and pass its client secret:
-
-```vue
-<VueStripeProvider :publishable-key="key">
-  <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
-    <VueStripePaymentElement />
-    <PayButton /> <!-- calls useCheckoutSession().confirm() -->
-  </VueStripeCheckoutElementsProvider>
-</VueStripeProvider>
-```
-
-**Pros:**
-- Customers stay on your site
-- Session features (promotion codes, tax, shipping options, Adaptive Pricing) without building the logic
-- Same element components as `VueStripeElements`
-
-**Cons:**
-- Only the Payment, Address, Express Checkout, Contact Details, Tax ID, Currency Selector, Terms and Link Signup elements are available
-- Requires a server-created session
-
-[Learn more about Custom Checkout →](/guide/custom-checkout)
-
-## Checkout Form (beta)
-
-Stripe's whole checkout form (contact details, addresses, wallets, payment method, total and Pay button) as one element on your page, backed by a Checkout Session created with `ui_mode: 'form'`:
-
-```vue
-<VueStripeProvider :publishable-key="key">
-  <VueStripeCheckoutFormProvider :client-secret="clientSecret">
-    <VueStripeCheckoutForm @confirm="onConfirm" /> <!-- onConfirm calls useCheckoutForm().confirm() -->
-  </VueStripeCheckoutFormProvider>
-</VueStripeProvider>
-```
-
-**Pros:**
-- Customers stay on your site, in your page layout
-- One element instead of a field-by-field form
-- Session features (tax, discounts, shipping, Adaptive Pricing) as with the other Checkout Sessions
-
-**Cons:**
-- Stripe beta: your account needs access to `ui_mode: 'form'`
-- The form's fields and order are Stripe's
-
-[Learn more about the Checkout Form →](/guide/checkout-form)
-
-## Composables Without a Form
-
-Some flows need no element at all, only a composable inside `VueStripeProvider`:
-
-- **Bank accounts**: [`useFinancialConnections`](/api/composables/use-financial-connections) opens Stripe's bank login modal (ACH Direct Debit, Financial Connections data).
-- **Identity**: [`useIdentity`](/api/composables/use-identity) opens Stripe Identity's verification modal.
-- **Wallet sheet behind your own button**: [`usePaymentRequest`](/api/composables/use-payment-request) (prefer the Express Checkout Element for new integrations).
-- **Confirming on your server**: [`useCreateConfirmationToken`](/api/composables/use-create-confirmation-token) with the Payment Element, then [`useHandleNextAction`](/api/composables/use-handle-next-action). See [Tokens and Payment Methods](/guide/tokens).
-
-## Decision Flowchart
-
-```
-Do you need custom UI?
-│
-├─ No → Use Stripe Checkout (Hosted),
-│        or Embedded Checkout / Checkout Form (beta) to keep customers on your site
-│
-└─ Yes → Do you need multiple payment methods?
-          │
-          ├─ Yes → Use Payment Element
-          │        (optionally add Express Checkout)
-          │
-          └─ No (cards only) → Use Card Element
-                               (optionally add Express Checkout)
-```
-
-## Combining Approaches
-
-You can mix approaches in the same checkout:
-
-```vue
-<template>
-  <VueStripeProvider :publishable-key="key">
-    <VueStripeElements :client-secret="secret">
-      <!-- Quick payment options at top -->
-      <VueStripeExpressCheckoutElement @confirm="onExpressConfirm" />
-
-      <div class="divider">Or pay with card</div>
-
-      <!-- Full payment form below -->
-      <VueStripePaymentElement />
-      <button @click="handleSubmit">Pay</button>
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-## Migration Path
-
-Starting simple and need to upgrade later?
-
-| From | To | Effort |
-|------|----|--------|
-| Checkout → Payment Element | Medium | Requires backend changes |
-| Card Element → Payment Element | Low | Mostly frontend changes |
-| Payment Element → Custom | Low | Already have the foundation |
-
-## Next Steps
-
-Choose your approach and dive deeper:
-
-- [Payment Element Guide](/guide/payment-element) - The recommended approach
-- [Card Element Guide](/guide/card-element) - For card-only payments
-- [Express Checkout Guide](/guide/express-checkout) - Add wallet payments
-- [Custom Checkout Guide](/guide/custom-checkout) - Your own page on a Checkout Session
-- [Confirming Payments](/guide/confirming-payments) - Which composable confirms what
+- [`useFinancialConnections`](/api/composables/use-financial-connections) opens Stripe's bank login modal, for ACH Direct Debit or Financial Connections data.
+- [`useIdentity`](/api/composables/use-identity) opens Stripe Identity's verification modal.
+- [`usePaymentRequest`](/api/composables/use-payment-request) shows the browser's wallet sheet behind a button of your own. New integrations should use the Express Checkout Element instead.
+- A [method confirmer](/api/composables/confirm/) confirms with a PaymentMethod saved earlier, with no element at all.
