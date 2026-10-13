@@ -36,7 +36,9 @@ export function useSetupIntent(): UseSetupIntentReturn {
   const stripeInstance = injectStripe('useSetupIntent')
   const elementsInstance = inject(stripeElementsInjectionKey, null)
 
+  // Overlapping calls: stay loading until the last one settles.
   const loading = ref(false)
+  let pending = 0
   const error = ref<string | null>(null)
 
   const confirmSetup = async (options: ConfirmSetupOptions) => {
@@ -46,6 +48,7 @@ export function useSetupIntent(): UseSetupIntentReturn {
       return { error: { message: 'Stripe not initialized' } }
     }
 
+    pending++
     loading.value = true
     error.value = null
 
@@ -90,7 +93,7 @@ export function useSetupIntent(): UseSetupIntentReturn {
       error.value = errorMessage
       return { error: { message: errorMessage } }
     } finally {
-      loading.value = false
+      loading.value = --pending > 0
     }
   }
 
@@ -101,6 +104,7 @@ export function useSetupIntent(): UseSetupIntentReturn {
       return { error: { message: 'Stripe not initialized' } }
     }
 
+    pending++
     loading.value = true
     error.value = null
 
@@ -115,7 +119,7 @@ export function useSetupIntent(): UseSetupIntentReturn {
       error.value = errorMessage
       return { error: { message: errorMessage } }
     } finally {
-      loading.value = false
+      loading.value = --pending > 0
     }
   }
 

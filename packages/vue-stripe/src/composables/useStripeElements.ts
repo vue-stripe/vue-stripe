@@ -53,13 +53,18 @@ export function useStripeElements(): UseStripeElementsReturn {
 
   /**
    * Re-fetches the Elements' data from Stripe after the Intent or Checkout Session
-   * was updated on your server (e.g. the amount changed).
+   * was updated on your server (e.g. the amount changed). Only for groups created with
+   * a client secret: on a deferred (`mode`) group Stripe.js throws, which resolves `{ error }`.
    */
   const fetchUpdates = async () => {
     if (!elementsContext.elements.value) {
       return { error: { message: 'Elements not initialized' } }
     }
-    return elementsContext.elements.value.fetchUpdates()
+    try {
+      return await elementsContext.elements.value.fetchUpdates()
+    } catch (err) {
+      return { error: { message: err instanceof Error ? err.message : String(err) } }
+    }
   }
 
   /**

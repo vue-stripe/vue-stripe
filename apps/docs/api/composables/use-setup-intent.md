@@ -91,7 +91,7 @@ interface UseSetupIntentReturn {
 |----------|------|-------------|
 | `confirmSetup` | `(options: ConfirmSetupOptions) => Promise<ConfirmSetupResult>` | Confirm a setup intent |
 | `retrieveSetupIntent` | `(clientSecret: string) => Promise<ConfirmSetupResult>` | Look up a SetupIntent by its client secret |
-| `loading` | `Readonly<Ref<boolean>>` | Whether a confirm or retrieve is in progress |
+| `loading` | `Readonly<Ref<boolean>>` | `true` while a confirm or retrieve is in flight (until the last of overlapping calls settles) |
 | `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirm or retrieve attempt |
 
 ### retrieveSetupIntent

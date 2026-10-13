@@ -62,7 +62,7 @@ type VerifyIdentityResult = VerificationSessionResult | VueStripeErrorResult
 | Property | Type | Description |
 |----------|------|-------------|
 | `verifyIdentity` | `(clientSecret: string) => Promise<VerifyIdentityResult>` | Opens the Identity modal; resolves to Stripe's result once the customer submits (no `error`) or stops (`{ error }`). |
-| `loading` | `Readonly<Ref<boolean>>` | `true` while the modal is open. |
+| `loading` | `Readonly<Ref<boolean>>` | `true` while the modal is open (until the last of overlapping calls settles). |
 | `error` | `Readonly<Ref<string \| null>>` | The error message of the last call, or `null`. Cleared when a new call starts. |
 
 When Stripe.js is not available (the plugin's load failed, for example; a call made while it loads waits for it), or the Stripe call throws, `verifyIdentity` does not reject: it resolves to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`), so one `if (result.error)` check covers every failure.

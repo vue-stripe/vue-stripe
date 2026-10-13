@@ -85,7 +85,7 @@ const onChange = (event) => {
 
 With the Payment Element, nothing reaches the `#error` slot while the customer types; the fields show their own messages. It also checks its fields when you confirm: `usePaymentIntent` and `useSetupIntent` call `elements.submit()` first and resolve to `{ error }` (type `validation_error`) without contacting your server when a field is incomplete.
 
-If an element fails to load (for example, the Payment Element without a client secret or `mode`), it emits `@loaderror` and shows the message in the same `#error` slot.
+If an element fails to load (for example, the Payment Element or the Express Checkout Element without a client secret or `mode`), it emits `@loaderror` and shows the message in the same `#error` slot.
 
 ## 3. Handle confirmation errors
 

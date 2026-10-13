@@ -167,6 +167,39 @@ describe('Split Card Elements', () => {
       expect(mockElement.on).toHaveBeenCalledWith('blur', expect.any(Function))
       expect(mockElement.on).toHaveBeenCalledWith('escape', expect.any(Function))
     })
+
+    // #661: Stripe.js declares both on cardNumber, as on card.
+    it('re-emits networkschange and loaderror', async () => {
+      const handlers: Record<string, (event: unknown) => void> = {}
+      const mockElement = {
+        ...makeMockElement(),
+        on: vi.fn((event: string, handler: (event: unknown) => void) => {
+          handlers[event] = handler
+        })
+      }
+      const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
+      mockLoadStripe.mockResolvedValueOnce({
+        elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
+        registerAppInfo: vi.fn()
+      } as any)
+
+      const wrapper = await mountWithProviders(VueStripeCardNumberElement)
+      // What Stripe.js sends for a co-badged card (4000 0025 0000 1001)
+      const networks = {
+        elementType: 'cardNumber',
+        networks: ['cartes_bancaires', 'visa'],
+        loading: false
+      }
+      const loadError = { elementType: 'cardNumber', error: { message: 'Failed to load' } }
+      handlers['networkschange']?.(networks)
+      handlers['loaderror']?.(loadError)
+      await nextTick()
+
+      const number = wrapper.findComponent(VueStripeCardNumberElement)
+      expect(number.emitted('networkschange')).toEqual([[networks]])
+      expect(number.emitted('loaderror')).toEqual([[loadError]])
+      expect(number.find('.vue-stripe-cardNumber-element-error').text()).toBe('Failed to load')
+    })
   })
 
   describe('VueStripeCardExpiryElement', () => {
