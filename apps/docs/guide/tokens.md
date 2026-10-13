@@ -64,32 +64,46 @@ Set `amount` from the cart before the customer starts typing: changing `mode`, `
 import { ref } from 'vue'
 import { useCreateConfirmationToken, useHandleNextAction } from '@vue-stripe/vue-stripe'
 
-const { createConfirmationToken, loading, error } = useCreateConfirmationToken()
-const { handleNextAction, error: actionError } = useHandleNextAction()
+type PayResult = { status?: string; clientSecret?: string; error?: string }
+
+const { createConfirmationToken, loading } = useCreateConfirmationToken()
+const { handleNextAction } = useHandleNextAction()
 const status = ref('')
-const serverError = ref('')
+const message = ref('')
 
 const pay = async () => {
+  // Clear the previous attempt's outcome
   status.value = ''
-  serverError.value = ''
-  const { confirmationToken } = await createConfirmationToken({
+  message.value = ''
+
+  const { confirmationToken, error } = await createConfirmationToken({
     params: { return_url: `${window.location.origin}/complete` }
   })
-  if (!confirmationToken) return // `error` holds the message
+  if (!confirmationToken) {
+    message.value = error?.message ?? 'Check your payment details.'
+    return
+  }
 
   const response = await fetch('/api/pay', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ confirmationToken: confirmationToken.id })
   })
-  const result: { status?: string; clientSecret?: string; error?: string } = await response.json()
+  // A proxy or crash error page is not JSON
+  const result: PayResult = await response.json().catch(() => ({}))
 
   if (!response.ok || !result.status) {
-    serverError.value = result.error ?? 'Payment failed. Please try again.' // declined (402) or server error
+    message.value = result.error ?? 'Payment failed. Please try again.' // declined (402) or server error
     return
   }
   if (result.status === 'requires_action' && result.clientSecret) {
-    const { paymentIntent } = await handleNextAction({ clientSecret: result.clientSecret })
+    const { paymentIntent, error: actionError } = await handleNextAction({
+      clientSecret: result.clientSecret
+    })
+    if (actionError) {
+      message.value = actionError.message ?? 'Authentication failed.' // 3D Secure failed or was cancelled
+      return
+    }
     status.value = paymentIntent?.status ?? 'failed'
   } else {
     status.value = result.status
@@ -99,10 +113,12 @@ const pay = async () => {
 
 <template>
   <button :disabled="loading" @click="pay">Pay</button>
-  <p v-if="error || actionError || serverError">{{ error || actionError || serverError }}</p>
+  <p v-if="message">{{ message }}</p>
   <p v-if="status">Payment {{ status }}</p>
 </template>
 ```
+
+`pay()` clears `message` at the start of each attempt. Don't show the composables' `error` refs here instead: each one resets only when its own composable runs again, so a failed 3D Secure message would stay on the page after the next payment succeeds.
 
 `confirmationToken.payment_method_preview` describes what the customer chose (`type`, `card.brand`, `card.last4`, ...) if you want to show it or check it before charging.
 
