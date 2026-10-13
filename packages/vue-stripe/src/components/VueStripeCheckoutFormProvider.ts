@@ -19,6 +19,52 @@ import { stripeCheckoutFormInjectionKey, stripeInjectionKey } from '../utils/inj
 import { VueStripeProviderError } from '../utils/errors'
 import { hx } from '../utils/h'
 import { statusShell } from '../utils/status-shell'
+import type { VueStripeComponent } from '../utils/element-types'
+
+const checkoutFormProviderProps = {
+  /** Client secret of a Checkout Session (`ui_mode: 'form'`), or a Promise resolving to it. */
+  clientSecret: {
+    type: [String, Promise] as PropType<string | Promise<string> | undefined>,
+    default: undefined
+  },
+  /** Alternative to `clientSecret`: a function returning the client secret. */
+  fetchClientSecret: {
+    type: Function as PropType<(() => Promise<string>) | undefined>,
+    default: undefined
+  },
+  /** Appearance of the form (Stripe's `Appearance` without `rules`). */
+  appearance: {
+    type: Object as PropType<StripeCheckoutFormSdkOptions['appearance'] | undefined>,
+    default: undefined
+  },
+  /** When to show the loader: `'auto'`, `'always'` or `'never'`. */
+  loader: {
+    type: String as PropType<StripeCheckoutFormSdkOptions['loader'] | undefined>,
+    default: undefined
+  },
+  /** Custom fonts for the form. */
+  fonts: {
+    type: Array as PropType<StripeCheckoutFormSdkOptions['fonts'] | undefined>,
+    default: undefined
+  },
+  /** Saved payment methods (`enableSave`, `enableRedisplay`). */
+  savedPaymentMethod: {
+    type: Object as PropType<StripeCheckoutFormSdkOptions['savedPaymentMethod'] | undefined>,
+    default: undefined
+  },
+  /** Prefill email, phone number and addresses. */
+  defaultValues: {
+    type: Object as PropType<StripeCheckoutFormSdkOptions['defaultValues'] | undefined>,
+    default: undefined
+  }
+}
+
+/** Event name -> payload. */
+type CheckoutFormProviderEvents = {
+  ready: [actions: StripeCheckoutFormLoadActionsSuccess]
+  change: [session: StripeCheckoutSession]
+  error: [message: string]
+}
 
 /**
  * Checkout Form (`stripe.initCheckoutFormSdk()`, `ui_mode: 'form'`). Stripe beta:
@@ -29,44 +75,8 @@ import { statusShell } from '../utils/status-shell'
  */
 export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeCheckoutFormProvider',
-  props: {
-    /** Client secret of a Checkout Session (`ui_mode: 'form'`), or a Promise resolving to it. */
-    clientSecret: {
-      type: [String, Promise] as PropType<string | Promise<string> | undefined>,
-      default: undefined
-    },
-    /** Alternative to `clientSecret`: a function returning the client secret. */
-    fetchClientSecret: {
-      type: Function as PropType<(() => Promise<string>) | undefined>,
-      default: undefined
-    },
-    /** Appearance of the form (Stripe's `Appearance` without `rules`). */
-    appearance: {
-      type: Object as PropType<StripeCheckoutFormSdkOptions['appearance'] | undefined>,
-      default: undefined
-    },
-    /** When to show the loader: `'auto'`, `'always'` or `'never'`. */
-    loader: {
-      type: String as PropType<StripeCheckoutFormSdkOptions['loader'] | undefined>,
-      default: undefined
-    },
-    /** Custom fonts for the form. */
-    fonts: {
-      type: Array as PropType<StripeCheckoutFormSdkOptions['fonts'] | undefined>,
-      default: undefined
-    },
-    /** Saved payment methods (`enableSave`, `enableRedisplay`). */
-    savedPaymentMethod: {
-      type: Object as PropType<StripeCheckoutFormSdkOptions['savedPaymentMethod'] | undefined>,
-      default: undefined
-    },
-    /** Prefill email, phone number and addresses. */
-    defaultValues: {
-      type: Object as PropType<StripeCheckoutFormSdkOptions['defaultValues'] | undefined>,
-      default: undefined
-    }
-  },
-  emits: ['ready', 'change', 'error'],
+  props: checkoutFormProviderProps,
+  emits: ['ready', 'change', 'error'] satisfies Array<keyof CheckoutFormProviderEvents>,
   setup(props, { emit, slots }) {
     const stripeInstance = inject(stripeInjectionKey, null)
     if (!stripeInstance) {
@@ -181,4 +191,8 @@ export default /* @__PURE__ */ defineComponent({
             })
           )
   }
-})
+}) as unknown as VueStripeComponent<
+  typeof checkoutFormProviderProps,
+  Record<never, never>,
+  CheckoutFormProviderEvents
+>

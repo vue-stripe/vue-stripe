@@ -183,10 +183,16 @@ function topLevelKeys(body: string): string[] {
 
 const isFactoryDefinition = (source: string) => /createStripeElement[<(]/.test(source)
 
-/** Props of a component: the factory's `props:` for element definitions, else its own. */
+/**
+ * Props of a component: the factory's `props:` for element definitions, else its own,
+ * written inline (`props: { ... }`) or as a module-level `const name = { ... }` (`props: name`).
+ */
 function extractProps(source: string): string[] {
-  const from = isFactoryDefinition(source) ? factorySource : source
-  const body = objectBody(stripComments(from), /\bprops:\s*\{/)
+  const code = stripComments(isFactoryDefinition(source) ? factorySource : source)
+  const named = code.match(/\bprops:\s*([A-Za-z_$][\w$]*)\s*[,}]/)?.[1]
+  const body = named
+    ? objectBody(code, new RegExp(`\\bconst ${named}\\s*=\\s*\\{`))
+    : objectBody(code, /\bprops:\s*\{/)
   return body ? topLevelKeys(body) : []
 }
 
@@ -325,6 +331,19 @@ describe('docs/API contract: extractors', () => {
     })`
     expect(extractProps(source)).toEqual(['sessionUrl', 'buttonText', 'fetchClientSecret'])
     expect(extractExposed(source)).toEqual(['checkout', 'loading', 'clear'])
+  })
+
+  it('reads props declared as a module-level object and passed as `props: name`', () => {
+    const source = `const checkoutProps = {
+      sessionUrl: { type: String as PropType<string | undefined>, default: undefined },
+      disabled: { type: Boolean, default: false }
+    }
+    export default defineComponent({
+      props: checkoutProps,
+      setup(props, { expose }) { expose({ checkout } satisfies CheckoutExposed) }
+    }) as unknown as VueStripeComponent<typeof checkoutProps, CheckoutExposed, CheckoutEvents>`
+    expect(extractProps(source)).toEqual(['sessionUrl', 'disabled'])
+    expect(extractExposed(source)).toEqual(['checkout'])
   })
 
   it('reads an empty factory events list as no events, and a missing one as BASE_EVENTS', () => {

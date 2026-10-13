@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.vue2.json",
+  "compilerOptions": { "skipLibCheck": true }
+}

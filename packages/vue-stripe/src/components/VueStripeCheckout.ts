@@ -1,6 +1,32 @@
-import { defineComponent, ref, type PropType } from 'vue-demi'
+import { defineComponent, ref, type PropType, type Ref } from 'vue-demi'
 import { VueStripeCheckoutError } from '../utils/errors'
 import { hx } from '../utils/h'
+import type { VueStripeComponent } from '../utils/element-types'
+
+const checkoutProps = {
+  /** Hosted Checkout Session URL (`session.url`) created on your server. */
+  sessionUrl: { type: String as PropType<string | undefined>, default: undefined },
+  buttonText: { type: String, default: 'Checkout' },
+  loadingText: { type: String, default: 'Redirecting...' },
+  disabled: { type: Boolean, default: false },
+  buttonClass: { type: String, default: 'vue-stripe-checkout-button' }
+}
+
+/** Template ref members. */
+type CheckoutExposed = {
+  /** Starts the redirect (ignored while `loading` or `disabled`). */
+  checkout: () => void
+  /** `true` once the redirect has started. */
+  loading: Ref<boolean>
+}
+
+/** Event name -> payload. */
+type CheckoutEvents = {
+  checkout: []
+  'before-redirect': [event: { url: string }]
+  success: []
+  error: [error: VueStripeCheckoutError]
+}
 
 /**
  * Redirects to a hosted Checkout Session URL created on your server.
@@ -9,15 +35,8 @@ import { hx } from '../utils/h'
  */
 export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeCheckout',
-  props: {
-    /** Hosted Checkout Session URL (`session.url`) created on your server. */
-    sessionUrl: { type: String as PropType<string | undefined>, default: undefined },
-    buttonText: { type: String, default: 'Checkout' },
-    loadingText: { type: String, default: 'Redirecting...' },
-    disabled: { type: Boolean, default: false },
-    buttonClass: { type: String, default: 'vue-stripe-checkout-button' }
-  },
-  emits: ['checkout', 'before-redirect', 'success', 'error'],
+  props: checkoutProps,
+  emits: ['checkout', 'before-redirect', 'success', 'error'] satisfies Array<keyof CheckoutEvents>,
   setup(props, { emit, expose, slots }) {
     const loading = ref(false)
 
@@ -41,7 +60,7 @@ export default /* @__PURE__ */ defineComponent({
       emit('success')
     }
 
-    expose({ checkout, loading })
+    expose({ checkout, loading } satisfies CheckoutExposed)
 
     return () => {
       // Custom content: the wrapper handles clicks, so a plain slot works without scoped props.
@@ -62,4 +81,4 @@ export default /* @__PURE__ */ defineComponent({
       )
     }
   }
-})
+}) as unknown as VueStripeComponent<typeof checkoutProps, CheckoutExposed, CheckoutEvents>

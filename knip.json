@@ -10,7 +10,8 @@
       "entry": ["tests/**/*.ts"]
     },
     "packages/vue2-smoke": {
-      "entry": ["tests/**/*.ts"]
+      "entry": ["tests/**/*.ts", "types/*.vue"],
+      "ignoreDependencies": ["vue3"]
     },
     "apps/playground": {
       "ignore": ["src/components/ui/**"]

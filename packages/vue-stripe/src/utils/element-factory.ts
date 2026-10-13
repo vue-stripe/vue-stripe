@@ -13,6 +13,7 @@ import type {
   ElementDefinition,
   ElementEvents,
   StripeElementComponent,
+  StripeElementExposed,
   StripeElementLike
 } from './element-types'
 import {
@@ -48,8 +49,11 @@ export function createStripeElement<
   TOptions extends object = Record<string, unknown>,
   TElement = StripeElementLike,
   TExtra extends object = Record<never, never>,
-  TEvents extends ElementEvents = ElementEvents
->(def: ElementDefinition): StripeElementComponent<TOptions, TElement, TExtra, TEvents> {
+  TEvents extends ElementEvents = ElementEvents,
+  TUnsupported extends keyof StripeElementExposed<TElement> = never
+>(
+  def: ElementDefinition
+): StripeElementComponent<TOptions, TElement, TExtra, TEvents, TUnsupported> {
   const { elementType, componentName, events = BASE_EVENTS } = def
   const loadingText = def.loadingText ?? `Loading ${elementType}...`
   const className = def.className ?? `vue-stripe-${elementType}-element`
@@ -232,5 +236,11 @@ export function createStripeElement<
     }
   })
   // The runtime component is typed loosely; callers get the precise public type.
-  return component as unknown as StripeElementComponent<TOptions, TElement, TExtra, TEvents>
+  return component as unknown as StripeElementComponent<
+    TOptions,
+    TElement,
+    TExtra,
+    TEvents,
+    TUnsupported
+  >
 }

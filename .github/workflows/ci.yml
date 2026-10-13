@@ -99,6 +99,10 @@ jobs:
       - name: Vue 2.7 smoke test
         run: pnpm --filter @vue-stripe/vue2-smoke test
 
+      # vue-tsc on the built dist/types, Vue 2.7 and Vue 3, skipLibCheck false and true.
+      - name: Type declarations on Vue 2.7 and Vue 3
+        run: pnpm --filter @vue-stripe/vue2-smoke typecheck
+
   size:
     name: Bundle size and dead code
     runs-on: ubuntu-latest
