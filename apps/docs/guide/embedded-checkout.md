@@ -19,7 +19,7 @@ sequenceDiagram
     participant Browser
     participant Server
     participant Stripe
-    Browser->>Server: POST /checkout-session
+    Browser->>Server: POST /api/embedded-checkout-session
     Server->>Stripe: checkout.sessions.create({ ui_mode: 'embedded_page' })
     Stripe-->>Server: session.client_secret
     Server-->>Browser: clientSecret
@@ -30,7 +30,7 @@ sequenceDiagram
 
 ## 1. Create the session on your server
 
-Create the session with `ui_mode: 'embedded_page'` and a `return_url`, and send `client_secret` to the browser:
+Create the session with `ui_mode: 'embedded_page'` and a `return_url`, and send `client_secret` to the browser. The route has its own path because the other Checkout guides create sessions with a different `ui_mode`, so one app can follow several of them.
 
 ```js
 // Node.js (Express-style handler)
@@ -38,7 +38,7 @@ import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
-app.post('/api/checkout-session', async (req, res) => {
+app.post('/api/embedded-checkout-session', async (req, res) => {
   const session = await stripe.checkout.sessions.create({
     ui_mode: 'embedded_page',
     mode: 'payment',
@@ -65,7 +65,7 @@ import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 const fetchClientSecret = () =>
-  fetch('/api/checkout-session', { method: 'POST' })
+  fetch('/api/embedded-checkout-session', { method: 'POST' })
     .then((response) => response.json())
     .then((data) => data.clientSecret)
 </script>
