@@ -6,7 +6,7 @@ description: "Method confirmers: a Vue composable for each of the 46 Stripe.js c
 
 Stripe.js has a confirm method for each payment method, such as `stripe.confirmCardPayment()` or `stripe.confirmSepaDebitSetup()`. Vue Stripe wraps every one of them, 46 in Stripe.js 10, in a composable named after it: `useConfirmCardPayment`, `useConfirmSepaDebitSetup`, and so on. Call them inside a `VueStripeProvider`; they do not need `VueStripeElements`, but components that render the Card, IBAN or BECS element do.
 
-With the [Payment Element](/api/components/stripe-payment-element), confirm with [`usePaymentIntent`](/api/composables/use-payment-intent) or [`useSetupIntent`](/api/composables/use-setup-intent) instead. [How confirming works](/guide/confirming-payments#which-composable-confirms) explains which composable fits which flow. Some payment methods must be enabled on your Stripe account, or are offered only in some countries or currencies; each family page links Stripe's guide for the method.
+With the [Payment Element](/api/components/stripe-payment-element), confirm with [`usePaymentIntent`](/api/composables/use-payment-intent) or [`useSetupIntent`](/api/composables/use-setup-intent) instead. [How confirming works](/guide/confirming-payments#which-composable-confirms) explains which composable fits which flow. Some payment methods must be enabled on your Stripe account, or are offered only in some countries or currencies; [What each method needs](#what-each-method-needs) lists the currency and fields each confirmer requires, and each family page links Stripe's guide for the method.
 
 ## Usage
 
@@ -33,6 +33,44 @@ const pay = async (clientSecret: string) => {
 | [Wallets](/api/composables/confirm/wallets) | 15 | `useConfirmAlipayPayment`, `useConfirmAmazonPaySetup`, `useConfirmBlikPayment`, ... |
 | [Buy now, pay later](/api/composables/confirm/bnpl) | 4 | `useConfirmAffirmPayment`, `useConfirmAfterpayClearpayPayment`, `useConfirmBilliePayment`, ... |
 | [Vouchers](/api/composables/confirm/vouchers) | 3 | `useConfirmBoletoPayment`, `useConfirmKonbiniPayment`, `useConfirmOxxoPayment` |
+
+## What each method needs
+
+The composables pass your arguments to Stripe.js unchanged, but Stripe accepts a confirm only when the Intent and the `data` fit the method. Three rules cover most failures:
+
+- **Pass `payment_method`.** With only `{ return_url }`, most methods fail with `payment_intent_incompatible_payment_method` ("A payment method of type cashapp was expected to be present, but this PaymentIntent does not have a payment method and none was provided"), even where Stripe's own reference shows that form. Pass `payment_method: {}`, with the billing details below. For iDEAL, BLIK, FPX, SEPA Debit and Bacs, Stripe.js throws "Missing value for confirmIdealPayment: payment_method.ideal should be an object or element." unless `payment_method` has the method's own key, such as `{ ideal: {} }`.
+- **Create the Intent in a currency the method takes.** Otherwise the server's `paymentIntents.create()` fails with "The currency provided (usd) is invalid. Payments with ideal support the following currencies: eur." Some methods also take other currencies on accounts in other countries.
+- **Send the billing fields the method requires.** A missing one comes back as `parameter_missing`, for example "Missing required param: billing_details[email]."
+
+Observed with Stripe.js 10 on a US sandbox account in October 2026:
+
+| Method | Intent | `data` |
+|--------|--------|--------|
+| ACSS Debit | `cad` or `usd`, created with `payment_method_options.acss_debit.mandate_options` (a SetupIntent also needs `payment_method_options.acss_debit.currency`) | `payment_method.billing_details` with `name` and `email`. Stripe.js then opens its modal for the bank account |
+| Affirm | `usd`, at least $35.00 | `payment_method: {}` |
+| Afterpay / Clearpay | `usd` | `payment_method.billing_details` with `name` and `email` |
+| Alipay | `usd` or `cny` | `return_url` is enough |
+| Amazon Pay (setup) | SetupIntent | `payment_method: {}` |
+| Bacs Debit (setup) | SetupIntent | `payment_method.bacs_debit` (`sort_code`, `account_number`) and `billing_details` with `name`, `email` and `address` |
+| Bancontact | `eur` | Payment: `return_url` is enough. Setup: `payment_method.billing_details` with `name` and `email` |
+| BLIK | `pln` | `payment_method: { blik: {} }` and `payment_method_options.blik.code`. Setup: also `billing_details.email` |
+| Boleto | `brl` | `payment_method.boleto.tax_id` and `billing_details` with `name`, `email` and `address` (required by the Stripe.js type) |
+| Cash App Pay | `usd` | `payment_method: {}`, for payments and setups |
+| Customer balance | Created with a `customer` | `payment_method: {}` (or `{ customer_balance: {} }`), and `payment_method_options.customer_balance` with `funding_type: 'bank_transfer'` and the `bank_transfer.type`, here or on the Intent (see [the example](/api/composables/confirm/redirects#example)) |
+| EPS | `eur` | `payment_method: {}` |
+| FPX | `myr` | `payment_method: { fpx: { bank } }` |
+| iDEAL | `eur` | `payment_method: { ideal: {} }`. Setup: also `billing_details` with `name` and `email` |
+| Klarna | `usd` | `return_url` is enough |
+| Multibanco | `eur` | `payment_method.billing_details.email` |
+| OXXO | `mxn` | `payment_method.billing_details` with `name` and `email` |
+| Przelewy24 | `eur` or `pln` | `payment_method.billing_details.email` |
+| Pay by Bank | `gbp` or `eur` | `return_url` is enough |
+| Pix | `brl` | `payment_method.billing_details` with `name`, `email` and `tax_id` (see [Pix](/api/composables/confirm/wallets#useconfirmpixpayment)) |
+| SEPA Debit | `eur` | `payment_method.sepa_debit` (the IBAN Element or `{ iban }`) and `billing_details` with `name` and `email` |
+| US bank account | `usd` | `payment_method.us_bank_account` (or a payment method from [`useFinancialConnections`](/api/composables/use-financial-connections)) and `billing_details.name` |
+| WeChat Pay | `usd` or `cny` | `payment_method_options.wechat_pay.client`: `'web'` or `'mobile_web'`. Stripe.js throws without it |
+
+Billie needs a [Stripe beta flag](/api/composables/confirm/bnpl#useconfirmbilliepayment), and Stripe refuses [giropay and Sofort](/api/composables/confirm/redirects) payments. GrabPay, Konbini, MobilePay, PayNow, PayPal, PromptPay, TWINT and AU BECS Debit were not available on the account used for this table; follow the Stripe guide each family page links. [Test your integration](/guide/testing#redirects-qr-codes-bnpl-and-vouchers) describes what each method does in test mode.
 
 ## Return value
 

@@ -6,7 +6,7 @@ description: "Vue composables that confirm wallet payments with Stripe.js: Alipa
 
 Confirm a PaymentIntent or SetupIntent with a wallet or app-based method: Alipay, Amazon Pay, BLIK, Cash App Pay, GrabPay, MobilePay, PayNow, PayPal, Pix, PromptPay, TWINT and WeChat Pay. Depending on the method, Stripe redirects to the wallet and back to your `return_url`, shows a QR code, or waits for the customer to approve in their banking app (BLIK).
 
-Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider).
+Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider). [What each method needs](/api/composables/confirm/#what-each-method-needs) lists the Intent currency and the `data` each method requires, and [Test your integration](/guide/testing#redirects-qr-codes-bnpl-and-vouchers) what each method does in test mode.
 
 ## When to use
 
@@ -15,25 +15,30 @@ The [Express Checkout Element](/api/components/stripe-express-checkout-element) 
 ## Example
 
 ```vue
-<!-- PayWithPayPal.vue: rendered inside <VueStripeProvider> -->
+<!-- PayWithCashApp.vue: rendered inside <VueStripeProvider> -->
 <script setup lang="ts">
-import { useConfirmPayPalPayment } from '@vue-stripe/vue-stripe'
+import { useConfirmCashappPayment } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{ clientSecret: string }>()
 
-const { confirmPayPalPayment, loading, error } = useConfirmPayPalPayment()
+const { confirmCashappPayment, loading, error } = useConfirmCashappPayment()
 
+// `payment_method: {}` lets Stripe create the Cash App Pay payment method;
+// without it the call fails with payment_intent_incompatible_payment_method
 const pay = () =>
-  confirmPayPalPayment(props.clientSecret, {
+  confirmCashappPayment(props.clientSecret, {
+    payment_method: {},
     return_url: `${window.location.origin}/checkout/complete`
   })
 </script>
 
 <template>
-  <button :disabled="loading" @click="pay">Pay with PayPal</button>
+  <button :disabled="loading" @click="pay">Pay with Cash App Pay</button>
   <p v-if="error">{{ error }}</p>
 </template>
 ```
+
+Stripe.js then shows a QR code in a modal and resolves once the customer has paid. [What each method needs](/api/composables/confirm/#what-each-method-needs) lists the Intent currency and the `data` for each wallet.
 
 BLIK takes the six-digit code from the customer's banking app and resolves once they approve the payment there:
 
@@ -222,6 +227,15 @@ confirmPixPayment(
   data?: ConfirmPixPaymentData,
   options?: ConfirmPixPaymentOptions
 ): Promise<PaymentIntentResult>
+```
+
+Stripe requires `billing_details` with `name`, `email` and `tax_id` (the customer's CPF or CNPJ); without them the call resolves to "Missing required param: billing_details[tax_id]." and so on. The Stripe.js 10 `BillingDetails` type has no `tax_id`, so an inline object literal fails type checking with TS2353. Build the object in a variable, which skips the excess-property check:
+
+```ts
+const payWithPix = (clientSecret: string) => {
+  const billing_details = { name: 'Jenny Rosen', email: 'jenny@example.com', tax_id: '000.000.000-00' }
+  return confirmPixPayment(clientSecret, { payment_method: { billing_details } })
+}
 ```
 
 ### useConfirmPromptPayPayment

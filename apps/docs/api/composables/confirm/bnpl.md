@@ -6,7 +6,7 @@ description: "Vue composables that confirm buy now, pay later payments with Stri
 
 Confirm a PaymentIntent with a buy now, pay later method: Affirm, Afterpay / Clearpay, Billie (Stripe beta) and Klarna. Stripe redirects the customer to the provider to approve the plan and back to your `return_url`.
 
-Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider).
+Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider). [What each method needs](/api/composables/confirm/#what-each-method-needs) lists the Intent currency and the `data` each method requires, and [Test your integration](/guide/testing#redirects-qr-codes-bnpl-and-vouchers) what each method does in test mode.
 
 ## When to use
 
