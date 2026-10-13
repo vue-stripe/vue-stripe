@@ -192,7 +192,7 @@ import '@vue-stripe/vue-stripe/style.css'
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots).
 
 ```ts
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'

@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    // File paths: an ES module resolution does not load a mapped folder.
+    "paths": {
+      "vue": ["../../node_modules/vue/types/index.d.ts"],
+      "vue-demi": ["../../node_modules/vue-demi/lib/index.d.ts"]
+    }
+  },
+  "files": ["consumer.mts", "consumer.cts"]
+}
