@@ -4,7 +4,11 @@ import type {
 } from '@stripe/stripe-js'
 import { createStripeElement } from '../utils/element-factory'
 
-type PaymentMethodMessagingEvents = { ready: [element: StripePaymentMethodMessagingElement] }
+type PaymentMethodMessagingEvents = {
+  ready: [element: StripePaymentMethodMessagingElement]
+  /** Not in Stripe.js 10's types, but emitted, e.g. with no `countryCode` for an unsupported country. */
+  loaderror: [event: { elementType: 'paymentMethodMessaging'; error: { message?: string } }]
+}
 
 /**
  * Payment Method Messaging Element: promotional BNPL messaging (Affirm, Klarna,
@@ -21,5 +25,6 @@ export default /* @__PURE__ */ createStripeElement<
   elementType: 'paymentMethodMessaging',
   componentName: 'VueStripePaymentMethodMessagingElement',
   loadingText: 'Loading payment method messaging...',
-  events: ['ready']
+  // Stripe.js emits `loaderror` (then destroys the element) without declaring it in its types.
+  events: ['ready', 'loaderror']
 })

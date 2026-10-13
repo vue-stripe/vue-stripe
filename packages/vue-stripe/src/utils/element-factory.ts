@@ -217,9 +217,13 @@ export function createStripeElement<
       const teardown = () => {
         const el = element.value
         if (!el) return
-        for (const name of events) el.off?.(name, handlers[name])
-        el.destroy()
         element.value = null
+        for (const name of events) el.off?.(name, handlers[name])
+        try {
+          el.destroy()
+        } catch {
+          // Stripe already destroyed it (the Payment Method Messaging Element after loaderror).
+        }
       }
 
       // VueStripeElements builds a new group when the Intent or the deferred-Intent
