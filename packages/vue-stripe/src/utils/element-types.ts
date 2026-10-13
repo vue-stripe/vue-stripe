@@ -26,6 +26,12 @@ export interface ElementDefinition {
   componentName: string
   /** Stripe events re-emitted as Vue events (exact Stripe.js 10 union). Defaults to BASE_EVENTS. */
   events?: readonly string[]
+  /**
+   * Events subscribed on the Stripe element only when the app listens for them, because
+   * subscribing changes Stripe's behaviour (Express Checkout waits for the handler to call
+   * `resolve()` once a `click` handler is attached).
+   */
+  listenerOnlyEvents?: readonly string[]
   /** Options merged under `props.options` (e.g. IBAN supportedCountries). */
   defaultOptions?: () => Record<string, unknown>
   /** Creator inside VueStripeCheckoutElementsProvider; omit when Checkout Sessions lack the element. */

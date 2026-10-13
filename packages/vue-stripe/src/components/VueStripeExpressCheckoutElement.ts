@@ -30,7 +30,9 @@ type ExpressCheckoutEvents = {
 /**
  * Express Checkout Element (Apple Pay, Google Pay, Link, PayPal, ...). Works within
  * `<VueStripeElements>` and `<VueStripeCheckoutElementsProvider>`. Under Checkout Sessions
- * the `click`, `shippingaddresschange` and `shippingratechange` events never fire.
+ * the `click`, `shippingaddresschange` and `shippingratechange` events never fire. Those
+ * three are passed to Stripe only when you listen for them; a listener must call
+ * `event.resolve()` (or `reject()`).
  */
 export default /* @__PURE__ */ createStripeElement<
   StripeExpressCheckoutElementOptions,
@@ -53,6 +55,9 @@ export default /* @__PURE__ */ createStripeElement<
     'availablepaymentmethodschange',
     'loaderror'
   ],
+  // Once these have a handler, Stripe waits for it to call resolve() (1 s for click, 20 s
+  // for the shipping events), so they are only subscribed when the app listens.
+  listenerOnlyEvents: ['click', 'shippingaddresschange', 'shippingratechange'],
   className: 'vue-stripe-express-checkout-element',
   // `ready` carries availablePaymentMethods, which wallet UIs need.
   readyPayload: 'event',

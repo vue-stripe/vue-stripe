@@ -88,6 +88,18 @@ export function createStripeElement<
           'mount'
         ] ?? null
 
+      // Vue 3 keeps listeners for declared emits in the vnode props (onClick, onClickOnce);
+      // Vue 2.7 keeps them in $listeners. Read when the element is created.
+      const subscribes = (name: string) => {
+        if (!def.listenerOnlyEvents?.includes(name)) return true
+        const key = `on${name[0]!.toUpperCase()}${name.slice(1)}`
+        const vnodeProps = (
+          instance?.vnode as { props?: Record<string, unknown> | null } | undefined
+        )?.props
+        const proxy = instance?.proxy as { $listeners?: Record<string, unknown> } | null | undefined
+        return !!(vnodeProps?.[key] || vnodeProps?.[`${key}Once`] || proxy?.$listeners?.[name])
+      }
+
       const handlers: Record<string, (...args: unknown[]) => void> = {}
       for (const name of events) {
         handlers[name] = (...args: unknown[]) => {
@@ -143,7 +155,9 @@ export function createStripeElement<
           applied = snapshot(updatable(props.options))
           loading.value = true
           element.value = created
-          for (const name of events) created.on(name, handlers[name] as never)
+          for (const name of events) {
+            if (subscribes(name)) created.on(name, handlers[name] as never)
+          }
           created.mount(target)
           // Elements without a `ready` event (e.g. the Issuing displays) are shown once mounted.
           if (!events.includes('ready')) loading.value = false
