@@ -228,7 +228,12 @@ export function createStripeElement<
       })
 
       return () =>
-        renderElement(className, { error: error.value, loading: loading.value }, slots, loadingText)
+        renderElement(
+          className,
+          { error: error.value, loading: loading.value, mount: mountPoint() },
+          slots,
+          loadingText
+        )
     }
   })
   // The runtime component is typed loosely; callers get the precise public type.

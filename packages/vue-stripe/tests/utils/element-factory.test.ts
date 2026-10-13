@@ -139,6 +139,22 @@ describe('createStripeElement', () => {
     expect(wrapper.find('.vue-stripe-element-loader').exists()).toBe(false)
   })
 
+  it('keeps the classes Stripe.js added to the mount node when loading ends (#563)', async () => {
+    const Comp = createStripeElement({ elementType: 'x', componentName: 'X' })
+    const { wrapper, element, handler } = mountUnder(Comp)
+    await flushPromises()
+    const host = element.mount.mock.calls[0]![0] as HTMLElement
+    host.classList.add('StripeElement', 'StripeElement--empty')
+    handler('ready')({ elementType: 'x' })
+    await nextTick()
+    expect(wrapper.find('.vue-stripe-element-loading').exists()).toBe(false)
+    expect(host.classList.contains('vue-stripe-element-mount')).toBe(true)
+    expect(host.classList.contains('StripeElement--empty')).toBe(true)
+    handler('change')({ error: { message: 'Invalid' } })
+    await nextTick()
+    expect(wrapper.find('.vue-stripe-element-error').element.nextElementSibling).toBe(host)
+  })
+
   it('turns loading off after mount when the element has no ready event', async () => {
     const Comp = createStripeElement({ elementType: 'x', componentName: 'X', events: ['click'] })
     const { wrapper, element, child } = mountUnder(Comp)
