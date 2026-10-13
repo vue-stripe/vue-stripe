@@ -2,7 +2,7 @@
 
 Collect an IBAN with `VueStripeIbanElement` and confirm a SEPA Direct Debit payment with [`useConfirmSepaDebitPayment()`](/api/composables/confirm/bank-debits). The element formats and validates the IBAN as the customer types and reports the bank and country.
 
-SEPA Direct Debit does not succeed at once: the PaymentIntent goes to `processing` and settles or fails after a few business days, so fulfil the order from a webhook, not from the confirm result.
+SEPA Direct Debit does not succeed at once: the PaymentIntent goes to `processing` and settles or fails after a few business days, so fulfil the order from a webhook, not from the confirm result. [Payments that settle later](/guide/payment-objects#payments-that-settle-later) explains the timing.
 
 ## Before you begin
 
@@ -135,13 +135,13 @@ const handleSubmit = async () => {
 </template>
 ```
 
-`placeholderCountry` picks the IBAN format of the placeholder, for example `DE00 0000 0000 0000 0000 00` for `'DE'`. For colors and fonts, pass a Stripe `style` object in `options`.
+`placeholderCountry` picks the IBAN format of the placeholder, for example `DE00 0000 0000 0000 0000 00` for `'DE'`. For colors and fonts, pass a Stripe `style` object in `options` ([Style elements](/guide/styling#_3-style-the-card-iban-and-becs-elements)).
 
 ## 4. Fulfil the order when the payment succeeds
 
-Listen for `payment_intent.succeeded` and `payment_intent.payment_failed` on your server and fulfil or cancel the order there.
+Listen for `payment_intent.succeeded` and `payment_intent.payment_failed` on your server and fulfil or cancel the order there ([Fulfil orders with webhooks](/guide/webhooks)).
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#sepa-direct-debit-iban).
 
 ## See also
 

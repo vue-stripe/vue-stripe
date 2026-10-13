@@ -51,7 +51,7 @@ The library imports Stripe.js through the `@stripe/stripe-js/pure` entry, so imp
 
 ### One build for Vue 3 and Vue 2.7
 
-Every component is a render function written against [vue-demi](https://github.com/vueuse/vue-demi), with no single-file components in the library. vue-demi resolves to Vue 3 or Vue 2.7 at install time, so one published build serves both. CI mounts that build on Vue 2.7 to check it. Vue 2.6 and older are not supported, because the components rely on APIs that arrived in 2.7. See [Installation](/guide/installation#vue-2-7) for the Vue 2.7 setup.
+Every component is a render function written against [vue-demi](https://github.com/vueuse/vue-demi), with no single-file components in the library. vue-demi resolves to Vue 3 or Vue 2.7 at install time, so one published build serves both. CI mounts that build on Vue 2.7 to check it. Vue 2.6 and older are not supported, because the components rely on APIs that arrived in 2.7. See [Use Vue Stripe on Vue 2.7](/guide/vue-2) for the Vue 2.7 setup.
 
 ### Stripe objects stay out of Vue's reactivity
 

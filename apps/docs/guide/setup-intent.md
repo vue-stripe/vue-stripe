@@ -1,6 +1,6 @@
 # Save a payment method for later
 
-Save a customer's payment method without charging it, with a SetupIntent, the Payment Element and [`useSetupIntent()`](/api/composables/use-setup-intent). Stripe runs 3D Secure while the customer is present, so later off-session charges are less likely to fail.
+Save a customer's payment method without charging it, with a SetupIntent, the Payment Element and [`useSetupIntent()`](/api/composables/use-setup-intent). Stripe runs 3D Secure while the customer is present, so later off-session charges are less likely to fail. To decide between a SetupIntent and a PaymentIntent, see [Payment objects](/guide/payment-objects#paymentintent-or-setupintent).
 
 ## Before you begin
 
@@ -131,11 +131,14 @@ const paymentIntent = await stripe.paymentIntents.create({
 
 If the bank asks for authentication again, the charge fails with `authentication_required`; bring the customer back on-session to confirm it.
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#saving-cards).
 
 ## See also
 
 - [useSetupIntent API](/api/composables/use-setup-intent): confirm options and result
 - [Card confirmers](/api/composables/confirm/cards): `useConfirmCardSetup` with the Card Element
+- [Start a subscription](/guide/subscriptions)
+- [Handle errors and declines](/guide/error-handling)
+- [PaymentIntent or SetupIntent](/guide/payment-objects#paymentintent-or-setupintent)
 - [Live demo](/live-demo/setup-intent)
 - [Stripe docs: Save and reuse payment methods](https://docs.stripe.com/payments/save-and-reuse)

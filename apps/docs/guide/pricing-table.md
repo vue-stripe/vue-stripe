@@ -91,4 +91,5 @@ If your site sets a Content Security Policy, allow `https://js.stripe.com` in `s
 
 - [VueStripePricingTable API](/api/components/stripe-pricing-table): props, events, slots and limits
 - [Redirect to Stripe Checkout](/guide/checkout): build the Checkout Session yourself
+- [Start a subscription](/guide/subscriptions): build the subscription flow yourself
 - [Stripe docs: Pricing tables](https://docs.stripe.com/payments/checkout/pricing-table)

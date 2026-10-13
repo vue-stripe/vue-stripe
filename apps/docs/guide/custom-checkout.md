@@ -227,7 +227,7 @@ if (result.type === 'error') {
 }
 ```
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#cards).
 
 ## See also
 

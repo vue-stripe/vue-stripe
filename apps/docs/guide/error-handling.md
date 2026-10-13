@@ -119,7 +119,7 @@ const pay = async () => {
 
 - The composable's `error` ref holds the last message too. Bind it in the template when you don't need to branch on the type.
 - If Stripe.js has not loaded, or Stripe.js throws, `usePaymentIntent`, `useSetupIntent`, `useCreatePaymentMethod`, `useHandleNextAction`, `useFinancialConnections` and `useIdentity` resolve to `{ error: { message } }`, with no `type`; hence the `'type' in error` check.
-- The method confirmers (`useConfirmCardPayment`, `useConfirmSepaDebitPayment`, ...), `useCreateToken`, `useCreateConfirmationToken` and `useVerifyMicrodeposits*` behave like the Stripe.js method they wrap: a declined payment resolves to `{ error }`, but a thrown error rejects. Wrap those calls in `try` / `catch`. See [Return value](/api/composables/confirm/#return-value).
+- The method confirmers (`useConfirmCardPayment`, `useConfirmSepaDebitPayment`, ...), `useCreateToken`, `useCreateConfirmationToken` and `useVerifyMicrodeposits*` behave like the Stripe.js method they wrap: a declined payment resolves to `{ error }`, but a thrown error rejects. Wrap those calls in `try` / `catch`. See [Return value](/api/composables/confirm/#return-value), and [How confirming works](/guide/confirming-payments#two-error-styles) for why there are two styles.
 - After a decline the PaymentIntent is back in `requires_payment_method`. Keep the form mounted and let the customer try again with the same client secret.
 
 ### Common error codes

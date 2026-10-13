@@ -45,7 +45,7 @@ Stripe.js's `redirect` option decides what happens for payment methods that don'
 
 With `'if_required'` you still need a `return_url` page, because some payment methods always redirect. That page reads the client secret from its URL and retrieves the Intent, for example with `usePaymentIntent().retrievePaymentIntent()`, before it shows a result. Checkout Sessions work the same way: `useCheckoutSession().confirm()` redirects to the session's return URL after success unless you pass `redirect: 'if_required'`.
 
-A redirect means the confirming page is gone when the payment finishes, so code after the `await` may never run. Don't put order fulfilment there. Fulfil from a webhook, which arrives whether or not the customer comes back.
+A redirect means the confirming page is gone when the payment finishes, so code after the `await` may never run. Don't put order fulfilment there. Fulfil from a [webhook](/guide/webhooks), which arrives whether or not the customer comes back.
 
 ## Next actions
 
@@ -65,7 +65,7 @@ For a card, the bank answers within seconds, and confirmation returns `succeeded
 
 For these methods, a successful confirm call means "accepted for processing", not "paid". Show the customer that the payment is on its way, and act on the `payment_intent.succeeded` or `payment_intent.payment_failed` webhook. [Payment objects](/guide/payment-objects#payments-that-settle-later) explains why settlement takes time and what mandates are for.
 
-ACH Direct Debit and Canadian pre-authorized debits also differ in how the details are collected. The bank account is linked in Stripe's Financial Connections modal ([`useFinancialConnections`](/api/composables/use-financial-connections)) instead of an element. The customer then accepts a mandate, and only then is the Intent confirmed with `useConfirmUsBankAccountPayment`. The [ACH Direct Debit demo](/live-demo/ach-debit) runs the whole flow.
+ACH Direct Debit and Canadian pre-authorized debits also differ in how the details are collected. The bank account is linked in Stripe's Financial Connections modal ([`useFinancialConnections`](/api/composables/use-financial-connections)) instead of an element. The customer then accepts a mandate, and only then is the Intent confirmed with `useConfirmUsBankAccountPayment`. [Accept ACH Direct Debit](/guide/ach-debit) walks through it, and the [ACH Direct Debit demo](/live-demo/ach-debit) runs the whole flow.
 
 ## Two error styles
 

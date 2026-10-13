@@ -30,7 +30,7 @@ The frames protect the card data, not your page. A script injected into your pag
 Anything that runs in the browser can be changed by the person using it. Three consequences follow, and the guides apply all of them:
 
 - **Your server sets the amount.** The `amount` on `VueStripeElements` in the deferred-Intent flow only drives what the Payment Element displays. The amount charged is what your server puts on the Intent or the Checkout Session, computed from your own prices.
-- **Don't fulfil on the return page.** A customer can close the tab before the redirect, or open the success URL without paying. Fulfil orders from a webhook (`payment_intent.succeeded`, `checkout.session.completed`), which Stripe sends to your server whatever the browser does. Or retrieve the Intent or session on your server and check its status before acting.
+- **Don't fulfil on the return page.** A customer can close the tab before the redirect, or open the success URL without paying. Fulfil orders from a [webhook](/guide/webhooks) (`payment_intent.succeeded`, `checkout.session.completed`), which Stripe sends to your server whatever the browser does. Or retrieve the Intent or session on your server and check its status before acting.
 - **Check the signature on every webhook.** Your webhook endpoint is a public URL. Stripe signs each event with your endpoint's signing secret, and the server library's `constructEvent()` rejects events Stripe didn't send.
 
 ## Other secrets the browser sees

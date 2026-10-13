@@ -4,7 +4,7 @@ Move a working Vue Stripe 5 app to Vue Stripe 6, which runs on Stripe.js 10 (API
 
 ## Before you begin
 
-- Your app runs on Vue 2.7 or Vue 3. Vue 2.6 is no longer supported; upgrade to 2.7 first (see [Vue 2.7](/guide/installation#vue-2-7)).
+- Your app runs on Vue 2.7 or Vue 3. Vue 2.6 is no longer supported; upgrade to 2.7 first (see [Use Vue Stripe on Vue 2.7](/guide/vue-2)).
 - Note which Vue Stripe components, props and composables your app uses, so you can match them against the table in step 3.
 
 ## 1. Update the packages
@@ -28,7 +28,7 @@ import '@vue-stripe/vue-stripe/style.css'
 
 ## 3. Replace what changed
 
-Work through the table row by row. The last column gives the reason in short.
+Work through the table row by row. The last column gives the reason in short; [Stripe.js versions](/guide/stripe-js-versions) has the background for each Stripe-driven change.
 
 | v5.x | v6.0 | Reason |
 |------|------|--------|

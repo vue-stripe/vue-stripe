@@ -152,14 +152,16 @@ Pass known billing details through `defaultValues`:
 />
 ```
 
-To change colors and fonts, pass an `appearance` object to `VueStripeElements`; see the [Appearance API](/api/components/stripe-elements#appearance-api).
+To change colors and fonts, pass an `appearance` object to `VueStripeElements`; see [Style elements](/guide/styling#_2-theme-the-fields-with-the-appearance-api) and the [Appearance API](/api/components/stripe-elements#appearance-api) reference.
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#cards).
 
 ## See also
 
 - [Add Apple Pay, Google Pay and Link buttons](/guide/express-checkout)
 - [Payment Element API](/api/components/stripe-payment-element): props, events and options
 - [usePaymentIntent API](/api/composables/use-payment-intent): confirm options and result
+- [Handle errors and declines](/guide/error-handling)
+- [Collect payment details before creating an Intent](/guide/deferred-intent)
 - [Live demo](/live-demo/payment-element)
 - [Stripe docs: payment methods](https://docs.stripe.com/payments/payment-methods/overview)

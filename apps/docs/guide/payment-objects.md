@@ -119,7 +119,7 @@ So bank debits trade speed for other things. They often cost less than cards, wh
 Because of this:
 
 - The browser can't show "paid" when confirmation returns. Show "payment submitted" instead.
-- The outcome reaches your server by webhook (`payment_intent.succeeded` or `payment_intent.payment_failed`). Fulfil orders there, not on the return page.
+- The outcome reaches your server by webhook (`payment_intent.succeeded` or `payment_intent.payment_failed`). Fulfil orders there, not on the return page; [Fulfil orders with webhooks](/guide/webhooks) shows how.
 - Even a succeeded debit isn't final. The customer can still dispute it for the period shown above, and a late failure from the bank shows up as a dispute.
 
 Debits also need a **mandate**: the customer's permission for you to debit the account, shown as text at the time of collection and recorded by Stripe when you confirm. The SEPA, BECS and ACH guides show where the mandate text goes. Saving a bank account for later use goes through a SetupIntent, so the mandate covers future debits too.

@@ -196,7 +196,7 @@ const handleConfirm = async (event: StripeExpressCheckoutElementConfirmEvent) =>
 </template>
 ```
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#wallets-apple-pay-and-google-pay).
 
 ## See also
 

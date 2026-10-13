@@ -144,7 +144,7 @@ const handleSubmit = async () => {
 
 ## Style the input
 
-Card elements take a Stripe `style` object in `options`; the wrapper `div` gets the `vue-stripe-card-element` class for borders and focus rings:
+Card elements take a Stripe `style` object in `options`; the wrapper `div` gets the `vue-stripe-card-element` class for borders and focus rings ([Style elements](/guide/styling#_3-style-the-card-iban-and-becs-elements) has the full list):
 
 ```vue
 <VueStripeCardElement
@@ -157,7 +157,7 @@ Card elements take a Stripe `style` object in `options`; the wrapper `div` gets 
 />
 ```
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#cards).
 
 ## See also
 

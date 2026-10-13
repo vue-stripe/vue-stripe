@@ -137,7 +137,7 @@ When the session lets customers change line items and sets `permissions.update.l
 />
 ```
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#cards).
 
 ## See also
 

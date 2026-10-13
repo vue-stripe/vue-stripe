@@ -2,7 +2,7 @@
 
 Add Vue Stripe to an existing Vue app, load its stylesheet, configure your publishable key and check that Stripe.js loads.
 
-Requirements: Vue 3 or Vue 2.7, and `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive). Vue 2.6 is not supported. Upgrading from v5? See [Upgrade from v5 to v6](/guide/migration-v6).
+Requirements: Vue 3 or Vue 2.7, and `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive). Vue 2.6 is not supported; the full list is under [Compatibility](/api/#compatibility). Upgrading from v5? See [Upgrade from v5 to v6](/guide/migration-v6).
 
 ## 1. Install the package
 

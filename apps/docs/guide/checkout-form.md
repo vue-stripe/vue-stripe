@@ -160,7 +160,7 @@ No other element component works inside `VueStripeCheckoutFormProvider`: the for
 
 The form collects the email, phone number, addresses and tax ID itself, so `useCheckoutForm()` has no `updateEmail` or address updates. It keeps the actions that change the order: `applyPromotionCode`, `updateLineItemQuantity`, `updateShippingOption`, `addOptionalLineItem` / `removeOptionalLineItem` and `runServerUpdate`. The full list is in the [useCheckoutForm API](/api/composables/use-checkout-form).
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#cards).
 
 ## See also
 

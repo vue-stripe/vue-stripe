@@ -102,7 +102,7 @@ async function pay() {
 
 Before you confirm, show the customer the mandate text and get their agreement; the Pay button above does both. Replace the example wording with your own: Stripe's [ACH mandate guidance](https://docs.stripe.com/payments/ach-direct-debit/accept-a-payment) lists what it must contain.
 
-`confirmUsBankAccountPayment(clientSecret)` records the mandate and starts the debit. The PaymentIntent moves to `processing` and becomes `succeeded` or `requires_payment_method` (failed) later, usually within four business days. Fulfil the order from the `payment_intent.succeeded` [webhook](/guide/webhooks), and handle `payment_intent.payment_failed`.
+`confirmUsBankAccountPayment(clientSecret)` records the mandate and starts the debit. The PaymentIntent moves to `processing` and becomes `succeeded` or `requires_payment_method` (failed) later, usually within four business days ([Payments that settle later](/guide/payment-objects#payments-that-settle-later)). Fulfil the order from the `payment_intent.succeeded` [webhook](/guide/webhooks), and handle `payment_intent.payment_failed`.
 
 `useConfirmUsBankAccountPayment` rejects when Stripe.js throws, like the Stripe.js method it wraps; wrap the call in `try` / `catch` if you need to handle that. See [Handle errors and declines](/guide/error-handling).
 

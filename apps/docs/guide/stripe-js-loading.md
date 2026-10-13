@@ -59,7 +59,7 @@ Some components load more than Stripe.js. `VueStripePricingTable` adds Stripe's 
 
 Stripe.js needs a browser: it adds a script to `document` and draws its fields in iframes. Vue Stripe therefore never loads it during server rendering. The provider loads in `onMounted`, which doesn't run on the server, and the plugin returns before loading when there is no `window`. The server renders each provider in its loading state. The browser hydrates that same loading state, then loads Stripe.js and renders the real content.
 
-So the library is safe to import and render in an SSR app. What you still choose is how much of the payment UI the server should render at all. Framework-specific advice, such as client-only wrappers for Nuxt, is in [Installation](/guide/installation).
+So the library is safe to import and render in an SSR app. What you still choose is how much of the payment UI the server should render at all. Framework-specific advice, such as client-only wrappers for Nuxt, is in [Use Vue Stripe with Nuxt and SSR](/guide/ssr).
 
 ## Release trains
 

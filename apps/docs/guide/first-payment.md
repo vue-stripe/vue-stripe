@@ -377,6 +377,8 @@ Your card has been declined.
 
 The browser console shows a request that failed with status 402: that is Stripe's answer for a declined card.
 
+More cards that decline in specific ways are in [Test your integration](/guide/testing#declines-and-errors).
+
 The PaymentIntent stays open after a decline, so the customer can try another card. Replace the card number with `4242 4242 4242 4242` and click **Pay €10** again, without reloading. The text under the button reads:
 
 ```text
@@ -404,3 +406,6 @@ Stop both servers with <kbd>Ctrl</kbd>+<kbd>C</kbd> in each terminal.
 - [Save a payment method for later](/guide/setup-intent): collect a card now and charge it later.
 - [Redirect to Stripe Checkout](/guide/checkout): let Stripe host the whole payment page.
 - [Install and set up](/guide/installation): add Vue Stripe to an existing app.
+- [Handle errors and declines](/guide/error-handling): show each kind of error the way your customers need it.
+- [Fulfil orders with webhooks](/guide/webhooks): act on payments on your server, not in the browser.
+- [Test your integration](/guide/testing): every test card, bank account and wallet setup.

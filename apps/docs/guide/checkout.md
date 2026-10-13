@@ -116,9 +116,9 @@ app.get('/success', async (req, res) => {
 })
 ```
 
-Fulfil the order from the `checkout.session.completed` webhook, which arrives even if the customer closes the tab before the redirect.
+Fulfil the order from the `checkout.session.completed` webhook, which arrives even if the customer closes the tab before the redirect. See [Fulfil orders with webhooks](/guide/webhooks).
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#cards).
 
 ## See also
 

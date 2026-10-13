@@ -78,7 +78,7 @@ So this doesn't work: a page component that renders `<VueStripeProvider>` in its
 
 That is why the guides put the provider in a parent component and the form, with its composables, in a child component. Errors at call time are a different case. A failed Stripe call is reported when the call runs, through the composable's `error` ref and its result, never thrown from `setup()`. [How confirming works](/guide/confirming-payments#two-error-styles) explains which calls resolve and which reject.
 
-The common mistakes this causes, and how to fix them, are collected in the troubleshooting how-to guide.
+The common mistakes this causes, and how to fix them, are collected in [Troubleshoot common problems](/guide/troubleshooting).
 
 ## One factory for every element
 
@@ -100,7 +100,7 @@ The composables return these objects through `computed()`. On Vue 2.7, `readonly
 
 ## Vue 2.7 and Vue 3
 
-The components are render functions, not single-file components, and every Vue API comes from `vue-demi`. A small helper turns Vue 3 style props into the `{ attrs, on, class, style }` shape Vue 2 expects, and template refs are string refs, which resolve the same way on both. The plugin provides through `app.provide()` on Vue 3. On Vue 2.7 it uses a global mixin that applies only to root instances, so a nested `VueStripeProvider` still wins. See [Installation](/guide/installation#vue-2-7) for the setup.
+The components are render functions, not single-file components, and every Vue API comes from `vue-demi`. A small helper turns Vue 3 style props into the `{ attrs, on, class, style }` shape Vue 2 expects, and template refs are string refs, which resolve the same way on both. The plugin provides through `app.provide()` on Vue 3. On Vue 2.7 it uses a global mixin that applies only to root instances, so a nested `VueStripeProvider` still wins. See [Use Vue Stripe on Vue 2.7](/guide/vue-2) for the setup.
 
 ## Related pages
 

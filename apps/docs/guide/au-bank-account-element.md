@@ -2,7 +2,7 @@
 
 Collect an Australian BSB and account number with `VueStripeAuBankAccountElement` and confirm a BECS Direct Debit payment with [`useConfirmAuBecsDebitPayment()`](/api/composables/confirm/bank-debits). BECS takes Australian bank accounts and AUD only.
 
-BECS Direct Debit does not succeed at once: the PaymentIntent goes to `processing` and settles or fails in about three business days, so fulfil the order from a webhook, not from the confirm result.
+BECS Direct Debit does not succeed at once: the PaymentIntent goes to `processing` and settles or fails within three business days, so fulfil the order from a webhook, not from the confirm result. [Payments that settle later](/guide/payment-objects#payments-that-settle-later) explains the timing.
 
 ## Before you begin
 
@@ -140,13 +140,13 @@ const handleSubmit = async () => {
 </template>
 ```
 
-For colors and fonts, pass a Stripe `style` object in `options`; `iconStyle: 'solid'` and `hideIcon: true` change the bank icon.
+For colors and fonts, pass a Stripe `style` object in `options`; `iconStyle: 'solid'` and `hideIcon: true` change the bank icon ([Style elements](/guide/styling#_3-style-the-card-iban-and-becs-elements)).
 
 ## 4. Fulfil the order when the payment settles
 
-Listen for `payment_intent.succeeded` and `payment_intent.payment_failed` on your server and fulfil or cancel the order there.
+Listen for `payment_intent.succeeded` and `payment_intent.payment_failed` on your server and fulfil or cancel the order there ([Fulfil orders with webhooks](/guide/webhooks)).
 
-Test data: see Test your integration.
+Test data: see [Test your integration](/guide/testing#becs-direct-debit-australia).
 
 ## See also
 
