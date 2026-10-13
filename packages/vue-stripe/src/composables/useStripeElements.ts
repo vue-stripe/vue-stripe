@@ -1,4 +1,4 @@
-import { inject, readonly } from 'vue-demi'
+import { computed, inject, readonly } from 'vue-demi'
 import type { StripeElement, StripeElements } from '@stripe/stripe-js'
 import type { UseStripeElementsReturn } from '../types'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
@@ -77,7 +77,9 @@ export function useStripeElements(): UseStripeElementsReturn {
   }) as StripeElements['getElement']
 
   return {
-    elements: readonly(elementsContext.elements),
+    // computed, not readonly(): Vue 2.7's readonly() copies plain objects, so Stripe's
+    // objects would reach callers as copies (identity lost, methods run on the copy).
+    elements: computed(() => elementsContext.elements.value),
     submit,
     fetchUpdates,
     getElement,

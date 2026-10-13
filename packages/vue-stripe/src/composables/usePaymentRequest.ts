@@ -198,7 +198,7 @@ export function usePaymentRequest(options: PaymentRequestOptions): UsePaymentReq
   return {
     // computed, not readonly(): Vue 2.7's readonly() would wrap Stripe's object in a copy.
     paymentRequest: computed(() => paymentRequest.value),
-    canMakePayment: readonly(canMakePayment),
+    canMakePayment: computed(() => canMakePayment.value),
     show: () => call('show', (pr) => pr.show()),
     update: (updateOptions) => call('update', (pr) => pr.update(updateOptions)),
     abort: () => call('abort', (pr) => pr.abort()),

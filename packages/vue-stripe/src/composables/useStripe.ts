@@ -1,4 +1,4 @@
-import { inject, readonly } from 'vue-demi'
+import { computed, inject, readonly } from 'vue-demi'
 import type { UseStripeReturn } from '../types'
 import { stripeInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
@@ -37,7 +37,9 @@ export function useStripe(): UseStripeReturn {
   }
 
   return {
-    stripe: readonly(stripeInstance.stripe),
+    // computed, not readonly(): Vue 2.7's readonly() copies plain objects, so Stripe's
+    // objects would reach callers as copies (identity lost, methods run on the copy).
+    stripe: computed(() => stripeInstance.stripe.value),
     loading: readonly(stripeInstance.loading),
     error: readonly(stripeInstance.error),
     initialize: async () => {

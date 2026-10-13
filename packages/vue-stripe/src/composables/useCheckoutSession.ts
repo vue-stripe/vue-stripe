@@ -1,4 +1,4 @@
-import { inject, readonly } from 'vue-demi'
+import { computed, inject, readonly } from 'vue-demi'
 import type {
   Appearance,
   CssFontSource,
@@ -75,10 +75,11 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
     (() => ctx.checkout.value?.[name]() ?? null) as StripeCheckoutElementsSdk[K]
 
   return {
-    // Casts bridge Vue's DeepReadonly<Ref<...>> to the interface's Readonly<Ref<...>>.
-    checkout: readonly(ctx.checkout) as UseCheckoutSessionReturn['checkout'],
-    actions: readonly(ctx.actions) as UseCheckoutSessionReturn['actions'],
-    session: readonly(ctx.session) as UseCheckoutSessionReturn['session'],
+    // computed, not readonly(): Vue 2.7's readonly() copies plain objects, so Stripe's
+    // objects would reach callers as copies (identity lost, methods run on the copy).
+    checkout: computed(() => ctx.checkout.value),
+    actions: computed(() => ctx.actions.value),
+    session: computed(() => ctx.session.value),
     loading: readonly(ctx.loading),
     error: readonly(ctx.error),
 
