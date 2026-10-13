@@ -1,14 +1,60 @@
 ---
-description: "Use Vue Stripe with Nuxt, Quasar SSR, VitePress or your own Vite SSR setup: Stripe.js loads only in the browser, so hydration matches."
+description: "Use Vue Stripe with Nuxt and other server-rendered Vue apps: fetch client secrets in the browser, keep the key set on the server, and add the return pages."
 ---
 
 # Use Vue Stripe with Nuxt and SSR
 
-Render pages that use Vue Stripe on the server: Nuxt, Quasar SSR, VitePress or your own Vite SSR setup.
+Render pages that use Vue Stripe on the server. This page lists what every server-rendered app needs, then sets up Nuxt step by step. Other setups have their own pages:
+
+- [Use Vue Stripe in a Vite SSR app](/guide/vite-ssr), for your own server with `vue/server-renderer`
+- [Use Vue Stripe in VitePress](/guide/vitepress)
+- [Quasar SSR](#quasar-ssr), below
 
 Stripe.js only runs in the browser. Vue Stripe never loads it on the server: `VueStripeProvider` loads Stripe.js in `onMounted`, and the [plugin](/guide/plugin) loads it the first time a component reads it in the browser. During server rendering every provider renders its `#loading` slot, and the browser's first render matches it, so hydration does not mismatch. After hydration Stripe.js loads and the elements mount.
 
 From 6.0.0-beta.1 no bundler setting is needed: the package loads in Node as it is. What you set up is where the keys live, and where the client secret is fetched.
+
+## What every SSR app needs
+
+### Fetch client secrets in the browser
+
+`setup()` and `<script setup>` also run on the server. A request started there runs on every server render, and a relative URL such as `fetch('/api/checkout-session')` has no origin on the server, so Node's `fetch` rejects with "Failed to parse URL". When nothing handles that rejection, Node exits: one page view stops a Vite SSR or Quasar SSR server, in development and in production. Nuxt catches the rejection and logs it.
+
+- **`VueStripeElements`:** fetch the client secret in `onMounted`, which runs only in the browser, as [the Payment Element guide](/guide/payment-element#_2-load-stripe-and-create-the-elements-group) does. In Nuxt, `useFetch(..., { server: false })` does the same.
+- **`VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`:** don't pass a Promise created at the top of `<script setup>` in `client-secret`. Pass a function in `fetch-client-secret`. The provider calls it in the browser only, once Stripe.js has loaded:
+
+```vue
+<!-- CheckoutPage.vue -->
+<script setup lang="ts">
+import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
+import CheckoutForm from './CheckoutForm.vue'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+
+// Called by the provider in the browser only, once Stripe.js has loaded.
+const fetchClientSecret = () =>
+  fetch('/api/checkout-session', { method: 'POST' })
+    .then((response) => response.json())
+    .then((data: { clientSecret: string }) => data.clientSecret)
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeCheckoutElementsProvider :fetch-client-secret="fetchClientSecret">
+      <CheckoutForm />
+
+      <template #loading>Loading checkout...</template>
+      <template #error="{ error }">Checkout could not load: {{ error }}</template>
+    </VueStripeCheckoutElementsProvider>
+  </VueStripeProvider>
+</template>
+```
+
+`CheckoutForm` is the form from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form). The server renders the providers' loading state, and the browser creates one session per visit.
+
+### Set the publishable key where the server can read it
+
+`VueStripeProvider` throws "publishableKey or stripeKey is required" during setup when its key is empty. On the server that turns the whole response into an HTTP 500 before any browser code runs. The server process needs the key in production as well as in development; each setup below says where it reads it from. The [plugin](/guide/plugin) does not throw: with an empty key the page renders, and the error appears in the browser when Stripe.js loads.
 
 <a id="nuxt-3"></a>
 
@@ -107,7 +153,7 @@ Check `data?.clientSecret`, not only `data`. `useFetch` takes its type from the 
 
 ### Build the page on a Checkout Session instead
 
-[`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider) and [`VueStripeCheckoutFormProvider`](/api/components/stripe-checkout-form-provider) take the client secret as a string or a Promise. In Nuxt, don't create that Promise at the top of `<script setup>`: setup also runs on the server, where every render would start the request, and a relative `fetch('/api/...')` there rejects with "Failed to parse URL". Pass a function in `fetch-client-secret` instead. The provider calls it in the browser only, once Stripe.js has loaded.
+[`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider) and [`VueStripeCheckoutFormProvider`](/api/components/stripe-checkout-form-provider) take the client secret as a string or a Promise. In Nuxt, pass a function in `fetch-client-secret` instead, as in [every SSR app](#fetch-client-secrets-in-the-browser): a Promise created at the top of `<script setup>` would start the request on the server for every render.
 
 1. Create the session in a server route. Checking `client_secret` gives the page a `string`, and catches a session created without `ui_mode: 'elements'`:
 
@@ -167,13 +213,27 @@ You don't have to, but if you prefer to send no Stripe markup from the server, w
 
 ## Quasar SSR
 
-Use the components as in any Vue app. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
+Use the components as in any Vue app, and fetch client secrets in the browser as in [every SSR app](#fetch-client-secrets-in-the-browser). A sample that starts a request at the top of `<script setup>`, such as a Promise in `client-secret`, stops the Quasar SSR server. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
 
 ```vue
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+
+defineProps<{ publishableKey: string }>()
+
+const clientSecret = ref('')
+
+onMounted(async () => {
+  const response = await fetch('/api/create-payment-intent', { method: 'POST' })
+  clientSecret.value = (await response.json()).clientSecret
+})
+</script>
+
 <template>
   <q-no-ssr>
     <VueStripeProvider :publishable-key="publishableKey">
-      <VueStripeElements :client-secret="clientSecret">
+      <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
         <VueStripePaymentElement />
       </VueStripeElements>
     </VueStripeProvider>
@@ -181,11 +241,17 @@ Use the components as in any Vue app. `<q-no-ssr>` around the form is optional, 
 </template>
 ```
 
+Render `VueStripeElements` only once the client secret has arrived (`v-if`): created without one, the Payment Element fails with a `[Vue Stripe]` error in the console.
+
 ## VitePress
 
-Import the stylesheet in `.vitepress/theme/index.ts`. Components can then be used directly in Markdown pages or theme components; they render their loading state while VitePress builds the static HTML. This documentation site runs its live demos this way.
+See [Use Vue Stripe in VitePress](/guide/vitepress): where VitePress reads the key, the plugin in `enhanceApp`, the dev proxy and the API of a static build.
 
 ## If something goes wrong
+
+### The server process exits after one request
+
+Node prints `TypeError: Failed to parse URL from /api/...` and stops. A component starts a request with a relative URL during server rendering, usually a Promise passed to `client-secret`. Pass a function in `fetch-client-secret`, or fetch in `onMounted`; see [Fetch client secrets in the browser](#fetch-client-secrets-in-the-browser).
 
 ### The server fails with `ERR_UNSUPPORTED_DIR_IMPORT`
 
