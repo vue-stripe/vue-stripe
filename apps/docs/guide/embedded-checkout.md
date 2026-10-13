@@ -84,36 +84,60 @@ That is the whole integration. Stripe handles the payment form, validation, 3D S
 
 ## 3. Handle completion
 
-After a successful payment Stripe redirects the customer to your `return_url`. Read the session ID from the URL and check the session on your server:
+After a successful payment Stripe redirects the customer to your `return_url`. On that page, read `session_id` from the URL and ask your server for the session's status:
 
 ```js
-// GET /checkout/complete?session_id=cs_test_...
-app.get('/api/checkout-session/:id', async (req, res) => {
-  const session = await stripe.checkout.sessions.retrieve(req.params.id)
-  res.json({ status: session.status, paymentStatus: session.payment_status })
+// GET /api/checkout-status?session_id=cs_test_...
+app.get('/api/checkout-status', async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+    res.json({ status: session.status, paymentStatus: session.payment_status })
+  } catch {
+    res.status(404).json({ error: 'No such Checkout Session' })
+  }
 })
 ```
 
-`status: 'complete'` and `payment_status: 'paid'` mean the payment went through. Fulfil orders from the `checkout.session.completed` webhook, not from the return page, so a closed browser tab does not lose an order.
+`status: 'complete'` and `payment_status: 'paid'` mean the payment went through; [Redirect to Stripe Checkout](/guide/checkout#_3-show-the-outcome-on-the-success-page) has a return page that reads this route. Fulfil orders from the `checkout.session.completed` webhook, not from the return page, so a closed browser tab does not lose an order.
 
 ### Stay on the page
 
-To show your own success message instead of redirecting, create the session with `redirect_on_completion: 'if_required'` (only redirect-based payment methods use `return_url`) or `'never'`, and listen for `@complete`:
+To show your own success message instead of redirecting, set `redirect_on_completion` when you create the session in step 1:
+
+- `'if_required'`: keep `return_url`. Cards and wallets complete on the page; payment methods that need a redirect, such as bank authentication, still return to `return_url`.
+- `'never'`: remove `return_url`, because Stripe rejects a session that has both. Stripe then offers no payment methods that need a redirect.
+
+```js
+const session = await stripe.checkout.sessions.create({
+  ui_mode: 'embedded_page',
+  mode: 'payment',
+  line_items: [{ price: 'price_123', quantity: 1 }],
+  redirect_on_completion: 'never' // no return_url
+})
+```
+
+Then listen for `@complete` in `CheckoutPage.vue` from step 2:
 
 ```vue
-<script setup>
+<!-- CheckoutPage.vue -->
+<script setup lang="ts">
 import { ref } from 'vue'
+import { VueStripeProvider, VueStripeEmbeddedCheckout } from '@vue-stripe/vue-stripe'
 
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const done = ref(false)
+
+const fetchClientSecret = () =>
+  fetch('/api/embedded-checkout-session', { method: 'POST' })
+    .then((response) => response.json())
+    .then((data) => data.clientSecret)
 </script>
 
 <template>
   <p v-if="done">Thank you for your order.</p>
-  <VueStripeEmbeddedCheckout
-    v-else
-    :client-secret="clientSecret"
-    @complete="done = true"
-  />
+  <VueStripeProvider v-else :publishable-key="publishableKey">
+    <VueStripeEmbeddedCheckout :fetch-client-secret="fetchClientSecret" @complete="done = true" />
+  </VueStripeProvider>
 </template>
 ```
 
