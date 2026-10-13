@@ -40,7 +40,7 @@ Work through the table row by row. The last column gives the reason in short; [S
 | `@loaderstop` on `VueStripePaymentElement` | Removed | Stripe never emitted this event |
 | `@loadError` on `VueStripeAddressElement` | `@loaderror` | Same casing as Stripe and the other elements |
 | `<VueStripeCheckout :session-id>` / `:price-id` (with `mode`, `success-url`, `cancel-url`, `customer-email`, ...) | `<VueStripeCheckout :session-url>` | Stripe removed `redirectToCheckout({ sessionId })` (Clover) |
-| `useStripeCheckout().redirectToCheckout({ sessionId })` / `({ lineItems, ... })`, `LegacyCheckoutOptions` | `redirectToCheckout({ url })` or `redirectToUrl(url)` | Same |
+| `useStripeCheckout().redirectToCheckout({ sessionId })` / `({ lineItems, ... })`, `LegacyCheckoutOptions` | `redirectToCheckout({ url })` (typed `CheckoutRedirectOptions`) or `redirectToUrl(url)` | Same |
 | `<VueStripeCheckoutProvider :client-secret="string">` | `<VueStripeCheckoutElementsProvider :client-secret="stringOrPromise">`. The old name is a deprecated alias, and `fetchClientSecret` is still accepted | `initCheckout` became `initCheckoutElementsSdk` |
 | `VueStripeCheckoutProvider` `@ready(checkout)` | `@ready(actions)`, plus a new `@change(session)` | Session methods moved to `loadActions()` |
 | `useCheckoutSession().checkout` is a `StripeCheckout` with the session methods | `checkout` is a `StripeCheckoutElementsSdk`; session methods are on `actions` (and still forwarded by `useCheckoutSession()`) | Same |
