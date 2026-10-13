@@ -157,13 +157,21 @@ Unlike the other element components, `@ready` emits Stripe's ready event (it car
 
 ```ts
 interface StripeExpressCheckoutElementReadyEvent {
-  availablePaymentMethods?: {
-    applePay?: boolean
-    googlePay?: boolean
-    link?: boolean
-  }
+  elementType: 'expressCheckout'
+  availablePaymentMethods: undefined | AvailablePaymentMethods
+}
+
+type AvailablePaymentMethods = {
+  amazonPay: boolean
+  applePay: boolean
+  googlePay: boolean
+  link: boolean
+  paypal: boolean
+  klarna: boolean
 }
 ```
+
+`availablePaymentMethods` is `undefined` when no wallet can show in this browser, so `Boolean(event.availablePaymentMethods)` tells you whether the element renders any button. Otherwise every wallet key is present, `true` for the ones that can show.
 
 ### Click event
 
