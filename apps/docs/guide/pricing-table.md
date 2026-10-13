@@ -10,6 +10,7 @@ Embed a pricing table you configured in the Stripe Dashboard with `VueStripePric
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
 - Your page is served over `http(s)://`; the table does not render from `file://`.
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## 1. Create the pricing table in the Dashboard
 

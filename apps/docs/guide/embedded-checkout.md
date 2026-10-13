@@ -10,6 +10,7 @@ Put Stripe's prebuilt Checkout page inside your own page with `VueStripeEmbedded
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
 - A Stripe secret key on your server and a Price (`price_...`) in your Stripe account.
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## How the steps fit together
 

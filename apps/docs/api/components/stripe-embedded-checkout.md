@@ -87,7 +87,7 @@ interface VueStripeEmbeddedCheckoutProps {
 |-------|---------|-------------|
 | `@ready` | `StripeEmbeddedCheckout` | Emitted after the page is created and mounted |
 | `@complete` | none | Stripe's `onComplete`: the Checkout Session completed. Fires when Stripe does not redirect, see below |
-| `@analytics` | `StripeEmbeddedCheckoutAnalyticsEventUnion` | Stripe's `onAnalyticsEvent`: `rendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed` |
+| `@analytics` | `StripeEmbeddedCheckoutAnalyticsEventUnion` | Stripe's `onAnalyticsEvent`: `checkoutRendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed` |
 | `@error` | `string` | No client secret was given, another Embedded Checkout is already mounted, or `createEmbeddedCheckoutPage` failed |
 
 ::: tip Redirect or `@complete`

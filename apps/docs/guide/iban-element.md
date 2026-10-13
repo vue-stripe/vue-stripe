@@ -13,6 +13,7 @@ SEPA Direct Debit does not succeed at once: the PaymentIntent goes to `processin
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
 - SEPA Direct Debit is enabled in the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods).
 - You show the SEPA mandate text next to the form. Stripe gives the required wording in its [SEPA Direct Debit guide](https://docs.stripe.com/payments/sepa-debit/accept-a-payment).
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## 1. Create a SEPA PaymentIntent on your server
 
@@ -72,7 +73,7 @@ import { ref } from 'vue'
 import { VueStripeIbanElement, useConfirmSepaDebitPayment } from '@vue-stripe/vue-stripe'
 import type { StripeIbanElementChangeEvent } from '@stripe/stripe-js'
 
-const emit = defineEmits<{ submitted: [] }>()
+const emit = defineEmits<{ (e: 'submitted'): void }>()
 
 const ibanRef = ref<InstanceType<typeof VueStripeIbanElement> | null>(null)
 const { confirmSepaDebitPayment, loading: processing } = useConfirmSepaDebitPayment()

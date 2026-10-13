@@ -10,6 +10,7 @@ Collect payment details with the Payment Element, turn them into a ConfirmationT
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
 - Your server can create PaymentIntents with your secret key.
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## ConfirmationToken: confirm on your server {#confirmationtoken-confirm-on-your-server}
 

@@ -14,11 +14,11 @@ Move a working Vue Stripe 5 app to Vue Stripe 6, which runs on Stripe.js 10 (API
 ## 1. Update the packages
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 ```
 
 ::: tip v6 is in beta
-Until 6.0.0 is released, v6 is published under the `beta` tag: `npm install @vue-stripe/vue-stripe@beta @stripe/stripe-js@^10`.
+The range `^6.0.0-beta.2` installs the latest beta until 6.0.0 is released, then the latest 6.x. A plain `@^6` matches no version during the beta.
 :::
 
 ## 2. Import the stylesheet

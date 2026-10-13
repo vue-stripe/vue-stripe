@@ -10,6 +10,7 @@ Put Stripe Elements on your own page while a Checkout Session keeps the order: l
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
 - A Stripe secret key on your server and a Price (`price_...`) in your Stripe account.
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## How the steps fit together
 
@@ -81,7 +82,7 @@ const clientSecret = fetch('/api/checkout-session', { method: 'POST' })
 </template>
 ```
 
-`fetchClientSecret` (a function returning a Promise) is still accepted for v5 code. The previous name, `VueStripeCheckoutProvider`, still works as a deprecated alias.
+`fetch-client-secret` takes a function returning a Promise instead. The provider calls it only in the browser, after Stripe.js loads, so use it when the page is rendered on the server ([Use Vue Stripe with Nuxt and SSR](/guide/ssr#build-the-page-on-a-checkout-session-instead)). The previous name, `VueStripeCheckoutProvider`, still works as a deprecated alias.
 
 ## 3. Build the form
 

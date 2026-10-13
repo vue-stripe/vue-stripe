@@ -21,6 +21,7 @@ Vue Stripe wraps the six Issuing elements as components. Their reference is on o
 
 - Issuing is enabled on your Stripe account, and you have an issued card (`ic_...`).
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 In a sandbox, test cards created in the Dashboard or with the API work; there every card shows its number and CVC. In live mode the number and CVC are available for virtual cards only, unless Stripe enables physical card details for your account.
 

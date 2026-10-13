@@ -15,6 +15,7 @@ Stripe.js no longer offers a client-side `redirectToCheckout()`. If you passed `
 ## Before you begin
 
 - A Stripe secret key on your server and a Price (`price_...`) in your Stripe account.
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## 1. Create a Checkout Session on your server
 

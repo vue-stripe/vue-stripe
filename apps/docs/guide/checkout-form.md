@@ -15,6 +15,7 @@ The Checkout Form is a Stripe beta. Your Stripe account needs access to `ui_mode
 - Your Stripe account has access to the Checkout Form beta (see above).
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
 - A Stripe secret key on your server and a Price (`price_...`) in your Stripe account.
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## How the steps fit together
 

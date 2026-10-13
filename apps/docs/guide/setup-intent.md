@@ -10,6 +10,7 @@ Save a customer's payment method without charging it, with a SetupIntent, the Pa
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
 - A Stripe Customer (`cus_...`) for the person whose payment method you save.
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## 1. Create a SetupIntent on your server
 
@@ -88,7 +89,10 @@ import { useSetupIntent } from '@vue-stripe/vue-stripe'
 import type { SetupIntent } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{ clientSecret: string; disabled: boolean }>()
-const emit = defineEmits<{ success: [setupIntent: SetupIntent]; error: [message: string] }>()
+const emit = defineEmits<{
+  (e: 'success', setupIntent: SetupIntent): void
+  (e: 'error', message: string): void
+}>()
 
 const { confirmSetup, loading } = useSetupIntent()
 

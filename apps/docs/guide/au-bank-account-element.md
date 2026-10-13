@@ -13,6 +13,7 @@ BECS Direct Debit does not succeed at once: the PaymentIntent goes to `processin
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
 - Your Stripe account is based in Australia: Stripe offers BECS Direct Debit to Australian accounts only ([Business locations](https://docs.stripe.com/payments/au-becs-debit)). On an account elsewhere, step 1 fails with "All types provided in `allowed_payment_method_types` are invalid", in a sandbox too.
 - BECS Direct Debit is enabled in the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods).
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## 1. Create a BECS PaymentIntent on your server
 

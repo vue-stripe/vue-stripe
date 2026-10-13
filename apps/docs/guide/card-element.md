@@ -50,7 +50,7 @@ import { VueStripeCardElement, useConfirmCardPayment } from '@vue-stripe/vue-str
 import type { StripeCardElementChangeEvent } from '@stripe/stripe-js'
 
 const props = defineProps<{ clientSecret: string }>()
-const emit = defineEmits<{ success: [] }>()
+const emit = defineEmits<{ (e: 'success'): void }>()
 
 const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
 const { confirmCardPayment, loading: processing } = useConfirmCardPayment()

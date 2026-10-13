@@ -10,6 +10,7 @@ Collect a payment with `VueStripePaymentElement` and confirm it with [`usePaymen
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
 - Your server has an endpoint that creates a PaymentIntent and returns its `client_secret`.
+- Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## 1. Create a PaymentIntent on your server
 
