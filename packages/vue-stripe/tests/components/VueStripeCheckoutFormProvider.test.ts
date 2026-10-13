@@ -69,7 +69,9 @@ describe('VueStripeCheckoutFormProvider (Stripe.js 10 Checkout Form SDK, beta)',
   it('throws when used outside VueStripeProvider', () => {
     expect(() =>
       mount(VueStripeCheckoutFormProvider, { props: { clientSecret: 'cs_test' } })
-    ).toThrow('VueStripeCheckoutFormProvider must be used within VueStripeProvider')
+    ).toThrow(
+      'VueStripeCheckoutFormProvider must be used within a VueStripeProvider component or an app using createVueStripe()'
+    )
   })
 
   it('calls initCheckoutFormSdk synchronously with a clientSecret string', async () => {

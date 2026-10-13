@@ -28,7 +28,9 @@ describe('VueStripeElements', () => {
       mount(VueStripeElements, {
         props: {}
       })
-    }).toThrow('VueStripeElements must be used within VueStripeProvider')
+    }).toThrow(
+      'VueStripeElements must be used within a VueStripeProvider component or an app using createVueStripe()'
+    )
   })
 
   it('should render loading state initially', async () => {

@@ -67,7 +67,7 @@ describe('VueStripeCheckoutElementsProvider (Stripe.js 10 Checkout Elements SDK)
   it('throws when used outside VueStripeProvider', () => {
     expect(() =>
       mount(VueStripeCheckoutElementsProvider, { props: { clientSecret: 'cs_test' } })
-    ).toThrow('must be used within VueStripeProvider')
+    ).toThrow('must be used within a VueStripeProvider component or an app using createVueStripe()')
   })
 
   it('calls initCheckoutElementsSdk synchronously with a clientSecret string', async () => {

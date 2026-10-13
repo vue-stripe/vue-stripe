@@ -82,7 +82,7 @@ describe('VueStripeEmbeddedCheckout (stripe.createEmbeddedCheckoutPage)', () => 
 
   it('throws when used outside VueStripeProvider', () => {
     expect(() => mount(VueStripeEmbeddedCheckout, { props: { clientSecret: 'cs_test' } })).toThrow(
-      'VueStripeEmbeddedCheckout must be used within VueStripeProvider'
+      'VueStripeEmbeddedCheckout must be used within a VueStripeProvider component or an app using createVueStripe()'
     )
   })
 

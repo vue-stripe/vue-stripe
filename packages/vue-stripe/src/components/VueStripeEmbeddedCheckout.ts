@@ -1,7 +1,6 @@
 import {
   defineComponent,
   getCurrentInstance,
-  inject,
   markRaw,
   onMounted,
   onUnmounted,
@@ -11,8 +10,7 @@ import {
   type PropType
 } from 'vue-demi'
 import type { StripeEmbeddedCheckout, StripeEmbeddedCheckoutOptions } from '@stripe/stripe-js'
-import { stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { injectStripe } from '../utils/inject-stripe'
 import { renderElement } from '../utils/element-render'
 
 // Stripe.js allows one Embedded Checkout per page; this is the instance holding it.
@@ -47,12 +45,7 @@ export default /* @__PURE__ */ defineComponent({
   },
   emits: ['ready', 'complete', 'analytics', 'error'],
   setup(props, { emit, expose, slots }) {
-    const stripeInstance = inject(stripeInjectionKey, null)
-    if (!stripeInstance) {
-      throw new VueStripeProviderError(
-        'VueStripeEmbeddedCheckout must be used within VueStripeProvider'
-      )
-    }
+    const stripeInstance = injectStripe('VueStripeEmbeddedCheckout')
 
     // Stripe objects are never made deeply reactive.
     const checkout = shallowRef<StripeEmbeddedCheckout | null>(null)

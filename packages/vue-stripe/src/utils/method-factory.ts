@@ -1,8 +1,8 @@
-import { inject, readonly, ref } from 'vue-demi'
+import { readonly, ref } from 'vue-demi'
 import type { Ref } from 'vue-demi'
 import type { Stripe } from '@stripe/stripe-js'
-import { stripeInjectionKey } from './injection-keys'
 import { VueStripeProviderError } from './errors'
+import { injectStripe, whenStripeLoaded } from './inject-stripe'
 
 /** Names of the methods on the Stripe.js `Stripe` instance. */
 export type StripeMethodName = {
@@ -23,8 +23,8 @@ export type UseStripeMethodReturn<K extends StripeMethodName> = { [P in K]: Stri
 
 /**
  * Shared by the method composables. Injects the Stripe instance from
- * `<VueStripeProvider>` (throwing `VueStripeProviderError` naming `composable`
- * outside one) and returns `{ [method], loading, error }`, where `[method](...args)`
+ * `<VueStripeProvider>` or `createVueStripe()` (throwing `VueStripeProviderError`
+ * naming `composable` without either) and returns `{ [method], loading, error }`, where `[method](...args)`
  * resolves to `run(stripe, args)` untouched: an `{ error }` result also sets `error`,
  * and a throw is recorded in `error` and rethrown. `loading` stays true until
  * overlapping calls settle.
@@ -34,13 +34,7 @@ export function useStripeMethodCall(
   method: string,
   run: (stripe: Stripe, args: unknown[]) => unknown
 ) {
-  const stripeInstance = inject(stripeInjectionKey)
-
-  if (!stripeInstance) {
-    throw new VueStripeProviderError(
-      `${composable} must be called within a VueStripeProvider component`
-    )
-  }
+  const stripeInstance = injectStripe(composable)
 
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -54,7 +48,8 @@ export function useStripeMethodCall(
       error.value = null
 
       try {
-        const stripe = stripeInstance.stripe.value
+        // Under createVueStripe() the load may still be running; wait for it.
+        const stripe = stripeInstance.stripe.value ?? (await whenStripeLoaded(stripeInstance))
         if (!stripe) throw new VueStripeProviderError('Stripe.js is not loaded yet')
 
         const result = await run(stripe, args)
@@ -80,8 +75,8 @@ export function useStripeMethodCall(
  * `createStripeMethodComposable('confirmCardPayment')` gives `useConfirmCardPayment()`
  * returning `{ confirmCardPayment, loading, error }`.
  *
- * The composable injects the Stripe instance from `<VueStripeProvider>` (throwing
- * `VueStripeProviderError` outside one). The wrapped method forwards its arguments,
+ * The composable injects the Stripe instance from `<VueStripeProvider>` or
+ * `createVueStripe()` (throwing `VueStripeProviderError` without either). The wrapped method forwards its arguments,
  * resolves to Stripe's result untouched (an `{ error }` result also sets `error`),
  * and rethrows anything Stripe throws after recording it in `error`.
  *

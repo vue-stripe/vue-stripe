@@ -1,7 +1,6 @@
 import {
   computed,
   getCurrentScope,
-  inject,
   onScopeDispose,
   readonly,
   ref,
@@ -19,8 +18,7 @@ import type {
   PaymentRequestEventType,
   UsePaymentRequestReturn
 } from '../types'
-import { stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { injectStripe } from '../utils/inject-stripe'
 
 type Listener = { event: PaymentRequestEventType; handler: (event: never) => unknown }
 
@@ -65,13 +63,7 @@ const messageOf = (err: unknown, fallback: string) =>
  * ```
  */
 export function usePaymentRequest(options: PaymentRequestOptions): UsePaymentRequestReturn {
-  const stripeInstance = inject(stripeInjectionKey)
-
-  if (!stripeInstance) {
-    throw new VueStripeProviderError(
-      'usePaymentRequest must be called within a VueStripeProvider component'
-    )
-  }
+  const stripeInstance = injectStripe('usePaymentRequest')
 
   // shallowRef: Stripe's object must never be made deeply reactive.
   const paymentRequest = shallowRef<PaymentRequest | null>(null)

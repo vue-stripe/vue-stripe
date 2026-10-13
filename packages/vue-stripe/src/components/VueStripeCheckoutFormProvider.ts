@@ -1,6 +1,5 @@
 import {
   defineComponent,
-  inject,
   markRaw,
   onUnmounted,
   provide,
@@ -15,8 +14,8 @@ import type {
   StripeCheckoutFormSdkOptions,
   StripeCheckoutSession
 } from '@stripe/stripe-js'
-import { stripeCheckoutFormInjectionKey, stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { stripeCheckoutFormInjectionKey } from '../utils/injection-keys'
+import { injectStripe } from '../utils/inject-stripe'
 import { hx } from '../utils/h'
 import { statusShell } from '../utils/status-shell'
 
@@ -68,12 +67,7 @@ export default /* @__PURE__ */ defineComponent({
   },
   emits: ['ready', 'change', 'error'],
   setup(props, { emit, slots }) {
-    const stripeInstance = inject(stripeInjectionKey, null)
-    if (!stripeInstance) {
-      throw new VueStripeProviderError(
-        'VueStripeCheckoutFormProvider must be used within VueStripeProvider or an app using createVueStripe()'
-      )
-    }
+    const stripeInstance = injectStripe('VueStripeCheckoutFormProvider')
 
     // Stripe objects are never made deeply reactive.
     const checkout = shallowRef<StripeCheckoutFormSdk | null>(null)

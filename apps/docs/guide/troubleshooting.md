@@ -54,7 +54,7 @@ Version `6.0.0-beta.0` cannot be loaded by Node's ES module loader directly. Upd
 
 ### "useStripe must be called within a VueStripeProvider component or an app using createVueStripe()"
 
-The same message exists for `usePaymentIntent`, `useSetupIntent` and the other composables. A composable finds Stripe through the providers **above** the component that calls it, so it cannot run in the component that renders the provider:
+The same message exists for `usePaymentIntent`, `useSetupIntent` and the other composables, and, with "must be used within", for the components that need Stripe (`VueStripeElements`, `VueStripeEmbeddedCheckout` and the Checkout providers). A composable finds Stripe through the providers **above** the component that calls it, so it cannot run in the component that renders the provider:
 
 ```vue
 <!-- Wrong: CheckoutPage.vue calls the composable and renders the provider -->
@@ -114,29 +114,20 @@ The Card, split card, IBAN, AU bank account and Link Authentication elements don
 
 ### Confirming resolves to "Stripe not initialized"
 
-The call ran before Stripe.js finished loading, for example directly in `setup()`. Confirm from a user action, and disable the button until Stripe is ready:
+Stripe.js did not load, so there is no Stripe instance to call. The method confirmers (`useConfirmCardPayment`, ...) reject with "Stripe.js is not loaded yet" in the same situation. Inside `VueStripeProvider` this does not happen: the provider renders its children only once Stripe.js has loaded, and shows its `#error` slot when the load fails. With the [plugin](/guide/plugin), components render before Stripe.js loads; a composable call made during the load waits for it, and only a failed load (blocked network, a secret key) ends in this error. Read the load error from `useStripe().error`:
 
 ```vue
 <script setup>
-import { useStripe, usePaymentIntent } from '@vue-stripe/vue-stripe'
+import { useStripe } from '@vue-stripe/vue-stripe'
 
-const props = defineProps({ clientSecret: { type: String, required: true } })
-const { stripe } = useStripe()
-const { confirmPayment, loading } = usePaymentIntent()
-
-const pay = () =>
-  confirmPayment({
-    clientSecret: props.clientSecret,
-    confirmParams: { return_url: `${window.location.origin}/complete` }
-  })
+const { stripe, error } = useStripe()
 </script>
 
 <template>
-  <button :disabled="!stripe || loading" @click="pay">Pay</button>
+  <p v-if="error">Payments are unavailable: {{ error }}</p>
+  <PaymentForm v-else-if="stripe" />
 </template>
 ```
-
-Inside `VueStripeProvider` this rarely happens, because the provider renders its children only once Stripe.js has loaded. With the plugin, components render before Stripe.js loads. The method confirmers (`useConfirmCardPayment`, ...) reject with "Stripe.js is not loaded yet" in the same situation.
 
 ### Calling Stripe.js through `useStripe()` instead of a composable
 

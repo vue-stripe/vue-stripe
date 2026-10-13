@@ -280,8 +280,9 @@ describe('useCreateConfirmationToken', () => {
     expect(create).not.toHaveBeenCalled()
   })
 
-  it('rejects with VueStripeProviderError while Stripe.js is not loaded', async () => {
+  it('waits for a load in progress and rejects with VueStripeProviderError when it fails', async () => {
     let api: any
+    const loading = ref(true)
     mount(
       defineComponent({
         setup() {
@@ -295,7 +296,7 @@ describe('useCreateConfirmationToken', () => {
           provide: {
             [stripeInjectionKey as symbol]: {
               stripe: ref(null),
-              loading: ref(true),
+              loading,
               error: ref(null)
             }
           }
@@ -303,7 +304,10 @@ describe('useCreateConfirmationToken', () => {
       }
     )
 
-    await expect(api.createConfirmationToken()).rejects.toBeInstanceOf(VueStripeProviderError)
+    const call = api.createConfirmationToken()
+    expect(api.loading.value).toBe(true)
+    loading.value = false
+    await expect(call).rejects.toBeInstanceOf(VueStripeProviderError)
     expect(api.error.value).toBe('Stripe.js is not loaded yet')
   })
 

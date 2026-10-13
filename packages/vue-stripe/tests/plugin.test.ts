@@ -15,7 +15,10 @@ import VueStripeCheckoutElementsProvider from '../src/components/VueStripeChecko
 import VueStripeElements from '../src/components/VueStripeElements'
 import VueStripePaymentElement from '../src/components/VueStripePaymentElement'
 import VueStripeProvider from '../src/components/VueStripeProvider'
-import { flushPromises, type MockStripe, type MockStripeElements } from './setup'
+import { flushPromises, makeMockStripe, type MockStripe, type MockStripeElements } from './setup'
+import { useRadarSession } from '../src/composables/useRadarSession'
+import { usePaymentIntent } from '../src/composables/usePaymentIntent'
+import { useFinancialConnections } from '../src/composables/useFinancialConnections'
 
 describe('createVueStripe Plugin', () => {
   beforeEach(() => {
@@ -311,5 +314,73 @@ describe('createVueStripe lazy loading', () => {
     void instance.error
     void instance.stripe
     expect(loadStripe).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('createVueStripe: composables without a provider (#565)', () => {
+  const withStripe = async () => {
+    const { loadStripe } = vi.mocked(await import('@stripe/stripe-js/pure'))
+    const stripe = {
+      ...makeMockStripe(),
+      createRadarSession: vi.fn(() => Promise.resolve({ radarSession: { id: 'rse_123' } })),
+      retrievePaymentIntent: vi.fn(() =>
+        Promise.resolve({ paymentIntent: { id: 'pi_123', status: 'succeeded' } })
+      ),
+      collectBankAccountForSetup: vi.fn(() => Promise.resolve({ setupIntent: { id: 'seti_1' } }))
+    }
+    loadStripe.mockResolvedValueOnce(stripe as never)
+    return { loadStripe, stripe }
+  }
+
+  const mountConsumer = () => {
+    const api: {
+      radar?: ReturnType<typeof useRadarSession>
+      intent?: ReturnType<typeof usePaymentIntent>
+      bank?: ReturnType<typeof useFinancialConnections>
+    } = {}
+    const Consumer = defineComponent({
+      setup() {
+        api.radar = useRadarSession()
+        api.intent = usePaymentIntent()
+        api.bank = useFinancialConnections()
+        return () => h('div')
+      }
+    })
+    mount(Consumer, { global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] } })
+    return api
+  }
+
+  beforeEach(() => vi.clearAllMocks())
+
+  it('starts loading Stripe.js when a composable reads the context in setup()', async () => {
+    const { loadStripe } = await withStripe()
+    mountConsumer()
+    expect(loadStripe).toHaveBeenCalledTimes(1)
+    await flushPromises()
+  })
+
+  it('waits for the load in progress instead of failing the first call', async () => {
+    const { stripe } = await withStripe()
+    const api = mountConsumer()
+    const radar = api.radar!.createRadarSession()
+    const intent = api.intent!.retrievePaymentIntent('pi_123_secret_456')
+    const bank = api.bank!.collectBankAccountForSetup({ clientSecret: 'seti_1_secret_2' } as never)
+    await expect(radar).resolves.toEqual({ radarSession: { id: 'rse_123' } })
+    await expect(intent).resolves.toEqual({ paymentIntent: { id: 'pi_123', status: 'succeeded' } })
+    await expect(bank).resolves.toEqual({ setupIntent: { id: 'seti_1' } })
+    expect(stripe.createRadarSession).toHaveBeenCalledTimes(1)
+    expect(api.intent!.error.value).toBe(null)
+  })
+
+  it('reports a failed load to a waiting call', async () => {
+    const { loadStripe } = vi.mocked(await import('@stripe/stripe-js/pure'))
+    loadStripe.mockRejectedValueOnce(new Error('Failed to load Stripe.js'))
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const api = mountConsumer()
+    await expect(api.radar!.createRadarSession()).rejects.toThrow('Stripe.js is not loaded yet')
+    await expect(api.intent!.retrievePaymentIntent('pi_1_secret_2')).resolves.toEqual({
+      error: { message: 'Stripe not initialized' }
+    })
+    consoleError.mockRestore()
   })
 })
