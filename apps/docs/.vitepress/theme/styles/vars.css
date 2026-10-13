@@ -152,14 +152,7 @@
   max-width: 100% !important;
 }
 
-/* Label in name (WCAG 2.5.3): the search button is named "Search", its visible label. Its
-   key hint is decoration; VitePress draws the "Ctrl" key with ::after, so draw the "K" the
-   same way and the button's text content is just its label. */
-.DocSearch-Button .DocSearch-Button-Key + .DocSearch-Button-Key {
-  font-size: 0;
-}
-
-.DocSearch-Button .DocSearch-Button-Key + .DocSearch-Button-Key::after {
+/* The search button's "K" key, drawn like VitePress's "Ctrl" (see SearchKeyHint.vue). */
+.vs-css-key .DocSearch-Button-Key + .DocSearch-Button-Key::after {
   content: 'K';
-  font-size: 12px;
 }
