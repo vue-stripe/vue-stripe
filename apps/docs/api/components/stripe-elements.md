@@ -44,10 +44,10 @@ Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret`
 | `amount` | `number` | No | Amount in the smallest currency unit (e.g. cents for USD). Required for `'payment'` and `'subscription'` modes |
 | `setupFutureUsage` | `'off_session' \| 'on_session'` | No | Indicates intent to save the payment method for future use |
 | `captureMethod` | `'automatic' \| 'automatic_async' \| 'manual'` | No | Controls when to capture funds from the customer's account |
-| `appearance` | `object` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance`. Changes are applied live with `elements.update()` |
-| `fonts` | `object[]` | No | Custom fonts to load into the Elements iframe (`CssFontSource` / `CustomFontSource`). Convenience prop — equivalent to `options.fonts` |
+| `appearance` | `Appearance` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance`. Changes are applied live with `elements.update()` |
+| `fonts` | `(CssFontSource \| CustomFontSource)[]` | No | Custom fonts to load into the Elements iframe. Convenience prop — equivalent to `options.fonts` |
 | `locale` | `string` | No | Locale to display Elements in (e.g. `'en'`, `'fr'`, `'auto'`). Convenience prop — equivalent to `options.locale`. Changes are applied live with `elements.update()` |
-| `options` | `object` | No | Any other option passed to `stripe.elements()` (e.g. `allowedPaymentMethodTypes` in the mode-based flow, `loader`) |
+| `options` | `StripeElementsOptions` | No | Any other option passed to `stripe.elements()` (e.g. `allowedPaymentMethodTypes` in the mode-based flow, `loader`) |
 
 \* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation.
 
@@ -88,28 +88,18 @@ With neither `clientSecret` nor `mode`, Stripe.js Endive logs "Unable to select 
 
 ### Options Object
 
-The `options` prop accepts the full `StripeElementsOptions` type from `@stripe/stripe-js`. The interface below is an illustrative subset of that upstream type, showing the most commonly used fields:
+The `options` prop takes Stripe's `StripeElementsOptions` (also accepted: a plain object of `stripe.elements()` options). `appearance` is typed as Stripe's `Appearance`, and `fonts` as an array of `CssFontSource | CustomFontSource`. All of these are re-exported from the package:
 
 ```ts
-// Illustrative subset of @stripe/stripe-js StripeElementsOptions
-interface StripeElementsOptions {
-  appearance?: {
-    theme?: 'stripe' | 'night' | 'flat' | 'none'
-    variables?: Record<string, string>
-    rules?: Record<string, Record<string, string>>
-    labels?: 'above' | 'floating'
-  }
-  fonts?: Array<{
-    cssSrc?: string
-    family?: string
-    src?: string
-    weight?: string
-    style?: string
-  }>
-  locale?: string
-  loader?: 'auto' | 'always' | 'never'
-}
+import type {
+  Appearance,
+  CssFontSource,
+  CustomFontSource,
+  StripeElementsOptions
+} from '@vue-stripe/vue-stripe'
 ```
+
+See [`stripe.elements()` options](https://docs.stripe.com/js/elements_object/create#stripe_elements-options) for every key.
 
 ### Appearance API
 
@@ -117,10 +107,10 @@ The `appearance` prop (or `options.appearance`) themes every element in the grou
 
 | Key | Type | Description |
 |-----|------|-------------|
-| `theme` | `'stripe' \| 'night' \| 'flat' \| 'none'` | Base theme |
+| `theme` | `'stripe' \| 'night' \| 'flat'` | Base theme |
 | `variables` | `Record<string, string>` | Design tokens such as `colorPrimary`, `colorBackground`, `colorText`, `colorDanger`, `fontFamily`, `fontSizeBase`, `spacingUnit`, `borderRadius` |
 | `rules` | `Record<string, Record<string, string>>` | CSS-like rules per selector, e.g. `.Input`, `.Input:focus`, `.Input--invalid`, `.Label`, `.Error` |
-| `labels` | `'above' \| 'floating'` | Label position |
+| `labels` | `'auto' \| 'above' \| 'floating'` | Label position |
 
 ```vue
 <VueStripeElements
@@ -261,8 +251,11 @@ The fields inside Stripe's iframes are styled with the [Appearance API](#appeara
 ## TypeScript
 
 ```ts
-import type { VueStripeElementsProps } from '@vue-stripe/vue-stripe'
-import type { Appearance, StripeElements, StripeElementsOptions } from '@stripe/stripe-js'
+import type {
+  VueStripeElementsProps,
+  Appearance,
+  StripeElements
+} from '@vue-stripe/vue-stripe'
 
 const appearance: Appearance = {
   theme: 'stripe',
