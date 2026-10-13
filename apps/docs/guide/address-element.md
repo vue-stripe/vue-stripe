@@ -9,11 +9,11 @@ Collect a full address with `VueStripeAddressElement`. It formats the form for e
 ## Before you begin
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
-- No client secret is needed: the Address Element works in a `VueStripeElements` group without one. If you take a payment on the same page, put it in the same group as the Payment Element.
+- No Intent is needed, but the `VueStripeElements` group needs either a `clientSecret` or a `mode`. Without both, Stripe.js throws "Unable to select session" on every page load (see [`VueStripeElements`](/api/components/stripe-elements#props)). Step 1 uses `mode="setup"`. If you take a payment on the same page, put the Address Element in the Payment Element's group instead.
 
 ## 1. Render the element
 
-Pick the form with `mode`: `'shipping'` (the default) or `'billing'`.
+Pick the form with the element's `options.mode`: `'shipping'` (the default) or `'billing'`. The `mode` on `VueStripeElements` is a different setting: it gives the group a session when there is no client secret.
 
 ```vue
 <!-- AddressPage.vue -->
@@ -37,7 +37,7 @@ const onChange = (event: StripeAddressElementChangeEvent) => {
 
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
+    <VueStripeElements mode="setup" currency="usd">
       <VueStripeAddressElement :options="{ mode: 'shipping' }" @change="onChange" />
       <button :disabled="!address">Continue</button>
     </VueStripeElements>

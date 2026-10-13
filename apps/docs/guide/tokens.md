@@ -23,7 +23,7 @@ sequenceDiagram
     Browser->>Server: POST /api/pay { confirmationToken }
     Server->>Stripe: paymentIntents.create({ confirm: true, confirmation_token })
     Stripe-->>Server: PaymentIntent (succeeded or requires_action)
-    Server-->>Browser: { status, clientSecret }
+    Server-->>Browser: { status, clientSecret }, or 402 { error } when declined
     Browser->>Stripe: handleNextAction({ clientSecret }) when requires_action
 ```
 
@@ -66,8 +66,11 @@ import { useCreateConfirmationToken, useHandleNextAction } from '@vue-stripe/vue
 const { createConfirmationToken, loading, error } = useCreateConfirmationToken()
 const { handleNextAction, error: actionError } = useHandleNextAction()
 const status = ref('')
+const serverError = ref('')
 
 const pay = async () => {
+  status.value = ''
+  serverError.value = ''
   const { confirmationToken } = await createConfirmationToken({
     params: { return_url: `${window.location.origin}/complete` }
   })
@@ -78,9 +81,13 @@ const pay = async () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ confirmationToken: confirmationToken.id })
   })
-  const result: { status: string; clientSecret: string } = await response.json()
+  const result: { status?: string; clientSecret?: string; error?: string } = await response.json()
 
-  if (result.status === 'requires_action') {
+  if (!response.ok || !result.status) {
+    serverError.value = result.error ?? 'Payment failed. Please try again.' // declined (402) or server error
+    return
+  }
+  if (result.status === 'requires_action' && result.clientSecret) {
     const { paymentIntent } = await handleNextAction({ clientSecret: result.clientSecret })
     status.value = paymentIntent?.status ?? 'failed'
   } else {
@@ -91,7 +98,7 @@ const pay = async () => {
 
 <template>
   <button :disabled="loading" @click="pay">Pay</button>
-  <p v-if="error || actionError">{{ error || actionError }}</p>
+  <p v-if="error || actionError || serverError">{{ error || actionError || serverError }}</p>
   <p v-if="status">Payment {{ status }}</p>
 </template>
 ```
@@ -107,18 +114,29 @@ import Stripe from 'stripe'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 app.post('/api/pay', async (req, res) => {
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: 1099, // compute from the cart on the server, never trust the browser
-    currency: 'usd',
-    automatic_payment_methods: { enabled: true },
-    confirm: true,
-    confirmation_token: req.body.confirmationToken,
-    return_url: 'https://example.com/complete'
-  })
-
-  res.json({ status: paymentIntent.status, clientSecret: paymentIntent.client_secret })
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 1099, // compute from the cart on the server, never trust the browser
+      currency: 'usd',
+      automatic_payment_methods: { enabled: true },
+      confirm: true,
+      confirmation_token: req.body.confirmationToken,
+      return_url: 'https://example.com/complete'
+    })
+    res.json({ status: paymentIntent.status, clientSecret: paymentIntent.client_secret })
+  } catch (err) {
+    if (err instanceof Stripe.errors.StripeCardError) {
+      // A decline: the message is written for the customer
+      res.status(402).json({ error: err.message })
+    } else {
+      console.error(err)
+      res.status(500).json({ error: 'Payment failed. Please try again.' })
+    }
+  }
 })
 ```
+
+Because the server confirms, a decline does not come back as a PaymentIntent status: `paymentIntents.create()` throws a `StripeCardError` (HTTP 402, `code: 'card_declined'`, with a `decline_code`). Its `message` ("Your card was declined.") is safe to show the customer; other errors are not, so the handler logs them and returns a generic message. Try it with the [decline test cards](/guide/testing#declines-and-errors).
 
 The same token confirms a SetupIntent (`stripe.setupIntents.create({ confirm: true, confirmation_token })`) when you render the Elements group with `mode="setup"`.
 

@@ -4,7 +4,7 @@ description: "VueStripeExpressCheckoutElement reference: Apple Pay, Google Pay, 
 
 # VueStripeExpressCheckoutElement
 
-Renders wallet buttons (Apple Pay, Google Pay, Link, PayPal, Amazon Pay, Klarna) that the customer pays with in the wallet's own payment sheet. A button appears only when its wallet is enabled in the Dashboard and available on the customer's device and browser, and the page is served over HTTPS (localhost excepted); [Test your integration](/guide/testing#wallets-apple-pay-and-google-pay) explains how to test them. Use it inside [VueStripeElements](/api/components/stripe-elements) with a `clientSecret` or a deferred Intent (`mode` / `currency` / `amount`), or inside [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (see [With Checkout Sessions](#with-checkout-sessions)). For the steps, see [Add Apple Pay, Google Pay and Link buttons](/guide/express-checkout); [Choosing an integration](/guide/approaches#express-checkout-and-the-payment-element) covers pairing it with the Payment Element.
+Renders wallet buttons (Apple Pay, Google Pay, Link, PayPal, Amazon Pay, Klarna) that the customer pays with in the wallet's own payment sheet. A button appears only when its wallet is enabled in the Dashboard and available on the customer's device and browser, and the page is served over HTTPS. That includes development: on `http://localhost` Stripe.js logs that Apple Pay and Google Pay will not appear, so [test them through an HTTPS tunnel](/guide/testing#wallets-apple-pay-and-google-pay). Use it inside [VueStripeElements](/api/components/stripe-elements) with a `clientSecret` or a deferred Intent (`mode` / `currency` / `amount`), or inside [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (see [With Checkout Sessions](#with-checkout-sessions)). For the steps, see [Add Apple Pay, Google Pay and Link buttons](/guide/express-checkout); [Choosing an integration](/guide/approaches#express-checkout-and-the-payment-element) covers pairing it with the Payment Element.
 
 ## Usage
 
@@ -240,10 +240,10 @@ Access these via a template ref:
 |--------|------|-------------|
 | `element` | `ShallowRef<StripeExpressCheckoutElement \| null>` | The Stripe element instance (`null` until created) |
 | `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
-| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `error` | `Ref<string \| null>` | Current load or creation error message |
 | `focus()` | `() => void` | Focus the element |
 | `blur()` | `() => void` | Blur the element |
-| `clear()` | `() => void` | Clear the element's value |
+| `clear()` | `() => void` | Not supported by this element: Stripe.js throws `IntegrationError: clear() is not supported by the Express Checkout Element.` Exposed only because every element component shares it |
 
 The component owns the element's lifecycle: it creates, mounts and destroys the element. Removing the component (for example with `v-if`) destroys the element, which takes the place of Stripe's `element.unmount()`; for a one-time listener use Vue's `.once` modifier (`@ready.once`) instead of `element.once()`.
 
@@ -258,7 +258,6 @@ import type { StripeExpressCheckoutElement } from '@stripe/stripe-js'
 const expressRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement> | null>(null)
 
 const focus = () => expressRef.value?.focus()
-const clear = () => expressRef.value?.clear()
 const stripeElement = (): StripeExpressCheckoutElement | null => expressRef.value?.element ?? null
 </script>
 
