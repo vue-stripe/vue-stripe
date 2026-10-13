@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue'
-import type { Stripe, StripeElements } from '@stripe/stripe-js'
 import {
   VueStripeProvider,
   VueStripeElements,
-  VueStripePaymentElement
+  VueStripePaymentElement,
+  type ConfirmPaymentResult
 } from '@vue-stripe/vue-stripe'
+import PaymentActions from '@/components/docs/PaymentActions.vue'
 
 // Publishable key comes from the shared playground config (set via the header
 // "Add Key" dialog / localStorage) — never hardcode a key in source.
@@ -13,57 +14,30 @@ const stripeConfig = inject<{ publishableKey: string }>('stripeConfig')
 const publishableKey = computed(() => stripeConfig?.publishableKey ?? '')
 const clientSecret = ref('')
 const clientSecretInput = ref('')
-const loading = ref(false)
-const errorMessage = ref('')
 
-// Capture instances from component events
-const stripeInstance = ref<Stripe | null>(null)
-const elementsInstance = ref<StripeElements | null>(null)
-
-const onStripeLoad = (stripe: Stripe) => {
-  stripeInstance.value = stripe
-}
-
-const onElementsReady = (elements: StripeElements) => {
-  elementsInstance.value = elements
-}
+// The components' events only drive the debug panel; confirming goes through PaymentActions.
+const stripeLoaded = ref(false)
+const elementsReady = ref(false)
 
 const setClientSecret = () => {
   clientSecret.value = clientSecretInput.value.trim()
 }
 
-const handleSubmit = async () => {
-  if (!stripeInstance.value || !elementsInstance.value) {
-    errorMessage.value = 'Stripe not ready'
-    return
-  }
+// PaymentActions' slot `confirm`: usePaymentIntent().confirmPayment for this page's return URL.
+type Confirm = (returnUrl: string) => Promise<ConfirmPaymentResult>
 
-  loading.value = true
-  errorMessage.value = ''
-
-  const { error } = await stripeInstance.value.confirmPayment({
-    elements: elementsInstance.value,
-    confirmParams: {
-      return_url: `${window.location.origin}/docs-example`
-    },
-    redirect: 'if_required'
-  })
-
-  if (error) {
-    errorMessage.value = error.message || 'Payment failed'
-    loading.value = false
-  } else {
-    errorMessage.value = ''
-    alert('Payment succeeded!')
-    loading.value = false
-  }
+const handleSubmit = async (confirm: Confirm) => {
+  const { error } = await confirm(`${window.location.origin}/docs-example`)
+  if (!error) alert('Payment succeeded!')
 }
 </script>
 
 <template>
   <div class="payment-form">
     <h2>Docs Example Test</h2>
-    <p class="description">Testing the single-file event-based pattern from the documentation.</p>
+    <p class="description">
+      Testing the Payment Element pattern from the documentation (usePaymentIntent).
+    </p>
 
     <!-- No key configured -->
     <div v-if="!publishableKey" class="error">
@@ -92,29 +66,22 @@ const handleSubmit = async () => {
       </div>
 
       <!-- Payment Form -->
-      <VueStripeProvider v-else :publishable-key="publishableKey" @load="onStripeLoad">
-        <VueStripeElements
-          v-if="clientSecret"
-          :client-secret="clientSecret"
-          @ready="onElementsReady"
-        >
-          <form @submit.prevent="handleSubmit">
-            <VueStripePaymentElement />
+      <VueStripeProvider v-else :publishable-key="publishableKey" @load="stripeLoaded = true">
+        <VueStripeElements :client-secret="clientSecret" @ready="elementsReady = true">
+          <PaymentActions v-slot="{ confirm, loading, error }" :client-secret="clientSecret">
+            <form @submit.prevent="handleSubmit(confirm)">
+              <VueStripePaymentElement />
 
-            <div v-if="errorMessage" class="error">
-              {{ errorMessage }}
-            </div>
+              <div v-if="error" class="error">
+                {{ error }}
+              </div>
 
-            <button type="submit" :disabled="loading">
-              {{ loading ? 'Processing...' : 'Pay Now' }}
-            </button>
-          </form>
+              <button type="submit" :disabled="loading">
+                {{ loading ? 'Processing...' : 'Pay Now' }}
+              </button>
+            </form>
+          </PaymentActions>
         </VueStripeElements>
-
-        <template v-else>
-          <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
-          <p v-else>Loading payment form...</p>
-        </template>
       </VueStripeProvider>
     </template>
 
@@ -122,8 +89,8 @@ const handleSubmit = async () => {
     <div class="debug">
       <h4>Debug Info:</h4>
       <ul>
-        <li>Stripe loaded: {{ !!stripeInstance }}</li>
-        <li>Elements ready: {{ !!elementsInstance }}</li>
+        <li>Stripe loaded: {{ stripeLoaded }}</li>
+        <li>Elements ready: {{ elementsReady }}</li>
         <li>Client secret set: {{ !!clientSecret }}</li>
       </ul>
     </div>
