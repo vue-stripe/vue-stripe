@@ -47,7 +47,7 @@ const onError = (message) => console.error(message)
 |------|------|----------|-------------|
 | `clientSecret` | `string` | One of the two | Client secret of a Checkout Session created with `ui_mode: 'embedded_page'` |
 | `fetchClientSecret` | `() => Promise<string>` | One of the two | Function resolving to the client secret. Stripe calls it when the page is created |
-| `onLineItemsChange` | `(event: StripeEmbeddedCheckoutLineItemsChangeEvent) => Promise<ResultAction>` | No | Called when the customer adds, removes or changes a line item. Resolve `{ type: 'accept' }` or `{ type: 'reject', errorMessage }`. Required when the session sets `permissions.update.line_items: 'server_only'` |
+| `onLineItemsChange` | `(event: StripeEmbeddedCheckoutLineItemsChangeEvent) => Promise<ResultAction>` | No | Called when the customer adds, removes or changes a line item. Resolve `{ type: 'accept' }` or `{ type: 'reject', errorMessage }`. Passed to Stripe.js as is; Stripe does not call it on sessions the API creates today (see below) |
 
 The options are read once, when the page is created. To show another Checkout Session, re-mount the component, for example by changing its `key`:
 
@@ -57,29 +57,13 @@ The options are read once, when the page is created. To show another Checkout Se
 
 ### onLineItemsChange
 
-`onLineItemsChange` is a function prop, not an event, because Stripe waits for its result before it applies the change. Update the session on your server, then accept or reject:
+`onLineItemsChange` is a function prop, not an event, because Stripe waits for its result before it applies the change. The component passes it to `stripe.createEmbeddedCheckoutPage()` unchanged.
 
-```vue
-<script setup>
-const onLineItemsChange = async (event) => {
-  const response = await fetch('/api/checkout-session/line-items', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId: event.checkoutSessionId, lineItems: event.lineItems })
-  })
-  return response.ok
-    ? { type: 'accept' }
-    : { type: 'reject', errorMessage: 'That quantity is not available' }
-}
-</script>
+::: warning No session can enable it
+Stripe.js 10.0.0 declares `onLineItemsChange` and says it is required when the session sets `permissions.update.line_items: 'server_only'`. The Checkout Sessions API has no such parameter: `permissions[update][line_items]` and `permissions[update_line_items]` are rejected with "Received unknown parameter" on every API version from `2025-03-31.basil` to `2026-09-30.endive`, and stripe-node 23 types `permissions` with `update_shipping_details` only. Stripe's [Dynamically update line items](https://docs.stripe.com/payments/checkout/dynamically-update-line-items?payment-ui=embedded-page) guide says the full embedded page doesn't support dynamically updating line items.
 
-<template>
-  <VueStripeEmbeddedCheckout
-    :client-secret="clientSecret"
-    :on-line-items-change="onLineItemsChange"
-  />
-</template>
-```
+To let customers change quantities on the embedded page, set `adjustable_quantity` on the session's line items; Stripe applies the change itself. To approve or change line items from your server, use the [Checkout Form](/guide/checkout-form) or [your own checkout page](/guide/custom-checkout), and call `runServerUpdate()` from [`useCheckoutForm`](/api/composables/use-checkout-form) or [`useCheckoutSession`](/api/composables/use-checkout-session).
+:::
 
 ::: info `onShippingDetailsChange` is not supported
 Stripe deprecated dynamic shipping updates in Embedded Checkout (`onShippingDetailsChange`, deprecated since Stripe.js 9.14), so the component does not expose it.

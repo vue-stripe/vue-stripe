@@ -126,9 +126,17 @@ Stripe allows a single Embedded Checkout on a page at a time. If a second `VueSt
 <VueStripeEmbeddedCheckout :key="clientSecret" :client-secret="clientSecret" />
 ```
 
-## Approve line item changes
+## Let customers change quantities
 
-When the session lets customers change line items and sets `permissions.update.line_items: 'server_only'`, Stripe asks you to approve each change. Pass an `on-line-items-change` function that updates the session on your server and resolves `{ type: 'accept' }` or `{ type: 'reject', errorMessage }`. See [onLineItemsChange](/api/components/stripe-embedded-checkout#onlineitemschange) in the API reference.
+Set `adjustable_quantity` on a line item when you create the session; Stripe shows a quantity picker and updates the total itself:
+
+```ts
+line_items: [
+  { price: 'price_123', quantity: 1, adjustable_quantity: { enabled: true, minimum: 1, maximum: 10 } }
+]
+```
+
+The embedded page can't ask your server to approve a line item change: Stripe's API has no session setting that turns on the component's `on-line-items-change` prop ([onLineItemsChange](/api/components/stripe-embedded-checkout#onlineitemschange)). To change line items from your server during checkout, use the [Checkout Form](/guide/checkout-form) or [build your own checkout page](/guide/custom-checkout), both of which have `runServerUpdate()`.
 
 ## Track the checkout funnel
 
