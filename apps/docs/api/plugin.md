@@ -114,8 +114,11 @@ The plugin provides two values app-wide, the same two `VueStripeProvider` [provi
 ## TypeScript
 
 ```ts
+// main.ts
+import { createApp } from 'vue'
 import { createVueStripe } from '@vue-stripe/vue-stripe'
 import type { VueStripeOptions } from '@vue-stripe/vue-stripe'
+import App from './App.vue'
 
 const options: VueStripeOptions = {
   publishableKey: 'pk_test_...',
@@ -123,14 +126,22 @@ const options: VueStripeOptions = {
   locale: 'en'
 }
 
-app.use(createVueStripe(options))
+createApp(App).use(createVueStripe(options)).mount('#app')
 ```
 
-```ts
+```vue
+<script setup lang="ts">
 import { useStripe } from '@vue-stripe/vue-stripe'
 
 // stripe is Readonly<Ref<Stripe | null>>, from the nearest VueStripeProvider or the plugin
-const { stripe, loading, error, initialize } = useStripe()
+const { stripe, loading, error } = useStripe()
+</script>
+
+<template>
+  <p v-if="loading">Loading Stripe...</p>
+  <p v-else-if="error">{{ error }}</p>
+  <p v-else-if="stripe">Stripe.js is ready</p>
+</template>
 ```
 
 ## See Also

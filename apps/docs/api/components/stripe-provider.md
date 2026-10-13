@@ -120,7 +120,7 @@ The provider calls `loadStripe.setLoadParameters({ advancedFraudSignals: false }
 ```ts
 import type { ReleaseTrain } from '@vue-stripe/vue-stripe'
 
-const train: ReleaseTrain = 'endive'
+export const STRIPE_JS_TRAIN: ReleaseTrain = 'endive'
 ```
 
 ## Events

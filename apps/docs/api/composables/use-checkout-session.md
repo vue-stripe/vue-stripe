@@ -175,13 +175,19 @@ const onConfirm = async (event) => {
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { useCheckoutSession } from '@vue-stripe/vue-stripe'
 import type { StripeCheckoutConfirmResult, UseCheckoutSessionReturn } from '@vue-stripe/vue-stripe'
 
 const checkout: UseCheckoutSessionReturn = useCheckoutSession()
 
 const pay = async (): Promise<StripeCheckoutConfirmResult> => checkout.confirm()
+</script>
+
+<template>
+  <button :disabled="!checkout.session.value?.canConfirm" @click="pay">Pay</button>
+</template>
 ```
 
 ## See Also

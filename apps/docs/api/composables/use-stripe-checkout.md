@@ -64,11 +64,13 @@ interface CheckoutRedirectOptions {
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { useStripeCheckout, VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
 import type { CheckoutRedirectOptions, UseStripeCheckoutReturn } from '@vue-stripe/vue-stripe'
 
-const { redirectToCheckout }: UseStripeCheckoutReturn = useStripeCheckout()
+const props = defineProps<{ sessionUrl: string }>()
+const { redirectToCheckout, loading }: UseStripeCheckoutReturn = useStripeCheckout()
 
 const checkout = async (url: string) => {
   const options: CheckoutRedirectOptions = { url }
@@ -80,6 +82,11 @@ const checkout = async (url: string) => {
     }
   }
 }
+</script>
+
+<template>
+  <button :disabled="loading" @click="checkout(props.sessionUrl)">Checkout</button>
+</template>
 ```
 
 ## See Also

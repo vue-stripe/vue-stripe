@@ -68,15 +68,16 @@ The same message exists for `usePaymentIntent`, `useSetupIntent` and the other c
 
 ```vue
 <!-- Wrong: CheckoutPage.vue calls the composable and renders the provider -->
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider, useStripe } from '@vue-stripe/vue-stripe'
 
+const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const { stripe } = useStripe() // throws: no provider above this component
 </script>
 
 <template>
   <VueStripeProvider :publishable-key="key">
-    ...
+    <p v-if="stripe">Stripe is ready</p>
   </VueStripeProvider>
 </template>
 ```
@@ -85,6 +86,13 @@ Move the code that calls the composable into a child component:
 
 ```vue
 <!-- Correct: CheckoutPage.vue -->
+<script setup lang="ts">
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
+import PaymentForm from './PaymentForm.vue'
+
+const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+</script>
+
 <template>
   <VueStripeProvider :publishable-key="key">
     <PaymentForm />
@@ -94,11 +102,15 @@ Move the code that calls the composable into a child component:
 
 ```vue
 <!-- Correct: PaymentForm.vue -->
-<script setup>
+<script setup lang="ts">
 import { useStripe } from '@vue-stripe/vue-stripe'
 
 const { stripe } = useStripe() // works: VueStripeProvider is above
 </script>
+
+<template>
+  <p v-if="stripe">Stripe is ready</p>
+</template>
 ```
 
 Or install the [plugin](/guide/plugin), which provides Stripe to the whole app.
@@ -127,8 +139,9 @@ The Card, split card, IBAN, AU bank account and Link Authentication elements don
 Stripe.js did not load, so there is no Stripe instance to call. The method confirmers (`useConfirmCardPayment`, ...) reject with "Stripe.js is not loaded yet" in the same situation. Inside `VueStripeProvider` this does not happen: the provider renders its children only once Stripe.js has loaded, and shows its `#error` slot when the load fails. With the [plugin](/guide/plugin), components render before Stripe.js loads; a composable call made during the load waits for it, and only a failed load (blocked network, a secret key) ends in this error. Read the load error from `useStripe().error`:
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { useStripe } from '@vue-stripe/vue-stripe'
+import PaymentForm from './PaymentForm.vue'
 
 const { stripe, error } = useStripe()
 </script>

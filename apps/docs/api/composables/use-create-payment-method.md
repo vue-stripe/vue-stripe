@@ -70,20 +70,30 @@ In the Elements flow, `elements.submit()` runs first (as Stripe requires); the m
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useCreatePaymentMethod, VueStripeCardElement } from '@vue-stripe/vue-stripe'
 import type { CreatePaymentMethodResult } from '@vue-stripe/vue-stripe'
 
 const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
+const paymentMethodId = ref<string | null>(null)
 const { createPaymentMethod } = useCreatePaymentMethod()
 
 const create = async (): Promise<string | null> => {
   const card = cardRef.value?.element
   if (!card) return null
   const result: CreatePaymentMethodResult = await createPaymentMethod({ type: 'card', card })
-  return result.paymentMethod?.id ?? null
+  paymentMethodId.value = result.paymentMethod?.id ?? null
+  return paymentMethodId.value
 }
+</script>
+
+<template>
+  <VueStripeCardElement ref="cardRef" />
+  <button type="button" @click="create">Save card</button>
+  <p v-if="paymentMethodId">Created {{ paymentMethodId }}</p>
+</template>
 ```
 
 ## See Also

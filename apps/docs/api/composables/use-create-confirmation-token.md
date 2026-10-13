@@ -86,7 +86,8 @@ interface UseCreateConfirmationTokenReturn {
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { useCreateConfirmationToken } from '@vue-stripe/vue-stripe'
 import type {
   CreateConfirmationTokenOptions,
@@ -94,8 +95,20 @@ import type {
 } from '@vue-stripe/vue-stripe'
 
 const api: UseCreateConfirmationTokenReturn = useCreateConfirmationToken()
-const options: CreateConfirmationTokenOptions = { params: { return_url: location.href } }
-const { confirmationToken, error } = await api.createConfirmationToken(options)
+
+const pay = async () => {
+  const options: CreateConfirmationTokenOptions = { params: { return_url: location.href } }
+  const { confirmationToken, error } = await api.createConfirmationToken(options)
+  if (error) return
+  // Send confirmationToken.id to your server, which confirms the PaymentIntent
+  await fetch('/api/confirm', { method: 'POST', body: confirmationToken.id })
+}
+</script>
+
+<template>
+  <button :disabled="api.loading.value" @click="pay">Pay</button>
+  <p v-if="api.error.value">{{ api.error.value }}</p>
+</template>
 ```
 
 ## See Also
