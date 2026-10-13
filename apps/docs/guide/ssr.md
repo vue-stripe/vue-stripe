@@ -62,7 +62,17 @@ const fetchClientSecret = () =>
 
 The paths below follow Nuxt 4, which reads plugins, pages and components from the `app/` directory. On Nuxt 3, or in a Nuxt 4 project that keeps the Nuxt 3 layout (no `app/` directory), drop the `app/` prefix: `plugins/`, `pages/` and `components/` sit at the project root. `server/` stays at the root in both.
 
-### 1. Configure Nuxt
+### 1. Install the packages
+
+Install Vue Stripe and Stripe.js, plus Stripe's Node library for the server routes:
+
+```bash
+npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10 stripe
+```
+
+Nuxt builds without `stripe` installed; the server routes then fail at runtime with `ERR_MODULE_NOT_FOUND`.
+
+### 2. Configure Nuxt
 
 ```ts
 // nuxt.config.ts
@@ -85,7 +95,16 @@ NUXT_STRIPE_SECRET_KEY=sk_test_...
 NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
-### 2. Provide Stripe
+`nuxi dev` reads `.env`; the production server does not. Set the two variables in the server's environment, or pass the file to Node when you start the build:
+
+```bash
+npx nuxi build
+node --env-file=.env .output/server/index.mjs
+```
+
+Without them every page that renders `VueStripeProvider` answers 500 "publishableKey or stripeKey is required", and the server routes fail with an empty secret key.
+
+### 3. Provide Stripe
 
 Either install the plugin once, so every page can use the elements and composables without a provider:
 
@@ -101,9 +120,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 })
 ```
 
-or wrap the checkout part of a page in `VueStripeProvider`, as in step 4 below.
+or wrap the payment part of each page in `VueStripeProvider`, as in steps 5 and 6 below.
 
-### 3. Create the Intent in a server route
+### 4. Create the Intent in a server route
 
 ```ts
 // server/api/payment-intent.post.ts
@@ -113,7 +132,7 @@ export default defineEventHandler(async () => {
   const stripe = new Stripe(useRuntimeConfig().stripeSecretKey)
 
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: 1000, // decide the amount on the server
+    amount: 2000, // decide the amount on the server
     currency: 'usd',
     automatic_payment_methods: { enabled: true }
   })
@@ -122,12 +141,14 @@ export default defineEventHandler(async () => {
 })
 ```
 
-### 4. Render the payment form
+The amount, $20.00, matches the "Pay $20.00" button of the `PaymentForm` in step 5. Change both together.
+
+### 5. Render the payment form
 
 Fetch the client secret in the browser (`server: false`), so a page render does not create a PaymentIntent:
 
 ```vue
-<!-- app/pages/checkout.vue -->
+<!-- app/pages/checkout/index.vue -->
 <script setup lang="ts">
 import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
 
@@ -145,11 +166,59 @@ const { data } = await useFetch('/api/payment-intent', { method: 'POST', server:
 </template>
 ```
 
-`PaymentForm` is the component from [Accept a payment with the Payment Element](/guide/payment-element#_3-render-the-payment-element-and-confirm). With the plugin from step 2, drop the `VueStripeProvider` wrapper.
+`PaymentForm` is the component from [Accept a payment with the Payment Element](/guide/payment-element#_3-render-the-payment-element-and-confirm). With the plugin from step 3, drop the `VueStripeProvider` wrapper.
+
+Name the file `checkout/index.vue`, not `checkout.vue`. Nuxt treats `app/pages/checkout/complete.vue`, the Checkout Session return page below, as a child route of `checkout.vue`, and because that page has no `<NuxtPage />`, `/checkout/complete` would show the payment form again.
 
 Check `data?.clientSecret`, not only `data`. `useFetch` takes its type from the server route, and stripe-node types `client_secret` as `string | null`, so `nuxi typecheck` rejects `data.clientSecret` as a `client-secret` until the template has ruled out `null`.
 
 `ref`, `useFetch` and the other Nuxt and Vue functions are auto-imported. Import the Vue Stripe components yourself, or register them in a plugin.
+
+### 6. Show the result on the return page
+
+`PaymentForm` confirms with `return_url: ${window.location.origin}/payment-complete`, so after a successful payment Stripe sends the customer to `/payment-complete`, with `payment_intent_client_secret` in the query string. Read the result there in a component inside the provider:
+
+```vue
+<!-- app/components/PaymentStatus.vue -->
+<script setup lang="ts">
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
+
+const route = useRoute()
+const { retrievePaymentIntent } = usePaymentIntent()
+const status = ref('')
+
+onMounted(async () => {
+  const clientSecret = route.query.payment_intent_client_secret
+  if (typeof clientSecret !== 'string') return
+  const { paymentIntent, error } = await retrievePaymentIntent(clientSecret)
+  status.value = error ? 'unknown' : (paymentIntent?.status ?? 'unknown')
+})
+</script>
+
+<template>
+  <p v-if="status === 'succeeded'">Payment received.</p>
+  <p v-else-if="status === 'processing'">Your payment is processing. We will email you when it completes.</p>
+  <p v-else-if="status === 'requires_payment_method'">The payment failed. Please try another payment method.</p>
+  <p v-else-if="status">We could not check the payment status. Please contact us.</p>
+</template>
+```
+
+```vue
+<!-- app/pages/payment-complete.vue -->
+<script setup lang="ts">
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
+
+const config = useRuntimeConfig()
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="config.public.stripePublishableKey">
+    <PaymentStatus />
+  </VueStripeProvider>
+</template>
+```
+
+With the plugin, render `<PaymentStatus />` without the provider. Use this page to inform the customer only; fulfil orders from [webhooks](/guide/webhooks).
 
 ### Build the page on a Checkout Session instead
 
@@ -205,7 +274,40 @@ Check `data?.clientSecret`, not only `data`. `useFetch` takes its type from the 
    </template>
    ```
 
-`CheckoutForm` is the form from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form). The server renders the providers' loading state, and the browser creates one session per visit. `VueStripeCheckoutFormProvider` and [`VueStripeEmbeddedCheckout`](/api/components/stripe-embedded-checkout) take the same `fetch-client-secret` prop.
+   `CheckoutForm` is the form from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form). `VueStripeCheckoutFormProvider` and [`VueStripeEmbeddedCheckout`](/api/components/stripe-embedded-checkout) take the same `fetch-client-secret` prop.
+
+3. Check the session on the return page. Stripe redirects to the session's `return_url`, `/checkout/complete?session_id=...`. Read the session on the server:
+
+   ```ts
+   // server/api/checkout-session/[id].get.ts
+   import Stripe from 'stripe'
+
+   export default defineEventHandler(async (event) => {
+     const stripe = new Stripe(useRuntimeConfig().stripeSecretKey)
+     const id = getRouterParam(event, 'id')
+     if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing session ID' })
+
+     const session = await stripe.checkout.sessions.retrieve(id)
+     return { status: session.status, paymentStatus: session.payment_status }
+   })
+   ```
+
+   ```vue
+   <!-- app/pages/checkout/complete.vue -->
+   <script setup lang="ts">
+   const route = useRoute()
+   const { data } = await useFetch(`/api/checkout-session/${route.query.session_id}`)
+   </script>
+
+   <template>
+     <p v-if="data?.paymentStatus === 'paid'">Payment received.</p>
+     <p v-else-if="data?.status === 'complete'">Your payment is processing. We will email you when it completes.</p>
+     <p v-else-if="data?.status === 'open'">The payment did not complete. <NuxtLink to="/custom-checkout">Try again</NuxtLink></p>
+     <p v-else>We could not check the payment status. Please contact us.</p>
+   </template>
+   ```
+
+   This page needs no Stripe.js, so it renders on the server. It works because the payment page is `checkout/index.vue` (step 5); next to a `checkout.vue` it would render as that page's child.
 
 ### Render on the client only
 
@@ -253,6 +355,10 @@ See [Use Vue Stripe in VitePress](/guide/vitepress): where VitePress reads the k
 
 Node prints `TypeError: Failed to parse URL from /api/...` and stops. A component starts a request with a relative URL during server rendering, usually a Promise passed to `client-secret`. Pass a function in `fetch-client-secret`, or fetch in `onMounted`; see [Fetch client secrets in the browser](#fetch-client-secrets-in-the-browser).
 
+### Every page answers 500 "publishableKey or stripeKey is required"
+
+The server rendered `VueStripeProvider` with an empty key. In Nuxt's production server, set `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` in the environment or start it with `node --env-file=.env` ([step 2](#_2-configure-nuxt)). In a Vite SSR app, the key must be set when you run `vite build` ([Use Vue Stripe in a Vite SSR app](/guide/vite-ssr)).
+
 ### The server fails with `ERR_UNSUPPORTED_DIR_IMPORT`
 
 Version `6.0.0-beta.0` imports `@stripe/stripe-js/pure` as a directory, which Node's ES module loader rejects when the server loads the package from `node_modules`. Update to 6.0.0-beta.1 or later. If you must stay on 6.0.0-beta.0, bundle the package for the server as a workaround: `build.transpile: ['@vue-stripe/vue-stripe']` in Nuxt, `ssr.noExternal: ['@vue-stripe/vue-stripe']` in Vite (`vite.ssr.noExternal` in VitePress).
@@ -263,4 +369,4 @@ If you see a hydration mismatch, look for your own code that reads browser-only 
 
 ## Result
 
-The server renders the page, including the providers' loading state, without loading Stripe.js. In the browser the page hydrates, Stripe.js loads once, and the elements appear.
+The server renders the page, including the providers' loading state, without loading Stripe.js. In the browser the page hydrates, Stripe.js loads once, and the elements appear. After paying, the customer lands on a return page that shows the result.
