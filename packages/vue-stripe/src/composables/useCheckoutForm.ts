@@ -9,6 +9,7 @@ import type {
 import type { UseCheckoutFormReturn } from '../types'
 import { stripeCheckoutFormInjectionKey } from '../utils/injection-keys'
 import { VueStripeCheckoutError } from '../utils/errors'
+import { forwardCheckoutAction } from '../utils/checkout-action'
 
 /**
  * Drive a Checkout Form integration (Stripe.js Checkout Form SDK, `ui_mode: 'form'`;
@@ -40,24 +41,12 @@ export function useCheckoutForm(): UseCheckoutFormReturn {
   }
 
   // Forward an action by name. Generic over the key so a renamed Stripe action
-  // fails the build. Before loadActions() resolves, return Stripe's own
-  // error-result shape instead of throwing.
+  // fails the build. Every outcome resolves to Stripe's result shape (see
+  // forwardCheckoutAction), so callers only branch on `result.type`.
   const call = <K extends keyof StripeCheckoutFormLoadActionsSuccess>(
     name: K
-  ): StripeCheckoutFormLoadActionsSuccess[K] => {
-    const wrapped = (...args: unknown[]) => {
-      const current = ctx.actions.value
-      const fn = current?.[name]
-      if (typeof fn !== 'function') {
-        return Promise.resolve({
-          type: 'error',
-          error: { message: 'Checkout session is not ready yet', code: null }
-        })
-      }
-      return (fn as (...a: unknown[]) => unknown).apply(current, args)
-    }
-    return wrapped as StripeCheckoutFormLoadActionsSuccess[K]
-  }
+  ): StripeCheckoutFormLoadActionsSuccess[K] =>
+    forwardCheckoutAction(ctx.actions, name) as StripeCheckoutFormLoadActionsSuccess[K]
 
   // Appearance and fonts live on the SDK handle, which exists before actions load.
   const withCheckout = (method: string, run: () => void) => {

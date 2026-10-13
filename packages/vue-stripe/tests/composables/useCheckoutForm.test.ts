@@ -179,6 +179,44 @@ describe('useCheckoutForm (Checkout Form SDK actions, beta)', () => {
     expect(api().getCurrencySelectorElement()).toBe(selector)
   })
 
+  it('resolves { type: "error" } when Stripe throws an integration error (#579)', async () => {
+    const { api, checkoutForm } = await mountWith()
+    const actions = (await checkoutForm.loadActions.mock.results[0]!.value).actions
+    actions.confirm.mockImplementation(() => {
+      throw new Error('An email address is required to confirm this Checkout Session.')
+    })
+    actions.updateLineItemQuantity.mockRejectedValueOnce(
+      new Error('You must first set line_items.adjustable_quantity.enabled=true')
+    )
+    await expect(api().confirm()).resolves.toEqual({
+      type: 'error',
+      error: {
+        message: 'An email address is required to confirm this Checkout Session.',
+        code: null
+      }
+    })
+    await expect(api().updateLineItemQuantity({ lineItem: 'li_1', quantity: 2 })).resolves.toEqual({
+      type: 'error',
+      error: {
+        message: 'You must first set line_items.adjustable_quantity.enabled=true',
+        code: null
+      }
+    })
+  })
+
+  it('names an action the loaded session does not have instead of "not ready" (#593)', async () => {
+    const { api, checkoutForm } = await mountWith()
+    const actions = (await checkoutForm.loadActions.mock.results[0]!.value).actions
+    delete (actions as Record<string, unknown>)['addOptionalLineItem']
+    await expect(api().addOptionalLineItem('price_123')).resolves.toEqual({
+      type: 'error',
+      error: {
+        message: 'addOptionalLineItem is not available for this Checkout Session',
+        code: null
+      }
+    })
+  })
+
   it('returns the not-ready sentinel before loadActions() resolves', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const api = mountWithContext({
