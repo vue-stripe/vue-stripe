@@ -1,6 +1,7 @@
+import { execFileSync } from 'node:child_process'
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type { HeadConfig, TransformContext } from 'vitepress'
+import type { DefaultTheme, HeadConfig, TransformContext } from 'vitepress'
 
 // Per-page SEO head: canonical URL, Open Graph and Twitter tags, robots and JSON-LD.
 // Everything here is computed at build time from the page's own frontmatter and git date,
@@ -14,6 +15,7 @@ export const NPM_URL = 'https://www.npmjs.com/package/@vue-stripe/vue-stripe'
 export const maintainer = {
   name: 'Joff Tiquez',
   url: 'https://jofftiquez.dev',
+  x: '@jrtiquez',
   sameAs: ['https://jofftiquez.dev', 'https://github.com/jofftiquez', 'https://x.com/jrtiquez']
 }
 
@@ -39,6 +41,89 @@ export function routeOf(relativePath: string): string {
 
 export function sectionOf(route: string, sections: DocSection[]): DocSection | undefined {
   return sections.find((s) => new RegExp(s.match).test(route))
+}
+
+/** A sidebar entry that has a page of its own. */
+interface SidebarLink {
+  text: string
+  link: string
+}
+
+/**
+ * The sidebar entries with a page of their own on the way to `route`, outermost first and
+ * ending with the page's own entry: the confirm pages sit under "Method confirmers"
+ * (/api/composables/confirm/). Groups without a link ("Composables") have no page, so they
+ * are not part of the trail. Empty when no sidebar links the page.
+ */
+export function sidebarTrail(route: string, sidebars: DefaultTheme.SidebarItem[][]): SidebarLink[] {
+  const walk = (items: DefaultTheme.SidebarItem[], chain: SidebarLink[]): SidebarLink[] | null => {
+    for (const item of items) {
+      if (item.link === route) return [...chain, { text: item.text ?? '', link: route }]
+      if (!item.items) continue
+      const parent = item.link && item.text ? [{ text: item.text, link: item.link }] : []
+      const found = walk(item.items, [...chain, ...parent])
+      if (found) return found
+    }
+    return null
+  }
+  for (const sidebar of sidebars) {
+    const found = walk(sidebar, [])
+    if (found) return found
+  }
+  return []
+}
+
+/**
+ * The date each file under `dir` was first committed, as an ISO string keyed by its path
+ * relative to `dir`: the oldest commit that added the path, carried across renames. One
+ * `git log` covers every page. Files not committed yet (and builds without git) have none.
+ */
+export function firstCommitDates(dir: string): Map<string, string> {
+  const dates = new Map<string, string>()
+  let log: string
+  try {
+    log = execFileSync(
+      'git',
+      [
+        'log',
+        '--reverse',
+        '--relative',
+        '--format=@@%aI',
+        '--name-status',
+        '-M',
+        '--diff-filter=AR',
+        '--',
+        '.'
+      ],
+      {
+        cwd: dir,
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+        stdio: ['ignore', 'pipe', 'ignore']
+      }
+    )
+  } catch {
+    return dates
+  }
+  let date = ''
+  for (const line of log.split('\n')) {
+    if (line.startsWith('@@')) {
+      date = new Date(line.slice(2)).toISOString()
+      continue
+    }
+    const [status = '', from = '', to = ''] = line.split('\t')
+    if (status === 'A' && !dates.has(from)) dates.set(from, date)
+    else if (status.startsWith('R') && to && !dates.has(to)) dates.set(to, dates.get(from) ?? date)
+  }
+  return dates
+}
+
+let publishedDates: { dir: string; dates: Map<string, string> } | undefined
+function datePublishedOf(srcDir: string, relativePath: string): string {
+  if (publishedDates?.dir !== srcDir) {
+    publishedDates = { dir: srcDir, dates: firstCommitDates(srcDir) }
+  }
+  return publishedDates.dates.get(relativePath) ?? ''
 }
 
 /** The image @nolebase/vitepress-plugin-og-image writes for a sidebar page. */
@@ -107,19 +192,43 @@ function homeJsonLd(description: string, pkg: PackageFacts) {
   }
 }
 
+/**
+ * The breadcrumb trail of a page, as the sidebar draws it: the site, the page's Diataxis
+ * section, each sidebar group with a page of its own, then the page under its sidebar label
+ * (its title when no sidebar links it). A section overview (/guide/, /api/, /live-demo/) is
+ * the section itself and ends the trail; a page that is also its section's nav target (the
+ * tutorial, the Explanation hub) still gets its own item, so the trail names the page.
+ */
+export function breadcrumbs(opts: {
+  route: string
+  title: string
+  section: DocSection | undefined
+  trail: SidebarLink[]
+}): { name: string; url: string }[] {
+  const { route, title, section, trail } = opts
+  const crumbs = [{ name: SITE_NAME, url: `${SITE_URL}/` }]
+  if (section) crumbs.push({ name: section.name, url: SITE_URL + section.link })
+  for (const parent of trail.slice(0, -1)) {
+    if (parent.link !== section?.link)
+      crumbs.push({ name: parent.text, url: SITE_URL + parent.link })
+  }
+  if (section?.link !== route || !route.endsWith('/')) {
+    crumbs.push({ name: trail[trail.length - 1]?.text || title, url: SITE_URL + route })
+  }
+  return crumbs
+}
+
 function articleJsonLd(opts: {
   url: string
-  route: string
   headline: string
   description: string
   image: string
+  datePublished: string
   dateModified: string
   section: DocSection | undefined
+  crumbs: { name: string; url: string }[]
 }) {
-  const { url, route, headline, description, image, dateModified, section } = opts
-  const crumbs = [{ name: SITE_NAME, url: `${SITE_URL}/` }]
-  if (section) crumbs.push({ name: section.name, url: SITE_URL + section.link })
-  if (!section || section.link !== route) crumbs.push({ name: headline, url })
+  const { url, headline, description, image, datePublished, dateModified, section, crumbs } = opts
 
   return {
     '@context': 'https://schema.org',
@@ -133,6 +242,7 @@ function articleJsonLd(opts: {
         mainEntityOfPage: url,
         image,
         inLanguage: 'en-US',
+        ...(datePublished && { datePublished }),
         ...(dateModified && { dateModified }),
         ...(section && { articleSection: section.name }),
         author: person,
@@ -153,76 +263,124 @@ function articleJsonLd(opts: {
   }
 }
 
+/** The home page's static share card (public/og-image.png) and what it shows. */
+const HOME_IMAGE = `${SITE_URL}/og-image.png`
+const HOME_IMAGE_ALT = 'Vue Stripe: Stripe Checkout and Elements for Vue.js'
+
+/** Alt text for a page's generated share card, which shows its section and sidebar label. */
+export function ogImageAlt(card: { title: string; category?: string | undefined }): string {
+  return card.category
+    ? `${SITE_NAME} ${card.category}: ${card.title}`
+    : `${SITE_NAME}: ${card.title}`
+}
+
 export function seoHead(
-  { pageData, siteData, title }: TransformContext,
-  opts: { sections: DocSection[]; pkg: PackageFacts }
+  { pageData, siteData, siteConfig, title }: TransformContext,
+  opts: { sections: DocSection[]; pkg: PackageFacts; sidebars: DefaultTheme.SidebarItem[][] }
 ): HeadConfig[] {
   const { relativePath } = pageData
   const isHome = relativePath === 'index.md' || relativePath === ''
   const isNotFound = pageData.isNotFound || relativePath === '404.md'
   const route = routeOf(relativePath)
   const url = SITE_URL + route
+  // A page that repeats another (`canonical: /path` frontmatter) names that page as canonical.
+  const canonical =
+    typeof pageData.frontmatter['canonical'] === 'string'
+      ? SITE_URL + pageData.frontmatter['canonical']
+      : url
   const description = pageData.description || siteData.description
   // Sidebar pages get a generated image from the OG image plugin (in buildEnd); the home
   // page uses the static one.
-  const image = isHome ? `${SITE_URL}/og-image.png` : ogImageOf(relativePath)
+  const image = isHome ? HOME_IMAGE : ogImageOf(relativePath)
   const dateModified = pageData.lastUpdated ? new Date(pageData.lastUpdated).toISOString() : ''
+  const datePublished = isHome ? '' : datePublishedOf(siteConfig.srcDir, relativePath)
 
   if (isNotFound) return [['meta', { name: 'robots', content: 'noindex, follow' }]]
 
   const head: HeadConfig[] = [
-    ['link', { rel: 'canonical', href: url }],
+    ['link', { rel: 'canonical', href: canonical }],
     ['meta', { name: 'robots', content: 'index, follow, max-image-preview:large' }],
     ['meta', { property: 'og:type', content: isHome ? 'website' : 'article' }],
     ['meta', { property: 'og:title', content: title }],
     ['meta', { property: 'og:description', content: description }],
-    ['meta', { property: 'og:url', content: url }],
+    ['meta', { property: 'og:url', content: canonical }],
     ['meta', { name: 'twitter:title', content: title }],
     ['meta', { name: 'twitter:description', content: description }]
   ]
 
+  // The plugin writes the other pages' image tags; finishOgTags adds their alt text.
   if (isHome) {
     head.push(
       ['meta', { property: 'og:image', content: image }],
       ['meta', { property: 'og:image:width', content: '1200' }],
       ['meta', { property: 'og:image:height', content: '630' }],
-      ['meta', { name: 'twitter:image', content: image }]
+      ['meta', { property: 'og:image:type', content: 'image/png' }],
+      ['meta', { property: 'og:image:alt', content: HOME_IMAGE_ALT }],
+      ['meta', { name: 'twitter:image', content: image }],
+      ['meta', { name: 'twitter:image:alt', content: HOME_IMAGE_ALT }]
     )
+  }
+  if (datePublished) {
+    head.push(['meta', { property: 'article:published_time', content: datePublished }])
   }
   if (dateModified && !isHome) {
     head.push(['meta', { property: 'article:modified_time', content: dateModified }])
   }
 
+  const section = sectionOf(route, opts.sections)
   head.push(
     jsonLd(
       isHome
         ? homeJsonLd(description, opts.pkg)
         : articleJsonLd({
             url,
-            route,
             headline: pageData.title,
             description,
             image,
+            datePublished,
             dateModified,
-            section: sectionOf(route, opts.sections)
+            section,
+            crumbs: breadcrumbs({
+              route,
+              title: pageData.title,
+              section,
+              trail: sidebarTrail(route, opts.sidebars)
+            })
           })
     )
   )
   return head
 }
 
+const escapeAttribute = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
 /**
- * The OG image plugin rewrites each page's Open Graph tags with rehype-meta, which resets
- * og:type to "website". Every page but the home page is an article, so set it back.
+ * Finishes the Open Graph tags of the pages that got a generated image. The OG image plugin
+ * rewrites them with rehype-meta, which resets og:type to "website" (every page but the home
+ * page is an article) and writes og:image without its type or alt text. The alt text goes
+ * right after each image tag, where parsers attach structured properties.
  */
-export function restoreArticleOgType(outDir: string): void {
+export function finishOgTags(outDir: string, altOf: (route: string) => string | undefined): void {
   const website = '<meta property="og:type" content="website">'
   for (const file of readdirSync(outDir, { recursive: true, encoding: 'utf8' })) {
     if (!file.endsWith('.html') || file === 'index.html' || file === '404.html') continue
     const path = join(outDir, file)
-    const html = readFileSync(path, 'utf8')
-    if (html.includes(website)) {
-      writeFileSync(path, html.replace(website, '<meta property="og:type" content="article">'))
+    let html = readFileSync(path, 'utf8')
+    html = html.replace(website, '<meta property="og:type" content="article">')
+    const alt = altOf(routeOf(file.replace(/\\/g, '/').replace(/\.html$/, '.md')))
+    if (alt && !html.includes('property="og:image:alt"')) {
+      const content = escapeAttribute(alt)
+      html = html
+        .replace(
+          /(<meta property="og:image:height" content="\d+">)/,
+          `$1\n<meta property="og:image:type" content="image/png">\n<meta property="og:image:alt" content="${content}">`
+        )
+        .replace(
+          /(<meta name="twitter:image" content="[^"]*">)/,
+          `$1\n<meta name="twitter:image:alt" content="${content}">`
+        )
     }
+    writeFileSync(path, html)
   }
 }
