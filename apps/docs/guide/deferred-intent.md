@@ -1,3 +1,7 @@
+---
+description: "Render the Stripe Payment Element in Vue before a PaymentIntent exists, then create and confirm the Intent on your server when the customer pays."
+---
+
 # Collect payment details before creating an Intent
 
 Render the Payment Element before any PaymentIntent exists, and create the Intent only when the customer clicks Pay. Use this when the amount is not final until checkout, when you don't want an Intent for every visitor who opens the page, or when your server must check the order before charging.

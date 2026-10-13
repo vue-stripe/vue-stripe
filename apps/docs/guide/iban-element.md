@@ -1,3 +1,7 @@
+---
+description: "Accept SEPA Direct Debit payments in Vue with VueStripeIbanElement and useConfirmSepaDebitPayment, including the mandate text and settlement timing."
+---
+
 # Accept SEPA Direct Debit
 
 Collect an IBAN with `VueStripeIbanElement` and confirm a SEPA Direct Debit payment with [`useConfirmSepaDebitPayment()`](/api/composables/confirm/bank-debits). The element formats and validates the IBAN as the customer types and reports the bank and country.

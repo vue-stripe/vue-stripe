@@ -1,3 +1,7 @@
+---
+description: "Split Card Elements reference: VueStripeCardNumberElement, VueStripeCardExpiryElement and VueStripeCardCvcElement for card forms with separate fields."
+---
+
 # Split Card Elements
 
 Three components that render the card number, expiry date and CVC as separate fields, for layouts the single [VueStripeCardElement](/api/components/stripe-card-element) can't give. Use them together inside the same [VueStripeElements](/api/components/stripe-elements), without a `clientSecret`. To confirm or create a PaymentMethod, pass only the card number element: Stripe reads the expiry and CVC from the sibling fields of the same Elements group. [Choosing an integration](/guide/approaches#payment-element-or-card-element) compares the card elements with the Payment Element.

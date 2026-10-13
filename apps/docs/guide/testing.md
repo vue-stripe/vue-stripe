@@ -1,3 +1,7 @@
+---
+description: "Stripe test cards, bank accounts, wallets and webhooks for testing a Vue Stripe integration end to end before you go live with real keys."
+---
+
 # Test your integration
 
 Run every payment flow end to end with Stripe's test data before you go live: test cards, bank accounts, wallets and webhooks. This page is the single list of test numbers used across these docs. The numbers come from Stripe's [testing documentation](https://docs.stripe.com/testing), which has the complete set.

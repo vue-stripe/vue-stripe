@@ -1,3 +1,7 @@
+---
+description: "useVerifyMicrodepositsForSetup reference: verify a SetupIntent's bank account with micro-deposit amounts or a descriptor code for ACH and ACSS in Vue."
+---
+
 # useVerifyMicrodepositsForSetup
 
 Verify the customer's bank account of a SetupIntent with micro-deposits, for ACH Direct Debit and Canadian pre-authorized debits (ACSS). Wraps [`stripe.verifyMicrodepositsForSetup()`](https://docs.stripe.com/js/payment_intents/verify_microdeposits_for_setup).

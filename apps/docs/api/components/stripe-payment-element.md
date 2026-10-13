@@ -1,3 +1,7 @@
+---
+description: "VueStripePaymentElement reference: Stripe's Payment Element for Vue, one form for cards, wallets, bank debits and BNPL. Props, events, slots, methods."
+---
+
 # VueStripePaymentElement
 
 Stripe's Payment Element: one form for cards, wallets, bank debits, buy-now-pay-later and local payment methods. Stripe chooses which methods to show from the Intent or Checkout Session, the customer's location and your Dashboard settings. Use it inside [VueStripeElements](/api/components/stripe-elements) or [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider). For the steps of a full integration, see [Accept a payment with the Payment Element](/guide/payment-element); [Choosing an integration](/guide/approaches#payment-element-or-card-element) compares it with the Card Element.

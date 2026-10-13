@@ -1,3 +1,7 @@
+---
+description: "Install @vue-stripe/vue-stripe and @stripe/stripe-js, import the stylesheet, set your publishable key and check that Stripe.js loads in your Vue app."
+---
+
 # Install and set up
 
 Add Vue Stripe to an existing Vue app, load its stylesheet, configure your publishable key and check that Stripe.js loads.

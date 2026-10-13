@@ -1,3 +1,7 @@
+---
+description: "VueStripeTaxIdElement reference: collect a business name and tax ID such as EU VAT, GST or ABN in Vue, on a Checkout Session or with Stripe beta access."
+---
+
 # VueStripeTaxIdElement
 
 Collects a business name and tax ID (e.g. EU VAT, GST, ABN). Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createTaxIdElement()`), or inside [VueStripeElements](/api/components/stripe-elements) with Stripe beta access (`elements.create('taxId')`). The tax ID it collects is used for the session's tax calculation and invoice.

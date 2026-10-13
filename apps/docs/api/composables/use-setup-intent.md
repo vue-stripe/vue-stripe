@@ -1,3 +1,7 @@
+---
+description: "useSetupIntent reference: confirm a SetupIntent from the Payment Element in Vue to save a payment method for later, with loading and error refs."
+---
+
 # useSetupIntent
 
 Confirms a SetupIntent with `stripe.confirmSetup()`, using the Elements group from the nearest [`VueStripeElements`](/api/components/stripe-elements), and tracks `loading` and `error`. A SetupIntent saves a payment method for later without charging it. Call it in a component rendered inside `VueStripeProvider` (or an app that installs [`createVueStripe()`](/api/plugin)); inside `VueStripeElements` it picks up the Elements group automatically. [Save a payment method for later](/guide/setup-intent) walks through the flow, and [PaymentIntent or SetupIntent](/guide/payment-objects#paymentintent-or-setupintent) explains which to use.

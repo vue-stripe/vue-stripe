@@ -1,6 +1,6 @@
 ---
 title: Embedded Subscription Example
-description: Create subscriptions using embedded Stripe Elements on your site
+description: "Live demo of a Stripe subscription in Vue with the Payment Element on your own page, confirmed with a test card in Stripe test mode."
 ---
 
 # Embedded Subscription Elements

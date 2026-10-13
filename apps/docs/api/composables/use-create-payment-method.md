@@ -1,3 +1,7 @@
+---
+description: "useCreatePaymentMethod reference: create a reusable Stripe PaymentMethod from the Payment Element or Card Element in Vue, without confirming a payment."
+---
+
 # useCreatePaymentMethod
 
 Create a [PaymentMethod](https://docs.stripe.com/api/payment_methods) with the raw Stripe instance. Wraps [`stripe.createPaymentMethod()`](https://docs.stripe.com/js/payment_methods/create_payment_method).

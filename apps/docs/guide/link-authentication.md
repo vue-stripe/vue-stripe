@@ -1,3 +1,7 @@
+---
+description: "Add Stripe Link to a Vue Payment Element checkout with VueStripeLinkAuthenticationElement, so returning customers pay with their saved details."
+---
+
 # Add Link to a Payment Element checkout
 
 Collect the customer's email with `VueStripeLinkAuthenticationElement` so customers with a [Stripe Link](https://docs.stripe.com/payments/link) account can sign in and pay with their saved details. Link checks the email, verifies a returning customer with a one-time code and fills in the Payment Element; new customers can save their details for next time.

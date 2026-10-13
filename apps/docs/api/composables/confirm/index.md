@@ -1,3 +1,7 @@
+---
+description: "Method confirmers: a Vue composable for each of the 46 Stripe.js confirm methods, with loading and error refs, and when to use them over usePaymentIntent."
+---
+
 # Method confirmers
 
 Stripe.js has a confirm method for each payment method, such as `stripe.confirmCardPayment()` or `stripe.confirmSepaDebitSetup()`. Vue Stripe wraps every one of them, 46 in Stripe.js 10, in a composable named after it: `useConfirmCardPayment`, `useConfirmSepaDebitSetup`, and so on. Call them inside a `VueStripeProvider`; they do not need `VueStripeElements`, but components that render the Card, IBAN or BECS element do.

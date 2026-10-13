@@ -1,3 +1,7 @@
+---
+description: "VueStripeContactDetailsElement reference: collect and validate the customer's email in Vue, on a Checkout Session or inside VueStripeElements."
+---
+
 # VueStripeContactDetailsElement
 
 Collects the customer's email address. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createContactDetailsElement()`), where the email lands on the Checkout Session, or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('contactDetails')`). No beta flag is needed. Stripe validates the address and, inside the Checkout provider, keeps `session.email` up to date, so you don't need your own input plus `updateEmail()`.

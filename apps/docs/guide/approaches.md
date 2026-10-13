@@ -1,3 +1,7 @@
+---
+description: "Compare the ways to take a Stripe payment in Vue: hosted, embedded or custom Checkout, the Payment Element or the Card Element, plugin or provider."
+---
+
 # Choosing an integration
 
 Stripe offers several ways to take a payment in the browser, and Vue Stripe wraps all of them. They differ along two lines: who lays out the payment form, and where the order data (line items, tax, discounts, shipping) is computed. This page compares the options, and the smaller choices inside them, so you can pick one before you open a how-to guide.

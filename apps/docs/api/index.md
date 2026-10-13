@@ -1,3 +1,7 @@
+---
+description: "API reference for @vue-stripe/vue-stripe: every component, composable, plugin option and type, with compatibility for Vue 3, Vue 2.7 and Stripe.js 10."
+---
+
 # API reference
 
 Every export of `@vue-stripe/vue-stripe`: components, composables, the plugin and types. To find the export that wraps a Stripe.js method or element, use [Stripe.js coverage](/coverage). Exported TypeScript types and the error classes are listed in [Types and errors](/api/types).

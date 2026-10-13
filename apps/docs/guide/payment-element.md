@@ -1,3 +1,7 @@
+---
+description: "Accept a payment in Vue with VueStripePaymentElement and usePaymentIntent: create a PaymentIntent on your server, render the form and confirm it."
+---
+
 # Accept a payment with the Payment Element
 
 Collect a payment with `VueStripePaymentElement` and confirm it with [`usePaymentIntent()`](/api/composables/use-payment-intent). The Payment Element shows every payment method you enable in the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods) that fits the customer's location, currency and device.

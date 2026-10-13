@@ -1,6 +1,6 @@
 ---
-title: Card Element
-description: Accept card payments with the legacy Card Element
+title: Card Element Example
+description: "Live demo of VueStripeCardElement: accept a test card payment in Vue with Stripe's single-field Card Element and useConfirmCardPayment."
 ---
 
 # Card Element

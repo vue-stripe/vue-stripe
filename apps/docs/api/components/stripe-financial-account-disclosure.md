@@ -1,3 +1,7 @@
+---
+description: "VueStripeFinancialAccountDisclosure reference: render the legal disclosure Stripe requires for Financial Accounts for platforms in a Vue app."
+---
+
 # VueStripeFinancialAccountDisclosure
 
 Renders the legal disclosure Stripe requires for Financial Accounts for platforms. It is the Vue port of React Stripe.js 7's `FinancialAccountDisclosure`: it calls `stripe.createFinancialAccountDisclosure(options)` and mounts the HTML element Stripe.js returns. Vue Stripe does not ship any legal text of its own.

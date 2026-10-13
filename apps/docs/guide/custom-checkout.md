@@ -1,3 +1,7 @@
+---
+description: "Build your own checkout page in Vue on a Stripe Checkout Session with the Checkout Elements SDK, the Payment Element and useCheckoutSession."
+---
+
 # Build your own checkout page on a Checkout Session
 
 Put Stripe Elements on your own page while a Checkout Session keeps the order: line items, discounts, taxes, shipping and currency stay on the session. You choose the layout; Stripe calculates totals and runs the payment. Stripe calls this "Elements with the Checkout Sessions API", and Stripe.js exposes it as the Checkout Elements SDK (`stripe.initCheckoutElementsSdk()`). To compare it with hosted, embedded and Payment Element integrations, see [Choosing an integration](/guide/approaches).

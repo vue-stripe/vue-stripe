@@ -1,3 +1,7 @@
+---
+description: "Fulfil orders from Stripe webhooks on your server: handle the events for your integration, make fulfilment idempotent and test with the Stripe CLI."
+---
+
 # Fulfil orders with webhooks
 
 Ship the goods, grant access or mark the order paid from your server, when Stripe tells it that the money arrived. This works for every Vue Stripe integration: Payment Element, Checkout (hosted, embedded or on a Checkout Session), bank debits and subscriptions.

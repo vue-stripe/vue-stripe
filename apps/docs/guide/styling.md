@@ -1,3 +1,7 @@
+---
+description: "Style Stripe Elements in Vue: the Appearance API for the fields inside the iframes, and CSS classes and slots for the Vue Stripe wrapper around them."
+---
+
 # Style elements
 
 Make Stripe's payment fields match your design. Two layers are involved:

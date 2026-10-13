@@ -1,6 +1,6 @@
 ---
 title: Payment Method Messaging (BNPL) Example
-description: Promote Buy Now, Pay Later options with the Payment Method Messaging Element
+description: "Live demo of VueStripePaymentMethodMessagingElement: Affirm, Klarna and Afterpay / Clearpay installment messaging for an amount in Vue."
 ---
 
 # Payment Method Messaging (BNPL)

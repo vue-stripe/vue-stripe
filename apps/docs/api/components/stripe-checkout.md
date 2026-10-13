@@ -1,3 +1,7 @@
+---
+description: "VueStripeCheckout reference: a Vue button that redirects to a hosted Stripe Checkout page from the session URL your server returns. Props, events, v5 changes."
+---
+
 # VueStripeCheckout
 
 A button that sends the customer to a hosted Stripe Checkout page. Your server creates the Checkout Session and returns `session.url`; the component redirects to that URL with `window.location.replace()`. It needs no `VueStripeProvider`, `VueStripeElements` or client secret. For the server code and the full flow, see [Redirect to Stripe Checkout](/guide/checkout). [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) compares hosted Checkout with the other options.

@@ -1,3 +1,7 @@
+---
+description: "Which Stripe keys and secrets belong in the browser and which on your server, how Stripe iframes keep card data off your page, and what PCI scope means."
+---
+
 # What runs where: keys, iframes and PCI scope
 
 A Stripe integration splits its work between the customer's browser, your server and Stripe. Most of the warnings in these docs, such as keeping the secret key on the server or not trusting the return page, follow from that split. This page explains it once, so the warnings on other pages make sense.

@@ -1,3 +1,7 @@
+---
+description: "Handle Stripe errors in a Vue app: Stripe.js load failures, validation errors, card declines and error codes, the return page and Checkout errors."
+---
+
 # Handle errors and declines
 
 Show customers a clear message when a payment cannot go through, and keep your app working when Stripe.js, an element or your server fails.

@@ -1,6 +1,6 @@
 ---
 title: Identity Verification Example
-description: Verify a customer's identity with Stripe Identity and useIdentity
+description: "Live demo of Stripe Identity in Vue: open the verification modal with useIdentity and complete it with Stripe test data, with no real ID needed."
 ---
 
 # Identity Verification Example

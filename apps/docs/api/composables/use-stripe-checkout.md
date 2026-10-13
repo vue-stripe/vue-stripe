@@ -1,3 +1,7 @@
+---
+description: "useStripeCheckout reference: redirect the browser to a hosted Stripe Checkout Session URL from Vue, with loading and error refs and no Stripe.js load."
+---
+
 # useStripeCheckout
 
 Redirects the browser to a hosted Stripe Checkout Session's `url`, and tracks `loading` and `error`. It is also exported as `useCheckout`. No Stripe instance is involved, so it works with or without `VueStripeProvider` and needs no `VueStripeElements`. [Redirect to Stripe Checkout](/guide/checkout) has the server code, and [the Checkout redirect: component or composable](/guide/approaches#the-checkout-redirect-component-or-composable) compares it with [`VueStripeCheckout`](/api/components/stripe-checkout).

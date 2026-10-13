@@ -1,3 +1,7 @@
+---
+description: "Accept card payments in Vue with VueStripeCardElement or split card fields, and confirm them with useConfirmCardPayment, including 3D Secure."
+---
+
 # Accept card payments with the Card Element
 
 Collect card details with `VueStripeCardElement`, or with separate number, expiry and CVC fields, and confirm with [`useConfirmCardPayment()`](/api/composables/confirm/cards). The Card Element takes cards only; to decide between it and the Payment Element, see [Choosing an integration](/guide/approaches).

@@ -1,3 +1,7 @@
+---
+description: "How Stripe versions Stripe.js (Basil, Clover, Dahlia, Endive), what each release changed for Vue apps, and why some Vue Stripe 5 components are gone."
+---
+
 # Stripe.js versions and what v6 changed
 
 Vue Stripe 6 runs on Stripe.js 10, the Endive release. Vue Stripe 5 ran on Basil and Clover. Stripe has shipped two more trains since Clover, Dahlia and Endive, and Clover itself removed several things v5 still offered on Basil. This page explains how Stripe versions Stripe.js, what each recent train changed that matters to a Vue Stripe app, and why some v5 components and props are gone.

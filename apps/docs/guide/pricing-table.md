@@ -1,3 +1,7 @@
+---
+description: "Embed a Stripe pricing table configured in the Dashboard in a Vue app with VueStripePricingTable, so customers pick a plan and subscribe via Checkout."
+---
+
 # Embed a pricing table
 
 Embed a pricing table you configured in the Stripe Dashboard with `VueStripePricingTable`. Customers pick a plan and go to Stripe Checkout to subscribe; the products, prices and look of the table live in the Dashboard, so changes there need no code change.

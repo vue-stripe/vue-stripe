@@ -1,3 +1,7 @@
+---
+description: "How Vue Stripe loads Stripe.js: nothing on import, one shared script per page, where to mount the provider, fraud signals and server-side rendering."
+---
+
 # How Stripe.js is loaded
 
 Before any element can appear, the browser has to download Stripe.js from Stripe and create a `Stripe` instance with your publishable key. Vue Stripe makes a few deliberate choices about when that happens and how often. They affect page weight, Stripe's fraud signals and server-side rendering. This page explains them.

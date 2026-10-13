@@ -1,3 +1,7 @@
+---
+description: "Provide Stripe to a whole Vue app with the createVueStripe plugin, and combine it with VueStripeProvider where a page needs another key or account."
+---
+
 # Provide Stripe app-wide
 
 Install the `createVueStripe` plugin once, so every component in the app can use the Vue Stripe elements and composables without a `VueStripeProvider` around it.

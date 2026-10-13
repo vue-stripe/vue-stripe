@@ -1,3 +1,7 @@
+---
+description: "VueStripeLinkSignupElement reference (beta): offer customers to save their details with Stripe Link, on a Checkout Session or inside VueStripeElements."
+---
+
 # VueStripeLinkSignupElement
 
 Offers customers to save their details with [Link](https://stripe.com/payments/link) for faster checkout next time. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createLinkSignupElement(options)`), or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('linkSignup', options)`).

@@ -1,3 +1,7 @@
+---
+description: "VueStripeCheckoutFormProvider reference: initialize Stripe's Checkout Form SDK (beta) for a Checkout Session and provide it to Vue components."
+---
+
 # VueStripeCheckoutFormProvider
 
 Initializes the **Checkout Form** via `stripe.initCheckoutFormSdk()` and provides the Checkout Form SDK to descendants. Place [`VueStripeCheckoutForm`](/api/components/stripe-checkout-form) inside it to render Stripe's complete checkout form on your page, and confirm with the [`useCheckoutForm`](/api/composables/use-checkout-form) composable. [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) compares it with the other Checkout options.

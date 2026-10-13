@@ -1,6 +1,6 @@
 ---
 title: Payment Element Example
-description: Accept one-time payments with the universal Payment Element
+description: "Live demo of VueStripePaymentElement: create a PaymentIntent and accept a one-time test payment in Vue with Stripe's Payment Element."
 ---
 
 # Payment Element Example

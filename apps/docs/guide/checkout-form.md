@@ -1,3 +1,7 @@
+---
+description: "Add Stripe's Checkout Form (beta) to a Vue page: create a Checkout Session with ui_mode form, render VueStripeCheckoutForm, confirm with useCheckoutForm."
+---
+
 # Add the Checkout Form (beta)
 
 Put Stripe's complete checkout form on your page with `VueStripeCheckoutForm`: contact details, addresses, shipping, tax ID, express checkout wallets, the payment method, the order total and the Pay button come as one element. A Checkout Session keeps the order, so Stripe calculates totals, tax, discounts and shipping. Stripe.js exposes it as the Checkout Form SDK (`stripe.initCheckoutFormSdk()`, `ui_mode: 'form'`). To compare it with the other Checkout integrations, see [Choosing an integration](/guide/approaches).

@@ -1,6 +1,6 @@
 ---
 title: Live Demo
-description: Test Vue Stripe components with real Stripe integrations
+description: "Live demos of every Vue Stripe flow in Stripe test mode: Checkout, the Payment Element, wallets, bank debits, saved cards, tokens and subscriptions."
 ---
 
 # Live Demo

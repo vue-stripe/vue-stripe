@@ -1,3 +1,7 @@
+---
+description: "What confirming a Stripe PaymentIntent does, why the Payment Element is submitted first, and how redirects, next actions and delayed methods work."
+---
+
 # How confirming works
 
 Collecting payment details is half of a payment. The other half is **confirming**: telling Stripe to attach those details to a PaymentIntent or SetupIntent and try the payment. This page explains what happens during that step, why the Payment Element has to be submitted first, what redirects and next actions are, and why some payment methods are still undecided when confirmation returns.

@@ -1,3 +1,7 @@
+---
+description: "VueStripeProvider reference: load Stripe.js once and provide the Stripe instance to Vue components and composables. Props, loading and error slots, events."
+---
+
 # VueStripeProvider
 
 Loads Stripe.js and provides the `Stripe` instance to every component and composable inside it. Children render once Stripe.js is ready; until then the provider renders its `#loading` slot, and on failure its `#error` slot. [How Stripe.js is loaded](/guide/stripe-js-loading) explains when the script loads and where to mount the provider.

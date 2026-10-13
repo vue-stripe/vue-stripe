@@ -1,3 +1,7 @@
+---
+description: "VueStripeLinkAuthenticationElement reference: collect the customer's email and sign them in to Stripe Link so the Payment Element fills saved details."
+---
+
 # VueStripeLinkAuthenticationElement
 
 Collects the customer's email and signs them in to [Stripe Link](https://docs.stripe.com/payments/link) when the email has a Link account, so the Payment Element can fill in their saved details. It collects no payment details itself: pair it with [VueStripePaymentElement](/api/components/stripe-payment-element) inside [VueStripeElements](/api/components/stripe-elements). To add it to a checkout, see [Add Link to checkout](/guide/link-authentication).

@@ -1,6 +1,6 @@
 ---
 title: Custom Checkout Example
-description: Build your own checkout page on a Checkout Session with the Checkout Elements SDK
+description: "Live demo of a custom checkout page in Vue on a Stripe Checkout Session, with the Checkout Elements SDK, the Payment Element and an Address Element."
 ---
 
 # Custom Checkout Example

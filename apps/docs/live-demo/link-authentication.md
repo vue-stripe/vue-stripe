@@ -1,6 +1,6 @@
 ---
-title: Link Authentication
-description: Enable one-click checkout with Stripe Link
+title: Link Authentication Example
+description: "Live demo of VueStripeLinkAuthenticationElement: collect an email and let returning Stripe Link customers pay with saved details in Vue."
 ---
 
 # Link Authentication

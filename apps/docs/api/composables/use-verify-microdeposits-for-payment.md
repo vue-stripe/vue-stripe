@@ -1,3 +1,7 @@
+---
+description: "useVerifyMicrodepositsForPayment reference: verify a PaymentIntent's bank account with micro-deposit amounts for ACH Direct Debit and ACSS in Vue."
+---
+
 # useVerifyMicrodepositsForPayment
 
 Verify the customer's bank account of a PaymentIntent with micro-deposits, for ACH Direct Debit and Canadian pre-authorized debits (ACSS). Wraps [`stripe.verifyMicrodepositsForPayment()`](https://docs.stripe.com/js/payment_intents/verify_microdeposits_for_payment).

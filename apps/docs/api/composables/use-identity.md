@@ -1,3 +1,7 @@
+---
+description: "useIdentity reference: open Stripe Identity's verification modal for a VerificationSession from a Vue component and read the result."
+---
+
 # useIdentity
 
 Verify a customer's identity with [Stripe Identity](https://docs.stripe.com/identity). Wraps [`stripe.verifyIdentity()`](https://docs.stripe.com/js/identity/modal), which opens Stripe's Identity modal for a VerificationSession and resolves when the customer submits or closes it. [Verify a customer's identity](/guide/identity) shows the server and client steps.

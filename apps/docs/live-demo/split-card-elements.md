@@ -1,6 +1,6 @@
 ---
-title: Split Card Elements
-description: Accept card payments with separate inputs for card number, expiry, and CVC
+title: Split Card Elements Example
+description: "Live demo of Split Card Elements: separate card number, expiry and CVC fields in Vue, confirmed with a test card in Stripe test mode."
 ---
 
 # Split Card Elements

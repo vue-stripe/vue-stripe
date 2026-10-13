@@ -1,3 +1,7 @@
+---
+description: "TypeScript types and error classes exported by @vue-stripe/vue-stripe, including the re-exported Stripe.js types and the typed Vue Stripe errors."
+---
+
 # Types and errors
 
 The TypeScript types and error classes that `@vue-stripe/vue-stripe` exports. Import every type from the package, not from `@stripe/stripe-js`: the Stripe.js types below are re-exported under their original names, so one import covers both.

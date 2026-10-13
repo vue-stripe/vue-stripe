@@ -1,6 +1,6 @@
 ---
 title: ACH Direct Debit Example
-description: Link a US bank account with Financial Connections and confirm an ACH Direct Debit payment with useFinancialConnections and useConfirmUsBankAccountPayment
+description: "Live demo of ACH Direct Debit in Vue: link a US bank account with Financial Connections and confirm with useConfirmUsBankAccountPayment in test mode."
 ---
 
 # ACH Direct Debit Example

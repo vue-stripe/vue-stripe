@@ -1,3 +1,7 @@
+---
+description: "VueStripeAuBankAccountElement reference: collect an Australian BSB and account number for BECS Direct Debit in Vue. Props, events, confirm composables."
+---
+
 # VueStripeAuBankAccountElement
 
 Collects an Australian BSB and account number for BECS Direct Debit (AUD only). The element validates the details and reports the bank and branch in `@change`. Use it inside [VueStripeElements](/api/components/stripe-elements), and confirm with [`useConfirmAuBecsDebitPayment()` or `useConfirmAuBecsDebitSetup()`](/api/composables/confirm/bank-debits), passing the exposed `element`. For the server and client steps, including the mandate, see [Accept BECS Direct Debit](/guide/au-bank-account-element). BECS payments stay `processing` for a few business days; [Payments that settle later](/guide/payment-objects#payments-that-settle-later) explains the status flow.

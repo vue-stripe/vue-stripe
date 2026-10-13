@@ -1,3 +1,7 @@
+---
+description: "useCreateConfirmationToken reference: create a Stripe ConfirmationToken from the Payment Element in Vue and confirm the PaymentIntent on your server."
+---
+
 # useCreateConfirmationToken
 
 Create a [ConfirmationToken](https://docs.stripe.com/api/confirmation_tokens) from the Payment Element and confirm the PaymentIntent or SetupIntent on your server. Wraps [`stripe.createConfirmationToken()`](https://docs.stripe.com/js/confirmation_tokens/create_confirmation_token).

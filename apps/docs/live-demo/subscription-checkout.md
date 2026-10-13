@@ -1,6 +1,6 @@
 ---
 title: Subscription Checkout Example
-description: Create subscriptions using Stripe Checkout's hosted page
+description: "Live demo of a Stripe subscription in Vue through hosted Stripe Checkout: choose a price, redirect to Checkout and pay with a test card."
 ---
 
 # Subscription via Stripe Checkout

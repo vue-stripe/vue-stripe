@@ -1,6 +1,6 @@
 ---
 title: Tokens Example
-description: Create a ConfirmationToken, a card Token and a Radar Session with useCreateConfirmationToken, useCreateToken and useRadarSession
+description: "Live demo of tokens in Vue: create a ConfirmationToken, a card Token and a Radar Session with useCreateConfirmationToken, useCreateToken, useRadarSession."
 ---
 
 # Tokens Example

@@ -1,6 +1,6 @@
 ---
 title: Express Checkout Example
-description: One-click wallets — Apple Pay, Google Pay, Link and PayPal
+description: "Live demo of VueStripeExpressCheckoutElement: Apple Pay, Google Pay, Link and PayPal buttons in Vue, shown according to the browser and device."
 ---
 
 # Express Checkout

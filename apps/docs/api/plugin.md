@@ -1,3 +1,7 @@
+---
+description: "createVueStripe reference: a Vue plugin that provides Stripe to the whole app instead of VueStripeProvider. Options, provided values and TypeScript."
+---
+
 # createVueStripe Plugin
 
 A Vue plugin that provides Stripe to the whole app, in place of wrapping the tree in [`VueStripeProvider`](/api/components/stripe-provider). It provides the Stripe instance and config under the same injection keys the provider uses. [Provide Stripe app-wide](/guide/plugin) walks through installing it and overriding it for one part of the app. [Choosing an integration](/guide/approaches#plugin-or-provider) compares the two, and [How Stripe.js is loaded](/guide/stripe-js-loading#where-to-mount-the-provider) explains when each one loads Stripe.js.

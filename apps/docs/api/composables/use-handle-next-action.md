@@ -1,3 +1,7 @@
+---
+description: "useHandleNextAction reference: complete 3D Secure or another required action on an Intent you confirmed on your server, from a Vue component."
+---
+
 # useHandleNextAction
 
 Invoke the next required action (e.g. 3DS authentication) on a PaymentIntent or SetupIntent **without re-confirming it**. Wraps [`stripe.handleNextAction()`](https://docs.stripe.com/js/payment_intents/handle_next_action).

@@ -1,3 +1,7 @@
+---
+description: "Collect a shipping or billing address in Vue with VueStripeAddressElement: country-aware fields, validation and address autocomplete from Stripe."
+---
+
 # Collect a shipping or billing address
 
 Collect a full address with `VueStripeAddressElement`. It formats the form for each country, validates it and can suggest addresses as the customer types.

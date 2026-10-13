@@ -1,3 +1,7 @@
+---
+description: "VueStripeCheckoutForm reference: render Stripe's complete Checkout Form (beta), from contact details to the Pay button, as one Vue component."
+---
+
 # VueStripeCheckoutForm
 
 Renders Stripe's complete **Checkout Form**: contact details, addresses, shipping options, tax ID, express checkout wallets, the payment method, the order total and the Pay button, in one element. Use it inside a [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider), which creates it with `checkoutFormSdk.createForm()`. To lay out the fields yourself, use [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) with individual elements; [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) compares the options. [Add the Checkout Form](/guide/checkout-form) walks through a full integration.

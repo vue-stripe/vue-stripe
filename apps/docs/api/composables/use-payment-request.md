@@ -1,3 +1,7 @@
+---
+description: "usePaymentRequest reference: open the browser payment sheet for Apple Pay, Google Pay or Link behind your own Vue button with Stripe's Payment Request API."
+---
+
 # usePaymentRequest
 
 Show Apple Pay, Google Pay, Link or a browser-saved card behind your own button with the [Payment Request API](https://docs.stripe.com/js/payment_request). Wraps [`stripe.paymentRequest()`](https://docs.stripe.com/js/payment_request/create): creates the `PaymentRequest` once Stripe.js has loaded, checks for a wallet with `canMakePayment()`, forwards `show`, `update` and `abort`, and detaches your event handlers when the component unmounts.

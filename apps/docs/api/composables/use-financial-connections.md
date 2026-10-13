@@ -1,3 +1,7 @@
+---
+description: "useFinancialConnections reference: link bank accounts with Stripe Financial Connections and collect ACH Direct Debit accounts from a Vue app."
+---
+
 # useFinancialConnections
 
 Collect bank accounts with [Stripe Financial Connections](https://docs.stripe.com/financial-connections) and the [ACH Direct Debit](https://docs.stripe.com/payments/ach-direct-debit) bank account flows. Wraps four Stripe.js methods, each of which opens Stripe's modal and resolves when the customer finishes or closes it. [Accept ACH Direct Debit](/guide/ach-debit) walks through the payment flow:

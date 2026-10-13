@@ -1,6 +1,6 @@
 ---
 title: Save a Card Example
-description: Save a card for future payments with a SetupIntent and useSetupIntent
+description: "Live demo of saving a card for future payments in Vue with a SetupIntent, the Payment Element and useSetupIntent, in Stripe test mode."
 ---
 
 # Save a Card (SetupIntent)

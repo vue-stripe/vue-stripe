@@ -1,3 +1,7 @@
+---
+description: "VueStripeElements reference: create a Stripe Elements group in Vue from a client secret or a deferred Intent, with Appearance API options, fonts and slots."
+---
+
 # VueStripeElements
 
 Creates a Stripe Elements group (`stripe.elements()`) and provides it to the element components and composables inside it. Use it inside a [VueStripeProvider](/api/components/stripe-provider), or in an app that installs the [`createVueStripe()`](/api/plugin) plugin; without a provider, a Stripe.js load failure renders in this component's `#error` slot. [How Vue Stripe works](/guide/architecture#the-provider-chain) explains the provider chain.

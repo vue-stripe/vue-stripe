@@ -1,3 +1,7 @@
+---
+description: "Upgrade a Vue Stripe 5 app to Vue Stripe 6 and Stripe.js 10 (Endive): removed elements and props, the Checkout Elements SDK and new requirements."
+---
+
 # Upgrade from v5 to v6
 
 Move a working Vue Stripe 5 app to Vue Stripe 6, which runs on Stripe.js 10 (API version Endive). Most breaking changes follow Stripe: elements and methods that Stripe removed are gone here too, and Checkout Sessions with Elements use the new Checkout Elements SDK.
