@@ -4,21 +4,45 @@ import { VueStripeProviderError } from '../utils/errors'
 import { hx } from '../utils/h'
 
 const PRICING_TABLE_SCRIPT_URL = 'https://js.stripe.com/v3/pricing-table.js'
+const PRICING_TABLE_TAG = 'stripe-pricing-table'
+const LOADED_ATTRIBUTE = 'data-vue-stripe-loaded'
 
-/** Load Stripe's pricing-table web component script once per page. */
-const loadPricingTableScript = (): Promise<void> =>
-  new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${PRICING_TABLE_SCRIPT_URL}"]`)) {
+// The script tag being loaded, shared by every table mounted meanwhile.
+let inFlight: { script: HTMLScriptElement; promise: Promise<void> } | null = null
+
+/**
+ * Load Stripe's pricing-table web component script once per page. A failed tag is
+ * removed, so the next mount (a retry) adds a new one.
+ */
+const loadPricingTableScript = (): Promise<void> => {
+  if (customElements.get(PRICING_TABLE_TAG)) return Promise.resolve()
+  if (inFlight?.script.isConnected) return inFlight.promise
+  const existing = document.querySelector<HTMLScriptElement>(
+    `script[src="${PRICING_TABLE_SCRIPT_URL}"]`
+  )
+  if (existing?.hasAttribute(LOADED_ATTRIBUTE)) return Promise.resolve()
+  // A tag from the page's own HTML: wait for the element it defines.
+  if (existing) return customElements.whenDefined(PRICING_TABLE_TAG).then(() => undefined)
+
+  const script = document.createElement('script')
+  script.src = PRICING_TABLE_SCRIPT_URL
+  script.async = true
+  const promise = new Promise<void>((resolve, reject) => {
+    script.onload = () => {
+      script.setAttribute(LOADED_ATTRIBUTE, '')
+      inFlight = null
       resolve()
-      return
     }
-    const script = document.createElement('script')
-    script.src = PRICING_TABLE_SCRIPT_URL
-    script.async = true
-    script.onload = () => resolve()
-    script.onerror = () => reject(new Error('Failed to load Stripe pricing table script'))
-    document.head.appendChild(script)
+    script.onerror = () => {
+      script.remove()
+      inFlight = null
+      reject(new Error('Failed to load Stripe pricing table script'))
+    }
   })
+  inFlight = { script, promise }
+  document.head.appendChild(script)
+  return promise
+}
 
 /**
  * Stripe's no-code `<stripe-pricing-table>`. Rendered from a render function, so the

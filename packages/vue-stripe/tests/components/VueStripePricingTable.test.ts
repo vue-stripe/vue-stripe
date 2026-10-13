@@ -254,4 +254,57 @@ describe('VueStripePricingTable', () => {
 
     vi.restoreAllMocks()
   })
+  describe('retry after a script load error (#591)', () => {
+    const scripts = () =>
+      Array.from(document.querySelectorAll<HTMLScriptElement>('script[src*="pricing-table.js"]'))
+
+    const mountTables = (count: number) =>
+      mount(VueStripeProvider, {
+        props: { publishableKey: 'pk_test_123' },
+        slots: {
+          default: () =>
+            Array.from({ length: count }, (_, i) =>
+              h(VueStripePricingTable, { key: i, pricingTableId: `prctbl_${i}` })
+            )
+        }
+      })
+
+    it('adds a new script tag on remount and emits load only once it loads', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const first = mountTables(1)
+      await flushPromises()
+      expect(scripts()).toHaveLength(1)
+      scripts()[0]!.onerror?.(new Event('error'))
+      await flushPromises()
+      expect(first.findComponent(VueStripePricingTable).emitted('error')).toHaveLength(1)
+      expect(scripts()).toHaveLength(0)
+      first.unmount()
+
+      const second = mountTables(1)
+      await flushPromises()
+      const table = second.findComponent(VueStripePricingTable)
+      expect(scripts()).toHaveLength(1)
+      expect(table.emitted('load')).toBeUndefined()
+      scripts()[0]!.onload?.(new Event('load'))
+      await flushPromises()
+      expect(table.emitted('load')).toHaveLength(1)
+      second.unmount()
+      consoleError.mockRestore()
+    })
+
+    it('reports the failure to every table waiting on the same script', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const wrapper = mountTables(2)
+      await flushPromises()
+      expect(scripts()).toHaveLength(1)
+      scripts()[0]!.onerror?.(new Event('error'))
+      await flushPromises()
+      for (const table of wrapper.findAllComponents(VueStripePricingTable)) {
+        expect(table.emitted('error')).toHaveLength(1)
+        expect(table.emitted('load')).toBeUndefined()
+      }
+      wrapper.unmount()
+      consoleError.mockRestore()
+    })
+  })
 })
