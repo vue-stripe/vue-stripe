@@ -14,17 +14,19 @@ Install Vue Stripe together with Stripe.js:
 
 ::: code-group
 ```bash [npm]
-npm install @vue-stripe/vue-stripe @stripe/stripe-js
+npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 ```
 
 ```bash [pnpm]
-pnpm add @vue-stripe/vue-stripe @stripe/stripe-js
+pnpm add @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 ```
 
 ```bash [yarn]
-yarn add @vue-stripe/vue-stripe @stripe/stripe-js
+yarn add @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 ```
 :::
+
+The version ranges select Vue Stripe 6 and Stripe.js 10, now and after 6.0.0 is released. Without them, the package manager installs Vue Stripe 5 while 6.0.0 is still a beta, and these docs do not apply to it. If the app already has an older `@stripe/stripe-js`, the same command upgrades it.
 
 Type definitions ship with the package; Stripe.js types such as `Stripe`, `StripeElements` and `PaymentIntent` are re-exported from `@vue-stripe/vue-stripe`.
 
@@ -91,13 +93,43 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 When the page shows "Stripe is ready.", the installation works. If it shows the error message instead, see [Troubleshoot common problems](/guide/troubleshooting).
 
+## 5. Send API requests to your server
+
+The how-to guides call your server with paths on the app's own origin, such as `fetch('/api/create-payment-intent', { method: 'POST' })`. In development the app and your server usually run on different ports, so let the dev server forward `/api` requests. Replace `3000` with the port your server listens on:
+
+::: code-group
+```ts [Vite (vite.config.ts)]
+import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    proxy: { '/api': 'http://localhost:3000' }
+  }
+})
+```
+
+```js [Vue CLI (vue.config.js)]
+module.exports = {
+  devServer: {
+    proxy: {
+      '^/api': { target: 'http://localhost:3000' }
+    }
+  }
+}
+```
+:::
+
+Vite restarts by itself when its config changes; restart `vue-cli-service serve` yourself. Nuxt server routes (`server/api/`), Laravel and other setups that serve the app and its API from one origin need nothing here. In production, serve the API on the app's origin too, for example behind the same reverse proxy, or call it by its full URL and allow the app's origin with CORS on the server.
+
 ## Other setups
 
 ### Vue 2.7
 
 Vue 2.7 needs one extra step so that vue-demi picks the Vue 2 build. See [Use Vue Stripe on Vue 2.7](/guide/vue-2).
 
-### Nuxt 3
+### Nuxt
 
 Nuxt, Quasar SSR, VitePress and other server-rendered apps are covered in [Use Vue Stripe with Nuxt and SSR](/guide/ssr).
 
