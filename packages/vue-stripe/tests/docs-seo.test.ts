@@ -246,7 +246,7 @@ describe('docs SEO head and share cards', () => {
     const date = dates.get('guide/installation.md')
     expect(date).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.000Z$/)
     expect(Date.parse(date!)).toBeLessThan(Date.now())
-  })
+  }, 20_000) // one git log over the whole docs history; room for a loaded CI runner
 
   it('describes the share card it alt-texts', () => {
     expect(ogImageAlt({ title: 'useStripe', category: 'Reference' })).toBe(
