@@ -2,7 +2,7 @@
 import { ref, inject, watch } from 'vue'
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 import { CircleCheck, Siren } from 'lucide-vue-next'
-import type { Stripe } from '@stripe/stripe-js'
+import type { Stripe } from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -31,8 +31,8 @@ const log = (type: string, message: string) => {
 
 // Track load event
 const onLoad = (_stripe: Stripe) => {
-  // Stripe instance is ready - you can now use it for payments
-  // The stripe object has methods like confirmPayment, confirmSetup, etc.
+  // Stripe instance is ready: child components confirm payments through the library's
+  // composables (usePaymentIntent, useSetupIntent, useConfirmCardPayment, ...).
   log('load', `Stripe.js loaded successfully! Instance ready for payments.`)
 }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject, defineComponent, h } from 'vue'
+import { createApp, ref, inject, defineComponent, h } from 'vue'
 import { VueStripeProvider, useStripe } from '@vue-stripe/vue-stripe'
 import { Siren } from 'lucide-vue-next'
 import {
@@ -23,6 +23,18 @@ const log = (type: string, message: string) => {
   const time = new Date().toLocaleTimeString()
   events.value.unshift({ time, type, message })
 }
+
+// Stripe.js methods next to the library API that calls them for you.
+const stripeWrappers = [
+  ['stripe.confirmPayment()', 'usePaymentIntent().confirmPayment'],
+  ['stripe.confirmSetup()', 'useSetupIntent().confirmSetup'],
+  ['stripe.confirmCardPayment()', 'useConfirmCardPayment()'],
+  ['stripe.elements()', '<VueStripeElements>'],
+  ['stripe.createToken()', 'useCreateToken()'],
+  ['stripe.createPaymentMethod()', 'useCreatePaymentMethod()'],
+  ['stripe.confirm<Method>Payment() / Setup()', 'useConfirm<Method>Payment() / Setup()'],
+  ['stripe.handleNextAction()', 'useHandleNextAction()']
+] as const
 
 // Demo component that uses useStripe inside VueStripeProvider
 const StripeConsumer = defineComponent({
@@ -49,16 +61,19 @@ const StripeConsumer = defineComponent({
         ]),
         stripe.value
           ? h('div', { class: 'mt-5 pt-5 border-t' }, [
-              h('h5', { class: 'font-semibold mb-3' }, 'Available Stripe Methods'),
-              h('ul', { class: 'text-sm space-y-1 pl-5 list-disc text-muted-foreground' }, [
-                h('li', [h('code', 'stripe.confirmPayment()')]),
-                h('li', [h('code', 'stripe.confirmSetup()')]),
-                h('li', [h('code', 'stripe.confirmCardPayment()')]),
-                h('li', [h('code', 'stripe.elements()')]),
-                h('li', [h('code', 'stripe.createToken()')]),
-                h('li', [h('code', 'stripe.createPaymentMethod()')]),
-                h('li', '...and more')
-              ])
+              h('h5', { class: 'font-semibold mb-3' }, 'Library wrappers for Stripe methods'),
+              h(
+                'p',
+                { class: 'text-sm text-muted-foreground mb-3' },
+                'useStripe() is the escape hatch for anything the library does not wrap. Stripe.js methods it does wrap:'
+              ),
+              h(
+                'ul',
+                { class: 'text-sm space-y-1 pl-5 list-disc text-muted-foreground' },
+                stripeWrappers.map(([method, wrapper]) =>
+                  h('li', [h('code', method), ' via ', h('code', wrapper)])
+                )
+              )
             ])
           : null
       ])
@@ -71,14 +86,15 @@ const outsideError = ref<string | null>(null)
 
 const testOutsideProvider = () => {
   try {
-    // This would throw - we catch it for demo
-    outsideError.value = 'useStripe must be called within a VueStripeProvider component'
-    showOutsideError.value = true
-    log('error', 'Attempted to use useStripe outside VueStripeProvider')
+    // Call the real composable in the context of an app with no VueStripeProvider (and no
+    // createVueStripe()), so it throws the library's VueStripeProviderError. Never mounted.
+    createApp(() => null).runWithContext(useStripe)
+    outsideError.value = 'useStripe() did not throw'
   } catch (e) {
     outsideError.value = e instanceof Error ? e.message : 'Unknown error'
-    showOutsideError.value = true
+    log('error', `Attempted to use useStripe outside VueStripeProvider: ${outsideError.value}`)
   }
+  showOutsideError.value = true
 }
 </script>
 

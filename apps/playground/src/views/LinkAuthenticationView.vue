@@ -5,7 +5,7 @@ import {
   VueStripeElements,
   VueStripeLinkAuthenticationElement
 } from '@vue-stripe/vue-stripe'
-import type { StripeLinkAuthenticationElementChangeEvent } from '@stripe/stripe-js'
+import type { StripeLinkAuthenticationElementChangeEvent } from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
