@@ -8,73 +8,82 @@ import GitHubStarsCTA from '../GitHubStarsCTA.vue'
 </script>
 
 <template>
-  <section class="hero">
-    <div class="hero-copy">
-      <a class="hero-notice" :href="withBase('/guide/migration-v6')">
-        <span class="hero-notice-dot" aria-hidden="true" />
-        <span>Now on Stripe.js 10 (Endive)</span>
-        <span class="hero-notice-link">What changed in v6</span>
-      </a>
+  <div class="hero-wrap">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="hero-badge">
+          <StripeBadge />
+        </div>
 
-      <h1 class="hero-title">
-        <span class="hero-name">Vue Stripe</span>
-        Stripe Elements and Checkout as Vue components
-      </h1>
-      <p class="hero-lede">
-        Components and composables for every Stripe.js element and method, typed, tested on Vue 3
-        and Vue 2.7, and maintained as a Stripe Verified Partner.
-      </p>
+        <h1 class="hero-title">
+          <span class="hero-name">Vue Stripe</span>
+          Stripe Elements and Checkout as Vue components
+        </h1>
+        <p class="hero-lede">
+          Components and composables for every Stripe.js element and method, typed and tested on Vue
+          3 and Vue 2.7.
+        </p>
 
-      <div class="hero-actions">
-        <a class="hero-btn is-brand" :href="withBase('/guide/first-payment')">Get started</a>
-        <a class="hero-btn is-alt" :href="withBase('/live-demo/')">Try the live demos</a>
-        <GitHubStarsCTA />
+        <div class="hero-actions">
+          <a class="hero-btn is-brand" :href="withBase('/guide/first-payment')">Get started</a>
+          <a class="hero-btn is-alt" :href="withBase('/live-demo/')">Try the live demos</a>
+          <GitHubStarsCTA />
+        </div>
+
+        <a class="hero-notice" :href="withBase('/guide/migration-v6')">
+          <span class="hero-notice-dot" aria-hidden="true" />
+          <span>Now on Stripe.js 10 (Endive)</span>
+          <span class="hero-notice-link">What changed in v6</span>
+        </a>
       </div>
 
-      <div class="hero-trust">
-        <StripeBadge />
-      </div>
-    </div>
+      <div class="hero-visual" aria-label="Example: a Vue template and the payment form it renders">
+        <div class="hero-code">
+          <div class="hero-code-bar">
+            <span>CheckoutPage.vue</span>
+          </div>
+          <slot />
+        </div>
 
-    <div class="hero-visual" aria-label="Example: a Vue template and the payment form it renders">
-      <div class="hero-code">
-        <div class="hero-code-bar">
-          <span>CheckoutPage.vue</span>
-        </div>
-        <slot />
-      </div>
-
-      <div class="hero-sheet" aria-hidden="true">
-        <div class="sheet-tabs">
-          <span class="sheet-tab is-active">Card</span>
-          <span class="sheet-tab">Bank</span>
-          <span class="sheet-tab">Link</span>
-        </div>
-        <div class="sheet-field">
-          <span class="sheet-label">Card number</span>
-          <span class="sheet-input">4242 4242 4242 4242 <span class="sheet-brand">VISA</span></span>
-        </div>
-        <div class="sheet-row">
-          <div class="sheet-field">
-            <span class="sheet-label">Expiration</span>
-            <span class="sheet-input">12 / 34</span>
+        <div class="hero-sheet" aria-hidden="true">
+          <div class="sheet-tabs">
+            <span class="sheet-tab is-active">Card</span>
+            <span class="sheet-tab">Bank</span>
+            <span class="sheet-tab">Link</span>
           </div>
           <div class="sheet-field">
-            <span class="sheet-label">CVC</span>
-            <span class="sheet-input">123</span>
+            <span class="sheet-label">Card number</span>
+            <span class="sheet-input"
+              >4242 4242 4242 4242 <span class="sheet-brand">VISA</span></span
+            >
           </div>
+          <div class="sheet-row">
+            <div class="sheet-field">
+              <span class="sheet-label">Expiration</span>
+              <span class="sheet-input">12 / 34</span>
+            </div>
+            <div class="sheet-field">
+              <span class="sheet-label">CVC</span>
+              <span class="sheet-input">123</span>
+            </div>
+          </div>
+          <div class="sheet-field">
+            <span class="sheet-label">Country</span>
+            <span class="sheet-input">United States</span>
+          </div>
+          <span class="sheet-pay">Pay $25.00</span>
         </div>
-        <div class="sheet-field">
-          <span class="sheet-label">Country</span>
-          <span class="sheet-input">United States</span>
-        </div>
-        <span class="sheet-pay">Pay $25.00</span>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </template>
 
 <style scoped>
+/* Full width, so the showcase glow is only ever cut at the viewport edge */
+.hero-wrap {
+  overflow-x: clip;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -93,13 +102,21 @@ import GitHubStarsCTA from '../GitHubStarsCTA.vue'
   }
 }
 
-/* Endive notice: small, quiet, one line */
+.hero-badge {
+  margin-bottom: 24px;
+}
+
+.hero-badge :deep(.stripe-badge-link) {
+  margin-bottom: 0;
+}
+
+/* Endive notice: small, quiet, one line, under the actions */
 .hero-notice {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-top: 28px;
   padding: 4px 12px 4px 10px;
   border: 1px solid var(--vp-c-divider);
   border-radius: 999px;
@@ -211,18 +228,50 @@ import GitHubStarsCTA from '../GitHubStarsCTA.vue'
   outline-offset: 3px;
 }
 
-.hero-trust {
-  margin-top: 28px;
-}
-
-.hero-trust :deep(.stripe-badge-link) {
-  margin-bottom: 0;
-}
-
 /* Visual: the code card, and the payment sheet it renders overlapping its lower right corner */
 .hero-visual {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
+}
+
+/* Brand glow behind the showcase: Vue Stripe yellow above, Stripe blurple below */
+.hero-visual::before,
+.hero-visual::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-visual::before {
+  top: -8%;
+  left: 18%;
+  width: 220px;
+  height: 220px;
+  background: #fed968;
+  filter: blur(80px);
+  opacity: 0.75;
+}
+
+.hero-visual::after {
+  right: 4%;
+  bottom: -14%;
+  width: 360px;
+  height: 360px;
+  background: #635bff;
+  filter: blur(110px);
+  opacity: 0.6;
+}
+
+.dark .hero-visual::before {
+  opacity: 0.5;
+}
+
+.dark .hero-visual::after {
+  opacity: 0.5;
 }
 
 .hero-code {
