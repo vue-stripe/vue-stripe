@@ -1,0 +1,144 @@
+<script setup lang="ts">
+// One icon component for the docs (markdown, home page, live demos). Icons come from
+// Lucide (@lucide/vue) and are imported by name here, so only the ones listed ship.
+// Usage in markdown or templates: <DocIcon name="check" /> or <DocIcon name="landmark" :size="20" />.
+import { computed } from 'vue'
+import {
+  BadgeCheck,
+  Banknote,
+  BookOpen,
+  Boxes,
+  Check,
+  Circle,
+  CircleCheck,
+  CircleDot,
+  CircleX,
+  Code,
+  Coins,
+  Columns2,
+  Copy,
+  CreditCard,
+  ExternalLink,
+  Fingerprint,
+  Gauge,
+  Globe,
+  Hash,
+  IdCard,
+  Info,
+  KeyRound,
+  Landmark,
+  Layers,
+  LayoutTemplate,
+  Link,
+  MapPin,
+  MessageSquare,
+  Minus,
+  Package,
+  PanelTop,
+  Play,
+  Puzzle,
+  Receipt,
+  RefreshCw,
+  Repeat,
+  Search,
+  ShieldCheck,
+  ShoppingCart,
+  Smartphone,
+  Store,
+  TriangleAlert,
+  Wallet,
+  Workflow,
+  X,
+  Zap
+} from '@lucide/vue'
+
+const ICONS = {
+  'badge-check': BadgeCheck,
+  banknote: Banknote,
+  'book-open': BookOpen,
+  boxes: Boxes,
+  check: Check,
+  circle: Circle,
+  'circle-check': CircleCheck,
+  'circle-dot': CircleDot,
+  'circle-x': CircleX,
+  code: Code,
+  coins: Coins,
+  columns: Columns2,
+  copy: Copy,
+  'credit-card': CreditCard,
+  'external-link': ExternalLink,
+  fingerprint: Fingerprint,
+  gauge: Gauge,
+  globe: Globe,
+  hash: Hash,
+  'id-card': IdCard,
+  info: Info,
+  key: KeyRound,
+  landmark: Landmark,
+  layers: Layers,
+  'layout-template': LayoutTemplate,
+  link: Link,
+  'map-pin': MapPin,
+  message: MessageSquare,
+  minus: Minus,
+  package: Package,
+  'panel-top': PanelTop,
+  play: Play,
+  puzzle: Puzzle,
+  receipt: Receipt,
+  refresh: RefreshCw,
+  repeat: Repeat,
+  search: Search,
+  'shield-check': ShieldCheck,
+  'shopping-cart': ShoppingCart,
+  smartphone: Smartphone,
+  store: Store,
+  warning: TriangleAlert,
+  wallet: Wallet,
+  workflow: Workflow,
+  x: X,
+  zap: Zap
+} as const
+
+export type DocIconName = keyof typeof ICONS
+
+const props = withDefaults(
+  defineProps<{
+    name: DocIconName
+    /** Pixel size. Without one the icon follows the surrounding text (1.1em). */
+    size?: number | undefined
+    strokeWidth?: number
+    /** Accessible label. Without one the icon is decorative and hidden from screen readers. */
+    label?: string | undefined
+  }>(),
+  { size: undefined, strokeWidth: 1.75, label: undefined }
+)
+
+const icon = computed(() => ICONS[props.name])
+</script>
+
+<template>
+  <component
+    :is="icon"
+    :class="['doc-icon', { 'doc-icon--inline': size === undefined }]"
+    v-bind="size === undefined ? {} : { size }"
+    :stroke-width="strokeWidth"
+    :aria-hidden="label ? undefined : 'true'"
+    :aria-label="label"
+    :role="label ? 'img' : undefined"
+  />
+</template>
+
+<style scoped>
+.doc-icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: -0.15em;
+}
+
+.doc-icon--inline {
+  width: 1.1em;
+  height: 1.1em;
+}
+</style>

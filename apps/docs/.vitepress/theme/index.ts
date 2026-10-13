@@ -8,6 +8,7 @@ import StripeBadge from './components/StripeBadge.vue'
 import CopyForLLM from './components/CopyForLLM.vue'
 import GitHubStarsCTA from './components/GitHubStarsCTA.vue'
 import StripeCoverage from './components/StripeCoverage.vue'
+import DocIcon from './components/DocIcon.vue'
 
 // Example components for interactive documentation
 import ProductSelector from './components/examples/ProductSelector.vue'
@@ -120,6 +121,7 @@ export default {
     app.component('IbanElementExample', IbanElementExample)
     app.component('ExpressCheckoutExample', ExpressCheckoutExample)
     app.component('StripeCoverage', StripeCoverage)
+    app.component('DocIcon', DocIcon)
     app.component('AuBankAccountPaymentExample', AuBankAccountPaymentExample)
     app.component('AchDebitExample', AchDebitExample)
     app.component('IdentityExample', IdentityExample)
