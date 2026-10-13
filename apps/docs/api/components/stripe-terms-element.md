@@ -56,9 +56,9 @@ Inside [VueStripeElements](/api/components/stripe-elements) the same component c
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@ready` | `StripeTermsElement` | Emitted when the element is fully rendered |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when the user presses the Escape key |
+| `@focus` | `{ elementType: 'terms' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'terms' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'terms' }` | Emitted when the user presses the Escape key |
 | `@loaderstart` | `{ elementType: 'terms' }` | Emitted when the element begins loading |
 | `@loaderror` | `{ elementType: 'terms'; error: StripeError }` | Emitted when the element fails to load (for example without beta access) |
 

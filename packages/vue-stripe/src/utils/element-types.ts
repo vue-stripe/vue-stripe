@@ -68,18 +68,29 @@ export interface StripeElementExposed<TElement> {
 /** Event name -> payload tuple, used to type a component's listeners (`@change`, ...). */
 export type ElementEvents = Record<string, unknown[]>
 
-/** Payloads of the events most elements share. */
-export type BaseElementEvents<TElement, TChange> = {
+/** Stripe's `{ elementType }` event: `focus`, `blur`, `escape` and `loaderstart`. */
+export type ElementTypeEvent<T extends string> = [event: { elementType: T }]
+
+/** Payloads of the events most elements share; the element type comes from `TChange`. */
+export type BaseElementEvents<TElement, TChange extends { elementType: string }> = {
   ready: [element: TElement]
   change: [event: TChange]
-  focus: []
-  blur: []
-  escape: []
+  focus: ElementTypeEvent<TChange['elementType']>
+  blur: ElementTypeEvent<TChange['elementType']>
+  escape: ElementTypeEvent<TChange['elementType']>
 }
 
 /** Payload of `loaderstart` / `loaderror` for an element type. */
-export type LoadStartEvent<T extends string> = [event: { elementType: T }]
+export type LoadStartEvent<T extends string> = ElementTypeEvent<T>
 export type LoadErrorEvent<T extends string> = [event: { elementType: T; error: StripeError }]
+
+/**
+ * Payload of the card elements' `networkschange`. Stripe.js 10's `.d.ts` declares only
+ * `elementType`; Stripe sends `networks` (null while `loading`) as well.
+ */
+export type NetworksChangeEvent<T extends 'card' | 'cardNumber'> = [
+  event: { elementType: T; networks: string[] | null; loading: boolean }
+]
 
 /**
  * Public type of a factory-built element component. `TUnsupported` drops standard members

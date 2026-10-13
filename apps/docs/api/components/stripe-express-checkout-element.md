@@ -143,9 +143,9 @@ interface StripeExpressCheckoutElementOptions {
 | `@shippingratechange` | `StripeExpressCheckoutElementShippingRateChangeEvent` | Emitted when shipping rate changes. Call `event.resolve()` with updated line items, or `event.reject()` if the rate is unsupported |
 | `@loaderror` | `{ elementType: 'expressCheckout', error: StripeError }` | Emitted when the element fails to load |
 | `@availablepaymentmethodschange` | `StripeExpressCheckoutElementAvailablePaymentMethodsChangeEvent` | Emitted when the wallets that can be shown change |
-| `@focus` | - | Emitted when a button gains focus |
-| `@blur` | - | Emitted when a button loses focus |
-| `@escape` | - | Emitted when the escape key is pressed |
+| `@focus` | `{ elementType: 'expressCheckout' }` | Emitted when a button gains focus |
+| `@blur` | `{ elementType: 'expressCheckout' }` | Emitted when a button loses focus |
+| `@escape` | `{ elementType: 'expressCheckout' }` | Emitted when the escape key is pressed |
 
 Unlike the other element components, `@ready` emits Stripe's ready event (it carries `availablePaymentMethods`), not the element. Use the exposed `element` member to reach the Stripe element.
 

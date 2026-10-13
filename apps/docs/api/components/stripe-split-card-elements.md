@@ -109,9 +109,9 @@ All three components emit the same events:
 |-------|---------|-------------|
 | `@ready` | `StripeCardNumberElement` / `StripeCardExpiryElement` / `StripeCardCvcElement` | Emitted when the element is fully rendered (payload: that component's Stripe element) |
 | `@change` | `StripeCardNumberElementChangeEvent` / `StripeCardExpiryElementChangeEvent` / `StripeCardCvcElementChangeEvent` | Emitted when the element value changes |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when the escape key is pressed |
+| `@focus` | `{ elementType: 'cardNumber' }` / `{ elementType: 'cardExpiry' }` / `{ elementType: 'cardCvc' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'cardNumber' }` / `{ elementType: 'cardExpiry' }` / `{ elementType: 'cardCvc' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'cardNumber' }` / `{ elementType: 'cardExpiry' }` / `{ elementType: 'cardCvc' }` | Emitted when the escape key is pressed |
 
 ### Change Event Differences
 

@@ -228,13 +228,55 @@ describe('VueStripeCardElement', () => {
     const wrapper = await mountWithProviders()
 
     if (focusCallback) {
-      focusCallback()
+      focusCallback({ elementType: 'card' })
     }
 
     await nextTick()
 
     const cardComponent = wrapper.findComponent(VueStripeCardElement)
-    expect(cardComponent.emitted('focus')).toBeTruthy()
+    // Stripe's event object is forwarded as the payload (#652)
+    expect(cardComponent.emitted('focus')).toEqual([[{ elementType: 'card' }]])
+  })
+
+  it('should forward the networkschange payload with networks and loading', async () => {
+    let networksCallback: Function | null = null
+    const mockElement = {
+      ...makeMockElement(),
+      on: vi.fn((event: string, callback: Function) => {
+        if (event === 'networkschange') {
+          networksCallback = callback
+        }
+      })
+    }
+
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({
+        create: vi.fn(() => mockElement)
+      })),
+      confirmPayment: vi.fn(),
+      confirmCardSetup: vi.fn(),
+      registerAppInfo: vi.fn()
+    } as any)
+
+    const wrapper = await mountWithProviders()
+
+    // What Stripe.js sends for a co-badged card (4000 0025 0000 1001)
+    const loadingEvent = { elementType: 'card', networks: null, loading: true }
+    const doneEvent = {
+      elementType: 'card',
+      networks: ['cartes_bancaires', 'visa'],
+      loading: false
+    }
+    if (networksCallback) {
+      networksCallback(loadingEvent)
+      networksCallback(doneEvent)
+    }
+
+    await nextTick()
+
+    const cardComponent = wrapper.findComponent(VueStripeCardElement)
+    expect(cardComponent.emitted('networkschange')).toEqual([[loadingEvent], [doneEvent]])
   })
 
   it('should emit blur event', async () => {

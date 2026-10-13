@@ -6,6 +6,7 @@
 // exposed member loses its type (becomes `any`) or has a different one.
 import { ref } from 'vue'
 import {
+  VueStripeCardElement,
   VueStripeCheckout,
   VueStripeCheckoutError,
   VueStripeCheckoutFormProvider,
@@ -18,6 +19,7 @@ import {
   VueStripePaymentElement,
   VueStripePricingTable,
   VueStripeProvider,
+  VueStripeTermsElement,
   VueStripeTreasuryDisclosure,
   useConfirmCardPayment,
   type DisclosureError,
@@ -57,6 +59,15 @@ const isDisclosureError = payload<DisclosureError>()
 const isCheckoutActions = payload<StripeCheckoutLoadActionsSuccess>()
 const isFormActions = payload<StripeCheckoutFormLoadActionsSuccess>()
 const isSession = payload<StripeCheckoutSession>()
+// focus / blur / escape carry Stripe's event object (#652)
+const isCardEvent = payload<{ elementType: 'card' }>()
+const isPaymentEvent = payload<{ elementType: 'payment' }>()
+const isTermsEvent = payload<{ elementType: 'terms' }>()
+const isNetworks = payload<{
+  elementType: 'card'
+  networks: string[] | null
+  loading: boolean
+}>()
 
 // VueStripeCheckout: Exposed Methods
 const checkoutRef = ref<InstanceType<typeof VueStripeCheckout> | null>(null)
@@ -135,7 +146,20 @@ log(
         @error="(message) => isString(message)"
         @update-end="() => log('updated')"
       >
-        <VueStripePaymentElement @change="(event) => isElementChange(event)" />
+        <VueStripePaymentElement
+          @change="(event) => isElementChange(event)"
+          @focus="(event) => isPaymentEvent(event)"
+          @blur="(event) => isPaymentEvent(event)"
+          @escape="(event) => isPaymentEvent(event)"
+        />
+        <VueStripeCardElement
+          @focus="(event) => isCardEvent(event)"
+          @blur="(event) => isCardEvent(event)"
+          @escape="(event) => isCardEvent(event)"
+          @networkschange="(event) => isNetworks(event)"
+        />
+        <!-- A handler may still ignore the payload -->
+        <VueStripeTermsElement @focus="() => log('focus')" @blur="(event) => isTermsEvent(event)" />
         <VueStripeExpressCheckoutElement ref="expressRef" />
       </VueStripeElements>
 

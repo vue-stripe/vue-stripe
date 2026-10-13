@@ -3,11 +3,15 @@ import type {
   StripeCardElementChangeEvent,
   StripeCardElementOptions
 } from '@stripe/stripe-js'
-import type { BaseElementEvents, LoadErrorEvent } from '../utils/element-factory'
+import type {
+  BaseElementEvents,
+  LoadErrorEvent,
+  NetworksChangeEvent
+} from '../utils/element-factory'
 import { BASE_EVENTS, createStripeElement } from '../utils/element-factory'
 
 type CardEvents = BaseElementEvents<StripeCardElement, StripeCardElementChangeEvent> & {
-  networkschange: [event: { elementType: 'card' }]
+  networkschange: NetworksChangeEvent<'card'>
   loaderror: LoadErrorEvent<'card'>
 }
 

@@ -73,9 +73,9 @@ interface StripeLinkAuthenticationElementOptions {
 |-------|---------|-------------|
 | `@ready` | `StripeLinkAuthenticationElement` | Emitted when the element is mounted and ready |
 | `@change` | `StripeLinkAuthenticationElementChangeEvent` | Emitted when the email value changes |
-| `@focus` | `void` | Emitted when the element gains focus |
-| `@blur` | `void` | Emitted when the element loses focus |
-| `@escape` | `void` | Emitted when the user presses the Escape key |
+| `@focus` | `{ elementType: 'linkAuthentication' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'linkAuthentication' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'linkAuthentication' }` | Emitted when the user presses the Escape key |
 | `@loaderstart` | `{ elementType: 'linkAuthentication' }` | Emitted when the element starts loading |
 | `@loaderror` | `{ elementType: 'linkAuthentication'; error: StripeError }` | Emitted when the element fails to load |
 

@@ -1,12 +1,12 @@
 import type { StripeLinkSignupElement, StripeLinkSignupElementOptions } from '@stripe/stripe-js'
-import type { LoadStartEvent, LoadErrorEvent } from '../utils/element-factory'
+import type { ElementTypeEvent, LoadErrorEvent, LoadStartEvent } from '../utils/element-factory'
 import { createStripeElement, pick } from '../utils/element-factory'
 
 type LinkSignupEvents = {
   ready: [element: StripeLinkSignupElement]
-  focus: []
-  blur: []
-  escape: []
+  focus: ElementTypeEvent<'linkSignup'>
+  blur: ElementTypeEvent<'linkSignup'>
+  escape: ElementTypeEvent<'linkSignup'>
   loaderstart: LoadStartEvent<'linkSignup'>
   loaderror: LoadErrorEvent<'linkSignup'>
 }

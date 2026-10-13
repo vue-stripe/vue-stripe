@@ -55,7 +55,7 @@ Types defined by Vue Stripe.
 |------|-------------|
 | `StripeElementComponent<TOptions, TElement, TExtra, TEvents>` | Public type of every element component; use it with `InstanceType<typeof ...>` for template refs |
 | `StripeElementExposed<TElement>` | Members every element component exposes: `element`, `loading`, `error`, `focus()`, `blur()`, `clear()` |
-| `BaseElementEvents<TElement, TChange>` | Payloads of the `ready`, `change`, `focus`, `blur` and `escape` events |
+| `BaseElementEvents<TElement, TChange>` | Payloads of the `ready`, `change`, `focus`, `blur` and `escape` events. `focus`, `blur` and `escape` carry `{ elementType }`, with the element type taken from `TChange` |
 | `VueStripeElement`, `VueStripeElementEvents` | Element state (`stripe`, `element`, `loading`, `error`) and the `ready` / `change` handler signatures |
 | `StripeDisclosureComponent<TOptions>` | Public type of the disclosure components |
 | `DisclosureStripeProp` | The disclosures' `stripe` prop: a `Stripe` instance, a Promise of one, or `null` |

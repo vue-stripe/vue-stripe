@@ -92,9 +92,9 @@ interface StripeTaxIdElementOptions {
 |-------|---------|-------------|
 | `@ready` | `StripeTaxIdElement` | Emitted when the element is fully rendered |
 | `@change` | `StripeTaxIdElementChangeEvent` | Emitted when the element value changes |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when the user presses the Escape key |
+| `@focus` | `{ elementType: 'taxId' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'taxId' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'taxId' }` | Emitted when the user presses the Escape key |
 | `@loaderstart` | `{ elementType: 'taxId' }` | Emitted when the element begins loading |
 | `@loaderror` | `{ elementType: 'taxId'; error: StripeError }` | Emitted when the element fails to load |
 

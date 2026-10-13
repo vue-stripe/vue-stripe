@@ -80,9 +80,9 @@ interface StripeAuBankAccountElementOptions {
 |-------|---------|-------------|
 | `@ready` | `StripeAuBankAccountElement` | Emitted when the element is fully rendered |
 | `@change` | `StripeAuBankAccountElementChangeEvent` | Emitted when input changes |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when Escape key is pressed |
+| `@focus` | `{ elementType: 'auBankAccount' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'auBankAccount' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'auBankAccount' }` | Emitted when Escape key is pressed |
 
 ### Change Event
 

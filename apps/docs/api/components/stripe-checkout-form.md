@@ -81,9 +81,9 @@ The Checkout Form has no `update()`: options are read when the form is created. 
 | `@change` | `StripeCheckoutFormChangeEvent` | Emitted when a value changes: `complete`, `empty`, `value`, `status` per section and, in the compact layout, `views` |
 | `@confirm` | `StripeCheckoutFormConfirmEvent` | The customer clicked Pay (`source: 'checkout-form-pay-button'`) or authorized a wallet (`source: 'checkout-form-ece'`). Pass it to `confirm({ formConfirmEvent })` |
 | `@cancel` | `{ elementType: 'checkoutForm' }` | The customer closed the payment interface (for example a wallet sheet) |
-| `@focus` | - | Emitted when the form gains focus |
-| `@blur` | - | Emitted when the form loses focus |
-| `@escape` | - | Emitted when the user presses the Escape key |
+| `@focus` | `{ elementType: 'checkoutForm' }` | Emitted when the form gains focus |
+| `@blur` | `{ elementType: 'checkoutForm' }` | Emitted when the form loses focus |
+| `@escape` | `{ elementType: 'checkoutForm' }` | Emitted when the user presses the Escape key |
 | `@loaderstart` | `{ elementType: 'checkoutForm' }` | Emitted when Stripe's loader is mounted |
 | `@loaderror` | `{ elementType: 'checkoutForm'; error: StripeError }` | Emitted when the form fails to load |
 

@@ -1,12 +1,12 @@
 import type { StripeTermsElement, StripeTermsElementOptions } from '@stripe/stripe-js'
-import type { LoadStartEvent, LoadErrorEvent } from '../utils/element-factory'
+import type { ElementTypeEvent, LoadErrorEvent, LoadStartEvent } from '../utils/element-factory'
 import { createStripeElement } from '../utils/element-factory'
 
 type TermsEvents = {
   ready: [element: StripeTermsElement]
-  focus: []
-  blur: []
-  escape: []
+  focus: ElementTypeEvent<'terms'>
+  blur: ElementTypeEvent<'terms'>
+  escape: ElementTypeEvent<'terms'>
   loaderstart: LoadStartEvent<'terms'>
   loaderror: LoadErrorEvent<'terms'>
 }

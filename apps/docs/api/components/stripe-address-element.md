@@ -123,9 +123,9 @@ For example, `allowedCountries: ['US', 'CA']` limits the country list, `blockPoB
 |-------|---------|-------------|
 | `@ready` | `StripeAddressElement` | Emitted when the element is fully rendered |
 | `@change` | `StripeAddressElementChangeEvent` | Emitted when the address value changes |
-| `@focus` | - | Emitted when any field gains focus |
-| `@blur` | - | Emitted when any field loses focus |
-| `@escape` | - | Emitted when the escape key is pressed |
+| `@focus` | `{ elementType: 'address' }` | Emitted when any field gains focus |
+| `@blur` | `{ elementType: 'address' }` | Emitted when any field loses focus |
+| `@escape` | `{ elementType: 'address' }` | Emitted when the escape key is pressed |
 | `@loaderstart` | `{ elementType: 'address' }` | Emitted when the element starts loading (Stripe shows its loader) |
 | `@loaderror` | `{ elementType: 'address'; error: StripeError }` | Emitted if the element fails to load. Renamed from `@loadError` in v6: update `@loadError` listeners to `@loaderror` |
 

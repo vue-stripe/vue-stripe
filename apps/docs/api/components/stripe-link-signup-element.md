@@ -89,9 +89,9 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@ready` | `StripeLinkSignupElement` | Emitted when the element is fully rendered |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when the user presses the Escape key |
+| `@focus` | `{ elementType: 'linkSignup' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'linkSignup' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'linkSignup' }` | Emitted when the user presses the Escape key |
 | `@loaderstart` | `{ elementType: 'linkSignup' }` | Emitted when the element begins loading |
 | `@loaderror` | `{ elementType: 'linkSignup'; error: StripeError }` | Emitted when the element fails to load |
 
