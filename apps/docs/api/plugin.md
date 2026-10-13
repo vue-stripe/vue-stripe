@@ -1,6 +1,6 @@
 # createVueStripe Plugin
 
-A Vue plugin that provides Stripe to the whole app, in place of wrapping the tree in [`VueStripeProvider`](/api/components/stripe-provider). It provides the Stripe instance and config under the same injection keys the provider uses. [Choosing an integration](/guide/approaches#plugin-or-provider) compares the two, and [How Stripe.js is loaded](/guide/stripe-js-loading#where-to-mount-the-provider) explains when each one loads Stripe.js.
+A Vue plugin that provides Stripe to the whole app, in place of wrapping the tree in [`VueStripeProvider`](/api/components/stripe-provider). It provides the Stripe instance and config under the same injection keys the provider uses. [Provide Stripe app-wide](/guide/plugin) walks through installing it and overriding it for one part of the app. [Choosing an integration](/guide/approaches#plugin-or-provider) compares the two, and [How Stripe.js is loaded](/guide/stripe-js-loading#where-to-mount-the-provider) explains when each one loads Stripe.js.
 
 ## Usage
 
@@ -132,5 +132,6 @@ const { stripe, loading, error, initialize } = useStripe()
 - [VueStripeProvider](/api/components/stripe-provider) - Component-based alternative
 - [useStripe](/api/composables/use-stripe) - Read the Stripe instance
 - [VueStripeElements](/api/components/stripe-elements) - Elements group
-- [Installation](/guide/installation) - Setup for different frameworks
+- [Provide Stripe app-wide](/guide/plugin) - Install the plugin and use it step by step
+- [Use Vue Stripe on Vue 2.7](/guide/vue-2#_5-optional-install-the-plugin) - The plugin on Vue 2.7
 - [Choosing an integration](/guide/approaches#plugin-or-provider) - The plugin and the provider compared

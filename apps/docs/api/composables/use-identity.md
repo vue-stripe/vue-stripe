@@ -1,6 +1,6 @@
 # useIdentity
 
-Verify a customer's identity with [Stripe Identity](https://docs.stripe.com/identity). Wraps [`stripe.verifyIdentity()`](https://docs.stripe.com/js/identity/modal), which opens Stripe's Identity modal for a VerificationSession and resolves when the customer submits or closes it.
+Verify a customer's identity with [Stripe Identity](https://docs.stripe.com/identity). Wraps [`stripe.verifyIdentity()`](https://docs.stripe.com/js/identity/modal), which opens Stripe's Identity modal for a VerificationSession and resolves when the customer submits or closes it. [Verify a customer's identity](/guide/identity) shows the server and client steps.
 
 Must be called within a `<VueStripeProvider>`. No `<VueStripeElements>` is needed. Create the [VerificationSession](https://docs.stripe.com/api/identity/verification_sessions) on your server and pass its client secret.
 
@@ -80,5 +80,7 @@ const run = async (clientSecret: string): Promise<VerifyIdentityResult> => {
 
 ## See Also
 
+- [Verify a customer's identity](/guide/identity) - Server and client steps
+- [Test your integration](/guide/testing#identity) - Test verification outcomes
 - [Live demo](/live-demo/identity)
 - [Stripe Identity docs](https://docs.stripe.com/identity)

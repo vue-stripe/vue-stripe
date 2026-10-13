@@ -172,4 +172,7 @@ The v5 session-ID and price-ID props are gone; the server creates the session an
 - [VueStripeEmbeddedCheckout](/api/components/stripe-embedded-checkout) - Checkout inside your page
 - [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Checkout Sessions with your own Elements UI
 - [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) - The Checkout options compared
+- [Fulfil orders with webhooks](/guide/webhooks) - Fulfil on `checkout.session.completed`, not on the redirect
+- [Handle errors and declines](/guide/error-handling#_5-handle-checkout-errors) - Checkout errors
+- [Test your integration](/guide/testing#cards) - Test cards
 - [Stripe Checkout](https://docs.stripe.com/payments/checkout) - Stripe's documentation

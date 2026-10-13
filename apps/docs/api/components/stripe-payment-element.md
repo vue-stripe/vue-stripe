@@ -302,4 +302,8 @@ const paymentRef = ref<InstanceType<typeof VueStripePaymentElement> | null>(null
 - [useSetupIntent](/api/composables/use-setup-intent) - Save payment methods
 - [Accept a payment with the Payment Element](/guide/payment-element) - Step-by-step guide
 - [Choosing an integration](/guide/approaches#payment-element-or-card-element) - Payment Element or Card Element
+- [Collect payment details before creating an Intent](/guide/deferred-intent) - The `mode` / `amount` / `currency` flow
+- [Handle errors and declines](/guide/error-handling) - Validation, confirmation and decline errors
+- [Style elements](/guide/styling#_2-theme-the-fields-with-the-appearance-api) - Theme the Payment Element
+- [Test your integration](/guide/testing#cards) - Test cards
 - [Stripe Payment Element docs](https://docs.stripe.com/payments/payment-element) - Official documentation

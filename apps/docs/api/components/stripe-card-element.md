@@ -258,3 +258,5 @@ const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
 - [Card confirmers](/api/composables/confirm/cards) - `useConfirmCardPayment` and `useConfirmCardSetup`
 - [useCreatePaymentMethod](/api/composables/use-create-payment-method) - Create a PaymentMethod from the card
 - [Accept card payments with the Card Element](/guide/card-element) - Step-by-step guide
+- [Style elements](/guide/styling#_3-style-the-card-iban-and-becs-elements) - The `style` option and wrapper CSS
+- [Test your integration](/guide/testing#cards) - Test cards

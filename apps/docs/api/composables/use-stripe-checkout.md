@@ -56,7 +56,7 @@ interface CheckoutRedirectOptions {
 
 - Both functions navigate with `window.location.replace(url)`, so the current page is replaced in the browser history.
 - `redirectToCheckout` only fails when no URL is given: it sets `error.value` to ``useStripeCheckout: `url` is required (Checkout Session URL from your server)`` and rejects with a `VueStripeCheckoutError`. Errors from Stripe itself (an expired or invalid session) are shown on Stripe's hosted page after the redirect.
-- Don't treat the return to your `success_url` as proof of payment; fulfil orders from Stripe's webhook events. [The browser can't be trusted with the outcome](/guide/security#the-browser-can-t-be-trusted-with-the-outcome) explains why.
+- Don't treat the return to your `success_url` as proof of payment; fulfil orders from Stripe's webhook events ([Fulfil orders with webhooks](/guide/webhooks)). [The browser can't be trusted with the outcome](/guide/security#the-browser-can-t-be-trusted-with-the-outcome) explains why.
 
 ## TypeScript
 

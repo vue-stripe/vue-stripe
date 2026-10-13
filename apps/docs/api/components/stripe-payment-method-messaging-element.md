@@ -142,7 +142,7 @@ The default styles for these classes ship in the package stylesheet. Import it o
 import '@vue-stripe/vue-stripe/style.css'
 ```
 
-Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-paymentMethodMessaging-element*` for this one.
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-paymentMethodMessaging-element*` for this one. [Style elements](/guide/styling#_4-style-the-wrapper-markup) covers the markup and the Appearance API.
 
 ## TypeScript
 

@@ -210,7 +210,8 @@ const onAnalytics = (event: StripeEmbeddedCheckoutAnalyticsEventUnion): void => 
 ## See Also
 
 - [Embed Stripe Checkout](/guide/embedded-checkout) - How-to guide with the server code
-- [Embedded Checkout Live Demo](/live-demo/embedded-checkout) - Pay with a test card
+- [Embedded Checkout Live Demo](/live-demo/embedded-checkout) - Pay with a [test card](/guide/testing#cards)
+- [Fulfil orders with webhooks](/guide/webhooks) - Fulfil when the session completes
 - [VueStripeCheckout](/api/components/stripe-checkout) - Redirect to hosted Checkout instead
 - [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Your own layout on a Checkout Session
 - [Stripe Embedded Checkout docs](https://docs.stripe.com/payments/accept-a-payment?platform=web&ui=embedded-form)

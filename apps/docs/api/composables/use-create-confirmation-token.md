@@ -99,4 +99,5 @@ const { confirmationToken, error } = await api.createConfirmationToken(options)
 - [Confirm payments on your server](/guide/tokens#confirmationtoken-confirm-on-your-server) - The ConfirmationToken flow step by step
 - [useHandleNextAction](/api/composables/use-handle-next-action) - Finish 3D Secure after your server confirms
 - [VueStripeElements](/api/components/stripe-elements) - `mode`, `amount` and `currency` for a deferred intent
+- [Collect payment details before creating an Intent](/guide/deferred-intent) - The deferred-intent flow
 - [Payment objects](/guide/payment-objects#paymentmethods-confirmationtokens-and-tokens) - PaymentMethods, ConfirmationTokens and Tokens

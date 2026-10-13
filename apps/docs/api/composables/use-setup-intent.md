@@ -134,7 +134,7 @@ Before calling `stripe.confirmSetup()`, `confirmSetup` calls `elements.submit()`
 
 ## Error Handling
 
-The promise never rejects. Every failure resolves to `{ error }` and sets `error.value`: a validation error from `elements.submit()`, Stripe's error (`StripeError`, with `type` and `code`), `{ error: { message: 'Stripe not initialized' } }` when Stripe.js has not loaded yet, or `{ error: { message } }` when the Stripe call throws. Outside a provider, `useSetupIntent()` itself throws a `VueStripeProviderError`. The [method confirmers overview](/api/composables/confirm/#return-value) lists which composables resolve `{ error }` and which reject.
+The promise never rejects. Every failure resolves to `{ error }` and sets `error.value`: a validation error from `elements.submit()`, Stripe's error (`StripeError`, with `type` and `code`), `{ error: { message: 'Stripe not initialized' } }` when Stripe.js has not loaded yet, or `{ error: { message } }` when the Stripe call throws. Outside a provider, `useSetupIntent()` itself throws a `VueStripeProviderError`. The [method confirmers overview](/api/composables/confirm/#return-value) lists which composables resolve `{ error }` and which reject. [Handle errors and declines](/guide/error-handling#_3-handle-confirmation-errors) shows how to branch on the error type.
 
 ## TypeScript
 
@@ -162,4 +162,6 @@ const save = async (options: ConfirmSetupOptions) => {
 - [usePaymentIntent](/api/composables/use-payment-intent) - Charge immediately
 - [Save a payment method for later](/guide/setup-intent) - Step-by-step guide, including the server code
 - [Payment objects](/guide/payment-objects#paymentintent-or-setupintent) - SetupIntent or PaymentIntent
+- [Start a subscription](/guide/subscriptions#option-c-save-a-card-then-subscribe) - Save a card, then subscribe
+- [Handle errors and declines](/guide/error-handling) - Show validation and confirmation errors
 - [Stripe SetupIntents docs](https://docs.stripe.com/payments/setup-intents)

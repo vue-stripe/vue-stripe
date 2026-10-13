@@ -168,7 +168,7 @@ The default styles for these classes ship in the package stylesheet. Import it o
 import '@vue-stripe/vue-stripe/style.css'
 ```
 
-Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-au-bank-account-element*` for this one.
+Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-au-bank-account-element*` for this one. [Style elements](/guide/styling#_4-style-the-wrapper-markup) covers the markup and the Appearance API.
 
 ## TypeScript
 
@@ -198,4 +198,7 @@ const account = (): StripeAuBankAccountElement | null => becsRef.value?.element 
 - [VueStripeElements](/api/components/stripe-elements) - Required parent
 - [VueStripeIbanElement](/api/components/stripe-iban-element) - SEPA Direct Debit
 - [Payments that settle later](/guide/payment-objects#payments-that-settle-later) - Why the PaymentIntent stays `processing`
+- [Fulfil orders with webhooks](/guide/webhooks#_2-handle-the-events-for-your-integration) - Act on settlement events
+- [Style elements](/guide/styling#_3-style-the-card-iban-and-becs-elements) - The `style` option and icon
+- [Test your integration](/guide/testing#becs-direct-debit-australia) - Test BSB and account numbers
 - [Live demo](/live-demo/becs-payment)
