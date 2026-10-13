@@ -209,7 +209,7 @@ const resetForm = () => {
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs mt-2 overflow-x-auto">
 curl https://api.stripe.com/v1/setup_intents \
   -u sk_test_YOUR_SECRET_KEY: \
-  -d "payment_method_types[]"=card</pre>
+  -d "allowed_payment_method_types[]"=card</pre>
               </li>
               <li>Copy the <code>client_secret</code> from the response</li>
             </ol>

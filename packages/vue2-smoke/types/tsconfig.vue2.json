@@ -1,0 +1,21 @@
+{
+  // vue-tsc on Vue 2.7 against the built dist/types, as a Vue 2.7 app sees them:
+  // vue-demi (switched to Vue 2.7) and vue resolve to this package's copies.
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": false,
+    "noEmit": true,
+    "jsx": "preserve",
+    "types": [],
+    "paths": {
+      "vue": ["../node_modules/vue"],
+      "vue-demi": ["../node_modules/vue-demi"]
+    }
+  },
+  "vueCompilerOptions": { "target": 2.7 },
+  "include": ["*.vue"]
+}

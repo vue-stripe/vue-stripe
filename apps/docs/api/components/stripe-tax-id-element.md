@@ -1,34 +1,23 @@
 ---
-description: "VueStripeTaxIdElement reference: collect a business name and tax ID such as EU VAT, GST or ABN in Vue, on a Checkout Session or with Stripe beta access."
+description: "VueStripeTaxIdElement reference: collect a business name and tax ID such as EU VAT, GST or ABN in Vue on a Checkout Session, with real-time verification."
 ---
 
 # VueStripeTaxIdElement
 
-Collects a business name and tax ID (e.g. EU VAT, GST, ABN). Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createTaxIdElement()`), or inside [VueStripeElements](/api/components/stripe-elements) with Stripe beta access (`elements.create('taxId')`). The tax ID it collects is used for the session's tax calculation and invoice.
+Collects a business name and tax ID (e.g. EU VAT, GST, ABN). Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createTaxIdElement()`), or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('taxId')`). The tax ID it collects is used for the session's tax calculation and invoice.
 
-::: danger Requires a beta flag
-The Tax ID element is beta-gated by Stripe. Initialize Stripe with the Tax ID beta flag, or `createTaxIdElement` will not exist at runtime. Pass it via the [`betas`](/api/components/stripe-provider#props) prop on `VueStripeProvider` (check [Stripe's Tax ID docs](https://docs.stripe.com/tax/advanced/tax-ids?payment-ui=embedded-components) for the current flag name):
+::: info Beta flags
+Stripe's [Tax ID guide](https://docs.stripe.com/tax/advanced/tax-ids?payment-ui=embedded-components) and [Stripe.js reference](https://docs.stripe.com/js/custom_checkout/create_tax_id_element) create the element on a Checkout Session without a beta flag, and with Stripe.js 10 it works without `betas` on `VueStripeProvider`. The session needs `tax_id_collection: { enabled: true }`.
 
-```vue
-<VueStripeProvider
-  :publishable-key="publishableKey"
-  :betas="['custom_checkout_tax_id_1']"
->
-  <!-- … -->
-</VueStripeProvider>
-```
-
-Add `'custom_checkout_tax_id_verification_1'` as well for real-time tax ID verification. Your Stripe account must have access to these betas.
+- **Real-time verification** is the `verification.taxId.mode: 'if_supported'` option, not a flag. It requires a Tax Complete subscription or Tax Custom pricing; on an account without one the element emits `@loaderror`.
+- **Inside `VueStripeElements`**, Stripe documents no integration, and the `@stripe/stripe-js` 10.0.0 type declarations still mark `elements.create('taxId')` (and `createTaxIdElement`) "Requires beta access". It renders without a flag in a standard sandbox, but the Checkout Session integration is the documented one.
 :::
 
 ## Usage
 
 ```vue
 <template>
-  <VueStripeProvider
-    :publishable-key="publishableKey"
-    :betas="['custom_checkout_tax_id_1']"
-  >
+  <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
       <VueStripeTaxIdElement
         :options="taxIdOptions"
@@ -84,6 +73,10 @@ interface StripeTaxIdElementOptions {
     businessName?: { required?: 'always' | 'never' | 'auto' }
     taxId?: { required?: 'always' | 'never' | 'auto' }
   }
+  // Real-time tax ID verification (Tax Complete or Tax Custom pricing).
+  verification?: {
+    taxId?: { mode?: 'if_supported' | 'never' } // default 'never'
+  }
   // Default values for the element fields.
   defaultValues?: {
     businessName?: string
@@ -120,6 +113,10 @@ interface StripeTaxIdElementChangeEvent {
     taxId: string
     taxIdType: TaxIdType
     externalTaxIdType: ExternalTaxIdType
+  }
+  // Only when verification is enabled
+  verification?: {
+    taxId?: { status: 'pending' | 'verified' | 'unverified' | 'unavailable' }
   }
 }
 ```

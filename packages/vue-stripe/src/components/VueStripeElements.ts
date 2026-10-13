@@ -23,9 +23,49 @@ import type { CaptureMethod, ElementsMode, SetupFutureUsage } from '../types'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
 import { statusShell } from '../utils/status-shell'
+import type { VueStripeComponent } from '../utils/element-types'
 
 /** Stripe.js 10.0.0 declares only `on('update-end')` on the Elements group; `off` is used when present. */
 type UpdateEndDetachable = { off?: (eventType: 'update-end', handler: () => void) => void }
+
+const elementsProps = {
+  /** Client secret of a PaymentIntent or SetupIntent (Intent-based flow). */
+  clientSecret: { type: String as PropType<string | undefined>, default: undefined },
+  /** Deferred Intent flow: 'payment' | 'setup' | 'subscription'. */
+  mode: { type: String as PropType<ElementsMode | undefined>, default: undefined },
+  /** Currency code (e.g. 'usd') for the deferred Intent flow. */
+  currency: { type: String as PropType<string | undefined>, default: undefined },
+  /** Amount in the smallest currency unit, for 'payment' and 'subscription' modes. */
+  amount: { type: Number as PropType<number | undefined>, default: undefined },
+  setupFutureUsage: {
+    type: String as PropType<SetupFutureUsage | undefined>,
+    default: undefined
+  },
+  captureMethod: { type: String as PropType<CaptureMethod | undefined>, default: undefined },
+  /** Appearance API options (theme, variables, rules). Applied live via elements.update(). */
+  appearance: {
+    type: Object as PropType<Appearance | undefined>,
+    default: undefined
+  },
+  /** Custom fonts (CssFontSource | CustomFontSource); creation time only. */
+  fonts: {
+    type: Array as PropType<Array<CssFontSource | CustomFontSource> | undefined>,
+    default: undefined
+  },
+  locale: { type: String as PropType<string | undefined>, default: undefined },
+  /** Any other `stripe.elements()` option (e.g. allowedPaymentMethodTypes in mode-based flows). */
+  options: {
+    type: Object as PropType<StripeElementsOptions | Record<string, unknown> | undefined>,
+    default: undefined
+  }
+}
+
+/** Event name -> payload. */
+type ElementsEvents = {
+  ready: [elements: StripeElements]
+  error: [message: string]
+  'update-end': []
+}
 
 /**
  * Creates a Stripe Elements group (`stripe.elements()`) and provides it to the
@@ -34,38 +74,8 @@ type UpdateEndDetachable = { off?: (eventType: 'update-end', handler: () => void
  */
 export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeElements',
-  props: {
-    /** Client secret of a PaymentIntent or SetupIntent (Intent-based flow). */
-    clientSecret: { type: String as PropType<string | undefined>, default: undefined },
-    /** Deferred Intent flow: 'payment' | 'setup' | 'subscription'. */
-    mode: { type: String as PropType<ElementsMode | undefined>, default: undefined },
-    /** Currency code (e.g. 'usd') for the deferred Intent flow. */
-    currency: { type: String as PropType<string | undefined>, default: undefined },
-    /** Amount in the smallest currency unit, for 'payment' and 'subscription' modes. */
-    amount: { type: Number as PropType<number | undefined>, default: undefined },
-    setupFutureUsage: {
-      type: String as PropType<SetupFutureUsage | undefined>,
-      default: undefined
-    },
-    captureMethod: { type: String as PropType<CaptureMethod | undefined>, default: undefined },
-    /** Appearance API options (theme, variables, rules). Applied live via elements.update(). */
-    appearance: {
-      type: Object as PropType<Appearance | undefined>,
-      default: undefined
-    },
-    /** Custom fonts (CssFontSource | CustomFontSource); creation time only. */
-    fonts: {
-      type: Array as PropType<Array<CssFontSource | CustomFontSource> | undefined>,
-      default: undefined
-    },
-    locale: { type: String as PropType<string | undefined>, default: undefined },
-    /** Any other `stripe.elements()` option (e.g. allowedPaymentMethodTypes in mode-based flows). */
-    options: {
-      type: Object as PropType<StripeElementsOptions | Record<string, unknown> | undefined>,
-      default: undefined
-    }
-  },
-  emits: ['ready', 'error', 'update-end'],
+  props: elementsProps,
+  emits: ['ready', 'error', 'update-end'] satisfies Array<keyof ElementsEvents>,
   setup(props, { emit, slots }) {
     const stripeInstance = injectStripe('VueStripeElements')
 
@@ -107,7 +117,7 @@ export default /* @__PURE__ */ defineComponent({
         const elementsOptions: Record<string, unknown> = { ...props.options }
         // Removed in Stripe.js Endive: Stripe rejects `paymentMethodTypes` as an
         // integration error. Mode-based Elements: use options.allowedPaymentMethodTypes;
-        // clientSecret flow: set payment_method_types on the Intent or use Dashboard settings.
+        // clientSecret flow: set allowed_payment_method_types on the Intent or use Dashboard settings.
         delete elementsOptions['paymentMethodTypes']
 
         // Intent-based flow vs deferred Intent flow (mode / currency / amount).
@@ -198,4 +208,4 @@ export default /* @__PURE__ */ defineComponent({
         'Initializing Elements...'
       )
   }
-})
+}) as unknown as VueStripeComponent<typeof elementsProps, Record<never, never>, ElementsEvents>

@@ -8,6 +8,34 @@ import {
 import { VueStripeProviderError } from '../utils/errors'
 import { loadStripeInstance } from '../utils/load-stripe'
 import { statusShell } from '../utils/status-shell'
+import type { VueStripeComponent } from '../utils/element-types'
+
+const providerProps = {
+  publishableKey: { type: String as PropType<string | undefined>, default: undefined },
+  /** @deprecated v4 alias of `publishableKey`. */
+  stripeKey: { type: String as PropType<string | undefined>, default: undefined },
+  stripeAccount: { type: String as PropType<string | undefined>, default: undefined },
+  /** @deprecated Versioned Stripe.js (Endive) always uses its release train's API version and ignores this; it is still forwarded to `loadStripe()`. */
+  apiVersion: { type: String as PropType<string | undefined>, default: undefined },
+  locale: { type: String as PropType<string | undefined>, default: undefined },
+  /** Stripe beta flags, e.g. the Tax ID Element's beta (forwarded to `loadStripe`). */
+  betas: { type: Array as PropType<string[] | undefined>, default: undefined },
+  /** Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }` (forwarded to `loadStripe`). */
+  developerTools: {
+    type: Object as PropType<StripeConstructorOptions['developerTools']>,
+    default: undefined
+  },
+  /** `false` loads Stripe.js without advanced fraud signals (Radar). Read once, before Stripe.js loads. */
+  advancedFraudSignals: { type: Boolean, default: true },
+  /** Any `loadStripe()` option (`stripeAccount`, `apiVersion`, `locale`, `betas`, `developerTools`). Explicit props win. */
+  options: { type: Object as PropType<StripeConstructorOptions | undefined>, default: undefined }
+}
+
+/** Event name -> payload. */
+type ProviderEvents = {
+  load: [stripe: Stripe]
+  error: [error: Error]
+}
 
 /**
  * Loads Stripe.js and provides the Stripe instance to everything inside it.
@@ -15,27 +43,8 @@ import { statusShell } from '../utils/status-shell'
  */
 export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeProvider',
-  props: {
-    publishableKey: { type: String as PropType<string | undefined>, default: undefined },
-    /** @deprecated v4 alias of `publishableKey`. */
-    stripeKey: { type: String as PropType<string | undefined>, default: undefined },
-    stripeAccount: { type: String as PropType<string | undefined>, default: undefined },
-    /** @deprecated Versioned Stripe.js (Endive) always uses its release train's API version and ignores this; it is still forwarded to `loadStripe()`. */
-    apiVersion: { type: String as PropType<string | undefined>, default: undefined },
-    locale: { type: String as PropType<string | undefined>, default: undefined },
-    /** Stripe beta flags, e.g. the Tax ID Element's beta (forwarded to `loadStripe`). */
-    betas: { type: Array as PropType<string[] | undefined>, default: undefined },
-    /** Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }` (forwarded to `loadStripe`). */
-    developerTools: {
-      type: Object as PropType<StripeConstructorOptions['developerTools']>,
-      default: undefined
-    },
-    /** `false` loads Stripe.js without advanced fraud signals (Radar). Read once, before Stripe.js loads. */
-    advancedFraudSignals: { type: Boolean, default: true },
-    /** Any `loadStripe()` option (`stripeAccount`, `apiVersion`, `locale`, `betas`, `developerTools`). Explicit props win. */
-    options: { type: Object as PropType<StripeConstructorOptions | undefined>, default: undefined }
-  },
-  emits: ['load', 'error'],
+  props: providerProps,
+  emits: ['load', 'error'] satisfies Array<keyof ProviderEvents>,
   setup(props, { emit, slots }) {
     // Support both publishableKey and stripeKey for backwards compatibility
     const key = props.publishableKey || props.stripeKey
@@ -95,4 +104,4 @@ export default /* @__PURE__ */ defineComponent({
         'Loading Stripe...'
       )
   }
-})
+}) as unknown as VueStripeComponent<typeof providerProps, Record<never, never>, ProviderEvents>

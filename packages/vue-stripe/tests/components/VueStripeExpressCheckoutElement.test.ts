@@ -50,6 +50,28 @@ describe('VueStripeExpressCheckoutElement', () => {
     expect(expressCheckoutComponent.exists()).toBe(true)
   })
 
+  it('clear() returns early with a warning instead of calling Stripe (which throws)', async () => {
+    const mockElement = makeMockElement()
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
+    mockLoadStripe.mockResolvedValueOnce({
+      elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
+      registerAppInfo: vi.fn()
+    } as any)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const wrapper = await mountWithProviders()
+    const vm = wrapper.findComponent(VueStripeExpressCheckoutElement).vm as unknown as {
+      clear: () => void
+    }
+    expect(() => vm.clear()).not.toThrow()
+
+    expect(mockElement.clear).not.toHaveBeenCalled()
+    expect(warn).toHaveBeenCalledWith(
+      '[Vue Stripe] clear() is not supported by the Express Checkout Element'
+    )
+    warn.mockRestore()
+  })
+
   it('should mount Stripe express checkout element on the DOM', async () => {
     const mockElement = makeMockElement()
     const mockCreate = vi.fn(() => mockElement)

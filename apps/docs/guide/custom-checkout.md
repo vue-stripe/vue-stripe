@@ -172,17 +172,17 @@ See the [Currency Selector API](/api/components/stripe-currency-selector-element
 
 ### Tax ID
 
-Business customers can enter a VAT/GST number. Create the session with `tax_id_collection: { enabled: true }`, enable the beta on `VueStripeProvider`, and render the element:
+Business customers can enter a VAT/GST number. Create the session with `tax_id_collection: { enabled: true }` and render the element. No beta flag is needed:
 
 ```vue
-<VueStripeProvider :publishable-key="publishableKey" :betas="['custom_checkout_tax_id_1']">
+<VueStripeProvider :publishable-key="publishableKey">
   <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
     <VueStripeTaxIdElement />
   </VueStripeCheckoutElementsProvider>
 </VueStripeProvider>
 ```
 
-The Tax ID element is a Stripe beta; your account needs access. See the [Tax ID API](/api/components/stripe-tax-id-element).
+To verify tax IDs as the customer types, pass `:options="{ verification: { taxId: { mode: 'if_supported' } } }"`; this needs a Tax Complete subscription or Tax Custom pricing. See the [Tax ID API](/api/components/stripe-tax-id-element).
 
 ### Contact details
 

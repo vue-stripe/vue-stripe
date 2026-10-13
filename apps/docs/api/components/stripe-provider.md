@@ -59,7 +59,7 @@ import type { StripeConstructorOptions } from '@stripe/stripe-js'
 const options: StripeConstructorOptions = {
   stripeAccount: 'acct_...',
   locale: 'auto',
-  betas: ['custom_checkout_tax_id_1'],
+  betas: ['elements_link_signup_beta_1'],
   developerTools: { assistant: { enabled: false } }
 }
 ```
@@ -68,7 +68,7 @@ const options: StripeConstructorOptions = {
 <!-- betas as a prop (wins over options.betas) -->
 <VueStripeProvider
   :publishable-key="publishableKey"
-  :betas="['custom_checkout_tax_id_1']"
+  :betas="['elements_link_signup_beta_1']"
 >
   <!-- ... -->
 </VueStripeProvider>
@@ -187,6 +187,8 @@ import '@vue-stripe/vue-stripe/style.css'
 ```
 
 ## TypeScript
+
+The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
 
 ```ts
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'

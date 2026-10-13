@@ -73,7 +73,7 @@ Stripe.js Endive rejects `paymentMethodTypes` on `stripe.elements()` as an integ
   </VueStripeElements>
   ```
 
-- **`clientSecret` flow**: set `payment_method_types` on the PaymentIntent / SetupIntent on your server, or manage payment methods in the Stripe Dashboard. `allowedPaymentMethodTypes` is **not** valid together with `clientSecret`.
+- **`clientSecret` flow**: set `allowed_payment_method_types` on the PaymentIntent / SetupIntent on your server, or manage payment methods in the Stripe Dashboard. `allowedPaymentMethodTypes` is **not** valid together with `clientSecret`.
 :::
 
 ::: tip No Intent yet? Pass `mode`
@@ -253,6 +253,8 @@ import '@vue-stripe/vue-stripe/style.css'
 The fields inside Stripe's iframes are styled with the [Appearance API](#appearance-api), not with CSS.
 
 ## TypeScript
+
+The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
 
 ```ts
 import type {

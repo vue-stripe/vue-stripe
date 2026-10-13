@@ -144,6 +144,8 @@ The provider uses its own injection key, so `useCheckoutSession()` does not work
 
 ## TypeScript
 
+The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+
 ```ts
 import type {
   StripeCheckoutFormLoadActionsSuccess,

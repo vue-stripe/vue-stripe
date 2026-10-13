@@ -33,7 +33,11 @@ export function useStripeMethodCall(
   composable: string,
   method: string,
   run: (stripe: Stripe, args: unknown[]) => unknown
-) {
+  // Written out: the inferred type is emitted as Vue 3's two-argument `Ref`, which Vue 2.7 rejects.
+): Record<string, unknown> & {
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+} {
   const stripeInstance = injectStripe(composable)
 
   const loading = ref(false)
@@ -76,9 +80,10 @@ export function useStripeMethodCall(
  * returning `{ confirmCardPayment, loading, error }`.
  *
  * The composable injects the Stripe instance from `<VueStripeProvider>` or
- * `createVueStripe()` (throwing `VueStripeProviderError` without either). The wrapped method forwards its arguments,
- * resolves to Stripe's result untouched (an `{ error }` result also sets `error`),
- * and rethrows anything Stripe throws after recording it in `error`.
+ * `createVueStripe()` (throwing `VueStripeProviderError` without either). The
+ * wrapped method forwards its arguments, resolves to Stripe's result untouched (an
+ * `{ error }` result also sets `error`), and rethrows anything Stripe throws after
+ * recording it in `error`.
  *
  * `composableName` (default `use<Method>`) names the composable in that error,
  * for composables named differently from the method (`useRadarSession`).

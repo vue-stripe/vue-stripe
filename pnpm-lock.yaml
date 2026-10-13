@@ -495,6 +495,9 @@ importers:
       prettier:
         specifier: ^3.9.10
         version: 3.9.10
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       vitest:
         specifier: ^5.0.3
         version: 5.0.3(@types/node@24.19.2)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.44.1)(yaml@2.9.1))
@@ -507,6 +510,12 @@ importers:
       vue-template-compiler:
         specifier: 2.7.16
         version: 2.7.16(vue@2.7.16)
+      vue-tsc:
+        specifier: ^3.3.13
+        version: 3.3.13(typescript@5.9.3)
+      vue3:
+        specifier: npm:vue@^3.5.43
+        version: vue@3.5.43(typescript@5.9.3)
 
   tools/typescript-config:
     dependencies:

@@ -40,7 +40,7 @@ Work through the table row by row. The last column gives the reason in short; [S
 | `vue` `^2.6 \|\| ^3` | `^2.7 \|\| ^3` | v6 relies on `expose` and `useSlots`; Vue 2.6 is end-of-life |
 | No stylesheet export | `import '@vue-stripe/vue-stripe/style.css'` | Render-function components carry no styles of their own |
 | `VueStripeIdealBankElement`, `VueStripeP24BankElement`, `VueStripeEpsBankElement`, `VueStripeFpxBankElement` | `VueStripePaymentElement` | Stripe removed these elements (Clover) |
-| `<VueStripeElements :payment-method-types>` | Mode-based flow: `:options="{ allowedPaymentMethodTypes }"`. `clientSecret` flow: `payment_method_types` on the Intent, or Dashboard settings | Stripe removed the option (Endive) |
+| `<VueStripeElements :payment-method-types>` | Mode-based flow: `:options="{ allowedPaymentMethodTypes }"`. `clientSecret` flow: `allowed_payment_method_types` on the Intent, or Dashboard settings | Stripe removed the option (Endive) |
 | `@loaderstop` on `VueStripePaymentElement` | Removed | Stripe never emitted this event |
 | `@loadError` on `VueStripeAddressElement` | `@loaderror` | Same casing as Stripe and the other elements |
 | `<VueStripeCheckout :session-id>` / `:price-id` (with `mode`, `success-url`, `cancel-url`, `customer-email`, ...) | `<VueStripeCheckout :session-url>` | Stripe removed `redirectToCheckout({ sessionId })` (Clover) |
@@ -56,7 +56,7 @@ Work through the table row by row. The last column gives the reason in short; [S
 
 ### Payment method types on `VueStripeElements`
 
-`allowedPaymentMethodTypes` works when `VueStripeElements` gets `mode` / `currency` / `amount` instead of a client secret, and in `elements.update()`. With a `clientSecret`, Stripe reads the payment methods from the Intent, so set `payment_method_types` on the PaymentIntent or SetupIntent on your server, or manage them in the Dashboard.
+`allowedPaymentMethodTypes` works when `VueStripeElements` gets `mode` / `currency` / `amount` instead of a client secret, and in `elements.update()`. With a `clientSecret`, Stripe reads the payment methods from the Intent, so set `allowed_payment_method_types` on the PaymentIntent or SetupIntent on your server, or manage them in the Dashboard.
 
 ```vue
 <!-- v5 -->

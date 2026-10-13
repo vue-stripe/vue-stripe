@@ -81,15 +81,41 @@ export type BaseElementEvents<TElement, TChange> = {
 export type LoadStartEvent<T extends string> = [event: { elementType: T }]
 export type LoadErrorEvent<T extends string> = [event: { elementType: T; error: StripeError }]
 
-/** Public type of a factory-built element component. */
+/**
+ * Public type of a factory-built element component. `TUnsupported` drops standard members
+ * the Stripe element rejects (the Express Checkout Element throws on `clear()`).
+ */
 export type StripeElementComponent<
   TOptions extends object,
   TElement,
   TExtra extends object = Record<never, never>,
-  TEvents extends ElementEvents = ElementEvents
+  TEvents extends ElementEvents = ElementEvents,
+  TUnsupported extends keyof StripeElementExposed<TElement> = never
 > = DefineComponent<
   { options?: TOptions | undefined },
-  StripeElementExposed<TElement> & TExtra,
+  Omit<StripeElementExposed<TElement>, TUnsupported> & TExtra,
+  Record<never, never>,
+  Record<never, never>,
+  Record<never, never>,
+  ComponentOptionsMixin,
+  ComponentOptionsMixin,
+  { [K in keyof TEvents]: (...args: TEvents[K]) => void }
+>
+
+/**
+ * Public type of a hand-written component (providers, VueStripeCheckout, ...). It passes only
+ * the first 8 `DefineComponent` parameters, which Vue 2.7 and Vue 3 share, so the emitted
+ * `.d.ts` resolves on both; `defineComponent()`'s inferred type passes Vue 3's 16+.
+ * `TProps` is the runtime props object (`typeof props`), so required props and defaults keep
+ * their types; `TExposed` is what `expose()` publishes on the template ref.
+ */
+export type VueStripeComponent<
+  TProps,
+  TExposed extends object = Record<never, never>,
+  TEvents extends ElementEvents = ElementEvents
+> = DefineComponent<
+  TProps,
+  TExposed,
   Record<never, never>,
   Record<never, never>,
   Record<never, never>,

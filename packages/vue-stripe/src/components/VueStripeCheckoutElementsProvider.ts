@@ -19,6 +19,42 @@ import { stripeCheckoutInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
 import { hx } from '../utils/h'
 import { statusShell } from '../utils/status-shell'
+import type { VueStripeComponent } from '../utils/element-types'
+
+const checkoutElementsProviderProps = {
+  /** Client secret of a Checkout Session (`ui_mode: 'elements'`), or a Promise resolving to it. */
+  clientSecret: {
+    type: [String, Promise] as PropType<string | Promise<string> | undefined>,
+    default: undefined
+  },
+  /** Alternative to `clientSecret`: a function returning the client secret (v5 compatible). */
+  fetchClientSecret: {
+    type: Function as PropType<(() => Promise<string>) | undefined>,
+    default: undefined
+  },
+  /** Appearance, fonts, loader, saved payment methods and address sync for the Checkout elements. */
+  elementsOptions: {
+    type: Object as PropType<StripeCheckoutElementsOptions | undefined>,
+    default: undefined
+  },
+  /** Adaptive Pricing (`{ allowed: boolean }`). */
+  adaptivePricing: {
+    type: Object as PropType<StripeCheckoutElementsSdkOptions['adaptivePricing'] | undefined>,
+    default: undefined
+  },
+  /** Prefill email, phone number and addresses. */
+  defaultValues: {
+    type: Object as PropType<StripeCheckoutElementsSdkOptions['defaultValues'] | undefined>,
+    default: undefined
+  }
+}
+
+/** Event name -> payload. */
+type CheckoutElementsProviderEvents = {
+  ready: [actions: StripeCheckoutLoadActionsSuccess]
+  change: [session: StripeCheckoutSession]
+  error: [message: string]
+}
 
 /**
  * Elements with Checkout Sessions (`stripe.initCheckoutElementsSdk()`).
@@ -28,34 +64,8 @@ import { statusShell } from '../utils/status-shell'
  */
 export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeCheckoutElementsProvider',
-  props: {
-    /** Client secret of a Checkout Session (`ui_mode: 'elements'`), or a Promise resolving to it. */
-    clientSecret: {
-      type: [String, Promise] as PropType<string | Promise<string> | undefined>,
-      default: undefined
-    },
-    /** Alternative to `clientSecret`: a function returning the client secret (v5 compatible). */
-    fetchClientSecret: {
-      type: Function as PropType<(() => Promise<string>) | undefined>,
-      default: undefined
-    },
-    /** Appearance, fonts, loader, saved payment methods and address sync for the Checkout elements. */
-    elementsOptions: {
-      type: Object as PropType<StripeCheckoutElementsOptions | undefined>,
-      default: undefined
-    },
-    /** Adaptive Pricing (`{ allowed: boolean }`). */
-    adaptivePricing: {
-      type: Object as PropType<StripeCheckoutElementsSdkOptions['adaptivePricing'] | undefined>,
-      default: undefined
-    },
-    /** Prefill email, phone number and addresses. */
-    defaultValues: {
-      type: Object as PropType<StripeCheckoutElementsSdkOptions['defaultValues'] | undefined>,
-      default: undefined
-    }
-  },
-  emits: ['ready', 'change', 'error'],
+  props: checkoutElementsProviderProps,
+  emits: ['ready', 'change', 'error'] satisfies Array<keyof CheckoutElementsProviderEvents>,
   setup(props, { emit, slots }) {
     const stripeInstance = injectStripe('VueStripeCheckoutElementsProvider')
 
@@ -175,4 +185,8 @@ export default /* @__PURE__ */ defineComponent({
           )
     }
   }
-})
+}) as unknown as VueStripeComponent<
+  typeof checkoutElementsProviderProps,
+  Record<never, never>,
+  CheckoutElementsProviderEvents
+>
