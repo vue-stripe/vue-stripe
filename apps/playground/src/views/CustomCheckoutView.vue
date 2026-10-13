@@ -26,13 +26,10 @@ const useAdaptivePricing = ref(true)
 const useContactDetails = ref(false)
 const useTerms = ref(false)
 const useLinkSignup = ref(false)
-// Tax ID and Link Signup are Stripe betas: the flags go on the Stripe instance
-// (VueStripeProvider `betas`). The Terms element is gated on the Stripe account instead.
+// Link Signup is a Stripe beta: its flag goes on the Stripe instance (VueStripeProvider
+// `betas`). Tax ID needs no flag; the Terms element is gated on the Stripe account.
 const betas = computed(() => {
-  const flags = [
-    ...(useTaxId.value ? ['custom_checkout_tax_id_1'] : []),
-    ...(useLinkSignup.value ? ['elements_link_signup_beta_1'] : [])
-  ]
+  const flags = [...(useLinkSignup.value ? ['elements_link_signup_beta_1'] : [])]
   return flags.length ? flags : undefined
 })
 
@@ -133,7 +130,7 @@ const reset = () => {
             </label>
             <label class="flex items-center gap-2">
               <input v-model="useTaxId" type="checkbox" data-test="use-tax-id" />
-              Tax ID element (Stripe beta; your account needs access)
+              Tax ID element (real-time verification needs Stripe Tax)
             </label>
             <label class="flex items-center gap-2">
               <input v-model="useContactDetails" type="checkbox" data-test="use-contact-details" />
