@@ -38,7 +38,9 @@ export default /* @__PURE__ */ createStripeElement<
   StripeExpressCheckoutElementOptions,
   StripeExpressCheckoutElement,
   Record<never, never>,
-  ExpressCheckoutEvents
+  ExpressCheckoutEvents,
+  // Stripe.js throws an IntegrationError on clear(); calling it is a type error.
+  'clear'
 >({
   elementType: 'expressCheckout',
   componentName: 'VueStripeExpressCheckoutElement',
@@ -72,5 +74,11 @@ export default /* @__PURE__ */ createStripeElement<
         'paymentMethodOrder'
       ]) as never
     ),
-  loadingText: 'Loading express checkout...'
+  loadingText: 'Loading express checkout...',
+  // Replaces the shared clear(), which would make Stripe.js throw.
+  expose: () => ({
+    clear: () => {
+      console.warn('[Vue Stripe] clear() is not supported by the Express Checkout Element')
+    }
+  })
 })

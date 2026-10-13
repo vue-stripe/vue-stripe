@@ -78,15 +78,19 @@ export type BaseElementEvents<TElement, TChange> = {
 export type LoadStartEvent<T extends string> = [event: { elementType: T }]
 export type LoadErrorEvent<T extends string> = [event: { elementType: T; error: StripeError }]
 
-/** Public type of a factory-built element component. */
+/**
+ * Public type of a factory-built element component. `TUnsupported` drops standard members
+ * the Stripe element rejects (the Express Checkout Element throws on `clear()`).
+ */
 export type StripeElementComponent<
   TOptions extends object,
   TElement,
   TExtra extends object = Record<never, never>,
-  TEvents extends ElementEvents = ElementEvents
+  TEvents extends ElementEvents = ElementEvents,
+  TUnsupported extends keyof StripeElementExposed<TElement> = never
 > = DefineComponent<
   { options?: TOptions | undefined },
-  StripeElementExposed<TElement> & TExtra,
+  Omit<StripeElementExposed<TElement>, TUnsupported> & TExtra,
   Record<never, never>,
   Record<never, never>,
   Record<never, never>,

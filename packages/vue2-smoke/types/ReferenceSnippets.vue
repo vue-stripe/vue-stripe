@@ -12,6 +12,7 @@ import {
   VueStripeCheckoutProvider,
   VueStripeElements,
   VueStripeEmbeddedCheckout,
+  VueStripeExpressCheckoutElement,
   VueStripeFinancialAccountDisclosure,
   VueStripeIssuingDisclosure,
   VueStripePaymentElement,
@@ -79,6 +80,10 @@ const disclosureLoading: boolean | undefined = issuingRef.value?.loading
 const disclosureError: string | null | undefined =
   financialRef.value?.error ?? treasuryRef.value?.error
 
+// VueStripeExpressCheckoutElement: Stripe.js throws on clear(), so it is not in the type
+const expressRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement> | null>(null)
+const focusExpress = () => expressRef.value?.focus()
+
 // A method composable (utils/method-factory)
 const { confirmCardPayment, loading: confirming } = useConfirmCardPayment()
 const confirmingNow: boolean = confirming.value
@@ -92,9 +97,12 @@ log(pricingTableRef.value?.checkout)
 log(embeddedRef.value?.focus)
 // @ts-expect-error disclosures expose no `checkout`
 log(issuingRef.value?.checkout)
+// @ts-expect-error the Express Checkout Element does not support clear()
+expressRef.value?.clear()
 
 log(
   triggerCheckout,
+  focusExpress,
   redirecting,
   tableLoading,
   tableError,
@@ -124,6 +132,7 @@ log(
         @update-end="() => log('updated')"
       >
         <VueStripePaymentElement @change="(event) => isElementChange(event)" />
+        <VueStripeExpressCheckoutElement ref="expressRef" />
       </VueStripeElements>
 
       <VueStripeCheckout
