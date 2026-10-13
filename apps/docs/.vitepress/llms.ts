@@ -2,6 +2,15 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { DefaultTheme, SiteConfig } from 'vitepress'
 import type { CoverageCategory } from './theme/data/stripe-coverage'
+import {
+  FEATURES,
+  HERO,
+  HERO_FILES,
+  INTEGRATIONS,
+  INTEGRATIONS_COMPARE,
+  INTEGRATIONS_LEDE,
+  INTEGRATIONS_TITLE
+} from './theme/data/home'
 import { SITE_URL, routeOf, sectionOf, type DocSection } from './seo'
 
 // Build-time Markdown for language models (https://llmstxt.org): /llms.txt indexes every page
@@ -147,6 +156,62 @@ export function coverageMarkdown(coverage: CoverageCategory[]): string {
     .join('\n\n')
 }
 
+/**
+ * The home page as Markdown. Its copy lives in the home components (./theme/data/home.ts);
+ * index.md adds the hero's example project, one code fence per `<template #file>` slot, and
+ * the live demo section.
+ */
+export function homeMarkdown(body: string): string {
+  const link = (text: string, href: string) => `[${text}](${absolute(href)})`
+  const code = new Map(
+    // The fence, not the slot: a Vue file's own </template> line sits inside the fence.
+    [...body.matchAll(/^<template #(\w+)>\s*\n(```[^\n]*\n[\s\S]*?\n```)\s*\n<\/template>/gm)].map(
+      ([, id, fence]) => [id, fence!.trim().replace(/^(```\w+):line-numbers/, '$1')]
+    )
+  )
+  const demo = /<HomeSection\b[^>]*\btitle="([^"]*)"[^>]*\blede="([^"]*)"/.exec(body)
+  return [
+    `# ${HERO.name}: ${HERO.title}`,
+    '',
+    HERO.lede,
+    '',
+    ...HERO.actions.map((a) => `- ${link(a.text, a.link)}`),
+    `- ${HERO.notice.text}: ${link(HERO.notice.linkText, HERO.notice.link)}`,
+    '',
+    '## Features',
+    '',
+    ...FEATURES.map((f) => `- **${f.link ? link(f.title, f.link) : f.title}**: ${f.text}`),
+    '',
+    `## ${INTEGRATIONS_TITLE}`,
+    '',
+    `${INTEGRATIONS_LEDE} ${link(INTEGRATIONS_COMPARE.text, INTEGRATIONS_COMPARE.link)}.`,
+    '',
+    ...INTEGRATIONS.map(
+      (o) =>
+        `- **${o.title}** (\`${o.component}\`): ${o.text} ${link('Guide', o.guide)}${o.demo ? `, ${link('live demo', o.demo)}` : ''}.`
+    ),
+    '',
+    '## Example: a Payment Element checkout',
+    '',
+    ...HERO_FILES.flatMap((f) => [
+      `### ${f.folder ? `${f.folder}/` : ''}${f.name}`,
+      '',
+      code.get(f.id) ?? '',
+      ''
+    ]),
+    ...(demo
+      ? [
+          `## ${demo[1]}`,
+          '',
+          `${demo[2]} ${link('Open the live demo', '/live-demo/payment-element')}.`
+        ]
+      : [])
+  ]
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 function flattenSidebar(items: DefaultTheme.SidebarItem[]): { text: string; link: string }[] {
   return items.flatMap((item) => [
     ...(item.link && item.text ? [{ text: item.text, link: item.link }] : []),
@@ -194,6 +259,17 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
         a.route.localeCompare(b.route)
     )
 
+  // The home page leads both files, as the overview of everything else.
+  const homeSource = parseFrontmatter(readFileSync(join(siteConfig.srcDir, 'index.md'), 'utf8'))
+  const home: Page = {
+    relativePath: 'index.md',
+    route: '/',
+    title: 'Vue Stripe home page',
+    description: homeSource.data['description'] ?? '',
+    section: undefined,
+    markdown: homeMarkdown(homeSource.body)
+  }
+
   const grouped = options.sections.map((section) => ({
     section,
     pages: pages.filter((p) => p.section === section)
@@ -206,6 +282,10 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
     '# Vue Stripe',
     '',
     options.header.trim(),
+    '',
+    '## Start here',
+    '',
+    `- [${home.title}](${markdownUrl(home.route)}): ${home.description}`,
     '',
     ...grouped.flatMap(({ section, pages }) => [
       `## ${section.name}`,
@@ -222,13 +302,13 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
     '',
     options.header.trim(),
     '',
-    ...grouped.flatMap(({ pages }) => pages.map((p) => `---\n\n${pageDocument(p)}`))
+    ...[home, ...grouped.flatMap(({ pages }) => pages)].map((p) => `---\n\n${pageDocument(p)}`)
   ].join('\n')
 
   const outDir = siteConfig.outDir
   writeFileSync(join(outDir, 'llms.txt'), llms)
   writeFileSync(join(outDir, 'llms-full.txt'), full)
-  for (const page of pages) {
+  for (const page of [home, ...pages]) {
     const file = join(outDir, page.relativePath)
     mkdirSync(dirname(file), { recursive: true })
     writeFileSync(file, pageDocument(page))

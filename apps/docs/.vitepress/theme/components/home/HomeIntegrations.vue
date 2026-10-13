@@ -1,72 +1,21 @@
 <script setup lang="ts">
 import { withBase } from 'vitepress'
-import DocIcon, { type DocIconName } from '../DocIcon.vue'
-
-const OPTIONS: {
-  icon: DocIconName
-  title: string
-  text: string
-  component: string
-  guide: string
-  demo?: string
-}[] = [
-  {
-    icon: 'credit-card',
-    title: 'Payment Element on your page',
-    text: 'Cards, wallets and local payment methods in one form, confirmed against a PaymentIntent.',
-    component: 'VueStripePaymentElement',
-    guide: '/guide/payment-element',
-    demo: '/live-demo/payment-element'
-  },
-  {
-    icon: 'layout-template',
-    title: 'Custom Checkout',
-    text: 'Your own layout on a Checkout Session. Stripe keeps line items, tax, discounts and currency.',
-    component: 'VueStripeCheckoutElementsProvider',
-    guide: '/guide/custom-checkout',
-    demo: '/live-demo/custom-checkout'
-  },
-  {
-    icon: 'panel-top',
-    title: 'Embedded Checkout',
-    text: "Stripe's prebuilt checkout page, mounted inside your page.",
-    component: 'VueStripeEmbeddedCheckout',
-    guide: '/guide/embedded-checkout',
-    demo: '/live-demo/embedded-checkout'
-  },
-  {
-    icon: 'external-link',
-    title: 'Hosted Checkout',
-    text: 'Redirect to checkout.stripe.com with the session URL your server creates.',
-    component: 'VueStripeCheckout',
-    guide: '/guide/checkout',
-    demo: '/live-demo/checkout-redirect'
-  },
-  {
-    icon: 'receipt',
-    title: 'Checkout Form',
-    text: 'A complete checkout form from one component, on a Checkout Session. Stripe beta.',
-    component: 'VueStripeCheckoutForm',
-    guide: '/guide/checkout-form',
-    demo: '/live-demo/checkout-form'
-  },
-  {
-    icon: 'columns',
-    title: 'Pricing Table',
-    text: 'A pricing table you configure in the Stripe Dashboard, embedded with one tag.',
-    component: 'VueStripePricingTable',
-    guide: '/guide/pricing-table'
-  }
-]
+import DocIcon from '../DocIcon.vue'
+import {
+  INTEGRATIONS as OPTIONS,
+  INTEGRATIONS_COMPARE,
+  INTEGRATIONS_LEDE,
+  INTEGRATIONS_TITLE
+} from '../../data/home'
 </script>
 
 <template>
   <section class="integrations" aria-labelledby="integrations-title">
     <div class="integrations-head">
-      <h2 id="integrations-title">Pick how you take payments</h2>
+      <h2 id="integrations-title">{{ INTEGRATIONS_TITLE }}</h2>
       <p>
-        Six ways to put Stripe in a Vue app, from a single element to a full checkout page.
-        <a :href="withBase('/guide/approaches')">Compare them</a>
+        {{ INTEGRATIONS_LEDE }}
+        <a :href="withBase(INTEGRATIONS_COMPARE.link)">{{ INTEGRATIONS_COMPARE.text }}</a>
       </p>
     </div>
     <ul class="integrations-list">

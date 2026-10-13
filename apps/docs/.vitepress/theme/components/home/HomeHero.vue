@@ -8,14 +8,10 @@ import { withBase } from 'vitepress'
 import StripeBadge from '../StripeBadge.vue'
 import GitHubStarsCTA from '../GitHubStarsCTA.vue'
 import DocIcon from '../DocIcon.vue'
+import { HERO, HERO_FILES } from '../../data/home'
 
-type FileId = 'checkout' | 'paybutton' | 'server'
-
-const FILES: { id: FileId; name: string; folder: string; language: string }[] = [
-  { id: 'checkout', name: 'CheckoutPage.vue', folder: 'src', language: 'Vue' },
-  { id: 'paybutton', name: 'PayButton.vue', folder: 'src', language: 'Vue' },
-  { id: 'server', name: 'server.mjs', folder: '', language: 'JavaScript' }
-]
+const FILES = HERO_FILES
+type FileId = (typeof FILES)[number]['id']
 
 const active = ref<FileId>('checkout')
 const activeFile = computed(() => FILES.find((f) => f.id === active.value)!)
@@ -41,26 +37,27 @@ const onTabKey = (event: KeyboardEvent) => {
         <StripeBadge />
 
         <h1 class="hero-title">
-          <span class="hero-name">Vue Stripe</span>
-          Stripe Elements and Checkout as Vue components
+          <span class="hero-name">{{ HERO.name }}</span>
+          {{ HERO.title }}
         </h1>
 
-        <p class="hero-lede">
-          Components and composables for every Stripe.js element and method, typed and tested on Vue
-          3 and Vue 2.7. Drop a provider into your app, render the Payment Element, and confirm with
-          one composable.
-        </p>
+        <p class="hero-lede">{{ HERO.lede }}</p>
 
         <div class="hero-actions">
-          <a class="hero-btn is-brand" :href="withBase('/guide/first-payment')">Get started</a>
-          <a class="hero-btn is-alt" :href="withBase('/live-demo/')">Try the live demos</a>
+          <a
+            v-for="(action, i) in HERO.actions"
+            :key="action.link"
+            :class="['hero-btn', i === 0 ? 'is-brand' : 'is-alt']"
+            :href="withBase(action.link)"
+            >{{ action.text }}</a
+          >
           <GitHubStarsCTA />
         </div>
 
-        <a class="hero-notice" :href="withBase('/guide/migration-v6')">
+        <a class="hero-notice" :href="withBase(HERO.notice.link)">
           <span class="hero-notice-dot" aria-hidden="true" />
-          <span>Now on Stripe.js 10 (Endive)</span>
-          <span class="hero-notice-link">What changed in v6</span>
+          <span>{{ HERO.notice.text }}</span>
+          <span class="hero-notice-link">{{ HERO.notice.linkText }}</span>
         </a>
       </div>
 
