@@ -39,7 +39,7 @@ const onError = (error) => console.error('Stripe.js failed to load', error)
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect |
 | `apiVersion` | `string` | No | Deprecated and ignored: not passed to `loadStripe()`, because Stripe.js Endive refuses it. See [API version](#api-version) |
 | `locale` | `string` | No | Locale for Stripe.js (e.g., 'en', 'es', 'fr') |
-| `betas` | `string[]` | No | Stripe beta flags, forwarded to `loadStripe()` (e.g. the [Tax ID Element](/api/components/stripe-tax-id-element)'s beta) |
+| `betas` | `string[]` | No | Stripe beta flags, forwarded to `loadStripe()` (e.g. `elements_link_signup_beta_1` for the [Link Signup Element](/api/components/stripe-link-signup-element)) |
 | `developerTools` | `StripeConstructorOptions['developerTools']` | No | Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }`, forwarded to `loadStripe()` |
 | `advancedFraudSignals` | `boolean` | No | Default `true`. `false` loads Stripe.js without advanced fraud signals. See [Advanced fraud signals](#advanced-fraud-signals) |
 | `options` | `StripeConstructorOptions` | No | Any `loadStripe()` option. Explicit props win over the same key in `options` |

@@ -159,12 +159,15 @@ Element components placed inside the provider are created with the Checkout SDK'
 | [VueStripePaymentElement](/api/components/stripe-payment-element) | `createPaymentElement()` | `layout`, `paymentMethodOrder`, `readOnly`, `terms`, `fields`, `wallets`, `walletOptions` |
 | [VueStripeAddressElement](/api/components/stripe-address-element) | `createBillingAddressElement()` / `createShippingAddressElement()` (picked by `options.mode`: `'billing'` or `'shipping'`, default `'shipping'`) | `contacts`, `display`, `fields` |
 | [VueStripeExpressCheckoutElement](/api/components/stripe-express-checkout-element) | `createExpressCheckoutElement()` | `buttonHeight`, `buttonTheme`, `buttonType`, `layout`, `paymentMethods`, `paymentMethodOrder` |
-| [VueStripeTaxIdElement](/api/components/stripe-tax-id-element) | `createTaxIdElement()` | All Tax ID options (needs the Tax ID beta on `VueStripeProvider`) |
+| [VueStripeTaxIdElement](/api/components/stripe-tax-id-element) | `createTaxIdElement()` | All Tax ID options |
+| [VueStripeContactDetailsElement](/api/components/stripe-contact-details-element) | `createContactDetailsElement()` | None |
 | [VueStripeCurrencySelectorElement](/api/components/stripe-currency-selector-element) | `createCurrencySelectorElement()` | None |
+| [VueStripeTermsElement](/api/components/stripe-terms-element) | `createTermsElement()` (Stripe beta) | None |
+| [VueStripeLinkSignupElement](/api/components/stripe-link-signup-element) | `createLinkSignupElement()` (Stripe beta) | `defaultValues` |
 
 The Checkout SDK accepts only these option subsets; other keys you pass are dropped. Appearance and fonts are not element options here: set them with `elementsOptions`, or change them later with `useCheckoutSession().changeAppearance()` / `loadFonts()`.
 
-The Card, split card (number / expiry / CVC), IBAN, AU bank account and Link Authentication elements are **not** available with Checkout Sessions; rendering one inside this provider sets its error state and logs an error. A `VueStripeElements` nested inside the provider takes over for its own children.
+The Card, split card (number / expiry / CVC), IBAN, AU bank account, Link Authentication, Payment Method Messaging and Issuing elements are **not** available with Checkout Sessions; rendering one inside this provider sets its error state and logs an error. A `VueStripeElements` nested inside the provider takes over for its own children.
 
 ::: warning Express Checkout events under Checkout Sessions
 With Checkout Sessions, Express Checkout's `@click`, `@shippingaddresschange` and `@shippingratechange` never fire: Stripe handles them from the session. Confirm from `@confirm` with `useCheckoutSession().confirm({ expressCheckoutConfirmEvent: event })`.
