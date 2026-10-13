@@ -3,7 +3,16 @@ import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-i
 import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { coverage } from './theme/data/stripe-coverage'
-import { maintainer, restoreArticleOgType, seoHead, type DocSection } from './seo'
+import {
+  NPM_URL,
+  REPOSITORY_URL,
+  SITE_URL,
+  maintainer,
+  restoreArticleOgType,
+  seoHead,
+  type DocSection
+} from './seo'
+import { coverageMarkdown, writeLlmsFiles } from './llms'
 
 // Build the "Stripe.js Coverage NN%" nav label from the single coverage data source,
 // so the toolbar stays in sync with the /coverage page automatically.
@@ -362,6 +371,23 @@ const liveDemoSidebar: DefaultTheme.SidebarItem[] = requirePages([
   }
 ])
 
+// The text under the H1 of /llms.txt and /llms-full.txt.
+const llmsHeader = `> Vue Stripe (${pkg.name}) is a Vue library for the browser side of a Stripe integration. It wraps Stripe.js 10 (Endive) Elements, embedded Checkout and the Stripe.js methods in Vue components and composables. One build runs on Vue 3 and Vue 2.7.
+
+Vue Stripe was created in 2017 by ${maintainer.name} (${maintainer.url}), who still maintains it. It is MIT licensed and a Stripe Verified Partner.
+
+- Package: \`${pkg.name}\` ${pkg.version} on npm (${NPM_URL})
+- Install: \`npm install ${pkg.name} @stripe/stripe-js\`, then import \`${pkg.name}/style.css\` once
+- Peer dependencies: ${Object.entries(pkg.peerDependencies)
+  .map(([dep, range]) => `${dep} ${range}`)
+  .join(', ')}
+- Source code and issues: ${REPOSITORY_URL}
+- Documentation: ${SITE_URL}/
+- The whole documentation in one file: ${SITE_URL}/llms-full.txt
+- Every page is also available as Markdown at its URL plus \`.md\` (section overviews end in \`/index.md\`), as linked below.
+
+The docs follow Diataxis: tutorials teach by doing, how-to guides solve one task each, the reference documents every export, and explanation pages cover how and why the library works. The live demos run each flow against Stripe's test mode.`
+
 // Load environment variables from .env files (for local dev)
 const envFromFile = loadEnv('', process.cwd())
 
@@ -454,6 +480,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           'Vue Stripe, Stripe Vue, Vue.js Stripe, Stripe Elements, Stripe Checkout, Payment Element, Stripe.js, Vue 3, Vue 2.7, Nuxt, TypeScript, payments'
       }
     ],
+    ['link', { rel: 'alternate', type: 'text/plain', title: 'llms.txt', href: '/llms.txt' }],
 
     // Open Graph and Twitter Card, site-wide parts
     ['meta', { property: 'og:site_name', content: 'Vue Stripe' }],
@@ -566,5 +593,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
       templateSvgPath: './public/og-template.svg'
     })(siteConfig)
     restoreArticleOgType(siteConfig.outDir)
+
+    // /llms.txt, /llms-full.txt and a .md copy of every page (./llms.ts).
+    writeLlmsFiles(siteConfig, {
+      sections: docSections,
+      sidebars: [guideSidebar, referenceSidebar, liveDemoSidebar],
+      header: llmsHeader,
+      components: { StripeCoverage: coverageMarkdown(coverage) }
+    })
   }
 })
