@@ -125,12 +125,21 @@ export default /* @__PURE__ */ defineComponent({
         onComplete: () => emit('complete'),
         onAnalyticsEvent: (event) => emit('analytics', event)
       }
-      if (props.clientSecret) options.clientSecret = props.clientSecret
-      if (props.fetchClientSecret) options.fetchClientSecret = props.fetchClientSecret
       const onLineItemsChange = props.onLineItemsChange
       if (onLineItemsChange) options.onLineItemsChange = (event) => onLineItemsChange(event)
 
       try {
+        // fetchClientSecret is resolved here, not handed to Stripe: Stripe calls it after the
+        // page is created and reports a failure (or a session that is not embedded_page) only
+        // inside its iframe and as an uncaught IntegrationError (#684).
+        const clientSecret: unknown = props.clientSecret || (await props.fetchClientSecret?.())
+        if (unmounted) return release()
+        if (!clientSecret || typeof clientSecret !== 'string') {
+          release()
+          fail('fetchClientSecret did not resolve to a client secret')
+          return
+        }
+        options.clientSecret = clientSecret
         const page = await stripe.createEmbeddedCheckoutPage(options)
         if (unmounted) {
           // Unmounted while Stripe was creating the page.
@@ -160,11 +169,12 @@ export default /* @__PURE__ */ defineComponent({
     })
     onUnmounted(() => {
       unmounted = true
+      // Also frees the page slot while the client secret is still being fetched.
+      release()
       const page = checkout.value
       if (!page) return
       page.destroy()
       checkout.value = null
-      release()
     })
 
     expose({ checkout, loading, error } satisfies EmbeddedCheckoutExposed)
