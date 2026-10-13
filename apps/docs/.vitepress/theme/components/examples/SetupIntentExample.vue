@@ -9,6 +9,7 @@ import {
 import PaymentStatus from './PaymentStatus.vue'
 import { useBackendApi } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 const { createSetupIntent, loading, error } = useBackendApi()
@@ -78,7 +79,7 @@ const SaveCardForm = defineComponent({
 <template>
   <div class="setup-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -119,7 +120,7 @@ const SaveCardForm = defineComponent({
 
       <!-- Step 3 -->
       <div v-else class="step success">
-        <span class="success-icon">✓</span>
+        <span class="success-icon"><DocIcon name="check" :size="28" :stroke-width="2.5" /></span>
         <h4>Card saved!</h4>
         <p v-if="setupIntentId" class="id">
           SetupIntent: <code>{{ setupIntentId }}</code>

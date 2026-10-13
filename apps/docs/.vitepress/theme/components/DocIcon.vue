@@ -5,9 +5,11 @@
 import { computed } from 'vue'
 import {
   BadgeCheck,
+  Ban,
   Banknote,
   BookOpen,
   Boxes,
+  CalendarSync,
   Check,
   Circle,
   CircleCheck,
@@ -23,6 +25,7 @@ import {
   Gauge,
   Globe,
   Hash,
+  Hourglass,
   IdCard,
   Info,
   KeyRound,
@@ -46,7 +49,9 @@ import {
   Smartphone,
   Store,
   TriangleAlert,
+  Vault,
   Wallet,
+  WalletCards,
   Workflow,
   X,
   Zap
@@ -54,9 +59,11 @@ import {
 
 const ICONS = {
   'badge-check': BadgeCheck,
+  ban: Ban,
   banknote: Banknote,
   'book-open': BookOpen,
   boxes: Boxes,
+  'calendar-sync': CalendarSync,
   check: Check,
   circle: Circle,
   'circle-check': CircleCheck,
@@ -72,6 +79,7 @@ const ICONS = {
   gauge: Gauge,
   globe: Globe,
   hash: Hash,
+  hourglass: Hourglass,
   'id-card': IdCard,
   info: Info,
   key: KeyRound,
@@ -94,8 +102,10 @@ const ICONS = {
   'shopping-cart': ShoppingCart,
   smartphone: Smartphone,
   store: Store,
+  vault: Vault,
   warning: TriangleAlert,
   wallet: Wallet,
+  'wallet-cards': WalletCards,
   workflow: Workflow,
   x: X,
   zap: Zap

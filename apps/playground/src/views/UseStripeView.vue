@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { createApp, ref, inject, defineComponent, h } from 'vue'
 import { VueStripeProvider, useStripe } from '@vue-stripe/vue-stripe'
-import { Siren } from 'lucide-vue-next'
+import { CircleCheck, CircleX, Siren } from 'lucide-vue-next'
 import {
   Card,
   CardHeader,
@@ -48,7 +48,12 @@ const StripeConsumer = defineComponent({
         h('div', { class: 'grid grid-cols-3 gap-4' }, [
           h('div', { class: 'bg-secondary rounded-lg p-4' }, [
             h('label', { class: 'block text-xs text-muted-foreground mb-1' }, 'stripe'),
-            h('code', { class: 'text-sm' }, stripe.value ? 'Stripe instance' : 'null')
+            stripe.value
+              ? h('code', { class: 'text-sm inline-flex items-center gap-1 text-success' }, [
+                  h(CircleCheck, { class: 'size-4' }),
+                  'Stripe instance'
+                ])
+              : h('code', { class: 'text-sm' }, 'null')
           ]),
           h('div', { class: 'bg-secondary rounded-lg p-4' }, [
             h('label', { class: 'block text-xs text-muted-foreground mb-1' }, 'loading'),
@@ -120,7 +125,10 @@ const testOutsideProvider = () => {
     <!-- Live Demo: Inside Provider -->
     <Card>
       <CardHeader>
-        <CardTitle class="text-lg">Inside StripeProvider (Works)</CardTitle>
+        <CardTitle class="text-lg flex items-center gap-2">
+          <CircleCheck class="size-5 text-success" />
+          Inside StripeProvider (Works)
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">
@@ -153,7 +161,10 @@ const testOutsideProvider = () => {
     <!-- Demo: Outside Provider (Error) -->
     <Card>
       <CardHeader>
-        <CardTitle class="text-lg">Outside StripeProvider (Throws Error)</CardTitle>
+        <CardTitle class="text-lg flex items-center gap-2">
+          <CircleX class="size-5 text-destructive" />
+          Outside StripeProvider (Throws Error)
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground mb-4">

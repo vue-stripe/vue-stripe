@@ -2,6 +2,7 @@
 // Rendered inside VueStripeCheckoutElementsProvider: the element components detect the
 // Checkout provider and use the Checkout Elements SDK creators instead of stripe.elements().
 import { computed, ref, watch } from 'vue'
+import { CircleCheck, CircleX } from 'lucide-vue-next'
 import {
   VueStripePaymentElement,
   VueStripeAddressElement,
@@ -36,7 +37,7 @@ const { session, loading, error, confirm, updateEmail, applyPromotionCode } = us
 const email = ref('')
 const promo = ref('')
 const confirming = ref(false)
-const result = ref<string | null>(null)
+const result = ref<{ ok: boolean; text: string } | null>(null)
 
 const total = computed(() => session.value?.total.total.amount ?? '')
 const canConfirm = computed(() => session.value?.canConfirm ?? false)
@@ -51,13 +52,19 @@ watch(canConfirm, (next, prev) => {
 
 const onUpdateEmail = async () => {
   const res = await updateEmail(email.value)
-  result.value = res.type === 'error' ? `Error: ${res.error.message}` : 'Email updated'
+  result.value =
+    res.type === 'error'
+      ? { ok: false, text: `Error: ${res.error.message}` }
+      : { ok: true, text: 'Email updated' }
   emit('log', 'updateEmail', res.type)
 }
 
 const onApplyPromo = async () => {
   const res = await applyPromotionCode(promo.value)
-  result.value = res.type === 'error' ? `Error: ${res.error.message}` : 'Promotion code applied'
+  result.value =
+    res.type === 'error'
+      ? { ok: false, text: `Error: ${res.error.message}` }
+      : { ok: true, text: 'Promotion code applied' }
   emit('log', 'applyPromotionCode', res.type)
 }
 
@@ -81,8 +88,8 @@ const onConfirm = async () => {
   confirming.value = false
   result.value =
     res.type === 'error'
-      ? `Error: ${res.error.message}`
-      : `Status: ${res.session.status.type}, ${res.session.total.total.amount}`
+      ? { ok: false, text: `Error: ${res.error.message}` }
+      : { ok: true, text: `Status: ${res.session.status.type}, ${res.session.total.total.amount}` }
   emit('log', 'confirm', res.type === 'error' ? res.error.message : res.session.status.type)
 }
 </script>
@@ -194,7 +201,15 @@ const onConfirm = async () => {
       {{ confirming ? 'Processing...' : `Pay ${total}` }}
     </Button>
 
-    <p v-if="result" class="rounded-md bg-muted p-3 text-sm" data-test="result">{{ result }}</p>
+    <p
+      v-if="result"
+      class="flex items-center gap-2 rounded-md bg-muted p-3 text-sm"
+      data-test="result"
+    >
+      <CircleCheck v-if="result.ok" class="size-4 shrink-0 text-success" />
+      <CircleX v-else class="size-4 shrink-0 text-destructive" />
+      {{ result.text }}
+    </p>
     <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
   </div>
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import DocIcon from '../DocIcon.vue'
 
 const props = defineProps<{
   generatedSecret?: string | null
@@ -80,7 +81,7 @@ defineExpose({
     </div>
 
     <div v-if="isValid" class="valid-msg">
-      <span class="icon">✓</span>
+      <DocIcon name="circle-check" />
       Valid client secret - ready for payment
     </div>
 
@@ -215,9 +216,5 @@ defineExpose({
   border-radius: 4px;
   color: var(--vp-c-text-2);
   font-size: 0.875rem;
-}
-
-.icon {
-  font-size: 1rem;
 }
 </style>

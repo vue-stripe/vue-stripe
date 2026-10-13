@@ -5,6 +5,7 @@ import {
   type Product,
   type PaymentIntentResult
 } from '../../composables/useBackendApi'
+import DocIcon from '../DocIcon.vue'
 
 const props = defineProps<{
   product?: Product | null
@@ -145,7 +146,8 @@ defineExpose({
           <div class="secret-row">
             <code class="secret">{{ result.clientSecret }}</code>
             <button class="copy-btn" @click="copySecret">
-              {{ copied ? '✓ Copied' : 'Copy' }}
+              <DocIcon :name="copied ? 'check' : 'copy'" />
+              {{ copied ? 'Copied' : 'Copy' }}
             </button>
           </div>
         </div>
@@ -336,6 +338,9 @@ defineExpose({
 }
 
 .copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   padding: 0.375rem 0.75rem;
   background: var(--vp-c-green-1);
   color: white;

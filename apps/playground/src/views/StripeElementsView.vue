@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, defineComponent, h, computed, type PropType } from 'vue'
-import { CircleCheck, CircleX, Moon, Palette } from 'lucide-vue-next'
+import { Circle, CircleCheck, CircleX, Moon, Palette } from 'lucide-vue-next'
 import {
   VueStripeProvider,
   VueStripeElements,
@@ -91,17 +91,29 @@ const ElementsConsumer = defineComponent({
           h('li', { class: 'mb-2' }, [h('strong', 'error: '), error.value || 'null']),
           h('li', { class: 'mb-2' }, [
             h('strong', 'elements: '),
-            elements.value ? 'StripeElements instance available' : 'null'
+            elements.value
+              ? h('span', { class: 'inline-flex items-center gap-1 text-success' }, [
+                  h(CircleCheck, { class: 'size-4' }),
+                  'StripeElements instance available'
+                ])
+              : h('span', { class: 'inline-flex items-center gap-1 text-destructive' }, [
+                  h(CircleX, { class: 'size-4' }),
+                  'null'
+                ])
           ]),
           h('li', { class: 'mb-2' }, [
             h('strong', 'clientSecret: '),
             props.clientSecret
-              ? h('span', { class: 'text-success' }, [
+              ? h('span', { class: 'inline-flex items-center gap-1 text-success' }, [
+                  h(CircleCheck, { class: 'size-4' }),
                   'Provided (',
                   props.clientSecret.slice(0, 10),
                   '...)'
                 ])
-              : h('span', { class: 'text-muted-foreground' }, 'Not provided')
+              : h('span', { class: 'inline-flex items-center gap-1 text-muted-foreground' }, [
+                  h(Circle, { class: 'size-4' }),
+                  'Not provided'
+                ])
           ])
         ]),
         props.clientSecret
@@ -244,6 +256,11 @@ const onAppearanceCardReady = () => {
             'bg-secondary text-muted-foreground': clientSecretStatus.type === 'none'
           }"
         >
+          <CircleCheck v-if="clientSecretStatus.valid" class="inline size-4 -mt-0.5 mr-1" />
+          <CircleX
+            v-else-if="clientSecretStatus.type === 'invalid'"
+            class="inline size-4 -mt-0.5 mr-1"
+          />
           {{ clientSecretStatus.message }}
           <span v-if="clientSecretStatus.valid" class="font-medium ml-1">
             ({{ clientSecretStatus.type === 'payment_intent' ? 'PaymentIntent' : 'SetupIntent' }})
@@ -346,8 +363,9 @@ const onAppearanceCardReady = () => {
                 <p
                   v-if="appearanceCardReady"
                   data-test="appearance-ready"
-                  class="mt-3 p-3 rounded-md text-sm bg-success/10 text-success"
+                  class="mt-3 p-3 rounded-md text-sm bg-success/10 text-success flex items-center justify-center gap-2"
                 >
+                  <CircleCheck class="size-4" />
                   Themed Card element mounted with first-class props
                 </p>
                 <pre class="bg-secondary p-3 rounded-md text-xs text-left overflow-x-auto mt-3">{{

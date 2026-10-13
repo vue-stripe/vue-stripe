@@ -10,6 +10,7 @@ import ProductSelector from './ProductSelector.vue'
 import PaymentStatus from './PaymentStatus.vue'
 import { useBackendApi, type Product } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 const { createPaymentIntent, formatPrice, loading, error } = useBackendApi()
@@ -87,7 +88,7 @@ const ExpressForm = defineComponent({
 <template>
   <div class="express-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -132,7 +133,7 @@ const ExpressForm = defineComponent({
       </div>
 
       <div v-else class="step success">
-        <span class="success-icon">✓</span>
+        <span class="success-icon"><DocIcon name="check" :size="28" :stroke-width="2.5" /></span>
         <h4>Payment successful!</h4>
         <button class="link-btn" @click="reset">Start over</button>
       </div>

@@ -6,6 +6,7 @@ import {
   VueStripePaymentMethodMessagingElement
 } from '@vue-stripe/vue-stripe'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 
@@ -44,7 +45,7 @@ const messagingOptions = computed(() => ({
 <template>
   <div class="bnpl-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -101,7 +102,9 @@ const messagingOptions = computed(() => ({
 
       <!-- Live element -->
       <div class="stripe-container">
-        <span :class="['indicator', { ready }]">{{ ready ? '✓' : '○' }} Messaging element</span>
+        <span :class="['indicator', { ready }]"
+          ><DocIcon :name="ready ? 'circle-check' : 'circle'" /> Messaging element</span
+        >
         <VueStripeProvider :publishable-key="publishableKey">
           <VueStripeElements>
             <VueStripePaymentMethodMessagingElement

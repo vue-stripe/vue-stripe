@@ -18,11 +18,11 @@ A Vue plugin that provides Stripe to your whole app, as an alternative to wrappi
 
 | Scenario | Use Plugin | Use VueStripeProvider |
 |----------|------------|-------------------|
-| Single Stripe account for the entire app | Yes | Yes |
-| Stripe in many unrelated parts of the app | Yes | Repeated wrappers |
-| Multiple Stripe accounts (Connect) | As the default, plus a provider per account | Yes |
-| Key or account known only at runtime | No | Yes |
-| Custom `#loading` / `#error` slots for Stripe.js loading | Use `useStripe()` state | Yes |
+| Single Stripe account for the entire app | <DocIcon name="check" /> Yes | <DocIcon name="check" /> Yes |
+| Stripe in many unrelated parts of the app | <DocIcon name="check" /> Yes | <DocIcon name="warning" /> Repeated wrappers |
+| Multiple Stripe accounts (Connect) | <DocIcon name="warning" /> As the default, plus a provider per account | <DocIcon name="check" /> Yes |
+| Key or account known only at runtime | <DocIcon name="x" /> No | <DocIcon name="check" /> Yes |
+| Custom `#loading` / `#error` slots for Stripe.js loading | <DocIcon name="warning" /> Use `useStripe()` state | <DocIcon name="check" /> Yes |
 
 ::: tip Mixing both
 Install the plugin for the common case and add a `VueStripeProvider` where one subtree needs a different key, connected account or `betas`. Vue resolves the nearest provider first, so the provider wins inside its subtree and the plugin covers everything else.

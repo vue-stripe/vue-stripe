@@ -9,6 +9,7 @@ import {
   type CheckoutSessionResult
 } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 
@@ -73,7 +74,7 @@ async function startCheckout() {
   <div class="subscription-checkout-example">
     <!-- Check for publishable key -->
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -100,7 +101,7 @@ async function startCheckout() {
         </div>
         <div class="progress-line" :class="{ completed: step === 'complete' }"></div>
         <div class="progress-step" :class="{ active: step === 'complete' }">
-          <span class="step-dot">✓</span>
+          <span class="step-dot"><DocIcon name="check" :size="16" :stroke-width="3" /></span>
           <span class="step-label">Complete</span>
         </div>
       </div>
@@ -152,7 +153,7 @@ async function startCheckout() {
       <!-- Step 3: Complete -->
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
-          <div class="success-icon">✓</div>
+          <div class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></div>
           <h4>Subscription Created!</h4>
           <p v-if="sessionResult">Session ID: {{ sessionResult.sessionId }}</p>
           <button class="reset-btn" @click="reset">Start Over</button>

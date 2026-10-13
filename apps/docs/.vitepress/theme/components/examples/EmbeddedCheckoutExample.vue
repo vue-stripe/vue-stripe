@@ -6,6 +6,7 @@ import ProductSelector from './ProductSelector.vue'
 import PaymentStatus from './PaymentStatus.vue'
 import { useBackendApi, type Product } from '../../composables/useBackendApi'
 import { useStripeConfig } from '../../composables/useStripeConfig'
+import DocIcon from '../DocIcon.vue'
 
 const { publishableKey } = useStripeConfig()
 const { createCheckoutSession, formatPrice } = useBackendApi()
@@ -65,7 +66,7 @@ function reset() {
 <template>
   <div class="embedded-checkout-example">
     <div v-if="!publishableKey" class="warning-box">
-      <strong>Missing Configuration</strong>
+      <strong><DocIcon name="warning" /> Missing Configuration</strong>
       <p>Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your <code>.env</code> file.</p>
     </div>
 
@@ -149,7 +150,7 @@ function reset() {
       <!-- Step 3: Complete -->
       <div v-else-if="step === 'complete'" class="step-content">
         <div class="success-state">
-          <span class="success-icon">&#10003;</span>
+          <span class="success-icon"><DocIcon name="check" :size="32" :stroke-width="2.5" /></span>
           <h4>Checkout Complete</h4>
           <p v-if="selectedProduct">Thank you for your purchase of {{ selectedProduct.name }}.</p>
           <p v-if="sessionId" class="payment-id">

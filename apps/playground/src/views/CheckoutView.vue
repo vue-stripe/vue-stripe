@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, inject, computed, onMounted } from 'vue'
+import { Check, X } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 import { VueStripeCheckout, useStripeCheckout } from '@vue-stripe/vue-stripe'
 import { apiUrl, createCheckoutSession } from '@/lib/backend'
@@ -137,9 +138,9 @@ const clearResult = () => {
       class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-linear-to-r from-green-100 to-green-50 border border-success"
     >
       <div
-        class="w-12 h-12 rounded-full bg-success text-white flex items-center justify-center text-2xl font-bold shrink-0"
+        class="w-12 h-12 rounded-full bg-success text-white flex items-center justify-center shrink-0"
       >
-        ✓
+        <Check class="size-6" :stroke-width="3" />
       </div>
       <div class="flex-1">
         <h3 class="text-lg font-semibold text-green-800 mb-1">Payment Successful!</h3>
@@ -153,9 +154,9 @@ const clearResult = () => {
       class="flex items-center gap-4 p-4 rounded-lg mb-4 bg-linear-to-r from-yellow-100 to-yellow-50 border border-warning"
     >
       <div
-        class="w-12 h-12 rounded-full bg-warning text-yellow-800 flex items-center justify-center text-2xl font-bold shrink-0"
+        class="w-12 h-12 rounded-full bg-warning text-yellow-800 flex items-center justify-center shrink-0"
       >
-        ✕
+        <X class="size-6" :stroke-width="3" />
       </div>
       <div class="flex-1">
         <h3 class="text-lg font-semibold text-yellow-800 mb-1">Payment Cancelled</h3>
