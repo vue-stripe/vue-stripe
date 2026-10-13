@@ -12,14 +12,14 @@ Find the message or symptom you see, then apply the fix. Errors that Vue Stripe 
 
 `VueStripeProvider` received no key, usually because the environment variable is empty in the browser:
 
-- Check the variable prefix your build tool exposes to client code (`VITE_`, `VUE_APP_`, `NUXT_PUBLIC_`); see [Install and set up](/guide/installation#_3-add-your-publishable-key).
+- Check the variable prefix your build tool exposes to client code (`VITE_`, `VUE_APP_`, `NUXT_PUBLIC_`, `QCLI_` in Quasar); see [Install and set up](/guide/installation#_3-add-your-publishable-key).
 - Restart the dev server after editing `.env` files; most tools read them only at startup.
 
 ### The provider shows an error instead of loading
 
 The provider's `#error` slot (or its default error text) means Stripe.js could not load or rejected the key at load time:
 
-- **Blocked script**: an ad blocker, privacy extension or Content Security Policy blocked `https://js.stripe.com`. Allow Stripe's hosts in your CSP as listed in [Stripe's CSP guide](https://docs.stripe.com/security/guide#content-security-policy) (at least `https://js.stripe.com` in `script-src` and `frame-src`), and test in a clean browser profile.
+- **Blocked script**: an ad blocker, privacy extension or Content Security Policy blocked `https://js.stripe.com`. Allow Stripe's hosts in your CSP as listed in [Stripe's CSP guide](https://docs.stripe.com/security/guide#content-security-policy) (at least `https://js.stripe.com` in `script-src` and `frame-src`), and test in a clean browser profile. A policy with `default-src` also needs `https://api.stripe.com` in `connect-src`, plus the stylesheet's host when you pass `fonts` or call `loadFonts()`. A new Quasar app ships such a policy in `index.html`; [Use Vue Stripe with Quasar](/guide/quasar#_4-allow-stripe-in-the-content-security-policy) shows one that works.
 - **Secret key**: a secret key (`sk_...`) is rejected by Stripe.js when it loads; never send it to the browser. Use the publishable key, `pk_test_...` or `pk_live_...`.
 
 A wrong or revoked publishable key does not show here: Stripe.js accepts any key when it loads, and the provider renders its children. See the next section.

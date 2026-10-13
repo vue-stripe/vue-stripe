@@ -14,6 +14,8 @@ Lessons that take you from an empty folder to a working result, one step at a ti
 
 Steps for a specific goal, such as accepting SEPA Direct Debit or embedding Stripe Checkout. They assume Vue Stripe is installed and you know what you want to build. The [index below](#i-want-to) lists them by goal.
 
+The samples read the publishable key with Vite's `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, read `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, and in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY` ([key table](/guide/installation#_3-add-your-publishable-key)).
+
 ## Reference
 
 The props, events, slots, exposed members and return values of every component, composable and type. Open the [reference overview](/api/), or look up a Stripe.js method in [Stripe.js coverage](/coverage) to find the export that wraps it.
@@ -37,7 +39,9 @@ Background on how Vue Stripe and Stripe fit together, and why. Read these when y
 
 - [Install and set up](/guide/installation) Vue Stripe in a Vite, Vue CLI, Quasar or Laravel app
 - [Use Vue Stripe on Vue 2.7](/guide/vue-2)
-- [Use Vue Stripe with Nuxt and SSR](/guide/ssr), including Quasar SSR and VitePress
+- [Use Vue Stripe with Nuxt and SSR](/guide/ssr), including VitePress
+- [Use Vue Stripe with Quasar](/guide/quasar), in SPA and SSR mode
+- [Use Vue Stripe with Laravel and Inertia](/guide/laravel), with stripe-php routes and webhooks
 - [Provide Stripe app-wide](/guide/plugin) with the `createVueStripe` plugin
 - [Upgrade from v5 to v6](/guide/migration-v6)
 
