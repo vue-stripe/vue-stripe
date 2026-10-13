@@ -65,7 +65,7 @@ const fonts = [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Inter:wght@40
 
 - `theme` picks a base look; `variables` adjust colors, fonts, spacing and radius across all fields; `rules` target single parts (`.Input`, `.Label`, `.Tab`, `.Error`, ...) with CSS-like declarations. Stripe lists every [variable and rule selector](https://docs.stripe.com/elements/appearance-api).
 - A font used in `fontFamily` must be loaded into the iframe with `fonts`; your page's fonts are not available there.
-- In TypeScript, check the object with `satisfies Appearance` rather than annotating it as `Appearance`: the prop is typed as a plain object, which an `Appearance`-typed variable is not assignable to.
+- In TypeScript, the `appearance` prop is typed as Stripe's `Appearance`, so either annotate the object (`const appearance: Appearance = { ... }`) or check it with `satisfies Appearance`, as above. `satisfies` keeps the literal types (`theme: 'night'`), which the computed value in the next sample relies on.
 
 ### Switch themes at runtime
 
