@@ -1,3 +1,7 @@
+---
+description: "usePaymentIntent reference: confirm a PaymentIntent from the Payment Element in Vue, with the automatic elements.submit() call and loading and error refs."
+---
+
 # usePaymentIntent
 
 Confirms a PaymentIntent with `stripe.confirmPayment()`, using the Elements group from the nearest [`VueStripeElements`](/api/components/stripe-elements), and tracks `loading` and `error`. Call it in a component rendered inside `VueStripeProvider` (or an app that installs [`createVueStripe()`](/api/plugin)); inside `VueStripeElements` it picks up the Elements group automatically. [Accept a payment with the Payment Element](/guide/payment-element) walks through the whole flow, and [How confirming works](/guide/confirming-payments) explains what confirming does.

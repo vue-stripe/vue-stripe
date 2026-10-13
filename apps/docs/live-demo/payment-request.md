@@ -1,6 +1,6 @@
 ---
 title: Payment Request Example
-description: Pay through the browser's payment sheet with usePaymentRequest and useConfirmCardPayment
+description: "Live demo of usePaymentRequest: pay through the browser's payment sheet behind your own Vue button and confirm with useConfirmCardPayment."
 ---
 
 # Payment Request Example

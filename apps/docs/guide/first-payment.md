@@ -1,3 +1,7 @@
+---
+description: "Tutorial: build a small Vue app and Node server that takes a Stripe test payment with the Payment Element, including 3D Secure and a declined card."
+---
+
 # Take your first test payment
 
 In this tutorial you build a small Vue app that charges €10 to a Stripe test card. You write a Node server of about 20 lines that creates the payment, add Stripe's payment form to a Vite app, and then pay three times: once with a card that succeeds, once with a card that asks for 3D Secure authentication, and once with a card that is declined.

@@ -1,3 +1,7 @@
+---
+description: "useEphemeralKeyNonce reference: create the nonce Stripe Issuing Elements need before they show a card's details, then the ephemeral key on your server."
+---
+
 # useEphemeralKeyNonce
 
 Create the single-use nonce that [Stripe Issuing](https://docs.stripe.com/issuing/elements) needs before its card elements (`issuingCardNumberDisplay`, `issuingCardCvcDisplay`, ...) can show a card's details. Wraps [`stripe.createEphemeralKeyNonce()`](https://docs.stripe.com/js/issuing/create_ephemeral_key_nonce).

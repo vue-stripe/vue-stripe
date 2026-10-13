@@ -1,6 +1,6 @@
 ---
 title: Address Element Example
-description: Collect validated shipping or billing addresses with autocomplete
+description: "Live demo of VueStripeAddressElement: collect a validated shipping or billing address with autocomplete and read its change events in Vue."
 ---
 
 # Address Element

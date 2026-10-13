@@ -1,3 +1,7 @@
+---
+description: "Accept BECS Direct Debit from Australian bank accounts in Vue with VueStripeAuBankAccountElement, the mandate text and useConfirmAuBecsDebitPayment."
+---
+
 # Accept BECS Direct Debit (Australia)
 
 Collect an Australian BSB and account number with `VueStripeAuBankAccountElement` and confirm a BECS Direct Debit payment with [`useConfirmAuBecsDebitPayment()`](/api/composables/confirm/bank-debits). BECS takes Australian bank accounts and AUD only.

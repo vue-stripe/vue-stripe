@@ -1,3 +1,7 @@
+---
+description: "Add Apple Pay, Google Pay and Link buttons to a Vue checkout with VueStripeExpressCheckoutElement and confirm the payment with usePaymentIntent."
+---
+
 # Add Apple Pay, Google Pay and Link buttons
 
 Show one-click wallet buttons with `VueStripeExpressCheckoutElement` and confirm the payment with [`usePaymentIntent()`](/api/composables/use-payment-intent). The element shows only the wallets the customer's browser and device support.

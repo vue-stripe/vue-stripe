@@ -1,3 +1,7 @@
+---
+description: "Accept ACH Direct Debit payments from US bank accounts in Vue with Stripe Financial Connections, a mandate and useConfirmUsBankAccountPayment."
+---
+
 # Accept ACH Direct Debit
 
 Take a payment from a US bank account. The customer links the account in Stripe's Financial Connections modal, accepts a mandate, and the payment settles in a few business days. No Elements group is needed: Stripe's modal collects the account.

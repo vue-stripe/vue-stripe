@@ -1,3 +1,7 @@
+---
+description: "Fixes for common Vue Stripe problems: missing keys, provider errors, unstyled or empty elements, Vue 2.7 and SSR issues, and missing wallet buttons."
+---
+
 # Troubleshoot common problems
 
 Find the message or symptom you see, then apply the fix. Errors that Vue Stripe throws start with the component or composable name; console messages from the library start with `[Vue Stripe]`.

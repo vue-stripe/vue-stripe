@@ -1,3 +1,7 @@
+---
+description: "Save a customer's payment method for later in Vue with a SetupIntent, the Payment Element and useSetupIntent, ready for off-session charges."
+---
+
 # Save a payment method for later
 
 Save a customer's payment method without charging it, with a SetupIntent, the Payment Element and [`useSetupIntent()`](/api/composables/use-setup-intent). Stripe runs 3D Secure while the customer is present, so later off-session charges are less likely to fail. To decide between a SetupIntent and a PaymentIntent, see [Payment objects](/guide/payment-objects#paymentintent-or-setupintent).

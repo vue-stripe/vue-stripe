@@ -1,3 +1,7 @@
+---
+description: "useStripe reference: get the Stripe instance and its loading and error state in any Vue component under VueStripeProvider or the createVueStripe plugin."
+---
+
 # useStripe
 
 Returns the `Stripe` instance and its loading and error state. Call it in a component rendered inside [`VueStripeProvider`](/api/components/stripe-provider), or anywhere in an app that installs [`createVueStripe()`](/api/plugin). [How Vue Stripe works](/guide/architecture#why-composables-must-run-inside-the-providers) explains why it must run inside the provider.

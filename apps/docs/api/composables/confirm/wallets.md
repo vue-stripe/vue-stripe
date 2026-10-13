@@ -1,3 +1,7 @@
+---
+description: "Vue composables that confirm wallet payments with Stripe.js: Alipay, Amazon Pay, BLIK, Cash App Pay, PayPal, Pix, TWINT, WeChat Pay and others."
+---
+
 # Wallet confirmers
 
 Confirm a PaymentIntent or SetupIntent with a wallet or app-based method: Alipay, Amazon Pay, BLIK, Cash App Pay, GrabPay, MobilePay, PayNow, PayPal, Pix, PromptPay, TWINT and WeChat Pay. Depending on the method, Stripe redirects to the wallet and back to your `return_url`, shows a QR code, or waits for the customer to approve in their banking app (BLIK).

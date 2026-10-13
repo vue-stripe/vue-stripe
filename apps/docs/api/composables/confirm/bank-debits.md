@@ -1,3 +1,7 @@
+---
+description: "Vue composables that confirm bank debit payments and setups with Stripe.js: ACSS, BECS, Bacs, SEPA Direct Debit and US bank accounts (ACH)."
+---
+
 # Bank debit confirmers
 
 Confirm a PaymentIntent or SetupIntent that debits a bank account: Canadian pre-authorized debits (ACSS), Australian BECS, UK Bacs, SEPA Direct Debit and US bank accounts (ACH). ACSS opens a Stripe modal that collects and verifies the account; SEPA and BECS take the account from [`VueStripeIbanElement`](/api/components/stripe-iban-element) / [`VueStripeAuBankAccountElement`](/api/components/stripe-au-bank-account-element).

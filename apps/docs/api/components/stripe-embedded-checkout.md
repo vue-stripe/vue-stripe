@@ -1,3 +1,7 @@
+---
+description: "VueStripeEmbeddedCheckout reference: embed Stripe's prebuilt Checkout page in a Vue app with createEmbeddedCheckoutPage. Props, events and slots."
+---
+
 # VueStripeEmbeddedCheckout
 
 Embeds Stripe's prebuilt Checkout page in your site with `stripe.createEmbeddedCheckoutPage()`. Stripe renders the whole payment form (line items, totals, payment methods, address and tax fields) in an iframe on your page, driven by a Checkout Session. [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) compares it with the other Checkout options, and [Embed Stripe Checkout](/guide/embedded-checkout) shows the server and client code.

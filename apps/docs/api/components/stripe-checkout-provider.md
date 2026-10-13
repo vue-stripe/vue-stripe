@@ -1,3 +1,7 @@
+---
+description: "VueStripeCheckoutElementsProvider reference: run Stripe's Checkout Elements SDK on a Checkout Session and lay out your own checkout page in Vue."
+---
+
 # VueStripeCheckoutElementsProvider
 
 Initializes **Elements with Checkout Sessions** via `stripe.initCheckoutElementsSdk()` and provides the Checkout SDK to descendants. Place element components inside it to build your own checkout page on top of a Checkout Session, and drive the session with the [`useCheckoutSession`](/api/composables/use-checkout-session) composable. [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) compares it with the other Checkout options, and [Build your own page on a Checkout Session](/guide/custom-checkout) shows the server and client code.

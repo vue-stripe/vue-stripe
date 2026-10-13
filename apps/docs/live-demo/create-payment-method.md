@@ -1,6 +1,6 @@
 ---
 title: Create Payment Method Example
-description: Tokenize a card into a reusable PaymentMethod with useCreatePaymentMethod
+description: "Live demo of useCreatePaymentMethod: turn card details into a reusable Stripe PaymentMethod in Vue without confirming a payment."
 ---
 
 # Create Payment Method

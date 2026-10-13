@@ -1,3 +1,7 @@
+---
+description: "VueStripeCardElement reference: a single Stripe card field (number, expiry, CVC, postal code) for Vue. Props, events, slots and exposed methods."
+---
+
 # VueStripeCardElement
 
 A single card field that collects the card number, expiry date, CVC and (optionally) postal code. It needs no Intent on its parent: use it inside [VueStripeElements](/api/components/stripe-elements) without a `clientSecret`, and confirm with [`useConfirmCardPayment()`](/api/composables/confirm/cards) or create a PaymentMethod with [`useCreatePaymentMethod()`](/api/composables/use-create-payment-method). For the steps, see [Accept card payments with the Card Element](/guide/card-element); [Choosing an integration](/guide/approaches#payment-element-or-card-element) compares it with the Payment Element.

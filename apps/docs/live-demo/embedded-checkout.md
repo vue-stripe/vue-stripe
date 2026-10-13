@@ -1,6 +1,6 @@
 ---
 title: Embedded Checkout Example
-description: Stripe's prebuilt Checkout page embedded in your site with VueStripeEmbeddedCheckout
+description: "Live demo of VueStripeEmbeddedCheckout: Stripe's prebuilt Checkout page embedded in a Vue page and paid with a test card in Stripe test mode."
 ---
 
 # Embedded Checkout Example

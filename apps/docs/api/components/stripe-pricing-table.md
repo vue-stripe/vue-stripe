@@ -1,3 +1,7 @@
+---
+description: "VueStripePricingTable reference: embed a Stripe pricing table configured in the Dashboard in a Vue app. Props, events, slots and Content Security Policy."
+---
+
 # VueStripePricingTable
 
 Embeds a Stripe pricing table that you configure in the Stripe Dashboard. The component loads Stripe's pricing-table script (`https://js.stripe.com/v3/pricing-table.js`, once per page) and renders Stripe's `<stripe-pricing-table>` web component. A click on a price takes the customer to Stripe Checkout. Use it inside [VueStripeProvider](/api/components/stripe-provider) or an app that installs [`createVueStripe()`](/api/plugin); it needs only the publishable key, not `VueStripeElements`. To add one to a page, see [Embed a pricing table](/guide/pricing-table).

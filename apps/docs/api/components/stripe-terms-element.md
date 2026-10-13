@@ -1,3 +1,7 @@
+---
+description: "VueStripeTermsElement reference (beta): show the terms a customer agrees to by paying, on a Checkout Session or inside VueStripeElements in Vue."
+---
+
 # VueStripeTermsElement
 
 Shows the terms the customer agrees to by paying. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createTermsElement()`), or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('terms')`).

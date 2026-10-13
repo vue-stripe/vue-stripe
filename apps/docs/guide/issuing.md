@@ -1,3 +1,7 @@
+---
+description: "Display the card number, CVC, expiry and PIN of cards issued with Stripe Issuing in a Vue app, inside Stripe iframes that keep you out of PCI scope."
+---
+
 # Display issued card details
 
 Show cardholders the details of cards you issue with [Stripe Issuing](https://docs.stripe.com/issuing). Issuing Elements show the card number, CVC, expiry date and PIN inside Stripe-hosted iframes, so the details never pass through your page or your server and stay out of your PCI scope.

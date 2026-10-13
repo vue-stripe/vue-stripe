@@ -1,3 +1,7 @@
+---
+description: "Redirect customers to a Stripe-hosted Checkout page from Vue with VueStripeCheckout or useStripeCheckout, using the session URL from your server."
+---
+
 # Redirect to Stripe Checkout
 
 Send the customer to a Stripe-hosted payment page with `VueStripeCheckout` or [`useStripeCheckout()`](/api/composables/use-stripe-checkout). Your server creates the Checkout Session and returns its `url`; Vue Stripe redirects to it with `window.location.replace()`. To compare hosted Checkout with the embedded and Elements options, see [Choosing an integration](/guide/approaches).

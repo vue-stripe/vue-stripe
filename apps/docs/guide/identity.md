@@ -1,3 +1,7 @@
+---
+description: "Verify a customer's identity in Vue with Stripe Identity: create a VerificationSession on your server and open the verification modal with useIdentity."
+---
+
 # Verify a customer's identity
 
 Ask a customer to verify who they are with [Stripe Identity](https://docs.stripe.com/identity): Stripe's modal captures an ID document (and optionally a selfie), and your server receives the outcome. In the browser, [`useIdentity`](/api/composables/use-identity) opens the modal; no Elements group is needed.

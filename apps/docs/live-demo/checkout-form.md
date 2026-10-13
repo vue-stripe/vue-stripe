@@ -1,6 +1,6 @@
 ---
 title: Checkout Form Example
-description: Stripe's complete checkout form on your page with VueStripeCheckoutFormProvider and VueStripeCheckoutForm (beta)
+description: "Live demo of Stripe's complete Checkout Form (beta) in Vue with VueStripeCheckoutFormProvider, VueStripeCheckoutForm and useCheckoutForm."
 ---
 
 # Checkout Form Example

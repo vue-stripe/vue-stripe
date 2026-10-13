@@ -1,3 +1,7 @@
+---
+description: "Vue composables that confirm buy now, pay later payments with Stripe.js: Affirm, Afterpay / Clearpay, Billie and Klarna, with the redirect back to your app."
+---
+
 # Buy now, pay later confirmers
 
 Confirm a PaymentIntent with a buy now, pay later method: Affirm, Afterpay / Clearpay, Billie and Klarna. Stripe redirects the customer to the provider to approve the plan and back to your `return_url`.

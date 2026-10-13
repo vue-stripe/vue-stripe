@@ -1,3 +1,7 @@
+---
+description: "What PaymentIntents, SetupIntents, Checkout Sessions, PaymentMethods and tokens are, and which Vue Stripe components and composables use each one."
+---
+
 # Payment objects: Intents, Sessions and tokens
 
 A Stripe integration passes a few kinds of objects between your server, the browser and Stripe. Each Vue Stripe component and composable works with one of them, so knowing what each object is for explains most of the library's API: why `VueStripeElements` takes a client secret, why some flows confirm on the server, and why a bank debit is still undecided after you confirm it.

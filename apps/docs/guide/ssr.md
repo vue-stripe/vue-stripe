@@ -1,3 +1,7 @@
+---
+description: "Use Vue Stripe with Nuxt 3, Quasar SSR, VitePress or your own Vite SSR setup: Stripe.js loads only in the browser, so hydration matches."
+---
+
 # Use Vue Stripe with Nuxt and SSR
 
 Render pages that use Vue Stripe on the server: Nuxt 3, Quasar SSR, VitePress or your own Vite SSR setup.

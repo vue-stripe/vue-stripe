@@ -1,6 +1,6 @@
 ---
 title: SEPA Direct Debit Example
-description: Collect a bank account (IBAN) for euro SEPA Direct Debit payments
+description: "Live demo of SEPA Direct Debit in Vue: collect an IBAN with VueStripeIbanElement and confirm a euro payment in Stripe test mode."
 ---
 
 # SEPA Direct Debit (IBAN)

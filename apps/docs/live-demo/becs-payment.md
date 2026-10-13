@@ -1,6 +1,6 @@
 ---
 title: BECS Direct Debit Example
-description: Accept BECS Direct Debit payments from customers in Australia
+description: "Live demo of BECS Direct Debit in Vue: collect an Australian bank account with VueStripeAuBankAccountElement and confirm it in Stripe test mode."
 ---
 
 # BECS Direct Debit Example

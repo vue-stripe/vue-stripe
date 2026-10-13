@@ -1,3 +1,7 @@
+---
+description: "Show Affirm, Klarna and Afterpay / Clearpay installment messaging on Vue product and cart pages with VueStripePaymentMethodMessagingElement."
+---
+
 # Show buy-now-pay-later messaging
 
 Show customers which buy-now-pay-later (BNPL) options fit the current price, for example "4 interest-free payments of $30.00 with Klarna", with `VueStripePaymentMethodMessagingElement`. It covers Affirm, Klarna and Afterpay/Clearpay and shows only the ones that apply to the amount, currency and country you pass.

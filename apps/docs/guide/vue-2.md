@@ -1,3 +1,7 @@
+---
+description: "Use Vue Stripe in a Vue 2.7 app: install the packages, let vue-demi switch to Vue 2, import the stylesheet, and use the components or the plugin."
+---
+
 # Use Vue Stripe on Vue 2.7
 
 Run Vue Stripe in a Vue 2.7 app. The library ships one build for Vue 2.7 and Vue 3 through [vue-demi](https://github.com/vueuse/vue-demi); every component is a render function, so templates, `h()` and the Options API all work.

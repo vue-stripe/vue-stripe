@@ -1,3 +1,7 @@
+---
+description: "useStripeElements reference: get the nearest Stripe Elements group in a Vue component, with the submit, fetchUpdates and getElement helpers."
+---
+
 # useStripeElements
 
 Returns the `StripeElements` group created by the nearest [`VueStripeElements`](/api/components/stripe-elements), with `submit`, `fetchUpdates` and `getElement`. Call it in a component rendered inside `VueStripeElements`. To confirm a payment or setup, use [`usePaymentIntent`](/api/composables/use-payment-intent) or [`useSetupIntent`](/api/composables/use-setup-intent): they use the same group and call `submit()` for you.

@@ -1,3 +1,7 @@
+---
+description: "Vue composables that confirm cash voucher payments with Stripe.js: Boleto in Brazil, Konbini in Japan and OXXO in Mexico, settled through your webhook."
+---
+
 # Voucher confirmers
 
 Confirm a PaymentIntent with a cash voucher: Boleto (Brazil), Konbini (Japan) and OXXO (Mexico). By default Stripe.js displays the voucher to the customer (pass `{ handleActions: false }` to render it yourself from `paymentIntent.next_action`). The PaymentIntent stays `requires_action` until the customer pays, so confirm the payment from your webhook.

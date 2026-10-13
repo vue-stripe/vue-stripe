@@ -1,3 +1,7 @@
+---
+description: "Vue composables that confirm bank redirect and bank transfer payments with Stripe.js: iDEAL, Bancontact, EPS, FPX, Przelewy24, Sofort, Multibanco and more."
+---
+
 # Redirect and bank transfer confirmers
 
 Confirm a PaymentIntent or SetupIntent with a bank redirect (Bancontact, EPS, FPX, giropay, iDEAL, Przelewy24, Sofort, Pay by Bank) or a bank transfer (Multibanco, customer balance). Redirect methods send the customer to their bank to authorize the payment and back to your `return_url`; on that page, read the `payment_intent_client_secret` query parameter and retrieve the PaymentIntent with [`usePaymentIntent`](/api/composables/use-payment-intent) to show the outcome.

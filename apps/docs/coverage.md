@@ -1,6 +1,6 @@
 ---
 title: Stripe.js Coverage
-description: Every Stripe.js 10 element and method next to the Vue Stripe component or composable that wraps it.
+description: "Every Stripe.js 10 element and method next to the Vue Stripe component or composable that wraps it, with links to guides, reference and demos."
 aside: false
 pageClass: coverage-page
 ---

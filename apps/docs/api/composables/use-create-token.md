@@ -1,3 +1,7 @@
+---
+description: "useCreateToken reference: create single-use Stripe Tokens in Vue for cards, bank accounts, PII, CVC recollection and Connect account or person data."
+---
+
 # useCreateToken
 
 Turn card details, bank account details, PII, or Connect account / person details into a single-use [Token](https://docs.stripe.com/api/tokens) that you send to your server. Wraps [`stripe.createToken()`](https://docs.stripe.com/js/tokens_sources/create_token?type=cardElement).

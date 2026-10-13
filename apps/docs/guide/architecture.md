@@ -1,3 +1,7 @@
+---
+description: "How Vue Stripe passes Stripe.js objects through Vue provide/inject: the provider chain, render timing, and why composables must run inside providers."
+---
+
 # How Vue Stripe works
 
 Vue Stripe passes Stripe's objects down the component tree with Vue's provide/inject. Providers create the objects, and components and composables inject them. This page follows that chain, explains when each part renders, and explains why a composable only works below the provider it needs.

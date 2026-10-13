@@ -1,3 +1,7 @@
+---
+description: "VueStripeTreasuryDisclosure reference: render the legal disclosure Stripe requires for Treasury financial accounts in a Vue app, via createTreasuryDisclosure."
+---
+
 # VueStripeTreasuryDisclosure
 
 Renders the legal disclosure Stripe requires for Treasury financial accounts. It is the Vue port of React Stripe.js 7's `TreasuryDisclosure`: it calls `stripe.createTreasuryDisclosure(options)` and mounts the HTML element Stripe.js returns. Vue Stripe does not ship any legal text of its own.

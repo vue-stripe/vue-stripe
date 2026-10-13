@@ -1,3 +1,7 @@
+---
+description: "About Vue Stripe: a Vue 3 and Vue 2.7 library that wraps Stripe.js 10 Elements, Checkout and methods in components and composables, and why."
+---
+
 # About Vue Stripe
 
 Vue Stripe is a Vue library for the browser side of a Stripe integration. It wraps [Stripe.js](https://docs.stripe.com/js) 10 (the Endive release) in Vue components and composables. Components cover Stripe's Elements and its embedded Checkout UIs. Composables cover the Stripe.js methods that confirm payments, create tokens and run next actions. One build runs on Vue 3 and Vue 2.7.
@@ -64,6 +68,10 @@ Using a component or composable outside the provider it needs throws a typed err
 ## Relation to Stripe.js versions
 
 Stripe ships Stripe.js in named release trains, and each major version of `@stripe/stripe-js` loads one train. Vue Stripe 6 requires `@stripe/stripe-js` 10, which loads Endive. When Stripe removes an element or a method in a new train, Vue Stripe removes its wrapper in the matching major release, because there is nothing left to wrap. [Stripe.js versions](/guide/stripe-js-versions) covers what Clover, Dahlia and Endive changed, and why some v5 components are gone.
+
+## Who maintains it
+
+[Joff Tiquez](https://github.com/jofftiquez) created Vue Stripe in 2017 and has maintained it since. The code, issues and releases are on [GitHub](https://github.com/vue-stripe/vue-stripe), and the package is published to npm as [`@vue-stripe/vue-stripe`](https://www.npmjs.com/package/@vue-stripe/vue-stripe).
 
 ## Where to go next
 

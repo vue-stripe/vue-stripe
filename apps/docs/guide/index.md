@@ -1,3 +1,7 @@
+---
+description: "Overview of the Vue Stripe documentation: tutorials, how-to guides, reference and explanation, and which section to start with for your task."
+---
+
 # Documentation overview
 
 The Vue Stripe documentation has four sections. Each one serves a different need, so start with the one that matches what you are doing right now.

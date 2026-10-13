@@ -1,3 +1,7 @@
+---
+description: "VueStripeIbanElement reference: collect and validate an IBAN for SEPA Direct Debit in Vue. Props, change events, and the payment and setup confirmers."
+---
+
 # VueStripeIbanElement
 
 Collects an IBAN for SEPA Direct Debit. The element formats and validates the IBAN as the customer types and reports the bank and country in `@change`. Use it inside [VueStripeElements](/api/components/stripe-elements), and confirm with [`useConfirmSepaDebitPayment()` or `useConfirmSepaDebitSetup()`](/api/composables/confirm/bank-debits), passing the exposed `element`. For the server and client steps, see [Accept SEPA Direct Debit](/guide/iban-element). SEPA payments settle days later; [Payments that settle later](/guide/payment-objects#payments-that-settle-later) explains what that means for fulfilment.

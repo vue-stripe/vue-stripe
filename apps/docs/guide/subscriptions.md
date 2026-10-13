@@ -1,3 +1,7 @@
+---
+description: "Start a Stripe subscription from Vue with Stripe Checkout, the Payment Element or a saved card, keep access in sync with webhooks, and test renewals."
+---
+
 # Start a subscription
 
 Sign a customer up for a recurring price and collect the first payment. There are four ways to do it with Vue Stripe; pick one:

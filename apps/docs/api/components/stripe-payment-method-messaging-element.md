@@ -1,3 +1,7 @@
+---
+description: "VueStripePaymentMethodMessagingElement reference: show Affirm, Klarna and Afterpay messaging for an amount and currency on Vue product and cart pages."
+---
+
 # VueStripePaymentMethodMessagingElement
 
 Displays buy-now-pay-later messaging (Affirm, Klarna, Afterpay / Clearpay) for an amount and currency. Wraps [`elements.create('paymentMethodMessaging')`](https://docs.stripe.com/js/element/payment_method_messaging_element). Use it inside [VueStripeElements](/api/components/stripe-elements). It is display-only: it collects no payment details. To add it to a product page, see [Show buy-now-pay-later messaging](/guide/payment-method-messaging).

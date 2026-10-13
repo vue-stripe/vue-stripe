@@ -1,3 +1,7 @@
+---
+description: "useHandleCardAction reference: run 3D Secure in Vue for a PaymentIntent confirmed on the server with manual confirmation, the legacy Stripe flow."
+---
+
 # useHandleCardAction
 
 Run the card action (3D Secure) of a PaymentIntent that you confirm on the server with `confirmation_method: 'manual'`. Wraps [`stripe.handleCardAction()`](https://docs.stripe.com/js/payment_intents/handle_card_action).

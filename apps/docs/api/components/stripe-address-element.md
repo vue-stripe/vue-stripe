@@ -1,3 +1,7 @@
+---
+description: "VueStripeAddressElement reference: collect a shipping or billing address with autocomplete in Vue, inside VueStripeElements or a Checkout Session."
+---
+
 # VueStripeAddressElement
 
 Collects a shipping or billing address, with optional name, phone and address autocomplete. It needs no Intent: use it inside [VueStripeElements](/api/components/stripe-elements) with a `clientSecret` or a deferred Intent (`mode` / `currency` / `amount`), or inside [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (see [With Checkout Sessions](#with-checkout-sessions)). Read the address from `@change` or the exposed `getValue()`. For recipes (pre-fill, phone, allowed countries, P.O. boxes, address before payment), see [Collect a shipping or billing address](/guide/address-element).

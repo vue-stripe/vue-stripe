@@ -1,3 +1,7 @@
+---
+description: "useConfirmCardPayment and useConfirmCardSetup reference: Vue composables that confirm a PaymentIntent or SetupIntent with card details and 3D Secure."
+---
+
 # Card confirmers
 
 Confirm a PaymentIntent or SetupIntent with card details. Stripe runs 3D Secure and any other required action before the promise resolves.

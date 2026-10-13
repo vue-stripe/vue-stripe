@@ -1,3 +1,7 @@
+---
+description: "useCheckoutSession reference: reactive Checkout Session state and actions (confirm, promotion codes, email, shipping) for the Checkout Elements SDK in Vue."
+---
+
 # useCheckoutSession
 
 Drives an **Elements with Checkout Sessions** integration from inside a [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider). Returns the reactive session state, every session action (`confirm`, `applyPromotionCode`, `updateEmail`, …) and the SDK's `changeAppearance` / `loadFonts` and element getters (`getPaymentElement`, ...).

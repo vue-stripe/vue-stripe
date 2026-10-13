@@ -1,3 +1,7 @@
+---
+description: "useCheckoutForm reference (beta): read the Checkout Session state and call confirm, promotion code and line item actions from a Vue Checkout Form."
+---
+
 # useCheckoutForm
 
 Drives a **Checkout Form** integration from inside a [`VueStripeCheckoutFormProvider`](/api/components/stripe-checkout-form-provider). Returns the reactive session state, the Form SDK's actions (`confirm`, `applyPromotionCode`, `updateLineItemQuantity`, ...) and the SDK's `changeAppearance` / `loadFonts` / `getForm`.

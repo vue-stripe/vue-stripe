@@ -1,3 +1,7 @@
+---
+description: "Confirm payments on your server from Vue: create a ConfirmationToken from the Payment Element with useCreateConfirmationToken, then confirm it server-side."
+---
+
 # Confirm payments on your server
 
 Collect payment details with the Payment Element, turn them into a ConfirmationToken with [`useCreateConfirmationToken()`](/api/composables/use-create-confirmation-token), and create and confirm the PaymentIntent on your server. This follows Stripe's [finalize payments on the server](https://docs.stripe.com/payments/finalize-payments-on-the-server) flow: the Payment Element runs without an Intent, and the Intent only exists once the customer clicks Pay. [Payment objects](/guide/payment-objects#paymentmethods-confirmationtokens-and-tokens) explains how ConfirmationTokens relate to PaymentMethods and Tokens.

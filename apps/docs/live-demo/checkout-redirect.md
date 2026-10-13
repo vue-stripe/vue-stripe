@@ -1,6 +1,6 @@
 ---
 title: Stripe Checkout (URL Redirect)
-description: One-time payments by redirecting to the Stripe Checkout session URL
+description: "Live demo of a one-time payment through hosted Stripe Checkout: the server creates a session and Vue redirects to its URL with VueStripeCheckout."
 ---
 
 # Stripe Checkout (URL Redirect)
