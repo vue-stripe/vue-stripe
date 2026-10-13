@@ -243,6 +243,10 @@ const collapse = () => paymentRef.value?.collapse()
 
 <template>
   <VueStripePaymentElement ref="paymentRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
+  <button type="button" @click="collapse">Collapse</button>
 </template>
 ```
 
@@ -275,7 +279,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-pa
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -306,6 +311,17 @@ const handleChange = (event: StripePaymentElementChangeEvent) => {
 
 // Template ref
 const paymentRef = ref<InstanceType<typeof VueStripePaymentElement> | null>(null)
+</script>
+
+<template>
+  <VueStripePaymentElement
+    ref="paymentRef"
+    :options="options"
+    @ready="handleReady"
+    @change="handleChange"
+  />
+  <button type="button" @click="paymentRef?.focus()">Focus</button>
+</template>
 ```
 
 ## See Also

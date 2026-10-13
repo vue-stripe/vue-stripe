@@ -140,12 +140,18 @@ import type {
   UsePaymentIntentReturn
 } from '@vue-stripe/vue-stripe'
 
-const { confirmPayment }: UsePaymentIntentReturn = usePaymentIntent()
+// usePay.ts: call usePay() in a component's setup
+export function usePay() {
+  const { confirmPayment }: UsePaymentIntentReturn = usePaymentIntent()
 
-const pay = async (options: ConfirmPaymentOptions) => {
-  const result: ConfirmPaymentResult = await confirmPayment(options)
-  // result.paymentIntent is PaymentIntent | undefined
-  // result.error is StripeError | { message: string } | undefined
+  const pay = async (options: ConfirmPaymentOptions): Promise<ConfirmPaymentResult> => {
+    const result = await confirmPayment(options)
+    // result.paymentIntent is PaymentIntent | undefined
+    // result.error is StripeError | { message: string } | undefined
+    return result
+  }
+
+  return { pay }
 }
 ```
 

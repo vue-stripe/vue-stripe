@@ -135,6 +135,7 @@ const stripeElement = (): StripeLinkSignupElement | null => linkSignupRef.value?
 
 <template>
   <VueStripeLinkSignupElement ref="linkSignupRef" />
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -161,7 +162,8 @@ The default styles ship in the package stylesheet (`import '@vue-stripe/vue-stri
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeLinkSignupElement } from '@vue-stripe/vue-stripe'
 import type { StripeLinkSignupElement, StripeLinkSignupElementOptions } from '@stripe/stripe-js'
 
@@ -170,6 +172,14 @@ const options: StripeLinkSignupElementOptions = {
 }
 
 const handleReady = (element: StripeLinkSignupElement) => console.log('ready', element)
+</script>
+
+<template>
+  <VueStripeLinkSignupElement
+    :options="options"
+    @ready="handleReady"
+  />
+</template>
 ```
 
 ## See Also

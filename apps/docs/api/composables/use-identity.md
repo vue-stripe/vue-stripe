@@ -82,12 +82,17 @@ When Stripe.js is not available (the plugin's load failed, for example; a call m
 import { useIdentity } from '@vue-stripe/vue-stripe'
 import type { VerifyIdentityResult } from '@vue-stripe/vue-stripe'
 
-const { verifyIdentity } = useIdentity()
+// useVerify.ts: call useVerify() in a component's setup
+export function useVerify() {
+  const { verifyIdentity } = useIdentity()
 
-const run = async (clientSecret: string): Promise<VerifyIdentityResult> => {
-  const result = await verifyIdentity(clientSecret)
-  if (result.error) console.error(result.error.message)
-  return result
+  const run = async (clientSecret: string): Promise<VerifyIdentityResult> => {
+    const result = await verifyIdentity(clientSecret)
+    if (result.error) console.error(result.error.message)
+    return result
+  }
+
+  return { run }
 }
 ```
 

@@ -174,6 +174,10 @@ const readTaxId = () => taxIdRef.value?.getValue()
 
 <template>
   <VueStripeTaxIdElement ref="taxIdRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
+  <button type="button" @click="readTaxId">Read tax id</button>
 </template>
 ```
 
@@ -206,10 +210,10 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ta
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeTaxIdElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripeTaxIdElement,
   StripeTaxIdElementOptions,
   StripeTaxIdElementChangeEvent
 } from '@stripe/stripe-js'
@@ -222,6 +226,14 @@ const handleChange = (event: StripeTaxIdElementChangeEvent) => {
   console.log('Complete:', event.complete)
   console.log('Tax ID:', event.value.taxId)
 }
+</script>
+
+<template>
+  <VueStripeTaxIdElement
+    :options="options"
+    @change="handleChange"
+  />
+</template>
 ```
 
 ## See Also

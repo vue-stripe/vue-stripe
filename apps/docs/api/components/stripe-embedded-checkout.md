@@ -187,15 +187,17 @@ The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-ts
 
 `InstanceType<typeof VueStripeEmbeddedCheckout>` also includes the exposed members. A template ref unwraps their refs, so `checkoutRef.value?.checkout` is a `StripeEmbeddedCheckout | null`.
 
-```ts
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
 import { VueStripeEmbeddedCheckout } from '@vue-stripe/vue-stripe'
 import type {
-  VueStripeEmbeddedCheckoutProps,
   StripeEmbeddedCheckout,
-  StripeEmbeddedCheckoutOptions,
-  StripeEmbeddedCheckoutAnalyticsEventUnion,
-  StripeEmbeddedCheckoutLineItemsChangeEvent
+  StripeEmbeddedCheckoutAnalyticsEventUnion
 } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
+const checkoutRef = ref<InstanceType<typeof VueStripeEmbeddedCheckout> | null>(null)
 
 const onReady = (checkout: StripeEmbeddedCheckout): void => {
   console.log('mounted', checkout)
@@ -203,6 +205,17 @@ const onReady = (checkout: StripeEmbeddedCheckout): void => {
 const onAnalytics = (event: StripeEmbeddedCheckoutAnalyticsEventUnion): void => {
   console.log(event.eventType)
 }
+</script>
+
+<template>
+  <VueStripeEmbeddedCheckout
+    ref="checkoutRef"
+    :client-secret="props.clientSecret"
+    @ready="onReady"
+    @analytics="onAnalytics"
+  />
+  <p v-if="checkoutRef?.checkout">Checkout is mounted</p>
+</template>
 ```
 
 ## See Also

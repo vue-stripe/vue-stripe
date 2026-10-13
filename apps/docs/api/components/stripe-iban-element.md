@@ -154,6 +154,9 @@ const stripeElement = (): StripeIbanElement | null => ibanRef.value?.element ?? 
 
 <template>
   <VueStripeIbanElement ref="ibanRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -186,7 +189,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ib
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeIbanElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -206,6 +210,16 @@ const handleChange = (event: StripeIbanElementChangeEvent) => {
 
 const ibanRef = ref<InstanceType<typeof VueStripeIbanElement> | null>(null)
 const iban = (): StripeIbanElement | null => ibanRef.value?.element ?? null
+</script>
+
+<template>
+  <VueStripeIbanElement
+    ref="ibanRef"
+    :options="options"
+    @change="handleChange"
+  />
+  <p v-if="iban()">The Stripe element exists</p>
+</template>
 ```
 
 ## See Also

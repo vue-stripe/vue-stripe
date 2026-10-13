@@ -124,6 +124,9 @@ const stripeElement = (): StripePaymentMethodMessagingElement | null => messagin
 
 <template>
   <VueStripePaymentMethodMessagingElement ref="messagingRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -156,10 +159,10 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-pa
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripePaymentMethodMessagingElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripePaymentMethodMessagingElement,
   StripePaymentMethodMessagingElementOptions
 } from '@stripe/stripe-js'
 
@@ -168,6 +171,11 @@ const options: StripePaymentMethodMessagingElementOptions = {
   currency: 'USD',
   countryCode: 'US'
 }
+</script>
+
+<template>
+  <VueStripePaymentMethodMessagingElement :options="options" />
+</template>
 ```
 
 ## See Also

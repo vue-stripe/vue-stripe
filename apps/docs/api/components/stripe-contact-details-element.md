@@ -114,6 +114,7 @@ const stripeElement = (): StripeContactDetailsElement | null => contactRef.value
 
 <template>
   <VueStripeContactDetailsElement ref="contactRef" />
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -140,10 +141,10 @@ The default styles ship in the package stylesheet (`import '@vue-stripe/vue-stri
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeContactDetailsElement } from '@vue-stripe/vue-stripe'
 import type {
-  StripeContactDetailsElement,
   StripeContactDetailsElementOptions,
   StripeContactDetailsElementChangeEvent
 } from '@stripe/stripe-js'
@@ -155,6 +156,14 @@ const options: StripeContactDetailsElementOptions = {
 const handleChange = (event: StripeContactDetailsElementChangeEvent) => {
   if (event.complete) console.log('Email:', event.value.email)
 }
+</script>
+
+<template>
+  <VueStripeContactDetailsElement
+    :options="options"
+    @change="handleChange"
+  />
+</template>
 ```
 
 ## See Also

@@ -153,11 +153,12 @@ The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-ts
 
 `InstanceType<typeof VueStripeCheckout>` also includes the exposed members. A template ref unwraps their refs, so `checkoutRef.value?.loading` is a `boolean`.
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCheckout, VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
 
-const sessionUrl = ref<string>('')
+const props = defineProps<{ sessionUrl: string }>()
 const checkoutRef = ref<InstanceType<typeof VueStripeCheckout> | null>(null)
 
 const handleBeforeRedirect = ({ url }: { url: string }) => {
@@ -167,6 +168,17 @@ const handleBeforeRedirect = ({ url }: { url: string }) => {
 const handleError = (error: VueStripeCheckoutError) => {
   console.error('Checkout failed:', error.message)
 }
+</script>
+
+<template>
+  <VueStripeCheckout
+    ref="checkoutRef"
+    :session-url="props.sessionUrl"
+    @before-redirect="handleBeforeRedirect"
+    @error="handleError"
+  />
+  <p v-if="checkoutRef?.loading">Redirecting to Stripe...</p>
+</template>
 ```
 
 ## Migrating from v5

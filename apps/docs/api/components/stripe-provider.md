@@ -168,13 +168,18 @@ Read it with the [useStripe](/api/composables/use-stripe) composable, which retu
 
 The resolved configuration (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`; `apiVersion` as given, though it is not used) is provided as a separate `VueStripeConfig` object under the exported `stripeConfigInjectionKey` symbol. `VueStripePricingTable` reads its publishable key from it. A descendant component injects it the same way:
 
-```ts
+```vue
+<script setup lang="ts">
 import { inject } from 'vue'
 import { stripeConfigInjectionKey } from '@vue-stripe/vue-stripe'
 
 // VueStripeConfig | null: null outside a VueStripeProvider or the plugin
 const config = inject(stripeConfigInjectionKey, null)
-const publishableKey = config?.publishableKey
+</script>
+
+<template>
+  <p v-if="config?.stripeAccount">Paying {{ config.stripeAccount }}</p>
+</template>
 ```
 
 ## Styling
@@ -201,18 +206,26 @@ import '@vue-stripe/vue-stripe/style.css'
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events). The props type is exported as `VueStripeProviderProps`.
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
-import type { VueStripeProviderProps } from '@vue-stripe/vue-stripe'
-import type { Stripe, StripeConstructorOptions } from '@stripe/stripe-js'
+import type { Stripe, StripeConstructorOptions } from '@vue-stripe/vue-stripe'
 
 const options: StripeConstructorOptions = { locale: 'auto' }
 
 const onLoad = (stripe: Stripe) => {
   // stripe is fully typed
+  console.log(stripe)
 }
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="'pk_test_...'" :options="options" @load="onLoad">
+    <slot />
+  </VueStripeProvider>
+</template>
 ```
 
 ## See Also

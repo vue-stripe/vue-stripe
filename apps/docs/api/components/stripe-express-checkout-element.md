@@ -273,6 +273,8 @@ const stripeElement = (): StripeExpressCheckoutElement | null => expressRef.valu
 
 <template>
   <VueStripeExpressCheckoutElement ref="expressRef" />
+  <button type="button" @click="focus">Focus</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -305,7 +307,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ex
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeExpressCheckoutElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -372,6 +375,21 @@ const handleLoadError = (
 const expressCheckoutRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement> | null>(null)
 const stripeElement = (): StripeExpressCheckoutElement | null =>
   expressCheckoutRef.value?.element ?? null
+</script>
+
+<template>
+  <VueStripeExpressCheckoutElement
+    ref="expressCheckoutRef"
+    :options="options"
+    @ready="handleReady"
+    @click="handleClick"
+    @confirm="handleConfirm"
+    @shippingaddresschange="handleShippingAddressChange"
+    @shippingratechange="handleShippingRateChange"
+    @loaderror="handleLoadError"
+  />
+  <p v-if="stripeElement()">The Stripe element exists</p>
+</template>
 ```
 
 ## See Also

@@ -14,6 +14,7 @@ With the [Payment Element](/api/components/stripe-payment-element), confirm with
 <script setup lang="ts">
 import { useConfirmCardPayment } from '@vue-stripe/vue-stripe'
 
+const props = defineProps<{ clientSecret: string }>()
 const { confirmCardPayment, loading, error } = useConfirmCardPayment()
 
 const pay = async (clientSecret: string) => {
@@ -21,6 +22,11 @@ const pay = async (clientSecret: string) => {
   return paymentIntent?.status
 }
 </script>
+
+<template>
+  <button :disabled="loading" @click="pay(props.clientSecret)">Pay</button>
+  <p v-if="error">{{ error }}</p>
+</template>
 ```
 
 ## Families

@@ -154,6 +154,7 @@ const logValue = async () => {
     {{ view.label }}
   </button>
   <VueStripeCheckoutForm ref="formRef" :options="{ layout: 'compact' }" @change="onChange" />
+  <button type="button" @click="logValue">Log value</button>
 </template>
 ```
 
@@ -186,13 +187,14 @@ Style the form's inside with the provider's `appearance` prop (or `useCheckoutFo
 
 ## TypeScript
 
-```ts
+The form's types (`StripeCheckoutForm`, `StripeCheckoutFormOptions`, `StripeCheckoutFormChangeEvent`, `StripeCheckoutFormConfirmEvent`, `StripeCheckoutFormValue`) are exported from `@vue-stripe/vue-stripe`:
+
+```vue
+<script setup lang="ts">
+import { VueStripeCheckoutForm } from '@vue-stripe/vue-stripe'
 import type {
-  StripeCheckoutForm,
-  StripeCheckoutFormChangeEvent,
   StripeCheckoutFormConfirmEvent,
-  StripeCheckoutFormOptions,
-  StripeCheckoutFormValue
+  StripeCheckoutFormOptions
 } from '@vue-stripe/vue-stripe'
 
 const options: StripeCheckoutFormOptions = {
@@ -203,6 +205,11 @@ const options: StripeCheckoutFormOptions = {
 const onConfirm = (event: StripeCheckoutFormConfirmEvent) => {
   console.log(event.source)
 }
+</script>
+
+<template>
+  <VueStripeCheckoutForm :options="options" @confirm="onConfirm" />
+</template>
 ```
 
 ## See Also

@@ -148,14 +148,16 @@ The provider uses its own injection key, so `useCheckoutSession()` does not work
 
 The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
 
-```ts
+```vue
+<script setup lang="ts">
+import { VueStripeCheckoutFormProvider, VueStripeCheckoutForm } from '@vue-stripe/vue-stripe'
 import type {
   StripeCheckoutFormLoadActionsSuccess,
   StripeCheckoutSession,
   VueStripeCheckoutFormProviderProps
 } from '@vue-stripe/vue-stripe'
 
-const props: VueStripeCheckoutFormProviderProps = {
+const config: VueStripeCheckoutFormProviderProps = {
   clientSecret: 'cs_test_..._secret_...',
   appearance: { theme: 'stripe' },
   savedPaymentMethod: { enableSave: 'never' }
@@ -168,6 +170,13 @@ const onReady = (actions: StripeCheckoutFormLoadActionsSuccess) => {
 const onChange = (session: StripeCheckoutSession) => {
   console.log('Status:', session.status.type)
 }
+</script>
+
+<template>
+  <VueStripeCheckoutFormProvider v-bind="config" @ready="onReady" @change="onChange">
+    <VueStripeCheckoutForm />
+  </VueStripeCheckoutFormProvider>
+</template>
 ```
 
 ## See Also

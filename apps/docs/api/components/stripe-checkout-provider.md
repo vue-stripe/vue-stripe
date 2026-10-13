@@ -204,15 +204,18 @@ Access these via [`useCheckoutSession()`](/api/composables/use-checkout-session)
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events). The props type is exported as `VueStripeCheckoutElementsProviderProps`.
 
-```ts
+```vue
+<script setup lang="ts">
+import { VueStripeCheckoutElementsProvider, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 import type {
   StripeCheckoutElementsOptions,
   StripeCheckoutLoadActionsSuccess,
-  StripeCheckoutSession,
-  VueStripeCheckoutElementsProviderProps
+  StripeCheckoutSession
 } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
 
 const elementsOptions: StripeCheckoutElementsOptions = {
   appearance: { theme: 'stripe' },
@@ -226,6 +229,18 @@ const onReady = (actions: StripeCheckoutLoadActionsSuccess) => {
 const onChange = (session: StripeCheckoutSession) => {
   console.log('Can confirm:', session.canConfirm)
 }
+</script>
+
+<template>
+  <VueStripeCheckoutElementsProvider
+    :client-secret="props.clientSecret"
+    :elements-options="elementsOptions"
+    @ready="onReady"
+    @change="onChange"
+  >
+    <VueStripePaymentElement />
+  </VueStripeCheckoutElementsProvider>
+</template>
 ```
 
 ## See Also

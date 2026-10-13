@@ -196,6 +196,9 @@ const stripeElement = (): StripeCardElement | null => cardRef.value?.element ?? 
 
 <template>
   <VueStripeCardElement ref="cardRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -228,7 +231,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ca
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCardElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -259,6 +263,17 @@ const handleChange = (event: StripeCardElementChangeEvent) => {
 
 // Template ref
 const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
+</script>
+
+<template>
+  <VueStripeCardElement
+    ref="cardRef"
+    :options="options"
+    @ready="handleReady"
+    @change="handleChange"
+  />
+  <button type="button" @click="cardRef?.focus()">Focus</button>
+</template>
 ```
 
 ## See Also

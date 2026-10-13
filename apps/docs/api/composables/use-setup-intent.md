@@ -150,12 +150,18 @@ import type {
   UseSetupIntentReturn
 } from '@vue-stripe/vue-stripe'
 
-const { confirmSetup }: UseSetupIntentReturn = useSetupIntent()
+// useSave.ts: call useSave() in a component's setup
+export function useSave() {
+  const { confirmSetup }: UseSetupIntentReturn = useSetupIntent()
 
-const save = async (options: ConfirmSetupOptions) => {
-  const result: ConfirmSetupResult = await confirmSetup(options)
-  // result.setupIntent is SetupIntent | undefined
-  // result.error is StripeError | { message: string } | undefined
+  const save = async (options: ConfirmSetupOptions): Promise<ConfirmSetupResult> => {
+    const result = await confirmSetup(options)
+    // result.setupIntent is SetupIntent | undefined
+    // result.error is StripeError | { message: string } | undefined
+    return result
+  }
+
+  return { save }
 }
 ```
 

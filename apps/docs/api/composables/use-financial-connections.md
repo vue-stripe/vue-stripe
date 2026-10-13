@@ -177,18 +177,22 @@ type CollectBankAccountForSetupOptions = Parameters<Stripe['collectBankAccountFo
 import { useFinancialConnections } from '@vue-stripe/vue-stripe'
 import type {
   CollectFinancialConnectionsAccountsOptions,
-  CollectFinancialConnectionsAccountsResult,
-  PreCollectedConsent
+  CollectFinancialConnectionsAccountsResult
 } from '@vue-stripe/vue-stripe'
 
-const { collectFinancialConnectionsAccounts } = useFinancialConnections()
+// useLinkAccounts.ts: call useLinkAccounts() in a component's setup
+export function useLinkAccounts() {
+  const { collectFinancialConnectionsAccounts } = useFinancialConnections()
 
-const link = async (
-  options: CollectFinancialConnectionsAccountsOptions
-): Promise<CollectFinancialConnectionsAccountsResult> => {
-  const result = await collectFinancialConnectionsAccounts(options)
-  if (result.error) console.error(result.error.message)
-  return result
+  const link = async (
+    options: CollectFinancialConnectionsAccountsOptions
+  ): Promise<CollectFinancialConnectionsAccountsResult> => {
+    const result = await collectFinancialConnectionsAccounts(options)
+    if (result.error) console.error(result.error.message)
+    return result
+  }
+
+  return { link }
 }
 ```
 

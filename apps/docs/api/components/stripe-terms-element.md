@@ -105,6 +105,7 @@ const stripeElement = (): StripeTermsElement | null => termsRef.value?.element ?
 
 <template>
   <VueStripeTermsElement ref="termsRef" />
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -131,7 +132,8 @@ The default styles ship in the package stylesheet (`import '@vue-stripe/vue-stri
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeTermsElement } from '@vue-stripe/vue-stripe'
 import type { StripeTermsElement, StripeError } from '@stripe/stripe-js'
 
@@ -139,6 +141,14 @@ const handleReady = (element: StripeTermsElement) => console.log('ready', elemen
 const handleLoadError = (event: { elementType: 'terms'; error: StripeError }) => {
   console.error(event.error.message)
 }
+</script>
+
+<template>
+  <VueStripeTermsElement
+    @ready="handleReady"
+    @loaderror="handleLoadError"
+  />
+</template>
 ```
 
 ## See Also

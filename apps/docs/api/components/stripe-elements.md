@@ -262,14 +262,14 @@ The fields inside Stripe's iframes are styled with the [Appearance API](#appeara
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events). The props type is exported as `VueStripeElementsProps`.
 
-```ts
-import type {
-  VueStripeElementsProps,
-  Appearance,
-  StripeElements
-} from '@vue-stripe/vue-stripe'
+```vue
+<script setup lang="ts">
+import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+import type { Appearance, StripeElements } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
 
 const appearance: Appearance = {
   theme: 'stripe',
@@ -278,9 +278,17 @@ const appearance: Appearance = {
   }
 }
 
-function onReady(elements: StripeElements) {
+const onReady = (elements: StripeElements) => {
   // elements is fully typed
+  console.log(elements.getElement('payment'))
 }
+</script>
+
+<template>
+  <VueStripeElements :client-secret="props.clientSecret" :appearance="appearance" @ready="onReady">
+    <VueStripePaymentElement />
+  </VueStripeElements>
+</template>
 ```
 
 ::: warning vue-tsc and `//` in a `v-if` element

@@ -208,6 +208,10 @@ const readAddress = () => addressRef.value?.getValue({ format: 'localized' })
 
 <template>
   <VueStripeAddressElement ref="addressRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
+  <button type="button" @click="readAddress">Read address</button>
 </template>
 ```
 
@@ -248,7 +252,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ad
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeAddressElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -285,6 +290,17 @@ const validateAddress = async () => {
     console.log(`${line1}, ${city}, ${state} ${postal_code}, ${country}`)
   }
 }
+</script>
+
+<template>
+  <VueStripeAddressElement
+    ref="addressRef"
+    :options="options"
+    @ready="handleReady"
+    @change="handleChange"
+  />
+  <button type="button" @click="validateAddress">Validate address</button>
+</template>
 ```
 
 ## See Also

@@ -123,6 +123,7 @@ const isLoading = () => pricingTableRef.value?.loading ?? true
 
 <template>
   <VueStripePricingTable ref="pricingTableRef" pricing-table-id="prctbl_..." />
+  <p v-if="isLoading()">Loading pricing table...</p>
 </template>
 ```
 
@@ -167,11 +168,12 @@ The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-ts
 
 `InstanceType<typeof VueStripePricingTable>` also includes the exposed members. A template ref unwraps their refs, so `pricingTableRef.value?.loading` is a `boolean`.
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripePricingTable } from '@vue-stripe/vue-stripe'
 import type { VueStripePricingTableProps } from '@vue-stripe/vue-stripe'
 
-const props: VueStripePricingTableProps = {
+const config: VueStripePricingTableProps = {
   pricingTableId: 'prctbl_1234567890',
   customerEmail: 'user@example.com',
   clientReferenceId: 'user_123'
@@ -180,6 +182,11 @@ const props: VueStripePricingTableProps = {
 const handleError = (error: Error): void => {
   console.error(error.message)
 }
+</script>
+
+<template>
+  <VueStripePricingTable v-bind="config" @error="handleError" />
+</template>
 ```
 
 ## See Also

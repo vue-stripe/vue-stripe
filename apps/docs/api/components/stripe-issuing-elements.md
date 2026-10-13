@@ -202,9 +202,16 @@ import { ref } from 'vue'
 import { VueStripeIssuingCardNumberDisplayElement } from '@vue-stripe/vue-stripe'
 import type { StripeIssuingCardNumberDisplayElement } from '@vue-stripe/vue-stripe'
 
+const props = defineProps<{ issuingCard: string; nonce: string; ephemeralKeySecret: string }>()
+
 const numberRef = ref<InstanceType<typeof VueStripeIssuingCardNumberDisplayElement> | null>(null)
 const number = (): StripeIssuingCardNumberDisplayElement | null => numberRef.value?.element ?? null
 </script>
+
+<template>
+  <VueStripeIssuingCardNumberDisplayElement ref="numberRef" :options="props" />
+  <p v-if="number()">The Stripe element exists</p>
+</template>
 ```
 
 ## Styling

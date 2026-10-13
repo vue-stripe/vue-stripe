@@ -215,6 +215,9 @@ const cardNumber = (): StripeCardNumberElement | null => numberRef.value?.elemen
   <VueStripeCardNumberElement ref="numberRef" />
   <VueStripeCardExpiryElement ref="expiryRef" />
   <VueStripeCardCvcElement ref="cvcRef" />
+  <button type="button" @click="focusNumber">Focus number</button>
+  <button type="button" @click="clearAll">Clear all</button>
+  <p v-if="cardNumber()">The Stripe element exists</p>
 </template>
 ```
 
@@ -249,7 +252,8 @@ Target `.vue-stripe-element*` to style every element at once, or e.g. `.vue-stri
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import {
   VueStripeCardNumberElement,
@@ -257,7 +261,6 @@ import {
   VueStripeCardCvcElement
 } from '@vue-stripe/vue-stripe'
 import type {
-  StripeCardNumberElement,
   StripeCardNumberElementChangeEvent,
   StripeCardNumberElementOptions
 } from '@stripe/stripe-js'
@@ -280,6 +283,20 @@ const handleNumberChange = (event: StripeCardNumberElementChangeEvent) => {
 const numberRef = ref<InstanceType<typeof VueStripeCardNumberElement> | null>(null)
 const expiryRef = ref<InstanceType<typeof VueStripeCardExpiryElement> | null>(null)
 const cvcRef = ref<InstanceType<typeof VueStripeCardCvcElement> | null>(null)
+
+const clearAll = () => {
+  numberRef.value?.clear()
+  expiryRef.value?.clear()
+  cvcRef.value?.clear()
+}
+</script>
+
+<template>
+  <VueStripeCardNumberElement ref="numberRef" :options="options" @change="handleNumberChange" />
+  <VueStripeCardExpiryElement ref="expiryRef" />
+  <VueStripeCardCvcElement ref="cvcRef" />
+  <button type="button" @click="clearAll">Clear</button>
+</template>
 ```
 
 ## See Also

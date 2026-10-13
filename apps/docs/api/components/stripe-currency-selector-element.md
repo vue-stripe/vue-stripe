@@ -111,6 +111,9 @@ const stripeElement = (): StripeCurrencySelectorElement | null => currencyRef.va
 
 <template>
   <VueStripeCurrencySelectorElement ref="currencyRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -143,7 +146,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-cu
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeCurrencySelectorElement } from '@vue-stripe/vue-stripe'
 import type { StripeCurrencySelectorElement, StripeError } from '@stripe/stripe-js'
 
@@ -154,6 +158,14 @@ const handleReady = (element: StripeCurrencySelectorElement) => {
 const handleLoadError = (event: { elementType: 'currencySelector'; error: StripeError }) => {
   console.error(event.error.message)
 }
+</script>
+
+<template>
+  <VueStripeCurrencySelectorElement
+    @ready="handleReady"
+    @loaderror="handleLoadError"
+  />
+</template>
 ```
 
 ## See Also

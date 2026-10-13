@@ -148,6 +148,9 @@ const stripeElement = (): StripeAuBankAccountElement | null => auBankRef.value?.
 
 <template>
   <VueStripeAuBankAccountElement ref="auBankRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -180,7 +183,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-au
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeAuBankAccountElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -197,6 +201,16 @@ const handleChange = (event: StripeAuBankAccountElementChangeEvent) => {
 
 const becsRef = ref<InstanceType<typeof VueStripeAuBankAccountElement> | null>(null)
 const account = (): StripeAuBankAccountElement | null => becsRef.value?.element ?? null
+</script>
+
+<template>
+  <VueStripeAuBankAccountElement
+    ref="becsRef"
+    :options="options"
+    @change="handleChange"
+  />
+  <p v-if="account()">The Stripe element exists</p>
+</template>
 ```
 
 ## See Also
