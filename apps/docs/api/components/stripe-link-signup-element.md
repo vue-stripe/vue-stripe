@@ -7,7 +7,7 @@ description: "VueStripeLinkSignupElement reference (beta): offer customers to sa
 Offers customers to save their details with [Link](https://stripe.com/payments/link) for faster checkout next time. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createLinkSignupElement(options)`), or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('linkSignup', options)`).
 
 ::: danger Stripe beta
-The Link Signup Element requires beta access: contact [Stripe support](https://support.stripe.com/). Stripe.js also needs a beta flag on the Stripe instance; without it, creating the element throws (reported through `@loaderror` and the `#error` slot). At the time of writing Stripe.js names the flag in that error: `elements_link_signup_beta_1`. Pass it with the [`betas`](/api/components/stripe-provider#props) prop:
+The Link Signup Element requires beta access: contact [Stripe support](https://support.stripe.com/). Stripe.js also needs the `elements_link_signup_beta_1` flag on the Stripe instance. Without it, creating the element throws, reported through `@loaderror` and the `#error` slot. The error does not name the flag; Stripe.js 10 reports an unknown element type: "A valid Element name must be provided. Valid Elements are: card, cardNumber, ... ; you passed: linkSignup." That message means the flag is missing. Pass it with the [`betas`](/api/components/stripe-provider#props) prop:
 
 ```vue
 <VueStripeProvider

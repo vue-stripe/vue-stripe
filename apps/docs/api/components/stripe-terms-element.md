@@ -7,7 +7,10 @@ description: "VueStripeTermsElement reference (beta): show the terms a customer 
 Shows the terms the customer agrees to by paying. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createTermsElement()`), or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('terms')`).
 
 ::: danger Stripe beta
-The Terms Element requires beta access: contact [Stripe support](https://support.stripe.com/). Access is granted to the Stripe account, not through a `betas` flag. Without it, Stripe.js mounts the element and then emits `@loaderror` with the message "You cannot use the Terms Element without being gated into this functionality. Please contact Stripe to request access." (observed with a Checkout Session in a sandbox account); the message is shown through the `#error` slot.
+The Terms Element requires beta access: contact [Stripe support](https://support.stripe.com/). Access is granted to the Stripe account, not through a `betas` flag. Without it, the two contexts fail differently (observed in a sandbox account):
+
+- **Inside `VueStripeCheckoutElementsProvider`**, Stripe.js mounts the element and then emits `@loaderror` with the message "You cannot use the Terms Element without being gated into this functionality. Please contact Stripe to request access."; the message is shown through the `#error` slot.
+- **Inside `VueStripeElements`** (client secret or deferred), the failure is silent: the element emits `@loaderstart` and `@ready`, renders nothing, and reports no error. Confirm that your account has access before you rely on it there.
 :::
 
 ::: info No live demo
