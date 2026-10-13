@@ -30,6 +30,8 @@ export interface CoverageItem {
   artifact?: string
   /** Roadmap issue number (when status === 'planned'). */
   issue?: number
+  /** Why a deprecated row is not wrapped and what replaces it (shown on the page). */
+  note?: string
   /**
    * The @stripe/stripe-js type members this row accounts for, as
    * `<declaring type>.<member>` (`Stripe.confirmPayment`, `StripeElementType.card`,
@@ -181,6 +183,7 @@ export const coverage: CoverageCategory[] = [
       {
         // Removed in Endive; the Express Checkout Element replaces it.
         name: 'Payment Request Button',
+        note: 'Removed by Stripe in Endive. Use the Express Checkout Element.',
         api: "create('paymentRequestButton')",
         status: 'deprecated'
       },
@@ -251,6 +254,7 @@ export const coverage: CoverageCategory[] = [
       {
         // Removed in Clover; collect these methods with the Payment Element.
         name: 'iDEAL / P24 / EPS / FPX bank elements',
+        note: 'Removed by Stripe in Clover. The Payment Element collects these methods.',
         api: "create('idealBank' | 'p24Bank' | 'epsBank' | 'fpxBank')",
         status: 'deprecated'
       },
@@ -288,6 +292,7 @@ export const coverage: CoverageCategory[] = [
       {
         // Superseded by the Address Element in shipping mode.
         name: 'Shipping Address',
+        note: 'Superseded by the Address Element in shipping mode.',
         api: "create('shippingAddress')",
         status: 'deprecated',
         surface: ['StripeElementType.shippingAddress']
@@ -336,11 +341,13 @@ export const coverage: CoverageCategory[] = [
       {
         // Removed in Clover; use the Payment Method Messaging Element.
         name: 'Affirm Message',
+        note: 'Removed by Stripe in Clover. Use the Payment Method Messaging Element.',
         api: "create('affirmMessage')",
         status: 'deprecated'
       },
       {
         name: 'Afterpay/Clearpay Message',
+        note: 'Removed by Stripe in Clover. Use the Payment Method Messaging Element.',
         api: "create('afterpayClearpayMessage')",
         status: 'deprecated'
       }
@@ -483,6 +490,7 @@ export const coverage: CoverageCategory[] = [
       {
         // Removed in Clover (sessionId / lineItems client-side redirect).
         name: 'Client-side redirectToCheckout',
+        note: 'Removed by Stripe in Clover. Create the session on your server and redirect to its URL.',
         api: 'stripe.redirectToCheckout()',
         status: 'deprecated'
       },
@@ -682,6 +690,7 @@ export const coverage: CoverageCategory[] = [
       {
         // Stripe discontinued the Orders API; the methods remain in the types.
         name: 'Orders',
+        note: 'Stripe discontinued the Orders API; the methods remain in the types only.',
         api: 'stripe.processOrder() / retrieveOrder()',
         status: 'deprecated',
         surface: ['Stripe.processOrder', 'Stripe.retrieveOrder']

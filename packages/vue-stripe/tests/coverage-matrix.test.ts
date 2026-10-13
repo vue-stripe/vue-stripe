@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest'
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import * as VueStripe from '../src'
 import { coverage } from '../../../apps/docs/.vitepress/theme/data/stripe-coverage'
+import { docLinks } from '../../../apps/docs/.vitepress/theme/data/coverage-links'
 import { STRIPE_CONFIRMERS, composableName } from './stripe-confirmers'
 
 /**
@@ -168,4 +172,33 @@ describe('docs coverage matrix reflects Stripe.js 10 (Endive)', () => {
       expect(v6Issues.has(item.issue!), `"${item.name}" points at #${item.issue}`).toBe(true)
     }
   })
+})
+
+// The /coverage page links every row to its guide, API reference and live demo
+// (apps/docs/.vitepress/theme/data/coverage-links.ts). A link must open an existing page,
+// and a confirm composable's API link must land on its own heading.
+describe('coverage page quick links', () => {
+  const docsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../../../apps/docs')
+  const covered = coverage.flatMap((c) => c.items).filter((i) => i.status === 'covered')
+  const pageFile = (link: string) =>
+    resolve(docsDir, `${link.split('#')[0]!.replace(/^\//, '')}.md`)
+
+  it.each(covered.map((i) => [i.name, i.artifact!] as const))(
+    '%s (%s) links to existing pages, with an API reference',
+    (_name, artifact) => {
+      const links = docLinks(artifact)
+      expect(links.api, `${artifact} has no API page`).toBeTruthy()
+      for (const link of [links.api, links.guide, links.demo].filter(Boolean) as string[]) {
+        expect(existsSync(pageFile(link)), `${artifact} -> ${link} (no such page)`).toBe(true)
+        const anchor = link.split('#')[1]
+        if (anchor) {
+          const headings = readFileSync(pageFile(link), 'utf8')
+            .split('\n')
+            .filter((l) => /^#{2,3} /.test(l))
+            .map((l) => l.replace(/^#+ /, '').trim().toLowerCase())
+          expect(headings, `${artifact} -> ${link} (no such heading)`).toContain(anchor)
+        }
+      }
+    }
+  )
 })
