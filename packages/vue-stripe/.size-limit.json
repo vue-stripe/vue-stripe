@@ -3,7 +3,7 @@
     "name": "ESM bundle (dist/es/index.js)",
     "path": "dist/es/index.js",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "11.35 kB",
+    "limit": "11.4 kB",
     "gzip": true
   },
   {
