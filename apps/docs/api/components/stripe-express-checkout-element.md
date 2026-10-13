@@ -157,13 +157,21 @@ Unlike the other element components, `@ready` emits Stripe's ready event (it car
 
 ```ts
 interface StripeExpressCheckoutElementReadyEvent {
-  availablePaymentMethods?: {
-    applePay?: boolean
-    googlePay?: boolean
-    link?: boolean
-  }
+  elementType: 'expressCheckout'
+  availablePaymentMethods: undefined | AvailablePaymentMethods
+}
+
+type AvailablePaymentMethods = {
+  amazonPay: boolean
+  applePay: boolean
+  googlePay: boolean
+  link: boolean
+  paypal: boolean
+  klarna: boolean
 }
 ```
+
+`availablePaymentMethods` is `undefined` when no wallet can show in this browser, so `Boolean(event.availablePaymentMethods)` tells you whether the element renders any button. Otherwise every wallet key is present, `true` for the ones that can show.
 
 ### Click event
 
@@ -265,6 +273,8 @@ const stripeElement = (): StripeExpressCheckoutElement | null => expressRef.valu
 
 <template>
   <VueStripeExpressCheckoutElement ref="expressRef" />
+  <button type="button" @click="focus">Focus</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -274,12 +284,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-express-checkout-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-express-checkout-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-express-checkout-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-express-checkout-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-express-checkout-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-express-checkout-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-express-checkout-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading express checkout...</div>
+  </div>
 </div>
 ```
 
@@ -293,7 +307,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ex
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeExpressCheckoutElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -360,6 +375,21 @@ const handleLoadError = (
 const expressCheckoutRef = ref<InstanceType<typeof VueStripeExpressCheckoutElement> | null>(null)
 const stripeElement = (): StripeExpressCheckoutElement | null =>
   expressCheckoutRef.value?.element ?? null
+</script>
+
+<template>
+  <VueStripeExpressCheckoutElement
+    ref="expressCheckoutRef"
+    :options="options"
+    @ready="handleReady"
+    @click="handleClick"
+    @confirm="handleConfirm"
+    @shippingaddresschange="handleShippingAddressChange"
+    @shippingratechange="handleShippingRateChange"
+    @loaderror="handleLoadError"
+  />
+  <p v-if="stripeElement()">The Stripe element exists</p>
+</template>
 ```
 
 ## See Also

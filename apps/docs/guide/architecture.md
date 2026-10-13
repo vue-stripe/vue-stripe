@@ -70,7 +70,7 @@ The layers differ in when they render the slot content below them. That timing d
 
 `VueStripeCheckoutElementsProvider` renders its children immediately. Since Stripe.js Clover, `initCheckoutElementsSdk()` returns synchronously, so the elements can mount and show Stripe's skeleton loaders while the session loads. The session actions arrive later, once `loadActions()` resolves. `useCheckoutSession()` therefore returns a "not ready yet" error result if a call comes in before then, rather than throwing.
 
-With the plugin, nothing waits. Stripe.js starts loading the first time something reads the Stripe context, and components render straight away with `loading` set to `true`. `VueStripeElements` shows its own `#loading` slot until the instance arrives. A composable called before then fails the way its reference page describes: `usePaymentIntent()` resolves to an `{ error }` result, and a method confirmer rejects.
+With the plugin, rendering does not wait. Stripe.js starts loading the first time something reads the Stripe context, and components render straight away with `loading` set to `true`. `VueStripeElements` shows its own `#loading` slot until the instance arrives. Composable calls wait instead: a method called during the load waits for it, then runs. Only a failed load ends the call the way its reference page describes for a missing Stripe.js: `usePaymentIntent()` resolves to `{ error: { message: 'Stripe not initialized' } }`, and a method confirmer rejects with `VueStripeProviderError`.
 
 The provider's slots and events are listed in the [`VueStripeProvider` reference](/api/components/stripe-provider).
 

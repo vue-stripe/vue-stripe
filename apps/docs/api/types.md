@@ -19,6 +19,7 @@ Types defined by Vue Stripe.
 | Type | Description |
 |------|-------------|
 | `VueStripeOptions` | Options of [`createVueStripe()`](/api/plugin) |
+| `VueStripeConfig` | The resolved config (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`) that the provider and the plugin [provide](/api/components/stripe-provider#provides) under `stripeConfigInjectionKey` |
 | `VueStripeProviderProps` | Props of [`VueStripeProvider`](/api/components/stripe-provider) |
 | `VueStripeElementsProps` | Props of [`VueStripeElements`](/api/components/stripe-elements) |
 | `VueStripeCheckoutElementsProviderProps` | Props of [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider) |

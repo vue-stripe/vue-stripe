@@ -39,7 +39,7 @@ const onError = (error) => console.error('Stripe.js failed to load', error)
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect |
 | `apiVersion` | `string` | No | Deprecated and ignored: not passed to `loadStripe()`, because Stripe.js Endive refuses it. See [API version](#api-version) |
 | `locale` | `string` | No | Locale for Stripe.js (e.g., 'en', 'es', 'fr') |
-| `betas` | `string[]` | No | Stripe beta flags, forwarded to `loadStripe()` (e.g. the [Tax ID Element](/api/components/stripe-tax-id-element)'s beta) |
+| `betas` | `string[]` | No | Stripe beta flags, forwarded to `loadStripe()` (e.g. `elements_link_signup_beta_1` for the [Link Signup Element](/api/components/stripe-link-signup-element)) |
 | `developerTools` | `StripeConstructorOptions['developerTools']` | No | Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }`, forwarded to `loadStripe()` |
 | `advancedFraudSignals` | `boolean` | No | Default `true`. `false` loads Stripe.js without advanced fraud signals. See [Advanced fraud signals](#advanced-fraud-signals) |
 | `options` | `StripeConstructorOptions` | No | Any `loadStripe()` option. Explicit props win over the same key in `options` |
@@ -156,7 +156,7 @@ Stripe.js does not validate a publishable key when it loads: with a wrong, revok
 
 ## Provides
 
-The provider exposes nothing on a template ref. It provides a single object under the `stripeInjectionKey` symbol:
+The provider exposes nothing on a template ref. It provides the Stripe context, an object with these refs:
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -164,9 +164,23 @@ The provider exposes nothing on a template ref. It provides a single object unde
 | `loading` | `Ref<boolean>` | Whether Stripe is loading |
 | `error` | `Ref<string \| null>` | Error message if loading failed |
 
-Read it with the [useStripe](/api/composables/use-stripe) composable, which returns `{ stripe, loading, error }`.
+Read it with the [useStripe](/api/composables/use-stripe) composable, which returns `{ stripe, loading, error }`. Its injection key is internal.
 
-The resolved configuration (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`; `apiVersion` as given, though it is not used) is provided as a separate object under the `stripeConfigInjectionKey` symbol, for descendant components.
+The resolved configuration (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`; `apiVersion` as given, though it is not used) is provided as a separate `VueStripeConfig` object under the exported `stripeConfigInjectionKey` symbol. `VueStripePricingTable` reads its publishable key from it. A descendant component injects it the same way:
+
+```vue
+<script setup lang="ts">
+import { inject } from 'vue'
+import { stripeConfigInjectionKey } from '@vue-stripe/vue-stripe'
+
+// VueStripeConfig | null: null outside a VueStripeProvider or the plugin
+const config = inject(stripeConfigInjectionKey, null)
+</script>
+
+<template>
+  <p v-if="config?.stripeAccount">Paying {{ config.stripeAccount }}</p>
+</template>
+```
 
 ## Styling
 
@@ -192,18 +206,26 @@ import '@vue-stripe/vue-stripe/style.css'
 
 ## TypeScript
 
-The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots).
+The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots). The props type is exported as `VueStripeProviderProps`.
 
-```ts
+```vue
+<script setup lang="ts">
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
-import type { VueStripeProviderProps } from '@vue-stripe/vue-stripe'
-import type { Stripe, StripeConstructorOptions } from '@stripe/stripe-js'
+import type { Stripe, StripeConstructorOptions } from '@vue-stripe/vue-stripe'
 
 const options: StripeConstructorOptions = { locale: 'auto' }
 
 const onLoad = (stripe: Stripe) => {
   // stripe is fully typed
+  console.log(stripe)
 }
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="'pk_test_...'" :options="options" @load="onLoad">
+    <slot />
+  </VueStripeProvider>
+</template>
 ```
 
 ## See Also

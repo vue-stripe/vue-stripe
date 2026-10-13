@@ -4,9 +4,9 @@ description: "Vue composables that confirm buy now, pay later payments with Stri
 
 # Buy now, pay later confirmers
 
-Confirm a PaymentIntent with a buy now, pay later method: Affirm, Afterpay / Clearpay, Billie and Klarna. Stripe redirects the customer to the provider to approve the plan and back to your `return_url`.
+Confirm a PaymentIntent with a buy now, pay later method: Affirm, Afterpay / Clearpay, Billie (Stripe beta) and Klarna. Stripe redirects the customer to the provider to approve the plan and back to your `return_url`.
 
-Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider).
+Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider). [What each method needs](/api/composables/confirm/#what-each-method-needs) lists the Intent currency and the `data` each method requires, and [Test your integration](/guide/testing#redirects-qr-codes-bnpl-and-vouchers) what each method does in test mode.
 
 ## When to use
 
@@ -73,6 +73,10 @@ confirmAfterpayClearpayPayment(
 ### useConfirmBilliePayment
 
 Wraps `stripe.confirmBilliePayment()`. Use `stripe.confirmBilliePayment` in the [Billie Payments](https://docs.stripe.com/payments/billie) with Payment Methods flow when the customer submits your payment form. When called, it will confirm the [PaymentIntent](https://docs.stripe.com/api/payment_intents) with `data` you provide, and it will automatically redirect the customer to authorize the transaction.
+
+::: danger Stripe beta
+Billie is a Stripe beta. Stripe.js refuses the call unless the Stripe instance was created with a beta flag: without it, `confirmBilliePayment()` rejects before any request with "You cannot call `stripe.confirmBilliePayment` without supplying an appropriate beta flag when initializing Stripe.js.", and the `error` ref holds the same message. Stripe gives the flag to accounts with access ([contact Stripe](https://support.stripe.com/)). Pass it with the [`betas`](/api/components/stripe-provider#props) prop of `VueStripeProvider`; the [plugin](/api/plugin) has no `betas` option, so wrap the component in a `VueStripeProvider` that sets it.
+:::
 
 ```ts
 const { confirmBilliePayment, loading, error } = useConfirmBilliePayment()

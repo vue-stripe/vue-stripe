@@ -148,6 +148,9 @@ const stripeElement = (): StripeAuBankAccountElement | null => auBankRef.value?.
 
 <template>
   <VueStripeAuBankAccountElement ref="auBankRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -157,12 +160,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-au-bank-account-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-au-bank-account-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-au-bank-account-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-au-bank-account-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-au-bank-account-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-au-bank-account-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-au-bank-account-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading BECS Direct Debit form...</div>
+  </div>
 </div>
 ```
 
@@ -176,7 +183,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-au
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeAuBankAccountElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -193,6 +201,16 @@ const handleChange = (event: StripeAuBankAccountElementChangeEvent) => {
 
 const becsRef = ref<InstanceType<typeof VueStripeAuBankAccountElement> | null>(null)
 const account = (): StripeAuBankAccountElement | null => becsRef.value?.element ?? null
+</script>
+
+<template>
+  <VueStripeAuBankAccountElement
+    ref="becsRef"
+    :options="options"
+    @change="handleChange"
+  />
+  <p v-if="account()">The Stripe element exists</p>
+</template>
 ```
 
 ## See Also
