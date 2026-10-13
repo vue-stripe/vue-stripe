@@ -56,7 +56,7 @@ The Checkout Form (`ui_mode: 'form'`, a Stripe beta) needs API version `2026-03-
 Endive removed two more things:
 
 - **The Payment Request Button element is gone.** The Express Checkout Element replaces it. It shows Apple Pay, Google Pay, Link and other wallets as separate buttons. The `stripe.paymentRequest()` object survives, for a wallet sheet behind your own button, and [`usePaymentRequest`](/api/composables/use-payment-request) wraps it.
-- **`paymentMethodTypes` on `stripe.elements()` is gone.** Stripe now rejects it as an integration error, so `VueStripeElements` dropped its `payment-method-types` prop. The payment methods come from the Intent's `payment_method_types` or your Dashboard settings in the client-secret flow. In the deferred-Intent flow, the `allowedPaymentMethodTypes` option replaces it.
+- **`paymentMethodTypes` on `stripe.elements()` is gone.** Stripe now rejects it as an integration error, so `VueStripeElements` dropped its `payment-method-types` prop. The payment methods come from the Intent's `allowed_payment_method_types` or your Dashboard settings in the client-secret flow. In the deferred-Intent flow, the `allowedPaymentMethodTypes` option replaces it.
 
 Endive is also stricter about Elements groups with no Intent. A group created with neither a client secret nor `mode` makes some elements, such as the Address Element, log "Unable to select session" inside their iframe. A `mode`, `currency` and `amount` on `VueStripeElements` avoid it even when no payment follows.
 

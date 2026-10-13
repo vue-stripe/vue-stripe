@@ -73,7 +73,7 @@ Stripe.js Endive rejects `paymentMethodTypes` on `stripe.elements()` as an integ
   </VueStripeElements>
   ```
 
-- **`clientSecret` flow**: set `payment_method_types` on the PaymentIntent / SetupIntent on your server, or manage payment methods in the Stripe Dashboard. `allowedPaymentMethodTypes` is **not** valid together with `clientSecret`.
+- **`clientSecret` flow**: set `allowed_payment_method_types` on the PaymentIntent / SetupIntent on your server, or manage payment methods in the Stripe Dashboard. `allowedPaymentMethodTypes` is **not** valid together with `clientSecret`.
 :::
 
 ::: tip No Intent yet? Pass `mode`

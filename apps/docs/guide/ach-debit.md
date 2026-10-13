@@ -26,7 +26,7 @@ app.post('/api/ach-payment-intent', async (req, res) => {
   const paymentIntent = await stripe.paymentIntents.create({
     amount: 1000, // decide the amount on the server
     currency: 'usd',
-    payment_method_types: ['us_bank_account'],
+    allowed_payment_method_types: ['us_bank_account'],
     payment_method_options: {
       us_bank_account: {
         financial_connections: { permissions: ['payment_method'] }
@@ -147,7 +147,7 @@ async function verify() {
 
 ## 5. Save the account for later payments
 
-To save the bank account without charging it, create a SetupIntent with `payment_method_types: ['us_bank_account']`, link the account with `collectBankAccountForSetup()` from the same composable, and confirm with `useConfirmUsBankAccountSetup`. Micro-deposits for a SetupIntent are verified with [`useVerifyMicrodepositsForSetup`](/api/composables/use-verify-microdeposits-for-setup).
+To save the bank account without charging it, create a SetupIntent with `allowed_payment_method_types: ['us_bank_account']`, link the account with `collectBankAccountForSetup()` from the same composable, and confirm with `useConfirmUsBankAccountSetup`. Micro-deposits for a SetupIntent are verified with [`useVerifyMicrodepositsForSetup`](/api/composables/use-verify-microdeposits-for-setup).
 
 ## Test it
 

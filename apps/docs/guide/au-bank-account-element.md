@@ -11,6 +11,7 @@ BECS Direct Debit does not succeed at once: the PaymentIntent goes to `processin
 ## Before you begin
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+- Your Stripe account is based in Australia: Stripe offers BECS Direct Debit to Australian accounts only ([Business locations](https://docs.stripe.com/payments/au-becs-debit)). On an account elsewhere, step 1 fails with "All types provided in `allowed_payment_method_types` are invalid", in a sandbox too.
 - BECS Direct Debit is enabled in the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods).
 
 ## 1. Create a BECS PaymentIntent on your server
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
     currency: 'aud', // BECS only supports AUD
-    payment_method_types: ['au_becs_debit']
+    allowed_payment_method_types: ['au_becs_debit']
   })
 
   return Response.json({ clientSecret: paymentIntent.client_secret })
@@ -94,6 +95,10 @@ const handleSubmit = async () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ amount: 1000 })
   })
+  if (!response.ok) {
+    errorMessage.value = 'Could not start the payment. Please try again.'
+    return
+  }
   const { clientSecret } = await response.json()
 
   const { error, paymentIntent } = await confirmAuBecsDebitPayment(clientSecret, {
