@@ -35,11 +35,10 @@ export function whenStripeLoaded(instance: StripeInstance): Promise<Stripe | nul
   }
   return new Promise((resolve) => {
     const stop = watch(
-      () => [instance.stripe.value, instance.loading.value] as const,
-      ([stripe, loading]) => {
-        if (!stripe && loading) return
+      () => !!instance.stripe.value || !instance.loading.value,
+      () => {
         stop()
-        resolve(stripe)
+        resolve(instance.stripe.value)
       }
     )
   })

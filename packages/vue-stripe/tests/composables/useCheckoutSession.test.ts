@@ -186,6 +186,23 @@ describe('useCheckoutSession (Checkout Elements SDK actions)', () => {
     })
   })
 
+  it('turns a non-Error throw into an error result', async () => {
+    const { api, checkout } = await mountWith()
+    const actions = (await checkout.loadActions.mock.results[0]!.value).actions
+    actions.applyPromotionCode.mockImplementation(() => {
+      throw 'boom'
+    })
+    actions.removePromotionCode.mockRejectedValueOnce('gone')
+    await expect(api().applyPromotionCode('X')).resolves.toEqual({
+      type: 'error',
+      error: { message: 'boom', code: null }
+    })
+    await expect(api().removePromotionCode()).resolves.toEqual({
+      type: 'error',
+      error: { message: 'gone', code: null }
+    })
+  })
+
   it('names an action the loaded session does not have instead of "not ready" (#593)', async () => {
     const { api, checkout } = await mountWith()
     const actions = (await checkout.loadActions.mock.results[0]!.value).actions

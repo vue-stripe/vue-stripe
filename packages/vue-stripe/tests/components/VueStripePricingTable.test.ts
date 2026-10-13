@@ -292,6 +292,50 @@ describe('VueStripePricingTable', () => {
       consoleError.mockRestore()
     })
 
+    it('reuses a script tag that already loaded', async () => {
+      const first = mountTables(1)
+      await flushPromises()
+      scripts()[0]!.onload?.(new Event('load'))
+      await flushPromises()
+      const second = mountTables(1)
+      await flushPromises()
+      expect(scripts()).toHaveLength(1)
+      expect(second.findComponent(VueStripePricingTable).emitted('load')).toHaveLength(1)
+      first.unmount()
+      second.unmount()
+    })
+
+    it('adds no tag once the custom element is defined', async () => {
+      const get = vi.spyOn(customElements, 'get').mockReturnValue(class extends HTMLElement {})
+      const wrapper = mountTables(1)
+      await flushPromises()
+      expect(scripts()).toHaveLength(0)
+      expect(wrapper.findComponent(VueStripePricingTable).emitted('load')).toHaveLength(1)
+      wrapper.unmount()
+      get.mockRestore()
+    })
+
+    it("waits for the element a tag from the page's HTML defines", async () => {
+      const own = document.createElement('script')
+      own.src = 'https://js.stripe.com/v3/pricing-table.js'
+      document.head.appendChild(own)
+      let define!: () => void
+      const whenDefined = vi
+        .spyOn(customElements, 'whenDefined')
+        .mockReturnValue(new Promise((resolve) => (define = () => resolve(HTMLElement))))
+      const wrapper = mountTables(1)
+      await flushPromises()
+      const table = wrapper.findComponent(VueStripePricingTable)
+      expect(scripts()).toHaveLength(1)
+      expect(table.emitted('load')).toBeUndefined()
+      define()
+      await flushPromises()
+      expect(whenDefined).toHaveBeenCalledWith('stripe-pricing-table')
+      expect(table.emitted('load')).toHaveLength(1)
+      wrapper.unmount()
+      whenDefined.mockRestore()
+    })
+
     it('reports the failure to every table waiting on the same script', async () => {
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
       const wrapper = mountTables(2)
