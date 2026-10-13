@@ -33,6 +33,7 @@
   border-radius: 4px;
   background-color: white;
   transition: all 0.3s ease;
+  box-sizing: border-box;
   min-height: 44px;
 }
 
@@ -76,6 +77,7 @@
   border-radius: 4px;
   background-color: white;
   transition: all 0.3s ease;
+  box-sizing: border-box;
   min-height: 44px;
 }
 
@@ -113,6 +115,7 @@
   border-radius: 4px;
   background-color: white;
   transition: all 0.3s ease;
+  box-sizing: border-box;
   min-height: 44px;
 }
 
@@ -150,6 +153,7 @@
   border-radius: 4px;
   background-color: white;
   transition: all 0.3s ease;
+  box-sizing: border-box;
   min-height: 44px;
 }
 
@@ -187,6 +191,7 @@
   border-radius: 4px;
   background-color: white;
   transition: all 0.3s ease;
+  box-sizing: border-box;
   min-height: 44px;
 }
 
@@ -330,6 +335,7 @@
   border-radius: 4px;
   background-color: white;
   transition: all 0.3s ease;
+  box-sizing: border-box;
   min-height: 44px;
 }
 

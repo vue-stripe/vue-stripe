@@ -151,7 +151,7 @@ interface StripeExpressCheckoutElementOptions {
 
 Unlike the other element components, `@ready` emits Stripe's ready event (it carries `availablePaymentMethods`), not the element. Use the exposed `element` member to reach the Stripe element.
 
-`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'expressCheckout', error: { message } }`; the message is also shown through the `#error` slot.
+`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'expressCheckout', error: { message } }`; the message is also shown through the `#error` slot. Inside a `VueStripeElements` that has neither a `clientSecret` nor a `mode`, the element is not created and `@loaderror` reports `VueStripeExpressCheckoutElement needs a VueStripeElements with a clientSecret or a mode`.
 
 ### Ready Event
 

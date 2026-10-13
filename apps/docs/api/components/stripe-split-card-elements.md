@@ -115,6 +115,13 @@ All three components emit the same events:
 | `@blur` | `{ elementType: 'cardNumber' }` / `{ elementType: 'cardExpiry' }` / `{ elementType: 'cardCvc' }` | Emitted when the element loses focus |
 | `@escape` | `{ elementType: 'cardNumber' }` / `{ elementType: 'cardExpiry' }` / `{ elementType: 'cardCvc' }` | Emitted when the escape key is pressed |
 
+`VueStripeCardNumberElement` also emits:
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `@networkschange` | `{ elementType: 'cardNumber'; networks: string[] \| null; loading: boolean }` | Emitted when the card networks available for the entered number change (co-badged cards). `networks` lists them, for example `['cartes_bancaires', 'visa']`; it is `null` while `loading` is `true` |
+| `@loaderror` | `{ elementType: 'cardNumber'; error: StripeError }` | Emitted when the element fails to load. Also fires when creating the element fails, with `{ elementType: 'cardNumber', error: { message } }`; the message is also shown through the `#error` slot |
+
 ### Change Event Differences
 
 **StripeCardNumberElement**

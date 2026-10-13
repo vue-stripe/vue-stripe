@@ -33,7 +33,7 @@ const { elements, loading, error } = useStripeElements()
 | `loading` | `Readonly<Ref<boolean>>` | True while Elements is initializing |
 | `error` | `Readonly<Ref<string \| null>>` | Error message if initialization failed |
 
-The `elements`, `loading` and `error` return values are **readonly refs**; `submit`, `fetchUpdates` and `getElement` are functions. Called before the Elements group exists, `submit` and `fetchUpdates` resolve to `{ error: { message: 'Elements not initialized' } }` and `getElement` returns `null`, instead of throwing.
+The `elements`, `loading` and `error` return values are **readonly refs**; `submit`, `fetchUpdates` and `getElement` are functions. Called before the Elements group exists, `submit` and `fetchUpdates` resolve to `{ error: { message: 'Elements not initialized' } }` and `getElement` returns `null`, instead of throwing. Where Stripe.js throws from `elements.fetchUpdates()`, `fetchUpdates` also resolves to `{ error: { message } }`.
 
 ### submit
 
@@ -67,7 +67,7 @@ In the component that renders an element, prefer its exposed `element` through a
 
 ### fetchUpdates
 
-When your server changes the PaymentIntent (amount, currency, payment method options, ...) after the Payment Element has mounted, call `fetchUpdates()` so the mounted elements reflect it:
+When your server changes the PaymentIntent (amount, currency, payment method options, ...) after the Payment Element has mounted, call `fetchUpdates()` so the mounted elements reflect it. It applies only to a group created with a `clientSecret`. On a deferred group (`mode`, `amount`, `currency`), Stripe.js refuses the call and `fetchUpdates()` resolves to `{ error }`; change the `amount` or `currency` prop of `VueStripeElements` instead.
 
 ```ts
 const { fetchUpdates } = useStripeElements()

@@ -1,4 +1,4 @@
-import type { ComponentOptionsMixin, DefineComponent, Ref, ShallowRef } from 'vue-demi'
+import type { ComponentOptionsMixin, DefineComponent, Ref, ShallowRef, VNode } from 'vue-demi'
 import type {
   StripeCheckoutElementsSdk,
   StripeCheckoutFormSdk,
@@ -43,6 +43,18 @@ export interface ElementDefinition {
    * Selector): Elements contexts are skipped, and one alone reports the element unavailable.
    */
   elements?: boolean
+  /**
+   * Set when `elements.create()` needs a group with a `clientSecret` or `mode`: Stripe.js
+   * builds the element on a bare group, then fails asynchronously without `ready` or
+   * `loaderror`. On a bare group the factory reports this message through `loaderror` /
+   * `#error` instead.
+   */
+  needsIntent?: string
+  /**
+   * `true` to create the element a tick after mount, once the elements rendered after it
+   * exist: Stripe.js throws when the Currency Selector is created before the Checkout Form.
+   */
+  createLast?: boolean
   /** Extra members for the component's public instance (e.g. getValue). */
   expose?: (element: Ref<StripeElementLike | null>) => Record<string, unknown>
   loadingText?: string
@@ -101,6 +113,32 @@ export type NetworksChangeEvent<T extends 'card' | 'cardNumber'> = [
   event: { elementType: T; networks: string[] | null; loading: boolean }
 ]
 
+/** A slot that receives `TProps` (nothing when `void`). */
+export type ScopedSlot<TProps = void> = (
+  ...args: [TProps] extends [void] ? [] : [props: TProps]
+) => VNode[]
+
+/**
+ * The `#loading` and `#error` slots every element (and most other components) renders;
+ * `#error` receives the error message.
+ */
+export interface StatusSlots {
+  loading?: ScopedSlot
+  error?: ScopedSlot<{ error: string }>
+}
+
+/**
+ * A component type with typed slots (#671). vue-tsc reads slot props from the `$slots` of
+ * the instance that `new Component(props)` builds, and the `DefineComponent` parameters that
+ * Vue 2.7 and Vue 3 share have no slots, so `$slots` would type every slot prop as `any`.
+ * The extra construct signature comes first, so `new` picks it; `InstanceType` (template
+ * refs) keeps reading the last one, the component's own.
+ */
+export type WithSlots<TComponent extends abstract new (...args: never[]) => object, TSlots> = (new (
+  ...args: unknown[]
+) => Omit<InstanceType<TComponent>, '$slots'> & { $slots: TSlots }) &
+  TComponent
+
 /**
  * Public type of a factory-built element component. `TUnsupported` drops standard members
  * the Stripe element rejects (the Express Checkout Element throws on `clear()`).
@@ -111,15 +149,18 @@ export type StripeElementComponent<
   TExtra extends object = Record<never, never>,
   TEvents extends ElementEvents = ElementEvents,
   TUnsupported extends keyof StripeElementExposed<TElement> = never
-> = DefineComponent<
-  { options?: TOptions | undefined },
-  Omit<StripeElementExposed<TElement>, TUnsupported> & TExtra,
-  Record<never, never>,
-  Record<never, never>,
-  Record<never, never>,
-  ComponentOptionsMixin,
-  ComponentOptionsMixin,
-  { [K in keyof TEvents]: (...args: TEvents[K]) => void }
+> = WithSlots<
+  DefineComponent<
+    { options?: TOptions | undefined },
+    Omit<StripeElementExposed<TElement>, TUnsupported> & TExtra,
+    Record<never, never>,
+    Record<never, never>,
+    Record<never, never>,
+    ComponentOptionsMixin,
+    ComponentOptionsMixin,
+    { [K in keyof TEvents]: (...args: TEvents[K]) => void }
+  >,
+  StatusSlots
 >
 
 /**
@@ -127,19 +168,24 @@ export type StripeElementComponent<
  * the first 8 `DefineComponent` parameters, which Vue 2.7 and Vue 3 share, so the emitted
  * `.d.ts` resolves on both; `defineComponent()`'s inferred type passes Vue 3's 16+.
  * `TProps` is the runtime props object (`typeof props`), so required props and defaults keep
- * their types; `TExposed` is what `expose()` publishes on the template ref.
+ * their types; `TExposed` is what `expose()` publishes on the template ref; `TSlots` gives
+ * each slot's props.
  */
 export type VueStripeComponent<
   TProps,
   TExposed extends object = Record<never, never>,
-  TEvents extends ElementEvents = ElementEvents
-> = DefineComponent<
-  TProps,
-  TExposed,
-  Record<never, never>,
-  Record<never, never>,
-  Record<never, never>,
-  ComponentOptionsMixin,
-  ComponentOptionsMixin,
-  { [K in keyof TEvents]: (...args: TEvents[K]) => void }
+  TEvents extends ElementEvents = ElementEvents,
+  TSlots = StatusSlots
+> = WithSlots<
+  DefineComponent<
+    TProps,
+    TExposed,
+    Record<never, never>,
+    Record<never, never>,
+    Record<never, never>,
+    ComponentOptionsMixin,
+    ComponentOptionsMixin,
+    { [K in keyof TEvents]: (...args: TEvents[K]) => void }
+  >,
+  TSlots
 >

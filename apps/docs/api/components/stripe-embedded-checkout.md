@@ -46,7 +46,7 @@ const onError = (message) => console.error(message)
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `clientSecret` | `string` | One of the two | Client secret of a Checkout Session created with `ui_mode: 'embedded_page'` |
-| `fetchClientSecret` | `() => Promise<string>` | One of the two | Function resolving to the client secret. Stripe calls it when the page is created |
+| `fetchClientSecret` | `() => Promise<string>` | One of the two | Function resolving to the client secret. The component calls it once on mount and passes the secret to Stripe |
 | `onLineItemsChange` | `(event: StripeEmbeddedCheckoutLineItemsChangeEvent) => Promise<ResultAction>` | No | Called when the customer adds, removes or changes a line item. Resolve `{ type: 'accept' }` or `{ type: 'reject', errorMessage }`. Passed to Stripe.js as is; Stripe does not call it on sessions the API creates today (see below) |
 
 The options are read once, when the page is created. To show another Checkout Session, re-mount the component, for example by changing its `key`:
@@ -88,7 +88,7 @@ interface VueStripeEmbeddedCheckoutProps {
 | `@ready` | `StripeEmbeddedCheckout` | Emitted after the page is created and mounted |
 | `@complete` | none | Stripe's `onComplete`: the Checkout Session completed. Fires when Stripe does not redirect, see below |
 | `@analytics` | `StripeEmbeddedCheckoutAnalyticsEventUnion` | Stripe's `onAnalyticsEvent`: `checkoutRendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed` |
-| `@error` | `string` | No client secret was given, another Embedded Checkout is already mounted, or `createEmbeddedCheckoutPage` failed |
+| `@error` | `string` | No client secret was given, `fetchClientSecret` rejected or resolved no client secret, another Embedded Checkout is already mounted, or `createEmbeddedCheckoutPage` failed (for example a session that is not `ui_mode: 'embedded_page'`). `@ready` is not emitted then |
 
 ::: tip Redirect or `@complete`
 By default (`redirect_on_completion: 'always'`) Stripe sends the customer to your `return_url` after payment. To stay on the page and react to `@complete`, create the session with `redirect_on_completion: 'if_required'` (redirect-based payment methods still use `return_url`) or `'never'` (omit `return_url`).
@@ -116,6 +116,8 @@ const onAnalytics = (event) => {
 |-------|-------|----------|
 | `VueStripeProviderError` (thrown) | Not inside `VueStripeProvider` | Wrap the component in `VueStripeProvider` |
 | `requires a clientSecret or fetchClientSecret prop` | Neither prop given | Pass one of them |
+| The rejection's message | `fetchClientSecret` rejected (for example the server route failed) | Fix the route, then re-mount the component |
+| `fetchClientSecret did not resolve to a client secret` | `fetchClientSecret` resolved an empty or non-string value | Resolve the session's `client_secret` |
 | `Only one VueStripeEmbeddedCheckout can be mounted at a time` | A second instance mounted while the first is on the page | Unmount the first one (`v-if`) before mounting another |
 | Stripe error message | Invalid or expired client secret, session not `ui_mode: 'embedded_page'` | Create a new session on your server |
 
@@ -135,7 +137,7 @@ Rendered while `stripe.createEmbeddedCheckoutPage()` is pending. Stripe then sho
 
 ### Error Slot
 
-Rendered when the page could not be created:
+Rendered when the page could not be created, including when `fetchClientSecret` rejects or resolves a session Stripe refuses:
 
 ```vue
 <VueStripeEmbeddedCheckout :client-secret="clientSecret">
@@ -183,7 +185,7 @@ Style the Checkout page itself in the [Stripe Dashboard branding settings](https
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots).
 
 `InstanceType<typeof VueStripeEmbeddedCheckout>` also includes the exposed members. A template ref unwraps their refs, so `checkoutRef.value?.checkout` is a `StripeEmbeddedCheckout | null`.
 

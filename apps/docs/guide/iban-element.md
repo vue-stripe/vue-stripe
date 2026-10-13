@@ -64,7 +64,7 @@ const submitted = ref(false)
 
 ## 3. Render the IBAN Element and confirm
 
-Take the Stripe element from the component's exposed `element` through a template ref and pass it as `sepa_debit`. SEPA needs the account holder's name and email in `billing_details`.
+Take the Stripe element from the component's exposed `element` through a template ref and pass it as `sepa_debit`. SEPA needs the account holder's name and email in `billing_details`. The IBAN Element shows its own validation message ("The IBAN you entered is incomplete.") above the field, in its `#error` slot, so the form only shows the errors from your server and from confirming.
 
 ```vue
 <!-- SepaForm.vue: rendered inside VueStripeElements -->
@@ -87,7 +87,6 @@ const errorMessage = ref('')
 const handleChange = (event: StripeIbanElementChangeEvent) => {
   ibanComplete.value = event.complete
   bankName.value = event.bankName || ''
-  errorMessage.value = event.error?.message || ''
 }
 
 const handleSubmit = async () => {

@@ -46,7 +46,9 @@ See [Style elements](/guide/styling) for the classes it styles.
 
 ### TypeScript cannot find the package's types
 
-Use a module resolution that reads package `exports`, such as `"moduleResolution": "bundler"` (Vite projects) or `"node16"` / `"nodenext"`, in `tsconfig.json`.
+Use a module resolution that reads package `exports`, such as `"moduleResolution": "bundler"` (Vite projects) or `"node16"` / `"nodenext"`, in `tsconfig.json`. The package ships declarations for both ES module files and CommonJS files (`.cts`, or `.ts` in a package without `"type": "module"`).
+
+Up to 6.0.0-beta.2, the declarations fail under `node16` / `nodenext`: TS2834 ("Relative import paths need explicit file extensions") inside `dist/types`, exports such as `useStripe` missing or typed `any`, and TS1479 in a CommonJS file. Update the package, or use `"moduleResolution": "bundler"` on those versions.
 
 ### Vue 2.7: components do not render
 

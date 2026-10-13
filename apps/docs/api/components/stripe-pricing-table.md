@@ -164,7 +164,7 @@ The pricing table itself is styled in the Stripe Dashboard.
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots).
 
 `InstanceType<typeof VueStripePricingTable>` also includes the exposed members. A template ref unwraps their refs, so `pricingTableRef.value?.loading` is a `boolean`.
 

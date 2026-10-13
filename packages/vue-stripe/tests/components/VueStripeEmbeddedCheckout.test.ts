@@ -109,11 +109,77 @@ describe('VueStripeEmbeddedCheckout (stripe.createEmbeddedCheckoutPage)', () => 
     expect(vm.error).toBeNull()
   })
 
-  it('forwards fetchClientSecret unchanged', async () => {
+  // #684: Stripe reports a failing fetchClientSecret only inside its iframe and as an uncaught
+  // IntegrationError, after the page was created, so the component resolves it first.
+  it('resolves fetchClientSecret and passes the secret to Stripe', async () => {
     const fetchClientSecret = vi.fn(() => Promise.resolve('cs_fetched'))
-    const { options } = await mountWith({ fetchClientSecret })
-    expect(options().fetchClientSecret).toBe(fetchClientSecret)
-    expect(options().clientSecret).toBeUndefined()
+    const { options, instances } = await mountWith({ fetchClientSecret })
+    expect(fetchClientSecret).toHaveBeenCalledTimes(1)
+    expect(options().clientSecret).toBe('cs_fetched')
+    expect('fetchClientSecret' in options()).toBe(false)
+    expect(instances()[0]!.emitted('ready')).toHaveLength(1)
+  })
+
+  describe('a failing fetchClientSecret (#684)', () => {
+    const errorSlot = {
+      error: ({ error }: { error: string }) => h('p', { class: 'custom-error' }, error)
+    }
+
+    it.each([
+      [
+        'rejects',
+        () => Promise.reject(new Error('[POST] "/api/checkout": 404 Page not found')),
+        '[POST] "/api/checkout": 404 Page not found'
+      ],
+      [
+        'resolves no client secret',
+        () => Promise.resolve(undefined),
+        'fetchClientSecret did not resolve to a client secret'
+      ]
+    ])('reports it through @error and #error when it %s', async (_, fetchClientSecret, message) => {
+      const { stripe, instances } = await mountWith({ fetchClientSecret }, { slots: errorSlot })
+      const component = instances()[0]!
+      expect(stripe.createEmbeddedCheckoutPage).not.toHaveBeenCalled()
+      expect(component.emitted('error')).toEqual([[message]])
+      expect(component.emitted('ready')).toBeUndefined()
+      expect(component.find('.custom-error').text()).toBe(message)
+    })
+
+    it('reports a session Stripe refuses (not ui_mode embedded_page)', async () => {
+      const message =
+        'Invalid Checkout session. Only Checkout sessions with ui_mode=embedded_page can be used with embedded Checkout.'
+      const create = vi.fn(() => Promise.reject(new Error(message)))
+      const { instances } = await mountWith(
+        { fetchClientSecret: () => Promise.resolve('cs_elements_secret') },
+        { create, slots: errorSlot }
+      )
+      const component = instances()[0]!
+      expect(create.mock.calls[0]).toEqual([
+        expect.objectContaining({ clientSecret: 'cs_elements_secret' })
+      ])
+      expect(component.emitted('error')).toEqual([[message]])
+      expect(component.emitted('ready')).toBeUndefined()
+      expect(component.find('.custom-error').text()).toBe(message)
+    })
+
+    it('creates nothing when unmounted while the secret is fetched, and frees the page slot', async () => {
+      let resolve!: (secret: string) => void
+      const fetchClientSecret = () => new Promise<string>((r) => (resolve = r))
+      const { stripe, shown, instances } = await mountWith({ fetchClientSecret })
+      shown.value = 0
+      await flushPromises()
+      resolve('cs_late')
+      await flushPromises()
+      expect(stripe.createEmbeddedCheckoutPage).not.toHaveBeenCalled()
+
+      shown.value = 1
+      await flushPromises()
+      resolve('cs_next')
+      await flushPromises()
+      await flushPromises()
+      expect(stripe.createEmbeddedCheckoutPage).toHaveBeenCalledTimes(1)
+      expect(instances()[0]!.emitted('error')).toBeUndefined()
+    })
   })
 
   it('emits complete from onComplete and analytics from onAnalyticsEvent', async () => {

@@ -74,7 +74,7 @@ interface UsePaymentIntentReturn {
 |----------|------|-------------|
 | `confirmPayment` | `(options: ConfirmPaymentOptions) => Promise<ConfirmPaymentResult>` | Confirm a payment |
 | `retrievePaymentIntent` | `(clientSecret: string) => Promise<ConfirmPaymentResult>` | Look up a PaymentIntent by its client secret |
-| `loading` | `Readonly<Ref<boolean>>` | Whether a confirm or retrieve is in progress |
+| `loading` | `Readonly<Ref<boolean>>` | `true` while a confirm or retrieve is in flight (until the last of overlapping calls settles) |
 | `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirm or retrieve attempt |
 
 ### retrievePaymentIntent

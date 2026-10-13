@@ -63,6 +63,10 @@ export default /* @__PURE__ */ createStripeElement<
   className: 'vue-stripe-express-checkout-element',
   // `ready` carries availablePaymentMethods, which wallet UIs need.
   readyPayload: 'event',
+  // On a group without a clientSecret or mode Stripe.js throws 'Unable to select session'
+  // asynchronously and never emits ready or loaderror (#662).
+  needsIntent:
+    'VueStripeExpressCheckoutElement needs a VueStripeElements with a clientSecret or a mode',
   createOnly: {
     applePay: true,
     business: true,

@@ -112,7 +112,7 @@ Every composable that calls Stripe.js reports a Stripe error result (a decline, 
 
 The other composables have their own contracts:
 
-- [`useStripeElements`](/api/composables/use-stripe-elements): `submit()` and `fetchUpdates()` resolve to `{ error: { message: 'Elements not initialized' } }` before the Elements group exists, and otherwise return Stripe's result.
+- [`useStripeElements`](/api/composables/use-stripe-elements): `submit()` and `fetchUpdates()` resolve to `{ error: { message: 'Elements not initialized' } }` before the Elements group exists, and otherwise return Stripe's result. `fetchUpdates()` also resolves to `{ error }` where Stripe.js throws, as it does on a deferred (`mode`) group.
 - [`useCheckoutSession`](/api/composables/use-checkout-session) and [`useCheckoutForm`](/api/composables/use-checkout-form): an action called before the session is ready resolves to `{ type: 'error', error: { message: 'Checkout session is not ready yet' } }`; otherwise it returns Stripe's result.
 - [`usePaymentRequest`](/api/composables/use-payment-request): methods never throw; failures set its `error` ref.
 - [`useStripeCheckout`](/api/composables/use-stripe-checkout): `redirectToCheckout()` rejects with `VueStripeCheckoutError` when `url` is empty.

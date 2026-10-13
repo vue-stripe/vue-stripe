@@ -45,19 +45,26 @@ app.post('/api/subscription-checkout', async (req, res) => {
 
 ```vue
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 
 const { redirectToUrl, loading } = useStripeCheckout()
+const failed = ref(false)
 
 const subscribe = async () => {
+  failed.value = false
   const response = await fetch('/api/subscription-checkout', { method: 'POST' })
-  const { url } = await response.json()
-  redirectToUrl(url)
+  if (!response.ok) {
+    failed.value = true
+    return
+  }
+  redirectToUrl((await response.json()).url)
 }
 </script>
 
 <template>
   <button :disabled="loading" @click="subscribe">Subscribe</button>
+  <p v-if="failed" class="error">Could not start checkout. Please try again.</p>
 </template>
 ```
 
@@ -111,13 +118,19 @@ import ConfirmSubscription from './ConfirmSubscription.vue'
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const email = ref('')
 const clientSecret = ref('')
+const failed = ref(false)
 
 const start = async () => {
+  failed.value = false
   const response = await fetch('/api/subscription', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email.value })
   })
+  if (!response.ok) {
+    failed.value = true
+    return
+  }
   clientSecret.value = (await response.json()).clientSecret
 }
 </script>
@@ -126,6 +139,7 @@ const start = async () => {
   <form v-if="!clientSecret" @submit.prevent="start">
     <input v-model="email" type="email" placeholder="Email" required />
     <button>Continue</button>
+    <p v-if="failed" class="error">Could not start the subscription. Please try again.</p>
   </form>
 
   <VueStripeProvider v-else :publishable-key="publishableKey">
@@ -225,15 +239,22 @@ const subscribe = async () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ paymentMethodId: setupIntent.payment_method, priceId: props.priceId })
   })
-  const subscription: { status: string; clientSecret?: string } = await response.json()
+  if (!response.ok) {
+    message.value = 'The subscription could not be started. Please try again.'
+    return
+  }
+  const subscription: { status: string; paymentStatus?: string; clientSecret?: string } =
+    await response.json()
 
   // 3. The bank asked for authentication on the first payment
-  if (subscription.status === 'incomplete' && subscription.clientSecret) {
+  if (subscription.paymentStatus === 'requires_action' && subscription.clientSecret) {
     const { error: actionError } = await handleNextAction({ clientSecret: subscription.clientSecret })
     message.value = actionError ? (actionError.message ?? 'Authentication failed.') : 'Subscription started.'
     return
   }
-  message.value = subscription.status === 'active' ? 'Subscription started.' : 'The first payment failed.'
+  // 4. Otherwise the first payment succeeded (or there is a trial), or it was declined
+  const started = subscription.status === 'active' || subscription.status === 'trialing'
+  message.value = started ? 'Subscription started.' : 'The first payment failed.'
 }
 </script>
 
@@ -250,16 +271,24 @@ app.post('/api/create-subscription', async (req, res) => {
     customer: req.user.stripeCustomerId,
     items: [{ price: req.body.priceId }], // check it is one of your plans
     default_payment_method: req.body.paymentMethodId,
-    expand: ['latest_invoice.confirmation_secret']
+    expand: ['latest_invoice.payments']
   })
+  if (subscription.status !== 'incomplete') {
+    return res.json({ status: subscription.status }) // active, or trialing
+  }
+
+  // The first payment did not go through: read its PaymentIntent
+  const { payment } = subscription.latest_invoice.payments.data[0]
+  const paymentIntent = await stripe.paymentIntents.retrieve(payment.payment_intent)
   res.json({
     status: subscription.status,
-    clientSecret: subscription.latest_invoice.confirmation_secret?.client_secret
+    paymentStatus: paymentIntent.status, // requires_action, or requires_payment_method when declined
+    clientSecret: paymentIntent.client_secret
   })
 })
 ```
 
-The SetupIntent attaches the card to the customer because it was created with `customer`. The subscription charges the first invoice right away; it is `active` when that succeeds, and `incomplete` when the payment needs authentication (finished in the browser by `useHandleNextAction`) or fails.
+The SetupIntent attaches the card to the customer because it was created with `customer`. The subscription charges the first invoice right away; it is `active` when that succeeds, and `incomplete` when the payment needs authentication or is declined. The first payment's PaymentIntent tells the two apart: `requires_action` means the bank wants 3D Secure, which `useHandleNextAction` runs in the browser; `requires_payment_method` means the card was declined, and the page shows "The first payment failed." Try both with `4000 0027 6000 3184` and `4000 0000 0000 0341` ([Test your integration](/guide/testing#subscriptions-and-renewals)).
 
 ## Keep access in sync with webhooks
 

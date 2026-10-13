@@ -9,7 +9,7 @@ import { VueStripeProviderError } from '../utils/errors'
 import { loadStripeInstance } from '../utils/load-stripe'
 import { statusShell } from '../utils/status-shell'
 import { errorLogger } from '../utils/report'
-import type { VueStripeComponent } from '../utils/element-types'
+import type { ScopedSlot, StatusSlots, VueStripeComponent } from '../utils/element-types'
 
 const providerProps = {
   publishableKey: { type: String as PropType<string | undefined>, default: undefined },
@@ -31,6 +31,9 @@ const providerProps = {
   /** Any `loadStripe()` option (`stripeAccount`, `apiVersion`, `locale`, `betas`, `developerTools`). Explicit props win. */
   options: { type: Object as PropType<StripeConstructorOptions | undefined>, default: undefined }
 }
+
+/** Slot name -> the slot's props. */
+type ProviderSlots = StatusSlots & { default?: ScopedSlot }
 
 /** Event name -> payload. */
 type ProviderEvents = {
@@ -107,4 +110,9 @@ export default /* @__PURE__ */ defineComponent({
         'Loading Stripe...'
       )
   }
-}) as unknown as VueStripeComponent<typeof providerProps, Record<never, never>, ProviderEvents>
+}) as unknown as VueStripeComponent<
+  typeof providerProps,
+  Record<never, never>,
+  ProviderEvents,
+  ProviderSlots
+>

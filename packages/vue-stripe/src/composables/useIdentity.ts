@@ -25,7 +25,9 @@ import { injectStripe, whenStripeLoaded } from '../utils/inject-stripe'
 export function useIdentity(): UseIdentityReturn {
   const stripeInstance = injectStripe('useIdentity')
 
+  // Overlapping calls: stay loading until the last one settles.
   const loading = ref(false)
+  let pending = 0
   const error = ref<string | null>(null)
 
   const verifyIdentity = async (clientSecret: string): Promise<VerifyIdentityResult> => {
@@ -35,6 +37,7 @@ export function useIdentity(): UseIdentityReturn {
       return { error: { message: 'Stripe not initialized' } }
     }
 
+    pending++
     loading.value = true
     error.value = null
 
@@ -51,7 +54,7 @@ export function useIdentity(): UseIdentityReturn {
       error.value = errorMessage
       return { error: { message: errorMessage } }
     } finally {
-      loading.value = false
+      loading.value = --pending > 0
     }
   }
 
