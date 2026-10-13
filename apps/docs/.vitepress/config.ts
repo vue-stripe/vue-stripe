@@ -91,6 +91,7 @@ const guideSidebar: DefaultTheme.SidebarItem[] = requirePages([
           { text: 'Use Vue Stripe on Vue 2.7', link: '/guide/vue-2' },
           { text: 'Use Vue Stripe with Nuxt and SSR', link: '/guide/ssr' },
           { text: 'Use Vue Stripe in a Vite SSR app', link: '/guide/vite-ssr' },
+          { text: 'Use Vue Stripe in VitePress', link: '/guide/vitepress' },
           { text: 'Provide Stripe app-wide (plugin)', link: '/guide/plugin' },
           { text: 'Upgrade from v5 to v6', link: '/guide/migration-v6' }
         ]
