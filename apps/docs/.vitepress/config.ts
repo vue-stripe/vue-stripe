@@ -23,7 +23,8 @@ const explanationSlugs = [
   'payment-objects',
   'confirming-payments',
   'stripe-js-loading',
-  'stripe-js-versions'
+  'stripe-js-versions',
+  'security'
 ]
 const tutorialMatch = `^/guide/(${tutorialSlugs.join('|')})`
 const explanationMatch = `^/guide/(${explanationSlugs.join('|')})$`
@@ -142,7 +143,8 @@ const guideSidebar: DefaultTheme.SidebarItem[] = withPages([
       { text: 'Payment objects: Intents, Sessions, tokens', link: '/guide/payment-objects' },
       { text: 'How confirming works', link: '/guide/confirming-payments' },
       { text: 'How Stripe.js is loaded', link: '/guide/stripe-js-loading' },
-      { text: 'Stripe.js versions and what v6 changed', link: '/guide/stripe-js-versions' }
+      { text: 'Stripe.js versions and what v6 changed', link: '/guide/stripe-js-versions' },
+      { text: 'What runs where: keys and PCI', link: '/guide/security' }
     ]
   }
 ])
