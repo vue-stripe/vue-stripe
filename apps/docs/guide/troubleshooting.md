@@ -28,7 +28,9 @@ A wrong or revoked publishable key does not show here: Stripe.js accepts any key
 
 The publishable key is wrong, revoked or malformed. Stripe.js only checks it on the first request, so the provider loads and the first element reports the error through `@loaderror` and its `#error` slot (a composable call resolves `{ error }` instead). Copy the publishable key again from the [API keys page](https://dashboard.stripe.com/apikeys), with no spaces or line breaks, in the mode (test or live) you want.
 
-### Elements show "No such payment_intent" or a key error
+### Elements show "The client_secret provided does not match any associated PaymentIntent on this account"
+
+The full message is "The client_secret provided does not match any associated PaymentIntent on this account. Ensure the publishable key used belongs to the same account that created the PaymentIntent." With Stripe.js 10 the element reports it through `@loaderror` and its `#error` slot, after Stripe retries for about 15 seconds. ("No such payment_intent" comes from `retrievePaymentIntent()` or `handleNextAction()` with an unknown PaymentIntent ID, not from the elements.)
 
 The client secret and the publishable key belong to different Stripe accounts or modes. Create the PaymentIntent with the secret key of the same account, in the same mode (test or live), as the publishable key in the browser.
 
