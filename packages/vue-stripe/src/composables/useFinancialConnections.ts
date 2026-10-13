@@ -1,8 +1,7 @@
-import { inject, ref, readonly } from 'vue-demi'
+import { ref, readonly } from 'vue-demi'
 import type { Stripe } from '@stripe/stripe-js'
 import type { UseFinancialConnectionsReturn, VueStripeErrorResult } from '../types'
-import { stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { injectStripe, whenStripeLoaded } from '../utils/inject-stripe'
 
 /**
  * Composable for Stripe Financial Connections and ACH Direct Debit bank account
@@ -28,13 +27,7 @@ import { VueStripeProviderError } from '../utils/errors'
  * ```
  */
 export function useFinancialConnections(): UseFinancialConnectionsReturn {
-  const stripeInstance = inject(stripeInjectionKey)
-
-  if (!stripeInstance) {
-    throw new VueStripeProviderError(
-      'useFinancialConnections must be called within a VueStripeProvider component'
-    )
-  }
+  const stripeInstance = injectStripe('useFinancialConnections')
 
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -44,7 +37,8 @@ export function useFinancialConnections(): UseFinancialConnectionsReturn {
     call: (stripe: Stripe) => Promise<T>,
     fallback: string
   ): Promise<T | VueStripeErrorResult> => {
-    if (!stripeInstance.stripe.value) {
+    const stripe = stripeInstance.stripe.value ?? (await whenStripeLoaded(stripeInstance))
+    if (!stripe) {
       error.value = 'Stripe not initialized'
       return { error: { message: 'Stripe not initialized' } }
     }
@@ -53,7 +47,7 @@ export function useFinancialConnections(): UseFinancialConnectionsReturn {
     error.value = null
 
     try {
-      const result = await call(stripeInstance.stripe.value)
+      const result = await call(stripe)
 
       if (result.error) {
         error.value = result.error.message || fallback

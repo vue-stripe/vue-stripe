@@ -1,7 +1,6 @@
-import { inject, ref, readonly } from 'vue-demi'
+import { ref, readonly } from 'vue-demi'
 import type { UseIdentityReturn, VerifyIdentityResult } from '../types'
-import { stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { injectStripe, whenStripeLoaded } from '../utils/inject-stripe'
 
 /**
  * Composable for Stripe Identity verification.
@@ -24,19 +23,14 @@ import { VueStripeProviderError } from '../utils/errors'
  * ```
  */
 export function useIdentity(): UseIdentityReturn {
-  const stripeInstance = inject(stripeInjectionKey)
-
-  if (!stripeInstance) {
-    throw new VueStripeProviderError(
-      'useIdentity must be called within a VueStripeProvider component'
-    )
-  }
+  const stripeInstance = injectStripe('useIdentity')
 
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   const verifyIdentity = async (clientSecret: string): Promise<VerifyIdentityResult> => {
-    if (!stripeInstance.stripe.value) {
+    const stripe = stripeInstance.stripe.value ?? (await whenStripeLoaded(stripeInstance))
+    if (!stripe) {
       error.value = 'Stripe not initialized'
       return { error: { message: 'Stripe not initialized' } }
     }
@@ -45,7 +39,7 @@ export function useIdentity(): UseIdentityReturn {
     error.value = null
 
     try {
-      const result = await stripeInstance.stripe.value.verifyIdentity(clientSecret)
+      const result = await stripe.verifyIdentity(clientSecret)
 
       if (result.error) {
         error.value = result.error.message || 'Failed to verify identity'

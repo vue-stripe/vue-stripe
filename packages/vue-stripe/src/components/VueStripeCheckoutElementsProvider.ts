@@ -1,6 +1,5 @@
 import {
   defineComponent,
-  inject,
   markRaw,
   onUnmounted,
   provide,
@@ -16,8 +15,8 @@ import type {
   StripeCheckoutLoadActionsSuccess,
   StripeCheckoutSession
 } from '@stripe/stripe-js'
-import { stripeCheckoutInjectionKey, stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { stripeCheckoutInjectionKey } from '../utils/injection-keys'
+import { injectStripe } from '../utils/inject-stripe'
 import { hx } from '../utils/h'
 import { statusShell } from '../utils/status-shell'
 import type { VueStripeComponent } from '../utils/element-types'
@@ -68,12 +67,7 @@ export default /* @__PURE__ */ defineComponent({
   props: checkoutElementsProviderProps,
   emits: ['ready', 'change', 'error'] satisfies Array<keyof CheckoutElementsProviderEvents>,
   setup(props, { emit, slots }) {
-    const stripeInstance = inject(stripeInjectionKey, null)
-    if (!stripeInstance) {
-      throw new VueStripeProviderError(
-        'VueStripeCheckoutElementsProvider must be used within VueStripeProvider or an app using createVueStripe()'
-      )
-    }
+    const stripeInstance = injectStripe('VueStripeCheckoutElementsProvider')
 
     // Stripe objects are never made deeply reactive.
     const checkout = shallowRef<StripeCheckoutElementsSdk | null>(null)
@@ -119,21 +113,30 @@ export default /* @__PURE__ */ defineComponent({
 
         sdk.on('change', (next) => {
           if (unmounted) return
-          session.value = markRaw(next)
+          // `session` stays null until the actions load, like `actions`.
+          if (actions.value) session.value = markRaw(next)
           emit('change', next)
         })
 
-        void sdk.loadActions().then((result) => {
-          if (unmounted) return
-          if (result.type === 'error') {
-            fail(result.error.message)
-            return
+        // loadActions() rejects (rather than resolving { type: 'error' }) when Stripe
+        // refuses an option, e.g. defaultValues.email on a session with customer_email.
+        sdk.loadActions().then(
+          (result) => {
+            if (unmounted) return
+            if (result.type === 'error') {
+              fail(result.error.message)
+              return
+            }
+            actions.value = markRaw(result.actions)
+            session.value = markRaw(result.actions.getSession())
+            loading.value = false
+            emit('ready', result.actions)
+          },
+          (err: unknown) => {
+            if (unmounted) return
+            fail(err instanceof Error ? err.message : String(err))
           }
-          actions.value = markRaw(result.actions)
-          session.value = markRaw(result.actions.getSession())
-          loading.value = false
-          emit('ready', result.actions)
-        })
+        )
       } catch (err) {
         started = false
         checkout.value = null

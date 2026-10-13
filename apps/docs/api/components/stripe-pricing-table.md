@@ -82,7 +82,7 @@ frame-src https://js.stripe.com;
 | `@load` | - | Emitted when the pricing table script loads successfully |
 | `@error` | `Error` | Emitted when the script fails to load (network error, CSP blocking). The message is also shown through the `#error` slot |
 
-`@error` reports only script load failures. An invalid or deleted pricing table ID is handled by Stripe's web component, not by `@error`. To retry after a load error, remount the component by changing its `key`; [Handle errors and declines](/guide/error-handling#_5-handle-checkout-errors) shows how.
+`@error` reports only script load failures. An invalid or deleted pricing table ID is handled by Stripe's web component, not by `@error`. A failed script tag is removed, and every table waiting on it gets `@error`. To retry after a load error, remount the component by changing its `key`: the remount adds a new script tag and emits `@load` once it loads. [Handle errors and declines](/guide/error-handling#_5-handle-checkout-errors) shows how.
 
 ## Slots
 

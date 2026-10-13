@@ -28,7 +28,8 @@ import { VueStripeElementsError } from '../utils/errors'
  * ```
  */
 export function useStripeElements(): UseStripeElementsReturn {
-  const elementsContext = inject(stripeElementsInjectionKey)
+  // The default keeps Vue from warning "injection not found" before the typed error.
+  const elementsContext = inject(stripeElementsInjectionKey, null)
 
   if (!elementsContext) {
     throw new VueStripeElementsError(

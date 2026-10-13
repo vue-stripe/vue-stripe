@@ -4,7 +4,7 @@ description: "VueStripeCurrencySelectorElement reference: let customers choose t
 
 # VueStripeCurrencySelectorElement
 
-Lets customers choose the currency they pay in. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createCurrencySelectorElement()`, no beta needed), inside a [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider) (created with the Checkout Form SDK's `createCurrencySelectorElement()`; the form then leaves out its built-in currency picker), or inside [VueStripeElements](/api/components/stripe-elements) with Stripe beta access (`elements.create('currencySelector')`). It needs a Checkout Session with [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing) enabled.
+Lets customers choose the currency they pay in. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createCurrencySelectorElement()`, no beta needed) or inside a [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider) (created with the Checkout Form SDK's `createCurrencySelectorElement()`; the form then leaves out its built-in currency picker). It needs a Checkout Session with [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing) enabled. Stripe.js does not create it in a plain Elements group ("The `currencySelector` Element cannot be created without using Custom Checkout"), so inside [VueStripeElements](/api/components/stripe-elements) alone it does not call `elements.create()`: it reports "VueStripeCurrencySelectorElement is not available inside VueStripeElements" through `@loaderror` and the `#error` slot. Inside a `VueStripeElements` nested in a Checkout provider, it uses the Checkout SDK.
 
 ## Usage
 
@@ -54,7 +54,7 @@ The Currency Selector element takes no configuration: Stripe's `StripeCurrencySe
 | `@escape` | - | Emitted when the user presses the Escape key |
 | `@loaderror` | `{ elementType: 'currencySelector'; error: StripeError }` | Emitted when the element fails to load |
 
-`@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'currencySelector', error: { message } }`; the message is also shown through the `#error` slot.
+`@loaderror` also fires when creating the element fails (for example inside `VueStripeElements` without a Checkout provider), with the payload `{ elementType: 'currencySelector', error: { message } }`; the message is also shown through the `#error` slot.
 
 ::: tip
 The Currency Selector does **not** emit a `@change` event — the selected currency is reflected on the reactive session exposed by [useCheckoutSession](/api/composables/use-checkout-session).

@@ -1,8 +1,8 @@
 import { inject, ref, readonly } from 'vue-demi'
 import type { CreatePaymentMethodData, CreatePaymentMethodFromElements } from '@stripe/stripe-js'
 import type { UseCreatePaymentMethodReturn, CreatePaymentMethodOptions } from '../types'
-import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { stripeElementsInjectionKey } from '../utils/injection-keys'
+import { injectStripe, whenStripeLoaded } from '../utils/inject-stripe'
 
 /**
  * Composable for creating a PaymentMethod with the raw Stripe instance.
@@ -26,20 +26,15 @@ import { VueStripeProviderError } from '../utils/errors'
  * ```
  */
 export function useCreatePaymentMethod(): UseCreatePaymentMethodReturn {
-  const stripeInstance = inject(stripeInjectionKey)
+  const stripeInstance = injectStripe('useCreatePaymentMethod')
   const elementsInstance = inject(stripeElementsInjectionKey, null)
-
-  if (!stripeInstance) {
-    throw new VueStripeProviderError(
-      'useCreatePaymentMethod must be called within a VueStripeProvider component or an app using createVueStripe()'
-    )
-  }
 
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   const createPaymentMethod = async (options: CreatePaymentMethodOptions = {}) => {
-    if (!stripeInstance.stripe.value) {
+    const stripe = stripeInstance.stripe.value ?? (await whenStripeLoaded(stripeInstance))
+    if (!stripe) {
       error.value = 'Stripe not initialized'
       return { error: { message: 'Stripe not initialized' } }
     }
@@ -70,7 +65,6 @@ export function useCreatePaymentMethod(): UseCreatePaymentMethodReturn {
       }
 
       // Stripe overloads createPaymentMethod by input shape: Elements-based or raw data.
-      const stripe = stripeInstance.stripe.value
       const result = params.elements
         ? await stripe.createPaymentMethod(params as CreatePaymentMethodFromElements)
         : await stripe.createPaymentMethod(params as CreatePaymentMethodData)

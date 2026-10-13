@@ -1,7 +1,6 @@
-import { computed, inject, readonly } from 'vue-demi'
+import { computed, readonly } from 'vue-demi'
 import type { UseStripeReturn } from '../types'
-import { stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { injectStripe } from '../utils/inject-stripe'
 
 /**
  * Composable to access the Stripe instance
@@ -24,13 +23,7 @@ import { VueStripeProviderError } from '../utils/errors'
  * ```
  */
 export function useStripe(): UseStripeReturn {
-  const stripeInstance = inject(stripeInjectionKey)
-
-  if (!stripeInstance) {
-    throw new VueStripeProviderError(
-      'useStripe must be called within a VueStripeProvider component or an app using createVueStripe()'
-    )
-  }
+  const stripeInstance = injectStripe('useStripe')
 
   return {
     // computed, not readonly(): Vue 2.7's readonly() copies plain objects, so Stripe's

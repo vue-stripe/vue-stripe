@@ -124,9 +124,9 @@ const train: ReleaseTrain = 'endive'
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@load` | `Stripe` | Emitted when Stripe.js loads successfully |
-| `@error` | `Error` | Emitted when Stripe.js fails to load (network error, invalid publishable key). The message is also shown through the `#error` slot |
+| `@error` | `Error` | Emitted when Stripe.js fails to load (network error, blocked script) or rejects the key at load time (a secret key). The message is also shown through the `#error` slot |
 
-An invalid publishable key is not validated up front; it surfaces as a load failure through `@error`. The failure is not cached, so re-mounting the provider tries again.
+Stripe.js does not validate a publishable key when it loads: with a wrong, revoked or malformed key the provider emits `@load` and renders its default slot. The key fails on the first request to Stripe, as `Invalid API Key provided` in the first element's `@loaderror` and `#error` slot, or in the `{ error }` of the first composable call. Only a secret key (`sk_...`) fails the load. A load failure is not cached, so re-mounting the provider tries again.
 
 ## Slots
 

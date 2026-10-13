@@ -107,7 +107,7 @@ Each action is forwarded to `actions` (Stripe's `StripeCheckoutLoadActionsSucces
 | `updateTaxIdInfo(info)` | Set the business name and tax ID (pass `null` to clear) |
 | `runServerUpdate(fn)` | Run your own server update (e.g. changing the session server-side) and refresh the session afterwards |
 | `validateElements()` | Validate every mounted Checkout element |
-| `addOptionalLineItem(priceId)` / `removeOptionalLineItem(priceId)` | Toggle optional items configured on the session |
+| `addOptionalLineItem(priceId)` / `removeOptionalLineItem(priceId)` | Toggle optional items. Not available for `ui_mode: 'elements'` sessions: the Checkout Sessions API rejects `optional_items` for them, and Stripe.js loads no such action, so these resolve to `{ type: 'error' }` with "addOptionalLineItem is not available for this Checkout Session" |
 
 ### SDK methods
 
@@ -124,7 +124,7 @@ Each action is forwarded to `actions` (Stripe's `StripeCheckoutLoadActionsSucces
 These call the SDK handle, which exists before the actions load. Called before the SDK exists, `changeAppearance` and `loadFonts` log a `[Vue Stripe]` warning and do nothing, and the getters return `null`. Inside a component you can also take the element from the component's exposed `element` ref.
 
 ::: info Result shape
-The actions resolve to Stripe's discriminated result: `{ type: 'success'; session }` on success or `{ type: 'error'; error }` on failure — always branch on `result.type`.
+The actions resolve to Stripe's discriminated result: `{ type: 'success'; session }` on success or `{ type: 'error'; error }` on failure. They never reject: when Stripe.js throws an integration error instead of resolving (for example `confirm()` on a session with no email, or `updateLineItemQuantity()` on a session without `adjustable_quantity`), the action resolves to `{ type: 'error', error: { message, code: null } }` with Stripe's message. Always branch on `result.type`.
 :::
 
 ::: warning Before the actions load

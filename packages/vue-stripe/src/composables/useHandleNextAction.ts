@@ -1,7 +1,6 @@
-import { inject, ref, readonly } from 'vue-demi'
+import { ref, readonly } from 'vue-demi'
 import type { UseHandleNextActionReturn, HandleNextActionOptions } from '../types'
-import { stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { injectStripe, whenStripeLoaded } from '../utils/inject-stripe'
 
 /**
  * Composable for invoking the next action (e.g. 3DS authentication) on a
@@ -24,19 +23,14 @@ import { VueStripeProviderError } from '../utils/errors'
  * ```
  */
 export function useHandleNextAction(): UseHandleNextActionReturn {
-  const stripeInstance = inject(stripeInjectionKey)
-
-  if (!stripeInstance) {
-    throw new VueStripeProviderError(
-      'useHandleNextAction must be called within a VueStripeProvider component or an app using createVueStripe()'
-    )
-  }
+  const stripeInstance = injectStripe('useHandleNextAction')
 
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   const handleNextAction = async (options: HandleNextActionOptions) => {
-    if (!stripeInstance.stripe.value) {
+    const stripe = stripeInstance.stripe.value ?? (await whenStripeLoaded(stripeInstance))
+    if (!stripe) {
       error.value = 'Stripe not initialized'
       return { error: { message: 'Stripe not initialized' } }
     }
@@ -46,7 +40,6 @@ export function useHandleNextAction(): UseHandleNextActionReturn {
 
     try {
       // Two Stripe overloads: an Intent client secret, or a shared payment token's hashedValue.
-      const stripe = stripeInstance.stripe.value
       const result =
         'hashedValue' in options
           ? await stripe.handleNextAction({ hashedValue: options.hashedValue })

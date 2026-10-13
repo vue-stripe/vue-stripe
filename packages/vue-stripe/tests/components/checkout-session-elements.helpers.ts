@@ -15,9 +15,12 @@ import {
   makeMockStripe
 } from '../setup'
 
-type LeafContext = 'checkout' | 'form' | 'elements'
+type LeafContext = 'checkout' | 'form' | 'elements' | 'both'
 
-/** Mount `Leaf` under Provider > (CheckoutElementsProvider | CheckoutFormProvider | Elements). */
+/**
+ * Mount `Leaf` under Provider > (CheckoutElementsProvider | CheckoutFormProvider | Elements),
+ * or `both`: Elements nested inside the CheckoutElementsProvider.
+ */
 export async function mountLeaf(
   Leaf: Component,
   { context = 'checkout' as LeafContext, options = {}, slots = {} } = {}
@@ -47,7 +50,15 @@ export async function mountLeaf(
       h(VueStripeCheckoutElementsProvider, { clientSecret: 'cs_test_secret' }, { default: leaf }),
     form: () =>
       h(VueStripeCheckoutFormProvider, { clientSecret: 'cs_test_secret' }, { default: leaf }),
-    elements: () => h(VueStripeElements, { clientSecret: 'pi_1_secret_2' }, { default: leaf })
+    elements: () => h(VueStripeElements, { clientSecret: 'pi_1_secret_2' }, { default: leaf }),
+    both: () =>
+      h(
+        VueStripeCheckoutElementsProvider,
+        { clientSecret: 'cs_test_secret' },
+        {
+          default: () => h(VueStripeElements, { clientSecret: 'pi_1_secret_2' }, { default: leaf })
+        }
+      )
   }
   const wrapper = mount(VueStripeProvider, {
     props: { publishableKey: 'pk_test_123' },

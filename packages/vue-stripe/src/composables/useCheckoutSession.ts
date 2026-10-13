@@ -10,6 +10,7 @@ import type {
 import type { UseCheckoutSessionReturn } from '../types'
 import { stripeCheckoutInjectionKey } from '../utils/injection-keys'
 import { VueStripeCheckoutError } from '../utils/errors'
+import { forwardCheckoutAction } from '../utils/checkout-action'
 
 type ElementGetter = Extract<keyof StripeCheckoutElementsSdk, `get${string}Element`>
 
@@ -42,24 +43,12 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
   }
 
   // Forward an action by name. Generic over the key so a renamed Stripe action
-  // fails the build. Before loadActions() resolves, return Stripe's own
-  // error-result shape instead of throwing.
+  // fails the build. Every outcome resolves to Stripe's result shape (see
+  // forwardCheckoutAction), so callers only branch on `result.type`.
   const call = <K extends keyof StripeCheckoutLoadActionsSuccess>(
     name: K
-  ): StripeCheckoutLoadActionsSuccess[K] => {
-    const wrapped = (...args: unknown[]) => {
-      const current = ctx.actions.value
-      const fn = current?.[name]
-      if (typeof fn !== 'function') {
-        return Promise.resolve({
-          type: 'error',
-          error: { message: 'Checkout session is not ready yet', code: null }
-        })
-      }
-      return (fn as (...a: unknown[]) => unknown).apply(current, args)
-    }
-    return wrapped as StripeCheckoutLoadActionsSuccess[K]
-  }
+  ): StripeCheckoutLoadActionsSuccess[K] =>
+    forwardCheckoutAction(ctx.actions, name) as StripeCheckoutLoadActionsSuccess[K]
 
   // Appearance and fonts live on the SDK handle, which exists before actions load.
   const withCheckout = (method: string, run: () => void) => {

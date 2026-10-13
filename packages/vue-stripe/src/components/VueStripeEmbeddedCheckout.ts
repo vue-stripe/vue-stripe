@@ -1,7 +1,6 @@
 import {
   defineComponent,
   getCurrentInstance,
-  inject,
   markRaw,
   onMounted,
   onUnmounted,
@@ -17,8 +16,7 @@ import type {
   StripeEmbeddedCheckoutAnalyticsEventUnion,
   StripeEmbeddedCheckoutOptions
 } from '@stripe/stripe-js'
-import { stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { injectStripe } from '../utils/inject-stripe'
 import { renderElement } from '../utils/element-render'
 import type { VueStripeComponent } from '../utils/element-types'
 
@@ -74,12 +72,7 @@ export default /* @__PURE__ */ defineComponent({
   props: embeddedCheckoutProps,
   emits: ['ready', 'complete', 'analytics', 'error'] satisfies Array<keyof EmbeddedCheckoutEvents>,
   setup(props, { emit, expose, slots }) {
-    const stripeInstance = inject(stripeInjectionKey, null)
-    if (!stripeInstance) {
-      throw new VueStripeProviderError(
-        'VueStripeEmbeddedCheckout must be used within VueStripeProvider'
-      )
-    }
+    const stripeInstance = injectStripe('VueStripeEmbeddedCheckout')
 
     // Stripe objects are never made deeply reactive.
     const checkout = shallowRef<StripeEmbeddedCheckout | null>(null)

@@ -1,6 +1,5 @@
 import {
   defineComponent,
-  inject,
   nextTick,
   onBeforeUnmount,
   onMounted,
@@ -21,8 +20,8 @@ import type {
   StripeElementsUpdateOptions
 } from '@stripe/stripe-js'
 import type { CaptureMethod, ElementsMode, SetupFutureUsage } from '../types'
-import { stripeElementsInjectionKey, stripeInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { stripeElementsInjectionKey } from '../utils/injection-keys'
+import { injectStripe } from '../utils/inject-stripe'
 import { statusShell } from '../utils/status-shell'
 import type { VueStripeComponent } from '../utils/element-types'
 
@@ -78,12 +77,7 @@ export default /* @__PURE__ */ defineComponent({
   props: elementsProps,
   emits: ['ready', 'error', 'update-end'] satisfies Array<keyof ElementsEvents>,
   setup(props, { emit, slots }) {
-    const stripeInstance = inject(stripeInjectionKey, null)
-    if (!stripeInstance) {
-      throw new VueStripeProviderError(
-        'VueStripeElements must be used within VueStripeProvider or an app using createVueStripe()'
-      )
-    }
+    const stripeInstance = injectStripe('VueStripeElements')
 
     const elements = shallowRef<StripeElements | null>(null)
     const loading = ref(true)

@@ -3,6 +3,7 @@ import { loadStripe } from '@stripe/stripe-js/pure'
 import type { Stripe } from '@stripe/stripe-js'
 import {
   createVueStripe,
+  useConfirmCardPayment,
   useStripe,
   VueStripeCardElement,
   VueStripeElements,
@@ -86,4 +87,23 @@ it('resolves useStripe() under the plugin, and a nested VueStripeProvider wins',
   ).toEqual(['pk_test_plugin', 'pk_test_provider'])
   // First consumer sits outside the provider, second inside it.
   expect(seen.map((ref) => ref.value?.key)).toEqual(['pk_test_plugin', 'pk_test_provider'])
+})
+
+it('starts the plugin load from a method composable and waits for it (#565)', async () => {
+  const result = { paymentIntent: { id: 'pi_123', status: 'succeeded' } }
+  stripe.confirmCardPayment.mockResolvedValueOnce(result)
+  let api!: ReturnType<typeof useConfirmCardPayment>
+  mount(
+    {
+      setup() {
+        api = useConfirmCardPayment()
+        return {}
+      },
+      render: (h: CreateElement) => h('div')
+    },
+    { localVue: withPlugin() }
+  )
+  expect(loadStripe).toHaveBeenCalledTimes(1)
+  // Called before the load settles: waits instead of failing.
+  await expect(api.confirmCardPayment('pi_x_secret_y')).resolves.toBe(result)
 })

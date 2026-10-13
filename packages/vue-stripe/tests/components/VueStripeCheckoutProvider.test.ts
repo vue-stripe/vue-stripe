@@ -67,7 +67,7 @@ describe('VueStripeCheckoutElementsProvider (Stripe.js 10 Checkout Elements SDK)
   it('throws when used outside VueStripeProvider', () => {
     expect(() =>
       mount(VueStripeCheckoutElementsProvider, { props: { clientSecret: 'cs_test' } })
-    ).toThrow('must be used within VueStripeProvider')
+    ).toThrow('must be used within a VueStripeProvider component or an app using createVueStripe()')
   })
 
   it('calls initCheckoutElementsSdk synchronously with a clientSecret string', async () => {
@@ -131,6 +131,38 @@ describe('VueStripeCheckoutElementsProvider (Stripe.js 10 Checkout Elements SDK)
     expect(injected.value?.session.value).toMatchObject({ email: 'a@b.com' })
     expect(injected.value?.loading.value).toBe(false)
     expect(provider().emitted('ready')?.[0]).toEqual([actions])
+  })
+
+  it('reports a rejected loadActions() through @error, #error and loading (#590)', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const checkout = makeMockCheckout()
+    checkout.loadActions.mockRejectedValue(
+      new Error('You cannot update the email because a `customer_email` is already set.')
+    )
+    const { wrapper, provider, injected } = await mountWith(undefined, checkout, {
+      error: ({ error }: { error: string }) => h('div', { class: 'checkout-error' }, error)
+    })
+    const message = 'You cannot update the email because a `customer_email` is already set.'
+    expect(wrapper.find('.checkout-error').text()).toBe(message)
+    expect(provider().emitted('error')?.[0]).toEqual([message])
+    expect(injected.value?.error.value).toBe(message)
+    expect(injected.value?.loading.value).toBe(false)
+    expect(injected.value?.session.value).toBe(null)
+    errorSpy.mockRestore()
+  })
+
+  it('keeps session null until loadActions() resolves (#590)', async () => {
+    const checkout = makeMockCheckout()
+    let resolveActions!: (value: unknown) => void
+    const actions = (await checkout.loadActions()).actions
+    checkout.loadActions.mockReturnValue(new Promise((r) => (resolveActions = r)))
+    const { injected } = await mountWith(undefined, checkout)
+    const onChange = checkout.on.mock.calls.find((c) => c[0] === 'change')?.[1]
+    onChange?.(makeMockCheckoutSession({ email: 'early@b.com' }))
+    expect(injected.value?.session.value).toBe(null)
+    resolveActions({ type: 'success', actions })
+    await flushPromises()
+    expect(injected.value?.session.value).not.toBe(null)
   })
 
   it('emits error and renders #error when loadActions resolves { type: "error" }', async () => {

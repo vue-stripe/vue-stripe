@@ -20,5 +20,6 @@ export default /* @__PURE__ */ createStripeElement<
 >({
   elementType: 'paymentMethodMessaging',
   componentName: 'VueStripePaymentMethodMessagingElement',
+  loadingText: 'Loading payment method messaging...',
   events: ['ready']
 })

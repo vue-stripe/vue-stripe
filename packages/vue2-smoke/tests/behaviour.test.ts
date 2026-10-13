@@ -234,3 +234,41 @@ it('runs usePaymentRequest under Vue 2 and detaches its handlers on destroy', as
   wrapper.destroy()
   expect(paymentRequest.off).toHaveBeenCalledWith('paymentmethod', onPaymentMethod)
 })
+
+it('keeps the node Stripe mounted into as the mount div when an error appears (#563)', async () => {
+  const wrapper = mount({
+    render(h: CreateElement) {
+      return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+        h(VueStripeElements as never, { props: { clientSecret: 'pi_x_secret_y' } }, [
+          h(VueStripeCardNumberElement as never)
+        ])
+      ])
+    }
+  })
+  await settle()
+  const host = element.mount.mock.calls[0]![0] as HTMLElement
+  const handler = (name: string) =>
+    element.on.mock.calls.find((call) => call[0] === name)?.[1] as (e?: unknown) => void
+  handler('ready')()
+  await flush()
+  // Stripe.js adds its state classes to the node it mounts into.
+  host.classList.add('StripeElement', 'StripeElement--empty')
+
+  handler('change')({ error: { message: 'Your card number is invalid.' } })
+  await flush()
+  const root = wrapper.find('.vue-stripe-cardNumber-element').element
+  expect(root.contains(host)).toBe(true)
+  expect(host.className).toContain('vue-stripe-element-mount')
+  expect(host.className).toContain('StripeElement--empty')
+  expect(host.textContent).toBe('')
+  expect(root.querySelectorAll('.vue-stripe-element-mount')).toHaveLength(1)
+  const error = root.querySelector('.vue-stripe-element-error')!
+  expect(error).not.toBe(host)
+  expect(error.nextElementSibling).toBe(host)
+
+  handler('change')({})
+  await flush()
+  expect(root.contains(host)).toBe(true)
+  expect(host.className).toContain('vue-stripe-element-mount')
+  expect(root.querySelector('.vue-stripe-element-error')).toBe(null)
+})

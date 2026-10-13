@@ -1,8 +1,8 @@
 import { inject, ref, readonly } from 'vue-demi'
 import type { ConfirmSetupData } from '@stripe/stripe-js'
 import type { UseSetupIntentReturn, ConfirmSetupOptions } from '../types'
-import { stripeInjectionKey, stripeElementsInjectionKey } from '../utils/injection-keys'
-import { VueStripeProviderError } from '../utils/errors'
+import { stripeElementsInjectionKey } from '../utils/injection-keys'
+import { injectStripe, whenStripeLoaded } from '../utils/inject-stripe'
 
 // `ConfirmSetupOptions` is defined once in ../types and re-exported there.
 
@@ -33,20 +33,15 @@ import { VueStripeProviderError } from '../utils/errors'
  * ```
  */
 export function useSetupIntent(): UseSetupIntentReturn {
-  const stripeInstance = inject(stripeInjectionKey)
+  const stripeInstance = injectStripe('useSetupIntent')
   const elementsInstance = inject(stripeElementsInjectionKey, null)
-
-  if (!stripeInstance) {
-    throw new VueStripeProviderError(
-      'useSetupIntent must be called within a VueStripeProvider component or an app using createVueStripe()'
-    )
-  }
 
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   const confirmSetup = async (options: ConfirmSetupOptions) => {
-    if (!stripeInstance.stripe.value) {
+    const stripe = stripeInstance.stripe.value ?? (await whenStripeLoaded(stripeInstance))
+    if (!stripe) {
       error.value = 'Stripe not initialized'
       return { error: { message: 'Stripe not initialized' } }
     }
@@ -69,7 +64,6 @@ export function useSetupIntent(): UseSetupIntentReturn {
         }
       }
 
-      const stripe = stripeInstance.stripe.value
       const base = { clientSecret: options.clientSecret, ...(elements ? { elements } : {}) }
       // Stripe types `redirect: 'always'` and `'if_required'` as separate overloads.
       // 'always' requires confirmParams.return_url; Stripe reports it if missing.
@@ -101,7 +95,8 @@ export function useSetupIntent(): UseSetupIntentReturn {
   }
 
   const retrieveSetupIntent = async (clientSecret: string) => {
-    if (!stripeInstance.stripe.value) {
+    const stripe = stripeInstance.stripe.value ?? (await whenStripeLoaded(stripeInstance))
+    if (!stripe) {
       error.value = 'Stripe not initialized'
       return { error: { message: 'Stripe not initialized' } }
     }
@@ -110,7 +105,7 @@ export function useSetupIntent(): UseSetupIntentReturn {
     error.value = null
 
     try {
-      const result = await stripeInstance.stripe.value.retrieveSetupIntent(clientSecret)
+      const result = await stripe.retrieveSetupIntent(clientSecret)
       if (result.error) {
         error.value = result.error.message || 'Failed to retrieve setup intent'
       }
