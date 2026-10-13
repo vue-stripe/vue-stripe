@@ -1,18 +1,13 @@
-# Embedded Checkout
+# Embed Stripe Checkout
 
-Embedded Checkout puts Stripe's prebuilt Checkout page inside your own page. Stripe renders the full form (line items, totals, payment methods, addresses, tax IDs, promotion codes) in an iframe, and the customer never leaves your site. Stripe.js 10 creates it with `stripe.createEmbeddedCheckoutPage()`; Vue Stripe wraps that in `VueStripeEmbeddedCheckout`.
+Put Stripe's prebuilt Checkout page inside your own page with `VueStripeEmbeddedCheckout`. Stripe renders the full form (line items, totals, payment methods, addresses, tax IDs, promotion codes) in an iframe, and the customer never leaves your site. To compare it with hosted Checkout and your own Elements form, see [Choosing an integration](/guide/approaches).
 
-## Which Checkout Should I Use?
+## Before you begin
 
-| Approach | Where the customer pays | Who renders the form | Code you write |
-|----------|------------------------|----------------------|----------------|
-| [Stripe Checkout](/guide/checkout) | `checkout.stripe.com` | Stripe | A redirect |
-| **Embedded Checkout** | Your page (Stripe iframe) | Stripe | One component |
-| [Custom Checkout](/guide/custom-checkout) | Your page | You, with Stripe Elements | Your own form |
+- Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+- A Stripe secret key on your server and a Price (`price_...`) in your Stripe account.
 
-Choose Embedded Checkout when you want Stripe's complete checkout form without sending the customer to another domain.
-
-## How It Works
+## How the steps fit together
 
 ```mermaid
 sequenceDiagram
@@ -28,7 +23,7 @@ sequenceDiagram
     Stripe-->>Browser: redirect to return_url (or onComplete)
 ```
 
-## Step 1: Create the Session (Server)
+## 1. Create the session on your server
 
 Create the session with `ui_mode: 'embedded_page'` and a `return_url`, and send `client_secret` to the browser:
 
@@ -52,14 +47,15 @@ app.post('/api/checkout-session', async (req, res) => {
 
 Stripe replaces `{CHECKOUT_SESSION_ID}` with the session ID when it redirects.
 
-## Step 2: Render the Component
+## 2. Render the component
 
 Put `VueStripeEmbeddedCheckout` inside `VueStripeProvider`. Pass either a `client-secret` you already have, or a `fetch-client-secret` function that Stripe calls when it creates the page:
 
 ```vue
 <!-- CheckoutPage.vue -->
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider, VueStripeEmbeddedCheckout } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
@@ -81,7 +77,7 @@ const fetchClientSecret = () =>
 
 That is the whole integration. Stripe handles the payment form, validation, 3D Secure and wallets.
 
-## Step 3: Handle Completion
+## 3. Handle completion
 
 After a successful payment Stripe redirects the customer to your `return_url`. Read the session ID from the URL and check the session on your server:
 
@@ -95,7 +91,7 @@ app.get('/api/checkout-session/:id', async (req, res) => {
 
 `status: 'complete'` and `payment_status: 'paid'` mean the payment went through. Fulfil orders from the `checkout.session.completed` webhook, not from the return page, so a closed browser tab does not lose an order.
 
-### Staying on the page
+### Stay on the page
 
 To show your own success message instead of redirecting, create the session with `redirect_on_completion: 'if_required'` (only redirect-based payment methods use `return_url`) or `'never'`, and listen for `@complete`:
 
@@ -118,7 +114,7 @@ const done = ref(false)
 
 The component destroys the embedded page when `v-if` removes it.
 
-## One Embedded Checkout per Page
+## Switch to another session
 
 Stripe allows a single Embedded Checkout on a page at a time. If a second `VueStripeEmbeddedCheckout` mounts while another one is on the page, it renders its `#error` slot and emits `@error` instead of loading. To switch to a different Checkout Session, re-mount the component, for example with `:key`:
 
@@ -126,11 +122,11 @@ Stripe allows a single Embedded Checkout on a page at a time. If a second `VueSt
 <VueStripeEmbeddedCheckout :key="clientSecret" :client-secret="clientSecret" />
 ```
 
-## Line Item Changes
+## Approve line item changes
 
 When the session lets customers change line items and sets `permissions.update.line_items: 'server_only'`, Stripe asks you to approve each change. Pass an `on-line-items-change` function that updates the session on your server and resolves `{ type: 'accept' }` or `{ type: 'reject', errorMessage }`. See [onLineItemsChange](/api/components/stripe-embedded-checkout#onlineitemschange) in the API reference.
 
-## Analytics
+## Track the checkout funnel
 
 `@analytics` forwards Stripe's analytics events (`rendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed`), so you can track the funnel without reaching into the iframe:
 
@@ -141,12 +137,11 @@ When the session lets customers change line items and sets `permissions.update.l
 />
 ```
 
-## Testing
+Test data: see Test your integration.
 
-Use a test-mode publishable key and the card `4242 4242 4242 4242` with any future expiry, any CVC and any postal code. Try the [live demo](/live-demo/embedded-checkout) to see the full flow.
+## See also
 
-## Next Steps
-
-- [VueStripeEmbeddedCheckout API Reference](/api/components/stripe-embedded-checkout) - Props, events, slots
-- [Custom Checkout](/guide/custom-checkout) - Your own layout on a Checkout Session
-- [Stripe Checkout](/guide/checkout) - Redirect to the hosted page
+- [VueStripeEmbeddedCheckout API](/api/components/stripe-embedded-checkout): props, events and slots
+- [Build your own checkout page on a Checkout Session](/guide/custom-checkout)
+- [Redirect to Stripe Checkout](/guide/checkout)
+- [Live demo](/live-demo/embedded-checkout)

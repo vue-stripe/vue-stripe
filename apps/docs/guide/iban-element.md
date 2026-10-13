@@ -1,248 +1,39 @@
-# IBAN Element
+# Accept SEPA Direct Debit
 
-The IBAN Element collects International Bank Account Numbers for SEPA Direct Debit payments across Europe. Use it when accepting bank-based payments from customers in the European Union.
+Collect an IBAN with `VueStripeIbanElement` and confirm a SEPA Direct Debit payment with [`useConfirmSepaDebitPayment()`](/api/composables/confirm/bank-debits). The element formats and validates the IBAN as the customer types and reports the bank and country.
 
-::: tip SEPA Coverage
-SEPA (Single Euro Payments Area) covers 36 European countries including all EU member states, plus Iceland, Liechtenstein, Norway, Switzerland, Monaco, San Marino, and others.
-:::
+SEPA Direct Debit does not succeed at once: the PaymentIntent goes to `processing` and settles or fails after a few business days, so fulfil the order from a webhook, not from the confirm result.
 
-## Why Use IBAN Element?
+## Before you begin
 
-| Feature | Benefit |
-|---------|---------|
-| **SEPA Coverage** | Accepts bank accounts from 36 European countries |
-| **Real-time Validation** | Validates IBAN format and checksum as user types |
-| **Bank Detection** | Automatically identifies the bank from the IBAN |
-| **Country Detection** | Detects country from IBAN prefix (DE, FR, NL, etc.) |
+- Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+- SEPA Direct Debit is enabled in the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods).
+- You show the SEPA mandate text next to the form. Stripe gives the required wording in its [SEPA Direct Debit guide](https://docs.stripe.com/payments/sepa-debit/accept-a-payment).
 
-## When to Use IBAN Element
+## 1. Create a SEPA PaymentIntent on your server
 
-| Scenario | Description |
-|----------|-------------|
-| **Recurring payments** | Subscription billing via SEPA Direct Debit |
-| **B2B transactions** | Business-to-business payments in Europe |
-| **Lower fees** | Bank transfers often have lower fees than cards |
-
-::: tip SEPA vs Cards
-- **SEPA Direct Debit** = Lower fees, but slower settlement (1-5 days)
-- **Cards** = Higher fees, but instant confirmation
-:::
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["IbanElement mounts inside StripeElements"] --> B["Renders IBAN input field<br/>Emits @ready when mounted"]
-    B --> C["Customer enters IBAN<br/>• Auto-formats with spaces<br/>• Validates checksum in real-time"]
-    C --> D["Emits @change on each keystroke<br/>{ complete, empty, country, bankName }"]
-    D --> E{Valid IBAN?}
-    E -->|Yes| F["Bank and country detected<br/>Ready for payment"]
-    E -->|No| G["Shows validation error"]
-    F --> H["On submit: Create SEPA PaymentIntent<br/>useConfirmSepaDebitPayment().confirmSepaDebitPayment()"]
-```
-
-## Required Components
-
-| Component | Role |
-|-----------|------|
-| `VueStripeProvider` | Loads Stripe.js and provides stripe instance |
-| `VueStripeElements` | Creates Elements instance (clientSecret optional) |
-| `VueStripeIbanElement` | Renders the IBAN input field |
-
-## Basic Implementation
-
-### Step 1: Set Up the Provider Hierarchy
-
-```vue
-<script setup>
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripeIbanElement
-} from '@vue-stripe/vue-stripe'
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-</script>
-
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <VueStripeIbanElement
-        @ready="onReady"
-        @change="onChange"
-        @focus="onFocus"
-        @blur="onBlur"
-        @escape="onEscape"
-      />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-**What's happening:**
-- `VueStripeProvider` loads Stripe.js with your publishable key
-- `VueStripeElements` creates the Elements container
-- `VueStripeIbanElement` renders the IBAN input with SEPA country support
-
-### Step 2: Handle Events
-
-```vue{8-27}
-<script setup>
-import { ref } from 'vue'
-
-const ibanComplete = ref(false)
-const bankName = ref('')
-const country = ref('')
-
-const onReady = (element) => {
-  console.log('IBAN element ready')
-}
-
-const onChange = (event) => {
-  ibanComplete.value = event.complete
-  bankName.value = event.bankName || ''
-  country.value = event.country || ''
-}
-
-const onFocus = () => {
-  console.log('IBAN element focused')
-}
-
-const onBlur = () => {
-  console.log('IBAN element blurred')
-}
-
-const onEscape = () => {
-  console.log('Escape key pressed in IBAN element')
-}
-</script>
-```
-
-**What's happening:**
-- The `@change` event includes `bankName` when a valid IBAN is detected
-- The `country` is automatically extracted from the IBAN prefix
-- Use `complete` to enable/disable the submit button
-
-## Events
-
-`VueStripeIbanElement` emits the following events:
-
-| Event | Payload | Description |
-|-------|---------|-------------|
-| `@ready` | `StripeIbanElement` | Fired when the element finishes mounting and is ready for input |
-| `@change` | `StripeIbanElementChangeEvent` | Fired on every change (includes `complete`, `empty`, `error`, `country`, `bankName`) |
-| `@focus` | — | Fired when the element gains focus |
-| `@blur` | — | Fired when the element loses focus |
-| `@escape` | — | Fired when the user presses the Escape key inside the element |
-
-## Confirming SEPA Payments
-
-SEPA Direct Debit requires a backend endpoint to create PaymentIntents with the `sepa_debit` payment method type:
-
-### Backend Endpoint
-
-```typescript
-// POST /api/sepa-debit-intent
+```ts
+// POST /api/sepa-debit-intent (Node, stripe-node)
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function POST(request: Request) {
-  const { amount, currency = 'eur' } = await request.json()
+  const { amount } = await request.json()
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
-    currency,
-    payment_method_types: ['sepa_debit'],
+    currency: 'eur',
+    payment_method_types: ['sepa_debit']
   })
 
-  return Response.json({
-    clientSecret: paymentIntent.client_secret
-  })
+  return Response.json({ clientSecret: paymentIntent.client_secret })
 }
 ```
 
-### Frontend Confirmation
+## 2. Render the providers
 
-In a component rendered inside `VueStripeElements`, confirm with [`useConfirmSepaDebitPayment()`](/api/composables/confirm/bank-debits) and look the element up with [`useStripeElements().getElement()`](/api/composables/use-stripe-elements):
-
-```vue
-<script setup lang="ts">
-import { useConfirmSepaDebitPayment, useStripeElements } from '@vue-stripe/vue-stripe'
-
-const { getElement } = useStripeElements()
-const { confirmSepaDebitPayment } = useConfirmSepaDebitPayment()
-
-const handleSubmit = async (clientSecret: string) => {
-  const ibanElement = getElement('iban')
-  if (!ibanElement) return
-
-  const { error, paymentIntent } = await confirmSepaDebitPayment(clientSecret, {
-    payment_method: {
-      sepa_debit: ibanElement,
-      billing_details: {
-        name: 'Customer Name',
-        email: 'customer@example.com'
-      }
-    }
-  })
-
-  if (error) {
-    console.error(error.message)
-  } else if (paymentIntent.status === 'processing') {
-    // SEPA payments are not instant - they go to 'processing' first
-    console.log('Payment is processing')
-  }
-}
-</script>
-```
-
-::: warning SEPA Payment Status
-Unlike card payments that succeed instantly, SEPA Direct Debit payments initially have a `processing` status. The payment typically takes 1-5 business days to complete or fail.
-:::
-
-## Customization
-
-### Custom Styling
-
-```vue
-<script setup>
-const ibanOptions = {
-  supportedCountries: ['SEPA'],
-  placeholderCountry: 'DE',
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770',
-      fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      '::placeholder': {
-        color: '#aab7c4'
-      }
-    },
-    invalid: {
-      color: '#9e2146',
-      iconColor: '#9e2146'
-    }
-  }
-}
-</script>
-
-<template>
-  <VueStripeIbanElement :options="ibanOptions" />
-</template>
-```
-
-### Placeholder Country
-
-The `placeholderCountry` option determines the placeholder format shown:
-
-| Country | Placeholder |
-|---------|-------------|
-| `DE` | `DE00 0000 0000 0000 0000 00` |
-| `FR` | `FR00 0000 0000 0000 0000 0000 000` |
-| `NL` | `NL00 AAAA 0000 0000 00` |
-
-## Complete Example
+`VueStripeElements` needs no client secret for the IBAN Element.
 
 ```vue
 <!-- SepaPage.vue -->
@@ -253,83 +44,52 @@ import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import SepaForm from './SepaForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const success = ref(false)
+const submitted = ref(false)
 </script>
 
 <template>
-  <div class="sepa-form">
-    <div v-if="success" class="success">
-      Payment submitted! It will be processed within 1-5 business days.
-    </div>
-
-    <VueStripeProvider v-else :publishable-key="publishableKey">
-      <VueStripeElements>
-        <SepaForm @success="success = true" />
-      </VueStripeElements>
-    </VueStripeProvider>
-  </div>
+  <p v-if="submitted">Payment submitted. It is processed within a few business days.</p>
+  <VueStripeProvider v-else :publishable-key="publishableKey">
+    <VueStripeElements>
+      <SepaForm @submitted="submitted = true" />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
-
-<style scoped>
-.sepa-form {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.success {
-  color: #00d66b;
-  padding: 20px;
-  text-align: center;
-}
-</style>
 ```
+
+## 3. Render the IBAN Element and confirm
+
+Take the Stripe element from the component's exposed `element` through a template ref and pass it as `sepa_debit`. SEPA needs the account holder's name and email in `billing_details`.
 
 ```vue
 <!-- SepaForm.vue: rendered inside VueStripeElements -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  VueStripeIbanElement,
-  useConfirmSepaDebitPayment,
-  useStripeElements
-} from '@vue-stripe/vue-stripe'
+import { VueStripeIbanElement, useConfirmSepaDebitPayment } from '@vue-stripe/vue-stripe'
 import type { StripeIbanElementChangeEvent } from '@stripe/stripe-js'
 
-const emit = defineEmits<{ success: [] }>()
+const emit = defineEmits<{ submitted: [] }>()
 
-const { getElement } = useStripeElements()
+const ibanRef = ref<InstanceType<typeof VueStripeIbanElement> | null>(null)
 const { confirmSepaDebitPayment, loading: processing } = useConfirmSepaDebitPayment()
 
+const name = ref('')
+const email = ref('')
 const ibanComplete = ref(false)
 const bankName = ref('')
-const country = ref('')
-const error = ref('')
-
-const ibanOptions = {
-  supportedCountries: ['SEPA'],
-  placeholderCountry: 'DE',
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770'
-    }
-  }
-}
+const errorMessage = ref('')
 
 const handleChange = (event: StripeIbanElementChangeEvent) => {
   ibanComplete.value = event.complete
   bankName.value = event.bankName || ''
-  country.value = event.country || ''
-  error.value = event.error?.message || ''
+  errorMessage.value = event.error?.message || ''
 }
 
 const handleSubmit = async () => {
-  const ibanElement = getElement('iban')
-  if (!ibanElement) return
+  const iban = ibanRef.value?.element
+  if (!iban) return
+  errorMessage.value = ''
 
-  error.value = ''
-
-  // In a real app, fetch clientSecret from your backend
   const response = await fetch('/api/sepa-debit-intent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -337,101 +97,55 @@ const handleSubmit = async () => {
   })
   const { clientSecret } = await response.json()
 
-  const result = await confirmSepaDebitPayment(clientSecret, {
+  const { error, paymentIntent } = await confirmSepaDebitPayment(clientSecret, {
     payment_method: {
-      sepa_debit: ibanElement,
-      billing_details: {
-        name: 'Customer Name',
-        email: 'customer@example.com'
-      }
+      sepa_debit: iban,
+      billing_details: { name: name.value, email: email.value }
     }
   })
 
-  if (result.error) {
-    error.value = result.error.message || 'Payment failed'
-  } else if (result.paymentIntent.status === 'processing') {
-    emit('success')
+  if (error) {
+    errorMessage.value = error.message || 'Payment failed'
+  } else if (paymentIntent?.status === 'processing') {
+    emit('submitted')
   }
 }
 </script>
 
 <template>
   <form @submit.prevent="handleSubmit">
-    <div class="field">
-      <label>IBAN</label>
-      <VueStripeIbanElement :options="ibanOptions" @change="handleChange" />
-    </div>
+    <input v-model="name" placeholder="Account holder name" required />
+    <input v-model="email" type="email" placeholder="Email" required />
 
-    <div v-if="bankName" class="bank-info">
-      Bank: {{ bankName }} ({{ country }})
-    </div>
+    <label>IBAN</label>
+    <VueStripeIbanElement
+      ref="ibanRef"
+      :options="{ supportedCountries: ['SEPA'], placeholderCountry: 'DE' }"
+      @change="handleChange"
+    />
+    <p v-if="bankName">Bank: {{ bankName }}</p>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
-    <div v-if="error" class="error">{{ error }}</div>
+    <!-- Your SEPA mandate text goes here -->
 
-    <button
-      type="submit"
-      :disabled="!ibanComplete || processing"
-    >
-      {{ processing ? 'Processing...' : 'Pay with SEPA' }}
+    <button type="submit" :disabled="!ibanComplete || processing">
+      {{ processing ? 'Processing...' : 'Pay with SEPA Direct Debit' }}
     </button>
   </form>
 </template>
-
-<style scoped>
-.field {
-  margin-bottom: 16px;
-}
-
-.field label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-.bank-info {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #f0f9ff;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  background: #5469d4;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.error {
-  color: #9e2146;
-  margin-bottom: 16px;
-}
-</style>
 ```
 
-## Test IBAN Numbers
+`placeholderCountry` picks the IBAN format of the placeholder, for example `DE00 0000 0000 0000 0000 00` for `'DE'`. For colors and fonts, pass a Stripe `style` object in `options`.
 
-Use these test IBANs in test mode:
+## 4. Fulfil the order when the payment succeeds
 
-| IBAN | Country | Description |
-|------|---------|-------------|
-| `DE89 3704 0044 0532 0130 00` | Germany | Standard test IBAN |
-| `FR76 3000 6000 0112 3456 7890 189` | France | Standard test IBAN |
-| `NL91 ABNA 0417 1643 00` | Netherlands | Standard test IBAN |
-| `AT61 1904 3002 3457 3201` | Austria | Standard test IBAN |
-| `BE62 5100 0754 7061` | Belgium | Standard test IBAN |
+Listen for `payment_intent.succeeded` and `payment_intent.payment_failed` on your server and fulfil or cancel the order there.
 
-## Next Steps
+Test data: see Test your integration.
 
-- [Payment Element](/guide/payment-element) — iDEAL, P24, EPS and other bank payments. Stripe removed the standalone iDEAL, P24, EPS and FPX elements in Stripe.js Clover (8.0); collect these payment methods with the [Payment Element](/guide/payment-element).
-- [API Reference](/api/components/stripe-iban-element) — Full props, events, and options
+## See also
+
+- [IBAN Element API](/api/components/stripe-iban-element): props, events and options
+- [Bank debit confirmers](/api/composables/confirm/bank-debits): `useConfirmSepaDebitPayment` and `useConfirmSepaDebitSetup`
+- [Live demo](/live-demo/iban-element)
+- For iDEAL, P24, EPS and other bank payments, use the [Payment Element](/guide/payment-element); Stripe removed their standalone elements.

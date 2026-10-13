@@ -1,19 +1,13 @@
-# Tokens and Payment Methods
+# Confirm payments on your server
 
-Sometimes the browser should only **collect** payment details and leave the charge for later or for your server. Stripe turns what the customer entered into an object your server can use, and Vue Stripe has a composable for each:
+Collect payment details with the Payment Element, turn them into a ConfirmationToken with [`useCreateConfirmationToken()`](/api/composables/use-create-confirmation-token), and create and confirm the PaymentIntent on your server. This follows Stripe's [finalize payments on the server](https://docs.stripe.com/payments/finalize-payments-on-the-server) flow: the Payment Element runs without an Intent, and the Intent only exists once the customer clicks Pay.
 
-| Composable | Creates | Use it to |
-|------------|---------|-----------|
-| [`useCreateConfirmationToken`](/api/composables/use-create-confirmation-token) | ConfirmationToken (`ctoken_...`) | Confirm the PaymentIntent or SetupIntent **on your server** (recommended for server-side confirmation) |
-| [`useCreatePaymentMethod`](/api/composables/use-create-payment-method) | PaymentMethod (`pm_...`) | Save details to a customer, or charge them later |
-| [`useCreateToken`](/api/composables/use-create-token) | Token (`tok_...`) | Legacy Charges integrations, Connect account / person tokens, PII, CVC recollection |
-| [`useRadarSession`](/api/composables/use-radar-session) | Radar Session (`rse_...`) | Give Radar device signals when payment details are collected outside Stripe.js |
+## Before you begin
 
-Try all of them in the [Tokens live demo](/live-demo/tokens) and [Create Payment Method demo](/live-demo/create-payment-method).
+- Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+- Your server can create PaymentIntents with your secret key.
 
-## ConfirmationToken: Confirm on Your Server
-
-In Stripe's [finalize payments on the server](https://docs.stripe.com/payments/finalize-payments-on-the-server) flow, the Payment Element runs **without an Intent**: `VueStripeElements` gets `mode`, `amount` and `currency` instead of a client secret. The Intent only exists once the customer clicks Pay.
+## ConfirmationToken: confirm on your server {#confirmationtoken-confirm-on-your-server}
 
 ```mermaid
 sequenceDiagram
@@ -29,10 +23,20 @@ sequenceDiagram
     Browser->>Stripe: handleNextAction({ clientSecret }) when requires_action
 ```
 
-### Step 1: The Payment Element With a Deferred Intent
+### 1. Render the Payment Element without an Intent
+
+Give `VueStripeElements` a `mode`, `amount` and `currency` instead of a client secret:
 
 ```vue
 <!-- CheckoutPage.vue -->
+<script setup lang="ts">
+import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
+import PayButton from './PayButton.vue'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+</script>
+
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeElements mode="payment" :amount="1099" currency="usd">
@@ -41,20 +45,13 @@ sequenceDiagram
     </VueStripeElements>
   </VueStripeProvider>
 </template>
-
-<script setup lang="ts">
-import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
-import PayButton from './PayButton.vue'
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-</script>
 ```
 
 Set `amount` from the cart before the customer starts typing: changing `mode`, `amount` or `currency` creates a new Elements group, so the Payment Element remounts empty.
 
-### Step 2: Create the Token and Send It to the Server
+### 2. Create the token and send it to your server
 
-`createConfirmationToken()` runs `elements.submit()` first, so a validation error (an incomplete card number, say) resolves as `{ error }` without creating a token. If the server's PaymentIntent needs 3D Secure, `useHandleNextAction` finishes it in the browser:
+`createConfirmationToken()` runs `elements.submit()` first, so a validation error (an incomplete card number, say) resolves as `{ error }` without creating a token. If the server's PaymentIntent needs 3D Secure, [`useHandleNextAction()`](/api/composables/use-handle-next-action) finishes it in the browser:
 
 ```vue
 <!-- PayButton.vue: rendered inside <VueStripeElements> -->
@@ -97,7 +94,7 @@ const pay = async () => {
 
 `confirmationToken.payment_method_preview` describes what the customer chose (`type`, `card.brand`, `card.last4`, ...) if you want to show it or check it before charging.
 
-### Step 3: Confirm on the Server
+### 3. Create and confirm the PaymentIntent on your server
 
 ```js
 // Node.js (Express-style handler)
@@ -121,9 +118,9 @@ app.post('/api/pay', async (req, res) => {
 
 The same token confirms a SetupIntent (`stripe.setupIntents.create({ confirm: true, confirmation_token })`) when you render the Elements group with `mode="setup"`.
 
-## PaymentMethod: Save or Charge Later
+## Create a PaymentMethod to charge later
 
-[`useCreatePaymentMethod`](/api/composables/use-create-payment-method) creates a reusable PaymentMethod. Inside a Payment Element group (with `:options="{ paymentMethodCreation: 'manual' }"` on `VueStripeElements`), call it with no arguments; with the Card Element, pass the element:
+[`useCreatePaymentMethod()`](/api/composables/use-create-payment-method) creates a reusable PaymentMethod (`pm_...`) for your server to attach to a customer or charge later. Inside a Payment Element group (with `:options="{ paymentMethodCreation: 'manual' }"` on `VueStripeElements`), call it with no arguments; with the Card Element, pass the element:
 
 ```vue
 <script setup lang="ts">
@@ -150,41 +147,15 @@ const save = async () => {
 </template>
 ```
 
-To save a card for future payments with authentication up front, prefer a SetupIntent: see [Saving Payment Methods](/guide/setup-intent).
+To save a card with authentication up front, use a SetupIntent instead: see [Save a payment method for later](/guide/setup-intent).
 
-## Token: Legacy and Connect
+## Tokens and Radar sessions
 
-[`useCreateToken`](/api/composables/use-create-token) exposes every `stripe.createToken()` overload. Card tokens only serve the legacy Charges API; the other token types remain current for Connect onboarding and identity data:
+- [`useCreateToken()`](/api/composables/use-create-token) wraps every `stripe.createToken()` overload: card tokens for the legacy Charges API, and account, person and PII tokens for Connect.
+- [`useRadarSession()`](/api/composables/use-radar-session) gives Radar the browser signals it needs when card details reach Stripe without Stripe.js; pass the session ID to your server as `radar_options.session`.
 
-```ts
-const { createToken } = useCreateToken()
+## See also
 
-// Card Element -> tok_... for the Charges API
-await createToken(cardRef.value!.element!, { name: 'Jenny Rosen' })
-
-// Connect: account and person tokens collected in the browser
-await createToken('account', { business_type: 'individual', tos_shown_and_accepted: true })
-await createToken('person', { first_name: 'Jenny', last_name: 'Rosen' })
-
-// Personally identifiable information
-await createToken('pii', { personal_id_number: '000000000' })
-```
-
-## Radar Session
-
-When card details reach Stripe without Stripe.js (a vault, a third-party form), Radar misses the browser signals it uses to score fraud. [`useRadarSession`](/api/composables/use-radar-session) captures them; pass the ID to the server and on to Stripe as `radar_options.session`:
-
-```ts
-const { createRadarSession } = useRadarSession()
-
-const { radarSession } = await createRadarSession()
-if (radarSession) {
-  await fetch('/api/pay', { method: 'POST', body: JSON.stringify({ radarSession: radarSession.id }) })
-}
-```
-
-## Next Steps
-
-- [Confirming Payments](/guide/confirming-payments): confirm in the browser instead
-- [Tokens live demo](/live-demo/tokens)
+- [How confirming works](/guide/confirming-payments): confirming in the browser instead
+- [Tokens live demo](/live-demo/tokens) and [Create Payment Method demo](/live-demo/create-payment-method)
 - [useHandleNextAction API](/api/composables/use-handle-next-action)

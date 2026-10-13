@@ -1,146 +1,15 @@
-# Card Element
+# Accept card payments with the Card Element
 
-The Card Element provides card-specific payment collection. Use it when you only need to accept card payments or want maximum control over the card input UI.
+Collect card details with `VueStripeCardElement`, or with separate number, expiry and CVC fields, and confirm with [`useConfirmCardPayment()`](/api/composables/confirm/cards). The Card Element takes cards only; to decide between it and the Payment Element, see [Choosing an integration](/guide/approaches).
 
-## Choosing Between Card Elements
+## Before you begin
 
-| Component | Use Case |
-|-----------|----------|
-| `VueStripeCardElement` | Single input for card number, expiry, and CVC |
-| Split elements | Separate inputs for custom layouts |
+- Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+- Your server has an endpoint that creates a PaymentIntent and returns its `client_secret`.
 
-## Single Card Element
+## 1. Render the providers
 
-The simplest way to collect card details. The page renders the providers; the form inside them confirms with [`useConfirmCardPayment()`](/api/composables/confirm/cards) and looks the element up with [`useStripeElements().getElement()`](/api/composables/use-stripe-elements):
-
-```vue
-<!-- CardPage.vue -->
-<script setup lang="ts">
-import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
-import CardForm from './CardForm.vue'
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = 'pi_..._secret_...' // From your backend
-</script>
-
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <CardForm :client-secret="clientSecret" />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-```vue
-<!-- CardForm.vue: rendered inside VueStripeElements -->
-<script setup lang="ts">
-import {
-  VueStripeCardElement,
-  useConfirmCardPayment,
-  useStripeElements
-} from '@vue-stripe/vue-stripe'
-
-const props = defineProps<{ clientSecret: string }>()
-
-const { getElement } = useStripeElements()
-const { confirmCardPayment } = useConfirmCardPayment()
-
-const handleSubmit = async () => {
-  const cardElement = getElement('card')
-  if (!cardElement) return
-
-  const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
-    payment_method: {
-      card: cardElement
-    }
-  })
-
-  if (error) {
-    console.error(error.message)
-  } else if (paymentIntent?.status === 'succeeded') {
-    console.log('Payment succeeded!')
-  }
-}
-</script>
-
-<template>
-  <form @submit.prevent="handleSubmit">
-    <VueStripeCardElement />
-    <button type="submit">Pay</button>
-  </form>
-</template>
-```
-
-::: tip No clientSecret required
-Unlike Payment Element, Card Element can work without a `clientSecret` on StripeElements. You pass the secret directly to `confirmCardPayment`.
-:::
-
-## Split Card Elements
-
-For custom layouts, use separate elements for each field:
-
-```vue
-<script setup>
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripeCardNumberElement,
-  VueStripeCardExpiryElement,
-  VueStripeCardCvcElement
-} from '@vue-stripe/vue-stripe'
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-</script>
-
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <div class="card-form">
-        <div class="field">
-          <label>Card number</label>
-          <VueStripeCardNumberElement />
-        </div>
-        <div class="row">
-          <div class="field">
-            <label>Expiry</label>
-            <VueStripeCardExpiryElement />
-          </div>
-          <div class="field">
-            <label>CVC</label>
-            <VueStripeCardCvcElement />
-          </div>
-        </div>
-      </div>
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-### Confirming with Split Elements
-
-When using split elements, reference the card number element. In a component inside `VueStripeElements`:
-
-```js
-import { useConfirmCardPayment, useStripeElements } from '@vue-stripe/vue-stripe'
-
-const { getElement } = useStripeElements()
-const { confirmCardPayment } = useConfirmCardPayment()
-
-const handleSubmit = async () => {
-  // Get the card number element (expiry and CVC are linked automatically)
-  const cardNumberElement = getElement('cardNumber')
-  if (!cardNumberElement) return
-
-  const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
-    payment_method: {
-      card: cardNumberElement
-    }
-  })
-}
-```
-
-## Complete Example
+The Card Element needs no client secret on `VueStripeElements`; you pass it to the confirm call instead.
 
 ```vue
 <!-- CardPage.vue -->
@@ -151,74 +20,54 @@ import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import CardForm from './CardForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = 'pi_..._secret_...' // From your backend
+const props = defineProps<{ clientSecret: string }>() // from your server
 const success = ref(false)
 </script>
 
 <template>
-  <div class="card-page">
-    <div v-if="success" class="success">
-      Payment successful!
-    </div>
-
-    <VueStripeProvider v-else :publishable-key="publishableKey">
-      <VueStripeElements>
-        <CardForm :client-secret="clientSecret" @success="success = true" />
-      </VueStripeElements>
-    </VueStripeProvider>
-  </div>
+  <p v-if="success">Payment successful.</p>
+  <VueStripeProvider v-else :publishable-key="publishableKey">
+    <VueStripeElements>
+      <CardForm :client-secret="props.clientSecret" @success="success = true" />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
-
-<style scoped>
-.card-page {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.success {
-  color: #00d66b;
-  padding: 20px;
-  text-align: center;
-}
-</style>
 ```
+
+## 2. Render the Card Element and confirm
+
+Take the Stripe element from the component's exposed `element` through a template ref and pass it to `confirmCardPayment()`. Stripe runs 3D Secure when the card needs it.
 
 ```vue
 <!-- CardForm.vue: rendered inside VueStripeElements -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  VueStripeCardElement,
-  useConfirmCardPayment,
-  useStripeElements
-} from '@vue-stripe/vue-stripe'
+import { VueStripeCardElement, useConfirmCardPayment } from '@vue-stripe/vue-stripe'
+import type { StripeCardElementChangeEvent } from '@stripe/stripe-js'
 
 const props = defineProps<{ clientSecret: string }>()
 const emit = defineEmits<{ success: [] }>()
 
-const { getElement } = useStripeElements()
+const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
 const { confirmCardPayment, loading: processing } = useConfirmCardPayment()
 
 const cardComplete = ref(false)
 const errorMessage = ref('')
 
-const handleChange = (event: { complete: boolean; error?: { message: string } }) => {
+const handleChange = (event: StripeCardElementChangeEvent) => {
   cardComplete.value = event.complete
   errorMessage.value = event.error?.message || ''
 }
 
 const handleSubmit = async () => {
-  const cardElement = getElement('card')
-  if (!cardElement) return
-
+  const card = cardRef.value?.element
+  if (!card) return
   errorMessage.value = ''
 
   const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
     payment_method: {
-      card: cardElement,
-      billing_details: {
-        name: 'Customer Name'
-      }
+      card,
+      billing_details: { name: 'Jenny Rosen' }
     }
   })
 
@@ -228,114 +77,91 @@ const handleSubmit = async () => {
     emit('success')
   }
 }
+</script>
 
-const cardStyles = {
-  base: {
-    fontSize: '16px',
-    color: '#424770',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    '::placeholder': {
-      color: '#aab7c4'
-    }
-  },
-  invalid: {
-    color: '#9e2146',
-    iconColor: '#9e2146'
-  }
+<template>
+  <form @submit.prevent="handleSubmit">
+    <label>Card details</label>
+    <VueStripeCardElement
+      ref="cardRef"
+      :options="{ hidePostalCode: true }"
+      @change="handleChange"
+    />
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <button type="submit" :disabled="processing || !cardComplete">
+      {{ processing ? 'Processing...' : 'Pay' }}
+    </button>
+  </form>
+</template>
+```
+
+## Use separate number, expiry and CVC fields
+
+For a custom layout, render the three split elements in the same `VueStripeElements` group. Confirm with the card number element; Stripe reads expiry and CVC from the other two.
+
+```vue
+<!-- SplitCardForm.vue: rendered inside VueStripeElements -->
+<script setup lang="ts">
+import { ref } from 'vue'
+import {
+  VueStripeCardNumberElement,
+  VueStripeCardExpiryElement,
+  VueStripeCardCvcElement,
+  useConfirmCardPayment
+} from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
+
+const numberRef = ref<InstanceType<typeof VueStripeCardNumberElement> | null>(null)
+const { confirmCardPayment, loading, error } = useConfirmCardPayment()
+
+const handleSubmit = async () => {
+  const card = numberRef.value?.element
+  if (!card) return
+  await confirmCardPayment(props.clientSecret, { payment_method: { card } })
 }
 </script>
 
 <template>
   <form @submit.prevent="handleSubmit">
-    <div class="card-field">
-      <label>Card details</label>
-      <VueStripeCardElement
-        :options="{ style: cardStyles, hidePostalCode: true }"
-        @change="handleChange"
-      />
+    <label>Card number</label>
+    <VueStripeCardNumberElement ref="numberRef" />
+    <div class="row">
+      <div>
+        <label>Expiry</label>
+        <VueStripeCardExpiryElement />
+      </div>
+      <div>
+        <label>CVC</label>
+        <VueStripeCardCvcElement />
+      </div>
     </div>
-
-    <div v-if="errorMessage" class="error">
-      {{ errorMessage }}
-    </div>
-
-    <button
-      type="submit"
-      :disabled="processing || !cardComplete"
-    >
-      {{ processing ? 'Processing...' : 'Pay' }}
-    </button>
+    <p v-if="error" class="error">{{ error }}</p>
+    <button type="submit" :disabled="loading">Pay</button>
   </form>
 </template>
-
-<style scoped>
-.card-field {
-  margin-bottom: 16px;
-}
-
-.card-field label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-:deep(.vue-stripe-card-element) {
-  padding: 12px;
-  border: 1px solid #e6e6e6;
-  border-radius: 4px;
-  background: white;
-}
-
-:deep(.vue-stripe-card-element:focus-within) {
-  border-color: #5469d4;
-  box-shadow: 0 0 0 1px #5469d4;
-}
-
-button {
-  width: 100%;
-  background: #5469d4;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.error {
-  color: #9e2146;
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-</style>
 ```
 
-## Card Element vs Payment Element
+## Style the input
 
-| Feature | Card Element | Payment Element |
-|---------|--------------|-----------------|
-| Payment methods | Cards only | 40+ methods |
-| Layout control | High | Medium |
-| Setup complexity | Lower | Higher |
-| Automatic updates | No | Yes |
-| clientSecret requirement | Optional | Required |
+Card elements take a Stripe `style` object in `options`; the wrapper `div` gets the `vue-stripe-card-element` class for borders and focus rings:
 
-## When to Use Card Element
+```vue
+<VueStripeCardElement
+  :options="{
+    style: {
+      base: { fontSize: '16px', color: '#424770', '::placeholder': { color: '#aab7c4' } },
+      invalid: { color: '#9e2146', iconColor: '#9e2146' }
+    }
+  }"
+/>
+```
 
-- You only accept card payments
-- You need precise control over field layout
-- You want to match an existing design system
-- You're building a POS-style interface
+Test data: see Test your integration.
 
-## Next Steps
+## See also
 
-- [Payment Element](/guide/payment-element) — For multi-method support
-- [Express Checkout](/guide/express-checkout) — Add Apple Pay and Google Pay
-- [Appearance API](/api/components/stripe-elements#appearance-api) — Style your elements
-- [API Reference](/api/components/stripe-card-element) — Full props, events, and options
+- [Card Element API](/api/components/stripe-card-element): props, events and options
+- [Split card elements API](/api/components/stripe-split-card-elements)
+- [Card confirmers](/api/composables/confirm/cards): `useConfirmCardPayment` and `useConfirmCardSetup`
+- [Live demo](/live-demo/card-element)
