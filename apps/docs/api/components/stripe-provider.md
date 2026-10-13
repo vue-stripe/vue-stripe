@@ -156,7 +156,7 @@ Stripe.js does not validate a publishable key when it loads: with a wrong, revok
 
 ## Provides
 
-The provider exposes nothing on a template ref. It provides a single object under the `stripeInjectionKey` symbol:
+The provider exposes nothing on a template ref. It provides the Stripe context, an object with these refs:
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -164,9 +164,18 @@ The provider exposes nothing on a template ref. It provides a single object unde
 | `loading` | `Ref<boolean>` | Whether Stripe is loading |
 | `error` | `Ref<string \| null>` | Error message if loading failed |
 
-Read it with the [useStripe](/api/composables/use-stripe) composable, which returns `{ stripe, loading, error }`.
+Read it with the [useStripe](/api/composables/use-stripe) composable, which returns `{ stripe, loading, error }`. Its injection key is internal.
 
-The resolved configuration (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`; `apiVersion` as given, though it is not used) is provided as a separate object under the `stripeConfigInjectionKey` symbol, for descendant components.
+The resolved configuration (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`; `apiVersion` as given, though it is not used) is provided as a separate `VueStripeConfig` object under the exported `stripeConfigInjectionKey` symbol. `VueStripePricingTable` reads its publishable key from it. A descendant component injects it the same way:
+
+```ts
+import { inject } from 'vue'
+import { stripeConfigInjectionKey } from '@vue-stripe/vue-stripe'
+
+// VueStripeConfig | null: null outside a VueStripeProvider or the plugin
+const config = inject(stripeConfigInjectionKey, null)
+const publishableKey = config?.publishableKey
+```
 
 ## Styling
 
