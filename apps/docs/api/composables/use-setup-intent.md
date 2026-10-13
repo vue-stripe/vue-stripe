@@ -1,71 +1,76 @@
 # useSetupIntent
 
-A composable for saving payment methods for future use with Stripe SetupIntents.
-
-## What is useSetupIntent?
-
-A composable that simplifies saving payment methods with built-in state management:
-
-| Capability | Description |
-|------------|-------------|
-| **Setup Confirmation** | Wraps `stripe.confirmSetup()` (after `elements.submit()`) with error handling |
-| **Loading State** | Tracks whether setup confirmation is in progress |
-| **Error State** | Captures and exposes setup errors |
-| **Auto Elements Injection** | Automatically uses Elements from context |
-| **Redirect Handling** | Supports both redirect and inline confirmation flows |
-
-## SetupIntent vs PaymentIntent
-
-| Intent Type | Purpose | When to Use |
-|-------------|---------|-------------|
-| **SetupIntent** | Save payment method for later | Subscriptions, future purchases, card on file |
-| **PaymentIntent** | Charge immediately | One-time purchases, checkout |
-
-::: tip Key Difference
-SetupIntent saves the card without charging. PaymentIntent charges immediately.
-:::
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["Component calls useSetupIntent()<br/>Returns { confirmSetup, loading, error }"] --> B["User clicks Save button, triggers confirmSetup()<br/><br/>await confirmSetup({<br/>  clientSecret: 'seti_xxx_secret_xxx',<br/>  confirmParams: { return_url: '...' }<br/>})"]
-    B --> C["Composable sets loading.value = true<br/>Calls elements.submit() (unless skipSubmit)<br/>then stripe.confirmSetup() with injected elements"]
-    C --> D{Result?}
-    D -->|Success| E["<b>SUCCESS</b><br/>loading = false<br/>Returns {<br/>  setupIntent: { status: 'succeeded' }<br/>}"]
-    D -->|Error| F["<b>ERROR</b><br/>loading = false<br/>error.value = message<br/>Returns { error: { message, code } }"]
-    E --> G["Card saved!<br/>Ready for future use"]
-    F --> H["Display error to user<br/>Allow retry"]
-```
-
-::: tip Usage Context
-This composable must be called within a component that is a descendant of `VueStripeProvider` (or in an app that installs [`createVueStripe()`](/api/plugin)). If used within `VueStripeElements`, the elements instance is automatically injected.
-:::
+Confirms a SetupIntent with `stripe.confirmSetup()`, using the Elements group from the nearest [`VueStripeElements`](/api/components/stripe-elements), and tracks `loading` and `error`. A SetupIntent saves a payment method for later without charging it. Call it in a component rendered inside `VueStripeProvider` (or an app that installs [`createVueStripe()`](/api/plugin)); inside `VueStripeElements` it picks up the Elements group automatically. [Save a payment method for later](/guide/setup-intent) walks through the flow, and [PaymentIntent or SetupIntent](/guide/payment-objects#paymentintent-or-setupintent) explains which to use.
 
 ## Usage
 
 ```vue
+<!-- SaveCardButton.vue, rendered inside VueStripeElements next to VueStripePaymentElement -->
 <script setup>
 import { useSetupIntent } from '@vue-stripe/vue-stripe'
 
+const props = defineProps({ clientSecret: { type: String, required: true } })
+
 const { confirmSetup, loading, error } = useSetupIntent()
 
-const handleSaveCard = async (clientSecret: string) => {
+const save = async () => {
   const result = await confirmSetup({
-    clientSecret,
-    confirmParams: {
-      return_url: window.location.href
-    }
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: `${window.location.origin}/account/cards` }
   })
 
-  if (result.error) {
-    console.error('Setup failed:', result.error.message)
-  } else if (result.setupIntent?.status === 'succeeded') {
-    console.log('Card saved successfully!')
+  if (result.setupIntent?.status === 'succeeded') {
+    // Saved without a redirect; result.setupIntent.payment_method is the saved method
   }
 }
 </script>
+
+<template>
+  <button :disabled="loading" @click="save">{{ loading ? 'Saving...' : 'Save card' }}</button>
+  <p v-if="error">{{ error }}</p>
+</template>
 ```
+
+## Options
+
+`confirmSetup(options)` takes a `ConfirmSetupOptions`:
+
+```ts
+import type { StripeElements } from '@stripe/stripe-js'
+
+interface ConfirmSetupOptions {
+  clientSecret: string
+  confirmParams?: {
+    return_url?: string
+    payment_method_data?: {
+      billing_details?: {
+        name?: string
+        email?: string
+        phone?: string
+        address?: {
+          line1?: string
+          line2?: string
+          city?: string
+          state?: string
+          postal_code?: string
+          country?: string
+        }
+      }
+    }
+  }
+  redirect?: 'if_required' | 'always'
+  elements?: StripeElements
+  skipSubmit?: boolean
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `clientSecret` | `string` | — | Client secret from the SetupIntent (required) |
+| `confirmParams` | object | `{}` | `return_url` and `payment_method_data.billing_details`, passed to `stripe.confirmSetup()` |
+| `redirect` | `'if_required' \| 'always'` | `'if_required'` | Redirect behavior. The default differs from Stripe's own (`'always'`): the promise resolves unless the payment method needs a redirect |
+| `elements` | `StripeElements` | injected | Override the injected Elements instance |
+| `skipSubmit` | `boolean` | `false` | Skip the automatic `elements.submit()` validation call before confirmation |
 
 ## Return Value
 
@@ -85,63 +90,21 @@ interface UseSetupIntentReturn {
 | `loading` | `Readonly<Ref<boolean>>` | Whether a confirm or retrieve is in progress |
 | `error` | `Readonly<Ref<string \| null>>` | Error message from the last confirm or retrieve attempt |
 
-## retrieveSetupIntent
+### retrieveSetupIntent
 
-Look up the current status of a SetupIntent by its client secret — useful after a
-redirect-based flow to read the final outcome. It shares the same `loading`/`error`
-refs as `confirmSetup`.
+Looks up the current status of a SetupIntent by its client secret, for example on your `return_url` page after a redirect. It shares the `loading` / `error` refs with `confirmSetup`.
 
 ```ts
 const { retrieveSetupIntent } = useSetupIntent()
 
-const { setupIntent } = await retrieveSetupIntent('seti_xxx_secret_xxx')
-if (setupIntent?.status === 'succeeded') {
-  // payment method saved
+const clientSecret = new URLSearchParams(window.location.search).get('setup_intent_client_secret')
+if (clientSecret) {
+  const { setupIntent } = await retrieveSetupIntent(clientSecret)
+  // setupIntent?.status: 'succeeded', 'processing', 'requires_payment_method', ...
 }
 ```
 
-## confirmSetup Options
-
-```ts
-interface ConfirmSetupOptions {
-  /** Client secret from the SetupIntent (required) */
-  clientSecret: string
-
-  /** Parameters passed through to stripe.confirmSetup() */
-  confirmParams?: {
-    /** URL to redirect after successful setup */
-    return_url?: string
-
-    /** Payment method data */
-    payment_method_data?: {
-      billing_details?: {
-        name?: string
-        email?: string
-        phone?: string
-        address?: {
-          line1?: string
-          line2?: string
-          city?: string
-          state?: string
-          postal_code?: string
-          country?: string
-        }
-      }
-    }
-  }
-
-  /** Redirect behavior (default: 'if_required') */
-  redirect?: 'if_required' | 'always'
-
-  /** Override injected elements (optional) */
-  elements?: StripeElements
-
-  /** Skip elements.submit() validation (not recommended, default: false) */
-  skipSubmit?: boolean
-}
-```
-
-## confirmSetup Result
+## Result
 
 `confirmSetup` and `retrieveSetupIntent` resolve to a `ConfirmSetupResult`, exported from the package:
 
@@ -163,355 +126,40 @@ interface VueStripeErrorResult {
 }
 ```
 
-The promise never rejects. When Stripe.js has not loaded yet (`{ error: { message: 'Stripe not initialized' } }`) or the Stripe call throws, it resolves to a `VueStripeErrorResult`, so one `if (result.error)` check covers every failure. With `redirect: 'always'`, a successful confirmation navigates away instead of resolving.
+With `redirect: 'always'`, or when the payment method needs a redirect, a successful confirmation navigates away instead of resolving.
 
-## Examples
+## Automatic submit
 
-### Basic Card Save
+Before calling `stripe.confirmSetup()`, `confirmSetup` calls `elements.submit()` to validate the form and collect wallet data, as Stripe requires for the Payment Element. If `submit()` reports a validation error, `confirmSetup` stops: `error.value` is set (to the validation message or `'Form validation failed'`) and the result resolves to `{ error: submitError }`; `stripe.confirmSetup()` is not called. Pass `skipSubmit: true` only when you already called [`submit()`](/api/composables/use-stripe-elements#submit) yourself.
 
-```vue
-<script setup>
-import { ref } from 'vue'
-import { useSetupIntent } from '@vue-stripe/vue-stripe'
+## Error Handling
 
-const { confirmSetup, loading, error } = useSetupIntent()
-const savedCard = ref(false)
-
-const handleSave = async () => {
-  const result = await confirmSetup({
-    clientSecret: 'seti_xxx_secret_xxx',
-    confirmParams: {
-      return_url: `${window.location.origin}/account/cards`
-    }
-  })
-
-  if (result.error) {
-    console.error(result.error.message)
-  } else if (result.setupIntent?.status === 'succeeded') {
-    savedCard.value = true
-  }
-}
-</script>
-
-<template>
-  <div>
-    <button @click="handleSave" :disabled="loading">
-      {{ loading ? 'Saving...' : 'Save Card' }}
-    </button>
-    <p v-if="error" class="error">{{ error }}</p>
-    <p v-if="savedCard" class="success">Card saved successfully!</p>
-  </div>
-</template>
-```
-
-### Without Redirect (Inline Flow)
-
-```vue
-<script setup>
-import { useSetupIntent } from '@vue-stripe/vue-stripe'
-
-const { confirmSetup, loading, error } = useSetupIntent()
-
-const handleSave = async (clientSecret: string) => {
-  const result = await confirmSetup({
-    clientSecret,
-    confirmParams: {
-      return_url: window.location.href // Used only if a redirect is required
-    },
-    redirect: 'if_required' // default: stays inline unless Stripe requires a redirect
-  })
-
-  if (result.setupIntent?.status === 'succeeded') {
-    // Handle success inline without redirect
-    showSuccessMessage()
-  }
-}
-</script>
-```
-
-### With Billing Details
-
-```vue
-<script setup>
-import { ref } from 'vue'
-import { useSetupIntent } from '@vue-stripe/vue-stripe'
-
-const { confirmSetup } = useSetupIntent()
-
-const customerName = ref('')
-const customerEmail = ref('')
-
-const handleSave = async (clientSecret: string) => {
-  const result = await confirmSetup({
-    clientSecret,
-    confirmParams: {
-      return_url: window.location.href,
-      payment_method_data: {
-        billing_details: {
-          name: customerName.value,
-          email: customerEmail.value
-        }
-      }
-    }
-  })
-
-  if (result.error) {
-    console.error(result.error.message)
-  }
-}
-</script>
-```
-
-### Complete Setup Form
-
-```vue
-<script setup>
-import { ref } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement
-} from '@vue-stripe/vue-stripe'
-
-const publishableKey = 'pk_test_...'
-const setupSecret = ref('') // SetupIntent client_secret from your backend
-
-const isComplete = ref(false)
-const setupStatus = ref<'idle' | 'processing' | 'success' | 'error'>('idle')
-const errorMessage = ref('')
-</script>
-
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="setupSecret">
-      <VueStripePaymentElement @change="e => isComplete = e.complete" />
-      <SetupFormButton
-        :client-secret="setupSecret"
-        :disabled="!isComplete"
-        @success="setupStatus = 'success'"
-        @error="msg => { setupStatus = 'error'; errorMessage = msg }"
-      />
-    </VueStripeElements>
-  </VueStripeProvider>
-
-  <div v-if="setupStatus === 'success'" class="success">
-    Card saved for future use!
-  </div>
-  <div v-if="setupStatus === 'error'" class="error">
-    {{ errorMessage }}
-  </div>
-</template>
-```
-
-```vue
-<!-- SetupFormButton.vue -->
-<script setup lang="ts">
-import { useSetupIntent } from '@vue-stripe/vue-stripe'
-
-const props = defineProps<{
-  clientSecret: string
-  disabled: boolean
-}>()
-
-const emit = defineEmits<{
-  success: []
-  error: [message: string]
-}>()
-
-const { confirmSetup, loading } = useSetupIntent()
-
-const handleSubmit = async () => {
-  const result = await confirmSetup({
-    clientSecret: props.clientSecret,
-    confirmParams: {
-      return_url: window.location.href
-    }
-  })
-
-  if (result.error) {
-    emit('error', result.error.message || 'Setup failed')
-  } else if (result.setupIntent?.status === 'succeeded') {
-    emit('success')
-  }
-}
-</script>
-
-<template>
-  <button
-    @click="handleSubmit"
-    :disabled="disabled || loading"
-    class="save-button"
-  >
-    {{ loading ? 'Saving...' : 'Save Card' }}
-  </button>
-</template>
-```
-
-### Subscription Setup Flow
-
-Common pattern for saving a card before starting a subscription:
-
-```vue
-<script setup>
-import { ref } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement,
-  useSetupIntent
-} from '@vue-stripe/vue-stripe'
-
-const publishableKey = 'pk_test_...'
-const setupSecret = ref('') // From: POST /create-setup-intent
-
-// Step 1: Create SetupIntent on mount
-onMounted(async () => {
-  const response = await fetch('/api/create-setup-intent', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ customer_id: customerId })
-  })
-  const data = await response.json()
-  setupSecret.value = data.client_secret
-})
-
-// SetupForm component (inside VueStripeElements)
-const SetupForm = {
-  setup() {
-    const { confirmSetup, loading, error } = useSetupIntent()
-
-    const handleSave = async () => {
-      const result = await confirmSetup({
-        clientSecret: setupSecret.value,
-        confirmParams: {
-          return_url: `${window.location.origin}/subscribe?step=confirm`
-        }
-      })
-
-      if (result.setupIntent?.status === 'succeeded') {
-        // Step 2: Create subscription with saved payment method
-        await createSubscription(result.setupIntent.payment_method)
-      }
-    }
-
-    return { handleSave, loading, error }
-  }
-}
-</script>
-```
+The promise never rejects. Every failure resolves to `{ error }` and sets `error.value`: a validation error from `elements.submit()`, Stripe's error (`StripeError`, with `type` and `code`), `{ error: { message: 'Stripe not initialized' } }` when Stripe.js has not loaded yet, or `{ error: { message } }` when the Stripe call throws. Outside a provider, `useSetupIntent()` itself throws a `VueStripeProviderError`. The [method confirmers overview](/api/composables/confirm/#return-value) lists which composables resolve `{ error }` and which reject.
 
 ## TypeScript
 
 ```ts
 import { useSetupIntent } from '@vue-stripe/vue-stripe'
-import type { ConfirmSetupResult } from '@vue-stripe/vue-stripe'
+import type {
+  ConfirmSetupOptions,
+  ConfirmSetupResult,
+  UseSetupIntentReturn
+} from '@vue-stripe/vue-stripe'
 
-const { confirmSetup, loading, error } = useSetupIntent()
+const { confirmSetup }: UseSetupIntentReturn = useSetupIntent()
 
-// Type-safe result handling
-const handleSetup = async (clientSecret: string) => {
-  const result: ConfirmSetupResult = await confirmSetup({
-    clientSecret,
-    confirmParams: {
-      return_url: window.location.href
-    }
-  })
-
-  // result: ConfirmSetupResult
+const save = async (options: ConfirmSetupOptions) => {
+  const result: ConfirmSetupResult = await confirmSetup(options)
   // result.setupIntent is SetupIntent | undefined
   // result.error is StripeError | { message: string } | undefined
-
-  if (result.setupIntent) {
-    const { id, status, payment_method } = result.setupIntent
-    console.log(`Setup ${id}: ${status}, PM: ${payment_method}`)
-  }
 }
-```
-
-## Error Handling
-
-The composable handles errors in two ways:
-
-1. **Stripe API errors** - Returned in `result.error` and stored in `error.value`
-2. **Exceptions** - Caught internally and returned as `{ error: { message: string } }`
-
-```vue
-<script setup>
-import { useSetupIntent } from '@vue-stripe/vue-stripe'
-
-const { confirmSetup, error } = useSetupIntent()
-
-const handleSave = async (clientSecret: string) => {
-  const result = await confirmSetup({
-    clientSecret,
-    confirmParams: {
-      return_url: window.location.href
-    }
-  })
-
-  if (result.error) {
-    // Check error type
-    switch (result.error.type) {
-      case 'card_error':
-        // Card was declined
-        console.error('Card declined:', result.error.message)
-        break
-      case 'validation_error':
-        // Invalid parameters
-        console.error('Validation error:', result.error.message)
-        break
-      default:
-        console.error('Setup error:', result.error.message)
-    }
-  }
-}
-</script>
-```
-
-## Common Error Codes
-
-| Code | Description |
-|------|-------------|
-| `card_declined` | The card was declined |
-| `expired_card` | The card has expired |
-| `incorrect_cvc` | The CVC is incorrect |
-| `processing_error` | Processing error occurred |
-| `setup_intent_authentication_failure` | Authentication failed |
-
-## Use Cases
-
-| Scenario | Description |
-|----------|-------------|
-| **Subscriptions** | Save card before creating a recurring subscription |
-| **Future Purchases** | Store card for one-click checkout later |
-| **Card on File** | Allow customers to manage saved payment methods |
-| **Free Trials** | Collect card during trial, charge when trial ends |
-
-## Requirements
-
-| Requirement | Details |
-|-------------|---------|
-| **VueStripeProvider** | Must be used within `VueStripeProvider` context, or in an app that installs `createVueStripe()` |
-| **SetupIntent** | Need a SetupIntent client_secret from your backend |
-| **StripeElements** | Optional - elements auto-injected if available |
-
-## Creating a SetupIntent (Backend)
-
-```js
-// Node.js example
-const stripe = require('stripe')('sk_test_...')
-
-const setupIntent = await stripe.setupIntents.create({
-  customer: 'cus_xxx', // Optional: attach to customer
-  payment_method_types: ['card'],
-})
-
-// Return setupIntent.client_secret to frontend
 ```
 
 ## See Also
 
-- [StripePaymentElement](/api/components/stripe-payment-element) - Payment UI component
-- [StripeElements](/api/components/stripe-elements) - Elements container
-- [usePaymentIntent](/api/composables/use-payment-intent) - For immediate charges
-- [Stripe SetupIntents Docs](https://stripe.com/docs/payments/setup-intents) - Official guide
+- [VueStripePaymentElement](/api/components/stripe-payment-element) - Payment UI component
+- [VueStripeElements](/api/components/stripe-elements) - Elements container
+- [usePaymentIntent](/api/composables/use-payment-intent) - Charge immediately
+- [Save a payment method for later](/guide/setup-intent) - Step-by-step guide, including the server code
+- [Payment objects](/guide/payment-objects#paymentintent-or-setupintent) - SetupIntent or PaymentIntent
+- [Stripe SetupIntents docs](https://docs.stripe.com/payments/setup-intents)

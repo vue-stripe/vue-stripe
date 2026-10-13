@@ -15,6 +15,7 @@ The [Tokens demo](/live-demo/tokens) creates a ConfirmationToken from a deferred
      <VueStripeElements mode="payment" :amount="1099" currency="usd"> -->
 <script setup lang="ts">
 import { VueStripePaymentElement, useCreateConfirmationToken } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const { createConfirmationToken, loading, error } = useCreateConfirmationToken()
 
@@ -92,3 +93,10 @@ const api: UseCreateConfirmationTokenReturn = useCreateConfirmationToken()
 const options: CreateConfirmationTokenOptions = { params: { return_url: location.href } }
 const { confirmationToken, error } = await api.createConfirmationToken(options)
 ```
+
+## See Also
+
+- [Confirm payments on your server](/guide/tokens#confirmationtoken-confirm-on-your-server) - The ConfirmationToken flow step by step
+- [useHandleNextAction](/api/composables/use-handle-next-action) - Finish 3D Secure after your server confirms
+- [VueStripeElements](/api/components/stripe-elements) - `mode`, `amount` and `currency` for a deferred intent
+- [Payment objects](/guide/payment-objects#paymentmethods-confirmationtokens-and-tokens) - PaymentMethods, ConfirmationTokens and Tokens

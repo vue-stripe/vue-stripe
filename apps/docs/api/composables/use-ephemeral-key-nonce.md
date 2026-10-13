@@ -47,3 +47,8 @@ The method resolves to Stripe's result untouched and rejects when Stripe.js thro
 ```ts
 createEphemeralKeyNonce(options: { issuingCard: string }): Promise<EphemeralKeyNonceResult>
 ```
+
+## See Also
+
+- [Display issued card details](/guide/issuing) - The full nonce and ephemeral key flow
+- [Issuing Elements](/api/components/stripe-issuing-elements) - The components that take the nonce

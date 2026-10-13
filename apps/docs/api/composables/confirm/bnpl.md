@@ -95,3 +95,9 @@ confirmKlarnaPayment(
   options?: ConfirmKlarnaPaymentOptions
 ): Promise<PaymentIntentResult>
 ```
+
+## See Also
+
+- [Method confirmers](/api/composables/confirm/) - The shared return value
+- [VueStripePaymentMethodMessagingElement](/api/components/stripe-payment-method-messaging-element) - Show installment messaging
+- [Redirects](/guide/confirming-payments#redirects) - How the return to your page works

@@ -6,7 +6,7 @@ Each composable returns the Stripe.js method under its own name plus `loading` a
 
 ## When to use
 
-The [Payment Element](/api/components/stripe-payment-element) collects all of these, shows the mandate text and confirms through [`usePaymentIntent`](/api/composables/use-payment-intent) / [`useSetupIntent`](/api/composables/use-setup-intent); prefer it for new integrations. Use the confirmers below with the IBAN or BECS element, with your own form, or to confirm an intent whose PaymentMethod is already attached (for US bank accounts, collected with `stripe.collectBankAccountForPayment()`).
+The [Payment Element](/api/components/stripe-payment-element) collects all of these, shows the mandate text and confirms through [`usePaymentIntent`](/api/composables/use-payment-intent) / [`useSetupIntent`](/api/composables/use-setup-intent); prefer it for new integrations. Use the confirmers below with the IBAN or BECS element, with your own form, or to confirm an intent whose PaymentMethod is already attached (for US bank accounts, collected with [`useFinancialConnections().collectBankAccountForPayment()`](/api/composables/use-financial-connections)).
 
 ## Example
 
@@ -184,3 +184,10 @@ confirmUsBankAccountSetup(
   data?: ConfirmUsBankAccountSetupData
 ): Promise<SetupIntentResult>
 ```
+
+## See Also
+
+- [Method confirmers](/api/composables/confirm/) - The shared return value
+- [Accept SEPA Direct Debit](/guide/iban-element) and [Accept BECS Direct Debit](/guide/au-bank-account-element) - Step-by-step guides
+- [useFinancialConnections](/api/composables/use-financial-connections) - Collect a US bank account before confirming
+- [Payment methods that settle later](/guide/confirming-payments#payment-methods-that-settle-later)

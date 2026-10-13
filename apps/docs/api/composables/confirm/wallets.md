@@ -264,3 +264,9 @@ confirmWechatPayPayment(
   options?: ConfirmWechatPayPaymentOptions
 ): Promise<PaymentIntentResult>
 ```
+
+## See Also
+
+- [Method confirmers](/api/composables/confirm/) - The shared return value
+- [Redirects](/guide/confirming-payments#redirects) and [Next actions](/guide/confirming-payments#next-actions)
+- [VueStripeExpressCheckoutElement](/api/components/stripe-express-checkout-element) - Apple Pay, Google Pay and Link buttons

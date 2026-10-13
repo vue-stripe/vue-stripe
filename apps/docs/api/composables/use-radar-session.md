@@ -48,3 +48,9 @@ The composable is named after the Radar Session it creates; the method keeps its
 ```ts
 createRadarSession(): Promise<RadarSessionPayload>
 ```
+
+## See Also
+
+- [Tokens and Radar sessions](/guide/tokens#tokens-and-radar-sessions)
+- [Fraud signals and privacy](/guide/security#fraud-signals-and-privacy) - What Stripe.js collects for Radar
+- [Method confirmers](/api/composables/confirm/#return-value) - The shared return contract

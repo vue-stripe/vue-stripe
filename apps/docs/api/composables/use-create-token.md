@@ -15,6 +15,7 @@ The [Tokens demo](/live-demo/tokens) creates a card Token from the Card Element.
 <script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCardElement, useCreateToken } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
 const { createToken, loading, error } = useCreateToken()
@@ -80,3 +81,10 @@ createToken(tokenType: 'cvc_update', element: StripeCardCvcElement): Promise<Tok
 createToken(tokenType: 'account', data: TokenCreateParams.Account): Promise<TokenResult>
 createToken(tokenType: 'person', data: TokenCreateParams.Person): Promise<TokenResult>
 ```
+
+## See Also
+
+- [Tokens and Radar sessions](/guide/tokens#tokens-and-radar-sessions) - Where tokens still fit
+- [useCreatePaymentMethod](/api/composables/use-create-payment-method) - The current way to save payment details
+- [Payment objects](/guide/payment-objects#paymentmethods-confirmationtokens-and-tokens) - PaymentMethods, ConfirmationTokens and Tokens
+- [Live demo](/live-demo/tokens)

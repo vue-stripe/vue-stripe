@@ -248,3 +248,9 @@ confirmCustomerBalancePayment(
   options: ConfirmCustomerBalancePaymentOptions
 ): Promise<PaymentIntentResult>
 ```
+
+## See Also
+
+- [Method confirmers](/api/composables/confirm/) - The shared return value
+- [Redirects](/guide/confirming-payments#redirects) - How the return to your page works
+- [VueStripePaymentElement](/api/components/stripe-payment-element) - Collects these methods with one element

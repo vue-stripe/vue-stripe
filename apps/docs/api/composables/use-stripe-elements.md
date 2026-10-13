@@ -1,40 +1,21 @@
 # useStripeElements
 
-Access the Stripe Elements instance from any component within `VueStripeElements`.
-
-## What is useStripeElements?
-
-A composable that provides access to the Stripe Elements instance from any child component:
-
-| Capability | Description |
-|------------|-------------|
-| **Elements Instance Access** | Get the StripeElements instance for element retrieval |
-| **Element Retrieval** | Look up a mounted element by type with `getElement()` |
-| **Form Submission** | Trigger validation and wallet collection via `submit()` |
-| **Loading State** | Know when Elements is still initializing |
-| **Error State** | Detect if Elements creation failed |
-| **Payment Submission** | The intent composables (`usePaymentIntent`, `useSetupIntent`, ...) confirm with this same instance |
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["Component calls useStripeElements()"] --> B["Composable checks for StripeElements context<br/>(Uses Vue's inject with stripeElementsInjectionKey)"]
-    B --> C{Context Found?}
-    C -->|Yes| D["<b>Context Found</b><br/>Returns { elements, submit, fetchUpdates,<br/>getElement, loading, error }"]
-    C -->|No| E["<b>No Context Found</b><br/>Throws VueStripeElementsError:<br/>'Elements context not found. Make sure to<br/>wrap your component with VueStripeElements.'"]
-    D --> F["Component uses elements.value for element access<br/><br/>// Get specific elements<br/>const card = getElement('card')<br/>const payment = getElement('payment')<br/><br/>// Trigger validation / wallet collection<br/>const { error } = await submit()<br/><br/>// Submit payment (uses the injected elements)<br/>await usePaymentIntent().confirmPayment({<br/>  clientSecret,<br/>  confirmParams: { return_url: '...' }<br/>})"]
-```
+Returns the `StripeElements` group created by the nearest [`VueStripeElements`](/api/components/stripe-elements), with `submit`, `fetchUpdates` and `getElement`. Call it in a component rendered inside `VueStripeElements`. To confirm a payment or setup, use [`usePaymentIntent`](/api/composables/use-payment-intent) or [`useSetupIntent`](/api/composables/use-setup-intent): they use the same group and call `submit()` for you.
 
 ## Usage
 
 ```vue
+<!-- PaymentStatus.vue, rendered inside VueStripeElements -->
 <script setup>
 import { useStripeElements } from '@vue-stripe/vue-stripe'
 
-// Must be called inside a component that's within StripeElements
-const { elements, submit, loading, error } = useStripeElements()
+const { elements, loading, error } = useStripeElements()
 </script>
+
+<template>
+  <p v-if="loading">Preparing the payment form...</p>
+  <p v-else-if="error">{{ error }}</p>
+</template>
 ```
 
 ## Return Value
@@ -50,6 +31,18 @@ const { elements, submit, loading, error } = useStripeElements()
 
 The `elements`, `loading` and `error` return values are **readonly refs**; `submit`, `fetchUpdates` and `getElement` are functions. Called before the Elements group exists, `submit` and `fetchUpdates` resolve to `{ error: { message: 'Elements not initialized' } }` and `getElement` returns `null`, instead of throwing.
 
+### submit
+
+`submit()` wraps `elements.submit()`. It resolves to an `ElementsSubmitResult`: `{ error }` when validation fails, or `{ selectedPaymentMethod }` on success.
+
+```ts
+const { submit } = useStripeElements()
+
+const { error } = await submit()
+```
+
+`usePaymentIntent`, `useSetupIntent`, `useCreatePaymentMethod` and `useCreateConfirmationToken` call it automatically before they call Stripe (`useCreatePaymentMethod` only in its Elements flow). Call it yourself only when you need to do something between validating and confirming (for example, create the Intent once the form is valid), and then pass `skipSubmit: true` to the confirming composable so it does not submit again.
+
 ### getElement
 
 `getElement(type)` wraps `elements.getElement()`. It has the same overloads as Stripe's method, so the return type follows the element type you pass (`StripePaymentElement | null` for `'payment'`, `StripeCardElement | null` for `'card'`, and so on), and the Address Element's lookup options pass through:
@@ -63,6 +56,8 @@ payment?.collapse()
 ```
 
 It reads the current group on every call, so after `VueStripeElements` re-creates the group (a new `clientSecret` or amount) it returns the element remounted on the new group. To know when an `appearance` / `locale` update has been applied, listen to [`@update-end`](/api/components/stripe-elements#update-end) on `VueStripeElements`.
+
+In the component that renders an element, prefer its exposed `element` through a template ref (`paymentRef.value?.element`); every element component exposes it.
 
 ### fetchUpdates
 
@@ -80,267 +75,29 @@ const applyCoupon = async (code: string) => {
 }
 ```
 
-## Examples
+## Behaviour
 
-### Basic Usage
-
-```vue
-<script setup>
-import { useStripeElements, usePaymentIntent } from '@vue-stripe/vue-stripe'
-
-const props = defineProps({ clientSecret: { type: String, required: true } })
-
-const { loading, error } = useStripeElements()
-// Confirms with the same injected Elements instance
-const { confirmPayment } = usePaymentIntent()
-
-const handleSubmit = async () => {
-  const { error } = await confirmPayment({
-    clientSecret: props.clientSecret,
-    confirmParams: {
-      return_url: 'https://example.com/complete'
-    },
-    redirect: 'always'
-  })
-}
-</script>
-```
-
-### Getting a Specific Element
-
-```vue
-<script setup>
-import { useStripeElements } from '@vue-stripe/vue-stripe'
-
-const { getElement } = useStripeElements()
-
-const focusCard = () => {
-  getElement('card')?.focus()
-}
-
-const clearCard = () => {
-  getElement('card')?.clear()
-}
-</script>
-```
-
-### Submitting Elements
-
-For the Payment Element, confirm with [`usePaymentIntent()`](/api/composables/use-payment-intent): it passes the injected Elements instance to Stripe for you:
-
-```vue
-<script setup>
-import { usePaymentIntent } from '@vue-stripe/vue-stripe'
-
-const props = defineProps({ clientSecret: { type: String, required: true } })
-
-const { confirmPayment } = usePaymentIntent()
-
-const pay = async () => {
-  const { error } = await confirmPayment({
-    clientSecret: props.clientSecret,
-    confirmParams: {
-      return_url: window.location.href
-    },
-    redirect: 'always'
-  })
-
-  if (error) {
-    console.error(error.message)
-  }
-}
-</script>
-```
-
-### Submitting for Validation
-
-Call `submit()` to trigger form validation and collect data required for wallets (Apple Pay, Google Pay) before confirming payment. It resolves to an `ElementsSubmitResult` (`{ error }` on failure, or `{ selectedPaymentMethod }` on success). Calling it yourself is useful when you need to do something between validating and confirming; then pass `skipSubmit: true` so the composable does not submit again:
-
-```vue
-<!-- Rendered inside <VueStripeElements mode="payment" :amount="1099" currency="usd"> -->
-<script setup>
-import { useStripeElements, usePaymentIntent } from '@vue-stripe/vue-stripe'
-
-const { submit } = useStripeElements()
-const { confirmPayment } = usePaymentIntent()
-
-const pay = async () => {
-  // Trigger form validation and wallet collection
-  const { error: submitError } = await submit()
-  if (submitError) {
-    console.error(submitError.message)
-    return
-  }
-
-  // e.g. create the PaymentIntent only once the form is valid
-  const response = await fetch('/api/create-payment-intent', { method: 'POST' })
-  const { clientSecret } = await response.json()
-
-  const { error } = await confirmPayment({
-    clientSecret,
-    confirmParams: { return_url: window.location.href },
-    skipSubmit: true
-  })
-
-  if (error) {
-    console.error(error.message)
-  }
-}
-</script>
-```
-
-> `usePaymentIntent` and `useSetupIntent` call `submit()` automatically unless `skipSubmit` is `true`.
-
-### Getting Element Data
-
-Retrieve data from elements for validation:
-
-```vue
-<script setup>
-import { ref } from 'vue'
-import { useStripeElements } from '@vue-stripe/vue-stripe'
-
-const { getElement } = useStripeElements()
-const cardComplete = ref(false)
-
-// The Payment Element emits change events that you can listen to
-// But you can also check elements directly
-const checkElements = () => {
-  // For card element (null before the Elements group exists)
-  const cardElement = getElement('card')
-  // Note: getElement returns the element but not its state
-  // Use the @change event on components to track completeness
-}
-</script>
-```
-
-## Error Handling
-
-`useStripeElements()` throws a `VueStripeElementsError` with the message `'Elements context not found. Make sure to wrap your component with VueStripeElements.'` if called outside of `VueStripeElements`:
-
-```vue
-<!-- Wrong - outside StripeElements -->
-<script setup>
-const { elements } = useStripeElements() // Throws VueStripeElementsError
-</script>
-
-<template>
-  <VueStripeProvider :publishable-key="key">
-    <VueStripeElements :client-secret="secret">
-      <MyPaymentForm />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-```vue
-<!-- Correct - inside StripeElements -->
-<!-- MyPaymentForm.vue -->
-<script setup>
-const { elements } = useStripeElements() // Works!
-</script>
-
-<!-- Parent.vue -->
-<template>
-  <VueStripeProvider :publishable-key="key">
-    <VueStripeElements :client-secret="secret">
-      <MyPaymentForm />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-## Element Types
-
-You can retrieve different element types:
-
-```ts
-// Get elements by type
-const { getElement } = useStripeElements()
-const paymentElement = getElement('payment')
-const cardElement = getElement('card')
-const cardNumberElement = getElement('cardNumber')
-const cardExpiryElement = getElement('cardExpiry')
-const cardCvcElement = getElement('cardCvc')
-const expressCheckoutElement = getElement('expressCheckout')
-const addressElement = getElement('address')
-const linkAuthenticationElement = getElement('linkAuthentication')
-```
+Called outside `VueStripeElements`, `useStripeElements()` throws a `VueStripeElementsError`: `Elements context not found. Make sure to wrap your component with VueStripeElements.` Calling it in the same component that renders `VueStripeElements` counts as outside: call it in a child component.
 
 ## TypeScript
 
 ```ts
 import { useStripeElements } from '@vue-stripe/vue-stripe'
-import type {
-  StripeElements,
-  StripeCardElement,
-  StripePaymentElement
-} from '@stripe/stripe-js'
+import type { UseStripeElementsReturn, ElementsSubmitResult } from '@vue-stripe/vue-stripe'
+import type { StripePaymentElement } from '@stripe/stripe-js'
 
-const { elements, submit, fetchUpdates, getElement, loading, error } = useStripeElements()
-// elements:     Readonly<Ref<StripeElements | null>>
-// submit:       () => Promise<ElementsSubmitResult>
-// fetchUpdates: () => Promise<{ error?: { message: string; status?: string } }>
-// getElement:   StripeElements['getElement']
+const { submit, getElement }: UseStripeElementsReturn = useStripeElements()
 
-// Trigger validation / wallet collection.
-// submit() resolves to { error } on failure or { selectedPaymentMethod } on success.
-const validate = async () => {
-  const { error: submitError } = await submit()
-  return submitError
-}
+const validate = async (): Promise<ElementsSubmitResult> => submit()
 
 // Typed through Stripe's getElement overloads
-const cardElement: StripeCardElement | null = getElement('card')
 const paymentElement: StripePaymentElement | null = getElement('payment')
-```
-
-## Common Patterns
-
-### Safe Elements Access
-
-`submit()`, `fetchUpdates()` and `getElement()` already handle the group not existing yet (they resolve to `{ error }` or return `null`), and the intent composables report `'Stripe not initialized'` the same way, so you only check the element you look up:
-
-```ts
-const { getElement } = useStripeElements()
-
-const focusPayment = () => {
-  const paymentElement = getElement('payment')
-  if (!paymentElement) {
-    console.error('Payment Element not mounted yet')
-    return
-  }
-  paymentElement.focus()
-}
-```
-
-### With Card Element
-
-```ts
-import { useConfirmCardPayment, useStripeElements } from '@vue-stripe/vue-stripe'
-
-const { getElement } = useStripeElements()
-const { confirmCardPayment } = useConfirmCardPayment()
-
-const payWithCard = async (clientSecret: string) => {
-  const cardElement = getElement('card')
-  if (!cardElement) return
-
-  const { error, paymentIntent } = await confirmCardPayment(clientSecret, {
-    payment_method: {
-      card: cardElement,
-      billing_details: {
-        name: 'Customer Name'
-      }
-    }
-  })
-
-  return { error, paymentIntent }
-}
 ```
 
 ## See Also
 
-- [StripeElements](/api/components/stripe-elements) - The Elements provider component
-- [useStripe](/api/composables/use-stripe) - Access Stripe instance
-- [Payment Element Guide](/guide/payment-element) - Using Payment Element
+- [VueStripeElements](/api/components/stripe-elements) - The Elements provider component
+- [useStripe](/api/composables/use-stripe) - Access the Stripe instance
+- [usePaymentIntent](/api/composables/use-payment-intent) - Confirm a PaymentIntent with this group
+- [Accept a payment with the Payment Element](/guide/payment-element)
+- [How confirming works](/guide/confirming-payments#why-the-payment-element-is-submitted-first) - Why the Payment Element is submitted first

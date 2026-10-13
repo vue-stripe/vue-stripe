@@ -42,3 +42,8 @@ const { handleCardAction, loading, error } = useHandleCardAction()
 ```ts
 handleCardAction(clientSecret: string): Promise<PaymentIntentResult>
 ```
+
+## See Also
+
+- [useHandleNextAction](/api/composables/use-handle-next-action) - The current way to run next actions
+- [Next actions](/guide/confirming-payments#next-actions) - What a next action is

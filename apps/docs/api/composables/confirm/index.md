@@ -1,6 +1,10 @@
 # Method confirmers
 
-Stripe.js has a confirm method for each payment method, such as `stripe.confirmCardPayment()` or `stripe.confirmSepaDebitSetup()`. Vue Stripe wraps every one of them, 46 in Stripe.js 10, in a composable named after it: `useConfirmCardPayment`, `useConfirmSepaDebitSetup`, and so on.
+Stripe.js has a confirm method for each payment method, such as `stripe.confirmCardPayment()` or `stripe.confirmSepaDebitSetup()`. Vue Stripe wraps every one of them, 46 in Stripe.js 10, in a composable named after it: `useConfirmCardPayment`, `useConfirmSepaDebitSetup`, and so on. Call them inside a `VueStripeProvider`; they do not need `VueStripeElements`, but components that render the Card, IBAN or BECS element do.
+
+With the [Payment Element](/api/components/stripe-payment-element), confirm with [`usePaymentIntent`](/api/composables/use-payment-intent) or [`useSetupIntent`](/api/composables/use-setup-intent) instead. [How confirming works](/guide/confirming-payments#which-composable-confirms) explains which composable fits which flow. Some payment methods must be enabled on your Stripe account, or are offered only in some countries or currencies; each family page links Stripe's guide for the method.
+
+## Usage
 
 ```vue
 <script setup lang="ts">
@@ -14,16 +18,6 @@ const pay = async (clientSecret: string) => {
 }
 </script>
 ```
-
-## When to use
-
-If you collect payment details with the [Payment Element](/api/components/stripe-payment-element), confirm with [`usePaymentIntent`](/api/composables/use-payment-intent) / [`useSetupIntent`](/api/composables/use-setup-intent): one call covers every payment method the Payment Element shows, and it runs `elements.submit()` first. The method confirmers are for everything else: the Card, IBAN and BECS elements, a button for one payment method, your own form, or a saved PaymentMethod ID.
-
-Some payment methods must be enabled on your Stripe account first, and a few are only offered in certain countries or currencies; see the Stripe guide linked from each method.
-
-::: tip Guide and live demo
-The [Confirming Payments guide](/guide/confirming-payments) compares the confirmers with `usePaymentIntent`, the Checkout composables and server-side confirmation. The [ACH Direct Debit demo](/live-demo/ach-debit) confirms with `useConfirmUsBankAccountPayment`.
-:::
 
 ## Families
 
@@ -54,10 +48,28 @@ const { confirmCardPayment, loading, error } = useConfirmCardPayment()
 The wrapped method:
 
 - forwards its arguments to Stripe.js unchanged and resolves to Stripe's result untouched (`{ paymentIntent }` / `{ setupIntent }` or `{ error }`). An `{ error }` result also sets `error`.
-- rejects when Stripe.js throws (for example on invalid arguments), after setting `error`. This differs from `usePaymentIntent` and `useSetupIntent`, which resolve to `{ error }` instead.
+- rejects when Stripe.js throws (for example on invalid arguments), after setting `error`.
 - rejects with `VueStripeProviderError` if Stripe.js has not loaded. `VueStripeProvider` renders its children only once Stripe.js is ready, so this does not happen in components inside it.
 
-Calling a composable outside a `VueStripeProvider` throws `VueStripeProviderError`. The confirmers do not need `VueStripeElements`; components that use the Card, IBAN or BECS element do.
+Calling a composable outside a `VueStripeProvider` throws `VueStripeProviderError`.
+
+### Resolve or reject
+
+Every composable that calls Stripe.js reports a Stripe error result (a decline, a validation error) as a resolved `{ error }` and also sets its `error` ref. They differ when Stripe.js has not loaded yet or when the Stripe.js call throws:
+
+| Composable | Stripe.js not loaded, or the Stripe.js call throws |
+|------------|-----------------------------------------------------|
+| [`usePaymentIntent`](/api/composables/use-payment-intent), [`useSetupIntent`](/api/composables/use-setup-intent), [`useCreatePaymentMethod`](/api/composables/use-create-payment-method), [`useHandleNextAction`](/api/composables/use-handle-next-action), [`useFinancialConnections`](/api/composables/use-financial-connections), [`useIdentity`](/api/composables/use-identity) | **Resolves** to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `'Stripe not initialized'`), so one `if (result.error)` check covers every failure |
+| The method confirmers on these pages, [`useCreateToken`](/api/composables/use-create-token), [`useCreateConfirmationToken`](/api/composables/use-create-confirmation-token), [`useHandleCardAction`](/api/composables/use-handle-card-action), [`useVerifyMicrodepositsForPayment`](/api/composables/use-verify-microdeposits-for-payment), [`useVerifyMicrodepositsForSetup`](/api/composables/use-verify-microdeposits-for-setup), [`useRadarSession`](/api/composables/use-radar-session), [`useEphemeralKeyNonce`](/api/composables/use-ephemeral-key-nonce) | **Rejects**, like the Stripe.js method it wraps: with `VueStripeProviderError` when Stripe.js has not loaded, or with what Stripe.js threw. `error` is set first |
+
+The other composables have their own contracts:
+
+- [`useStripeElements`](/api/composables/use-stripe-elements): `submit()` and `fetchUpdates()` resolve to `{ error: { message: 'Elements not initialized' } }` before the Elements group exists, and otherwise return Stripe's result.
+- [`useCheckoutSession`](/api/composables/use-checkout-session) and [`useCheckoutForm`](/api/composables/use-checkout-form): an action called before the session is ready resolves to `{ type: 'error', error: { message: 'Checkout session is not ready yet' } }`; otherwise it returns Stripe's result.
+- [`usePaymentRequest`](/api/composables/use-payment-request): methods never throw; failures set its `error` ref.
+- [`useStripeCheckout`](/api/composables/use-stripe-checkout): `redirectToCheckout()` rejects with `VueStripeCheckoutError` when `url` is empty.
+
+Inside `VueStripeProvider`, Stripe.js has always loaded by the time your component renders, so "not loaded" only happens in code outside it, or under the [plugin](/api/plugin) before the first load finishes. [How confirming works](/guide/confirming-payments#two-error-styles) explains why the two styles exist.
 
 ## TypeScript
 
@@ -120,3 +132,11 @@ const confirm: UseStripeMethodReturn<'confirmCardSetup'> = useConfirmCardSetup()
 | `useConfirmUsBankAccountPayment` | `stripe.confirmUsBankAccountPayment()` | [Bank debits](/api/composables/confirm/bank-debits) |
 | `useConfirmUsBankAccountSetup` | `stripe.confirmUsBankAccountSetup()` | [Bank debits](/api/composables/confirm/bank-debits) |
 | `useConfirmWechatPayPayment` | `stripe.confirmWechatPayPayment()` | [Wallets](/api/composables/confirm/wallets) |
+
+## See Also
+
+- [How confirming works](/guide/confirming-payments) - Which composable confirms which flow
+- [usePaymentIntent](/api/composables/use-payment-intent) and [useSetupIntent](/api/composables/use-setup-intent) - Confirm with the Payment Element
+- [Types and errors](/api/types) - `UseStripeMethodReturn`, `VueStripeErrorResult` and the error classes
+- [Stripe.js coverage](/coverage) - Every Stripe.js method and its composable
+- [ACH Direct Debit demo](/live-demo/ach-debit) - Confirms with `useConfirmUsBankAccountPayment`
