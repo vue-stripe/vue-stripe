@@ -143,7 +143,7 @@ The same token confirms a SetupIntent (`stripe.setupIntents.create({ confirm: tr
 
 ## Create a PaymentMethod to charge later
 
-[`useCreatePaymentMethod()`](/api/composables/use-create-payment-method) creates a reusable PaymentMethod (`pm_...`) for your server to attach to a customer or charge later. Inside a Payment Element group (with `:options="{ paymentMethodCreation: 'manual' }"` on `VueStripeElements`), call it with no arguments; with the Card Element, pass the element:
+[`useCreatePaymentMethod()`](/api/composables/use-create-payment-method) creates a reusable PaymentMethod (`pm_...`) for your server to attach to a customer or charge later. Inside a Payment Element group (with `:options="{ paymentMethodCreation: 'manual' }"` on `VueStripeElements`), call it with no arguments; with the Card Element, pass the element. The Card Element shows validation errors (an incomplete card number, say) in its own `#error` slot, so the sample shows only the other errors:
 
 ```vue
 <script setup lang="ts">
@@ -151,14 +151,18 @@ import { ref } from 'vue'
 import { VueStripeCardElement, useCreatePaymentMethod } from '@vue-stripe/vue-stripe'
 
 const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
-const { createPaymentMethod, loading, error } = useCreatePaymentMethod()
+const { createPaymentMethod, loading } = useCreatePaymentMethod()
+const message = ref('')
 
 const save = async () => {
   const card = cardRef.value?.element
   if (!card) return
-  const { paymentMethod } = await createPaymentMethod({ type: 'card', card })
+  message.value = ''
+  const { paymentMethod, error } = await createPaymentMethod({ type: 'card', card })
   if (paymentMethod) {
     // Send paymentMethod.id to your server, e.g. to attach it to a customer
+  } else if (error && !('type' in error && error.type === 'validation_error')) {
+    message.value = error.message ?? 'The card could not be saved.'
   }
 }
 </script>
@@ -166,7 +170,7 @@ const save = async () => {
 <template>
   <VueStripeCardElement ref="cardRef" />
   <button :disabled="loading" @click="save">Save card</button>
-  <p v-if="error">{{ error }}</p>
+  <p v-if="message">{{ message }}</p>
 </template>
 ```
 
