@@ -24,7 +24,7 @@ import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
 import { statusShell } from '../utils/status-shell'
 import { errorLogger } from '../utils/report'
-import type { VueStripeComponent } from '../utils/element-types'
+import type { ScopedSlot, StatusSlots, VueStripeComponent } from '../utils/element-types'
 
 /** Stripe.js 10.0.0 declares only `on('update-end')` on the Elements group; `off` is used when present. */
 type UpdateEndDetachable = { off?: (eventType: 'update-end', handler: () => void) => void }
@@ -60,6 +60,9 @@ const elementsProps = {
     default: undefined
   }
 }
+
+/** Slot name -> the slot's props. */
+type ElementsSlots = StatusSlots & { default?: ScopedSlot }
 
 /** Event name -> payload. */
 type ElementsEvents = {
@@ -221,4 +224,9 @@ export default /* @__PURE__ */ defineComponent({
         'Initializing Elements...'
       )
   }
-}) as unknown as VueStripeComponent<typeof elementsProps, Record<never, never>, ElementsEvents>
+}) as unknown as VueStripeComponent<
+  typeof elementsProps,
+  Record<never, never>,
+  ElementsEvents,
+  ElementsSlots
+>

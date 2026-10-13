@@ -477,6 +477,9 @@ importers:
 
   packages/vue2-smoke:
     devDependencies:
+      '@babel/types':
+        specifier: ^7.29.8
+        version: 7.29.8
       '@stripe/stripe-js':
         specifier: ^10.0.0
         version: 10.0.0

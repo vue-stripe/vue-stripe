@@ -19,7 +19,7 @@ import { stripeCheckoutInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
 import { statusShell } from '../utils/status-shell'
 import { errorLogger } from '../utils/report'
-import type { VueStripeComponent } from '../utils/element-types'
+import type { ScopedSlot, StatusSlots, VueStripeComponent } from '../utils/element-types'
 
 const checkoutElementsProviderProps = {
   /** Client secret of a Checkout Session (`ui_mode: 'elements'`), or a Promise resolving to it. */
@@ -47,6 +47,16 @@ const checkoutElementsProviderProps = {
     type: Object as PropType<StripeCheckoutElementsSdkOptions['defaultValues'] | undefined>,
     default: undefined
   }
+}
+
+/** Slot name -> the slot's props. `actions` and `session` are null until the actions load. */
+type CheckoutElementsProviderSlots = StatusSlots & {
+  default?: ScopedSlot<{
+    checkout: StripeCheckoutElementsSdk
+    actions: StripeCheckoutLoadActionsSuccess | null
+    session: StripeCheckoutSession | null
+    loading: boolean
+  }>
 }
 
 /** Event name -> payload. */
@@ -181,5 +191,6 @@ export default /* @__PURE__ */ defineComponent({
 }) as unknown as VueStripeComponent<
   typeof checkoutElementsProviderProps,
   Record<never, never>,
-  CheckoutElementsProviderEvents
+  CheckoutElementsProviderEvents,
+  CheckoutElementsProviderSlots
 >

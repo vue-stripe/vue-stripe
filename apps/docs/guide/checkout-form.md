@@ -24,7 +24,7 @@ sequenceDiagram
     participant Browser
     participant Server
     participant Stripe
-    Browser->>Server: POST /checkout-session
+    Browser->>Server: POST /api/checkout-form-session
     Server->>Stripe: checkout.sessions.create({ ui_mode: 'form' })
     Stripe-->>Server: session.client_secret
     Server-->>Browser: clientSecret
@@ -37,7 +37,7 @@ sequenceDiagram
 
 ## 1. Create the session on your server
 
-Create the session with `ui_mode: 'form'` and a `return_url`. `ui_mode: 'form'` needs Stripe API version `2026-03-25.dahlia` or later; older versions answer *"Invalid ui_mode: form"*.
+Create the session with `ui_mode: 'form'` and a `return_url`. `ui_mode: 'form'` needs Stripe API version `2026-03-25.dahlia` or later; older versions answer *"Invalid ui_mode: form"*. The route has its own path because the other Checkout guides create sessions with a different `ui_mode`, so one app can follow several of them.
 
 ```js
 // Node.js (Express-style handler)
@@ -45,7 +45,7 @@ import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
-app.post('/api/checkout-session', async (req, res) => {
+app.post('/api/checkout-form-session', async (req, res) => {
   const session = await stripe.checkout.sessions.create({
     ui_mode: 'form',
     mode: 'payment',
@@ -84,7 +84,7 @@ import PayForm from './PayForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
-const clientSecret = fetch('/api/checkout-session', { method: 'POST' })
+const clientSecret = fetch('/api/checkout-form-session', { method: 'POST' })
   .then((res) => res.json())
   .then((data) => data.clientSecret)
 </script>
@@ -101,14 +101,15 @@ const clientSecret = fetch('/api/checkout-session', { method: 'POST' })
   <p v-if="message">{{ message }}</p>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCheckoutForm, useCheckoutForm } from '@vue-stripe/vue-stripe'
+import type { StripeCheckoutFormConfirmEvent } from '@vue-stripe/vue-stripe'
 
 const { confirm } = useCheckoutForm()
 const message = ref('')
 
-const onConfirm = async (event) => {
+const onConfirm = async (event: StripeCheckoutFormConfirmEvent) => {
   // The session has return_url, so no returnUrl here.
   // redirect: 'if_required' keeps card payments on this page.
   const result = await confirm({ formConfirmEvent: event, redirect: 'if_required' })
@@ -122,27 +123,41 @@ Nothing is charged until you call `confirm`. Payment methods that need a redirec
 
 ## Read the form values
 
-`@change` reports whether the form is complete and its current values; `getValue()` on a template ref reads them on demand:
+`@change` reports whether the form is complete and its current values; `getValue()` on a template ref reads them on demand. This version of `PayForm.vue` shows a hint until the form is complete and names the receipt email after the payment:
 
 ```vue
-<script setup>
+<!-- PayForm.vue -->
+<script setup lang="ts">
 import { ref } from 'vue'
+import { VueStripeCheckoutForm, useCheckoutForm } from '@vue-stripe/vue-stripe'
+import type {
+  StripeCheckoutFormChangeEvent,
+  StripeCheckoutFormConfirmEvent
+} from '@vue-stripe/vue-stripe'
 
-const formRef = ref(null)
+const { confirm } = useCheckoutForm()
+const formRef = ref<InstanceType<typeof VueStripeCheckoutForm> | null>(null)
 const complete = ref(false)
+const message = ref('')
 
-const onChange = (event) => {
+const onChange = (event: StripeCheckoutFormChangeEvent) => {
   complete.value = event.complete
 }
 
-const readEmail = async () => {
-  const result = await formRef.value?.getValue()
-  return result?.value.customerDetails.email
+const onConfirm = async (event: StripeCheckoutFormConfirmEvent) => {
+  const values = await formRef.value?.getValue()
+  const result = await confirm({ formConfirmEvent: event, redirect: 'if_required' })
+  message.value =
+    result.type === 'error'
+      ? result.error.message
+      : `Payment ${result.session.status.type}. Receipt sent to ${values?.value.customerDetails.email}.`
 }
 </script>
 
 <template>
   <VueStripeCheckoutForm ref="formRef" @change="onChange" @confirm="onConfirm" />
+  <p v-if="!complete">Fill in every field to pay.</p>
+  <p v-if="message">{{ message }}</p>
 </template>
 ```
 
