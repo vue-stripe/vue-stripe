@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// Rendered inside VueStripeElements so useStripe/useStripeElements can inject the Stripe context.
+// Rendered inside VueStripeElements so useStripeElements/useConfirmAuBecsDebitPayment can inject the Stripe context.
 import { computed } from 'vue'
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+import { useConfirmAuBecsDebitPayment, useStripeElements } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{
   canConfirm: boolean
@@ -19,8 +19,8 @@ const emit = defineEmits<{
   error: [message: string | null]
 }>()
 
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+const { getElement } = useStripeElements()
+const { confirmAuBecsDebitPayment } = useConfirmAuBecsDebitPayment()
 
 function formatPrice(amount: number | null | undefined) {
   if (!amount) return ''
@@ -33,23 +33,18 @@ async function confirmPayment() {
   emit('confirm-start')
   emit('error', null)
   try {
-    if (!stripe.value || !elements.value) throw new Error('Stripe not initialized')
-
-    const auBankElement = elements.value.getElement('auBankAccount')
+    const auBankElement = getElement('auBankAccount')
     if (!auBankElement) throw new Error('AU Bank Account element not found')
 
-    const { error, paymentIntent } = await stripe.value.confirmAuBecsDebitPayment(
-      props.clientSecret,
-      {
-        payment_method: {
-          au_becs_debit: auBankElement,
-          billing_details: {
-            name: props.customerName || '',
-            email: props.customerEmail || ''
-          }
+    const { error, paymentIntent } = await confirmAuBecsDebitPayment(props.clientSecret, {
+      payment_method: {
+        au_becs_debit: auBankElement,
+        billing_details: {
+          name: props.customerName || '',
+          email: props.customerEmail || ''
         }
       }
-    )
+    })
     if (error) throw new Error(error.message)
     if (paymentIntent?.status === 'processing') emit('success')
   } catch (err) {

@@ -4,7 +4,7 @@ import {
   VueStripeProvider,
   VueStripeElements,
   VueStripeIbanElement,
-  useStripe,
+  useConfirmSepaDebitPayment,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
 import PaymentStatus from './PaymentStatus.vue'
@@ -45,37 +45,30 @@ const PayForm = defineComponent({
   props: { clientSecret: { type: String, required: true } },
   emits: ['done', 'error'],
   setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const { elements } = useStripeElements()
+    const { getElement } = useStripeElements()
+    const { confirmSepaDebitPayment, loading: confirming } = useConfirmSepaDebitPayment()
     const name = ref('')
     const email = ref('')
     const ibanReady = ref(false)
     const ibanComplete = ref(false)
-    const confirming = ref(false)
     const canPay = computed(
       () => ibanComplete.value && name.value && email.value && !confirming.value
     )
 
     async function pay() {
-      confirming.value = true
       try {
-        const ibanElement = elements.value?.getElement('iban')
-        if (!stripe.value || !ibanElement) throw new Error('Stripe not initialized')
-        const { error: err, paymentIntent } = await stripe.value.confirmSepaDebitPayment(
-          props.clientSecret,
-          {
-            payment_method: {
-              sepa_debit: ibanElement,
-              billing_details: { name: name.value, email: email.value }
-            }
+        const ibanElement = getElement('iban')
+        if (!ibanElement) throw new Error('IBAN element not found')
+        const { error: err, paymentIntent } = await confirmSepaDebitPayment(props.clientSecret, {
+          payment_method: {
+            sepa_debit: ibanElement,
+            billing_details: { name: name.value, email: email.value }
           }
-        )
+        })
         if (err) throw new Error(err.message)
         if (paymentIntent) emit('done', paymentIntent.status)
       } catch (e) {
         emit('error', e instanceof Error ? e.message : 'Payment failed')
-      } finally {
-        confirming.value = false
       }
     }
 

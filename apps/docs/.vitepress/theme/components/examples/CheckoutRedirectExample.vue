@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VueStripeProvider, VueStripeCheckout } from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeCheckout, useStripeCheckout } from '@vue-stripe/vue-stripe'
 import ProductSelector from './ProductSelector.vue'
 import PaymentStatus from './PaymentStatus.vue'
 import {
@@ -13,6 +13,7 @@ import { useStripeConfig } from '../../composables/useStripeConfig'
 const { publishableKey } = useStripeConfig()
 
 const { createCheckoutSession, formatPrice, loading, error } = useBackendApi()
+const { redirectToUrl } = useStripeCheckout()
 
 // Step management
 const step = ref<'select' | 'checkout' | 'complete'>('select')
@@ -63,13 +64,13 @@ async function createSession() {
   }
 }
 
-// Direct redirect approach (works without Vue Stripe components)
+// Direct redirect approach: useStripeCheckout() needs no provider or component
 async function startCheckoutDirect() {
   redirecting.value = true
   try {
     const result = await createSession()
     if (result?.url) {
-      window.location.href = result.url
+      redirectToUrl(result.url)
     }
   } catch {
     redirecting.value = false
