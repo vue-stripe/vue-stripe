@@ -129,7 +129,7 @@ Vite restarts by itself when its config changes; restart `vue-cli-service serve`
 
 Vue 2.7 needs one extra step so that vue-demi picks the Vue 2 build. See [Use Vue Stripe on Vue 2.7](/guide/vue-2).
 
-### Nuxt 3
+### Nuxt
 
 Nuxt, Quasar SSR, VitePress and other server-rendered apps are covered in [Use Vue Stripe with Nuxt and SSR](/guide/ssr).
 
