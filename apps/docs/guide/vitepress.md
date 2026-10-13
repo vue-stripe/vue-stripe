@@ -78,7 +78,7 @@ Then use them in Markdown pages:
 
 ```md
 <!-- docs/payment.md -->
-<script setup>
+<script setup lang="ts">
 import PaymentPage from './components/PaymentPage.vue'
 </script>
 
@@ -89,7 +89,7 @@ import PaymentPage from './components/PaymentPage.vue'
 
 ```md
 <!-- docs/payment-complete.md -->
-<script setup>
+<script setup lang="ts">
 import CompletePage from './components/CompletePage.vue'
 </script>
 

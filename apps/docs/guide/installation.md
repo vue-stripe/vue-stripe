@@ -80,7 +80,7 @@ Render a `VueStripeProvider` with your key. It loads Stripe.js, shows its `#load
 
 ```vue
 <!-- StripeCheck.vue -->
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY // Vue CLI: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
