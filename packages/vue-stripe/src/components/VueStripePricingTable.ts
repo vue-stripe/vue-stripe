@@ -1,7 +1,8 @@
-import { defineComponent, inject, onMounted, ref, type PropType } from 'vue-demi'
+import { defineComponent, inject, onMounted, ref, type PropType, type Ref } from 'vue-demi'
 import { stripeConfigInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 import { hx } from '../utils/h'
+import type { VueStripeComponent } from '../utils/element-types'
 
 const PRICING_TABLE_SCRIPT_URL = 'https://js.stripe.com/v3/pricing-table.js'
 
@@ -20,22 +21,38 @@ const loadPricingTableScript = (): Promise<void> =>
     document.head.appendChild(script)
   })
 
+const pricingTableProps = {
+  pricingTableId: { type: String, required: true },
+  customerEmail: { type: String as PropType<string | undefined>, default: undefined },
+  customerSessionClientSecret: {
+    type: String as PropType<string | undefined>,
+    default: undefined
+  },
+  clientReferenceId: { type: String as PropType<string | undefined>, default: undefined }
+}
+
+/** Template ref members. */
+type PricingTableExposed = {
+  /** `true` while the pricing table script loads. */
+  loading: Ref<boolean>
+  /** Message of a script load failure. */
+  error: Ref<string | null>
+}
+
+/** Event name -> payload. */
+type PricingTableEvents = {
+  load: []
+  error: [error: Error]
+}
+
 /**
  * Stripe's no-code `<stripe-pricing-table>`. Rendered from a render function, so the
  * custom element is never resolved as a Vue component (no "Failed to resolve component").
  */
 export default /* @__PURE__ */ defineComponent({
   name: 'VueStripePricingTable',
-  props: {
-    pricingTableId: { type: String, required: true },
-    customerEmail: { type: String as PropType<string | undefined>, default: undefined },
-    customerSessionClientSecret: {
-      type: String as PropType<string | undefined>,
-      default: undefined
-    },
-    clientReferenceId: { type: String as PropType<string | undefined>, default: undefined }
-  },
-  emits: ['load', 'error'],
+  props: pricingTableProps,
+  emits: ['load', 'error'] satisfies Array<keyof PricingTableEvents>,
   setup(props, { emit, expose, slots }) {
     const config = inject(stripeConfigInjectionKey, null)
     if (!config?.publishableKey) {
@@ -63,7 +80,7 @@ export default /* @__PURE__ */ defineComponent({
       }
     })
 
-    expose({ loading, error })
+    expose({ loading, error } satisfies PricingTableExposed)
 
     return () => {
       const status = loading.value
@@ -88,4 +105,8 @@ export default /* @__PURE__ */ defineComponent({
       ])
     }
   }
-})
+}) as unknown as VueStripeComponent<
+  typeof pricingTableProps,
+  PricingTableExposed,
+  PricingTableEvents
+>

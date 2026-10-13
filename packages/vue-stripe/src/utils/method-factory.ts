@@ -33,7 +33,11 @@ export function useStripeMethodCall(
   composable: string,
   method: string,
   run: (stripe: Stripe, args: unknown[]) => unknown
-) {
+  // Written out: the inferred type is emitted as Vue 3's two-argument `Ref`, which Vue 2.7 rejects.
+): Record<string, unknown> & {
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
+} {
   const stripeInstance = inject(stripeInjectionKey)
 
   if (!stripeInstance) {

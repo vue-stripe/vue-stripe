@@ -94,3 +94,25 @@ export type StripeElementComponent<
   ComponentOptionsMixin,
   { [K in keyof TEvents]: (...args: TEvents[K]) => void }
 >
+
+/**
+ * Public type of a hand-written component (providers, VueStripeCheckout, ...). It passes only
+ * the first 8 `DefineComponent` parameters, which Vue 2.7 and Vue 3 share, so the emitted
+ * `.d.ts` resolves on both; `defineComponent()`'s inferred type passes Vue 3's 16+.
+ * `TProps` is the runtime props object (`typeof props`), so required props and defaults keep
+ * their types; `TExposed` is what `expose()` publishes on the template ref.
+ */
+export type VueStripeComponent<
+  TProps,
+  TExposed extends object = Record<never, never>,
+  TEvents extends ElementEvents = ElementEvents
+> = DefineComponent<
+  TProps,
+  TExposed,
+  Record<never, never>,
+  Record<never, never>,
+  Record<never, never>,
+  ComponentOptionsMixin,
+  ComponentOptionsMixin,
+  { [K in keyof TEvents]: (...args: TEvents[K]) => void }
+>

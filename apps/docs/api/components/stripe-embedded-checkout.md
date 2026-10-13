@@ -193,6 +193,10 @@ Style the Checkout page itself in the [Stripe Dashboard branding settings](https
 
 ## TypeScript
 
+The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+
+`InstanceType<typeof VueStripeEmbeddedCheckout>` also includes the exposed members. A template ref unwraps their refs, so `checkoutRef.value?.checkout` is a `StripeEmbeddedCheckout | null`.
+
 ```ts
 import { VueStripeEmbeddedCheckout } from '@vue-stripe/vue-stripe'
 import type {

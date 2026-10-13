@@ -8,15 +8,59 @@ import {
   ref,
   shallowRef,
   watch,
-  type PropType
+  type PropType,
+  type Ref,
+  type ShallowRef
 } from 'vue-demi'
-import type { StripeEmbeddedCheckout, StripeEmbeddedCheckoutOptions } from '@stripe/stripe-js'
+import type {
+  StripeEmbeddedCheckout,
+  StripeEmbeddedCheckoutAnalyticsEventUnion,
+  StripeEmbeddedCheckoutOptions
+} from '@stripe/stripe-js'
 import { stripeInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 import { renderElement } from '../utils/element-render'
+import type { VueStripeComponent } from '../utils/element-types'
 
 // Stripe.js allows one Embedded Checkout per page; this is the instance holding it.
 let owner: object | null = null
+
+const embeddedCheckoutProps = {
+  /** Client secret of a Checkout Session created with `ui_mode: 'embedded_page'`. */
+  clientSecret: { type: String as PropType<string | undefined>, default: undefined },
+  /** Alternative to `clientSecret`: a function resolving to the client secret. */
+  fetchClientSecret: {
+    type: Function as PropType<(() => Promise<string>) | undefined>,
+    default: undefined
+  },
+  /**
+   * Called when the customer changes line items; resolve `{ type: 'accept' }` or
+   * `{ type: 'reject', errorMessage }`. Required when the session sets
+   * `permissions.update.line_items: 'server_only'`.
+   */
+  onLineItemsChange: {
+    type: Function as PropType<StripeEmbeddedCheckoutOptions['onLineItemsChange']>,
+    default: undefined
+  }
+}
+
+/** Template ref members. */
+type EmbeddedCheckoutExposed = {
+  /** The Embedded Checkout instance once created. */
+  checkout: ShallowRef<StripeEmbeddedCheckout | null>
+  /** `true` until the page is mounted. */
+  loading: Ref<boolean>
+  /** Message of the last failure. */
+  error: Ref<string | null>
+}
+
+/** Event name -> payload. */
+type EmbeddedCheckoutEvents = {
+  ready: [checkout: StripeEmbeddedCheckout]
+  complete: []
+  analytics: [event: StripeEmbeddedCheckoutAnalyticsEventUnion]
+  error: [message: string]
+}
 
 /**
  * Stripe's prebuilt Checkout page embedded in your site
@@ -27,25 +71,8 @@ let owner: object | null = null
  */
 export default /* @__PURE__ */ defineComponent({
   name: 'VueStripeEmbeddedCheckout',
-  props: {
-    /** Client secret of a Checkout Session created with `ui_mode: 'embedded_page'`. */
-    clientSecret: { type: String as PropType<string | undefined>, default: undefined },
-    /** Alternative to `clientSecret`: a function resolving to the client secret. */
-    fetchClientSecret: {
-      type: Function as PropType<(() => Promise<string>) | undefined>,
-      default: undefined
-    },
-    /**
-     * Called when the customer changes line items; resolve `{ type: 'accept' }` or
-     * `{ type: 'reject', errorMessage }`. Required when the session sets
-     * `permissions.update.line_items: 'server_only'`.
-     */
-    onLineItemsChange: {
-      type: Function as PropType<StripeEmbeddedCheckoutOptions['onLineItemsChange']>,
-      default: undefined
-    }
-  },
-  emits: ['ready', 'complete', 'analytics', 'error'],
+  props: embeddedCheckoutProps,
+  emits: ['ready', 'complete', 'analytics', 'error'] satisfies Array<keyof EmbeddedCheckoutEvents>,
   setup(props, { emit, expose, slots }) {
     const stripeInstance = inject(stripeInjectionKey, null)
     if (!stripeInstance) {
@@ -145,7 +172,7 @@ export default /* @__PURE__ */ defineComponent({
       release()
     })
 
-    expose({ checkout, loading, error })
+    expose({ checkout, loading, error } satisfies EmbeddedCheckoutExposed)
 
     return () =>
       renderElement(
@@ -155,4 +182,8 @@ export default /* @__PURE__ */ defineComponent({
         'Loading checkout...'
       )
   }
-})
+}) as unknown as VueStripeComponent<
+  typeof embeddedCheckoutProps,
+  EmbeddedCheckoutExposed,
+  EmbeddedCheckoutEvents
+>
