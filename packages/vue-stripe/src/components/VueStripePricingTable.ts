@@ -1,4 +1,14 @@
-import { defineComponent, inject, onMounted, ref, type PropType, type Ref } from 'vue-demi'
+import {
+  defineComponent,
+  Fragment,
+  h,
+  inject,
+  isVue2,
+  onMounted,
+  ref,
+  type PropType,
+  type Ref
+} from 'vue-demi'
 import { stripeConfigInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
 import { hx } from '../utils/h'
@@ -108,15 +118,27 @@ export default /* @__PURE__ */ defineComponent({
 
     expose({ loading, error } satisfies PricingTableExposed)
 
+    // Each state's nodes sit in a keyed Fragment on Vue 3, so a switch replaces them: unkeyed,
+    // Vue patched the loading root into a compiled #error root, which only gets its text
+    // patched and kept the loading root's class. Vue 2 patches every attribute; no wrapper.
+    const state = (key: string, nodes: unknown[]) =>
+      isVue2 ? nodes : [h(Fragment, { key }, nodes as never)]
+
     return () => {
       const status = loading.value
-        ? (slots['loading']?.() ?? [
-            hx('div', { class: 'vue-stripe-pricing-table-loading' }, 'Loading pricing table...')
-          ])
+        ? state(
+            'loading',
+            slots['loading']?.() ?? [
+              hx('div', { class: 'vue-stripe-pricing-table-loading' }, 'Loading pricing table...')
+            ]
+          )
         : error.value
-          ? (slots['error']?.({ error: error.value }) ?? [
-              hx('div', { class: 'vue-stripe-pricing-table-error' }, error.value)
-            ])
+          ? state(
+              'error',
+              slots['error']?.({ error: error.value }) ?? [
+                hx('div', { class: 'vue-stripe-pricing-table-error' }, error.value)
+              ]
+            )
           : []
       return hx('div', { class: 'vue-stripe-pricing-table' }, [
         ...status,

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h, nextTick } from 'vue-demi'
+import { defineComponent, h, nextTick, ref } from 'vue-demi'
 import VueStripePricingTable from '../../src/components/VueStripePricingTable'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
 import { flushPromises } from '../setup'
@@ -349,6 +349,61 @@ describe('VueStripePricingTable', () => {
       }
       wrapper.unmount()
       consoleError.mockRestore()
+    })
+  })
+
+  // A compiled slot root with dynamic text only gets its text patched, so an unkeyed switch
+  // from the loading state to the error state kept the loading root's class (as in #675).
+  describe('loading to error with compiled slots', () => {
+    const failScript = async () => {
+      await nextTick()
+      const script = document.querySelector<HTMLScriptElement>('script[src*="pricing-table.js"]')!
+      script.onerror?.(new Event('error'))
+      await flushPromises()
+      await nextTick()
+    }
+    const mountTemplate = (slots: string) =>
+      mount(
+        defineComponent({
+          components: { VueStripeProvider, VueStripePricingTable },
+          setup: () => ({ label: ref('dynamic') }),
+          template: `<VueStripeProvider publishable-key="pk_test_123">
+            <VueStripePricingTable pricing-table-id="prctbl_test_123">${slots}</VueStripePricingTable>
+          </VueStripeProvider>`
+        })
+      )
+
+    it('replaces a custom #loading root with the custom #error root', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const wrapper = mountTemplate(`
+        <template #loading><div class="my-loading">loading {{ label }}</div></template>
+        <template #error="{ error }"><div class="my-error">failed: {{ error }}</div></template>`)
+      await flushPromises()
+      expect(wrapper.find('.my-loading').text()).toBe('loading dynamic')
+
+      await failScript()
+      expect(wrapper.find('.my-loading').exists()).toBe(false)
+      expect(wrapper.find('.my-error').text()).toBe(
+        'failed: Failed to load Stripe pricing table script'
+      )
+      vi.restoreAllMocks()
+    })
+
+    it('replaces the default loading markup with the custom #error root', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const wrapper = mountTemplate(
+        `<template #error="{ error }"><div class="my-error">failed: {{ error }}</div></template>`
+      )
+      await flushPromises()
+      expect(wrapper.find('.vue-stripe-pricing-table-loading').exists()).toBe(true)
+      const table = wrapper.find('stripe-pricing-table').element
+
+      await failScript()
+      expect(wrapper.find('.vue-stripe-pricing-table-loading').exists()).toBe(false)
+      expect(wrapper.find('.my-error').classes()).toEqual(['my-error'])
+      // Stripe's web component is kept, not re-created.
+      expect(wrapper.find('stripe-pricing-table').element).toBe(table)
+      vi.restoreAllMocks()
     })
   })
 })
