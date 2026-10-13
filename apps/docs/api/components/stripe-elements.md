@@ -95,6 +95,7 @@ With neither `clientSecret` nor `mode`, Stripe.js Endive throws "Unable to selec
 The `options` prop takes Stripe's `StripeElementsOptions` (also accepted: a plain object of `stripe.elements()` options). `appearance` is typed as Stripe's `Appearance`, and `fonts` as an array of `CssFontSource | CustomFontSource`. All of these are re-exported from the package:
 
 ```ts
+// Listing of the exported option types, not a sample
 import type {
   Appearance,
   CssFontSource,

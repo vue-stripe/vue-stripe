@@ -240,6 +240,7 @@ The default styles ship in the package stylesheet (`import '@vue-stripe/vue-stri
 ## TypeScript
 
 ```ts
+// Listing of the exported Issuing types, not a sample
 import type {
   StripeIssuingCardNumberDisplayElement,
   StripeIssuingCardNumberDisplayElementOptions,

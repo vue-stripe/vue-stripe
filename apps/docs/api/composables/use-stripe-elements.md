@@ -87,17 +87,34 @@ Called outside `VueStripeElements`, `useStripeElements()` throws a `VueStripeEle
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
 import { useStripeElements } from '@vue-stripe/vue-stripe'
 import type { UseStripeElementsReturn, ElementsSubmitResult } from '@vue-stripe/vue-stripe'
 import type { StripePaymentElement } from '@stripe/stripe-js'
 
 const { submit, getElement }: UseStripeElementsReturn = useStripeElements()
+const message = ref('')
 
-const validate = async (): Promise<ElementsSubmitResult> => submit()
+const validate = async (): Promise<ElementsSubmitResult> => {
+  const result = await submit()
+  message.value = result.error?.message ?? 'The form is complete'
+  return result
+}
 
 // Typed through Stripe's getElement overloads
-const paymentElement: StripePaymentElement | null = getElement('payment')
+const collapse = () => {
+  const paymentElement: StripePaymentElement | null = getElement('payment')
+  paymentElement?.collapse()
+}
+</script>
+
+<template>
+  <button type="button" @click="validate">Check the form</button>
+  <button type="button" @click="collapse">Collapse</button>
+  <p v-if="message">{{ message }}</p>
+</template>
 ```
 
 ## See Also

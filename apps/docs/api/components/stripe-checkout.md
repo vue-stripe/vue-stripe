@@ -62,13 +62,24 @@ To create the session only when the customer clicks, use [useStripeCheckout](/ap
 | `@success` | - | Emitted once the redirect has been started |
 | `@error` | `VueStripeCheckoutError` | Emitted when `sessionUrl` is missing |
 
-```ts
-import { VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VueStripeCheckout, VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ sessionUrl: string }>()
+const message = ref('')
 
 const onError = (error: VueStripeCheckoutError) => {
   // "VueStripeCheckout: `sessionUrl` is required (create the Checkout Session on your server)"
-  console.error(error.message)
+  message.value = error.message
 }
+</script>
+
+<template>
+  <VueStripeCheckout :session-url="props.sessionUrl" @error="onError" />
+  <p v-if="message">{{ message }}</p>
+</template>
 ```
 
 Errors from Stripe itself (an expired or invalid session) are shown on Stripe's hosted page, not emitted by the component.

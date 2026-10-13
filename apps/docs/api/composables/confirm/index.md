@@ -123,11 +123,22 @@ Inside `VueStripeProvider`, Stripe.js has always loaded by the time your compone
 
 The composables are typed from the installed `@stripe/stripe-js`, so parameters, overloads and results follow Stripe's types. Name the return type with `UseStripeMethodReturn`:
 
-```ts
+```vue
+<script setup lang="ts">
 import { useConfirmCardSetup } from '@vue-stripe/vue-stripe'
 import type { UseStripeMethodReturn } from '@vue-stripe/vue-stripe'
 
+const props = defineProps<{ clientSecret: string; paymentMethod: string }>()
 const confirm: UseStripeMethodReturn<'confirmCardSetup'> = useConfirmCardSetup()
+
+const save = () =>
+  confirm.confirmCardSetup(props.clientSecret, { payment_method: props.paymentMethod })
+</script>
+
+<template>
+  <button :disabled="confirm.loading.value" @click="save">Save card</button>
+  <p v-if="confirm.error.value">{{ confirm.error.value }}</p>
+</template>
 ```
 
 ## All composables

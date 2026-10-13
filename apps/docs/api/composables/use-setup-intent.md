@@ -113,7 +113,7 @@ if (clientSecret) {
 `confirmSetup` and `retrieveSetupIntent` resolve to a `ConfirmSetupResult`, exported from the package:
 
 ```ts
-import type { ConfirmSetupResult, VueStripeErrorResult } from '@vue-stripe/vue-stripe'
+// Declarations, for reference, not a sample: import the types from '@vue-stripe/vue-stripe'
 
 // Stripe's own result, or the composable's error result
 type ConfirmSetupResult = SetupIntentResult | VueStripeErrorResult
