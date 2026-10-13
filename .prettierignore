@@ -29,6 +29,7 @@ node_modules
 firebase-debug.log
 
 # Generated files
+tools/browser-e2e/results
 *.d.ts
 pnpm-lock.yaml
 *.timestamp-*.mjs

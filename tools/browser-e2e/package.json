@@ -1,0 +1,29 @@
+{
+  "name": "@vue-stripe/browser-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Real-browser Playwright suite for the docs live demos, the playground and wallets. Not part of pnpm test or CI.",
+  "scripts": {
+    "e2e": "playwright test --project=flows",
+    "e2e:headed": "playwright test --project=flows --headed",
+    "e2e:wallets": "playwright test --project=wallets --headed --workers=1",
+    "e2e:serve": "node --experimental-strip-types scripts/serve.ts",
+    "e2e:tunnel": "node --experimental-strip-types scripts/tunnel.ts",
+    "e2e:report": "playwright show-report results/html",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format:check": "prettier --check . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore --ignore-path .gitignore",
+    "format": "prettier --write . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore --ignore-path .gitignore",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.19.2",
+    "@vue-stripe/typescript-config": "workspace:*",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "stripe": "^23.0.0",
+    "typescript": "^5.9.3"
+  }
+}

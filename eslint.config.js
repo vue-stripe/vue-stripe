@@ -40,7 +40,9 @@ export default tseslint.config(
       '**/*.timestamp-*.mjs',
       'apps/docs/.vitepress/cache/**',
       'apps/docs/.vitepress/dist/**',
-      `${BACKEND}/.next/**`
+      `${BACKEND}/.next/**`,
+      // Browser e2e run output (HTML report, traces).
+      'tools/browser-e2e/results/**'
     ]
   },
 

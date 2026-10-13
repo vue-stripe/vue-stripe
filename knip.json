@@ -19,6 +19,9 @@
     "apps/backend": {
       "ignore": ["src/components/ui/**"]
     },
-    "apps/docs": {}
+    "apps/docs": {},
+    "tools/browser-e2e": {
+      "ignoreBinaries": ["cloudflared"]
+    }
   }
 }
