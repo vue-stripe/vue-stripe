@@ -65,7 +65,7 @@ const fonts = [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Inter:wght@40
 
 - `theme` picks a base look; `variables` adjust colors, fonts, spacing and radius across all fields; `rules` target single parts (`.Input`, `.Label`, `.Tab`, `.Error`, ...) with CSS-like declarations. Stripe lists every [variable and rule selector](https://docs.stripe.com/elements/appearance-api).
 - A font used in `fontFamily` must be loaded into the iframe with `fonts`; your page's fonts are not available there.
-- In TypeScript, check the object with `satisfies Appearance` rather than annotating it as `Appearance`: the prop is typed as a plain object, which an `Appearance`-typed variable is not assignable to.
+- In TypeScript, the `appearance` prop is typed as Stripe's `Appearance`, so either annotate the object (`const appearance: Appearance = { ... }`) or check it with `satisfies Appearance`, as above. `satisfies` keeps the literal types (`theme: 'night'`), which the computed value in the next sample relies on.
 
 ### Switch themes at runtime
 
@@ -170,7 +170,35 @@ Every element component renders the same markup around Stripe's iframe:
 </div>
 ```
 
-Each part has a shared class (`vue-stripe-element`, `-mount`, `-error`, `-loader`, `-loading`) and an element-specific one built from the element type: `vue-stripe-payment-element`, `vue-stripe-card-element`, `vue-stripe-cardNumber-element`, `vue-stripe-iban-element`, `vue-stripe-au-bank-account-element`, `vue-stripe-express-checkout-element`, and so on (the Link Authentication Element uses `vue-stripe-link-auth`). Each component's API page shows its classes under "Styling".
+Each part has a shared class (`vue-stripe-element`, `vue-stripe-element-mount`, `-error`, `-loader`, `-loading`) and an element-specific one. The element-specific classes do not all follow one pattern: some use Stripe's camelCase element type and the Link Authentication Element has a short name. They keep the names v5 used, so existing CSS still applies. The wrapper class of each component, which the `-mount`, `-error`, `-loader` and `-loading` suffixes are added to:
+
+| Component | Wrapper class |
+|-----------|---------------|
+| `VueStripePaymentElement` | `vue-stripe-payment-element` |
+| `VueStripeExpressCheckoutElement` | `vue-stripe-express-checkout-element` |
+| `VueStripeAddressElement` | `vue-stripe-address-element` |
+| `VueStripeLinkAuthenticationElement` | `vue-stripe-link-auth` |
+| `VueStripeContactDetailsElement` | `vue-stripe-contact-details-element` |
+| `VueStripeTaxIdElement` | `vue-stripe-tax-id-element` |
+| `VueStripeCurrencySelectorElement` | `vue-stripe-currency-selector-element` |
+| `VueStripeLinkSignupElement` | `vue-stripe-link-signup-element` |
+| `VueStripeTermsElement` | `vue-stripe-terms-element` |
+| `VueStripePaymentMethodMessagingElement` | `vue-stripe-paymentMethodMessaging-element` |
+| `VueStripeCheckoutForm` | `vue-stripe-checkout-form` |
+| `VueStripeCardElement` | `vue-stripe-card-element` |
+| `VueStripeCardNumberElement` | `vue-stripe-cardNumber-element` |
+| `VueStripeCardExpiryElement` | `vue-stripe-cardExpiry-element` |
+| `VueStripeCardCvcElement` | `vue-stripe-cardCvc-element` |
+| `VueStripeIbanElement` | `vue-stripe-iban-element` |
+| `VueStripeAuBankAccountElement` | `vue-stripe-au-bank-account-element` |
+| `VueStripeIssuingCardNumberDisplayElement` | `vue-stripe-issuing-card-number-display-element` |
+| `VueStripeIssuingCardExpiryDisplayElement` | `vue-stripe-issuing-card-expiry-display-element` |
+| `VueStripeIssuingCardCvcDisplayElement` | `vue-stripe-issuing-card-cvc-display-element` |
+| `VueStripeIssuingCardPinDisplayElement` | `vue-stripe-issuing-card-pin-display-element` |
+| `VueStripeIssuingCardCopyButtonElement` | `vue-stripe-issuing-card-copy-button-element` |
+| `VueStripeIssuingAddToWalletButtonElement` | `vue-stripe-issuing-add-to-wallet-button-element` |
+
+So the Card Number Element's iframe is mounted in `vue-stripe-cardNumber-element-mount`, and the Link Authentication Element's error box is `vue-stripe-link-auth-error`. Each component's API page also shows its markup under "Styling".
 
 Target the shared classes to restyle every element, or the specific ones for a single element:
 
@@ -245,7 +273,7 @@ Every element component and provider has `#loading` and `#error` slots. Use them
 </VueStripeProvider>
 ```
 
-An element's `#error` slot shows Stripe's validation message while the customer types (an incomplete card number, say) and load errors. Errors from confirming a payment are not shown there; see [Handle errors and declines](/guide/error-handling).
+An element's `#error` slot shows load and creation errors. The Card, split card, IBAN and BECS elements also show Stripe's validation message there while the customer types (an incomplete card number, say). The Payment, Address, Link Authentication and Tax ID elements show their validation messages inside the iframe instead, so their `#error` slot stays empty while the customer types. Errors from confirming a payment are not shown there either; see [Handle errors and declines](/guide/error-handling).
 
 ## Checkout Sessions and Checkout pages
 

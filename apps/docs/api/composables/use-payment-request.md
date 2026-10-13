@@ -76,7 +76,7 @@ const pay = () => {
 | `false` | an object | A wallet is ready; show your button. |
 | `false` | `null` | No wallet in this browser (or the check failed: see `error`). |
 
-Wallets need HTTPS (or `localhost`), a registered domain for Apple Pay and Google Pay, and a browser with a saved card or a wallet set up. Headless and private browser windows usually resolve `null`.
+Wallets need HTTPS, in development too ([test wallets over a tunnel](/guide/testing#wallets-apple-pay-and-google-pay)), a registered domain for Apple Pay and Google Pay, and a browser with a saved card or a wallet set up. Headless and private browser windows usually resolve `null`.
 
 ### Events
 
