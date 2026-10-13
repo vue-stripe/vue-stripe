@@ -54,7 +54,7 @@ Stripe replaces `{CHECKOUT_SESSION_ID}` with the session ID when it redirects.
 
 ## 2. Wrap the page in the provider
 
-`VueStripeCheckoutElementsProvider` calls `stripe.initCheckoutElementsSdk()` and makes the session available to the components inside it. `client-secret` accepts a string or a **Promise**. Pass the Promise from your request so the elements can mount while the session is being created.
+`VueStripeCheckoutElementsProvider` calls `stripe.initCheckoutElementsSdk()` and makes the session available to the components inside it. `client-secret` accepts a string or a **Promise**. Pass the Promise from your request so the elements can mount while the session is being created. If the page is rendered on a server (Nuxt, Vite SSR, Quasar SSR), don't create this Promise at the top of `<script setup>`: the request starts during server rendering and stops a plain Node SSR server, so pass `fetch-client-secret` instead, as in [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser).
 
 ```vue
 <!-- CheckoutPage.vue -->
