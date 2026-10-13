@@ -93,6 +93,36 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 When the page shows "Stripe is ready.", the installation works. If it shows the error message instead, see [Troubleshoot common problems](/guide/troubleshooting).
 
+## 5. Send API requests to your server
+
+The how-to guides call your server with paths on the app's own origin, such as `fetch('/api/create-payment-intent', { method: 'POST' })`. In development the app and your server usually run on different ports, so let the dev server forward `/api` requests. Replace `3000` with the port your server listens on:
+
+::: code-group
+```ts [Vite (vite.config.ts)]
+import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    proxy: { '/api': 'http://localhost:3000' }
+  }
+})
+```
+
+```js [Vue CLI (vue.config.js)]
+module.exports = {
+  devServer: {
+    proxy: {
+      '^/api': { target: 'http://localhost:3000' }
+    }
+  }
+}
+```
+:::
+
+Vite restarts by itself when its config changes; restart `vue-cli-service serve` yourself. Nuxt server routes (`server/api/`), Laravel and other setups that serve the app and its API from one origin need nothing here. In production, serve the API on the app's origin too, for example behind the same reverse proxy, or call it by its full URL and allow the app's origin with CORS on the server.
+
 ## Other setups
 
 ### Vue 2.7

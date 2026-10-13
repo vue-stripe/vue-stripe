@@ -90,10 +90,7 @@ import Stripe from 'stripe'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const server = createServer(async (req, res) => {
-  // Let the Vite app on port 5173 call this server.
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
-
-  if (req.method === 'POST' && req.url === '/payment-intent') {
+  if (req.method === 'POST' && req.url === '/api/payment-intent') {
     const paymentIntent = await stripe.paymentIntents.create({ amount: 1000, currency: 'eur' })
     console.log('Created', paymentIntent.id)
     res.setHeader('Content-Type', 'application/json')
@@ -123,7 +120,7 @@ Server ready on http://localhost:3000
 Leave this terminal open. Open a second terminal in the `first-payment` folder and ask the server for a PaymentIntent:
 
 ```bash
-curl -X POST http://localhost:3000/payment-intent
+curl -X POST http://localhost:3000/api/payment-intent
 ```
 
 You get back the PaymentIntent's client secret:
@@ -137,6 +134,23 @@ The first terminal prints the ID of the PaymentIntent it created:
 ```text
 Created pi_3UQ03bEfCmJMLhhr1clJ9TXY
 ```
+
+Now let the app reach the server. Replace the contents of `vite.config.js`, so that Vite's dev server sends every request for `/api/...` on to port 3000:
+
+```js{6-9}
+import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    // Send the app's /api requests to the server from step 3.
+    proxy: { '/api': 'http://localhost:3000' }
+  }
+})
+```
+
+The app can now call `/api/payment-intent` on its own address, the way the how-to guides call their server.
 
 ## Step 4: Load Stripe
 
@@ -214,7 +228,7 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('')
 
 onMounted(async () => {
-  const response = await fetch('http://localhost:3000/payment-intent', { method: 'POST' })
+  const response = await fetch('/api/payment-intent', { method: 'POST' })
   const data = await response.json()
   clientSecret.value = data.clientSecret
 })
@@ -307,7 +321,7 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('')
 
 onMounted(async () => {
-  const response = await fetch('http://localhost:3000/payment-intent', { method: 'POST' })
+  const response = await fetch('/api/payment-intent', { method: 'POST' })
   const data = await response.json()
   clientSecret.value = data.clientSecret
 })
@@ -391,7 +405,7 @@ Payment succeeded
 
 You built a payment page in four parts:
 
-- `server.mjs` creates a €10 PaymentIntent with your secret key each time the page loads.
+- `server.mjs` creates a €10 PaymentIntent with your secret key each time the page loads. Vite's dev server forwards the app's `/api` requests to it.
 - `VueStripeProvider` loads Stripe.js with your publishable key.
 - `VueStripeElements` connects the Payment Element to the PaymentIntent's client secret, and `VueStripePaymentElement` shows the card form.
 - `PayButton.vue` confirms the payment with `usePaymentIntent()`, which also handled the 3D Secure window and the decline message.
