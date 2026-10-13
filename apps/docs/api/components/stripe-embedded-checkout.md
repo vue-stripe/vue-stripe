@@ -31,7 +31,7 @@ import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 const fetchClientSecret = () =>
-  fetch('/api/checkout-session', { method: 'POST' })
+  fetch('/api/embedded-checkout-session', { method: 'POST' })
     .then((response) => response.json())
     .then((data) => data.clientSecret)
 

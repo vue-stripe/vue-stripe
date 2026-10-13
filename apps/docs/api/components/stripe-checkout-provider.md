@@ -33,11 +33,7 @@ import CheckoutForm from './CheckoutForm.vue'
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // From your backend: stripe.checkout.sessions.create({ ui_mode: 'elements', ... })
-const clientSecret = fetch('/api/checkout-session', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ uiMode: 'elements' })
-})
+const clientSecret = fetch('/api/checkout-elements-session', { method: 'POST' })
   .then((res) => res.json())
   .then((data) => data.clientSecret)
 </script>
