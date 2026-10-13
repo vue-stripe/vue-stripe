@@ -20,6 +20,12 @@ Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not support
 npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 ```
 
+If the app uses TypeScript, it needs TypeScript 5.0 or later for the package's declarations. Vue CLI 5 scaffolds TypeScript 4.5; upgrade it:
+
+```bash
+npm install -D typescript@5
+```
+
 ## 2. Let vue-demi switch to Vue 2
 
 vue-demi selects the Vue 2.7 build in its `postinstall` script. pnpm 10 and later do not run dependency build scripts by default, so allow vue-demi's script, or switch it by hand:

@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, normalizePath, type Plugin } from 'vite'
 import { resolve } from 'path'
 import pkg from './package.json' with { type: 'json' }
 
@@ -13,14 +13,26 @@ const esmPureEntry = (): Plugin => ({
   }
 })
 
+// Component styles, emitted as dist/vue-stripe.css (exported as '@vue-stripe/vue-stripe/style.css').
+// The build adds the import to the entry, not src/index.ts itself: tsc would copy
+// `import './styles.css'` into dist/types/index.d.ts, where no styles.css exists (#622).
+const entry = resolve(import.meta.dirname, 'src/index.ts')
+const stylesheet = (): Plugin => ({
+  name: 'vue-stripe:stylesheet',
+  transform(code, id) {
+    if (normalizePath(id) !== normalizePath(entry)) return null
+    return { code: `import './styles.css'\n${code}`, map: null }
+  }
+})
+
 export default defineConfig({
-  plugins: [esmPureEntry()],
+  plugins: [stylesheet(), esmPureEntry()],
   define: {
     __VUE_STRIPE_VERSION__: JSON.stringify(pkg.version)
   },
   build: {
     lib: {
-      entry: resolve(import.meta.dirname, 'src/index.ts'),
+      entry,
       name: 'VueStripe',
       cssFileName: 'vue-stripe',
       formats: ['es', 'cjs', 'umd'],
@@ -29,7 +41,7 @@ export default defineConfig({
           case 'es':
             return 'es/index.js'
           case 'cjs':
-            return 'cjs/index.js'
+            return 'cjs/index.cjs'
           case 'umd':
             return 'umd/index.js'
           default:

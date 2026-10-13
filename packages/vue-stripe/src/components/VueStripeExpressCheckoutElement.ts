@@ -8,7 +8,7 @@ import type {
   StripeExpressCheckoutElementShippingAddressChangeEvent,
   StripeExpressCheckoutElementShippingRateChangeEvent
 } from '@stripe/stripe-js'
-import type { CreateOnly, LoadErrorEvent } from '../utils/element-factory'
+import type { CreateOnly, ElementTypeEvent, LoadErrorEvent } from '../utils/element-factory'
 import { createStripeElement, pick } from '../utils/element-factory'
 
 type ExpressCheckoutEvents = {
@@ -16,9 +16,9 @@ type ExpressCheckoutEvents = {
   click: [event: StripeExpressCheckoutElementClickEvent]
   confirm: [event: StripeExpressCheckoutElementConfirmEvent]
   cancel: [event: { elementType: 'expressCheckout' }]
-  focus: []
-  blur: []
-  escape: []
+  focus: ElementTypeEvent<'expressCheckout'>
+  blur: ElementTypeEvent<'expressCheckout'>
+  escape: ElementTypeEvent<'expressCheckout'>
   shippingaddresschange: [event: StripeExpressCheckoutElementShippingAddressChangeEvent]
   shippingratechange: [event: StripeExpressCheckoutElementShippingRateChangeEvent]
   availablepaymentmethodschange: [

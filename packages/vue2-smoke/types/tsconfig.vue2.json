@@ -8,6 +8,8 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "skipLibCheck": false,
+    // TypeScript 6 default: an unresolvable side-effect import in dist/types fails (#622).
+    "noUncheckedSideEffectImports": true,
     "noEmit": true,
     "jsx": "preserve",
     "types": [],

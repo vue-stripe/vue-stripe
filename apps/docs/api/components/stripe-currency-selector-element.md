@@ -49,9 +49,9 @@ The Currency Selector element takes no configuration: Stripe's `StripeCurrencySe
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@ready` | `StripeCurrencySelectorElement` | Emitted when the element is fully rendered |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when the user presses the Escape key |
+| `@focus` | `{ elementType: 'currencySelector' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'currencySelector' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'currencySelector' }` | Emitted when the user presses the Escape key |
 | `@loaderror` | `{ elementType: 'currencySelector'; error: StripeError }` | Emitted when the element fails to load |
 
 `@loaderror` also fires when creating the element fails (for example inside `VueStripeElements` without a Checkout provider), with the payload `{ elementType: 'currencySelector', error: { message } }`; the message is also shown through the `#error` slot.

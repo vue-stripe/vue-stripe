@@ -118,10 +118,10 @@ interface StripeElementStyle {
 |-------|---------|-------------|
 | `@ready` | `StripeCardElement` | Emitted when the element is fully rendered |
 | `@change` | `StripeCardElementChangeEvent` | Emitted when the element value changes |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when the escape key is pressed |
-| `@networkschange` | `{ elementType: 'card' }` | Emitted when the card networks available for the entered number change (co-badged cards) |
+| `@focus` | `{ elementType: 'card' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'card' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'card' }` | Emitted when the escape key is pressed |
+| `@networkschange` | `{ elementType: 'card'; networks: string[] \| null; loading: boolean }` | Emitted when the card networks available for the entered number change (co-badged cards). `networks` lists them, for example `['cartes_bancaires', 'visa']`; it is `null` while `loading` is `true` |
 | `@loaderror` | `{ elementType: 'card'; error: StripeError }` | Emitted when the element fails to load |
 
 `@loaderror` also fires when creating the element fails (for example when the surrounding provider does not support it), with the payload `{ elementType: 'card', error: { message } }`; the message is also shown through the `#error` slot.

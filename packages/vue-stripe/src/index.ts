@@ -1,6 +1,3 @@
-// Component styles, emitted as dist/vue-stripe.css (exported as '@vue-stripe/vue-stripe/style.css').
-import './styles.css'
-
 // Export all types (Vue-specific + Stripe.js types)
 // Vue components use VueStripe* prefix, so Stripe.js types can use original names
 export type {

@@ -6,7 +6,7 @@ description: "Install @vue-stripe/vue-stripe and @stripe/stripe-js, import the s
 
 Add Vue Stripe to an existing Vue app, load its stylesheet, configure your publishable key and check that Stripe.js loads.
 
-Requirements: Vue 3 or Vue 2.7, and `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive). Vue 2.6 is not supported; the full list is under [Compatibility](/api/#compatibility). Upgrading from v5? See [Upgrade from v5 to v6](/guide/migration-v6).
+Requirements: Vue 3 or Vue 2.7, `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive), and TypeScript 5.0 or later if the app uses TypeScript. Vue 2.6 is not supported; the full list is under [Compatibility](/api/#compatibility). Upgrading from v5? See [Upgrade from v5 to v6](/guide/migration-v6).
 
 ## 1. Install the package
 
@@ -28,7 +28,7 @@ yarn add @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 
 The version ranges select Vue Stripe 6 and Stripe.js 10, now and after 6.0.0 is released. Without them, the package manager installs Vue Stripe 5 while 6.0.0 is still a beta, and these docs do not apply to it. If the app already has an older `@stripe/stripe-js`, the same command upgrades it.
 
-Type definitions ship with the package; Stripe.js types such as `Stripe`, `StripeElements` and `PaymentIntent` are re-exported from `@vue-stripe/vue-stripe`.
+Type definitions ship with the package; Stripe.js types such as `Stripe`, `StripeElements` and `PaymentIntent` are re-exported from `@vue-stripe/vue-stripe`. The declarations need TypeScript 5.0 or later. Vue CLI 5 scaffolds TypeScript 4.5, so upgrade it in a Vue CLI app with `npm install -D typescript@5`.
 
 ## 2. Import the stylesheet
 

@@ -5,7 +5,7 @@ import type {
   StripeCheckoutFormOptions,
   StripeCheckoutFormValue
 } from '@stripe/stripe-js'
-import type { LoadErrorEvent, LoadStartEvent } from '../utils/element-factory'
+import type { ElementTypeEvent, LoadErrorEvent, LoadStartEvent } from '../utils/element-factory'
 import { createStripeElement } from '../utils/element-factory'
 
 type CheckoutFormEvents = {
@@ -13,9 +13,9 @@ type CheckoutFormEvents = {
   change: [event: StripeCheckoutFormChangeEvent]
   confirm: [event: StripeCheckoutFormConfirmEvent]
   cancel: [event: { elementType: 'checkoutForm' }]
-  focus: []
-  blur: []
-  escape: []
+  focus: ElementTypeEvent<'checkoutForm'>
+  blur: ElementTypeEvent<'checkoutForm'>
+  escape: ElementTypeEvent<'checkoutForm'>
   loaderstart: LoadStartEvent<'checkoutForm'>
   loaderror: LoadErrorEvent<'checkoutForm'>
 }

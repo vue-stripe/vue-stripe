@@ -86,9 +86,9 @@ interface StripeIbanElementOptions {
 |-------|---------|-------------|
 | `@ready` | `StripeIbanElement` | Emitted when the element is fully rendered |
 | `@change` | `StripeIbanElementChangeEvent` | Emitted when the element value changes |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when the user presses the Escape key |
+| `@focus` | `{ elementType: 'iban' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'iban' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'iban' }` | Emitted when the user presses the Escape key |
 
 ### Change Event
 

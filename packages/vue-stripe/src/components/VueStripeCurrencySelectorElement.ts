@@ -1,12 +1,12 @@
 import type { StripeCurrencySelectorElement } from '@stripe/stripe-js'
-import type { LoadErrorEvent } from '../utils/element-factory'
+import type { ElementTypeEvent, LoadErrorEvent } from '../utils/element-factory'
 import { createStripeElement } from '../utils/element-factory'
 
 type CurrencySelectorEvents = {
   ready: [element: StripeCurrencySelectorElement]
-  focus: []
-  blur: []
-  escape: []
+  focus: ElementTypeEvent<'currencySelector'>
+  blur: ElementTypeEvent<'currencySelector'>
+  escape: ElementTypeEvent<'currencySelector'>
   loaderror: LoadErrorEvent<'currencySelector'>
 }
 

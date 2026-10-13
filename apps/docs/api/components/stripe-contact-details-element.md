@@ -61,9 +61,9 @@ interface StripeContactDetailsElementOptions {
 |-------|---------|-------------|
 | `@ready` | `StripeContactDetailsElement` | Emitted when the element is fully rendered |
 | `@change` | `StripeContactDetailsElementChangeEvent` | Emitted when the email changes |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when the user presses the Escape key |
+| `@focus` | `{ elementType: 'contactDetails' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'contactDetails' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'contactDetails' }` | Emitted when the user presses the Escape key |
 | `@loaderstart` | `{ elementType: 'contactDetails' }` | Emitted when the element begins loading |
 | `@loaderror` | `{ elementType: 'contactDetails'; error: StripeError }` | Emitted when the element fails to load |
 

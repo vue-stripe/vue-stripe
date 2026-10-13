@@ -14,6 +14,7 @@ Every export of `@vue-stripe/vue-stripe`: components, composables, the plugin an
 | Stripe.js | `@stripe/stripe-js` `^10.0.0`, Stripe.js Endive (peer dependency) |
 | Rendering | Client and server. Stripe.js loads only in the browser; during server rendering, components render their loading state and hydrate without mismatches. `<ClientOnly>` is optional. See [Use Vue Stripe with Nuxt and SSR](/guide/ssr) |
 | Module formats | ES, CommonJS and UMD builds; TypeScript declarations included |
+| TypeScript | 5.0 or later for the declarations (they use `export type *`). Vue 3.5's own declarations need 5.4 when `skipLibCheck` is `false`, and vue-tsc 3 needs 5.0 |
 | Stylesheet | `@vue-stripe/vue-stripe/style.css`, imported once per app |
 
 ## Components

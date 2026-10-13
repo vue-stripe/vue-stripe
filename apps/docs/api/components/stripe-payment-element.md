@@ -162,9 +162,9 @@ For example, `:options="{ layout: { type: 'accordion', radios: 'always' } }"` sw
 |-------|---------|-------------|
 | `@ready` | `StripePaymentElement` | Emitted when the element is fully rendered |
 | `@change` | `StripePaymentElementChangeEvent` | Emitted when the element value changes |
-| `@focus` | - | Emitted when the element gains focus |
-| `@blur` | - | Emitted when the element loses focus |
-| `@escape` | - | Emitted when the escape key is pressed |
+| `@focus` | `{ elementType: 'payment' }` | Emitted when the element gains focus |
+| `@blur` | `{ elementType: 'payment' }` | Emitted when the element loses focus |
+| `@escape` | `{ elementType: 'payment' }` | Emitted when the escape key is pressed |
 | `@loaderstart` | `{ elementType: 'payment' }` | Emitted when the element starts loading |
 | `@loaderror` | `{ elementType: 'payment'; error: StripeError }` | Emitted when the element fails to load |
 | `@availablepaymentmethodschange` | `StripePaymentElementAvailablePaymentMethodsChangeEvent` | Emitted when the set of payment methods shown changes |
