@@ -174,6 +174,8 @@ The embedded page can't ask your server to approve a line item change: Stripe's 
 />
 ```
 
+Stripe may send no analytics events at all on a sandbox account: several test setups saw none, through `@analytics` or a direct `stripe.createEmbeddedCheckoutPage({ onAnalyticsEvent })` call, while `@complete` fired, so you may not be able to test the tracking there.
+
 Test data: see [Test your integration](/guide/testing#cards).
 
 ## See also
