@@ -1,7 +1,8 @@
-import { vi } from 'vitest'
+import { beforeEach, vi } from 'vitest'
 import { config } from '@vue/test-utils'
 import { isVue2 } from 'vue-demi'
 import { STRIPE_CONFIRMERS } from './stripe-confirmers'
+import { clearStripeInstances } from '../src/utils/load-stripe'
 
 // ---------------------------------------------------------------------------
 // Canonical, typed Stripe.js mock factories (single source of truth).
@@ -298,6 +299,10 @@ vi.mock('@stripe/stripe-js/pure', () => ({
   )
 }))
 vi.mock('@stripe/stripe-js', () => import('@stripe/stripe-js/pure'))
+
+// loadStripeInstance() reuses an instance per arguments for the page's lifetime; each
+// test is a new page, so every test gets its own mocked loadStripe() result.
+beforeEach(() => clearStripeInstances())
 
 // Configure Vue Test Utils (Vue 2 / Vue 3 via vue-demi)
 if (isVue2) {

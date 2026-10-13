@@ -71,7 +71,6 @@ describe('VueStripeProvider', () => {
       props: {
         publishableKey: 'pk_test_123',
         stripeAccount: 'acct_123',
-        apiVersion: '2023-10-16',
         locale: 'en-US'
       }
     })
@@ -80,9 +79,53 @@ describe('VueStripeProvider', () => {
 
     expect(mockLoadStripe).toHaveBeenCalledWith('pk_test_123', {
       stripeAccount: 'acct_123',
-      apiVersion: '2023-10-16',
       locale: 'en-US'
     })
+  })
+
+  it('drops apiVersion (prop or options), which versioned Stripe.js refuses, with one warning (#597)', async () => {
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const wrapper = mount({
+      render: () =>
+        h('div', [
+          h(VueStripeProvider, { publishableKey: 'pk_test_prop', apiVersion: '2026-09-30.endive' }),
+          h(VueStripeProvider, {
+            publishableKey: 'pk_test_options',
+            options: { apiVersion: '2020-08-27', locale: 'fr' }
+          })
+        ])
+    })
+    await flushPromises()
+
+    expect(mockLoadStripe).toHaveBeenCalledWith('pk_test_prop', {})
+    expect(mockLoadStripe).toHaveBeenCalledWith('pk_test_options', { locale: 'fr' })
+    expect(wrapper.findAll('.vue-stripe-error')).toHaveLength(0)
+    const notices = warn.mock.calls.filter(([m]) => /^\[Vue Stripe\] apiVersion/.test(String(m)))
+    expect(notices).toHaveLength(1)
+    warn.mockRestore()
+  })
+
+  it('reuses the Stripe instance when a provider with the same arguments remounts (#618)', async () => {
+    const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
+    const props = { publishableKey: 'pk_test_123', locale: 'fr' }
+
+    const first = mount(VueStripeProvider, { props })
+    await flushPromises()
+    const instance = first.emitted('load')![0]![0]
+    first.unmount()
+
+    const second = mount(VueStripeProvider, { props })
+    await flushPromises()
+    expect(second.emitted('load')![0]![0]).toBe(instance)
+    expect(mockLoadStripe).toHaveBeenCalledTimes(1)
+
+    // Different options are a different instance.
+    const third = mount(VueStripeProvider, { props: { ...props, locale: 'de' } })
+    await flushPromises()
+    expect(third.emitted('load')![0]![0]).not.toBe(instance)
+    expect(mockLoadStripe).toHaveBeenCalledTimes(2)
   })
 
   it('forwards every StripeConstructorOptions key in `options`, explicit props winning', async () => {

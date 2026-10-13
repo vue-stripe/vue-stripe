@@ -56,7 +56,7 @@ interface VueStripeOptions {
   /** Connected account ID for Stripe Connect (optional) */
   stripeAccount?: string
 
-  /** Forwarded to loadStripe(); Stripe.js Endive does not support overriding the API version */
+  /** @deprecated Ignored: Stripe.js Endive refuses apiVersion, so it is not passed to loadStripe() */
   apiVersion?: string
 
   /** Locale for Stripe elements (optional) */
@@ -74,12 +74,12 @@ interface VueStripeOptions {
 |--------|------|----------|-------------|
 | `publishableKey` | `string` | Yes | Your Stripe publishable key (`pk_test_...` or `pk_live_...`) |
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect (`acct_...`) |
-| `apiVersion` | `string` | No | Forwarded to `loadStripe()`. Stripe.js Endive uses the Endive API version and does not support overriding it; see [API version](/api/components/stripe-provider#api-version) |
+| `apiVersion` | `string` | No | Deprecated and ignored: not passed to `loadStripe()`, because Stripe.js Endive refuses it. Logs one `[Vue Stripe]` warning; see [API version](/api/components/stripe-provider#api-version) |
 | `locale` | `StripeConstructorOptions['locale']` | No | Locale for Stripe.js: one of Stripe's supported locales (`'auto'`, `'en'`, `'fr'`, `'de'`, ...) |
 | `developerTools` | `StripeConstructorOptions['developerTools']` | No | Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }` |
 | `advancedFraudSignals` | `boolean` | No | Default `true`. `false` loads Stripe.js without advanced fraud signals, as on [`VueStripeProvider`](/api/components/stripe-provider#advanced-fraud-signals) |
 
-The options are passed to `loadStripe(publishableKey, { stripeAccount, apiVersion, locale, developerTools })`. With `advancedFraudSignals: false`, the plugin first calls `loadStripe.setLoadParameters({ advancedFraudSignals: false })` from `@stripe/stripe-js/pure`; the [requirements](/api/components/stripe-provider#advanced-fraud-signals) are the same as on the provider. The plugin has no `betas` or `options`; for those, use a `VueStripeProvider` with its `betas` or `options` prop.
+The options are passed to `loadStripe(publishableKey, { stripeAccount, locale, developerTools })`. A `VueStripeProvider` with the same key and options shares the plugin's `Stripe` instance. With `advancedFraudSignals: false`, the plugin first calls `loadStripe.setLoadParameters({ advancedFraudSignals: false })` from `@stripe/stripe-js/pure`; the [requirements](/api/components/stripe-provider#advanced-fraud-signals) are the same as on the provider. The plugin has no `betas` or `options`; for those, use a `VueStripeProvider` with its `betas` or `options` prop.
 
 ## Provided values
 
@@ -90,7 +90,7 @@ The plugin provides two values app-wide, under the same injection keys `VueStrip
 {
   publishableKey: '...',
   stripeAccount: '...', // optional
-  apiVersion: '...',    // optional
+  apiVersion: '...',    // optional, as given (ignored)
   locale: '...'         // optional
 }
 

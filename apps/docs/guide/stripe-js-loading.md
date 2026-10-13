@@ -25,14 +25,17 @@ Vue Stripe imports only the `pure` entry. As a result:
 
 ## One script, many instances
 
-A page can have several providers: one for the platform account and one for a connected account, or one per payment widget. They share one script but each gets its own `Stripe` instance:
+A page can have several providers: one for the platform account and one for a connected account, or one per payment widget. They share one script, and each distinct configuration gets its own `Stripe` instance:
 
 - **The script loads once.** Every `loadStripe()` call after the first reuses the script already on the page.
-- **Each call creates its own instance**, with its own publishable key, connected account, locale and betas. Providers stay independent even though they share the script.
+- **Each configuration gets its own instance**, with its own publishable key, connected account, locale and betas. Providers stay independent even though they share the script: if `Stripe()` refuses one provider's arguments, for example a secret key, only that provider fails.
+- **The same configuration shares an instance.** Providers and the plugin with the same key, options and fraud-signal setting get the same `Stripe` instance, for the life of the page.
 
-Version 10.0.0 of the pure loader has a gap here. A second `loadStripe()` call made while the first one is still loading re-adds the script and drops the first call's listeners, so the first call never settles. Two providers that mount in the same tick would hit this. Vue Stripe's own `loadStripe` (exported from the package, with the same signature) waits for a load in progress, then creates its instance from the loaded script. That's why the guides recommend importing `loadStripe` from `@vue-stripe/vue-stripe` if your code needs it directly.
+Sharing matters because a `Stripe` instance is never torn down. Each one adds a hidden controller iframe to the page, and Stripe.js has no way to remove it. Without sharing, every visit to a page with a provider in a client-routed app (vue-router, Inertia, VitePress) would leave one more iframe behind. Sharing is safe because Stripe.js keeps the state that matters per object, not per instance: each `VueStripeElements` creates its own Elements group, and each Checkout provider its own Checkout SDK. The exception is Embedded Checkout, which Stripe allows only once per page whatever the instance.
 
-If the script fails to load, for example on a network error, the loader retries once, then reports the failure. The provider shows its `#error` slot and emits `error`. The failure isn't cached, so remounting the provider tries again.
+Version 10.0.0 of the pure loader has a gap here. A second `loadStripe()` call made while the first one is still loading re-adds the script and drops the first call's listeners, so the first call never settles. Two providers that mount in the same tick would hit this. Vue Stripe's own `loadStripe` (exported from the package, with the same signature) waits for the script in progress, then creates its instance from the loaded script. It shares only the script, so one caller's `Stripe()` error doesn't reach the others. That's why the guides recommend importing `loadStripe` from `@vue-stripe/vue-stripe` if your code needs it directly. Unlike the providers, it creates a new instance on every call, so call it once and keep the result.
+
+If the script fails to load, for example on a network error, the loader retries once, then reports the failure to every provider waiting for it. The provider shows its `#error` slot and emits `error`. Neither kind of failure is cached, so remounting the provider tries again.
 
 ## Advanced fraud signals
 
@@ -55,7 +58,7 @@ Where you mount the provider (or how you install the plugin) decides when Stripe
 - **High in the app.** A provider around the app's root, or a component that calls `useStripe()` on every page under the plugin, loads Stripe.js on the first page the customer opens. That's what Stripe recommends for fraud signals, and later checkout pages find the script already loaded. The cost is a script download on every visit.
 - **Plugin plus local providers.** The plugin covers the common key and loads on first use. Local providers add other keys, connected accounts or `betas` where a subtree needs them. They all share the one script.
 
-Remounting a provider is cheap after the first load: the script is reused, and only a new instance is created. That's why the documented way to switch keys or accounts is to remount the provider with a `:key`. The provider reads its props once, when it loads.
+Remounting a provider is cheap after the first load: the script is reused, and a provider with the same props gets the same instance back. That's why the documented way to switch keys or accounts is to remount the provider with a `:key`. The provider reads its props once, when it loads. Each new key or account adds one instance, which stays for the life of the page.
 
 Some components load more than Stripe.js. `VueStripePricingTable` adds Stripe's separate pricing-table script the first time it mounts, and Embedded Checkout loads Stripe's page inside its iframe.
 
@@ -71,7 +74,7 @@ Stripe ships Stripe.js in named release trains: Acacia, Basil, Clover, Dahlia an
 
 Each major version of `@stripe/stripe-js` loads exactly one train. Version 10, which Vue Stripe 6 requires, requests `https://js.stripe.com/endive/stripe.js`. In test mode, the loader warns if a different train is already on the page. Vue Stripe follows the same rule. A Vue Stripe major release supports one `@stripe/stripe-js` major, so moving to the next train is a Vue Stripe major upgrade, and the library's types and components match what that train offers. The `ReleaseTrain` type, re-exported from `@stripe/stripe-js`, names the current train in code.
 
-Stripe also ties its server API versions to the trains (`2026-09-30.endive`, for example) and recommends keeping your server's API version on the same train as Stripe.js. In the browser there is nothing to choose: a versioned Stripe.js always uses its train's API version, so the `apiVersion` option of `VueStripeProvider` and `createVueStripe()` has no effect on Endive (see [API version](/api/components/stripe-provider#api-version)). [Stripe.js versions](/guide/stripe-js-versions) explains what each recent train changed. Stripe's [versioning policy](https://docs.stripe.com/sdks/stripejs-versioning) has the details.
+Stripe also ties its server API versions to the trains (`2026-09-30.endive`, for example) and recommends keeping your server's API version on the same train as Stripe.js. In the browser there is nothing to choose: a versioned Stripe.js always uses its train's API version and refuses to create an instance when given one, even its own train's. That's why the deprecated `apiVersion` option of `VueStripeProvider` and `createVueStripe()` is ignored, with a `[Vue Stripe]` warning, instead of being passed to Stripe.js (see [API version](/api/components/stripe-provider#api-version)). [Stripe.js versions](/guide/stripe-js-versions) explains what each recent train changed. Stripe's [versioning policy](https://docs.stripe.com/sdks/stripejs-versioning) has the details.
 
 ## Related pages
 

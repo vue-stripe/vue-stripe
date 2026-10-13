@@ -37,7 +37,7 @@ const onError = (error) => console.error('Stripe.js failed to load', error)
 | `publishableKey` | `string` | Yes* | Your Stripe publishable key |
 | `stripeKey` | `string` | Yes* | Alias for `publishableKey` (backwards compatibility) |
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect |
-| `apiVersion` | `string` | No | Forwarded to `loadStripe()`. Stripe.js Endive uses the Endive API version and does not support overriding it; see [API version](#api-version) |
+| `apiVersion` | `string` | No | Deprecated and ignored: not passed to `loadStripe()`, because Stripe.js Endive refuses it. See [API version](#api-version) |
 | `locale` | `string` | No | Locale for Stripe.js (e.g., 'en', 'es', 'fr') |
 | `betas` | `string[]` | No | Stripe beta flags, forwarded to `loadStripe()` (e.g. the [Tax ID Element](/api/components/stripe-tax-id-element)'s beta) |
 | `developerTools` | `StripeConstructorOptions['developerTools']` | No | Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }`, forwarded to `loadStripe()` |
@@ -48,9 +48,11 @@ const onError = (error) => console.error('Stripe.js failed to load', error)
 
 The props are read once, when Stripe.js loads. To switch keys or accounts, re-mount the provider (e.g. with a `:key`).
 
+Providers with the same `loadStripe()` arguments (key, options and `advancedFraudSignals`) share one `Stripe` instance, including a provider that re-mounts after client-side navigation. Each distinct set of arguments gets its own instance, and keeps it for the life of the page. See [One script, many instances](/guide/stripe-js-loading#one-script-many-instances).
+
 ### Options Object
 
-Every `StripeConstructorOptions` key from `@stripe/stripe-js` (`stripeAccount`, `apiVersion`, `locale`, `betas`, `developerTools`) is a prop. The `options` prop accepts the same keys and is passed to `loadStripe()`. When a dedicated prop is also set, the prop wins:
+Every `StripeConstructorOptions` key from `@stripe/stripe-js` (`stripeAccount`, `apiVersion`, `locale`, `betas`, `developerTools`) is a prop; `apiVersion` is [ignored](#api-version). The `options` prop accepts the same keys and is passed to `loadStripe()`. When a dedicated prop is also set, the prop wins:
 
 ```ts
 import type { StripeConstructorOptions } from '@stripe/stripe-js'
@@ -89,7 +91,9 @@ const options: StripeConstructorOptions = {
 
 ### API version
 
-Each Stripe.js release train sends its requests with that train's API version: Stripe.js Endive, which `@stripe/stripe-js` 10 loads, uses an Endive API version. Stripe's [versioning policy](https://docs.stripe.com/sdks/stripejs-versioning#compatibility-with-api-versions) states that versioned Stripe.js can't override it. The `apiVersion` prop and the `apiVersion` key in `options` are still forwarded to `loadStripe()`, because `StripeConstructorOptions` still declares them, but don't rely on them. Keep your server's API version on the same train instead.
+Each Stripe.js release train sends its requests with that train's API version: Stripe.js Endive, which `@stripe/stripe-js` 10 loads, uses an Endive API version. Stripe's [versioning policy](https://docs.stripe.com/sdks/stripejs-versioning#compatibility-with-api-versions) states that versioned Stripe.js can't override it, and Stripe.js Endive refuses to create an instance when `apiVersion` is passed, even with an Endive version such as `2026-09-30.endive` ("Can not provide apiVersion to Stripe()").
+
+The `apiVersion` prop and the `apiVersion` key in `options` are deprecated and kept only so existing code compiles. The provider drops them before it calls `loadStripe()` and logs one `[Vue Stripe]` warning per page that the value is ignored. Remove them, and keep your server's API version on the same train instead.
 
 ### Advanced Fraud Signals
 
@@ -126,7 +130,7 @@ const train: ReleaseTrain = 'endive'
 | `@load` | `Stripe` | Emitted when Stripe.js loads successfully |
 | `@error` | `Error` | Emitted when Stripe.js fails to load (network error, blocked script) or rejects the key at load time (a secret key). The message is also shown through the `#error` slot |
 
-Stripe.js does not validate a publishable key when it loads: with a wrong, revoked or malformed key the provider emits `@load` and renders its default slot. The key fails on the first request to Stripe, as `Invalid API Key provided` in the first element's `@loaderror` and `#error` slot, or in the `{ error }` of the first composable call. Only a secret key (`sk_...`) fails the load. A load failure is not cached, so re-mounting the provider tries again.
+Stripe.js does not validate a publishable key when it loads: with a wrong, revoked or malformed key the provider emits `@load` and renders its default slot. The key fails on the first request to Stripe, as `Invalid API Key provided` in the first element's `@loaderror` and `#error` slot, or in the `{ error }` of the first composable call. Only a secret key (`sk_...`) fails the load. A load failure is not cached, so re-mounting the provider tries again. A failure tied to one provider's arguments, such as a secret key, reaches only that provider; other providers mounting at the same time load normally. A script that fails to load fails every provider waiting for it.
 
 ## Slots
 
@@ -162,7 +166,7 @@ The provider exposes nothing on a template ref. It provides a single object unde
 
 Read it with the [useStripe](/api/composables/use-stripe) composable, which returns `{ stripe, loading, error }`.
 
-The resolved configuration (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`) is provided as a separate object under the `stripeConfigInjectionKey` symbol, for descendant components.
+The resolved configuration (`publishableKey`, `stripeAccount`, `apiVersion`, `locale`; `apiVersion` as given, though it is not used) is provided as a separate object under the `stripeConfigInjectionKey` symbol, for descendant components.
 
 ## Styling
 
