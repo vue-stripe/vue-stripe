@@ -166,7 +166,7 @@ See [Provide Stripe app-wide](/guide/plugin) for what the plugin does.
 
 ## 6. Adapt samples from the other pages
 
-The other pages write their samples for Vue 3. Three changes make them run and type-check on Vue 2.7:
+The other pages write their samples for Vue 3. Three changes make them run on Vue 2.7, and type-check with the `vue-tsc` setup in [step 7](#_7-optional-type-check-templates-with-vue-tsc):
 
 1. **Give every template one root element.** Vue 2 refuses a template with several top-level elements ("Component template should contain exactly one root element"), a `<template>` or `<slot>` root, or `v-for` on the root. Wrap the content in one element, such as a `<div>`. A `v-if` / `v-else-if` / `v-else` chain counts as one root.
 
@@ -202,6 +202,38 @@ The other pages write their samples for Vue 3. Three changes make them run and t
    ```
 
 3. **Read the publishable key the way your build tool exposes it.** The samples use Vite's `import.meta.env.VITE_*` variables; Vue CLI reads `process.env.VUE_APP_*`. The [key table](/guide/installation#_3-add-your-publishable-key) lists both.
+
+## 7. Optional: type-check templates with vue-tsc
+
+`vue-tsc` checks templates on Vue 2.7 when you tell it the Vue version. It needs TypeScript 5 (step 1).
+
+1. Install it:
+
+   ```bash
+   npm install -D vue-tsc
+   ```
+
+2. Set the target in `tsconfig.json`:
+
+   ```json
+   {
+     "vueCompilerOptions": {
+       "target": 2.7,
+       "checkUnknownComponents": true,
+       "checkUnknownDirectives": true
+     }
+   }
+   ```
+
+3. Run the check:
+
+   ```bash
+   npx vue-tsc --noEmit
+   ```
+
+With this setup `vue-tsc` checks the props you pass and every event handler's parameter against the payload, for example an `@error` handler on `VueStripeProvider` that does not take an `Error`.
+
+Leave `strictTemplates` and `checkUnknownProps` off. On Vue 2.7, `vue-tsc` does not count `ref` or `@event` listeners as known attributes of a component, so these options reject `<VueStripeCardElement ref="card" />` and `<VueStripePaymentElement @change="onChange" />` with TS2353 or TS2559. Any Vue 2.7 component gets the same errors, not only Vue Stripe's. `strictTemplates` turns on `checkUnknownProps`, so the two flags in step 2 are the strict checks that work on Vue 2.7.
 
 ## Result
 
