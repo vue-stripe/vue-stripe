@@ -136,7 +136,7 @@ The component renders Stripe's `<stripe-pricing-table>` web component from a ren
   Vue.config.ignoredElements = ['stripe-pricing-table']
   ```
 
-- **Nuxt and other SSR apps:** server rendering emits only the loading markup, and the pricing table script loads in the browser on mount, so the component needs no client-only wrapper. `<ClientOnly>` or a `.client.vue` component is optional, for example to skip the loading markup on the server (see [Use Vue Stripe with Nuxt and SSR](/guide/ssr#nuxt-3)).
+- **Nuxt and other SSR apps:** server rendering emits only the loading markup, and the pricing table script loads in the browser on mount, so the component needs no client-only wrapper. `<ClientOnly>` or a `.client.vue` component is optional, for example to skip the loading markup on the server (see [Use Vue Stripe with Nuxt and SSR](/guide/ssr#nuxt)).
 
 ## Styling
 

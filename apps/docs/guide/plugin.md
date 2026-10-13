@@ -36,7 +36,7 @@ import '@vue-stripe/vue-stripe/style.css'
 import App from './App.vue'
 
 Vue.use(createVueStripe({
-  publishableKey: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
+  publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY // Vue CLI: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
 }))
 
 new Vue({ render: (h) => h(App) }).$mount('#app')
