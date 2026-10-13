@@ -20,6 +20,7 @@ export default /* @__PURE__ */ defineComponent({
     /** @deprecated v4 alias of `publishableKey`. */
     stripeKey: { type: String as PropType<string | undefined>, default: undefined },
     stripeAccount: { type: String as PropType<string | undefined>, default: undefined },
+    /** @deprecated Versioned Stripe.js (Endive) always uses its release train's API version and ignores this; it is still forwarded to `loadStripe()`. */
     apiVersion: { type: String as PropType<string | undefined>, default: undefined },
     locale: { type: String as PropType<string | undefined>, default: undefined },
     /** Stripe beta flags, e.g. the Tax ID Element's beta (forwarded to `loadStripe`). */

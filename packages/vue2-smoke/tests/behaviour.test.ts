@@ -3,6 +3,7 @@ import {
   VueStripeCardNumberElement,
   VueStripeCheckout,
   VueStripeElements,
+  VueStripeExpressCheckoutElement,
   VueStripePricingTable,
   VueStripeProvider,
   useConfirmCardPayment,
@@ -42,6 +43,31 @@ it('re-emits Stripe events to Vue 2 listeners and renders the change error', asy
   expect(onReady).toHaveBeenCalledWith(element)
   expect(onChange).toHaveBeenCalledWith({ error: { message: 'Your card number is incomplete.' } })
   expect(wrapper.find('.vue-stripe-element-error').text()).toBe('Your card number is incomplete.')
+})
+
+it('passes Express Checkout click to Stripe only when a Vue 2 listener exists', async () => {
+  const mountExpress = (on: Record<string, () => void>) =>
+    mount({
+      render(h: CreateElement) {
+        return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+          h(VueStripeElements as never, { props: { clientSecret: 'pi_x_secret_y' } }, [
+            h(VueStripeExpressCheckoutElement as never, { on })
+          ])
+        ])
+      }
+    })
+  const subscribed = () => element.on.mock.calls.map((call) => call[0])
+
+  mountExpress({})
+  await settle()
+  expect(subscribed()).toContain('confirm')
+  expect(subscribed()).not.toContain('click')
+
+  vi.clearAllMocks()
+  mountExpress({ click: vi.fn() })
+  await settle()
+  expect(subscribed()).toContain('click')
+  expect(subscribed()).not.toContain('shippingaddresschange')
 })
 
 it('renders the provider #loading scoped slot under Vue 2', () => {

@@ -67,7 +67,7 @@ Stripe ships Stripe.js in named release trains: Acacia, Basil, Clover, Dahlia an
 
 Each major version of `@stripe/stripe-js` loads exactly one train. Version 10, which Vue Stripe 6 requires, requests `https://js.stripe.com/endive/stripe.js`. In test mode, the loader warns if a different train is already on the page. Vue Stripe follows the same rule. A Vue Stripe major release supports one `@stripe/stripe-js` major, so moving to the next train is a Vue Stripe major upgrade, and the library's types and components match what that train offers. The `ReleaseTrain` type, re-exported from `@stripe/stripe-js`, names the current train in code.
 
-Stripe also ties its server API versions to the trains (`2026-09-30.endive`, for example) and recommends keeping your server's API version on the same train as Stripe.js. [Stripe.js versions](/guide/stripe-js-versions) explains what each recent train changed. Stripe's [versioning policy](https://docs.stripe.com/sdks/stripejs-versioning) has the details.
+Stripe also ties its server API versions to the trains (`2026-09-30.endive`, for example) and recommends keeping your server's API version on the same train as Stripe.js. In the browser there is nothing to choose: a versioned Stripe.js always uses its train's API version, so the `apiVersion` option of `VueStripeProvider` and `createVueStripe()` has no effect on Endive (see [API version](/api/components/stripe-provider#api-version)). [Stripe.js versions](/guide/stripe-js-versions) explains what each recent train changed. Stripe's [versioning policy](https://docs.stripe.com/sdks/stripejs-versioning) has the details.
 
 ## Related pages
 

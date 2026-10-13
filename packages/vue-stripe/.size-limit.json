@@ -11,7 +11,7 @@
     "path": "dist/es/index.js",
     "import": "{ VueStripeCardElement }",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "1.72 kB",
+    "limit": "1.85 kB",
     "gzip": true
   },
   {

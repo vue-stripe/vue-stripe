@@ -106,29 +106,55 @@ describe('VueStripeExpressCheckoutElement', () => {
     expect(mockCreate).toHaveBeenCalledWith('expressCheckout', expressCheckoutOptions)
   })
 
-  it('should set up event listeners on express checkout element', async () => {
-    const mockElement = makeMockElement()
-    const mockCreate = vi.fn(() => mockElement)
-
+  const mockStripeWith = async (mockElement: ReturnType<typeof makeMockElement>) => {
     const mockLoadStripe = vi.mocked(await import('@stripe/stripe-js/pure')).loadStripe
     mockLoadStripe.mockResolvedValueOnce({
-      elements: vi.fn(() => ({
-        create: mockCreate
-      })),
+      elements: vi.fn(() => ({ create: vi.fn(() => mockElement) })),
       confirmPayment: vi.fn(),
       confirmCardSetup: vi.fn(),
       registerAppInfo: vi.fn()
     } as any)
+  }
+  const subscribed = (mockElement: ReturnType<typeof makeMockElement>) =>
+    vi.mocked(mockElement.on).mock.calls.map(([event]) => event)
+
+  it('should set up event listeners on express checkout element', async () => {
+    const mockElement = makeMockElement()
+    await mockStripeWith(mockElement)
 
     await mountWithProviders()
 
-    // Check that event listeners were set up
-    expect(mockElement.on).toHaveBeenCalledWith('ready', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('click', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('confirm', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('cancel', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('shippingaddresschange', expect.any(Function))
-    expect(mockElement.on).toHaveBeenCalledWith('shippingratechange', expect.any(Function))
+    expect(subscribed(mockElement)).toEqual(
+      expect.arrayContaining(['ready', 'confirm', 'cancel', 'availablepaymentmethodschange'])
+    )
+  })
+
+  // Stripe waits up to 1 second for resolve() once a click handler is attached (20 seconds
+  // for the shipping events), so subscribing without an app listener breaks the wallet sheet.
+  it('leaves click and the shipping events to Stripe when the app does not listen', async () => {
+    const mockElement = makeMockElement()
+    await mockStripeWith(mockElement)
+
+    await mountWithProviders()
+
+    expect(subscribed(mockElement)).not.toContain('click')
+    expect(subscribed(mockElement)).not.toContain('shippingaddresschange')
+    expect(subscribed(mockElement)).not.toContain('shippingratechange')
+  })
+
+  it('subscribes to click and the shipping events the app listens to', async () => {
+    const mockElement = makeMockElement()
+    await mockStripeWith(mockElement)
+
+    await mountWithProviders({
+      onClick: vi.fn(),
+      onShippingaddresschange: vi.fn(),
+      onShippingratechangeOnce: vi.fn()
+    })
+
+    expect(subscribed(mockElement)).toEqual(
+      expect.arrayContaining(['click', 'shippingaddresschange', 'shippingratechange'])
+    )
   })
 
   it('should emit ready event when express checkout element is ready', async () => {
@@ -196,7 +222,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       registerAppInfo: vi.fn()
     } as any)
 
-    const wrapper = await mountWithProviders()
+    const wrapper = await mountWithProviders({ onClick: vi.fn() })
 
     // Simulate click event
     const clickEvent = {
@@ -282,7 +308,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       registerAppInfo: vi.fn()
     } as any)
 
-    const wrapper = await mountWithProviders()
+    const wrapper = await mountWithProviders({ onShippingaddresschange: vi.fn() })
 
     const resolve = vi.fn()
     const reject = vi.fn()
@@ -399,7 +425,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       registerAppInfo: vi.fn()
     } as any)
 
-    const wrapper = await mountWithProviders()
+    const wrapper = await mountWithProviders({ onShippingaddresschange: vi.fn() })
 
     const shippingEvent = {
       address: {
@@ -445,7 +471,7 @@ describe('VueStripeExpressCheckoutElement', () => {
       registerAppInfo: vi.fn()
     } as any)
 
-    const wrapper = await mountWithProviders()
+    const wrapper = await mountWithProviders({ onShippingratechange: vi.fn() })
 
     const shippingRateEvent = {
       shippingRate: {
