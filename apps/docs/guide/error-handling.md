@@ -86,7 +86,7 @@ If an element fails to load (for example, the Payment Element without a client s
 
 `confirmPayment()` and `confirmSetup()` resolve to `{ error }` when the payment fails; they never reject. Stripe's error carries a `type`, a `code` and, for declines, a `decline_code`.
 
-Show Stripe's `message` for errors the customer can fix (`card_error`, `validation_error`); its text is written for customers and localized. For any other type, show a generic message and log the details:
+Show Stripe's `message` for errors the customer can fix (`card_error`, `validation_error`); its text is written for customers and localized. A failed 3D Secure challenge is also customer-fixable but arrives as an `invalid_request_error` with the code `payment_intent_authentication_failure`, so check that code as well. For anything else, show a generic message and log the details:
 
 ```vue
 <!-- PayButton.vue: rendered inside <VueStripeElements> -->
@@ -108,8 +108,11 @@ const pay = async () => {
 
   if (error) {
     const type = 'type' in error ? error.type : undefined
+    const code = 'code' in error ? error.code : undefined
     if (type === 'card_error' || type === 'validation_error') {
       message.value = error.message ?? 'Your payment details were declined.'
+    } else if (code === 'payment_intent_authentication_failure') {
+      message.value = 'Authentication failed. Try again or use another card.'
     } else {
       message.value = 'Something went wrong. Please try again.'
       console.error('Payment failed', error)
@@ -129,9 +132,10 @@ const pay = async () => {
 ```
 
 - The composable's `error` ref holds the last message too. Bind it in the template when you don't need to branch on the type.
-- If Stripe.js has not loaded, or Stripe.js throws, `usePaymentIntent`, `useSetupIntent`, `useCreatePaymentMethod`, `useHandleNextAction`, `useFinancialConnections` and `useIdentity` resolve to `{ error: { message } }`, with no `type`; hence the `'type' in error` check.
+- If Stripe.js has not loaded, or Stripe.js throws, `usePaymentIntent`, `useSetupIntent`, `useCreatePaymentMethod`, `useHandleNextAction`, `useFinancialConnections` and `useIdentity` resolve to `{ error: { message } }`, with no `type` or `code`; hence the `'type' in error` and `'code' in error` checks.
 - The method confirmers (`useConfirmCardPayment`, `useConfirmSepaDebitPayment`, ...), `useCreateToken`, `useCreateConfirmationToken` and `useVerifyMicrodeposits*` behave like the Stripe.js method they wrap: a declined payment resolves to `{ error }`, but a thrown error rejects. Wrap those calls in `try` / `catch`. See [Return value](/api/composables/confirm/#return-value), and [How confirming works](/guide/confirming-payments#two-error-styles) for why there are two styles.
-- After a decline the PaymentIntent is back in `requires_payment_method`. Keep the form mounted and let the customer try again with the same client secret.
+- With `useSetupIntent`, check `setup_intent_authentication_failure` instead.
+- After a decline or a failed authentication the PaymentIntent is back in `requires_payment_method`. Keep the form mounted and let the customer try again with the same client secret.
 
 ### Common error codes
 
