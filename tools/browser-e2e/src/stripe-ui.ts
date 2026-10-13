@@ -119,7 +119,7 @@ export function backendResponse<T>(page: Page, path: string): Promise<T> {
 export async function pickFirstProduct(page: Page): Promise<string> {
   const card = page.locator('.product-card').first()
   await expect(card).toBeVisible({ timeout: 60_000 })
-  const name = (await card.locator('h5').textContent())?.trim() ?? ''
+  const name = (await card.getByRole('heading').first().textContent())?.trim() ?? ''
   await card.click()
   return name
 }
