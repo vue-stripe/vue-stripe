@@ -9,6 +9,6 @@ Collect a complete, validated shipping or billing address with built-in autocomp
 
 <AddressElementExample />
 
-::: tip See Also
-See the [API Reference](/api/components/stripe-address-element) for all options and events.
+::: tip See also
+How-to guide: [Collect a shipping or billing address](/guide/address-element). Reference: [VueStripeAddressElement](/api/components/stripe-address-element).
 :::

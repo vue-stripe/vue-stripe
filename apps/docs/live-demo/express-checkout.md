@@ -9,6 +9,6 @@ Offer one-click payment with the Express Checkout Element, which renders Apple P
 
 <ExpressCheckoutExample />
 
-::: tip See Also
-See the [API Reference](/api/components/stripe-express-checkout-element).
+::: tip See also
+How-to guide: [Add Apple Pay, Google Pay and Link buttons](/guide/express-checkout). Reference: [VueStripeExpressCheckoutElement](/api/components/stripe-express-checkout-element).
 :::

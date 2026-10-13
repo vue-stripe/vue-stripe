@@ -11,6 +11,6 @@ Pay with the test card `4242 4242 4242 4242`, any future expiry date and any CVC
 
 <EmbeddedCheckoutExample />
 
-::: tip See Also
-For implementation details, see the [Embedded Checkout Guide](/guide/embedded-checkout) and the [VueStripeEmbeddedCheckout API Reference](/api/components/stripe-embedded-checkout).
+::: tip See also
+How-to guide: [Embed Stripe Checkout](/guide/embedded-checkout). Reference: [VueStripeEmbeddedCheckout](/api/components/stripe-embedded-checkout).
 :::

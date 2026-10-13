@@ -15,6 +15,6 @@ The Checkout Form is a Stripe beta. This demo runs on a Stripe account that has 
 
 <CheckoutFormExample />
 
-::: tip See Also
-For implementation details, see the [Checkout Form Guide](/guide/checkout-form), the [VueStripeCheckoutForm API Reference](/api/components/stripe-checkout-form) and [useCheckoutForm](/api/composables/use-checkout-form).
+::: tip See also
+How-to guide: [Add the Checkout Form](/guide/checkout-form). Reference: [VueStripeCheckoutForm](/api/components/stripe-checkout-form) and [useCheckoutForm](/api/composables/use-checkout-form).
 :::

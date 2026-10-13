@@ -9,6 +9,6 @@ Stripe Checkout is a hosted payment page that handles the entire subscription fl
 
 <SubscriptionCheckoutExample />
 
-::: tip See Also
-For implementation details, see the [Checkout Guide](/guide/checkout) and [API Reference](/api/components/stripe-checkout).
+::: tip See also
+How-to guide: [Start a subscription](/guide/subscriptions#option-a-stripe-checkout). Reference: [VueStripeCheckout](/api/components/stripe-checkout).
 :::

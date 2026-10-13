@@ -9,6 +9,6 @@ Accept one-time payments by redirecting customers to Stripe's hosted checkout pa
 
 <CheckoutRedirectExample />
 
-::: tip See Also
-For implementation details, see the [Checkout Guide](/guide/checkout) and [API Reference](/api/components/stripe-checkout).
+::: tip See also
+How-to guide: [Redirect to Stripe Checkout](/guide/checkout). Reference: [VueStripeCheckout](/api/components/stripe-checkout).
 :::

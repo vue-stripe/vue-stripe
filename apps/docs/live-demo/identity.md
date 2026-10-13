@@ -11,6 +11,6 @@ This demo runs in test mode: under **Complete with test data**, pick an outcome 
 
 <IdentityExample />
 
-::: tip See Also
-For implementation details, see [useIdentity](/api/composables/use-identity).
+::: tip See also
+How-to guide: [Verify a customer's identity](/guide/identity). Reference: [useIdentity](/api/composables/use-identity).
 :::

@@ -9,6 +9,6 @@ Accept card payments using the single-field Card Element. This is a legacy eleme
 
 <CardElementExample />
 
-::: tip See Also
-For implementation details, see the [Card Element Guide](/guide/card-element) and [API Reference](/api/components/stripe-card-element).
+::: tip See also
+How-to guide: [Accept card payments with the Card Element](/guide/card-element). Reference: [VueStripeCardElement](/api/components/stripe-card-element).
 :::

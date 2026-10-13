@@ -15,6 +15,6 @@ For new integrations Stripe recommends the [Express Checkout Element](/live-demo
 
 <PaymentRequestExample />
 
-::: tip See Also
-For implementation details, see [usePaymentRequest](/api/composables/use-payment-request) and [useConfirmCardPayment](/api/composables/confirm/cards).
+::: tip See also
+How-to guide: [Add Apple Pay, Google Pay and Link buttons](/guide/express-checkout), with the Express Checkout Element that replaces this API. Reference: [usePaymentRequest](/api/composables/use-payment-request) and [useConfirmCardPayment](/api/composables/confirm/cards).
 :::

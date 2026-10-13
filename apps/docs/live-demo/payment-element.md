@@ -9,6 +9,6 @@ The Payment Element is Stripe's recommended way to accept payments. It automatic
 
 <PaymentElementExample />
 
-::: tip See Also
-For implementation details, see the [Payment Element Guide](/guide/payment-element) and [API Reference](/api/components/stripe-payment-element).
+::: tip See also
+How-to guide: [Accept a payment with the Payment Element](/guide/payment-element). Reference: [VueStripePaymentElement](/api/components/stripe-payment-element).
 :::

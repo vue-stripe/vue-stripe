@@ -15,6 +15,6 @@ Use the test card `4242 4242 4242 4242`, any future expiry date and any CVC. Not
 
 <TokensExample />
 
-::: tip See Also
-For implementation details, see the [Tokens and Payment Methods Guide](/guide/tokens), [useCreateConfirmationToken](/api/composables/use-create-confirmation-token), [useCreateToken](/api/composables/use-create-token) and [useRadarSession](/api/composables/use-radar-session).
+::: tip See also
+How-to guide: [Confirm payments on your server](/guide/tokens). Reference: [useCreateConfirmationToken](/api/composables/use-create-confirmation-token), [useCreateToken](/api/composables/use-create-token) and [useRadarSession](/api/composables/use-radar-session).
 :::

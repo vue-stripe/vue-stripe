@@ -11,6 +11,6 @@ In the test-mode modal, pick **Test (Non-OAuth)**, agree to the terms, choose th
 
 <AchDebitExample />
 
-::: tip See Also
-For implementation details, see [useFinancialConnections](/api/composables/use-financial-connections) and [useConfirmUsBankAccountPayment](/api/composables/confirm/bank-debits#useconfirmusbankaccountpayment).
+::: tip See also
+How-to guide: [Accept ACH Direct Debit](/guide/ach-debit). Reference: [useFinancialConnections](/api/composables/use-financial-connections) and [useConfirmUsBankAccountPayment](/api/composables/confirm/bank-debits#useconfirmusbankaccountpayment).
 :::

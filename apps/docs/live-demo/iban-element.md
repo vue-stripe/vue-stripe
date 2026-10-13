@@ -9,6 +9,6 @@ Collect a customer's IBAN with the IBAN Element and charge euro payments via SEP
 
 <IbanElementExample />
 
-::: tip See Also
-See the [API Reference](/api/components/stripe-iban-element).
+::: tip See also
+How-to guide: [Accept SEPA Direct Debit](/guide/iban-element). Reference: [VueStripeIbanElement](/api/components/stripe-iban-element).
 :::

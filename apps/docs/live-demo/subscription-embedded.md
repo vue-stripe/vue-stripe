@@ -9,6 +9,6 @@ Keep customers on your site throughout the entire subscription flow using embedd
 
 <SubscriptionEmbeddedExample />
 
-::: tip See Also
-For implementation details, see the [SetupIntent Guide](/guide/setup-intent) and [Stripe Checkout](/live-demo/subscription-checkout) for an alternative approach.
+::: tip See also
+How-to guide: [Start a subscription](/guide/subscriptions#option-b-the-payment-element). For the hosted alternative, try the [Stripe Checkout subscription demo](/live-demo/subscription-checkout).
 :::

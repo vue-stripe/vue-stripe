@@ -13,6 +13,6 @@ BECS (Bulk Electronic Clearing System) Direct Debit is Australia's primary direc
 BECS Direct Debit payments don't confirm instantly like cards. They typically settle in 3-4 business days. You'll need to use webhooks to track the final payment status.
 :::
 
-::: tip See Also
-For implementation details, see the [AU Bank Account Element Guide](/guide/au-bank-account-element) and [API Reference](/api/components/stripe-au-bank-account-element).
+::: tip See also
+How-to guide: [Accept BECS Direct Debit](/guide/au-bank-account-element). Reference: [VueStripeAuBankAccountElement](/api/components/stripe-au-bank-account-element).
 :::

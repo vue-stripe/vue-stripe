@@ -9,6 +9,6 @@ A checkout page you lay out yourself, backed by a Checkout Session. The server c
 
 <CustomCheckoutExample />
 
-::: tip See Also
-For implementation details, see the [Custom Checkout Guide](/guide/custom-checkout) and the [VueStripeCheckoutElementsProvider API Reference](/api/components/stripe-checkout-provider).
+::: tip See also
+How-to guide: [Build your own page on a Checkout Session](/guide/custom-checkout). Reference: [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider).
 :::

@@ -9,6 +9,6 @@ Save a customer's card for future off-session charges without taking a payment n
 
 <SetupIntentExample />
 
-::: tip See Also
-See the [useSetupIntent Reference](/api/composables/use-setup-intent) and the [Saving Payment Methods guide](/guide/setup-intent).
+::: tip See also
+How-to guide: [Save a payment method for later](/guide/setup-intent). Reference: [useSetupIntent](/api/composables/use-setup-intent).
 :::

@@ -9,6 +9,6 @@ Enable faster checkout with Stripe Link. The Link Authentication Element collect
 
 <LinkAuthenticationExample />
 
-::: tip See Also
-For implementation details, see the [Link Authentication Guide](/guide/link-authentication) and [API Reference](/api/components/stripe-link-authentication-element).
+::: tip See also
+How-to guide: [Add Link to checkout](/guide/link-authentication). Reference: [VueStripeLinkAuthenticationElement](/api/components/stripe-link-authentication-element).
 :::

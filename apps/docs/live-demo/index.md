@@ -166,17 +166,9 @@ Some components need Stripe access that the demo account does not have, so they 
 - [Issuing Elements](/api/components/stripe-issuing-elements) and the [Issuing](/api/components/stripe-issuing-disclosure), [Treasury](/api/components/stripe-treasury-disclosure) and [Financial Account](/api/components/stripe-financial-account-disclosure) disclosures: an account onboarded to Stripe Issuing or Treasury.
 - [VueStripePricingTable](/api/components/stripe-pricing-table): a pricing table created in your Stripe Dashboard. The [Pricing Table guide](/guide/pricing-table) shows how to set one up.
 
-## Test Cards
+## Test data
 
-Use these test card numbers:
-
-| Card Number | Result |
-|-------------|--------|
-| `4242 4242 4242 4242` | Successful payment |
-| `4000 0000 0000 3220` | 3D Secure required |
-| `4000 0000 0000 9995` | Declined |
-
-Use any future expiry date, any 3-digit CVC, and any postal code.
+Pay with `4242 4242 4242 4242`, any future expiry date, any CVC and any postal code. Cards for 3D Secure and declines, and test bank accounts, are in [Test your integration](/guide/testing).
 
 <style>
 .examples-grid {

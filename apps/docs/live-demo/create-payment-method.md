@@ -9,6 +9,6 @@ Tokenize card details into a reusable `PaymentMethod` — without confirming a p
 
 <CreatePaymentMethodExample />
 
-::: tip See Also
-See the [useCreatePaymentMethod Reference](/api/composables/use-create-payment-method).
+::: tip See also
+How-to guide: [Confirm payments on your server](/guide/tokens). Reference: [useCreatePaymentMethod](/api/composables/use-create-payment-method).
 :::

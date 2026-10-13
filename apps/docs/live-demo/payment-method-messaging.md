@@ -9,6 +9,6 @@ Show customers that **Buy Now, Pay Later** options — Affirm, Klarna, Afterpay/
 
 <PaymentMethodMessagingExample />
 
-::: tip See Also
-For implementation details, see the [API Reference](/api/components/stripe-payment-method-messaging-element).
+::: tip See also
+How-to guide: [Show buy-now-pay-later messaging](/guide/payment-method-messaging). Reference: [VueStripePaymentMethodMessagingElement](/api/components/stripe-payment-method-messaging-element).
 :::
