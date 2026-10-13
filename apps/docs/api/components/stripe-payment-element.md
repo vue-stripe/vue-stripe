@@ -91,13 +91,16 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 
 ### Options Object
 
+The commonly used subset of Stripe's `StripePaymentElementOptions` type (exported from `@stripe/stripe-js`). The installed `.d.ts` and [Stripe's Payment Element options](https://docs.stripe.com/js/elements_object/create_payment_element) are the full list.
+
 ```ts
 interface StripePaymentElementOptions {
   layout?: 'tabs' | 'accordion' | 'auto' | {
     type: 'tabs' | 'accordion'
     defaultCollapsed?: boolean
-    radios?: boolean
+    radios?: 'auto' | 'never' | 'always' | 'if_multiple'
     spacedAccordionItems?: boolean
+    visibleAccordionItemsCount?: number
   }
   defaultValues?: {
     billingDetails?: {
@@ -115,7 +118,7 @@ interface StripePaymentElementOptions {
     }
   }
   business?: {
-    name?: string
+    name: string
   }
   paymentMethodOrder?: string[]
   fields?: {
@@ -149,7 +152,7 @@ interface StripePaymentElementOptions {
 }
 ```
 
-For example, `:options="{ layout: { type: 'accordion', radios: true } }"` switches to the accordion layout, `fields: { billingDetails: 'never' }` hides the billing fields (pass them at confirm time instead), and `wallets: { applePay: 'never', googlePay: 'never' }` hides the wallets.
+For example, `:options="{ layout: { type: 'accordion', radios: 'always' } }"` switches to the accordion layout with a radio button on every item, `fields: { billingDetails: 'never' }` hides the billing fields (pass them at confirm time instead), and `wallets: { applePay: 'never', googlePay: 'never' }` hides the wallets.
 
 ## Events
 
@@ -190,7 +193,7 @@ interface StripePaymentElementChangeEvent {
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
 | `#loading` | - | Rendered while the element is loading (default: "Loading payment form...") |
-| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change`, a load error or a creation error |
+| `#error` | `{ error: string }` | Rendered when the element fails to load (`@loaderror`) or cannot be created. Not rendered for validation errors: the Payment Element shows them inside its iframe, and its `@change` payload has no `error` |
 
 ```vue
 <VueStripePaymentElement>
@@ -212,7 +215,7 @@ Access these via a template ref:
 |--------|------|-------------|
 | `element` | `ShallowRef<StripePaymentElement \| null>` | The Stripe element instance (`null` until created) |
 | `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
-| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `error` | `Ref<string \| null>` | Current load or creation error message; validation messages never reach it |
 | `focus()` | `() => void` | Focus the element |
 | `blur()` | `() => void` | Blur the element |
 | `clear()` | `() => void` | Clear the element's value |

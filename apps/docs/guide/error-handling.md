@@ -11,7 +11,7 @@ Errors reach your app at five points, each covered by a step below:
 | Where | Example | Where you see it |
 |-------|---------|------------------|
 | Loading Stripe.js | Network blocked, invalid publishable key | Provider `#error` slot and `@error` event |
-| Typing in an element | Incomplete card number, invalid IBAN | Element `@change` event and `#error` slot |
+| Typing in an element | Incomplete card number, invalid IBAN | Inside the Payment Element's iframe; `@change` and the `#error` slot of the Card, IBAN and BECS elements |
 | Confirming | Card declined, 3D Secure failed | `{ error }` result of the composable, and its `error` ref |
 | After confirming | A bank debit fails days later | Webhooks on your server |
 | Integration mistakes | A composable outside its provider | A thrown `VueStripeProviderError` / `VueStripeElementsError` / `VueStripeCheckoutError` |
@@ -48,7 +48,14 @@ With the [plugin](/guide/plugin) there is no provider: `VueStripeElements` shows
 
 ## 2. Show validation errors while the customer types
 
-Elements validate their fields as the customer types. Each element shows Stripe's message in its `#error` slot and emits `@change` with `complete` and `error`. Use `complete` to enable the pay button:
+Elements validate their fields as the customer types. Where the message appears depends on the element:
+
+| Element | Validation message | `@change` payload |
+|---------|--------------------|-------------------|
+| Payment, Address, Link Authentication, Tax ID | Shown by Stripe inside the iframe | `complete`, no `error` |
+| Card, split card (number, expiry, CVC), IBAN, AU BECS | In the element's `#error` slot | `complete` and `error` |
+
+Use `complete` to enable the pay button. With the Card Element, also show the message from the `#error` slot:
 
 ```vue
 <script setup>
@@ -71,7 +78,7 @@ const onChange = (event) => {
 </template>
 ```
 
-The Payment Element also checks its fields when you confirm: `usePaymentIntent` and `useSetupIntent` call `elements.submit()` first and resolve to `{ error }` (type `validation_error`) without contacting your server when a field is incomplete.
+With the Payment Element, nothing reaches the `#error` slot while the customer types; the fields show their own messages. It also checks its fields when you confirm: `usePaymentIntent` and `useSetupIntent` call `elements.submit()` first and resolve to `{ error }` (type `validation_error`) without contacting your server when a field is incomplete.
 
 If an element fails to load (for example, the Payment Element without a client secret or `mode`), it emits `@loaderror` and shows the message in the same `#error` slot.
 
@@ -79,7 +86,7 @@ If an element fails to load (for example, the Payment Element without a client s
 
 `confirmPayment()` and `confirmSetup()` resolve to `{ error }` when the payment fails; they never reject. Stripe's error carries a `type`, a `code` and, for declines, a `decline_code`.
 
-Show Stripe's `message` for errors the customer can fix (`card_error`, `validation_error`); its text is written for customers and localized. For any other type, show a generic message and log the details:
+Show Stripe's `message` for errors the customer can fix (`card_error`, `validation_error`); its text is written for customers and localized. A failed 3D Secure challenge is also customer-fixable but arrives as an `invalid_request_error` with the code `payment_intent_authentication_failure`, so check that code as well. For anything else, show a generic message and log the details:
 
 ```vue
 <!-- PayButton.vue: rendered inside <VueStripeElements> -->
@@ -101,8 +108,11 @@ const pay = async () => {
 
   if (error) {
     const type = 'type' in error ? error.type : undefined
+    const code = 'code' in error ? error.code : undefined
     if (type === 'card_error' || type === 'validation_error') {
       message.value = error.message ?? 'Your payment details were declined.'
+    } else if (code === 'payment_intent_authentication_failure') {
+      message.value = 'Authentication failed. Try again or use another card.'
     } else {
       message.value = 'Something went wrong. Please try again.'
       console.error('Payment failed', error)
@@ -122,9 +132,10 @@ const pay = async () => {
 ```
 
 - The composable's `error` ref holds the last message too. Bind it in the template when you don't need to branch on the type.
-- If Stripe.js has not loaded, or Stripe.js throws, `usePaymentIntent`, `useSetupIntent`, `useCreatePaymentMethod`, `useHandleNextAction`, `useFinancialConnections` and `useIdentity` resolve to `{ error: { message } }`, with no `type`; hence the `'type' in error` check.
+- If Stripe.js has not loaded, or Stripe.js throws, `usePaymentIntent`, `useSetupIntent`, `useCreatePaymentMethod`, `useHandleNextAction`, `useFinancialConnections` and `useIdentity` resolve to `{ error: { message } }`, with no `type` or `code`; hence the `'type' in error` and `'code' in error` checks.
 - The method confirmers (`useConfirmCardPayment`, `useConfirmSepaDebitPayment`, ...), `useCreateToken`, `useCreateConfirmationToken` and `useVerifyMicrodeposits*` behave like the Stripe.js method they wrap: a declined payment resolves to `{ error }`, but a thrown error rejects. Wrap those calls in `try` / `catch`. See [Return value](/api/composables/confirm/#return-value), and [How confirming works](/guide/confirming-payments#two-error-styles) for why there are two styles.
-- After a decline the PaymentIntent is back in `requires_payment_method`. Keep the form mounted and let the customer try again with the same client secret.
+- With `useSetupIntent`, check `setup_intent_authentication_failure` instead.
+- After a decline or a failed authentication the PaymentIntent is back in `requires_payment_method`. Keep the form mounted and let the customer try again with the same client secret.
 
 ### Common error codes
 

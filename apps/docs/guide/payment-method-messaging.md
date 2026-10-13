@@ -45,7 +45,7 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </template>
 ```
 
-`amount` is in the smallest currency unit (cents for USD), so `12000` is $120.00. `currency` is an upper-case ISO code.
+`amount` is in the smallest currency unit (cents for USD), so `12000` is $120.00. `currency` is an upper-case ISO code. Always pass `paymentMethodTypes`: without it, Stripe.js Endive renders an empty message and logs "No "Buy Now Pay Later" options are displayed because no relevant options were found."
 
 ## 2. Keep the amount in sync with the price
 
@@ -55,14 +55,16 @@ The component calls `element.update()` whenever `options` changes, so pass a com
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { VueStripePaymentMethodMessagingElement } from '@vue-stripe/vue-stripe'
+import type { StripePaymentMethodMessagingElementOptions } from '@stripe/stripe-js'
 
 const unitPrice = 4000 // $40.00
 const quantity = ref(1)
 
-const messagingOptions = computed(() => ({
+const messagingOptions = computed<StripePaymentMethodMessagingElementOptions>(() => ({
   amount: unitPrice * quantity.value,
-  currency: 'USD' as const,
-  countryCode: 'US' as const
+  currency: 'USD',
+  countryCode: 'US',
+  paymentMethodTypes: ['affirm', 'klarna', 'afterpay_clearpay']
 }))
 </script>
 

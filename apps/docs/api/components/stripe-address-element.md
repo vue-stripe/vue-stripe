@@ -7,7 +7,7 @@ description: "VueStripeAddressElement reference: collect a shipping or billing a
 Collects a shipping or billing address, with optional name, phone and address autocomplete. It needs no Intent: use it inside [VueStripeElements](/api/components/stripe-elements) with a `clientSecret` or a deferred Intent (`mode` / `currency` / `amount`), or inside [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (see [With Checkout Sessions](#with-checkout-sessions)). Read the address from `@change` or the exposed `getValue()`. For recipes (pre-fill, phone, allowed countries, P.O. boxes, address before payment), see [Collect a shipping or billing address](/guide/address-element).
 
 ::: warning Pass `mode` when there is no `clientSecret`
-With neither `clientSecret` nor `mode` on `VueStripeElements`, Stripe.js Endive logs "Unable to select session" inside the Address Element's iframe. Use `<VueStripeElements mode="payment" currency="usd" :amount="1099">` (or `mode="setup"`) until you have an Intent.
+With neither `clientSecret` nor `mode` on `VueStripeElements`, Stripe.js Endive throws "Unable to select session" from the Address Element's iframe on every load. Use `<VueStripeElements mode="payment" currency="usd" :amount="1099">` (or `mode="setup"`) until you have an Intent.
 :::
 
 ## Usage
@@ -160,7 +160,7 @@ interface StripeAddressElementChangeEvent {
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
 | `#loading` | - | Rendered while the element is loading (default: "Loading address form...") |
-| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change`, a load error or a creation error |
+| `#error` | `{ error: string }` | Rendered when the element fails to load (`@loaderror`) or cannot be created. Not rendered for validation errors: the Address Element shows them inside its iframe, and its `@change` payload has no `error` |
 
 ```vue
 <VueStripeAddressElement>
@@ -182,7 +182,7 @@ Access these via a template ref:
 |--------|------|-------------|
 | `element` | `ShallowRef<StripeAddressElement \| null>` | The Stripe element instance (`null` until created) |
 | `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
-| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `error` | `Ref<string \| null>` | Current load or creation error message; validation messages never reach it |
 | `focus()` | `() => void` | Focus the element |
 | `blur()` | `() => void` | Blur the element |
 | `clear()` | `() => void` | Clear the element's value |
