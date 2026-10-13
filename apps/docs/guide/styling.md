@@ -198,7 +198,7 @@ Each part has a shared class (`vue-stripe-element`, `vue-stripe-element-mount`, 
 | `VueStripeIssuingCardCopyButtonElement` | `vue-stripe-issuing-card-copy-button-element` |
 | `VueStripeIssuingAddToWalletButtonElement` | `vue-stripe-issuing-add-to-wallet-button-element` |
 
-So the Card Number Element's iframe is mounted in `vue-stripe-cardNumber-element-mount`, and the Link Authentication Element's error box is `vue-stripe-link-auth-error`. Each component's API page also shows its markup under "Styling".
+So the Card Number Element's iframe is mounted in `vue-stripe-cardNumber-element-mount`, and the Link Authentication Element's error box is `vue-stripe-link-auth-error`. Each component's API page also shows its markup under "Styling". The default stylesheet gives the Card, split card, IBAN and BECS boxes `box-sizing: border-box` with a 44px `min-height`, so they are 44px tall whether or not your app has a global `box-sizing` reset.
 
 Target the shared classes to restyle every element, or the specific ones for a single element:
 
