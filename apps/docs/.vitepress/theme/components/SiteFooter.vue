@@ -105,7 +105,10 @@ const href = (link: string) => (isExternal(link) ? link : withBase(link))
     </div>
 
     <div class="site-footer-legal">
-      <p>Released under the MIT License. Copyright 2017-2026 Vue Stripe Contributors.</p>
+      <p>
+        Released under the MIT License. Copyright 2017-2026 Joff Tiquez &amp; Vue Stripe
+        Contributors.
+      </p>
       <p>Stripe and Stripe.js are trademarks of Stripe, Inc.</p>
     </div>
   </footer>
