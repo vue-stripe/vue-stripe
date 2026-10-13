@@ -26,6 +26,10 @@ defineProps<{ title: string; lede?: string | undefined; id?: string | undefined 
   }
 }
 
+.home-section:last-child {
+  padding-bottom: 96px;
+}
+
 .home-section-title {
   margin: 0;
   font-size: 28px;

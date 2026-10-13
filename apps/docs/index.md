@@ -111,4 +111,3 @@ async function pay() {
 
 </HomeSection>
 
-<HomeCoverage />

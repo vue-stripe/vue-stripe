@@ -492,11 +492,6 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/vue-stripe/vue-stripe' }],
 
-    footer: {
-      message: 'Released under the MIT License.',
-      copyright: 'Copyright 2017-2026 Vue Stripe Contributors'
-    },
-
     search: {
       provider: 'local'
     },

@@ -7,11 +7,11 @@ import './styles/vars.css'
 import CopyForLLM from './components/CopyForLLM.vue'
 import StripeCoverage from './components/StripeCoverage.vue'
 import DocIcon from './components/DocIcon.vue'
+import SiteFooter from './components/SiteFooter.vue'
 import HomeHero from './components/home/HomeHero.vue'
 import HomeFeatures from './components/home/HomeFeatures.vue'
 import HomeIntegrations from './components/home/HomeIntegrations.vue'
 import HomeSection from './components/home/HomeSection.vue'
-import HomeCoverage from './components/home/HomeCoverage.vue'
 
 // Example components for interactive documentation
 import ProductSelector from './components/examples/ProductSelector.vue'
@@ -92,7 +92,9 @@ export default {
       // Copy for LLMs button near the title on doc pages
       'doc-before': () => h(CopyForLLM),
       // Analytics tracking (invisible component)
-      'layout-top': () => h(AnalyticsWrapper)
+      'layout-top': () => h(AnalyticsWrapper),
+      // Site footer on every page (replaces the default two-line footer)
+      'layout-bottom': () => h(SiteFooter)
       // Carbon Ads placeholder - will be injected when you have the actual code
       // 'aside-ads-before': () => h('div', { id: 'carbon-ads-container' })
     })
@@ -126,7 +128,6 @@ export default {
     app.component('HomeFeatures', HomeFeatures)
     app.component('HomeIntegrations', HomeIntegrations)
     app.component('HomeSection', HomeSection)
-    app.component('HomeCoverage', HomeCoverage)
     app.component('AuBankAccountPaymentExample', AuBankAccountPaymentExample)
     app.component('AchDebitExample', AchDebitExample)
     app.component('IdentityExample', IdentityExample)
