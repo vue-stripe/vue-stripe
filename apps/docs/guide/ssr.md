@@ -319,7 +319,7 @@ You don't have to, but if you prefer to send no Stripe markup from the server, w
 
 ## Quasar SSR
 
-Use the components as in any Vue app, and fetch client secrets in the browser as in [every SSR app](#fetch-client-secrets-in-the-browser). A sample that starts a request at the top of `<script setup>`, such as a Promise in `client-secret`, stops the Quasar SSR server. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
+The full Quasar setup (the `QCLI_` key prefix, a boot file, the CSP, the dev proxy and an SSR middleware for `/api`) is in [Use Vue Stripe with Quasar](/guide/quasar#_8-run-in-ssr-mode). Use the components as in any Vue app, and fetch client secrets in the browser as in [every SSR app](#fetch-client-secrets-in-the-browser). A sample that starts a request at the top of `<script setup>`, such as a Promise in `client-secret`, stops the Quasar SSR server. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
 
 ```vue
 <script setup lang="ts">
