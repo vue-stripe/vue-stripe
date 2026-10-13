@@ -61,7 +61,7 @@ first-payment@0.0.0 /home/you/first-payment
 ├── @stripe/stripe-js@10.x.x
 ├── @vitejs/plugin-vue@6.x.x
 ├── @vue-stripe/vue-stripe@6.x.x
-├── stripe@22.x.x
+├── stripe@23.x.x
 ├── vite@8.x.x
 └── vue@3.x.x
 ```
