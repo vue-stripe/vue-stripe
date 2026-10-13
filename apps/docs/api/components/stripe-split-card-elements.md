@@ -152,7 +152,7 @@ Each component has the same slots:
 
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
-| `#loading` | - | Rendered while the element is loading (default: "Loading cardNumber...", "Loading cardExpiry...", "Loading cardCvc...") |
+| `#loading` | - | Rendered while the element is loading (default: "Loading card number...", "Loading card expiry...", "Loading card CVC...") |
 | `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change` or a creation error |
 
 ```vue

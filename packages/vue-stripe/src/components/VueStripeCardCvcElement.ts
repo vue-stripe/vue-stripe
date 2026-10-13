@@ -16,5 +16,6 @@ export default /* @__PURE__ */ createStripeElement<
   CardCvcEvents
 >({
   elementType: 'cardCvc',
-  componentName: 'VueStripeCardCvcElement'
+  componentName: 'VueStripeCardCvcElement',
+  loadingText: 'Loading card CVC...'
 })

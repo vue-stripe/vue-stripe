@@ -19,5 +19,6 @@ export default /* @__PURE__ */ createStripeElement<
   CardExpiryEvents
 >({
   elementType: 'cardExpiry',
-  componentName: 'VueStripeCardExpiryElement'
+  componentName: 'VueStripeCardExpiryElement',
+  loadingText: 'Loading card expiry...'
 })

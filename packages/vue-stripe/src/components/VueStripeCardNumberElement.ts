@@ -19,5 +19,6 @@ export default /* @__PURE__ */ createStripeElement<
   CardNumberEvents
 >({
   elementType: 'cardNumber',
-  componentName: 'VueStripeCardNumberElement'
+  componentName: 'VueStripeCardNumberElement',
+  loadingText: 'Loading card number...'
 })

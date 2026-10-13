@@ -75,7 +75,7 @@ This is the only event: the element is display-only, so it has no `@change`, `@f
 
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
-| `#loading` | - | Rendered while the element is loading (default: "Loading paymentMethodMessaging...") |
+| `#loading` | - | Rendered while the element is loading (default: "Loading payment method messaging...") |
 | `#error` | `{ error: string }` | Rendered when the element has an error: a creation error |
 
 ```vue
