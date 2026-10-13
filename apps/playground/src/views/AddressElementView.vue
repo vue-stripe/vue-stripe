@@ -152,8 +152,8 @@ const onChange = (event: StripeAddressElementChangeEvent) => {
 const onFocus = () => logEvent('focus')
 const onBlur = () => logEvent('blur')
 const onEscape = () => logEvent('escape')
-const onLoadError = (event: { elementType: 'address'; error: string }) => {
-  logEvent('loaderror', event.error)
+const onLoadError = (event: { elementType: 'address'; error: { message?: string } }) => {
+  logEvent('loaderror', event.error.message ?? 'Address Element failed to load')
 }
 
 // Call getValue on the address element
@@ -281,7 +281,9 @@ const handleClear = () => {
 
         <div class="bg-secondary rounded-lg p-6">
           <VueStripeProvider :publishable-key="publishableKey">
-            <VueStripeElements>
+            <!-- No Intent here: mode/currency/amount give Elements a session (Stripe.js Endive
+                 rejects a bare stripe.elements() for the Address Element). -->
+            <VueStripeElements mode="payment" currency="usd" :amount="1000">
               <div class="bg-card rounded-md p-4 border">
                 <VueStripeAddressElement
                   ref="addressElementRef"
@@ -292,7 +294,7 @@ const handleClear = () => {
                   @focus="onFocus"
                   @blur="onBlur"
                   @escape="onEscape"
-                  @load-error="onLoadError"
+                  @loaderror="onLoadError"
                 />
               </div>
 

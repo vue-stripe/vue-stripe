@@ -47,7 +47,9 @@ function onChange(event: StripeAddressElementChangeEvent) {
       <div class="stripe-container">
         <span :class="['indicator', { ready }]">{{ ready ? '✓' : '○' }} Address element</span>
         <VueStripeProvider :publishable-key="publishableKey">
-          <VueStripeElements>
+          <!-- No Intent here: mode/currency/amount give Elements a session (Stripe.js Endive
+               rejects a bare stripe.elements() for the Address Element). -->
+          <VueStripeElements mode="payment" currency="usd" :amount="1000">
             <VueStripeAddressElement
               :key="mode"
               :options="{ mode }"

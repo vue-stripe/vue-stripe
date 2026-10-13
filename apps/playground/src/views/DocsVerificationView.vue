@@ -275,7 +275,7 @@ const addressOptions = {
         <p class="source">Source: guide/address-element.md - Basic Usage</p>
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
-          <VueStripeElements @ready="onElementsReady">
+          <VueStripeElements mode="payment" currency="usd" :amount="1000" @ready="onElementsReady">
             <VueStripeAddressElement :options="addressOptions" @change="onAddressChange" />
             <button type="button">Continue</button>
           </VueStripeElements>

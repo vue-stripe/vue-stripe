@@ -213,10 +213,6 @@ const onLoaderStart = () => {
   elementLoading.value = true
   logEvent('loaderstart')
 }
-const onLoaderStop = () => {
-  elementLoading.value = false
-  logEvent('loaderstop')
-}
 </script>
 
 <template>
@@ -396,7 +392,6 @@ const onLoaderStop = () => {
                   @focus="onFocus"
                   @blur="onBlur"
                   @loaderstart="onLoaderStart"
-                  @loaderstop="onLoaderStop"
                 />
 
                 <!-- Payment Form Child Component -->
