@@ -62,8 +62,9 @@ jobs:
           else
             npm publish --access public --provenance
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # No NODE_AUTH_TOKEN: npm authenticates through Trusted Publishing (GitHub OIDC,
+        # `id-token: write` above), configured on npmjs.com for this repo and publish.yml.
+        # A token in the environment would take precedence and fail.
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
