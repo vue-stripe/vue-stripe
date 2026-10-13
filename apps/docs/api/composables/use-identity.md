@@ -37,7 +37,16 @@ const verify = async (clientSecret) => {
 
 A submitted verification resolves without an `error`. Check `result.error` rather than `result.verificationSession`: `@stripe/stripe-js` types the success result as `{ verificationSession }`, but Stripe.js 10 (sandbox, October 2026) resolves `{ error: null }` with no session object. Fetch the VerificationSession on your server for its status.
 
-When the verification does not go ahead, Stripe resolves with an `error`, which also lands on the `error` ref. If the customer closes the modal, Stripe returns `{ error: { type: 'user_action', code: 'session_cancelled' } }` with no `message`, so the `error` ref falls back to `'Failed to verify identity'`; branch on `result.error.code` to tell a cancel apart. Stripe documents these other codes:
+When the verification does not go ahead, Stripe resolves with an `error`, which also lands on the `error` ref. If the customer closes the modal, Stripe returns `{ error: { type: 'user_action', code: 'session_cancelled' } }` with no `message`, so the `error` ref falls back to `'Failed to verify identity'`; branch on `result.error.code` to tell a cancel apart. The library's own `{ error: { message } }` result has no `code`, so narrow with `'code' in result.error` first, or TypeScript reports `Property 'code' does not exist`:
+
+```ts
+const result = await verifyIdentity(clientSecret)
+if (result.error && 'code' in result.error && result.error.code === 'session_cancelled') {
+  // The customer closed the modal: offer to start again with a new session
+}
+```
+
+Stripe documents these other codes:
 
 | `error.code` | Meaning |
 |--------------|---------|

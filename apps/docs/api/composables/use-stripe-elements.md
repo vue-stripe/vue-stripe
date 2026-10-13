@@ -4,7 +4,7 @@ description: "useStripeElements reference: get the nearest Stripe Elements group
 
 # useStripeElements
 
-Returns the `StripeElements` group created by the nearest [`VueStripeElements`](/api/components/stripe-elements), with `submit`, `fetchUpdates` and `getElement`. Call it in a component rendered inside `VueStripeElements`. To confirm a payment or setup, use [`usePaymentIntent`](/api/composables/use-payment-intent) or [`useSetupIntent`](/api/composables/use-setup-intent): they use the same group and call `submit()` for you.
+Returns the `StripeElements` group created by the nearest [`VueStripeElements`](/api/components/stripe-elements), with `submit`, `fetchUpdates` and `getElement`. Call it in a component rendered inside `VueStripeElements`. It is also exported as `useElements`, the same function under its v5 name. To confirm a payment or setup, use [`usePaymentIntent`](/api/composables/use-payment-intent) or [`useSetupIntent`](/api/composables/use-setup-intent): they use the same group and call `submit()` for you.
 
 ## Usage
 

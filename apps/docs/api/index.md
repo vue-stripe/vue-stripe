@@ -82,7 +82,7 @@ Stripe.js Clover (8.0) removed the standalone iDEAL, P24, EPS and FPX elements. 
 | Composable | Description |
 |------------|-------------|
 | [useStripe](/api/composables/use-stripe) | The `Stripe` instance and its loading and error state |
-| [useStripeElements](/api/composables/use-stripe-elements) | The `StripeElements` instance, `getElement`, `submit` and `fetchUpdates` |
+| [useStripeElements](/api/composables/use-stripe-elements) | The `StripeElements` instance, `getElement`, `submit` and `fetchUpdates` (alias: `useElements`) |
 | [usePaymentIntent](/api/composables/use-payment-intent) | `stripe.confirmPayment()` with the Elements group; runs `elements.submit()` first |
 | [useSetupIntent](/api/composables/use-setup-intent) | `stripe.confirmSetup()` with the Elements group; runs `elements.submit()` first |
 | [useStripeCheckout](/api/composables/use-stripe-checkout) | Redirects to Stripe Checkout (alias: `useCheckout`) |
