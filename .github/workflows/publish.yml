@@ -58,9 +58,9 @@ jobs:
         run: |
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then
             dist_tag=$(echo "$GITHUB_REF_NAME" | sed -E 's/^v[0-9.]+-([A-Za-z]+).*/\1/')
-            npm publish --access public --provenance --tag "$dist_tag"
+            npm publish --access public --provenance --tag "$dist_tag" --loglevel verbose
           else
-            npm publish --access public --provenance
+            npm publish --access public --provenance --loglevel verbose
           fi
         # No NODE_AUTH_TOKEN: npm authenticates through Trusted Publishing (GitHub OIDC,
         # `id-token: write` above), configured on npmjs.com for this repo and publish.yml.
