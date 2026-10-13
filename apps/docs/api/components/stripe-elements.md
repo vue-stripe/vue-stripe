@@ -1,43 +1,20 @@
 # VueStripeElements
 
-Creates a Stripe Elements instance and provides it to child element components.
-
-## What is StripeElements?
-
-StripeElements is the bridge between StripeProvider (or the [`createVueStripe()`](/api/plugin) plugin) and individual Stripe element components. It:
-
-| Capability | Description |
-|------------|-------------|
-| **Elements Instance** | Creates the Stripe Elements instance required by all element components |
-| **Payment Intent Binding** | Binds Elements to a specific PaymentIntent or SetupIntent via clientSecret |
-| **Appearance Control** | Configures theme, colors, fonts, and styling for all child elements |
-| **Context Provision** | Makes Elements available to child components via Vue's provide/inject |
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["StripeElements mounts inside StripeProvider or a createVueStripe() app<br/>(Receives Stripe instance from parent context)"] --> B["Waits for Stripe instance to be available<br/>(Shows #loading slot while waiting)"]
-    B --> C["Calls stripe.elements({ clientSecret, appearance, ... })<br/>Creates Elements instance with configuration"]
-    C --> D{Result?}
-    D -->|Success| E["<b>SUCCESS</b><br/>1. Store Elements ref<br/>2. provide() to tree<br/>3. Render #default"]
-    D -->|Failure| F["<b>FAILURE</b><br/>1. Store error message<br/>2. Show #error slot"]
-    E --> G["Child element components (PaymentElement,<br/>CardElement, etc.) inject Elements and<br/>mount their specific elements"]
-    F --> G
-```
+Creates a Stripe Elements group (`stripe.elements()`) and provides it to the element components and composables inside it. Use it inside a [VueStripeProvider](/api/components/stripe-provider), or in an app that installs the [`createVueStripe()`](/api/plugin) plugin; without a provider, a Stripe.js load failure renders in this component's `#error` slot. [How Vue Stripe works](/guide/architecture#the-provider-chain) explains the provider chain.
 
 ## Usage
 
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="clientSecret">
+    <VueStripeElements :client-secret="clientSecret" :appearance="{ theme: 'stripe' }">
       <VueStripePaymentElement />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 
 <script setup>
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import {
   VueStripeProvider,
   VueStripeElements,
@@ -47,6 +24,14 @@ import {
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 </script>
+```
+
+Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret`:
+
+```vue
+<VueStripeElements mode="payment" currency="usd" :amount="1099">
+  <VueStripePaymentElement />
+</VueStripeElements>
 ```
 
 ## Props
@@ -126,6 +111,40 @@ interface StripeElementsOptions {
 }
 ```
 
+### Appearance API
+
+The `appearance` prop (or `options.appearance`) themes every element in the group. It takes Stripe's [`Appearance`](https://docs.stripe.com/elements/appearance-api) object:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `theme` | `'stripe' \| 'night' \| 'flat' \| 'none'` | Base theme |
+| `variables` | `Record<string, string>` | Design tokens such as `colorPrimary`, `colorBackground`, `colorText`, `colorDanger`, `fontFamily`, `fontSizeBase`, `spacingUnit`, `borderRadius` |
+| `rules` | `Record<string, Record<string, string>>` | CSS-like rules per selector, e.g. `.Input`, `.Input:focus`, `.Input--invalid`, `.Label`, `.Error` |
+| `labels` | `'above' \| 'floating'` | Label position |
+
+```vue
+<VueStripeElements
+  :client-secret="secret"
+  :appearance="{
+    theme: 'stripe',
+    variables: { colorPrimary: '#0570de', borderRadius: '4px' },
+    rules: { '.Input:focus': { border: '1px solid #0570de' } }
+  }"
+>
+```
+
+Custom fonts load through `fonts` (or `options.fonts`): pass `{ cssSrc }` for a stylesheet or `{ family, src, weight, style }` for a font file, then name the family in `variables.fontFamily`:
+
+```vue
+<VueStripeElements
+  :client-secret="secret"
+  :fonts="[{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]"
+  :appearance="{ variables: { fontFamily: 'Roboto, sans-serif' } }"
+>
+```
+
+Changes to `appearance` are applied to the mounted elements with `elements.update()`. Pass a stable object (a `ref` or `computed`), not a new inline object on every render, if the parent re-renders often.
+
 ## Events
 
 | Event | Payload | Description |
@@ -137,6 +156,12 @@ interface StripeElementsOptions {
 ::: info `elements.update()` is asynchronous
 Since Stripe.js Dahlia, `elements.update()` returns a Promise. `VueStripeElements` waits for it when it applies `appearance` / `locale` changes; a rejected update sets the component's error state and surfaces as `@error`.
 :::
+
+```vue
+<VueStripeElements :client-secret="clientSecret" @ready="onReady" @error="onError">
+  <VueStripePaymentElement />
+</VueStripeElements>
+```
 
 ### `@update-end`
 
@@ -175,48 +200,13 @@ function switchTheme() {
 
 The event fires for every `elements.update()` call on the group, including calls you make yourself through [`useStripeElements().elements`](/api/composables/use-stripe-elements). A new `clientSecret`, `mode`, `currency`, `amount` or `setupFutureUsage` creates a new group instead of updating it: that emits `@ready`, not `@update-end`. The listener moves to the new group, and an event from the replaced group is never re-emitted. Stripe.js 10.0.0 types the group with `on('update-end')` only; `VueStripeElements` calls `off()` on unmount and on re-creation when the runtime provides it.
 
-```vue
-<template>
-  <VueStripeElements
-    :client-secret="clientSecret"
-    @ready="onReady"
-    @error="onError"
-  >
-    <VueStripePaymentElement />
-  </VueStripeElements>
-</template>
-
-<script setup lang="ts">
-import type { StripeElements } from '@stripe/stripe-js'
-import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
-
-const clientSecret = 'pi_xxx_secret_xxx'
-
-function onReady(elements: StripeElements) {
-  console.log('Elements ready', elements)
-}
-
-function onError(error: string) {
-  console.error('Elements failed to initialize:', error)
-}
-</script>
-```
-
 ## Slots
 
-### Default Slot
-
-Rendered when Elements is ready:
-
-```vue
-<VueStripeElements :client-secret="secret">
-  <VueStripePaymentElement />
-</VueStripeElements>
-```
-
-### Loading Slot
-
-Rendered while Elements is initializing:
+| Slot | Slot Props | Description |
+|------|-----------|-------------|
+| default | - | Rendered once the Elements group is created |
+| `#loading` | - | Rendered while the group is created (default: "Initializing Elements...") |
+| `#error` | `{ error: string }` | Rendered when creating the group fails, or, without a `VueStripeProvider`, when Stripe.js fails to load |
 
 ```vue
 <VueStripeElements :client-secret="secret">
@@ -224,16 +214,6 @@ Rendered while Elements is initializing:
     <div>Initializing payment form...</div>
   </template>
 
-  <VueStripePaymentElement />
-</VueStripeElements>
-```
-
-### Error Slot
-
-Rendered if Elements fails to initialize:
-
-```vue
-<VueStripeElements :client-secret="secret">
   <template #error="{ error }">
     <div class="error">{{ error }}</div>
   </template>
@@ -244,7 +224,7 @@ Rendered if Elements fails to initialize:
 
 ## Provides
 
-StripeElements uses Vue's `provide` to make these values available to descendants:
+The component exposes nothing on a template ref. It provides these values to descendants:
 
 | Key | Type | Description |
 |-----|------|-------------|
@@ -252,203 +232,37 @@ StripeElements uses Vue's `provide` to make these values available to descendant
 | `loading` | `Ref<boolean>` | Whether Elements is loading |
 | `error` | `Ref<string \| null>` | Error message if initialization failed |
 
-Access these values using the [useStripeElements](/api/composables/use-stripe-elements) composable.
+Read them with the [useStripeElements](/api/composables/use-stripe-elements) composable.
 
-## Appearance API
+## Styling
 
-Customize the look of all Stripe Elements using the Appearance API:
+The component renders a plain wrapper `div` around the default slot once the group exists. While loading and on failure it renders:
 
-### Themes
+```html
+<!-- while loading (#loading slot replaces the message) -->
+<div class="vue-stripe-elements-loading">
+  <div class="vue-stripe-loading-message">Initializing Elements...</div>
+</div>
 
-```vue
-<VueStripeElements
-  :client-secret="secret"
-  :options="{
-    appearance: {
-      theme: 'stripe' // or 'night', 'flat', 'none'
-    }
-  }"
->
+<!-- on failure (#error slot replaces the message) -->
+<div class="vue-stripe-elements-error">
+  <div class="vue-stripe-error-message">...</div>
+</div>
 ```
 
-### Variables
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
 
-```vue
-<VueStripeElements
-  :client-secret="secret"
-  :options="{
-    appearance: {
-      theme: 'stripe',
-      variables: {
-        colorPrimary: '#0570de',
-        colorBackground: '#ffffff',
-        colorText: '#30313d',
-        colorDanger: '#df1b41',
-        fontFamily: 'system-ui, sans-serif',
-        spacingUnit: '4px',
-        borderRadius: '4px',
-        fontSizeBase: '16px'
-      }
-    }
-  }"
->
+```ts
+import '@vue-stripe/vue-stripe/style.css'
 ```
 
-### Rules
-
-Target specific elements with CSS-like rules:
-
-```vue
-<VueStripeElements
-  :client-secret="secret"
-  :options="{
-    appearance: {
-      rules: {
-        '.Input': {
-          border: '1px solid #e6e6e6',
-          boxShadow: 'none'
-        },
-        '.Input:focus': {
-          border: '1px solid #0570de',
-          boxShadow: '0 0 0 1px #0570de'
-        },
-        '.Input--invalid': {
-          border: '1px solid #df1b41'
-        },
-        '.Label': {
-          fontWeight: '500'
-        },
-        '.Error': {
-          color: '#df1b41'
-        }
-      }
-    }
-  }"
->
-```
-
-### Custom Fonts
-
-```vue
-<VueStripeElements
-  :client-secret="secret"
-  :options="{
-    fonts: [
-      {
-        cssSrc: 'https://fonts.googleapis.com/css?family=Roboto'
-      }
-    ],
-    appearance: {
-      variables: {
-        fontFamily: 'Roboto, sans-serif'
-      }
-    }
-  }"
->
-```
-
-## Examples
-
-### Dark Theme
-
-```vue
-<VueStripeElements
-  :client-secret="secret"
-  :options="{
-    appearance: {
-      theme: 'night',
-      variables: {
-        colorPrimary: '#7c3aed'
-      }
-    }
-  }"
->
-  <VueStripePaymentElement />
-</VueStripeElements>
-```
-
-### Custom Styled
-
-```vue
-<script setup>
-const appearance = {
-  theme: 'none',
-  variables: {
-    fontFamily: '"Inter", system-ui, sans-serif',
-    fontSizeBase: '15px',
-    colorPrimary: '#10b981',
-    colorBackground: '#f9fafb',
-    colorText: '#1f2937',
-    colorDanger: '#ef4444',
-    borderRadius: '8px',
-    spacingUnit: '4px'
-  },
-  rules: {
-    '.Input': {
-      backgroundColor: '#ffffff',
-      border: '1px solid #d1d5db',
-      padding: '12px',
-      transition: 'border-color 0.15s ease'
-    },
-    '.Input:hover': {
-      borderColor: '#9ca3af'
-    },
-    '.Input:focus': {
-      borderColor: '#10b981',
-      boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.1)'
-    },
-    '.Label': {
-      fontSize: '14px',
-      fontWeight: '500',
-      marginBottom: '6px'
-    }
-  }
-}
-</script>
-
-<template>
-  <VueStripeElements
-    :client-secret="secret"
-    :options="{ appearance }"
-  >
-    <VueStripePaymentElement />
-  </VueStripeElements>
-</template>
-```
-
-### Without clientSecret (Card Element only)
-
-```vue
-<VueStripeProvider :publishable-key="key">
-  <VueStripeElements>
-    <!-- Card Element doesn't require clientSecret on Elements -->
-    <VueStripeCardElement />
-  </VueStripeElements>
-</VueStripeProvider>
-```
-
-For other elements (Payment, Address, ...) without an Intent, use the deferred Intent flow instead:
-
-```vue
-<VueStripeElements mode="payment" currency="usd" :amount="1099">
-  <VueStripeAddressElement :options="{ mode: 'shipping' }" />
-</VueStripeElements>
-```
-
-### Without VueStripeProvider
-
-In an app that installs [`createVueStripe()`](/api/plugin), `VueStripeElements` gets the Stripe instance from the plugin, so no provider is needed. If Stripe.js fails to load, `VueStripeElements` renders the load error in its `#error` slot.
-
-```vue
-<VueStripeElements :client-secret="clientSecret">
-  <VueStripePaymentElement />
-</VueStripeElements>
-```
+The fields inside Stripe's iframes are styled with the [Appearance API](#appearance-api), not with CSS.
 
 ## TypeScript
 
 ```ts
-import type { Appearance } from '@stripe/stripe-js'
+import type { VueStripeElementsProps } from '@vue-stripe/vue-stripe'
+import type { Appearance, StripeElements, StripeElementsOptions } from '@stripe/stripe-js'
 
 const appearance: Appearance = {
   theme: 'stripe',
@@ -456,11 +270,17 @@ const appearance: Appearance = {
     colorPrimary: '#0570de'
   }
 }
+
+function onReady(elements: StripeElements) {
+  // elements is fully typed
+}
 ```
 
 ## See Also
 
 - [useStripeElements](/api/composables/use-stripe-elements) - Access Elements in child components
-- [StripeProvider](/api/components/stripe-provider) - Parent provider component
+- [VueStripeProvider](/api/components/stripe-provider) - Parent provider component
 - [createVueStripe](/api/plugin) - App-wide alternative to the provider
-- [Appearance API](#appearance-api) - Themes, variables, rules and fonts
+- [How Vue Stripe works](/guide/architecture) - The provider chain and when each layer renders
+- [Accept a payment](/guide/payment-element) - The Payment Element with `VueStripeElements`
+- [Stripe Appearance API](https://docs.stripe.com/elements/appearance-api) - Every variable and rule selector

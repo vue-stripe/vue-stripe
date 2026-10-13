@@ -25,6 +25,7 @@ The docs' live demos run on an account that has not onboarded to Financial Accou
 
 <script setup>
 import { VueStripeProvider, VueStripeFinancialAccountDisclosure } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const options = {

@@ -77,3 +77,8 @@ const run = async (clientSecret: string): Promise<VerifyIdentityResult> => {
   return result
 }
 ```
+
+## See Also
+
+- [Live demo](/live-demo/identity)
+- [Stripe Identity docs](https://docs.stripe.com/identity)

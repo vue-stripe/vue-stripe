@@ -1,10 +1,6 @@
 # VueStripeContactDetailsElement
 
-Collects the customer's email address. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createContactDetailsElement()`), where the email lands on the Checkout Session, or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('contactDetails')`). No beta flag is needed.
-
-::: tip When to Use
-Use VueStripeContactDetailsElement instead of your own email input plus `updateEmail()`: Stripe validates the address and keeps `session.email` up to date.
-:::
+Collects the customer's email address. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createContactDetailsElement()`), where the email lands on the Checkout Session, or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('contactDetails')`). No beta flag is needed. Stripe validates the address and, inside the Checkout provider, keeps `session.email` up to date, so you don't need your own input plus `updateEmail()`.
 
 ## Usage
 
@@ -23,6 +19,7 @@ import {
   VueStripeCheckoutElementsProvider,
   VueStripeContactDetailsElement
 } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = '<checkout-session-client-secret>'

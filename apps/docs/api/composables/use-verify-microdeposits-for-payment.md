@@ -48,3 +48,10 @@ verifyMicrodepositsForPayment(
   data?: { amounts?: number[] } // VerifyMicrodepositsForPaymentData
 ): Promise<PaymentIntentResult>
 ```
+
+## See Also
+
+- [useVerifyMicrodepositsForSetup](/api/composables/use-verify-microdeposits-for-setup) - The SetupIntent variant
+- [useFinancialConnections](/api/composables/use-financial-connections) - Collect the bank account
+- [Payment methods that settle later](/guide/confirming-payments#payment-methods-that-settle-later)
+- [Live demo](/live-demo/ach-debit)

@@ -82,3 +82,8 @@ confirmOxxoPayment(
   options?: ConfirmOxxoPaymentOptions
 ): Promise<PaymentIntentResult>
 ```
+
+## See Also
+
+- [Method confirmers](/api/composables/confirm/) - The shared return value
+- [Payment methods that settle later](/guide/confirming-payments#payment-methods-that-settle-later)

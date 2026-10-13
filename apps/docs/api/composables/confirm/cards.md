@@ -81,3 +81,10 @@ confirmCardSetup(
   options?: ConfirmCardSetupOptions
 ): Promise<SetupIntentResult>
 ```
+
+## See Also
+
+- [Method confirmers](/api/composables/confirm/) - The shared return value
+- [VueStripeCardElement](/api/components/stripe-card-element) and [split card elements](/api/components/stripe-split-card-elements)
+- [Accept card payments with the Card Element](/guide/card-element) - Step-by-step guide
+- [How confirming works](/guide/confirming-payments)

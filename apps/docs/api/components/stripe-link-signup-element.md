@@ -41,6 +41,7 @@ import {
   VueStripeCheckoutElementsProvider,
   VueStripeLinkSignupElement
 } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = '<checkout-session-client-secret>'

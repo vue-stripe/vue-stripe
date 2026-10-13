@@ -81,3 +81,10 @@ const create = async (): Promise<string | null> => {
   return result.paymentMethod?.id ?? null
 }
 ```
+
+## See Also
+
+- [Create a PaymentMethod to charge later](/guide/tokens#create-a-paymentmethod-to-charge-later) - Step-by-step guide
+- [useCreateConfirmationToken](/api/composables/use-create-confirmation-token) - Confirm on your server instead
+- [Payment objects](/guide/payment-objects#paymentmethods-confirmationtokens-and-tokens) - PaymentMethods, ConfirmationTokens and Tokens
+- [Live demo](/live-demo/create-payment-method)

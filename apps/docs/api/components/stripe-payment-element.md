@@ -1,35 +1,6 @@
 # VueStripePaymentElement
 
-Stripe's recommended all-in-one payment component that supports cards, wallets (Apple Pay, Google Pay), bank transfers, and more.
-
-::: tip Recommended
-This is Stripe's recommended component for accepting payments. It automatically displays the most relevant payment methods based on the customer's location and transaction.
-:::
-
-## What is Payment Element?
-
-Payment Element is Stripe's modern, unified payment interface that:
-
-| Capability | Description |
-|------------|-------------|
-| **40+ Payment Methods** | Cards, wallets, bank transfers, BNPL, and regional methods |
-| **Dynamic Display** | Automatically shows relevant methods based on customer location |
-| **Built-in Validation** | Real-time error handling and input validation |
-| **Responsive Design** | Adapts to any screen size and device |
-| **Localization** | Automatic translation based on customer's locale |
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["Customer lands on checkout page"] --> B["PaymentElement renders inside StripeElements<br/>(Receives Elements instance + clientSecret from context)"]
-    B --> C["Stripe determines available payment methods based on:<br/>• PaymentIntent currency and amount<br/>• Customer's location and device<br/>• Your Dashboard payment method settings"]
-    C --> D["Customer fills payment details<br/>(Emits @change with { complete, value } on each input)"]
-    D --> E["On submit: Call usePaymentIntent().confirmPayment()"]
-    E --> F{Result?}
-    F -->|Success| G["<b>SUCCESS</b><br/>PaymentIntent status: 'succeeded'"]
-    F -->|Requires Action| H["<b>REQUIRES ACTION</b><br/>Redirect to 3D Secure, bank auth,<br/>or other flow then return to return_url"]
-```
+Stripe's Payment Element: one form for cards, wallets, bank debits, buy-now-pay-later and local payment methods. Stripe chooses which methods to show from the Intent or Checkout Session, the customer's location and your Dashboard settings. Use it inside [VueStripeElements](/api/components/stripe-elements) or [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider). For the steps of a full integration, see [Accept a payment with the Payment Element](/guide/payment-element); [Choosing an integration](/guide/approaches#payment-element-or-card-element) compares it with the Card Element.
 
 ## Usage
 
@@ -37,38 +8,26 @@ flowchart TD
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeElements :client-secret="clientSecret">
-      <VueStripePaymentElement
-        :options="paymentOptions"
-        @ready="onReady"
-        @change="onChange"
-      />
-      <!-- A child component confirms with usePaymentIntent(), see the complete example below -->
-      <PaymentFormButton :client-secret="clientSecret" :disabled="!isComplete" />
+      <VueStripePaymentElement :options="{ layout: 'tabs' }" @change="onChange" />
+      <!-- PayButton calls usePaymentIntent(), so it renders inside VueStripeElements -->
+      <PayButton :client-secret="clientSecret" :disabled="!isComplete" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 
 <script setup>
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
+import { ref } from 'vue'
 import {
   VueStripeProvider,
   VueStripeElements,
   VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
-import { ref } from 'vue'
-import PaymentFormButton from './PaymentFormButton.vue'
+import PayButton from './PayButton.vue'
 
-const publishableKey = 'pk_test_...'
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = 'pi_xxx_secret_xxx' // From your backend
-
 const isComplete = ref(false)
-
-const paymentOptions = {
-  layout: 'tabs'
-}
-
-const onReady = (element) => {
-  console.log('Payment element ready', element)
-}
 
 const onChange = (event) => {
   isComplete.value = event.complete
@@ -76,18 +35,45 @@ const onChange = (event) => {
 </script>
 ```
 
-## Requirements
+```vue
+<!-- PayButton.vue -->
+<script setup>
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
-The Payment Element needs one of:
+const props = defineProps({ clientSecret: String, disabled: Boolean })
+const { confirmPayment, loading, error } = usePaymentIntent()
 
-- **A `clientSecret`** on `VueStripeElements` from a PaymentIntent or SetupIntent:
-  1. **Create via your backend** - Recommended for production
-  2. **Create via Stripe Dashboard** - For testing:
-     - Go to [Stripe Dashboard → Payments](https://dashboard.stripe.com/test/payments)
-     - Click **"+ Create"** → **"Create payment"**
-     - Enter an amount and copy the `client_secret`
-- **A deferred Intent**: `mode` / `currency` / `amount` on `VueStripeElements`, creating the Intent on your server at submit time. Restrict payment methods here with `:options="{ allowedPaymentMethodTypes: [...] }"` on `VueStripeElements` (the v5 `paymentMethodTypes` prop was removed).
-- **A Checkout Session**: place it inside [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (see [With Checkout Sessions](#with-checkout-sessions)).
+const pay = () =>
+  confirmPayment({
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: window.location.href },
+    redirect: 'if_required'
+  })
+</script>
+
+<template>
+  <button :disabled="disabled || loading" @click="pay">Pay</button>
+  <p v-if="error">{{ error }}</p>
+</template>
+```
+
+The Payment Element needs one of these parents:
+
+- `VueStripeElements` with a `clientSecret` from a PaymentIntent or SetupIntent created on your server.
+- `VueStripeElements` with `mode` / `currency` / `amount` (a deferred Intent, created on your server at submit time). Restrict payment methods here with `:options="{ allowedPaymentMethodTypes: [...] }"` on `VueStripeElements`.
+- `VueStripeCheckoutElementsProvider` for a Checkout Session (see [With Checkout Sessions](#with-checkout-sessions)).
+
+### With Checkout Sessions
+
+Inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider), the component is created with `checkout.createPaymentElement()`. The Checkout SDK accepts only `layout`, `paymentMethodOrder`, `readOnly`, `terms`, `fields`, `wallets` and `walletOptions`; other options are dropped. Confirm with `useCheckoutSession().confirm()` instead of `usePaymentIntent()`.
+
+Saved payment methods are on by default with Checkout Sessions since Stripe.js Clover; control them with the provider's `elementsOptions.savedPaymentMethod`.
+
+```vue
+<VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+  <VueStripePaymentElement :options="{ layout: 'accordion' }" />
+</VueStripeCheckoutElementsProvider>
+```
 
 ## Props
 
@@ -158,6 +144,8 @@ interface StripePaymentElementOptions {
   }
 }
 ```
+
+For example, `:options="{ layout: { type: 'accordion', radios: true } }"` switches to the accordion layout, `fields: { billingDetails: 'never' }` hides the billing fields (pass them at confirm time instead), and `wallets: { applePay: 'never', googlePay: 'never' }` hides the wallets.
 
 ## Events
 
@@ -249,18 +237,6 @@ const collapse = () => paymentRef.value?.collapse()
 </template>
 ```
 
-## With Checkout Sessions
-
-Inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider), the component is created with `checkout.createPaymentElement()`. The Checkout SDK accepts only `layout`, `paymentMethodOrder`, `readOnly`, `terms`, `fields`, `wallets` and `walletOptions`; other options are dropped. Confirm with `useCheckoutSession().confirm()` instead of `usePaymentIntent()`.
-
-Saved payment methods are on by default with Checkout Sessions since Stripe.js Clover; control them with the provider's `elementsOptions.savedPaymentMethod`.
-
-```vue
-<VueStripeCheckoutElementsProvider :client-secret="clientSecret">
-  <VueStripePaymentElement :options="{ layout: 'accordion' }" />
-</VueStripeCheckoutElementsProvider>
-```
-
 ## Styling
 
 The component renders this markup around Stripe's iframe:
@@ -283,200 +259,6 @@ import '@vue-stripe/vue-stripe/style.css'
 ```
 
 Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-payment-element*` for this one.
-
-## Examples
-
-### Tabs Layout
-
-```vue
-<VueStripePaymentElement
-  :options="{ layout: 'tabs' }"
-/>
-```
-
-### Accordion Layout
-
-```vue
-<VueStripePaymentElement
-  :options="{
-    layout: {
-      type: 'accordion',
-      defaultCollapsed: false,
-      radios: true,
-      spacedAccordionItems: true
-    }
-  }"
-/>
-```
-
-### Pre-fill Billing Details
-
-```vue
-<script setup>
-const options = {
-  defaultValues: {
-    billingDetails: {
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+1 (555) 123-4567',
-      address: {
-        line1: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        postal_code: '94111',
-        country: 'US'
-      }
-    }
-  }
-}
-</script>
-
-<template>
-  <VueStripePaymentElement :options="options" />
-</template>
-```
-
-### Hide Billing Fields
-
-```vue
-<VueStripePaymentElement
-  :options="{
-    fields: {
-      billingDetails: 'never'
-    }
-  }"
-/>
-```
-
-### Control Payment Method Order
-
-```vue
-<VueStripePaymentElement
-  :options="{
-    paymentMethodOrder: ['card', 'apple_pay', 'google_pay', 'ideal']
-  }"
-/>
-```
-
-### Disable Wallet Payments
-
-```vue
-<VueStripePaymentElement
-  :options="{
-    wallets: {
-      applePay: 'never',
-      googlePay: 'never'
-    }
-  }"
-/>
-```
-
-### Complete Payment Form with usePaymentIntent
-
-```vue
-<script setup>
-import { ref } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement
-} from '@vue-stripe/vue-stripe'
-
-// Calls usePaymentIntent(), so it must render inside VueStripeElements
-import PaymentFormButton from './PaymentFormButton.vue'
-
-const publishableKey = 'pk_test_...'
-const clientSecret = 'pi_xxx_secret_xxx'
-
-const isComplete = ref(false)
-</script>
-
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="clientSecret">
-      <VueStripePaymentElement @change="e => isComplete = e.complete" />
-      <PaymentFormButton :client-secret="clientSecret" :disabled="!isComplete" />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-```vue
-<!-- PaymentFormButton.vue - child component -->
-<script setup lang="ts">
-import { usePaymentIntent } from '@vue-stripe/vue-stripe'
-
-const props = defineProps<{
-  clientSecret: string
-  disabled: boolean
-}>()
-
-const { confirmPayment, loading, error } = usePaymentIntent()
-
-const handleSubmit = async () => {
-  const result = await confirmPayment({
-    clientSecret: props.clientSecret,
-    confirmParams: {
-      return_url: window.location.href
-    },
-    redirect: 'if_required'
-  })
-
-  if (result.error) {
-    console.error(result.error.message)
-  } else if (result.paymentIntent?.status === 'succeeded') {
-    console.log('Payment successful!')
-  }
-}
-</script>
-
-<template>
-  <div>
-    <button @click="handleSubmit" :disabled="disabled || loading">
-      {{ loading ? 'Processing...' : 'Pay Now' }}
-    </button>
-    <p v-if="error" class="error">{{ error }}</p>
-  </div>
-</template>
-```
-
-### With Appearance Customization
-
-```vue
-<script setup>
-const appearance = {
-  theme: 'stripe',
-  variables: {
-    colorPrimary: '#635bff',
-    colorBackground: '#ffffff',
-    colorText: '#1a1a2e',
-    colorDanger: '#df1b41',
-    fontFamily: 'system-ui, sans-serif',
-    spacingUnit: '4px',
-    borderRadius: '8px'
-  },
-  rules: {
-    '.Input': {
-      border: '1px solid #e0e0e0',
-      boxShadow: 'none'
-    },
-    '.Input:focus': {
-      border: '1px solid #635bff',
-      boxShadow: '0 0 0 3px rgba(99, 91, 255, 0.1)'
-    }
-  }
-}
-</script>
-
-<template>
-  <VueStripeElements
-    :client-secret="clientSecret"
-    :options="{ appearance }"
-  >
-    <VueStripePaymentElement />
-  </VueStripeElements>
-</template>
-```
 
 ## TypeScript
 
@@ -513,33 +295,11 @@ const handleChange = (event: StripePaymentElementChangeEvent) => {
 const paymentRef = ref<InstanceType<typeof VueStripePaymentElement> | null>(null)
 ```
 
-## Test Cards
-
-Use these test card numbers in test mode:
-
-| Card | Number |
-|------|--------|
-| Visa (success) | `4242 4242 4242 4242` |
-| Visa (declined) | `4000 0000 0000 0002` |
-| Requires 3D Secure | `4000 0025 0000 3155` |
-| Insufficient funds | `4000 0000 0000 9995` |
-
-Use any future expiration date and any 3-digit CVC.
-
-## Advantages Over Card Element
-
-| Feature | Payment Element | Card Element |
-|---------|----------------|--------------|
-| Multiple payment methods | Yes | Cards only |
-| Wallets (Apple/Google Pay) | Built-in | Separate component |
-| Bank transfers | Yes | No |
-| Buy Now Pay Later | Yes | No |
-| Dynamic optimization | Yes | No |
-| Localization | Automatic | Manual |
-
 ## See Also
 
-- [StripeElements](/api/components/stripe-elements) - Parent container component
+- [VueStripeElements](/api/components/stripe-elements) - Parent container component
 - [usePaymentIntent](/api/composables/use-payment-intent) - Confirm payments
-- [Payment Element Guide](/guide/payment-element) - Step-by-step guide
-- [Stripe Payment Element Docs](https://stripe.com/docs/payments/payment-element) - Official documentation
+- [useSetupIntent](/api/composables/use-setup-intent) - Save payment methods
+- [Accept a payment with the Payment Element](/guide/payment-element) - Step-by-step guide
+- [Choosing an integration](/guide/approaches#payment-element-or-card-element) - Payment Element or Card Element
+- [Stripe Payment Element docs](https://docs.stripe.com/payments/payment-element) - Official documentation

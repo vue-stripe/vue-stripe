@@ -1,47 +1,14 @@
 # VueStripeCheckoutElementsProvider
 
-Initializes **Elements with Checkout Sessions** via `stripe.initCheckoutElementsSdk()` and provides the Checkout SDK to descendants. Place element components inside it to build your own checkout page on top of a Checkout Session, and drive the session with the [`useCheckoutSession`](/api/composables/use-checkout-session) composable.
+Initializes **Elements with Checkout Sessions** via `stripe.initCheckoutElementsSdk()` and provides the Checkout SDK to descendants. Place element components inside it to build your own checkout page on top of a Checkout Session, and drive the session with the [`useCheckoutSession`](/api/composables/use-checkout-session) composable. [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) compares it with the other Checkout options, and [Build your own page on a Checkout Session](/guide/custom-checkout) shows the server and client code.
+
+- Use it inside [`VueStripeProvider`](/api/components/stripe-provider).
+- Pass the `client_secret` of a Checkout Session created on your server with `ui_mode: 'elements'`.
+- The provider shows its `#loading` slot until the Stripe instance exists, then calls `stripe.initCheckoutElementsSdk()`, which returns the SDK synchronously, and renders its children at once. `@ready` fires when the session actions have loaded (`loadActions()`), and `@change` on every session change.
 
 ::: warning `VueStripeCheckoutProvider` is deprecated
 `VueStripeCheckoutProvider` is a deprecated alias of this same component (it mirrored the old `stripe.initCheckout()` name). It keeps working in v6 but may be removed in a future major release, so import `VueStripeCheckoutElementsProvider` instead.
 :::
-
-::: tip Elements with Checkout Sessions vs. the other checkout options
-- **`VueStripeCheckoutElementsProvider`** (this) — your own page and layout, Stripe Elements, backed by a Checkout Session (`ui_mode: 'elements'`). Stripe computes totals, tax, discounts and shipping on the session.
-- **[`VueStripeCheckoutFormProvider`](/api/components/stripe-checkout-form-provider)** (beta) — Stripe renders the whole form as one element on your page (`ui_mode: 'form'`).
-- **`VueStripeCheckout`** — redirect to Stripe's hosted Checkout page.
-- **`VueStripePricingTable`** — embed a Dashboard-configured pricing table.
-:::
-
-## Requirements
-
-- Must be used **inside** [`VueStripeProvider`](/api/components/stripe-provider).
-- Needs a Checkout Session created on your server with `ui_mode: 'elements'`; pass its `client_secret` to the provider.
-
-```js
-// Node.js
-const session = await stripe.checkout.sessions.create({
-  ui_mode: 'elements',
-  line_items: [{ price: 'price_xxx', quantity: 1 }],
-  mode: 'payment',
-  return_url: 'https://example.com/complete?session_id={CHECKOUT_SESSION_ID}'
-})
-
-res.json({ clientSecret: session.client_secret })
-```
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["VueStripeCheckoutElementsProvider mounts inside VueStripeProvider"] --> B["Waits for the Stripe instance<br/>(#loading slot)"]
-    B --> C["stripe.initCheckoutElementsSdk({ clientSecret, elementsOptions, ... })<br/>(synchronous: the SDK exists right away)"]
-    C --> D["Default slot renders<br/>Element components mount through the Checkout SDK"]
-    C --> E["sdk.loadActions()"]
-    E -->|success| F["actions + session available<br/>loading = false, @ready(actions)"]
-    E -->|error| G["#error slot, @error(message)"]
-    F --> H["sdk.on('change') keeps session in sync<br/>@change(session)"]
-```
 
 ## Usage
 
@@ -56,6 +23,7 @@ flowchart TD
 
 <script setup>
 import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import CheckoutForm from './CheckoutForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -249,6 +217,7 @@ const onChange = (session: StripeCheckoutSession) => {
 ## See Also
 
 - [useCheckoutSession](/api/composables/use-checkout-session) — drive the session from descendants
+- [Build your own page on a Checkout Session](/guide/custom-checkout) — how-to guide
 - [VueStripeProvider](/api/components/stripe-provider) — required parent
 - [VueStripeCheckout](/api/components/stripe-checkout) — hosted Checkout redirect
 - [Stripe: Elements with Checkout Sessions](https://docs.stripe.com/payments/quickstart-checkout-sessions) — official guide

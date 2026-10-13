@@ -171,3 +171,9 @@ on('shippingaddresschange', onAddress)
 ```
 
 The Stripe.js types `PaymentRequest`, `PaymentRequestOptions`, `PaymentRequestUpdateOptions`, `PaymentRequestItem`, `PaymentRequestShippingOption`, `PaymentRequestShippingAddress`, `PaymentRequestWallet`, `PaymentRequestCompleteStatus`, `PaymentRequestUpdateDetails`, `CanMakePaymentResult` and the five event payload types are re-exported from `@vue-stripe/vue-stripe`.
+
+## See Also
+
+- [VueStripeExpressCheckoutElement](/api/components/stripe-express-checkout-element) - Wallet buttons rendered for you
+- [Add Apple Pay, Google Pay and Link](/guide/express-checkout) - Step-by-step guide
+- [Live demo](/live-demo/payment-request)

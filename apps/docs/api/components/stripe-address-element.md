@@ -1,40 +1,10 @@
 # VueStripeAddressElement
 
-A complete address collection form with built-in autocomplete powered by Google Maps.
-
-::: tip No Intent Required
-VueStripeAddressElement does not need a PaymentIntent. Wrap it in `VueStripeProvider` and `VueStripeElements`; when you have no `clientSecret`, give `VueStripeElements` a `mode` / `currency` / `amount` (deferred Intent flow).
-:::
+Collects a shipping or billing address, with optional name, phone and address autocomplete. It needs no Intent: use it inside [VueStripeElements](/api/components/stripe-elements) with a `clientSecret` or a deferred Intent (`mode` / `currency` / `amount`), or inside [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (see [With Checkout Sessions](#with-checkout-sessions)). Read the address from `@change` or the exposed `getValue()`. For recipes (pre-fill, phone, allowed countries, P.O. boxes, address before payment), see [Collect a shipping or billing address](/guide/address-element).
 
 ::: warning Pass `mode` when there is no `clientSecret`
 With neither `clientSecret` nor `mode` on `VueStripeElements`, Stripe.js Endive logs "Unable to select session" inside the Address Element's iframe. Use `<VueStripeElements mode="payment" currency="usd" :amount="1099">` (or `mode="setup"`) until you have an Intent.
 :::
-
-## What is Address Element?
-
-Address Element provides a complete, validated address collection form:
-
-| Capability | Description |
-|------------|-------------|
-| **Google Maps Autocomplete** | Suggests addresses as the user types |
-| **Address Validation** | Validates addresses against postal databases |
-| **International Support** | Works with addresses from 200+ countries |
-| **Phone Collection** | Optional phone number field with country code |
-| **Shipping/Billing Modes** | Configurable for different use cases |
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["AddressElement mounts inside VueStripeElements<br/>(clientSecret or mode/currency/amount)"] --> B["Renders address form based on mode (shipping/billing)<br/>• Name field<br/>• Address line 1 (with autocomplete)<br/>• Address line 2<br/>• City, State/Province, Postal Code<br/>• Country selector<br/>• Phone (if configured)"]
-    B --> C["User starts typing address<br/>Google Maps suggests matching addresses"]
-    C --> D{User Action?}
-    D -->|Selects Suggestion| E["Auto-fills all fields"]
-    D -->|Types Manually| F["Form validates each field<br/>as they complete it"]
-    E --> G["Emits @change with { complete, isNewAddress, value }<br/>complete: true when all required fields are valid"]
-    F --> G
-    G --> H["On submit: Call getValue() to get validated address<br/>const { complete, value } = await addressRef.getValue()"]
-```
 
 ## Usage
 
@@ -43,16 +13,18 @@ flowchart TD
   <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeElements mode="payment" currency="usd" :amount="1099">
       <VueStripeAddressElement
-        :options="addressOptions"
-        @ready="onReady"
+        ref="addressRef"
+        :options="{ mode: 'shipping', autocomplete: { mode: 'automatic' } }"
         @change="onChange"
       />
-      <button @click="handleSubmit">Continue</button>
+      <button @click="next">Continue</button>
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 
 <script setup>
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
+import { ref } from 'vue'
 import {
   VueStripeProvider,
   VueStripeElements,
@@ -60,22 +32,29 @@ import {
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-
-const addressOptions = {
-  mode: 'shipping',
-  autocomplete: { mode: 'automatic' }
-}
-
-const onReady = () => {
-  console.log('Address element ready')
-}
+const addressRef = ref(null)
 
 const onChange = (event) => {
-  if (event.complete) {
-    console.log('Address complete:', event.value)
-  }
+  if (event.complete) console.log('Address:', event.value.address)
+}
+
+const next = async () => {
+  const result = await addressRef.value?.getValue()
+  if (result?.complete) console.log('Ship to:', result.value)
 }
 </script>
+```
+
+### With Checkout Sessions
+
+Inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider), the component is created with the Checkout SDK: `options.mode` picks `createBillingAddressElement()` (`'billing'`) or `createShippingAddressElement()` (`'shipping'`, the default). The Checkout SDK accepts only `contacts`, `display` and `fields`; other options are dropped. The address flows into the Checkout Session automatically.
+
+```vue
+<VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+  <VueStripeAddressElement :options="{ mode: 'shipping', display: { name: 'split' } }" />
+  <VueStripeAddressElement :options="{ mode: 'billing' }" />
+  <VueStripePaymentElement />
+</VueStripeCheckoutElementsProvider>
 ```
 
 ## Props
@@ -131,6 +110,8 @@ interface StripeAddressElementOptions {
   }
 }
 ```
+
+For example, `allowedCountries: ['US', 'CA']` limits the country list, `blockPoBox: true` rejects P.O. boxes, and `fields: { phone: 'always' }` adds a phone field.
 
 ## Events
 
@@ -234,18 +215,6 @@ const readAddress = () => addressRef.value?.getValue({ format: 'localized' })
 const { complete, value } = await addressRef.value!.getValue({ format: 'localized' })
 ```
 
-## With Checkout Sessions
-
-Inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider), the component is created with the Checkout SDK: `options.mode` picks `createBillingAddressElement()` (`'billing'`) or `createShippingAddressElement()` (`'shipping'`, the default). The Checkout SDK accepts only `contacts`, `display` and `fields`; other options are dropped. The address flows into the Checkout Session automatically.
-
-```vue
-<VueStripeCheckoutElementsProvider :client-secret="clientSecret">
-  <VueStripeAddressElement :options="{ mode: 'shipping', display: { name: 'split' } }" />
-  <VueStripeAddressElement :options="{ mode: 'billing' }" />
-  <VueStripePaymentElement />
-</VueStripeCheckoutElementsProvider>
-```
-
 ## Styling
 
 The component renders this markup around Stripe's iframe:
@@ -268,230 +237,6 @@ import '@vue-stripe/vue-stripe/style.css'
 ```
 
 Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-address-element*` for this one.
-
-## Examples
-
-### Shipping vs Billing Mode
-
-`mode` cannot change after the element is created, so the example re-mounts the component with `:key`:
-
-```vue
-<script setup>
-import { ref, computed } from 'vue'
-
-const mode = ref('shipping')
-
-const options = computed(() => ({
-  mode: mode.value
-}))
-</script>
-
-<template>
-  <div>
-    <button @click="mode = 'shipping'">Shipping</button>
-    <button @click="mode = 'billing'">Billing</button>
-  </div>
-  <VueStripeAddressElement :key="mode" :options="options" />
-</template>
-```
-
-### With Default Values (Pre-fill)
-
-```vue
-<script setup>
-const options = {
-  mode: 'shipping',
-  defaultValues: {
-    name: 'John Doe',
-    phone: '+1 555-123-4567',
-    address: {
-      line1: '123 Main Street',
-      line2: 'Apt 4B',
-      city: 'San Francisco',
-      state: 'CA',
-      postal_code: '94102',
-      country: 'US'
-    }
-  }
-}
-</script>
-
-<template>
-  <VueStripeAddressElement :options="options" />
-</template>
-```
-
-### With Phone Field
-
-```vue
-<script setup>
-const options = {
-  mode: 'shipping',
-  fields: {
-    phone: 'always'
-  },
-  validation: {
-    phone: {
-      required: 'always'
-    }
-  }
-}
-</script>
-
-<template>
-  <VueStripeAddressElement :options="options" />
-</template>
-```
-
-### Limit Countries
-
-```vue
-<script setup>
-const options = {
-  mode: 'shipping',
-  allowedCountries: ['US', 'CA', 'GB', 'AU']
-}
-</script>
-
-<template>
-  <VueStripeAddressElement :options="options" />
-</template>
-```
-
-### Block P.O. Boxes
-
-```vue
-<script setup>
-const options = {
-  mode: 'shipping',
-  blockPoBox: true
-}
-</script>
-
-<template>
-  <VueStripeAddressElement :options="options" />
-</template>
-```
-
-### Using getValue() for Validation
-
-```vue
-<script setup>
-import { ref } from 'vue'
-
-const addressRef = ref()
-const isValid = ref(false)
-const addressData = ref(null)
-
-const handleSubmit = async () => {
-  if (!addressRef.value) return
-
-  const result = await addressRef.value.getValue()
-
-  if (result.complete) {
-    isValid.value = true
-    addressData.value = result.value
-    // Proceed with checkout
-    console.log('Shipping to:', addressData.value.address)
-  } else {
-    isValid.value = false
-    alert('Please complete the address form')
-  }
-}
-</script>
-
-<template>
-  <VueStripeAddressElement ref="addressRef" :options="{ mode: 'shipping' }" />
-  <button @click="handleSubmit">Continue to Payment</button>
-
-  <div v-if="addressData">
-    <h4>Confirmed Address:</h4>
-    <p>{{ addressData.name }}</p>
-    <p>{{ addressData.address.line1 }}</p>
-    <p>{{ addressData.address.city }}, {{ addressData.address.state }} {{ addressData.address.postal_code }}</p>
-  </div>
-</template>
-```
-
-### Integration with Payment Element
-
-The composables must run in a component rendered **inside** `VueStripeElements`, so the page is split in two:
-
-```vue
-<!-- CheckoutPage.vue -->
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="clientSecret">
-      <CheckoutSteps :client-secret="clientSecret" />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-```vue
-<!-- CheckoutSteps.vue -->
-<script setup>
-import { ref } from 'vue'
-import {
-  VueStripeAddressElement,
-  VueStripePaymentElement,
-  usePaymentIntent
-} from '@vue-stripe/vue-stripe'
-
-const props = defineProps({
-  clientSecret: { type: String, required: true }
-})
-
-const addressRef = ref(null)
-const step = ref('address')
-
-// Confirms with the Elements group of the surrounding VueStripeElements
-const { confirmPayment } = usePaymentIntent()
-
-const handleContinue = async () => {
-  const result = await addressRef.value?.getValue()
-  if (result?.complete) {
-    step.value = 'payment'
-  }
-}
-
-const handlePayment = async () => {
-  const addressResult = await addressRef.value?.getValue()
-
-  const { error } = await confirmPayment({
-    clientSecret: props.clientSecret,
-    confirmParams: {
-      return_url: window.location.origin + '/success',
-      shipping: {
-        name: addressResult.value.name,
-        address: addressResult.value.address
-      }
-    },
-    redirect: 'always'
-  })
-
-  if (error) {
-    console.error(error)
-  }
-}
-</script>
-
-<template>
-  <!-- v-show keeps the Address Element mounted, so getValue() still works on step 2 -->
-  <div v-show="step === 'address'">
-    <h3>Shipping Address</h3>
-    <VueStripeAddressElement ref="addressRef" :options="{ mode: 'shipping' }" />
-    <button @click="handleContinue">Continue to Payment</button>
-  </div>
-
-  <div v-show="step === 'payment'">
-    <h3>Payment</h3>
-    <VueStripePaymentElement />
-    <button @click="handlePayment">Pay Now</button>
-    <button @click="step = 'address'">Back</button>
-  </div>
-</template>
-```
 
 ## TypeScript
 
@@ -534,27 +279,10 @@ const validateAddress = async () => {
 }
 ```
 
-## Key Features
-
-- **Google Maps Autocomplete**: Built-in address suggestions as you type
-- **No Intent Required**: Works with a deferred-Intent `VueStripeElements` (`mode` / `currency` / `amount`)
-- **Checkout Sessions**: Works inside `VueStripeCheckoutElementsProvider` as the billing or shipping address element
-- **International Support**: Handles addresses from all countries with proper formatting
-- **Phone Number Support**: Optional phone field with country-aware formatting
-- **Validation**: Built-in validation for complete addresses
-- **Pre-fill Support**: Populate with existing customer data
-- **P.O. Box Blocking**: Option to prevent P.O. Box addresses for physical delivery
-
-## Use Cases
-
-1. **Checkout shipping address** - Collect where to ship physical goods
-2. **Billing address** - Collect for payment verification
-3. **Customer profile** - Store addresses for future use
-4. **Multi-step checkout** - Collect address before payment details
-
 ## See Also
 
 - [VueStripeElements](/api/components/stripe-elements) - Parent container component
 - [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Parent for Checkout Sessions
 - [VueStripePaymentElement](/api/components/stripe-payment-element) - All-in-one payment UI
-- [Address Element Guide](/guide/address-element) - Step-by-step guide
+- [Collect a shipping or billing address](/guide/address-element) - Step-by-step guide and recipes
+- [Live demo](/live-demo/address-element)

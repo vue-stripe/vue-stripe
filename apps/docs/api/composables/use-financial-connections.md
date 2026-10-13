@@ -175,3 +175,10 @@ const link = async (
 ```
 
 All result types are Stripe's result for that method widened with `VueStripeErrorResult`: `CollectFinancialConnectionsAccountsResult`, `CollectBankAccountForPaymentResult`, `CollectBankAccountForSetupResult` and `CollectBankAccountTokenResult`.
+
+## See Also
+
+- [Bank debit confirmers](/api/composables/confirm/bank-debits#useconfirmusbankaccountpayment) - Confirm the ACH payment after collecting the account
+- [useVerifyMicrodepositsForPayment](/api/composables/use-verify-microdeposits-for-payment) - Verify a manually entered account
+- [Payment methods that settle later](/guide/confirming-payments#payment-methods-that-settle-later)
+- [Live demo](/live-demo/ach-debit)

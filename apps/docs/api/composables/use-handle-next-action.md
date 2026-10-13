@@ -78,3 +78,9 @@ const run = async (options: HandleNextActionOptions): Promise<HandleNextActionRe
   return result
 }
 ```
+
+## See Also
+
+- [useCreateConfirmationToken](/api/composables/use-create-confirmation-token) - Create the token your server confirms with
+- [Confirm payments on your server](/guide/tokens#confirmationtoken-confirm-on-your-server) - Step-by-step guide
+- [Next actions](/guide/confirming-payments#next-actions) - What a next action is

@@ -1,10 +1,6 @@
 # VueStripeCurrencySelectorElement
 
-Lets customers choose the currency they pay in. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createCurrencySelectorElement()`, no beta needed), inside a [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider) (created with the Checkout Form SDK's `createCurrencySelectorElement()`; the form then leaves out its built-in currency picker), or inside [VueStripeElements](/api/components/stripe-elements) with Stripe beta access (`elements.create('currencySelector')`).
-
-::: tip When to Use
-Use VueStripeCurrencySelectorElement when your Checkout Session enables [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing) and you want to surface a currency picker in your checkout UI.
-:::
+Lets customers choose the currency they pay in. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createCurrencySelectorElement()`, no beta needed), inside a [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider) (created with the Checkout Form SDK's `createCurrencySelectorElement()`; the form then leaves out its built-in currency picker), or inside [VueStripeElements](/api/components/stripe-elements) with Stripe beta access (`elements.create('currencySelector')`). It needs a Checkout Session with [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing) enabled.
 
 ## Usage
 
@@ -26,6 +22,7 @@ import {
   VueStripeCheckoutElementsProvider,
   VueStripeCurrencySelectorElement
 } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = '<checkout-session-client-secret>'
