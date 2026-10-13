@@ -5,40 +5,44 @@ The Express Checkout Element displays one-click payment buttons for Apple Pay, G
 ## Basic Setup
 
 ```vue
+<!-- ExpressPage.vue -->
 <script setup>
-import { ref } from 'vue'
-import type { Stripe, StripeElements } from '@stripe/stripe-js'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripeExpressCheckoutElement
-} from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
+import ExpressPay from './ExpressPay.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = ref('pi_..._secret_...')
+const clientSecret = 'pi_..._secret_...' // From your backend
+</script>
 
-// Capture the Stripe and Elements instances from component events
-const stripeInstance = ref<Stripe | null>(null)
-const elementsInstance = ref<StripeElements | null>(null)
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <ExpressPay :client-secret="clientSecret" />
+    </VueStripeElements>
+  </VueStripeProvider>
+</template>
+```
 
-const onStripeLoad = (stripe: Stripe) => {
-  stripeInstance.value = stripe
-}
+```vue
+<!-- ExpressPay.vue: rendered inside VueStripeElements -->
+<script setup>
+import { VueStripeExpressCheckoutElement, usePaymentIntent } from '@vue-stripe/vue-stripe'
 
-const onElementsReady = (elements: StripeElements) => {
-  elementsInstance.value = elements
-}
+const props = defineProps({
+  clientSecret: { type: String, required: true }
+})
+
+const { confirmPayment } = usePaymentIntent()
 
 const handleConfirm = async () => {
-  if (!stripeInstance.value || !elementsInstance.value) return
-
-  // The confirm event has no `elements` field: use the Elements group
-  // created by VueStripeElements.
-  const { error } = await stripeInstance.value.confirmPayment({
-    elements: elementsInstance.value,
+  // The confirm event has no `elements` field: usePaymentIntent() uses the
+  // Elements group created by VueStripeElements (and calls elements.submit() first).
+  const { error } = await confirmPayment({
+    clientSecret: props.clientSecret,
     confirmParams: {
       return_url: `${window.location.origin}/complete`
-    }
+    },
+    redirect: 'always'
   })
 
   if (error) {
@@ -48,16 +52,12 @@ const handleConfirm = async () => {
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
-    <VueStripeElements :client-secret="clientSecret" @ready="onElementsReady">
-      <VueStripeExpressCheckoutElement @confirm="handleConfirm" />
-    </VueStripeElements>
-  </VueStripeProvider>
+  <VueStripeExpressCheckoutElement @confirm="handleConfirm" />
 </template>
 ```
 
-::: tip Inside a child component
-In a component rendered inside `VueStripeElements`, use the composables instead of capturing instances: `useStripeElements().elements.value` is the same Elements group, and `usePaymentIntent().confirmPayment()` uses it automatically.
+::: tip Why a child component?
+Composables find the Stripe and Elements instances through the providers above them, so `usePaymentIntent()` must run in a component rendered *inside* `VueStripeElements`, not in the one that renders it.
 :::
 
 ## How It Works
@@ -149,32 +149,28 @@ const handleShippingAddressChange = async ({ address, resolve }) => {
 
 ## Combining with Payment Element
 
-A common pattern is to show Express Checkout above the Payment Element:
+A common pattern is to show Express Checkout above the Payment Element. This form is rendered inside `VueStripeElements`; `handleExpressConfirm` and `handleSubmit` both call `usePaymentIntent().confirmPayment()` as in the [complete example](#complete-example):
 
 ```vue
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="clientSecret">
-      <div class="checkout-form">
-        <!-- Express Checkout at top -->
-        <VueStripeExpressCheckoutElement
-          @confirm="handleExpressConfirm"
-          @ready="handleExpressReady"
-        />
+  <div class="checkout-form">
+    <!-- Express Checkout at top -->
+    <VueStripeExpressCheckoutElement
+      @confirm="handleExpressConfirm"
+      @ready="handleExpressReady"
+    />
 
-        <!-- Divider (only show if express checkout is available) -->
-        <div v-if="hasExpressCheckout" class="divider">
-          <span>Or pay with card</span>
-        </div>
+    <!-- Divider (only show if express checkout is available) -->
+    <div v-if="hasExpressCheckout" class="divider">
+      <span>Or pay with card</span>
+    </div>
 
-        <!-- Payment Element below -->
-        <form @submit.prevent="handleSubmit">
-          <VueStripePaymentElement />
-          <button type="submit">Pay $20.00</button>
-        </form>
-      </div>
-    </VueStripeElements>
-  </VueStripeProvider>
+    <!-- Payment Element below -->
+    <form @submit.prevent="handleSubmit">
+      <VueStripePaymentElement />
+      <button type="submit">Pay $20.00</button>
+    </form>
+  </div>
 </template>
 
 <script setup>
@@ -215,33 +211,15 @@ const handleExpressReady = ({ availablePaymentMethods }) => {
 ## Complete Example
 
 ```vue
+<!-- CheckoutPage.vue -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { Stripe, StripeElements } from '@stripe/stripe-js'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripeExpressCheckoutElement,
-  VueStripePaymentElement
-} from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
+import CheckoutForm from './CheckoutForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('')
-const hasExpressCheckout = ref(false)
-const processing = ref(false)
-const errorMessage = ref('')
-
-// Capture instances from component events
-const stripeInstance = ref<Stripe | null>(null)
-const elementsInstance = ref<StripeElements | null>(null)
-
-const onStripeLoad = (stripe: Stripe) => {
-  stripeInstance.value = stripe
-}
-
-const onElementsReady = (elements: StripeElements) => {
-  elementsInstance.value = elements
-}
 
 onMounted(async () => {
   const response = await fetch('/api/create-payment-intent', {
@@ -251,14 +229,48 @@ onMounted(async () => {
   const data = await response.json()
   clientSecret.value = data.clientSecret
 })
+</script>
 
-const handleExpressReady = ({ availablePaymentMethods }) => {
-  hasExpressCheckout.value =
-    availablePaymentMethods?.applePay ||
-    availablePaymentMethods?.googlePay
+<template>
+  <div class="checkout">
+    <VueStripeProvider :publishable-key="publishableKey">
+      <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
+        <CheckoutForm :client-secret="clientSecret" />
+      </VueStripeElements>
+
+      <div v-else>Loading...</div>
+    </VueStripeProvider>
+  </div>
+</template>
+```
+
+```vue
+<!-- CheckoutForm.vue: rendered inside VueStripeElements -->
+<script setup lang="ts">
+import { ref } from 'vue'
+import {
+  VueStripeExpressCheckoutElement,
+  VueStripePaymentElement,
+  usePaymentIntent
+} from '@vue-stripe/vue-stripe'
+import type {
+  StripeExpressCheckoutElementClickEvent,
+  StripeExpressCheckoutElementReadyEvent
+} from '@stripe/stripe-js'
+
+const props = defineProps<{ clientSecret: string }>()
+
+const { confirmPayment, loading: processing } = usePaymentIntent()
+const hasExpressCheckout = ref(false)
+const errorMessage = ref('')
+
+const handleExpressReady = ({ availablePaymentMethods }: StripeExpressCheckoutElementReadyEvent) => {
+  hasExpressCheckout.value = Boolean(
+    availablePaymentMethods?.applePay || availablePaymentMethods?.googlePay
+  )
 }
 
-const handleClick = ({ resolve }) => {
+const handleClick = ({ resolve }: StripeExpressCheckoutElementClickEvent) => {
   resolve({
     business: { name: 'My Store' },
     shippingAddressRequired: true,
@@ -269,78 +281,49 @@ const handleClick = ({ resolve }) => {
   })
 }
 
-const handleExpressConfirm = async () => {
-  if (!stripeInstance.value || !elementsInstance.value) return
+// Both buttons confirm the same PaymentIntent with the injected Elements group
+const pay = async () => {
+  errorMessage.value = ''
 
-  // Confirm with the Elements group from @ready (the confirm event has no `elements`)
-  const { error } = await stripeInstance.value.confirmPayment({
-    elements: elementsInstance.value,
+  const { error } = await confirmPayment({
+    clientSecret: props.clientSecret,
     confirmParams: {
       return_url: `${window.location.origin}/complete`
-    }
+    },
+    redirect: 'always'
   })
 
   if (error) {
     errorMessage.value = error.message || 'Payment failed'
-  }
-}
-
-const handleSubmit = async () => {
-  if (!stripeInstance.value || !elementsInstance.value) return
-
-  processing.value = true
-
-  const { error } = await stripeInstance.value.confirmPayment({
-    elements: elementsInstance.value,
-    confirmParams: {
-      return_url: `${window.location.origin}/complete`
-    }
-  })
-
-  if (error) {
-    errorMessage.value = error.message || 'Payment failed'
-    processing.value = false
   }
 }
 </script>
 
 <template>
-  <div class="checkout">
-    <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
-      <VueStripeElements
-        v-if="clientSecret"
-        :client-secret="clientSecret"
-        @ready="onElementsReady"
-      >
-        <!-- Express Checkout -->
-        <VueStripeExpressCheckoutElement
-          @ready="handleExpressReady"
-          @click="handleClick"
-          @confirm="handleExpressConfirm"
-        />
+  <!-- Express Checkout -->
+  <VueStripeExpressCheckoutElement
+    @ready="handleExpressReady"
+    @click="handleClick"
+    @confirm="pay"
+  />
 
-        <!-- Divider -->
-        <div v-if="hasExpressCheckout" class="divider">
-          <span>Or pay with card</span>
-        </div>
-
-        <!-- Regular Payment Form -->
-        <form @submit.prevent="handleSubmit">
-          <VueStripePaymentElement />
-
-          <div v-if="errorMessage" class="error">
-            {{ errorMessage }}
-          </div>
-
-          <button type="submit" :disabled="processing">
-            {{ processing ? 'Processing...' : 'Pay $20.00' }}
-          </button>
-        </form>
-      </VueStripeElements>
-
-      <div v-else>Loading...</div>
-    </VueStripeProvider>
+  <!-- Divider -->
+  <div v-if="hasExpressCheckout" class="divider">
+    <span>Or pay with card</span>
   </div>
+
+  <!-- Regular Payment Form -->
+  <form @submit.prevent="pay">
+    <VueStripePaymentElement />
+
+    <div v-if="errorMessage" class="error">
+      {{ errorMessage }}
+    </div>
+
+    <button type="submit" :disabled="processing">
+      {{ processing ? 'Processing...' : 'Pay $20.00' }}
+    </button>
+  </form>
 </template>
 ```
 

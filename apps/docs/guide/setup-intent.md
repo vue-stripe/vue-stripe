@@ -32,7 +32,7 @@ Use SetupIntent when you're not ready to charge yet.
 ```mermaid
 flowchart TD
     A["1. Your backend creates a SetupIntent<br/>POST /v1/setup_intents → { client_secret }"] --> B["2. Frontend loads StripeElements with client_secret<br/>User enters card details in StripePaymentElement"]
-    B --> C["3. User clicks 'Save Card'<br/>elements.submit() → confirmSetup()"]
+    B --> C["3. User clicks 'Save Card'<br/>useSetupIntent().confirmSetup()<br/>(runs elements.submit() first)"]
     C --> D{3D Secure Required?}
     D -->|Yes| E["<b>3D Secure Required</b><br/>User completes auth<br/>in modal/redirect"]
     D -->|No| F["<b>No 3DS Required</b><br/>Card saved immediately"]
@@ -85,13 +85,14 @@ app.post('/create-setup-intent', async (req, res) => {
 ### Step 2: Build the Save Card Form
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import {
   VueStripeProvider,
   VueStripeElements,
   VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
+import SaveCardButton from './SaveCardButton.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const setupSecret = ref('')
@@ -143,7 +144,8 @@ The button component must be inside `VueStripeElements` to access the composable
 ```vue
 <!-- SaveCardButton.vue -->
 <script setup lang="ts">
-import { useSetupIntent, useStripeElements } from '@vue-stripe/vue-stripe'
+import { useSetupIntent } from '@vue-stripe/vue-stripe'
+import type { SetupIntent } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{
   clientSecret: string
@@ -151,24 +153,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  success: [setupIntent: any]
+  success: [setupIntent: SetupIntent]
   error: [message: string]
 }>()
 
-const { elements } = useStripeElements()
 const { confirmSetup, loading } = useSetupIntent()
 
 const handleSave = async () => {
-  if (!elements.value) return
-
-  // Step 1: Validate the form
-  const { error: submitError } = await elements.value.submit()
-  if (submitError) {
-    emit('error', submitError.message || 'Validation failed')
-    return
-  }
-
-  // Step 2: Confirm the setup (saves the card)
+  // Validates the form (elements.submit()), then confirms the setup (saves the card).
+  // A validation error comes back as result.error, like a confirmation error.
   const result = await confirmSetup({
     clientSecret: props.clientSecret,
     confirmParams: {
@@ -198,7 +191,7 @@ const handleSave = async () => {
 
 ## The Two-Step Process
 
-Saving a card requires two steps:
+Saving a card takes two steps, and `useSetupIntent().confirmSetup()` runs both:
 
 ```mermaid
 flowchart TD
@@ -206,7 +199,7 @@ flowchart TD
 ```
 
 ::: warning Don't Skip Step 1
-Always call `elements.submit()` before `confirmSetup()`. This validates the form and prepares the payment details. Skipping this step will cause errors.
+`useSetupIntent().confirmSetup()` runs `elements.submit()` for you before confirming, and returns its validation error as `result.error`. Only pass `skipSubmit: true` when you already called `useStripeElements().submit()` yourself; confirming without it causes errors.
 :::
 
 ## After Saving: Using the Payment Method
@@ -248,19 +241,16 @@ const paymentIntent = await stripe.paymentIntents.create({
 A common pattern is saving a card then immediately starting a subscription:
 
 ```vue
-<script setup>
-import { ref } from 'vue'
-import { useSetupIntent, useStripeElements } from '@vue-stripe/vue-stripe'
+<!-- Rendered inside VueStripeElements -->
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { useSetupIntent } from '@vue-stripe/vue-stripe'
 
-const { elements } = useStripeElements()
+const router = useRouter()
 const { confirmSetup, loading } = useSetupIntent()
 
 const handleSubscribe = async (clientSecret: string, planId: string) => {
-  // 1. Validate form
-  const { error: submitError } = await elements.value!.submit()
-  if (submitError) return
-
-  // 2. Save the card
+  // 1 + 2. Validate the form and save the card
   const result = await confirmSetup({
     clientSecret,
     confirmParams: { return_url: window.location.href },
@@ -304,8 +294,13 @@ Use any future expiry date and any 3-digit CVC.
 ## Error Handling
 
 ```vue
-<script setup>
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useSetupIntent } from '@vue-stripe/vue-stripe'
+
 const { confirmSetup, loading, error } = useSetupIntent()
+const errorMessage = ref('')
+const showError = (message: string) => (errorMessage.value = message)
 
 const handleSave = async (clientSecret: string) => {
   const result = await confirmSetup({
@@ -315,7 +310,9 @@ const handleSave = async (clientSecret: string) => {
   })
 
   if (result.error) {
-    switch (result.error.code) {
+    // Stripe errors carry a `code`; the composable's own errors only a `message`
+    const code = 'code' in result.error ? result.error.code : undefined
+    switch (code) {
       case 'card_declined':
         showError('Your card was declined. Please try another card.')
         break

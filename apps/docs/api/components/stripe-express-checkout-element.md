@@ -352,7 +352,7 @@ const onClickWithShipping = (event) => {
 
 ### Confirm and Payment Completion
 
-The confirm event does **not** carry the Elements instance (`StripeExpressCheckoutElementConfirmEvent` has no `elements` field). Confirm with the Elements group provided by `VueStripeElements`: `usePaymentIntent()` picks it up automatically (and calls `elements.submit()` first), or read it with `useStripeElements().elements.value`.
+The confirm event does **not** carry the Elements instance (`StripeExpressCheckoutElementConfirmEvent` has no `elements` field). Confirm with the Elements group provided by `VueStripeElements`: `usePaymentIntent()` picks it up automatically and calls `elements.submit()` first.
 
 ```vue
 <!-- ExpressCheckout.vue: rendered inside <VueStripeElements :client-secret="clientSecret"> -->
@@ -385,29 +385,6 @@ const onConfirm = async (event) => {
 <template>
   <VueStripeExpressCheckoutElement @confirm="onConfirm" />
 </template>
-```
-
-The same with the raw Stripe instance:
-
-```ts
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
-
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
-
-const onConfirm = async () => {
-  if (!stripe.value || !elements.value) return
-
-  const { error: submitError } = await elements.value.submit()
-  if (submitError) return
-
-  const { error } = await stripe.value.confirmPayment({
-    elements: elements.value, // from VueStripeElements, not from the event
-    clientSecret,
-    confirmParams: { return_url: window.location.href },
-    redirect: 'if_required'
-  })
-}
 ```
 
 ### Shipping Address Collection

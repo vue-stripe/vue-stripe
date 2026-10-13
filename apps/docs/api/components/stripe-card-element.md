@@ -26,8 +26,8 @@ flowchart TD
     B --> C["Customer types card details<br/>• Card number (auto-formats, detects brand)<br/>• MM/YY expiry (auto-formats)<br/>• CVC (3 or 4 digits based on brand)"]
     C --> D["Emits @change on each keystroke<br/>{ complete, empty, error, brand, value }"]
     D --> E["On submit: Two approaches available"]
-    E --> F["<b>With PaymentIntent</b><br/>stripe.confirmCardPayment(clientSecret,<br/>{ payment_method: { card: cardElement }})"]
-    E --> G["<b>Create Payment Method Only</b><br/>stripe.createPaymentMethod({ type: 'card',<br/>card: cardElement })<br/>→ Returns PaymentMethod ID"]
+    E --> F["<b>With PaymentIntent</b><br/>useConfirmCardPayment().confirmCardPayment(clientSecret,<br/>{ payment_method: { card: cardElement }})"]
+    E --> G["<b>Create Payment Method Only</b><br/>useCreatePaymentMethod().createPaymentMethod({ type: 'card',<br/>card: cardElement })<br/>→ Returns PaymentMethod ID"]
 ```
 
 ## Usage
@@ -301,39 +301,36 @@ const handleChange = (event) => {
 ### Complete Payment Form
 
 ```vue
-<!-- This example shows the payment logic - in real usage,
-     useStripe/useStripeElements must be called in a child component -->
+<!-- CardForm.vue: rendered inside VueStripeElements -->
 <script setup>
 import { ref } from 'vue'
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+import {
+  VueStripeCardElement,
+  useConfirmCardPayment,
+  useStripeElements
+} from '@vue-stripe/vue-stripe'
 
-// In a child component inside VueStripeElements:
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+const props = defineProps({
+  clientSecret: { type: String, required: true }
+})
 
-const processing = ref(false)
+const { getElement } = useStripeElements()
+const { confirmCardPayment, loading: processing } = useConfirmCardPayment()
+
 const cardComplete = ref(false)
 
-const handleSubmit = async (clientSecret) => {
-  if (!stripe.value || !elements.value) return
+const handleSubmit = async () => {
+  const cardElement = getElement('card')
+  if (!cardElement) return
 
-  processing.value = true
-
-  const cardElement = elements.value.getElement('card')
-
-  const { error, paymentIntent } = await stripe.value.confirmCardPayment(
-    clientSecret,
-    {
-      payment_method: {
-        card: cardElement,
-        billing_details: {
-          name: 'Customer Name'
-        }
+  const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
+    payment_method: {
+      card: cardElement,
+      billing_details: {
+        name: 'Customer Name'
       }
     }
-  )
-
-  processing.value = false
+  })
 
   if (error) {
     console.error(error.message)
@@ -342,6 +339,13 @@ const handleSubmit = async (clientSecret) => {
   }
 }
 </script>
+
+<template>
+  <form @submit.prevent="handleSubmit">
+    <VueStripeCardElement @change="(e) => (cardComplete = e.complete)" />
+    <button :disabled="!cardComplete || processing">Pay</button>
+  </form>
+</template>
 ```
 
 ### With Custom Container Styling

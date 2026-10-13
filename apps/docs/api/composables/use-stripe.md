@@ -22,7 +22,7 @@ flowchart TD
     B --> C{Context Found?}
     C -->|Yes| D["<b>Context Found</b><br/>Returns { stripe, loading, error }"]
     C -->|No| E["<b>No Context Found</b><br/>Throws Error:<br/>'useStripe must be called within<br/>a VueStripeProvider component<br/>or an app using createVueStripe()'"]
-    D --> F["Component uses stripe.value for API calls<br/><br/>if (stripe.value) {<br/>  await stripe.value.confirmPayment({ ... })<br/>}"]
+    D --> F["Component reads stripe.value / loading.value<br/>(readiness, conditional UI)<br/><br/>Stripe.js calls go through the wrapping composables:<br/>usePaymentIntent(), useCreatePaymentMethod(), ..."]
 ```
 
 ## Usage
@@ -47,29 +47,35 @@ const { stripe, loading, error } = useStripe()
 
 All return values are **readonly refs** - you can read their `.value` but cannot modify them.
 
+::: tip Calling Stripe.js
+Every Stripe.js method has a wrapping composable ([`usePaymentIntent`](/api/composables/use-payment-intent), [`useSetupIntent`](/api/composables/use-setup-intent), [`useCreatePaymentMethod`](/api/composables/use-create-payment-method), the [`useConfirm*` composables](/api/composables/confirm/), ...). They inject the same instance, track `loading` / `error`, and handle the not-yet-loaded case, so use `useStripe()` for readiness and state rather than for calling `stripe.value.<method>()` yourself.
+:::
+
 ## Examples
 
 ### Basic Usage
 
 ```vue
+<!-- Rendered inside VueStripeProvider and VueStripeElements -->
 <script setup>
-import { useStripe } from '@vue-stripe/vue-stripe'
+import { useStripe, usePaymentIntent } from '@vue-stripe/vue-stripe'
 
-const { stripe, loading, error } = useStripe()
+const props = defineProps({ clientSecret: { type: String, required: true } })
 
-const confirmPayment = async () => {
-  if (!stripe.value) return
+const { loading, error } = useStripe()
+const { confirmPayment } = usePaymentIntent()
 
-  const result = await stripe.value.confirmPayment({
-    // ...
+const pay = () =>
+  confirmPayment({
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: `${window.location.origin}/complete` }
   })
-}
 </script>
 
 <template>
   <div v-if="loading">Loading...</div>
   <div v-else-if="error">{{ error }}</div>
-  <button v-else @click="confirmPayment">Pay</button>
+  <button v-else @click="pay">Pay</button>
 </template>
 ```
 
@@ -107,19 +113,20 @@ const isReady = computed(() => {
 
 ### Creating Payment Methods
 
+Use [`useCreatePaymentMethod()`](/api/composables/use-create-payment-method) with the element from [`useStripeElements()`](/api/composables/use-stripe-elements):
+
 ```vue
 <script setup>
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+import { useCreatePaymentMethod, useStripeElements } from '@vue-stripe/vue-stripe'
 
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+const { getElement } = useStripeElements()
+const { createPaymentMethod } = useCreatePaymentMethod()
 
-const createPaymentMethod = async () => {
-  if (!stripe.value || !elements.value) return
+const savePaymentMethod = async () => {
+  const cardElement = getElement('card')
+  if (!cardElement) return
 
-  const cardElement = elements.value.getElement('card')
-
-  const { error, paymentMethod } = await stripe.value.createPaymentMethod({
+  const { error, paymentMethod } = await createPaymentMethod({
     type: 'card',
     card: cardElement
   })
@@ -135,25 +142,23 @@ const createPaymentMethod = async () => {
 
 ### Retrieving a PaymentIntent
 
+Use `retrievePaymentIntent` from [`usePaymentIntent()`](/api/composables/use-payment-intent):
+
 ```vue
 <script setup>
 import { onMounted } from 'vue'
-import { useStripe } from '@vue-stripe/vue-stripe'
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
-const { stripe } = useStripe()
+const { retrievePaymentIntent } = usePaymentIntent()
 
 onMounted(async () => {
-  // Wait for Stripe to be ready
-  if (!stripe.value) return
-
   const clientSecret = new URLSearchParams(window.location.search).get(
     'payment_intent_client_secret'
   )
 
   if (clientSecret) {
-    const { paymentIntent } = await stripe.value.retrievePaymentIntent(
-      clientSecret
-    )
+    // Resolves to { error } instead of throwing while Stripe.js is not loaded
+    const { paymentIntent } = await retrievePaymentIntent(clientSecret)
     console.log('Payment status:', paymentIntent?.status)
   }
 })
@@ -195,58 +200,46 @@ const { stripe } = useStripe() // Works!
 ## TypeScript
 
 ```ts
-import { useStripe } from '@vue-stripe/vue-stripe'
-import type { Stripe, PaymentIntentResult } from '@stripe/stripe-js'
+import { computed } from 'vue'
+import { useStripe, usePaymentIntent } from '@vue-stripe/vue-stripe'
+import type { ConfirmPaymentResult } from '@vue-stripe/vue-stripe'
 
 const { stripe, loading, error } = useStripe()
+const { confirmPayment } = usePaymentIntent()
 
 // stripe.value is typed as Stripe | null
-const confirmPayment = async (): Promise<PaymentIntentResult | undefined> => {
-  if (!stripe.value) return
+const isReady = computed(() => !loading.value && !error.value && stripe.value !== null)
 
-  return stripe.value.confirmPayment({
-    elements: elements.value!,
+// The composable is typed end to end and handles the not-loaded case
+const pay = (clientSecret: string): Promise<ConfirmPaymentResult> =>
+  confirmPayment({
+    clientSecret,
     confirmParams: {
       return_url: 'https://example.com/complete'
     }
   })
-}
 ```
 
 ## Common Patterns
 
-### Safe Stripe Access
-
-```ts
-const safeConfirm = async () => {
-  const s = stripe.value
-  if (!s) {
-    console.error('Stripe not initialized')
-    return
-  }
-
-  // TypeScript now knows s is Stripe, not null
-  const result = await s.confirmPayment({ ... })
-}
-```
-
 ### With Loading State
+
+`useStripe().loading` covers Stripe.js loading; the composable's own `loading` covers the call in flight:
 
 ```vue
 <script setup>
-const { stripe, loading } = useStripe()
-const processing = ref(false)
+import { useStripe, usePaymentIntent } from '@vue-stripe/vue-stripe'
 
-const handleSubmit = async () => {
-  if (!stripe.value) return
+const props = defineProps({ clientSecret: { type: String, required: true } })
 
-  processing.value = true
-  try {
-    await stripe.value.confirmPayment({ ... })
-  } finally {
-    processing.value = false
-  }
-}
+const { loading } = useStripe()
+const { confirmPayment, loading: processing } = usePaymentIntent()
+
+const handleSubmit = () =>
+  confirmPayment({
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: `${window.location.origin}/complete` }
+  })
 </script>
 
 <template>

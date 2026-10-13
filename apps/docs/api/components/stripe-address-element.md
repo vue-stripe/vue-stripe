@@ -422,7 +422,7 @@ The composables must run in a component rendered **inside** `VueStripeElements`,
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeElements :client-secret="clientSecret">
-      <CheckoutSteps />
+      <CheckoutSteps :client-secret="clientSecret" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
@@ -435,15 +435,18 @@ import { ref } from 'vue'
 import {
   VueStripeAddressElement,
   VueStripePaymentElement,
-  useStripe,
-  useStripeElements
+  usePaymentIntent
 } from '@vue-stripe/vue-stripe'
+
+const props = defineProps({
+  clientSecret: { type: String, required: true }
+})
 
 const addressRef = ref(null)
 const step = ref('address')
 
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+// Confirms with the Elements group of the surrounding VueStripeElements
+const { confirmPayment } = usePaymentIntent()
 
 const handleContinue = async () => {
   const result = await addressRef.value?.getValue()
@@ -455,15 +458,16 @@ const handleContinue = async () => {
 const handlePayment = async () => {
   const addressResult = await addressRef.value?.getValue()
 
-  const { error } = await stripe.value.confirmPayment({
-    elements: elements.value,
+  const { error } = await confirmPayment({
+    clientSecret: props.clientSecret,
     confirmParams: {
       return_url: window.location.origin + '/success',
       shipping: {
         name: addressResult.value.name,
         address: addressResult.value.address
       }
-    }
+    },
+    redirect: 'always'
   })
 
   if (error) {

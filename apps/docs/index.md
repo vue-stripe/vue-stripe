@@ -31,20 +31,25 @@ features:
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="clientSecret" @ready="elementsReady = true">
+    <VueStripeElements
+      v-if="clientSecret"
+      :client-secret="clientSecret"
+      @ready="elementsReady = true"
+    >
       <VueStripePaymentElement @ready="paymentReady = true" />
-      <PayButton :disabled="!canConfirm" />
+      <PayButton :client-secret="clientSecret" :disabled="!canConfirm" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   VueStripeProvider,
   VueStripeElements,
   VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import PayButton from './PayButton.vue'
 
 const publishableKey = 'pk_test_...'
@@ -54,44 +59,45 @@ const paymentReady = ref(false)
 
 const canConfirm = computed(() => elementsReady.value && paymentReady.value)
 
-// Create PaymentIntent on your server, then set clientSecret
-async function createPaymentIntent(productId) {
-  const response = await fetch('/api/create-payment-intent', {
-    method: 'POST',
-    body: JSON.stringify({ productId })
-  })
+// Create the PaymentIntent on your server, then set clientSecret
+onMounted(async () => {
+  const response = await fetch('/api/create-payment-intent', { method: 'POST' })
   const data = await response.json()
   clientSecret.value = data.clientSecret
-}
+})
 </script>
 ```
 
 ```vue
 <!-- PayButton.vue - Must be inside VueStripeElements -->
 <script setup>
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
+
+const props = defineProps({
+  clientSecret: { type: String, required: true },
+  disabled: Boolean
+})
 
 // Call composables at setup scope, not inside functions
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+const { confirmPayment, loading, error } = usePaymentIntent()
 
-async function confirmPayment() {
-  const { error, paymentIntent } = await stripe.value.confirmPayment({
-    elements: elements.value,
+async function pay() {
+  // Validates the Payment Element (elements.submit()), then confirms the PaymentIntent
+  const { paymentIntent } = await confirmPayment({
+    clientSecret: props.clientSecret,
     confirmParams: { return_url: window.location.href },
     redirect: 'if_required'
   })
 
-  if (error) {
-    console.error(error.message)
-  } else if (paymentIntent.status === 'succeeded') {
+  if (paymentIntent?.status === 'succeeded') {
     console.log('Payment successful!')
   }
 }
 </script>
 
 <template>
-  <button @click="confirmPayment">Pay</button>
+  <button :disabled="disabled || loading" @click="pay">Pay</button>
+  <p v-if="error">{{ error }}</p>
 </template>
 ```
 

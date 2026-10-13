@@ -38,7 +38,7 @@ flowchart TD
     D --> E{Valid IBAN?}
     E -->|Yes| F["Bank and country detected<br/>Ready for payment"]
     E -->|No| G["Shows validation error"]
-    F --> H["On submit: Create SEPA PaymentIntent<br/>stripe.confirmSepaDebitPayment()"]
+    F --> H["On submit: Create SEPA PaymentIntent<br/>useConfirmSepaDebitPayment().confirmSepaDebitPayment()"]
 ```
 
 ## Required Components
@@ -164,28 +164,28 @@ export async function POST(request: Request) {
 
 ### Frontend Confirmation
 
-```vue
-<script setup>
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+In a component rendered inside `VueStripeElements`, confirm with [`useConfirmSepaDebitPayment()`](/api/composables/confirm/bank-debits) and look the element up with [`useStripeElements().getElement()`](/api/composables/use-stripe-elements):
 
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+```vue
+<script setup lang="ts">
+import { useConfirmSepaDebitPayment, useStripeElements } from '@vue-stripe/vue-stripe'
+
+const { getElement } = useStripeElements()
+const { confirmSepaDebitPayment } = useConfirmSepaDebitPayment()
 
 const handleSubmit = async (clientSecret: string) => {
-  const ibanElement = elements.value?.getElement('iban')
+  const ibanElement = getElement('iban')
+  if (!ibanElement) return
 
-  const { error, paymentIntent } = await stripe.value.confirmSepaDebitPayment(
-    clientSecret,
-    {
-      payment_method: {
-        sepa_debit: ibanElement,
-        billing_details: {
-          name: 'Customer Name',
-          email: 'customer@example.com'
-        }
+  const { error, paymentIntent } = await confirmSepaDebitPayment(clientSecret, {
+    payment_method: {
+      sepa_debit: ibanElement,
+      billing_details: {
+        name: 'Customer Name',
+        email: 'customer@example.com'
       }
     }
-  )
+  })
 
   if (error) {
     console.error(error.message)
@@ -245,25 +245,65 @@ The `placeholderCountry` option determines the placeholder format shown:
 ## Complete Example
 
 ```vue
+<!-- SepaPage.vue -->
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
+import SepaForm from './SepaForm.vue'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const success = ref(false)
+</script>
+
+<template>
+  <div class="sepa-form">
+    <div v-if="success" class="success">
+      Payment submitted! It will be processed within 1-5 business days.
+    </div>
+
+    <VueStripeProvider v-else :publishable-key="publishableKey">
+      <VueStripeElements>
+        <SepaForm @success="success = true" />
+      </VueStripeElements>
+    </VueStripeProvider>
+  </div>
+</template>
+
+<style scoped>
+.sepa-form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.success {
+  color: #00d66b;
+  padding: 20px;
+  text-align: center;
+}
+</style>
+```
+
+```vue
+<!-- SepaForm.vue: rendered inside VueStripeElements -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  VueStripeProvider,
-  VueStripeElements,
   VueStripeIbanElement,
-  useStripe,
+  useConfirmSepaDebitPayment,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
+import type { StripeIbanElementChangeEvent } from '@stripe/stripe-js'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const emit = defineEmits<{ success: [] }>()
 
-const ibanRef = ref()
+const { getElement } = useStripeElements()
+const { confirmSepaDebitPayment, loading: processing } = useConfirmSepaDebitPayment()
+
 const ibanComplete = ref(false)
 const bankName = ref('')
 const country = ref('')
-const processing = ref(false)
 const error = ref('')
-const success = ref(false)
 
 const ibanOptions = {
   supportedCountries: ['SEPA'],
@@ -276,7 +316,7 @@ const ibanOptions = {
   }
 }
 
-const handleChange = (event: any) => {
+const handleChange = (event: StripeIbanElementChangeEvent) => {
   ibanComplete.value = event.complete
   bankName.value = event.bankName || ''
   country.value = event.country || ''
@@ -284,6 +324,11 @@ const handleChange = (event: any) => {
 }
 
 const handleSubmit = async () => {
+  const ibanElement = getElement('iban')
+  if (!ibanElement) return
+
+  error.value = ''
+
   // In a real app, fetch clientSecret from your backend
   const response = await fetch('/api/sepa-debit-intent', {
     method: 'POST',
@@ -292,56 +337,47 @@ const handleSubmit = async () => {
   })
   const { clientSecret } = await response.json()
 
-  // Get stripe and elements from composables (inside provider)
-  // This would be in a child component
-  // const { stripe } = useStripe()
-  // const { elements } = useStripeElements()
-  // ... confirm payment
+  const result = await confirmSepaDebitPayment(clientSecret, {
+    payment_method: {
+      sepa_debit: ibanElement,
+      billing_details: {
+        name: 'Customer Name',
+        email: 'customer@example.com'
+      }
+    }
+  })
+
+  if (result.error) {
+    error.value = result.error.message || 'Payment failed'
+  } else if (result.paymentIntent.status === 'processing') {
+    emit('success')
+  }
 }
 </script>
 
 <template>
-  <div class="sepa-form">
-    <div v-if="success" class="success">
-      Payment submitted! It will be processed within 1-5 business days.
+  <form @submit.prevent="handleSubmit">
+    <div class="field">
+      <label>IBAN</label>
+      <VueStripeIbanElement :options="ibanOptions" @change="handleChange" />
     </div>
 
-    <VueStripeProvider v-else :publishable-key="publishableKey">
-      <VueStripeElements>
-        <form @submit.prevent="handleSubmit">
-          <div class="field">
-            <label>IBAN</label>
-            <VueStripeIbanElement
-              ref="ibanRef"
-              :options="ibanOptions"
-              @change="handleChange"
-            />
-          </div>
+    <div v-if="bankName" class="bank-info">
+      Bank: {{ bankName }} ({{ country }})
+    </div>
 
-          <div v-if="bankName" class="bank-info">
-            Bank: {{ bankName }} ({{ country }})
-          </div>
+    <div v-if="error" class="error">{{ error }}</div>
 
-          <div v-if="error" class="error">{{ error }}</div>
-
-          <button
-            type="submit"
-            :disabled="!ibanComplete || processing"
-          >
-            {{ processing ? 'Processing...' : 'Pay with SEPA' }}
-          </button>
-        </form>
-      </VueStripeElements>
-    </VueStripeProvider>
-  </div>
+    <button
+      type="submit"
+      :disabled="!ibanComplete || processing"
+    >
+      {{ processing ? 'Processing...' : 'Pay with SEPA' }}
+    </button>
+  </form>
 </template>
 
 <style scoped>
-.sepa-form {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
 .field {
   margin-bottom: 16px;
 }
@@ -379,12 +415,6 @@ button:disabled {
 .error {
   color: #9e2146;
   margin-bottom: 16px;
-}
-
-.success {
-  color: #00d66b;
-  padding: 20px;
-  text-align: center;
 }
 </style>
 ```

@@ -32,7 +32,7 @@ flowchart TD
     B --> E["Each element emits @change independently<br/>Track all three completion states for submit button"]
     C --> E
     D --> E
-    E --> F["On submit: Reference the CardNumber element<br/>stripe.createPaymentMethod({<br/>  type: 'card',<br/>  card: cardNumberElement ← Just the number element!<br/>})<br/>Stripe automatically collects expiry and CVC from siblings"]
+    E --> F["On submit: Reference the CardNumber element<br/>useCreatePaymentMethod().createPaymentMethod({<br/>  type: 'card',<br/>  card: cardNumberElement ← Just the number element!<br/>})<br/>Stripe automatically collects expiry and CVC from siblings"]
 ```
 
 ## Components
@@ -256,7 +256,7 @@ const clearAll = () => {
   cvcRef.value?.clear()
 }
 
-// Pass the number element to stripe.createPaymentMethod({ type: 'card', card })
+// Pass the number element to useCreatePaymentMethod().createPaymentMethod({ type: 'card', card })
 const cardNumber = (): StripeCardNumberElement | null => numberRef.value?.element ?? null
 </script>
 
@@ -398,36 +398,36 @@ const onNumberChange = (event) => {
 ### Payment Submission
 
 ```vue
+<!-- SplitCardForm.vue: rendered inside VueStripeElements -->
 <script setup>
-import { ref } from 'vue'
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+import {
+  VueStripeCardNumberElement,
+  VueStripeCardExpiryElement,
+  VueStripeCardCvcElement,
+  useConfirmCardPayment,
+  useStripeElements
+} from '@vue-stripe/vue-stripe'
 
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+const props = defineProps({
+  clientSecret: { type: String, required: true }
+})
 
-const processing = ref(false)
+const { getElement } = useStripeElements()
+const { confirmCardPayment, loading: processing } = useConfirmCardPayment()
 
-const handleSubmit = async (clientSecret) => {
-  if (!stripe.value || !elements.value) return
+const handleSubmit = async () => {
+  // Get the card number element (expiry and CVC are linked automatically)
+  const cardNumberElement = getElement('cardNumber')
+  if (!cardNumberElement) return
 
-  processing.value = true
-
-  // Get the card number element
-  const cardNumberElement = elements.value.getElement('cardNumber')
-
-  const { error, paymentIntent } = await stripe.value.confirmCardPayment(
-    clientSecret,
-    {
-      payment_method: {
-        card: cardNumberElement,
-        billing_details: {
-          name: 'Customer Name'
-        }
+  const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
+    payment_method: {
+      card: cardNumberElement,
+      billing_details: {
+        name: 'Customer Name'
       }
     }
-  )
-
-  processing.value = false
+  })
 
   if (error) {
     console.error(error.message)
@@ -436,6 +436,15 @@ const handleSubmit = async (clientSecret) => {
   }
 }
 </script>
+
+<template>
+  <form @submit.prevent="handleSubmit">
+    <VueStripeCardNumberElement />
+    <VueStripeCardExpiryElement />
+    <VueStripeCardCvcElement />
+    <button :disabled="processing">Pay</button>
+  </form>
+</template>
 ```
 
 ## TypeScript

@@ -308,47 +308,64 @@ const handleChange = (event) => {
 
 ### Complete SEPA Payment Form
 
+The page renders the providers; the form inside them confirms with [`useConfirmSepaDebitPayment()`](/api/composables/confirm/bank-debits):
+
 ```vue
+<!-- SepaPage.vue -->
+<script setup lang="ts">
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
+import SepaForm from './SepaForm.vue'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const clientSecret = 'pi_xxx_secret_xxx' // From your backend (sepa_debit)
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
+      <SepaForm :client-secret="clientSecret" />
+    </VueStripeElements>
+  </VueStripeProvider>
+</template>
+```
+
+```vue
+<!-- SepaForm.vue: rendered inside VueStripeElements -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  VueStripeProvider,
-  VueStripeElements,
   VueStripeIbanElement,
-  useStripe,
+  useConfirmSepaDebitPayment,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
+import type { StripeIbanElementChangeEvent } from '@stripe/stripe-js'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const props = defineProps<{ clientSecret: string }>()
+
+const { getElement } = useStripeElements()
+const { confirmSepaDebitPayment, loading: processing } = useConfirmSepaDebitPayment()
 
 const ibanComplete = ref(false)
 const bankName = ref('')
-const processing = ref(false)
 
-const handleChange = (event: any) => {
+const handleChange = (event: StripeIbanElementChangeEvent) => {
   ibanComplete.value = event.complete
   bankName.value = event.bankName || ''
 }
 
-// In a child component inside the provider:
-const confirmPayment = async (clientSecret: string) => {
-  const { stripe } = useStripe()
-  const { elements } = useStripeElements()
+const confirmPayment = async () => {
+  const ibanElement = getElement('iban')
+  if (!ibanElement) return
 
-  const ibanElement = elements.value?.getElement('iban')
-
-  const { error, paymentIntent } = await stripe.value.confirmSepaDebitPayment(
-    clientSecret,
-    {
-      payment_method: {
-        sepa_debit: ibanElement,
-        billing_details: {
-          name: 'Customer Name',
-          email: 'customer@example.com'
-        }
+  const { error, paymentIntent } = await confirmSepaDebitPayment(props.clientSecret, {
+    payment_method: {
+      sepa_debit: ibanElement,
+      billing_details: {
+        name: 'Customer Name',
+        email: 'customer@example.com'
       }
     }
-  )
+  })
 
   if (error) {
     console.error(error.message)
@@ -359,20 +376,16 @@ const confirmPayment = async (clientSecret: string) => {
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <form @submit.prevent="confirmPayment(clientSecret)">
-        <VueStripeIbanElement
-          :options="{ placeholderCountry: 'DE' }"
-          @change="handleChange"
-        />
-        <p v-if="bankName">Bank: {{ bankName }}</p>
-        <button :disabled="!ibanComplete || processing">
-          Pay with SEPA
-        </button>
-      </form>
-    </VueStripeElements>
-  </VueStripeProvider>
+  <form @submit.prevent="confirmPayment">
+    <VueStripeIbanElement
+      :options="{ placeholderCountry: 'DE' }"
+      @change="handleChange"
+    />
+    <p v-if="bankName">Bank: {{ bankName }}</p>
+    <button :disabled="!ibanComplete || processing">
+      Pay with SEPA
+    </button>
+  </form>
 </template>
 ```
 
