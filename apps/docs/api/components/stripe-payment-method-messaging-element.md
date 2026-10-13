@@ -58,8 +58,9 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 | `paymentMethodTypes` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | The providers to show. Optional in Stripe's types, but with Stripe.js Endive the element renders nothing without it |
 | `paymentMethodOrder` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | Fixed display order. By default Stripe orders them per customer |
 | `paymentMethods` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | Deprecated by Stripe; use `paymentMethodTypes` |
-| `logoColor` | `'black' \| 'white' \| 'color'` | Provider logo color. Defaults to black |
 | `metaData` | `{ messagingClientReferenceId: string \| null }` | Reference ID passed to Stripe |
+
+`@stripe/stripe-js` 10 also declares `logoColor`, but Stripe.js Endive rejects it: `elements.create()` and every `update()` log "Unrecognized ... parameter: logoColor is not a recognized parameter" and the logos keep their default look. Leave it out.
 
 `paymentMethodTypes` here is this element's own option (which messages to show). It is unrelated to the `paymentMethodTypes` prop that was removed from `VueStripeElements` in v6. [Stripe's reference](https://docs.stripe.com/js/element/payment_method_messaging_element) lists the supported currency and country combinations.
 
