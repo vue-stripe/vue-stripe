@@ -135,14 +135,17 @@ export function coverageMarkdown(coverage: CoverageCategory[]): string {
   return coverage
     .map((category) => {
       const rows = category.items.map((item) => {
-        const status =
+        const label =
           item.status === 'covered'
-            ? 'Covered'
+            ? 'Covered.'
             : item.status === 'accessible'
-              ? 'Reachable through useStripe() or useStripeElements()'
+              ? 'Reachable through useStripe() or useStripeElements().'
               : item.status === 'planned'
-                ? 'Planned'
-                : `Not wrapped. ${item.note ?? 'Deprecated by Stripe.'}`
+                ? 'Planned.'
+                : 'Not wrapped.'
+        // The page shows a row's note whatever its status (a beta flag, a deprecation).
+        const note = item.note ?? (item.status === 'deprecated' ? 'Deprecated by Stripe.' : '')
+        const status = note ? `${label} ${note}` : label
         return `| ${item.name} | \`${item.api}\` | ${item.artifact ? `\`${item.artifact}\`` : '-'} | ${status} |`
       })
       return [

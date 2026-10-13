@@ -11,7 +11,12 @@ import {
   sidebarTrail,
   type DocSection
 } from '../../../apps/docs/.vitepress/seo'
-import { homeMarkdown, parseFrontmatter } from '../../../apps/docs/.vitepress/llms'
+import {
+  coverageMarkdown,
+  homeMarkdown,
+  parseFrontmatter
+} from '../../../apps/docs/.vitepress/llms'
+import { coverage } from '../../../apps/docs/.vitepress/theme/data/stripe-coverage'
 
 /**
  * Every docs page gets its <meta name="description">, og:description, JSON-LD description
@@ -274,5 +279,16 @@ describe('docs SEO head and share cards', () => {
     // No Vue component or layout tags outside the code fences.
     const prose = markdown.replace(/^```[\s\S]*?^```/gm, '')
     expect(prose).not.toMatch(/<\/?(template|HomeHero|HomeSection|main)\b/)
+  })
+})
+
+describe('llms-full coverage table', () => {
+  it('carries every coverage note, whatever the row status', () => {
+    const markdown = coverageMarkdown(coverage)
+    const missing = coverage
+      .flatMap((c) => c.items)
+      .filter((item) => item.note && !markdown.includes(item.note))
+      .map((item) => `${item.name} (${item.status}): ${item.note}`)
+    expect(missing, missing.join('\n')).toEqual([])
   })
 })
