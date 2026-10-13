@@ -11,7 +11,7 @@ Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not support
 ## 1. Install the packages
 
 ```bash
-npm install @vue-stripe/vue-stripe @stripe/stripe-js
+npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 ```
 
 ## 2. Let vue-demi switch to Vue 2

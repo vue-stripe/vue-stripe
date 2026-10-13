@@ -14,17 +14,19 @@ Install Vue Stripe together with Stripe.js:
 
 ::: code-group
 ```bash [npm]
-npm install @vue-stripe/vue-stripe @stripe/stripe-js
+npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 ```
 
 ```bash [pnpm]
-pnpm add @vue-stripe/vue-stripe @stripe/stripe-js
+pnpm add @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 ```
 
 ```bash [yarn]
-yarn add @vue-stripe/vue-stripe @stripe/stripe-js
+yarn add @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 ```
 :::
+
+The version ranges select Vue Stripe 6 and Stripe.js 10, now and after 6.0.0 is released. Without them, the package manager installs Vue Stripe 5 while 6.0.0 is still a beta, and these docs do not apply to it. If the app already has an older `@stripe/stripe-js`, the same command upgrades it.
 
 Type definitions ship with the package; Stripe.js types such as `Stripe`, `StripeElements` and `PaymentIntent` are re-exported from `@vue-stripe/vue-stripe`.
 
