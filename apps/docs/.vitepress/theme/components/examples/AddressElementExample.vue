@@ -35,7 +35,7 @@ function onChange(event: StripeAddressElementChangeEvent) {
         autocomplete. It emits <code>change</code> events with the structured value.
       </p>
 
-      <div class="controls">
+      <div class="demo-controls">
         <span class="label">Mode</span>
         <button class="chip" :class="{ active: mode === 'shipping' }" @click="mode = 'shipping'">
           Shipping
@@ -109,13 +109,13 @@ function onChange(event: StripeAddressElementChangeEvent) {
   font-size: 0.9rem;
   color: var(--vp-c-text-2);
 }
-.controls {
+.demo-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1.25rem;
 }
-.controls .label {
+.demo-controls .label {
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--vp-c-text-2);

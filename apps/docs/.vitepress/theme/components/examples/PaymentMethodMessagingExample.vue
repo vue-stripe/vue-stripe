@@ -57,7 +57,7 @@ const messagingOptions = computed(() => ({
       </p>
 
       <!-- Controls -->
-      <div class="controls">
+      <div class="demo-controls">
         <div class="control">
           <label>Amount</label>
           <div class="amount-input">
@@ -157,7 +157,7 @@ const messagingOptions = computed(() => ({
   color: var(--vp-c-text-2);
 }
 
-.controls {
+.demo-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
