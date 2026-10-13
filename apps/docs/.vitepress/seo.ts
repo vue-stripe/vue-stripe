@@ -13,8 +13,8 @@ export const NPM_URL = 'https://www.npmjs.com/package/@vue-stripe/vue-stripe'
 
 export const maintainer = {
   name: 'Joff Tiquez',
-  url: 'https://github.com/jofftiquez',
-  sameAs: ['https://github.com/jofftiquez']
+  url: 'https://jofftiquez.dev',
+  sameAs: ['https://jofftiquez.dev', 'https://github.com/jofftiquez', 'https://x.com/jrtiquez']
 }
 
 /** A Diataxis section of the docs, as drawn by the nav (`match` is its activeMatch regex). */

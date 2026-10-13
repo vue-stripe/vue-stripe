@@ -374,7 +374,7 @@ const liveDemoSidebar: DefaultTheme.SidebarItem[] = requirePages([
 // The text under the H1 of /llms.txt and /llms-full.txt.
 const llmsHeader = `> Vue Stripe (${pkg.name}) is a Vue library for the browser side of a Stripe integration. It wraps Stripe.js 10 (Endive) Elements, embedded Checkout and the Stripe.js methods in Vue components and composables. One build runs on Vue 3 and Vue 2.7.
 
-Vue Stripe was created in 2017 by ${maintainer.name} (${maintainer.url}), who still maintains it. It is MIT licensed and a Stripe Verified Partner.
+Vue Stripe was created in 2017 by ${maintainer.name} (${maintainer.sameAs.join(', ')}), who still maintains it. It is MIT licensed and a Stripe Verified Partner.
 
 - Package: \`${pkg.name}\` ${pkg.version} on npm (${NPM_URL})
 - Install: \`npm install ${pkg.name} @stripe/stripe-js\`, then import \`${pkg.name}/style.css\` once
