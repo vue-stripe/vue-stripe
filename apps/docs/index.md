@@ -1,42 +1,34 @@
 ---
-layout: home
-
-hero:
-  name: Vue Stripe
-  text: Stripe Elements for Vue.js
-  tagline: Build beautiful payment forms with Vue.js
-  image:
-    src: /vue-stripe-logo-variant-1.png
-    alt: Vue Stripe
-  actions:
-    - theme: brand
-      text: Get Started
-      link: /guide/introduction
-
-features:
-  - title: Vue 3 and Vue 2.7
-    details: One build for both, with the Composition API and render-function components, tested on each in CI.
-  - title: All Stripe Elements
-    details: Payment, Express Checkout, Card, Address, Link, IBAN, BECS, Tax ID, Currency Selector, Contact Details, Issuing and more - all wrapped in Vue components.
-  - title: Every Checkout
-    details: Hosted Checkout, Embedded Checkout, Custom Checkout on a Checkout Session, the Checkout Form and the Pricing Table.
-    link: /guide/approaches
-    linkText: Choose your approach
-  - title: Composables for Every Method
-    details: usePaymentIntent, a useConfirm composable per payment method, tokens, Financial Connections, Identity and more. Your code never needs the raw stripe object.
-  - title: Type-Safe
-    details: Full TypeScript support with proper type definitions for all components and composables.
-  - title: 100% Stripe.js Coverage
-    details: Every Stripe.js 10 element and method has a wrapper, tracked on the coverage page.
-    link: /coverage
-    linkText: See the coverage
+layout: page
+title: Vue Stripe
+titleTemplate: Stripe Elements and Checkout for Vue
+description: Vue components and composables for every Stripe.js 10 element and method. Vue 3 and Vue 2.7, typed, Stripe Verified Partner.
 ---
 
-<div class="vp-doc">
-
-## Quick Example
+<HomeHero>
 
 ```vue
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements :client-secret="clientSecret">
+      <VueStripePaymentElement />
+      <PayButton :client-secret="clientSecret" />
+    </VueStripeElements>
+  </VueStripeProvider>
+</template>
+```
+
+</HomeHero>
+
+<HomeFeatures />
+
+<HomeIntegrations />
+
+<HomeSection id="quick-example" title="A payment form in two files" lede="The page renders the providers and the Payment Element; a child component confirms the payment with usePaymentIntent.">
+
+::: code-group
+
+```vue [CheckoutPage.vue]
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeElements
@@ -76,8 +68,8 @@ onMounted(async () => {
 </script>
 ```
 
-```vue
-<!-- PayButton.vue - Must be inside VueStripeElements -->
+```vue [PayButton.vue]
+<!-- Rendered inside VueStripeElements, so usePaymentIntent can reach the Elements group -->
 <script setup>
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
@@ -109,12 +101,14 @@ async function pay() {
 </template>
 ```
 
-## See In Action
+:::
+
+</HomeSection>
+
+<HomeSection id="try-it" title="Try it with a test card" lede="This live demo runs in Stripe test mode against our demo backend. Pay with 4242 4242 4242 4242, any future expiry date and any CVC.">
 
 <PaymentElementExample />
 
-::: tip
-This is a live demo using Stripe's test mode. Use card number `4242 4242 4242 4242` with any future date and CVC.
-:::
+</HomeSection>
 
-</div>
+<HomeCoverage />

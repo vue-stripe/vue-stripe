@@ -4,11 +4,14 @@ import DefaultTheme from 'vitepress/theme'
 import { useData } from 'vitepress'
 import { createMermaidRenderer } from 'vitepress-mermaid-renderer'
 import './styles/vars.css'
-import StripeBadge from './components/StripeBadge.vue'
 import CopyForLLM from './components/CopyForLLM.vue'
-import GitHubStarsCTA from './components/GitHubStarsCTA.vue'
 import StripeCoverage from './components/StripeCoverage.vue'
 import DocIcon from './components/DocIcon.vue'
+import HomeHero from './components/home/HomeHero.vue'
+import HomeFeatures from './components/home/HomeFeatures.vue'
+import HomeIntegrations from './components/home/HomeIntegrations.vue'
+import HomeSection from './components/home/HomeSection.vue'
+import HomeCoverage from './components/home/HomeCoverage.vue'
 
 // Example components for interactive documentation
 import ProductSelector from './components/examples/ProductSelector.vue'
@@ -86,14 +89,10 @@ export default {
     )
 
     return h(DefaultTheme.Layout, null, {
-      // Stripe Partner Badge above hero title on home page
-      'home-hero-info-before': () => h(StripeBadge),
       // Copy for LLMs button near the title on doc pages
       'doc-before': () => h(CopyForLLM),
       // Analytics tracking (invisible component)
-      'layout-top': () => h(AnalyticsWrapper),
-      // GitHub stars CTA after hero actions
-      'home-hero-actions-after': () => h(GitHubStarsCTA)
+      'layout-top': () => h(AnalyticsWrapper)
       // Carbon Ads placeholder - will be injected when you have the actual code
       // 'aside-ads-before': () => h('div', { id: 'carbon-ads-container' })
     })
@@ -122,6 +121,12 @@ export default {
     app.component('ExpressCheckoutExample', ExpressCheckoutExample)
     app.component('StripeCoverage', StripeCoverage)
     app.component('DocIcon', DocIcon)
+    // Home page sections (index.md uses layout: page and composes these)
+    app.component('HomeHero', HomeHero)
+    app.component('HomeFeatures', HomeFeatures)
+    app.component('HomeIntegrations', HomeIntegrations)
+    app.component('HomeSection', HomeSection)
+    app.component('HomeCoverage', HomeCoverage)
     app.component('AuBankAccountPaymentExample', AuBankAccountPaymentExample)
     app.component('AchDebitExample', AchDebitExample)
     app.component('IdentityExample', IdentityExample)
