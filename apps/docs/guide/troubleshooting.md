@@ -17,10 +17,16 @@ Find the message or symptom you see, then apply the fix. Errors that Vue Stripe 
 
 ### The provider shows an error instead of loading
 
-The provider's `#error` slot (or its default error text) means Stripe.js could not load or rejected the key:
+The provider's `#error` slot (or its default error text) means Stripe.js could not load or rejected the key at load time:
 
 - **Blocked script**: an ad blocker, privacy extension or Content Security Policy blocked `https://js.stripe.com`. Allow Stripe's hosts in your CSP as listed in [Stripe's CSP guide](https://docs.stripe.com/security/guide#content-security-policy) (at least `https://js.stripe.com` in `script-src` and `frame-src`), and test in a clean browser profile.
-- **Wrong key**: the key must be a publishable key, `pk_test_...` or `pk_live_...`, with no spaces or line breaks. A secret key (`sk_...`) is rejected by Stripe.js; never send it to the browser.
+- **Secret key**: a secret key (`sk_...`) is rejected by Stripe.js when it loads; never send it to the browser. Use the publishable key, `pk_test_...` or `pk_live_...`.
+
+A wrong or revoked publishable key does not show here: Stripe.js accepts any key when it loads, and the provider renders its children. See the next section.
+
+### Elements show "Invalid API Key provided"
+
+The publishable key is wrong, revoked or malformed. Stripe.js only checks it on the first request, so the provider loads and the first element reports the error through `@loaderror` and its `#error` slot (a composable call resolves `{ error }` instead). Copy the publishable key again from the [API keys page](https://dashboard.stripe.com/apikeys), with no spaces or line breaks, in the mode (test or live) you want.
 
 ### Elements show "No such payment_intent" or a key error
 
