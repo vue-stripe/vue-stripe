@@ -1,16 +1,20 @@
 ---
-description: "Use Vue Stripe with Nuxt 3, Quasar SSR, VitePress or your own Vite SSR setup: Stripe.js loads only in the browser, so hydration matches."
+description: "Use Vue Stripe with Nuxt, Quasar SSR, VitePress or your own Vite SSR setup: Stripe.js loads only in the browser, so hydration matches."
 ---
 
 # Use Vue Stripe with Nuxt and SSR
 
-Render pages that use Vue Stripe on the server: Nuxt 3, Quasar SSR, VitePress or your own Vite SSR setup.
+Render pages that use Vue Stripe on the server: Nuxt, Quasar SSR, VitePress or your own Vite SSR setup.
 
 Stripe.js only runs in the browser. Vue Stripe never loads it on the server: `VueStripeProvider` loads Stripe.js in `onMounted`, and the [plugin](/guide/plugin) loads it the first time a component reads it in the browser. During server rendering every provider renders its `#loading` slot, and the browser's first render matches it, so hydration does not mismatch. After hydration Stripe.js loads and the elements mount.
 
 From 6.0.0-beta.1 no bundler setting is needed: the package loads in Node as it is. What you set up is where the keys live, and where the client secret is fetched.
 
-## Nuxt 3
+<a id="nuxt-3"></a>
+
+## Nuxt
+
+The paths below follow Nuxt 4, which reads plugins, pages and components from the `app/` directory. On Nuxt 3, or in a Nuxt 4 project that keeps the Nuxt 3 layout (no `app/` directory), drop the `app/` prefix: `plugins/`, `pages/` and `components/` sit at the project root. `server/` stays at the root in both.
 
 ### 1. Configure Nuxt
 
@@ -40,7 +44,7 @@ NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 Either install the plugin once, so every page can use the elements and composables without a provider:
 
 ```ts
-// plugins/vue-stripe.ts
+// app/plugins/vue-stripe.ts
 import { createVueStripe } from '@vue-stripe/vue-stripe'
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -77,13 +81,9 @@ export default defineEventHandler(async () => {
 Fetch the client secret in the browser (`server: false`), so a page render does not create a PaymentIntent:
 
 ```vue
-<!-- pages/checkout.vue -->
+<!-- app/pages/checkout.vue -->
 <script setup lang="ts">
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement
-} from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
 
 const config = useRuntimeConfig()
 const { data } = await useFetch('/api/payment-intent', { method: 'POST', server: false })
@@ -91,18 +91,75 @@ const { data } = await useFetch('/api/payment-intent', { method: 'POST', server:
 
 <template>
   <VueStripeProvider :publishable-key="config.public.stripePublishableKey">
-    <VueStripeElements v-if="data" :client-secret="data.clientSecret">
-      <VueStripePaymentElement />
-      <!-- components/PayButton.vue calls usePaymentIntent() -->
-      <PayButton :client-secret="data.clientSecret" />
+    <VueStripeElements v-if="data?.clientSecret" :client-secret="data.clientSecret">
+      <!-- app/components/PaymentForm.vue renders the Payment Element and calls usePaymentIntent() -->
+      <PaymentForm :client-secret="data.clientSecret" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 ```
 
-`PayButton` is the same component as in [Accept a payment with the Payment Element](/guide/payment-element). With the plugin from step 2, drop the `VueStripeProvider` wrapper.
+`PaymentForm` is the component from [Accept a payment with the Payment Element](/guide/payment-element#_3-render-the-payment-element-and-confirm). With the plugin from step 2, drop the `VueStripeProvider` wrapper.
+
+Check `data?.clientSecret`, not only `data`. `useFetch` takes its type from the server route, and stripe-node types `client_secret` as `string | null`, so `nuxi typecheck` rejects `data.clientSecret` as a `client-secret` until the template has ruled out `null`.
 
 `ref`, `useFetch` and the other Nuxt and Vue functions are auto-imported. Import the Vue Stripe components yourself, or register them in a plugin.
+
+### Build the page on a Checkout Session instead
+
+[`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider) and [`VueStripeCheckoutFormProvider`](/api/components/stripe-checkout-form-provider) take the client secret as a string or a Promise. In Nuxt, don't create that Promise at the top of `<script setup>`: setup also runs on the server, where every render would start the request, and a relative `fetch('/api/...')` there rejects with "Failed to parse URL". Pass a function in `fetch-client-secret` instead. The provider calls it in the browser only, once Stripe.js has loaded.
+
+1. Create the session in a server route. Checking `client_secret` gives the page a `string`, and catches a session created without `ui_mode: 'elements'`:
+
+   ```ts
+   // server/api/checkout-session.post.ts
+   import Stripe from 'stripe'
+
+   export default defineEventHandler(async (event) => {
+     const stripe = new Stripe(useRuntimeConfig().stripeSecretKey)
+
+     const session = await stripe.checkout.sessions.create({
+       ui_mode: 'elements',
+       mode: 'payment',
+       line_items: [{ price: 'price_123', quantity: 1 }],
+       return_url: `${getRequestURL(event).origin}/checkout/complete?session_id={CHECKOUT_SESSION_ID}`
+     })
+
+     if (!session.client_secret) {
+       throw createError({ statusCode: 500, statusMessage: 'Checkout Session has no client secret' })
+     }
+     return { clientSecret: session.client_secret }
+   })
+   ```
+
+2. Pass the request as a function:
+
+   ```vue
+   <!-- app/pages/custom-checkout.vue -->
+   <script setup lang="ts">
+   import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
+
+   const config = useRuntimeConfig()
+
+   // Called by the provider in the browser only, once Stripe.js has loaded.
+   const fetchClientSecret = () =>
+     $fetch('/api/checkout-session', { method: 'POST' }).then((data) => data.clientSecret)
+   </script>
+
+   <template>
+     <VueStripeProvider :publishable-key="config.public.stripePublishableKey">
+       <VueStripeCheckoutElementsProvider :fetch-client-secret="fetchClientSecret">
+         <!-- app/components/CheckoutForm.vue uses useCheckoutSession() -->
+         <CheckoutForm />
+
+         <template #loading>Loading checkout...</template>
+         <template #error="{ error }">Checkout could not load: {{ error }}</template>
+       </VueStripeCheckoutElementsProvider>
+     </VueStripeProvider>
+   </template>
+   ```
+
+`CheckoutForm` is the form from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form). The server renders the providers' loading state, and the browser creates one session per visit. `VueStripeCheckoutFormProvider` and [`VueStripeEmbeddedCheckout`](/api/components/stripe-embedded-checkout) take the same `fetch-client-secret` prop.
 
 ### Render on the client only
 
