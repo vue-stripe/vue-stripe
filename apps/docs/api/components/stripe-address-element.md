@@ -7,7 +7,7 @@ description: "VueStripeAddressElement reference: collect a shipping or billing a
 Collects a shipping or billing address, with optional name, phone and address autocomplete. It needs no Intent: use it inside [VueStripeElements](/api/components/stripe-elements) with a `clientSecret` or a deferred Intent (`mode` / `currency` / `amount`), or inside [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (see [With Checkout Sessions](#with-checkout-sessions)). Read the address from `@change` or the exposed `getValue()`. For recipes (pre-fill, phone, allowed countries, P.O. boxes, address before payment), see [Collect a shipping or billing address](/guide/address-element).
 
 ::: warning Pass `mode` when there is no `clientSecret`
-With neither `clientSecret` nor `mode` on `VueStripeElements`, Stripe.js Endive logs "Unable to select session" inside the Address Element's iframe. Use `<VueStripeElements mode="payment" currency="usd" :amount="1099">` (or `mode="setup"`) until you have an Intent.
+With neither `clientSecret` nor `mode` on `VueStripeElements`, Stripe.js Endive throws "Unable to select session" from the Address Element's iframe on every load. Use `<VueStripeElements mode="payment" currency="usd" :amount="1099">` (or `mode="setup"`) until you have an Intent.
 :::
 
 ## Usage
