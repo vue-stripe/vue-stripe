@@ -1,45 +1,12 @@
 # Split Card Elements
 
-Three separate input components for card number, expiration, and CVC. Use these when you need more control over layout and per-field validation.
+Three components that render the card number, expiry date and CVC as separate fields, for layouts the single [VueStripeCardElement](/api/components/stripe-card-element) can't give. Use them together inside the same [VueStripeElements](/api/components/stripe-elements), without a `clientSecret`. To confirm or create a PaymentMethod, pass only the card number element: Stripe reads the expiry and CVC from the sibling fields of the same Elements group. [Choosing an integration](/guide/approaches#payment-element-or-card-element) compares the card elements with the Payment Element.
 
-::: tip When to Use
-Use Split Card Elements when you need:
-- Custom form layouts (horizontal, multi-column)
-- Different styling per field
-- Per-field validation display
-- Better accessibility with separate labels
-
-For simpler integration, consider [StripeCardElement](/api/components/stripe-card-element) instead.
-:::
-
-## What are Split Card Elements?
-
-Split Card Elements give you granular control over card input layout:
-
-| Component | Description |
-|-----------|-------------|
-| **VueStripeCardNumberElement** | Card number input with brand detection and Luhn validation |
-| **VueStripeCardExpiryElement** | MM/YY expiration date with auto-formatting |
-| **VueStripeCardCvcElement** | 3-4 digit security code (adapts to card brand) |
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["All three elements mount inside StripeElements<br/>(Share the same Elements instance and context)"] --> B["CardNumber<br/>4242 4242...<br/>Detects brand, Shows icon"]
-    A --> C["CardExpiry<br/>MM / YY<br/>Auto-formats, Validates"]
-    A --> D["CardCvc<br/>CVC<br/>3 or 4 digits based on brand"]
-    B --> E["Each element emits @change independently<br/>Track all three completion states for submit button"]
-    C --> E
-    D --> E
-    E --> F["On submit: Reference the CardNumber element<br/>useCreatePaymentMethod().createPaymentMethod({<br/>  type: 'card',<br/>  card: cardNumberElement ← Just the number element!<br/>})<br/>Stripe automatically collects expiry and CVC from siblings"]
-```
-
-## Components
-
-- **VueStripeCardNumberElement** - Card number input with brand detection
-- **VueStripeCardExpiryElement** - MM/YY expiration date input
-- **VueStripeCardCvcElement** - 3 or 4 digit security code input
+| Component | Stripe element type | Field |
+|-----------|---------------------|-------|
+| `VueStripeCardNumberElement` | `cardNumber` | Card number, with brand detection |
+| `VueStripeCardExpiryElement` | `cardExpiry` | MM / YY expiry date |
+| `VueStripeCardCvcElement` | `cardCvc` | 3 or 4 digit security code |
 
 ## Usage
 
@@ -47,81 +14,59 @@ flowchart TD
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeElements>
-      <div class="card-form">
-        <div class="field">
-          <label>Card Number</label>
-          <VueStripeCardNumberElement
-            :options="elementStyle"
-            @change="onNumberChange"
-          />
-        </div>
-
-        <div class="row">
-          <div class="field">
-            <label>Expiration</label>
-            <VueStripeCardExpiryElement
-              :options="elementStyle"
-              @change="onExpiryChange"
-            />
-          </div>
-
-          <div class="field">
-            <label>CVC</label>
-            <VueStripeCardCvcElement
-              :options="elementStyle"
-              @change="onCvcChange"
-            />
-          </div>
-        </div>
-
-        <button :disabled="!allComplete">Pay</button>
-      </div>
+      <SplitCardForm :client-secret="clientSecret" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripeCardNumberElement,
-  VueStripeCardExpiryElement,
-  VueStripeCardCvcElement
-} from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
+import SplitCardForm from './SplitCardForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-
-const numberComplete = ref(false)
-const expiryComplete = ref(false)
-const cvcComplete = ref(false)
-
-const allComplete = computed(() =>
-  numberComplete.value && expiryComplete.value && cvcComplete.value
-)
-
-const elementStyle = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#32325d'
-    }
-  }
-}
-
-const onNumberChange = (event) => {
-  numberComplete.value = event.complete
-}
-
-const onExpiryChange = (event) => {
-  expiryComplete.value = event.complete
-}
-
-const onCvcChange = (event) => {
-  cvcComplete.value = event.complete
-}
+const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 </script>
 ```
+
+```vue
+<!-- SplitCardForm.vue -->
+<script setup>
+import { ref } from 'vue'
+import {
+  VueStripeCardNumberElement,
+  VueStripeCardExpiryElement,
+  VueStripeCardCvcElement,
+  useConfirmCardPayment
+} from '@vue-stripe/vue-stripe'
+
+const props = defineProps({ clientSecret: String })
+const numberRef = ref(null)
+const { confirmCardPayment, loading, error } = useConfirmCardPayment()
+
+const pay = async () => {
+  // Only the number element: Stripe reads expiry and CVC from its siblings
+  const card = numberRef.value?.element
+  if (!card) return
+  await confirmCardPayment(props.clientSecret, { payment_method: { card } })
+}
+</script>
+
+<template>
+  <form @submit.prevent="pay">
+    <label>Card number</label>
+    <VueStripeCardNumberElement ref="numberRef" :options="{ showIcon: true }" />
+    <label>Expiry</label>
+    <VueStripeCardExpiryElement />
+    <label>CVC</label>
+    <VueStripeCardCvcElement />
+    <button :disabled="loading">Pay</button>
+    <p v-if="error">{{ error }}</p>
+  </form>
+</template>
+```
+
+Each field emits its own `@change`; track `event.complete` from all three to enable the submit button, and `event.error?.message` for per-field errors.
 
 ## Props
 
@@ -290,163 +235,6 @@ import '@vue-stripe/vue-stripe/style.css'
 
 Target `.vue-stripe-element*` to style every element at once, or e.g. `.vue-stripe-cardNumber-element*` for one field.
 
-## Examples
-
-### Horizontal Layout
-
-```vue
-<template>
-  <div class="horizontal-card-form">
-    <VueStripeCardNumberElement class="number-field" />
-    <VueStripeCardExpiryElement class="expiry-field" />
-    <VueStripeCardCvcElement class="cvc-field" />
-  </div>
-</template>
-
-<style scoped>
-.horizontal-card-form {
-  display: flex;
-  gap: 1rem;
-}
-
-.number-field {
-  flex: 2;
-}
-
-.expiry-field,
-.cvc-field {
-  flex: 1;
-}
-</style>
-```
-
-### With Per-Field Errors
-
-```vue
-<script setup>
-import { ref } from 'vue'
-
-const numberError = ref('')
-const expiryError = ref('')
-const cvcError = ref('')
-
-const onNumberChange = (event) => {
-  numberError.value = event.error?.message || ''
-}
-
-const onExpiryChange = (event) => {
-  expiryError.value = event.error?.message || ''
-}
-
-const onCvcChange = (event) => {
-  cvcError.value = event.error?.message || ''
-}
-</script>
-
-<template>
-  <div class="field">
-    <label>Card Number</label>
-    <VueStripeCardNumberElement @change="onNumberChange" />
-    <span v-if="numberError" class="error">{{ numberError }}</span>
-  </div>
-
-  <div class="field">
-    <label>Expiration</label>
-    <VueStripeCardExpiryElement @change="onExpiryChange" />
-    <span v-if="expiryError" class="error">{{ expiryError }}</span>
-  </div>
-
-  <div class="field">
-    <label>CVC</label>
-    <VueStripeCardCvcElement @change="onCvcChange" />
-    <span v-if="cvcError" class="error">{{ cvcError }}</span>
-  </div>
-</template>
-```
-
-### Card Brand Detection
-
-```vue
-<script setup>
-import { ref, computed } from 'vue'
-
-const cardBrand = ref('unknown')
-
-const brandIcon = computed(() => {
-  const icons = {
-    visa: 'https://js.stripe.com/v3/fingerprinted/img/visa-365725566f9578a9589553aa9296d178.svg',
-    mastercard: 'https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg',
-    amex: 'https://js.stripe.com/v3/fingerprinted/img/amex-a49b82f46c5cd6a96a6e418a6ca1717c.svg',
-    unknown: null
-  }
-  return icons[cardBrand.value] || null
-})
-
-const onNumberChange = (event) => {
-  cardBrand.value = event.brand
-}
-</script>
-
-<template>
-  <div class="card-number-field">
-    <VueStripeCardNumberElement @change="onNumberChange" />
-    <img v-if="brandIcon" :src="brandIcon" class="brand-icon" />
-  </div>
-</template>
-```
-
-### Payment Submission
-
-```vue
-<!-- SplitCardForm.vue: rendered inside VueStripeElements -->
-<script setup>
-import {
-  VueStripeCardNumberElement,
-  VueStripeCardExpiryElement,
-  VueStripeCardCvcElement,
-  useConfirmCardPayment,
-  useStripeElements
-} from '@vue-stripe/vue-stripe'
-
-const props = defineProps({
-  clientSecret: { type: String, required: true }
-})
-
-const { getElement } = useStripeElements()
-const { confirmCardPayment, loading: processing } = useConfirmCardPayment()
-
-const handleSubmit = async () => {
-  // Get the card number element (expiry and CVC are linked automatically)
-  const cardNumberElement = getElement('cardNumber')
-  if (!cardNumberElement) return
-
-  const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
-    payment_method: {
-      card: cardNumberElement,
-      billing_details: {
-        name: 'Customer Name'
-      }
-    }
-  })
-
-  if (error) {
-    console.error(error.message)
-  } else if (paymentIntent.status === 'succeeded') {
-    console.log('Payment successful!')
-  }
-}
-</script>
-
-<template>
-  <form @submit.prevent="handleSubmit">
-    <VueStripeCardNumberElement />
-    <VueStripeCardExpiryElement />
-    <VueStripeCardCvcElement />
-    <button :disabled="processing">Pay</button>
-  </form>
-</template>
-```
-
 ## TypeScript
 
 ```ts
@@ -482,34 +270,11 @@ const expiryRef = ref<InstanceType<typeof VueStripeCardExpiryElement> | null>(nu
 const cvcRef = ref<InstanceType<typeof VueStripeCardCvcElement> | null>(null)
 ```
 
-## Test Cards
-
-Use these test card numbers in test mode:
-
-| Card | Number |
-|------|--------|
-| Visa | `4242 4242 4242 4242` |
-| Visa (debit) | `4000 0566 5566 5556` |
-| Mastercard | `5555 5555 5555 4444` |
-| American Express | `3782 822463 10005` |
-| Discover | `6011 1111 1111 1117` |
-| Declined | `4000 0000 0000 0002` |
-
-Use any future expiration date and any 3-digit CVC (4-digit for Amex).
-
-## Comparison: Split vs Unified
-
-| Feature | Split Elements | Unified CardElement |
-|---------|----------------|---------------------|
-| Layout Control | Full control | Limited |
-| Per-field Styling | Yes | Shared styles |
-| Per-field Errors | Yes | Single error |
-| Accessibility | Better (separate labels) | Basic |
-| Implementation | More code | Simpler |
-| Brand Detection | Via change event | Via change event |
-
 ## See Also
 
-- [StripeCardElement](/api/components/stripe-card-element) - Unified card input
-- [StripeElements](/api/components/stripe-elements) - Parent container
-- [useStripeElements](/api/composables/use-stripe-elements) - Access elements
+- [VueStripeCardElement](/api/components/stripe-card-element) - Number, expiry and CVC in one field
+- [VueStripeElements](/api/components/stripe-elements) - Parent container
+- [Card confirmers](/api/composables/confirm/cards) - `useConfirmCardPayment` and `useConfirmCardSetup`
+- [useCreatePaymentMethod](/api/composables/use-create-payment-method) - Create a PaymentMethod from the number element
+- [Accept card payments with the Card Element](/guide/card-element) - Step-by-step guide for the card fields
+- [Live demo](/live-demo/split-card-elements)

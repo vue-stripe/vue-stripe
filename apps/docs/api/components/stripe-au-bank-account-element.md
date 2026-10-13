@@ -1,80 +1,49 @@
 # VueStripeAuBankAccountElement
 
-A form element for collecting Australian bank account details (BSB and account number) for BECS Direct Debit payments.
+Collects an Australian BSB and account number for BECS Direct Debit (AUD only). The element validates the details and reports the bank and branch in `@change`. Use it inside [VueStripeElements](/api/components/stripe-elements), and confirm with [`useConfirmAuBecsDebitPayment()` or `useConfirmAuBecsDebitSetup()`](/api/composables/confirm/bank-debits), passing the exposed `element`. For the server and client steps, including the mandate, see [Accept BECS Direct Debit](/guide/au-bank-account-element). BECS payments stay `processing` for a few business days; [Payments that settle later](/guide/payment-objects#payments-that-settle-later) explains the status flow.
 
-::: tip When to Use
-Use VueStripeAuBankAccountElement for Australian customers. BECS Direct Debit is ideal for recurring payments and only supports AUD (Australian Dollar) currency.
+::: info Mandate
+BECS Direct Debit requires you to show the Direct Debit Request service agreement and collect the customer's consent before you confirm. [Accept BECS Direct Debit](/guide/au-bank-account-element#_3-render-the-form-with-the-mandate-and-confirm) has the mandate text.
 :::
-
-## What is AU Bank Account Element?
-
-AU Bank Account Element collects bank details for Australian payments:
-
-| Capability | Description |
-|------------|-------------|
-| **BSB Input** | 6-digit bank identifier with validation |
-| **Account Number** | Bank account number input |
-| **Bank Lookup** | Automatic bank/branch name from BSB |
-| **AUD Only** | Supports Australian Dollar exclusively |
-| **Direct Debit** | For recurring and one-time payments |
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["AuBankAccountElement mounts inside StripeElements"] --> B["Renders BSB & Account fields<br/>Emits @ready when mounted"]
-    B --> C["Customer enters bank details<br/>• 6-digit BSB number<br/>• Account number"]
-    C --> D["Validates and looks up bank<br/>Emits @change with bankName"]
-    D --> E{Submit with mandate?}
-    E -->|Yes| F["useConfirmAuBecsDebitPayment()<br/>confirmAuBecsDebitPayment() with billing_details"]
-    F --> G["Payment initiates<br/>Status: 'processing'"]
-    G --> H["Settlement in 3-4 business days<br/>Webhook confirms result"]
-```
 
 ## Usage
 
 ```vue
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <VueStripeAuBankAccountElement
-        :options="options"
-        @ready="onReady"
-        @change="onChange"
-      />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-
+<!-- BecsForm.vue: rendered inside VueStripeProvider > VueStripeElements -->
 <script setup>
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripeAuBankAccountElement
-} from '@vue-stripe/vue-stripe'
+import { ref } from 'vue'
+import { VueStripeAuBankAccountElement, useConfirmAuBecsDebitPayment } from '@vue-stripe/vue-stripe'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const props = defineProps({ clientSecret: String, name: String, email: String })
 
-const options = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770'
+const becsRef = ref(null)
+const complete = ref(false)
+const mandateAccepted = ref(false)
+const { confirmAuBecsDebitPayment, loading } = useConfirmAuBecsDebitPayment()
+
+const pay = async () => {
+  const account = becsRef.value?.element
+  if (!account) return
+  const { error, paymentIntent } = await confirmAuBecsDebitPayment(props.clientSecret, {
+    payment_method: {
+      au_becs_debit: account,
+      billing_details: { name: props.name, email: props.email }
     }
-  },
-  iconStyle: 'solid'
-}
-
-const onReady = (element) => {
-  console.log('AU Bank Account element ready', element)
-}
-
-const onChange = (event) => {
-  console.log('Bank:', event.bankName)
-  console.log('Branch:', event.branchName)
-  console.log('Complete:', event.complete)
+  })
+  console.log(error ? error.message : paymentIntent.status) // 'processing'
 }
 </script>
+
+<template>
+  <form @submit.prevent="pay">
+    <VueStripeAuBankAccountElement ref="becsRef" @change="(e) => (complete = e.complete)" />
+    <label>
+      <input v-model="mandateAccepted" type="checkbox" />
+      I agree to the Direct Debit Request service agreement
+    </label>
+    <button :disabled="!complete || !mandateAccepted || loading">Pay with BECS Direct Debit</button>
+  </form>
+</template>
 ```
 
 ## Props
@@ -92,42 +61,14 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 ```ts
 interface StripeAuBankAccountElementOptions {
   classes?: StripeElementClasses
-  style?: {
-    base?: StripeElementStyle
-    complete?: StripeElementStyle
-    empty?: StripeElementStyle
-    invalid?: StripeElementStyle
-  }
-  iconStyle?: 'default' | 'solid'
-  hideIcon?: boolean
+  style?: StripeElementStyle // { base, complete, empty, invalid }
+  iconStyle?: 'default' | 'solid' // style of the bank icon, default 'default'
+  hideIcon?: boolean // default false
   disabled?: boolean
 }
 ```
 
-### Style Properties
-
-```ts
-interface StripeElementStyle {
-  color?: string
-  fontFamily?: string
-  fontSize?: string
-  fontWeight?: string
-  iconColor?: string
-  lineHeight?: string
-  letterSpacing?: string
-  padding?: string
-  '::placeholder'?: { color?: string }
-  ':focus'?: StripeElementStyle
-  ':hover'?: StripeElementStyle
-}
-```
-
-### Icon Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `iconStyle` | `'default' \| 'solid'` | `'default'` | Style of the bank icon |
-| `hideIcon` | `boolean` | `false` | Whether to hide the icon |
+`style` is Stripe's [element style object](https://docs.stripe.com/js/appendix/style), with `base`, `complete`, `empty` and `invalid` variants.
 
 ## Events
 
@@ -146,12 +87,9 @@ interface StripeAuBankAccountElementChangeEvent {
   elementType: 'auBankAccount'
   empty: boolean
   complete: boolean
-  bankName?: string   // Bank name from BSB lookup
-  branchName?: string // Branch name from BSB lookup
-  error?: {
-    message: string
-    type: string
-  }
+  bankName?: string // bank name from the BSB
+  branchName?: string // branch name from the BSB
+  error?: { type: 'validation_error'; code: string; message: string }
 }
 ```
 
@@ -232,179 +170,6 @@ import '@vue-stripe/vue-stripe/style.css'
 
 Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-au-bank-account-element*` for this one.
 
-## Examples
-
-### Basic Usage
-
-```vue
-<VueStripeAuBankAccountElement
-  @change="(e) => console.log('Bank:', e.bankName)"
-/>
-```
-
-### With Icon Options
-
-```vue
-<VueStripeAuBankAccountElement
-  :options="{
-    iconStyle: 'solid',
-    hideIcon: false
-  }"
-/>
-```
-
-### With Custom Styling
-
-```vue
-<script setup>
-const options = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#32325d',
-      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-      '::placeholder': {
-        color: '#aab7c4'
-      }
-    }
-  },
-  iconStyle: 'solid'
-}
-</script>
-
-<template>
-  <VueStripeAuBankAccountElement :options="options" />
-</template>
-```
-
-### Complete BECS Payment with Mandate
-
-The page renders the providers; the form inside them confirms with [`useConfirmAuBecsDebitPayment()`](/api/composables/confirm/bank-debits):
-
-```vue
-<!-- BecsPage.vue -->
-<script setup lang="ts">
-import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
-import BecsForm from './BecsForm.vue'
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = 'pi_xxx_secret_xxx' // From your backend (currency: aud)
-</script>
-
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <BecsForm :client-secret="clientSecret" />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-```vue
-<!-- BecsForm.vue: rendered inside VueStripeElements -->
-<script setup lang="ts">
-import { ref } from 'vue'
-import {
-  VueStripeAuBankAccountElement,
-  useConfirmAuBecsDebitPayment,
-  useStripeElements
-} from '@vue-stripe/vue-stripe'
-import type { StripeAuBankAccountElementChangeEvent } from '@stripe/stripe-js'
-
-const props = defineProps<{ clientSecret: string }>()
-
-const { getElement } = useStripeElements()
-const { confirmAuBecsDebitPayment, loading } = useConfirmAuBecsDebitPayment()
-
-const bankName = ref('')
-const isComplete = ref(false)
-const mandateAccepted = ref(false)
-
-const handleChange = (event: StripeAuBankAccountElementChangeEvent) => {
-  bankName.value = event.bankName || ''
-  isComplete.value = event.complete
-}
-
-const confirmPayment = async () => {
-  const auBankElement = getElement('auBankAccount')
-  if (!auBankElement) return
-
-  const { error, paymentIntent } = await confirmAuBecsDebitPayment(props.clientSecret, {
-    payment_method: {
-      au_becs_debit: auBankElement,
-      billing_details: {
-        name: 'John Smith',
-        email: 'john@example.com'
-      }
-    }
-  })
-
-  if (error) {
-    console.error(error.message)
-  } else if (paymentIntent.status === 'processing') {
-    console.log('Payment processing - settles in 3-4 business days')
-  }
-}
-</script>
-
-<template>
-  <form @submit.prevent="confirmPayment">
-    <VueStripeAuBankAccountElement @change="handleChange" />
-
-    <div v-if="bankName" class="bank-info">
-      Bank: {{ bankName }}
-    </div>
-
-    <!-- Mandate Agreement (Required) -->
-    <div class="mandate">
-      <label>
-        <input v-model="mandateAccepted" type="checkbox" />
-        I agree to the Direct Debit Request service agreement
-      </label>
-    </div>
-
-    <button :disabled="!isComplete || !mandateAccepted || loading">
-      Pay with BECS Direct Debit
-    </button>
-  </form>
-</template>
-```
-
-### Displaying Bank Information
-
-```vue
-<script setup>
-import { ref } from 'vue'
-
-const bankInfo = ref({
-  bankName: '',
-  branchName: ''
-})
-
-const handleChange = (event) => {
-  if (event.bankName) {
-    bankInfo.value.bankName = event.bankName
-  }
-  if (event.branchName) {
-    bankInfo.value.branchName = event.branchName
-  }
-}
-</script>
-
-<template>
-  <div>
-    <VueStripeAuBankAccountElement @change="handleChange" />
-
-    <div v-if="bankInfo.bankName" class="bank-details">
-      <p><strong>Bank:</strong> {{ bankInfo.bankName }}</p>
-      <p v-if="bankInfo.branchName">
-        <strong>Branch:</strong> {{ bankInfo.branchName }}
-      </p>
-    </div>
-  </div>
-</template>
-```
-
 ## TypeScript
 
 ```ts
@@ -416,89 +181,21 @@ import type {
   StripeAuBankAccountElementOptions
 } from '@stripe/stripe-js'
 
-// Options
-const options: StripeAuBankAccountElementOptions = {
-  style: {
-    base: {
-      fontSize: '16px'
-    }
-  },
-  iconStyle: 'solid',
-  hideIcon: false
-}
-
-// Event handlers
-const handleReady = (element: StripeAuBankAccountElement) => {
-  console.log('Ready:', element)
-}
+const options: StripeAuBankAccountElementOptions = { iconStyle: 'solid' }
 
 const handleChange = (event: StripeAuBankAccountElementChangeEvent) => {
-  console.log('Bank:', event.bankName)
-  console.log('Branch:', event.branchName)
-  console.log('Complete:', event.complete)
+  console.log(event.complete, event.bankName, event.branchName)
 }
 
-// Template ref
-const auBankRef = ref<InstanceType<typeof VueStripeAuBankAccountElement> | null>(null)
+const becsRef = ref<InstanceType<typeof VueStripeAuBankAccountElement> | null>(null)
+const account = (): StripeAuBankAccountElement | null => becsRef.value?.element ?? null
 ```
-
-## Mandate Agreement
-
-BECS Direct Debit requires displaying and collecting consent for the Direct Debit Request Service Agreement:
-
-```vue
-<template>
-  <div class="mandate-text">
-    <p>
-      By providing your bank account details and confirming this payment, you agree
-      to this Direct Debit Request and the
-      <a href="https://stripe.com/au-becs-dd-service-agreement/legal" target="_blank">
-        Direct Debit Request service agreement
-      </a>,
-      and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit
-      User ID number 507156 ("Stripe") to debit your account through the Bulk Electronic
-      Clearing System (BECS) on behalf of <strong>{{ businessName }}</strong>
-      (the "Merchant") for any amounts separately communicated to you by the Merchant.
-    </p>
-  </div>
-</template>
-```
-
-## Payment Status Flow
-
-| Status | Meaning | When |
-|--------|---------|------|
-| `processing` | Payment initiated | Immediately after confirm |
-| `succeeded` | Payment successful | 3-4 business days |
-| `requires_payment_method` | Payment failed | 3-4 business days |
-
-Use webhooks to track final status:
-
-```ts
-// webhook handler
-switch (event.type) {
-  case 'payment_intent.succeeded':
-    // BECS payment settled
-    break
-  case 'payment_intent.payment_failed':
-    // BECS payment failed
-    break
-}
-```
-
-## Error Handling
-
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `invalid_bsb` | BSB number is invalid | Verify BSB format (6 digits) |
-| `invalid_account_number` | Account number invalid | Check account number format |
-| `payment_intent_unexpected_state` | PaymentIntent not in expected state | Check PaymentIntent status |
-| `mandate_data_missing` | The customer hasn't agreed to the BECS Direct Debit Request (DDR) service agreement | Collect the customer's mandate consent (show the DDR terms and pass `mandate_data` on confirmation) |
 
 ## See Also
 
-- [VueStripeElements](/api/components/stripe-elements) - Parent container component
-- [useStripeElements](/api/composables/use-stripe-elements) - Access elements in child components
-- [AU Bank Account Element Guide](/guide/au-bank-account-element) - Step-by-step implementation
-- [VueStripePaymentElement](/api/components/stripe-payment-element) - FPX and other payment methods
-- [VueStripeIbanElement](/api/components/stripe-iban-element) - SEPA payments
+- [Accept BECS Direct Debit](/guide/au-bank-account-element) - Server and client steps, with the mandate
+- [Bank debit confirmers](/api/composables/confirm/bank-debits) - `useConfirmAuBecsDebitPayment` and `useConfirmAuBecsDebitSetup`
+- [VueStripeElements](/api/components/stripe-elements) - Required parent
+- [VueStripeIbanElement](/api/components/stripe-iban-element) - SEPA Direct Debit
+- [Payments that settle later](/guide/payment-objects#payments-that-settle-later) - Why the PaymentIntent stays `processing`
+- [Live demo](/live-demo/becs-payment)

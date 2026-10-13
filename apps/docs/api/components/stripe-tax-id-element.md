@@ -1,10 +1,6 @@
 # VueStripeTaxIdElement
 
-Collects a business name and tax ID (e.g. EU VAT, GST, ABN). Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createTaxIdElement()`), or inside [VueStripeElements](/api/components/stripe-elements) with Stripe beta access (`elements.create('taxId')`).
-
-::: tip When to Use
-Use VueStripeTaxIdElement to collect and validate a business tax ID during checkout, so the resulting invoice and tax calculation reflect the customer's tax registration.
-:::
+Collects a business name and tax ID (e.g. EU VAT, GST, ABN). Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createTaxIdElement()`), or inside [VueStripeElements](/api/components/stripe-elements) with Stripe beta access (`elements.create('taxId')`). The tax ID it collects is used for the session's tax calculation and invoice.
 
 ::: danger Requires a beta flag
 The Tax ID element is beta-gated by Stripe. Initialize Stripe with the Tax ID beta flag, or `createTaxIdElement` will not exist at runtime. Pass it via the [`betas`](/api/components/stripe-provider#props) prop on `VueStripeProvider` (check [Stripe's Tax ID docs](https://docs.stripe.com/tax/advanced/tax-ids?payment-ui=embedded-components) for the current flag name):
@@ -45,6 +41,7 @@ import {
   VueStripeCheckoutElementsProvider,
   VueStripeTaxIdElement
 } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = '<checkout-session-client-secret>'

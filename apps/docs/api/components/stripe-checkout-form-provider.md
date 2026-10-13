@@ -1,50 +1,18 @@
 # VueStripeCheckoutFormProvider
 
-Initializes the **Checkout Form** via `stripe.initCheckoutFormSdk()` and provides the Checkout Form SDK to descendants. Place [`VueStripeCheckoutForm`](/api/components/stripe-checkout-form) inside it to render Stripe's complete checkout form on your page, and confirm with the [`useCheckoutForm`](/api/composables/use-checkout-form) composable.
+Initializes the **Checkout Form** via `stripe.initCheckoutFormSdk()` and provides the Checkout Form SDK to descendants. Place [`VueStripeCheckoutForm`](/api/components/stripe-checkout-form) inside it to render Stripe's complete checkout form on your page, and confirm with the [`useCheckoutForm`](/api/composables/use-checkout-form) composable. [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) compares it with the other Checkout options.
+
+- Use it inside [`VueStripeProvider`](/api/components/stripe-provider), or in an app that installs the [`createVueStripe()`](/api/plugin) plugin.
+- Pass the `client_secret` of a Checkout Session created on your server with `ui_mode: 'form'` (Stripe API version `2026-03-25.dahlia` or later). [Add the Checkout Form](/guide/checkout-form) shows the server code.
+- The provider shows its `#loading` slot until the Stripe instance exists, then calls `stripe.initCheckoutFormSdk()`, which returns the SDK synchronously, and renders its children at once. `@ready` fires when the session actions have loaded (`loadActions()`), and `@change` on every session change.
 
 ::: warning Beta: requires Stripe access
 The Checkout Form SDK is a Stripe beta (`ui_mode: 'form'`). Your Stripe account needs access; contact [Stripe support](https://support.stripe.com/) to join. Some form options have their own gate: the `compact` layout is a separate private preview, and without it the form reports *"The `compact` layout is not available for your account"* through its `#error` slot and `@loaderror`.
 :::
 
-::: tip Checkout Form vs. Elements with Checkout Sessions
-- **`VueStripeCheckoutFormProvider`** (this): Stripe renders the whole form (contact, addresses, shipping, tax ID, express checkout, payment and the Pay button) in one element. Least code.
-- **[`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider)**: you compose the page from individual elements (Payment, Address, Express Checkout, ...) and drive the session yourself.
-- **[`VueStripeCheckout`](/api/components/stripe-checkout)**: redirect to Stripe's hosted Checkout page.
-:::
-
 ::: tip Live demo
 The [Checkout Form demo](/live-demo/checkout-form) pays a Checkout Session with this provider, `VueStripeCheckoutForm` and `useCheckoutForm()`.
 :::
-
-## Requirements
-
-- Must be used **inside** [`VueStripeProvider`](/api/components/stripe-provider), or in an app that installs the [`createVueStripe()`](/api/plugin) plugin.
-- Needs a Checkout Session created on your server with `ui_mode: 'form'` (Stripe API version `2026-03-25.dahlia` or later); pass its `client_secret` to the provider.
-
-```js
-// Node.js
-const session = await stripe.checkout.sessions.create({
-  ui_mode: 'form',
-  line_items: [{ price: 'price_xxx', quantity: 1 }],
-  mode: 'payment',
-  return_url: 'https://example.com/complete?session_id={CHECKOUT_SESSION_ID}'
-})
-
-res.json({ clientSecret: session.client_secret })
-```
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["VueStripeCheckoutFormProvider mounts inside VueStripeProvider"] --> B["Waits for the Stripe instance<br/>(#loading slot)"]
-    B --> C["stripe.initCheckoutFormSdk({ clientSecret, appearance, ... })<br/>(synchronous: the SDK exists right away)"]
-    C --> D["Default slot renders<br/>VueStripeCheckoutForm mounts through sdk.createForm()"]
-    C --> E["sdk.loadActions()"]
-    E -->|success| F["actions + session available<br/>loading = false, @ready(actions)"]
-    E -->|error| G["#error slot, @error(message)"]
-    F --> H["sdk.on('change') keeps session in sync<br/>@change(session)"]
-```
 
 ## Usage
 
@@ -59,6 +27,7 @@ flowchart TD
 
 <script setup>
 import { VueStripeProvider, VueStripeCheckoutFormProvider } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import PayForm from './PayForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY

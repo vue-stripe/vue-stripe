@@ -1,14 +1,6 @@
 # Issuing Elements
 
-Six components that wrap Stripe's [Issuing Elements](https://docs.stripe.com/issuing/elements). They show the sensitive details of a card you issued with Stripe Issuing (number, CVC, expiry date, PIN) inside Stripe-hosted iframes, copy them to the clipboard, or add the card to a wallet. The card data never touches your page or your server.
-
-::: tip Walkthrough
-The [Issuing Elements guide](/guide/issuing) explains the ephemeral key nonce flow end to end, with a server endpoint.
-:::
-
-::: info No live demo
-Issuing Elements need an account onboarded to Stripe Issuing and an issued card. The docs' live demos run on an account without Issuing, so these elements have no live demo; the [Issuing guide](/guide/issuing) walks through the full flow.
-:::
+Six components that wrap Stripe's [Issuing Elements](https://docs.stripe.com/issuing/elements). They show the sensitive details of a card you issued with Stripe Issuing (number, CVC, expiry date, PIN) inside Stripe-hosted iframes, copy them to the clipboard, or add the card to a wallet. The card data never touches your page or your server. [Display issued card details](/guide/issuing) walks through the ephemeral key nonce flow end to end, with the server endpoint; these elements have no live demo, because the docs' demo account has no Issuing.
 
 | Component | Stripe.js element type | Events |
 |-----------|------------------------|--------|
@@ -26,10 +18,10 @@ Issuing Elements need an account onboarded to Stripe Issuing and an issued card.
 
 The events are exactly the ones Stripe.js 10 declares for each element type. The CVC, expiry and PIN displays declare none, so the components show them as soon as they are mounted instead of waiting for `ready`.
 
-## Requirements
+Requirements:
 
 - A Stripe account with **Issuing** enabled and an issued card (`ic_...`).
-- A server endpoint that exchanges an ephemeral key **nonce** for an **ephemeral key** for that card (see the [guide](/guide/issuing#_1-server-create-the-ephemeral-key)).
+- A server endpoint that exchanges an ephemeral key **nonce** for an **ephemeral key** for that card (see [the guide](/guide/issuing#_1-create-the-ephemeral-key-on-your-server)).
 - `<VueStripeElements>` with no `clientSecret` and no `mode`: Issuing Elements do not take part in a payment.
 - They are not available inside `<VueStripeCheckoutElementsProvider>` (Checkout Sessions have no Issuing Elements); there the component shows a "not available inside Checkout Sessions" error.
 
@@ -49,6 +41,7 @@ import {
   VueStripeIssuingCardCvcDisplayElement,
   VueStripeIssuingCardCopyButtonElement
 } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const props = defineProps<{ cardId: string }>()
 const { createEphemeralKeyNonce } = useEphemeralKeyNonce()
@@ -84,7 +77,7 @@ const style = { base: { color: '#ffffff', fontSize: '16px' } }
 ```
 
 ::: warning Retrieve the card first when Stripe asks for it
-Stripe's guide calls `stripe.retrieveIssuingCard(cardId, { ephemeralKeySecret, nonce })` before creating Issuing Elements, and requires it with the `issuing_elements_2` beta (Connect, physical card details): without it element creation fails with "Issuing card has not been retrieved." Stripe.js 10.0.0 does not declare `retrieveIssuingCard` in its types; see the [guide](/guide/issuing#_3-client-retrieve-the-card) for a typed call.
+Stripe's guide calls `stripe.retrieveIssuingCard(cardId, { ephemeralKeySecret, nonce })` before creating Issuing Elements, and requires it with the `issuing_elements_2` beta (Connect, physical card details): without it element creation fails with "Issuing card has not been retrieved." Stripe.js 10.0.0 does not declare `retrieveIssuingCard` in its types; see the [guide](/guide/issuing#_3-retrieve-the-card) for a typed call.
 :::
 
 ## Props
@@ -128,6 +121,14 @@ interface IssuingAddToWalletButtonOptions {
 
 `nonce` and `ephemeralKeySecret` are optional in the display types, but Stripe needs them to fetch the card details: always pass both.
 
+### Add to Wallet
+
+`issuingAddToWalletButton` is a Stripe private preview. Load Stripe with the betas Stripe lists for it, through the provider's [`betas`](/api/components/stripe-provider#props) prop: `['issuing_add_to_wallet_button_element_1', 'issuing_elements_2']`. [Add an Add to Wallet button](/guide/issuing#add-an-add-to-wallet-button) shows the markup.
+
+Without those betas Stripe.js rejects the type when the component creates it ("A valid Element name must be provided ... you passed: issuingAddToWalletButton"), and the component shows that message in its `#error` slot.
+
+Stripe.js 10.0.0 lists `'issuingAddToWalletButton'` in `StripeElementType` but has no typed `elements.create()` overload for it. The component creates it by type name and still types its `options`, `element` and events with `StripeIssuingAddToWalletButtonElementOptions` / `StripeIssuingAddToWalletButtonElement`.
+
 ## Events
 
 ### VueStripeIssuingCardNumberDisplayElement
@@ -140,7 +141,7 @@ interface IssuingAddToWalletButtonOptions {
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@click` | `{ elementType: 'issuingCardCopyButton' }` | The button was clicked and the detail copied; show your "Copied" feedback here |
+| `@click` | `{ elementType: 'issuingCardCopyButton' }` | The button was clicked and the detail copied; show your "Copied" feedback here. The button is a transparent iframe that fills its parent, so size and decorate the parent yourself |
 
 ### VueStripeIssuingAddToWalletButtonElement
 
@@ -186,60 +187,6 @@ const number = (): StripeIssuingCardNumberDisplayElement | null => numberRef.val
 </script>
 ```
 
-## Copy Button Feedback
-
-The copy button renders a transparent iframe over its parent `<div>`. Size and decorate the parent yourself, and use `@click` to show feedback:
-
-```vue
-<script setup>
-import { ref } from 'vue'
-import { VueStripeIssuingCardCopyButtonElement } from '@vue-stripe/vue-stripe'
-
-const copied = ref(false)
-const onCopied = () => {
-  copied.value = true
-  setTimeout(() => (copied.value = false), 2000)
-}
-</script>
-
-<template>
-  <div class="copy-icon" :class="{ copied }">
-    <VueStripeIssuingCardCopyButtonElement :options="{ toCopy: 'number' }" @click="onCopied" />
-  </div>
-</template>
-
-<style scoped>
-.copy-icon {
-  position: relative;
-  width: 24px;
-  height: 24px;
-}
-</style>
-```
-
-## Add to Wallet
-
-`issuingAddToWalletButton` is a Stripe private preview. Load Stripe with the betas Stripe lists for it:
-
-```vue
-<VueStripeProvider
-  :publishable-key="publishableKey"
-  :betas="['issuing_add_to_wallet_button_element_1', 'issuing_elements_2']"
->
-  <VueStripeElements v-if="card">
-    <VueStripeIssuingAddToWalletButtonElement
-      :options="{ ...card, wallet: 'apple', buttonHeight: 50 }"
-      @click="onWalletClick"
-      @success="onAddedToWallet"
-    />
-  </VueStripeElements>
-</VueStripeProvider>
-```
-
-Without those betas Stripe.js rejects the type when the component creates it ("A valid Element name must be provided ... you passed: issuingAddToWalletButton"), and the component shows that message in its `#error` slot.
-
-Stripe.js 10.0.0 lists `'issuingAddToWalletButton'` in `StripeElementType` but has no typed `elements.create()` overload for it. The component creates it by type name and still types its `options`, `element` and events with `StripeIssuingAddToWalletButtonElementOptions` / `StripeIssuingAddToWalletButtonElement`.
-
 ## Styling
 
 Each component renders this markup around Stripe's iframe (`<type>` is `issuing-card-number-display`, `issuing-card-cvc-display`, `issuing-card-expiry-display`, `issuing-card-pin-display`, `issuing-card-copy-button` or `issuing-add-to-wallet-button`):
@@ -278,7 +225,7 @@ import type {
 
 ## See Also
 
-- [Issuing Elements guide](/guide/issuing) - the nonce and ephemeral key flow
-- [VueStripeElements](/api/components/stripe-elements) - the Elements group the components need
-- [useEphemeralKeyNonce](/api/composables/use-ephemeral-key-nonce) - creates the nonce with `createEphemeralKeyNonce()`
+- [Display issued card details](/guide/issuing) - The nonce and ephemeral key flow, copy feedback and Add to Wallet
+- [VueStripeElements](/api/components/stripe-elements) - The Elements group the components need
+- [useEphemeralKeyNonce](/api/composables/use-ephemeral-key-nonce) - Creates the nonce with `createEphemeralKeyNonce()`
 - [Stripe docs: Using Issuing Elements](https://docs.stripe.com/issuing/elements)

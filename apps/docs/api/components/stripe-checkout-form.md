@@ -1,13 +1,9 @@
 # VueStripeCheckoutForm
 
-Renders Stripe's complete **Checkout Form**: contact details, addresses, shipping options, tax ID, express checkout wallets, the payment method, the order total and the Pay button, in one element. Use it inside a [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider), which creates it with `checkoutFormSdk.createForm()`.
+Renders Stripe's complete **Checkout Form**: contact details, addresses, shipping options, tax ID, express checkout wallets, the payment method, the order total and the Pay button, in one element. Use it inside a [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider), which creates it with `checkoutFormSdk.createForm()`. To lay out the fields yourself, use [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) with individual elements; [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) compares the options. [Add the Checkout Form](/guide/checkout-form) walks through a full integration.
 
 ::: warning Beta: requires Stripe access
 The Checkout Form is a Stripe beta. Your Stripe account needs access to the Checkout Form SDK; the `compact` layout is a separate private preview. Without access, Stripe's message appears in the `#error` slot and `@loaderror` fires.
-:::
-
-::: tip When to Use
-Use VueStripeCheckoutForm when you want Stripe's full checkout UI on your own page with the least code. To lay out the fields yourself, use [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) with individual elements instead.
 :::
 
 ::: tip Live demo

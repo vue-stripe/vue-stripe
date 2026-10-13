@@ -1,46 +1,10 @@
 # VueStripeEmbeddedCheckout
 
-Embeds Stripe's prebuilt Checkout page in your site with `stripe.createEmbeddedCheckoutPage()`. Stripe renders the whole payment form (line items, totals, payment methods, address and tax fields) in an iframe on your page, driven by a Checkout Session.
+Embeds Stripe's prebuilt Checkout page in your site with `stripe.createEmbeddedCheckoutPage()`. Stripe renders the whole payment form (line items, totals, payment methods, address and tax fields) in an iframe on your page, driven by a Checkout Session. [Choosing an integration](/guide/approaches#choosing-among-the-checkout-options) compares it with the other Checkout options, and [Embed Stripe Checkout](/guide/embedded-checkout) shows the server and client code.
 
-::: tip Embedded Checkout vs. the other checkout options
-- **`VueStripeEmbeddedCheckout`** (this) - Stripe's Checkout page inside your page (`ui_mode: 'embedded_page'`). The least code; you do not lay out the form.
-- **`VueStripeCheckout`** - redirect to Stripe's hosted Checkout page on `checkout.stripe.com`.
-- **`VueStripeCheckoutElementsProvider`** - your own layout with Stripe Elements, backed by a Checkout Session (`ui_mode: 'elements'`).
-:::
-
-## Requirements
-
-- Must be used **inside** [`VueStripeProvider`](/api/components/stripe-provider). It does not need `VueStripeElements`.
-- Needs a Checkout Session created on your server with `ui_mode: 'embedded_page'` and a `return_url`; pass its `client_secret` to the component.
-- Stripe allows **one** Embedded Checkout per page. A second `VueStripeEmbeddedCheckout` mounted at the same time reports an error instead of loading.
-
-```js
-// Node.js
-const session = await stripe.checkout.sessions.create({
-  ui_mode: 'embedded_page',
-  line_items: [{ price: 'price_xxx', quantity: 1 }],
-  mode: 'payment',
-  return_url: 'https://example.com/complete?session_id={CHECKOUT_SESSION_ID}'
-})
-
-res.json({ clientSecret: session.client_secret })
-```
-
-## How It Works
-
-```mermaid
-flowchart TD
-    A["VueStripeEmbeddedCheckout mounts inside VueStripeProvider"] --> B{"clientSecret or<br/>fetchClientSecret given?"}
-    B -->|No| X["#error slot, @error(message)"]
-    B -->|Yes| C{"Another Embedded Checkout<br/>already on the page?"}
-    C -->|Yes| X
-    C -->|No| D["await stripe.createEmbeddedCheckoutPage(options)<br/>(#loading slot)"]
-    D -->|rejects| X
-    D -->|resolves| E["checkout.mount(element)<br/>@ready(checkout)"]
-    E --> F["Customer pays in Stripe's iframe<br/>@analytics(event) along the way"]
-    F --> G["Redirect to return_url, or @complete<br/>(redirect_on_completion: 'if_required' / 'never')"]
-    E --> H["Component unmounts: checkout.destroy()"]
-```
+- Use it inside [`VueStripeProvider`](/api/components/stripe-provider). It does not need `VueStripeElements`.
+- Pass the `client_secret` of a Checkout Session created on your server with `ui_mode: 'embedded_page'` and a `return_url`.
+- Stripe allows one Embedded Checkout per page. A second `VueStripeEmbeddedCheckout` mounted at the same time reports an error instead of loading.
 
 ## Usage
 
@@ -58,6 +22,7 @@ flowchart TD
 
 <script setup>
 import { VueStripeProvider, VueStripeEmbeddedCheckout } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
@@ -157,6 +122,15 @@ const onAnalytics = (event) => {
 </template>
 ```
 
+### Errors
+
+| Error | Cause | Fix |
+|-------|-------|----------|
+| `VueStripeProviderError` (thrown) | Not inside `VueStripeProvider` | Wrap the component in `VueStripeProvider` |
+| `requires a clientSecret or fetchClientSecret prop` | Neither prop given | Pass one of them |
+| `Only one VueStripeEmbeddedCheckout can be mounted at a time` | A second instance mounted while the first is on the page | Unmount the first one (`v-if`) before mounting another |
+| Stripe error message | Invalid or expired client secret, session not `ui_mode: 'embedded_page'` | Create a new session on your server |
+
 ## Slots
 
 ### Loading Slot
@@ -193,7 +167,7 @@ Rendered when the page could not be created:
 
 The component calls `checkout.destroy()` when it unmounts, so you rarely need the instance yourself. Removing the component (for example with `v-if`) destroys the page, which takes the place of Stripe's `checkout.unmount()`; mount a new component to show Checkout again.
 
-## Markup and Styling
+## Styling
 
 The component renders the same parts as the element components, so the shared `vue-stripe-element-*` styles apply:
 
@@ -205,16 +179,13 @@ The component renders the same parts as the element components, so the shared `v
 </div>
 ```
 
+The default styles for these classes ship in the package stylesheet. Import it once in your app:
+
+```ts
+import '@vue-stripe/vue-stripe/style.css'
+```
+
 Style the Checkout page itself in the [Stripe Dashboard branding settings](https://dashboard.stripe.com/settings/branding) or with the session's `branding_settings`.
-
-## Error Handling
-
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `VueStripeProviderError` (thrown) | Not inside `VueStripeProvider` | Wrap the component in `VueStripeProvider` |
-| `requires a clientSecret or fetchClientSecret prop` | Neither prop given | Pass one of them |
-| `Only one VueStripeEmbeddedCheckout can be mounted at a time` | A second instance mounted while the first is on the page | Unmount the first one (`v-if`) before mounting another |
-| Stripe error message | Invalid or expired client secret, session not `ui_mode: 'embedded_page'` | Create a new session on your server |
 
 ## TypeScript
 
@@ -238,7 +209,7 @@ const onAnalytics = (event: StripeEmbeddedCheckoutAnalyticsEventUnion): void => 
 
 ## See Also
 
-- [Embedded Checkout Guide](/guide/embedded-checkout) - Step-by-step tutorial
+- [Embed Stripe Checkout](/guide/embedded-checkout) - How-to guide with the server code
 - [Embedded Checkout Live Demo](/live-demo/embedded-checkout) - Pay with a test card
 - [VueStripeCheckout](/api/components/stripe-checkout) - Redirect to hosted Checkout instead
 - [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) - Your own layout on a Checkout Session
