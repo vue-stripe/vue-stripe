@@ -27,7 +27,7 @@ import { VueStripeProviderError } from '../utils/errors'
  */
 export function useCreatePaymentMethod(): UseCreatePaymentMethodReturn {
   const stripeInstance = inject(stripeInjectionKey)
-  const elementsInstance = inject(stripeElementsInjectionKey)
+  const elementsInstance = inject(stripeElementsInjectionKey, null)
 
   if (!stripeInstance) {
     throw new VueStripeProviderError(
