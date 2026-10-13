@@ -2,6 +2,9 @@ import type { Ref } from 'vue-demi'
 
 // Import specific Stripe types we need
 import type {
+  Appearance,
+  CssFontSource,
+  CustomFontSource,
   Stripe,
   StripeElements,
   StripeElementsOptions,
@@ -260,11 +263,11 @@ export interface VueStripeElementsProps {
    * Appearance API options to theme the Elements.
    * @see https://docs.stripe.com/elements/appearance-api
    */
-  appearance?: Record<string, unknown> | undefined
+  appearance?: Appearance | undefined
   /**
    * Custom fonts to load into the Elements iframe.
    */
-  fonts?: Array<Record<string, unknown>> | undefined
+  fonts?: Array<CssFontSource | CustomFontSource> | undefined
   /**
    * Locale to display the Elements in (e.g. 'en', 'fr', 'auto').
    */

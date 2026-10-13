@@ -6,7 +6,9 @@ import {
   VueStripeElements,
   VueStripeCardElement,
   VueStripePaymentElement,
-  useStripeElements
+  useStripeElements,
+  type Appearance,
+  type CssFontSource
 } from '@vue-stripe/vue-stripe'
 import {
   Card,
@@ -132,8 +134,8 @@ const ElementsConsumer = defineComponent({
 })
 
 // Appearance options for customization demo
-const appearanceOptions = {
-  theme: 'stripe' as const,
+const appearanceOptions: Appearance = {
+  theme: 'stripe',
   variables: {
     colorPrimary: '#0570de',
     colorBackground: '#ffffff',
@@ -145,8 +147,8 @@ const appearanceOptions = {
   }
 }
 
-const darkAppearance = {
-  theme: 'night' as const,
+const darkAppearance: Appearance = {
+  theme: 'night',
   variables: {
     colorPrimary: '#7c3aed'
   }
@@ -156,7 +158,7 @@ const darkAppearance = {
 // (elements.update() -> @update-end) and whose amount re-creates the group.
 const updateAmount = ref(1099)
 const updateTheme = ref<'stripe' | 'night'>('stripe')
-const updateAppearance = computed(() => ({ theme: updateTheme.value }))
+const updateAppearance = computed<Appearance>(() => ({ theme: updateTheme.value }))
 const updateEndCount = ref(0)
 const paymentElementRef = ref<{ element: unknown } | null>(null)
 const toggleUpdateTheme = () => {
@@ -173,7 +175,7 @@ const onUpdateEnd = () => {
 }
 
 // Custom fonts demo (first-class `fonts` prop, #389)
-const customFonts = [{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]
+const customFonts: CssFontSource[] = [{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]
 
 // Tracks the themed Card element mounting successfully (proves first-class
 // appearance/fonts/locale props flow through to a real Stripe element).

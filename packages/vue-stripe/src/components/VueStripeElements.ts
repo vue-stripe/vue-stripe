@@ -11,7 +11,11 @@ import {
   type PropType
 } from 'vue-demi'
 import type {
+  Appearance,
+  CssFontSource,
+  CustomFontSource,
   StripeElements,
+  StripeElementsOptions,
   StripeElementsOptionsClientSecret,
   StripeElementsOptionsMode,
   StripeElementsUpdateOptions
@@ -47,17 +51,20 @@ export default /* @__PURE__ */ defineComponent({
     captureMethod: { type: String as PropType<CaptureMethod | undefined>, default: undefined },
     /** Appearance API options (theme, variables, rules). Applied live via elements.update(). */
     appearance: {
-      type: Object as PropType<Record<string, unknown> | undefined>,
+      type: Object as PropType<Appearance | undefined>,
       default: undefined
     },
     /** Custom fonts (CssFontSource | CustomFontSource); creation time only. */
     fonts: {
-      type: Array as PropType<Array<Record<string, unknown>> | undefined>,
+      type: Array as PropType<Array<CssFontSource | CustomFontSource> | undefined>,
       default: undefined
     },
     locale: { type: String as PropType<string | undefined>, default: undefined },
     /** Any other `stripe.elements()` option (e.g. allowedPaymentMethodTypes in mode-based flows). */
-    options: { type: Object as PropType<Record<string, unknown> | undefined>, default: undefined }
+    options: {
+      type: Object as PropType<StripeElementsOptions | Record<string, unknown> | undefined>,
+      default: undefined
+    }
   },
   emits: ['ready', 'error', 'update-end'],
   setup(props, { emit, slots }) {
