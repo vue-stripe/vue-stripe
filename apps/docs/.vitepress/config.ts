@@ -31,24 +31,22 @@ const explanationMatch = `^/guide/(${explanationSlugs.join('|')})$`
 // Every other /guide/ page, the documentation overview at /guide/ included, is a how-to guide.
 const howToMatch = `^/guide/(?!(${tutorialSlugs.join('|')}|(${explanationSlugs.join('|')})$))`
 
-// Sidebar entries may name pages that are still being written. Hide those until their
-// Markdown file exists (the OG image step reads every linked file and would fail the build),
-// and say so in the build output. A group left with no entries is hidden too.
+// A sidebar link to a page that does not exist fails the build with the link in the message,
+// instead of the OG image step's bare ENOENT (it reads every linked file).
 const docsRoot = fileURLToPath(new URL('../', import.meta.url))
 const pageExists = (link: string) =>
   existsSync(`${docsRoot}${link.slice(1)}${link.endsWith('/') ? 'index' : ''}.md`)
-const withPages = (items: DefaultTheme.SidebarItem[]): DefaultTheme.SidebarItem[] =>
-  items.flatMap((item) => {
+const requirePages = (items: DefaultTheme.SidebarItem[]): DefaultTheme.SidebarItem[] =>
+  items.map((item) => {
     if (item.link && !pageExists(item.link)) {
-      console.warn(`[Vue Stripe docs] Sidebar entry hidden, no page yet: ${item.link}`)
-      return []
+      throw new Error(
+        `[Vue Stripe docs] Sidebar entry "${item.text}" links a missing page: ${item.link}`
+      )
     }
-    if (!item.items) return [item]
-    const children = withPages(item.items)
-    return children.length || item.link ? [{ ...item, items: children }] : []
+    return item.items ? { ...item, items: requirePages(item.items) } : item
   })
 
-const guideSidebar: DefaultTheme.SidebarItem[] = withPages([
+const guideSidebar: DefaultTheme.SidebarItem[] = requirePages([
   {
     text: 'Start here',
     items: [{ text: 'Documentation overview', link: '/guide/' }]
@@ -149,7 +147,7 @@ const guideSidebar: DefaultTheme.SidebarItem[] = withPages([
   }
 ])
 
-const referenceSidebar: DefaultTheme.SidebarItem[] = withPages([
+const referenceSidebar: DefaultTheme.SidebarItem[] = requirePages([
   {
     text: 'Reference',
     items: [
