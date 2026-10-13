@@ -37,8 +37,8 @@ Like the React component, it also accepts a `stripe` prop (a `Stripe` instance, 
 
 ```vue
 <script setup>
-import { loadStripe } from '@stripe/stripe-js'
-import { VueStripeFinancialAccountDisclosure } from '@vue-stripe/vue-stripe'
+// The library re-exports Stripe.js' loadStripe
+import { loadStripe, VueStripeFinancialAccountDisclosure } from '@vue-stripe/vue-stripe'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 </script>

@@ -186,12 +186,13 @@ Best for: Payment handling, conditional rendering, any reactive UI
 
 ```vue
 <script setup>
-const { stripe, loading } = useStripe()
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
+
+// Injects the Stripe and Elements instances from the providers above
+const { confirmPayment, loading, error } = usePaymentIntent()
 
 const handlePayment = async () => {
-  if (stripe.value) {
-    await stripe.value.confirmPayment({ ... })
-  }
+  await confirmPayment({ clientSecret, confirmParams: { ... } })
 }
 </script>
 ```
@@ -287,21 +288,23 @@ const { stripe } = useStripe() // Works!
 ### 3. Forgetting to wait for loading
 
 ```vue
-<!-- Wrong - stripe might be null -->
+<!-- Wrong - runs during setup, Stripe.js might still be loading -->
+<script setup>
+const { confirmPayment } = usePaymentIntent()
+confirmPayment({ ... }) // Resolves to { error: { message: 'Stripe not initialized' } }
+</script>
+
+<!-- Correct - confirm on a user action, once Stripe is ready -->
 <script setup>
 const { stripe } = useStripe()
-stripe.value.confirmPayment(...) // Error if still loading!
+const { confirmPayment, loading } = usePaymentIntent()
+
+const pay = () => confirmPayment({ ... })
 </script>
 
-<!-- Correct - check first -->
-<script setup>
-const { stripe, loading } = useStripe()
-
-const pay = async () => {
-  if (!stripe.value) return
-  await stripe.value.confirmPayment(...)
-}
-</script>
+<template>
+  <button :disabled="!stripe || loading" @click="pay">Pay</button>
+</template>
 ```
 
 ## Next Steps

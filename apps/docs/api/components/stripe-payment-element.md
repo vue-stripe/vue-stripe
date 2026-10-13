@@ -25,7 +25,7 @@ flowchart TD
     A["Customer lands on checkout page"] --> B["PaymentElement renders inside StripeElements<br/>(Receives Elements instance + clientSecret from context)"]
     B --> C["Stripe determines available payment methods based on:<br/>• PaymentIntent currency and amount<br/>• Customer's location and device<br/>• Your Dashboard payment method settings"]
     C --> D["Customer fills payment details<br/>(Emits @change with { complete, value } on each input)"]
-    D --> E["On submit: Call stripe.confirmPayment()"]
+    D --> E["On submit: Call usePaymentIntent().confirmPayment()"]
     E --> F{Result?}
     F -->|Success| G["<b>SUCCESS</b><br/>PaymentIntent status: 'succeeded'"]
     F -->|Requires Action| H["<b>REQUIRES ACTION</b><br/>Redirect to 3D Secure, bank auth,<br/>or other flow then return to return_url"]
@@ -42,9 +42,8 @@ flowchart TD
         @ready="onReady"
         @change="onChange"
       />
-      <button @click="handleSubmit" :disabled="!isComplete">
-        Pay
-      </button>
+      <!-- A child component confirms with usePaymentIntent(), see the complete example below -->
+      <PaymentFormButton :client-secret="clientSecret" :disabled="!isComplete" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
@@ -56,6 +55,7 @@ import {
   VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 import { ref } from 'vue'
+import PaymentFormButton from './PaymentFormButton.vue'
 
 const publishableKey = 'pk_test_...'
 const clientSecret = 'pi_xxx_secret_xxx' // From your backend
@@ -382,14 +382,13 @@ import {
   VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
 
+// Calls usePaymentIntent(), so it must render inside VueStripeElements
+import PaymentFormButton from './PaymentFormButton.vue'
+
 const publishableKey = 'pk_test_...'
 const clientSecret = 'pi_xxx_secret_xxx'
 
 const isComplete = ref(false)
-const status = ref('')
-
-// This component must be inside VueStripeProvider
-// Using a child component for the form is recommended
 </script>
 
 <template>
@@ -404,8 +403,7 @@ const status = ref('')
 
 ```vue
 <!-- PaymentFormButton.vue - child component -->
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{

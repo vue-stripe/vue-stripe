@@ -26,7 +26,7 @@ flowchart TD
     B --> C["Customer enters bank details<br/>• 6-digit BSB number<br/>• Account number"]
     C --> D["Validates and looks up bank<br/>Emits @change with bankName"]
     D --> E{Submit with mandate?}
-    E -->|Yes| F["stripe.confirmAuBecsDebitPayment()<br/>with billing_details"]
+    E -->|Yes| F["useConfirmAuBecsDebitPayment()<br/>confirmAuBecsDebitPayment() with billing_details"]
     F --> G["Payment initiates<br/>Status: 'processing'"]
     G --> H["Settlement in 3-4 business days<br/>Webhook confirms result"]
 ```
@@ -279,46 +279,65 @@ const options = {
 
 ### Complete BECS Payment with Mandate
 
+The page renders the providers; the form inside them confirms with [`useConfirmAuBecsDebitPayment()`](/api/composables/confirm/bank-debits):
+
 ```vue
+<!-- BecsPage.vue -->
+<script setup lang="ts">
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
+import BecsForm from './BecsForm.vue'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const clientSecret = 'pi_xxx_secret_xxx' // From your backend (currency: aud)
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements>
+      <BecsForm :client-secret="clientSecret" />
+    </VueStripeElements>
+  </VueStripeProvider>
+</template>
+```
+
+```vue
+<!-- BecsForm.vue: rendered inside VueStripeElements -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  VueStripeProvider,
-  VueStripeElements,
   VueStripeAuBankAccountElement,
-  useStripe,
+  useConfirmAuBecsDebitPayment,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
+import type { StripeAuBankAccountElementChangeEvent } from '@stripe/stripe-js'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const props = defineProps<{ clientSecret: string }>()
+
+const { getElement } = useStripeElements()
+const { confirmAuBecsDebitPayment, loading } = useConfirmAuBecsDebitPayment()
+
 const bankName = ref('')
 const isComplete = ref(false)
 const mandateAccepted = ref(false)
 
-const handleChange = (event: any) => {
+const handleChange = (event: StripeAuBankAccountElementChangeEvent) => {
   bankName.value = event.bankName || ''
   isComplete.value = event.complete
 }
 
-// In child component inside provider:
-const confirmPayment = async (clientSecret: string) => {
-  const { stripe } = useStripe()
-  const { elements } = useStripeElements()
+const confirmPayment = async () => {
+  const auBankElement = getElement('auBankAccount')
+  if (!auBankElement) return
 
-  const auBankElement = elements.value?.getElement('auBankAccount')
-
-  const { error, paymentIntent } = await stripe.value.confirmAuBecsDebitPayment(
-    clientSecret,
-    {
-      payment_method: {
-        au_becs_debit: auBankElement,
-        billing_details: {
-          name: 'John Smith',
-          email: 'john@example.com'
-        }
+  const { error, paymentIntent } = await confirmAuBecsDebitPayment(props.clientSecret, {
+    payment_method: {
+      au_becs_debit: auBankElement,
+      billing_details: {
+        name: 'John Smith',
+        email: 'john@example.com'
       }
     }
-  )
+  })
 
   if (error) {
     console.error(error.message)
@@ -329,29 +348,25 @@ const confirmPayment = async (clientSecret: string) => {
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <form @submit.prevent="confirmPayment(clientSecret)">
-        <VueStripeAuBankAccountElement @change="handleChange" />
+  <form @submit.prevent="confirmPayment">
+    <VueStripeAuBankAccountElement @change="handleChange" />
 
-        <div v-if="bankName" class="bank-info">
-          Bank: {{ bankName }}
-        </div>
+    <div v-if="bankName" class="bank-info">
+      Bank: {{ bankName }}
+    </div>
 
-        <!-- Mandate Agreement (Required) -->
-        <div class="mandate">
-          <label>
-            <input v-model="mandateAccepted" type="checkbox" />
-            I agree to the Direct Debit Request service agreement
-          </label>
-        </div>
+    <!-- Mandate Agreement (Required) -->
+    <div class="mandate">
+      <label>
+        <input v-model="mandateAccepted" type="checkbox" />
+        I agree to the Direct Debit Request service agreement
+      </label>
+    </div>
 
-        <button :disabled="!isComplete || !mandateAccepted">
-          Pay with BECS Direct Debit
-        </button>
-      </form>
-    </VueStripeElements>
-  </VueStripeProvider>
+    <button :disabled="!isComplete || !mandateAccepted || loading">
+      Pay with BECS Direct Debit
+    </button>
+  </form>
 </template>
 ```
 

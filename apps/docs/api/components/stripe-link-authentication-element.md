@@ -250,8 +250,7 @@ import {
   VueStripeElements,
   VueStripeLinkAuthenticationElement,
   VueStripePaymentElement,
-  useStripe,
-  useStripeElements
+  usePaymentIntent
 } from '@vue-stripe/vue-stripe'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -279,29 +278,20 @@ const onPaymentChange = (event) => {
   paymentComplete.value = event.complete
 }
 
-// Submit button component (needs StripeElements context)
+// Submit button component: rendered inside VueStripeElements, so its
+// setup() can call usePaymentIntent()
 const SubmitButton = defineComponent({
   props: ['clientSecret', 'disabled', 'email'],
   emits: ['success', 'error'],
   setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const { elements } = useStripeElements()
+    const { confirmPayment } = usePaymentIntent()
 
     const handleSubmit = async () => {
-      if (!stripe.value || !elements.value) return
-
       isProcessing.value = true
       paymentError.value = ''
 
-      const { error } = await elements.value.submit()
-      if (error) {
-        emit('error', error.message)
-        isProcessing.value = false
-        return
-      }
-
-      const { error: confirmError, paymentIntent } = await stripe.value.confirmPayment({
-        elements: elements.value,
+      // Validates the elements (elements.submit()), then confirms the payment
+      const { error, paymentIntent } = await confirmPayment({
         clientSecret: props.clientSecret,
         confirmParams: {
           return_url: window.location.href,
@@ -310,8 +300,8 @@ const SubmitButton = defineComponent({
         redirect: 'if_required'
       })
 
-      if (confirmError) {
-        emit('error', confirmError.message)
+      if (error) {
+        emit('error', error.message)
       } else {
         emit('success', paymentIntent)
       }

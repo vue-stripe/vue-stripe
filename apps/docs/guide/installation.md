@@ -179,10 +179,11 @@ Add to your `.env` file:
 NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 ```
 
-Update `nuxt.config.ts` to expose the variable:
+Update `nuxt.config.ts` to expose the variable and load the stylesheet:
 
 ```ts
 export default defineNuxtConfig({
+  css: ['@vue-stripe/vue-stripe/style.css'],
   runtimeConfig: {
     public: {
       stripePublishableKey: process.env.NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -224,6 +225,8 @@ defineProps<{
 
 ```vue
 <script setup>
+import { VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+
 const clientSecret = ref('')
 
 // Fetch client secret from your API
@@ -236,8 +239,9 @@ onMounted(async () => {
 <template>
   <ClientOnly>
     <StripeWrapper v-if="clientSecret" :client-secret="clientSecret">
-      <VueStripePaymentElement @change="onChange" />
-      <button @click="handleSubmit">Pay</button>
+      <VueStripePaymentElement />
+      <!-- components/PayButton.vue calls usePaymentIntent(), see Your First Payment -->
+      <PayButton :client-secret="clientSecret" />
     </StripeWrapper>
     <template #fallback>
       <div>Loading payment form...</div>
@@ -406,9 +410,10 @@ import axios from 'axios'
 import {
   VueStripeProvider,
   VueStripeElements,
-  VueStripePaymentElement,
-  usePaymentIntent
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
+// Calls usePaymentIntent() inside VueStripeElements, see Your First Payment
+import PayButton from './PayButton.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('')
@@ -428,7 +433,7 @@ onMounted(async () => {
   <VueStripeProvider v-else :publishable-key="publishableKey">
     <VueStripeElements :client-secret="clientSecret">
       <VueStripePaymentElement />
-      <button @click="handlePay">Pay Now</button>
+      <PayButton :client-secret="clientSecret" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
@@ -448,12 +453,11 @@ Since VitePress renders at build time, use dynamic imports:
 <script setup>
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 
-const StripeProvider = defineAsyncComponent(() =>
+const VueStripeProvider = defineAsyncComponent(() =>
   import('@vue-stripe/vue-stripe').then(m => m.VueStripeProvider)
 )
-const StripeElements = defineAsyncComponent(() =>
-  import('@vue-stripe/vue-stripe').then(m => m.VueStripeElements)
-)
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 const isClient = ref(false)
 onMounted(() => {

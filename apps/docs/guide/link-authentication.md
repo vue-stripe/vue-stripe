@@ -163,7 +163,7 @@ const onPaymentChange = (event) => {
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeElements :client-secret="clientSecret">
-      <form @submit.prevent="handleSubmit">
+      <form @submit.prevent>
         <div class="form-field">
           <label>Email</label>
           <VueStripeLinkAuthenticationElement @change="onEmailChange" />
@@ -176,9 +176,12 @@ const onPaymentChange = (event) => {
 
         <div v-if="error" class="error">{{ error }}</div>
 
+        <!-- A child of VueStripeElements, so it can use the composables -->
         <PaymentButton
+          :client-secret="clientSecret"
           :disabled="!canSubmit"
           :email="customerEmail"
+          @error="(message) => (error = message)"
         />
       </form>
     </VueStripeElements>
@@ -189,28 +192,19 @@ const onPaymentChange = (event) => {
 ### Payment Button Component
 
 ```vue
+<!-- PaymentButton.vue -->
 <script setup>
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
-const props = defineProps(['disabled', 'email'])
+const props = defineProps(['clientSecret', 'disabled', 'email'])
 const emit = defineEmits(['success', 'error'])
 
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+const { confirmPayment, loading } = usePaymentIntent()
 
 const handleClick = async () => {
-  if (!stripe.value || !elements.value) return
-
-  // Validate elements
-  const { error: submitError } = await elements.value.submit()
-  if (submitError) {
-    emit('error', submitError.message)
-    return
-  }
-
-  // Confirm payment
-  const { error, paymentIntent } = await stripe.value.confirmPayment({
-    elements: elements.value,
+  // Validates the elements (elements.submit()), then confirms the payment
+  const { error, paymentIntent } = await confirmPayment({
+    clientSecret: props.clientSecret,
     confirmParams: {
       return_url: window.location.href,
       receipt_email: props.email
@@ -227,7 +221,7 @@ const handleClick = async () => {
 </script>
 
 <template>
-  <button :disabled="disabled" @click="handleClick">
+  <button type="button" :disabled="disabled || loading" @click="handleClick">
     Pay Now
   </button>
 </template>

@@ -119,110 +119,92 @@ At this point, you should see a payment form with credit card fields (and other 
 
 ## Step 4: Handle the Payment
 
-Now let's wire up the submit button. We capture the Stripe and Elements instances via events:
+Now let's wire up the submit button. Confirming needs the Stripe and Elements instances, which the providers hand to their descendants, so the form moves into a child component rendered inside `VueStripeElements`. There, [`usePaymentIntent()`](/api/composables/use-payment-intent) finds both on its own:
 
-```vue{4-6,18-24,26-42,49,51}
+```vue
+<!-- PaymentForm.vue: rendered inside VueStripeElements -->
 <script setup>
-import { ref, onMounted } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement
-} from '@vue-stripe/vue-stripe'
+import { VueStripePaymentElement, usePaymentIntent } from '@vue-stripe/vue-stripe'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = ref('')
-const loading = ref(false)
-const errorMessage = ref('')
+const props = defineProps({
+  clientSecret: { type: String, required: true }
+})
 
-// ... fetch clientSecret in onMounted ...
-
-// Capture instances from component events
-const stripeInstance = ref(null)
-const elementsInstance = ref(null)
-
-const onStripeLoad = (stripe) => {
-  stripeInstance.value = stripe
-}
-
-const onElementsReady = (elements) => {
-  elementsInstance.value = elements
-}
+// Call composables at setup scope, inside the providers
+const { confirmPayment, loading, error } = usePaymentIntent()
 
 const handleSubmit = async () => {
-  if (!stripeInstance.value || !elementsInstance.value) {
-    return
-  }
-
-  loading.value = true
-  errorMessage.value = ''
-
-  const { error } = await stripeInstance.value.confirmPayment({
-    elements: elementsInstance.value,
+  // Validates the form (elements.submit()), then confirms the PaymentIntent
+  await confirmPayment({
+    clientSecret: props.clientSecret,
     confirmParams: {
       return_url: `${window.location.origin}/payment-complete`
-    }
+    },
+    redirect: 'always'
   })
-
-  if (error) {
-    // Show error to customer
-    errorMessage.value = error.message || 'Payment failed'
-    loading.value = false
-  }
-  // If successful, Stripe redirects to return_url
+  // If successful, Stripe redirects to return_url.
+  // If not, `error` holds the message to show the customer.
 }
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
-    <VueStripeElements v-if="clientSecret" :client-secret="clientSecret" @ready="onElementsReady">
-      <form @submit.prevent="handleSubmit">
-        <VueStripePaymentElement />
+  <form @submit.prevent="handleSubmit">
+    <VueStripePaymentElement />
 
-        <div v-if="errorMessage" class="error">
-          {{ errorMessage }}
-        </div>
+    <div v-if="error" class="error">
+      {{ error }}
+    </div>
 
-        <button type="submit" :disabled="loading">
-          {{ loading ? 'Processing...' : 'Pay $10.00' }}
-        </button>
-      </form>
+    <button type="submit" :disabled="loading">
+      {{ loading ? 'Processing...' : 'Pay $10.00' }}
+    </button>
+  </form>
+</template>
+```
+
+The page keeps the providers and renders the form inside them:
+
+```vue{4,15}
+<script setup>
+import { ref, onMounted } from 'vue'
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
+import PaymentForm from './PaymentForm.vue'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const clientSecret = ref('')
+
+// ... fetch clientSecret in onMounted ...
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
+      <PaymentForm :client-secret="clientSecret" />
     </VueStripeElements>
     <p v-else>Loading payment form...</p>
   </VueStripeProvider>
 </template>
 ```
 
+::: warning Composables need the providers above them
+`usePaymentIntent()` only works in a component rendered *inside* `VueStripeProvider` and `VueStripeElements`. Calling it in the component that renders the providers throws, because the providers are not its ancestors.
+:::
+
 ## Complete Example
 
-Here's the full payment form:
+Here's the full payment form, as a page and its form component:
 
 ```vue
+<!-- PaymentPage.vue -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { Stripe, StripeElements } from '@stripe/stripe-js'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentElement
-} from '@vue-stripe/vue-stripe'
+import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
+import PaymentForm from './PaymentForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('')
-const loading = ref(false)
 const errorMessage = ref('')
-
-// Capture instances from component events
-const stripeInstance = ref<Stripe | null>(null)
-const elementsInstance = ref<StripeElements | null>(null)
-
-const onStripeLoad = (stripe: Stripe) => {
-  stripeInstance.value = stripe
-}
-
-const onElementsReady = (elements: StripeElements) => {
-  elementsInstance.value = elements
-}
 
 onMounted(async () => {
   try {
@@ -237,48 +219,15 @@ onMounted(async () => {
     errorMessage.value = 'Failed to initialize payment'
   }
 })
-
-const handleSubmit = async () => {
-  if (!stripeInstance.value || !elementsInstance.value) return
-
-  loading.value = true
-  errorMessage.value = ''
-
-  const { error } = await stripeInstance.value.confirmPayment({
-    elements: elementsInstance.value,
-    confirmParams: {
-      return_url: `${window.location.origin}/payment-complete`
-    }
-  })
-
-  if (error) {
-    errorMessage.value = error.message || 'Payment failed'
-    loading.value = false
-  }
-}
 </script>
 
 <template>
   <div class="payment-form">
     <h2>Complete Your Payment</h2>
 
-    <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
-      <VueStripeElements
-        v-if="clientSecret"
-        :client-secret="clientSecret"
-        @ready="onElementsReady"
-      >
-        <form @submit.prevent="handleSubmit">
-          <VueStripePaymentElement />
-
-          <div v-if="errorMessage" class="error">
-            {{ errorMessage }}
-          </div>
-
-          <button type="submit" :disabled="loading">
-            {{ loading ? 'Processing...' : 'Pay $10.00' }}
-          </button>
-        </form>
+    <VueStripeProvider :publishable-key="publishableKey">
+      <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
+        <PaymentForm :client-secret="clientSecret" />
       </VueStripeElements>
 
       <template v-else>
@@ -296,6 +245,48 @@ const handleSubmit = async () => {
   padding: 20px;
 }
 
+.error {
+  color: #dc3545;
+  font-size: 14px;
+}
+</style>
+```
+
+```vue
+<!-- PaymentForm.vue -->
+<script setup lang="ts">
+import { VueStripePaymentElement, usePaymentIntent } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
+
+const { confirmPayment, loading, error } = usePaymentIntent()
+
+const handleSubmit = async () => {
+  await confirmPayment({
+    clientSecret: props.clientSecret,
+    confirmParams: {
+      return_url: `${window.location.origin}/payment-complete`
+    },
+    redirect: 'always'
+  })
+}
+</script>
+
+<template>
+  <form @submit.prevent="handleSubmit">
+    <VueStripePaymentElement />
+
+    <div v-if="error" class="error">
+      {{ error }}
+    </div>
+
+    <button type="submit" :disabled="loading">
+      {{ loading ? 'Processing...' : 'Pay $10.00' }}
+    </button>
+  </form>
+</template>
+
+<style scoped>
 form {
   display: flex;
   flex-direction: column;

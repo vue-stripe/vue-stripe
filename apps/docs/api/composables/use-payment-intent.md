@@ -34,7 +34,7 @@ This composable must be called within a component that is a descendant of `VueSt
 ## Usage
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
@@ -198,7 +198,7 @@ The promise never rejects. When Stripe.js has not loaded yet (`{ error: { messag
 ### Basic Payment Confirmation
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
@@ -235,7 +235,7 @@ const handlePay = async () => {
 ### Without Redirect (for embedded flows)
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
 const { confirmPayment, loading, error } = usePaymentIntent()
@@ -260,7 +260,7 @@ const handlePay = async (clientSecret: string) => {
 ### With Billing Details
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
@@ -294,7 +294,7 @@ const handlePay = async (clientSecret: string) => {
 ### With Shipping Information
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
 const { confirmPayment } = usePaymentIntent()
@@ -324,14 +324,14 @@ const handlePay = async (clientSecret: string) => {
 ### Complete Payment Form
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import {
   VueStripeProvider,
   VueStripeElements,
-  VueStripePaymentElement,
-  usePaymentIntent
+  VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
+import PaymentFormButton from './PaymentFormButton.vue'
 
 const publishableKey = 'pk_test_...'
 const clientSecret = ref('') // From your backend
@@ -339,8 +339,6 @@ const clientSecret = ref('') // From your backend
 const isComplete = ref(false)
 const paymentStatus = ref<'idle' | 'processing' | 'success' | 'error'>('idle')
 const errorMessage = ref('')
-
-// PaymentForm component (must be inside StripeElements)
 </script>
 
 <template>
@@ -413,14 +411,14 @@ const handleSubmit = async () => {
 ### Custom Elements Override
 
 ```vue
-<script setup>
-import { usePaymentIntent, useStripeElements } from '@vue-stripe/vue-stripe'
+<script setup lang="ts">
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
 const { confirmPayment } = usePaymentIntent()
-const { elements } = useStripeElements()
 
-// Use a different elements instance if needed
-const customElements = createCustomElements()
+// Use a different elements instance if needed, e.g. the group another
+// <VueStripeElements> passed to its @ready event
+const customElements = otherElementsGroup
 
 const handlePay = async (clientSecret: string) => {
   const result = await confirmPayment({
@@ -470,7 +468,7 @@ The composable handles errors in two ways:
 2. **Exceptions** - Caught internally and returned as `{ error: { message: string } }`
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
 const { confirmPayment, error } = usePaymentIntent()
@@ -484,8 +482,8 @@ const handlePay = async (clientSecret: string) => {
   })
 
   if (result.error) {
-    // Check error type
-    switch (result.error.type) {
+    // Check error type (the composable's own errors carry only a message)
+    switch ('type' in result.error ? result.error.type : undefined) {
       case 'card_error':
         // Card was declined
         console.error('Card declined:', result.error.message)
