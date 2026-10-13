@@ -10,8 +10,9 @@ import {
 } from '../../src/stripe-ui.ts'
 
 /**
- * Fails when `upper` is not laid out above `lower` in normal flow (for example when a global
- * stylesheet positions it absolutely somewhere else on the page).
+ * Fails when `upper` is not laid out above `lower` in normal flow. Regression guard: a global
+ * `.controls` rule from vitepress-mermaid-renderer once positioned these demo controls
+ * absolutely, outside the demo card (fixed by renaming them `.demo-controls`).
  */
 async function expectAbove(page: Page, upper: string, lower: string): Promise<void> {
   const [a, b] = await Promise.all([
@@ -83,7 +84,7 @@ test('address-element: a complete US address is captured', async ({ page, snap }
   await frame.locator('input[name="postalCode"]').fill('94080')
 
   // The Shipping / Billing chips sit above the element, inside the demo card.
-  await expectAbove(page, '.address-example .controls', '.address-example .stripe-container')
+  await expectAbove(page, '.address-example .demo-controls', '.address-example .stripe-container')
 
   const captured = page.locator('.captured')
   await expect(captured.locator('.badge')).toHaveText('complete')
@@ -108,7 +109,7 @@ test('payment-method-messaging: the BNPL message renders and follows the amount'
   await expect(frame.contentFrame().locator('body')).toContainText(/\S/)
   await snap('messaging')
   // Amount, currency and country controls sit above the element, inside the demo card.
-  await expectAbove(page, '.bnpl-example .controls', '.bnpl-example .stripe-container')
+  await expectAbove(page, '.bnpl-example .demo-controls', '.bnpl-example .stripe-container')
 
   await page.locator('.amount-input input').fill('300')
   await expect(frame.contentFrame().locator('body')).toContainText(/\S/)

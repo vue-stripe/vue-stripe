@@ -4,10 +4,11 @@ import { defineConfig, type LaunchOptions } from '@playwright/test'
 import { config, RESULTS_DIR } from './src/config.ts'
 
 // `flows` prefers the real Google Chrome (channel: 'chrome') and falls back to Playwright's
-// Chromium when Chrome is not installed. PW_EXECUTABLE_PATH pins any Chromium build (CI,
-// headless servers).
+// Chromium when Chrome is not installed. CHROME_PATH or PW_EXECUTABLE_PATH pins a binary
+// (a Chrome in a custom location, CI, headless servers).
 export function chromeBrowser(): { channel?: string; launchOptions: LaunchOptions } {
-  if (config.executablePath) return { launchOptions: { executablePath: config.executablePath } }
+  const executablePath = config.executablePath || config.chromePath
+  if (executablePath) return { launchOptions: { executablePath } }
   const chromePaths = [
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     '/usr/bin/google-chrome',

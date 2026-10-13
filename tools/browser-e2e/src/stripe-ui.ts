@@ -173,3 +173,13 @@ export async function waitForFrame(
   }
   throw new Error(`No ${fragment} frame after ${timeoutMs} ms`)
 }
+
+/** The playground reads its publishable key from localStorage (the header's key dialog). */
+export async function setPlaygroundKey(page: Page, publishableKey: string): Promise<void> {
+  await page.addInitScript((key) => {
+    localStorage.setItem(
+      'vue-stripe-playground-config',
+      JSON.stringify({ publishableKey: key, clientSecret: '', setupSecret: '', sessionId: '' })
+    )
+  }, publishableKey)
+}

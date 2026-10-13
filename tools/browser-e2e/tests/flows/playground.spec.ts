@@ -1,15 +1,9 @@
 import { config } from '../../src/config.ts'
 import { expect, test } from '../../src/fixtures.ts'
-import { waitForFrame } from '../../src/stripe-ui.ts'
+import { setPlaygroundKey, waitForFrame } from '../../src/stripe-ui.ts'
 
-// The playground keeps its publishable key in localStorage (the header's key dialog).
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript((publishableKey) => {
-    localStorage.setItem(
-      'vue-stripe-playground-config',
-      JSON.stringify({ publishableKey, clientSecret: '', setupSecret: '', sessionId: '' })
-    )
-  }, config.publishableKey)
+  await setPlaygroundKey(page, config.publishableKey)
 })
 
 test('pricing table: renders the products of PRICING_TABLE_ID', async ({ page, snap }) => {

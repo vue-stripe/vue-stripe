@@ -28,10 +28,15 @@ export const config = {
   secretKey: env('STRIPE_SECRET_KEY'),
   publishableKey: env('STRIPE_PUBLISHABLE_KEY'),
   pricingTableId: env('PRICING_TABLE_ID'),
+  // Optional keys of an Australian account, for BECS Direct Debit.
+  auSecretKey: env('STRIPE_AU_SECRET_KEY'),
+  auPublishableKey: env('STRIPE_AU_PUBLISHABLE_KEY'),
   docsUrl: trimSlash(env('DOCS_URL') || `http://localhost:${PORTS.docs}`),
   playgroundUrl: trimSlash(env('PLAYGROUND_URL') || `http://localhost:${PORTS.playground}`),
   backendUrl: `http://localhost:${PORTS.backend}`,
   chromeProfileDir: env('CHROME_PROFILE_DIR'),
+  // A Chrome binary to use instead of the installed Google Chrome (channel 'chrome').
+  chromePath: env('CHROME_PATH'),
   executablePath: env('PW_EXECUTABLE_PATH'),
   interactive: env('E2E_INTERACTIVE') === '1',
   issuing: env('ISSUING') === '1'

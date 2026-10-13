@@ -1,10 +1,12 @@
-import type { Locator } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
+import Stripe from 'stripe'
 import { config } from '../../src/config.ts'
 import { expect, test } from '../../src/fixtures.ts'
 import {
   backendResponse,
   elementFrame,
   pickFirstProduct,
+  setPlaygroundKey,
   waitForFrame
 } from '../../src/stripe-ui.ts'
 
@@ -91,27 +93,24 @@ test.describe('ach-debit', () => {
   })
 })
 
-test('becs-payment: BECS Direct Debit (Australian accounts only)', async ({
-  page,
-  stripe,
-  snap
-}) => {
+test('becs-payment: the docs demo against the docs account', async ({ page, stripe, snap }) => {
   await page.goto(`${config.docsUrl}/live-demo/becs-payment`)
   await expect(page.locator('.account-note')).toContainText('Requires an Australian Stripe account')
 
   const account = await stripe.accounts.retrieveCurrent()
   if (account.country !== 'AU') {
-    // On a non-AU account Stripe rejects the PaymentIntent and the demo shows the error.
+    // What the demo promises on a non-AU account: Stripe rejects the PaymentIntent and the
+    // demo shows the error. The AU flow itself runs in the next test, on the AU keys.
     await pickFirstProduct(page)
     await expect(page.locator('.error-box')).toContainText(
       /au_becs_debit|allowed_payment_method_types/i
     )
     await snap('non-au account error')
-    test.skip(
-      true,
-      `The keys belong to a ${account.country ?? 'non-AU'} account; BECS needs an Australian ` +
-        "account. The demo shows Stripe's rejection as expected. Use AU test keys to run it."
-    )
+    test.info().annotations.push({
+      type: 'note',
+      description: `${account.country} account: Stripe rejects au_becs_debit and the demo says so`
+    })
+    return
   }
 
   const created = backendResponse<IntentResponse>(page, '/api/becs-intent')
@@ -119,10 +118,7 @@ test('becs-payment: BECS Direct Debit (Australian accounts only)', async ({
   const { paymentIntentId } = await created
   await page.locator('#name').fill('Jenny Rosen')
   await page.locator('#email').fill('jenny.rosen@example.com')
-  const bank = elementFrame(page, '.vue-stripe-au-bank-account-element')
-  // BSB 000-000 with account 000123456: processing, then succeeded (guide/testing).
-  await bank.locator('input[name="bsb_number"]').fill('000000')
-  await bank.locator('input[name="account_number"]').fill('000123456')
+  await fillAuBankAccount(page)
   await page.locator('.mandate-checkbox input').check()
   await snap('bank entered')
   await page.getByRole('button', { name: /^Pay|Confirm/ }).click()
@@ -131,3 +127,44 @@ test('becs-payment: BECS Direct Debit (Australian accounts only)', async ({
   const intent = await stripe.paymentIntents.retrieve(paymentIntentId)
   expect(['processing', 'succeeded']).toContain(intent.status)
 })
+
+test('becs on an AU account: AU Bank Account Element and useConfirmAuBecsDebitPayment', async ({
+  page,
+  snap
+}) => {
+  test.skip(
+    !config.auSecretKey || !config.auPublishableKey,
+    'Set STRIPE_AU_SECRET_KEY and STRIPE_AU_PUBLISHABLE_KEY (an Australian test account)'
+  )
+  // The docs demo is tied to the docs account, so this drives the playground's AU Bank Account
+  // page with the AU publishable key and a PaymentIntent created on the AU account.
+  const au = new Stripe(config.auSecretKey, { maxNetworkRetries: 2 })
+  const created = await au.paymentIntents.create({
+    amount: 1000,
+    currency: 'aud',
+    allowed_payment_method_types: ['au_becs_debit']
+  })
+  await setPlaygroundKey(page, config.auPublishableKey)
+  await page.goto(`${config.playgroundUrl}/stripe-au-bank-account-element`)
+  await page.getByPlaceholder(/^pi_xxx_secret_xxx/).fill(created.client_secret ?? '')
+
+  await fillAuBankAccount(page)
+  await snap('bank entered')
+  await page.getByRole('button', { name: 'Confirm BECS Direct Debit Payment' }).click()
+
+  await expect(page.getByText(/PaymentIntent (processing|succeeded)!/)).toBeVisible()
+  await snap('confirmed')
+  const intent = await au.paymentIntents.retrieve(created.id, { expand: ['payment_method'] })
+  expect(['processing', 'succeeded']).toContain(intent.status)
+  expect(typeof intent.payment_method === 'object' && intent.payment_method?.type).toBe(
+    'au_becs_debit'
+  )
+})
+
+/** BSB 000-000 with account 000123456: processing, then succeeded (guide/testing). */
+async function fillAuBankAccount(page: Page): Promise<void> {
+  const bank = elementFrame(page, '.vue-stripe-au-bank-account-element')
+  await expect(bank.locator('input[name="au_bsb"]')).toBeVisible({ timeout: 60_000 })
+  await bank.locator('input[name="au_bsb"]').fill('000000')
+  await bank.locator('input[name="au_bank_account_number"]').fill('000123456')
+}

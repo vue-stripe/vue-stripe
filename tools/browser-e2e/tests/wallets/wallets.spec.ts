@@ -1,7 +1,7 @@
 // Wallets need what a CI browser lacks: a headed Google Chrome, a profile signed in to Google
-// with a card in Google Pay (or a Link account), and HTTPS on a domain registered with Stripe.
-// Run with `pnpm e2e:wallets` after `pnpm e2e:tunnel` (see README). E2E_INTERACTIVE=1 opens
-// the wallet sheet and pauses so you can finish the payment by hand.
+// with a card in Google Pay, and HTTPS on a domain registered with Stripe. Run with
+// `e2e:wallets` after `e2e:serve` and `e2e:tunnel` (README, Wallet check). E2E_INTERACTIVE=1
+// clicks each wallet button and pauses so you can finish the Google Pay and Link payments.
 import { chromium, type Frame, type Locator, type Page } from '@playwright/test'
 import { config } from '../../src/config.ts'
 import { expect, test as base } from '../../src/fixtures.ts'
@@ -11,8 +11,8 @@ const test = base.extend({
   // A persistent context on CHROME_PROFILE_DIR, so the Google account and saved cards load.
   context: async ({ headless }, use) => {
     const context = await chromium.launchPersistentContext(config.chromeProfileDir, {
-      ...(config.executablePath
-        ? { executablePath: config.executablePath }
+      ...(config.chromePath || config.executablePath
+        ? { executablePath: config.chromePath || config.executablePath }
         : { channel: 'chrome' }),
       headless,
       viewport: { width: 1280, height: 900 },
@@ -25,16 +25,14 @@ const test = base.extend({
   }
 })
 
-test.describe.configure({ mode: 'serial' })
-
 test.skip(({ headless }) => headless, 'Wallets need a headed Chrome: run pnpm e2e:wallets')
 test.skip(
   () => !config.chromeProfileDir,
-  'Set CHROME_PROFILE_DIR to a Chrome profile signed in to Google (see README step 6)'
+  'Set CHROME_PROFILE_DIR to a Chrome profile signed in to Google (README, Wallet check step 2)'
 )
 test.skip(
   () => !config.docsUrl.startsWith('https://'),
-  'Wallets need HTTPS on a domain registered with Stripe: run pnpm e2e:tunnel and set DOCS_URL'
+  'Wallets need HTTPS on a registered domain: run e2e:tunnel, set DOCS_URL (Wallet check step 5)'
 )
 
 /** Every frame Stripe mounted in `wrapper`, nested ones included (each wallet button has its own). */
@@ -88,34 +86,53 @@ async function handOver(page: Page, button: Locator): Promise<void> {
   await page.pause()
 }
 
-test('express-checkout: Link shows, Google Pay when the profile has it', async ({
-  page,
-  stripe,
-  snap
-}) => {
+const EXPRESS = '.vue-stripe-express-checkout-element'
+const GOOGLE_PAY = /google pay|gpay/i
+const LINK = /link/i
+
+/** Opens the Express Checkout demo with a fresh PaymentIntent and waits for its buttons. */
+async function openExpressCheckout(page: Page): Promise<string> {
   await page.goto(`${config.docsUrl}/live-demo/express-checkout`)
   const created = backendResponse<{ paymentIntentId: string }>(page, '/api/payment-intent')
   await pickFirstProduct(page)
   const { paymentIntentId } = await created
+  await expect(page.locator(`${EXPRESS} iframe`).first()).toBeVisible({ timeout: 60_000 })
+  await expect.poll(() => walletLabels(page, EXPRESS), { timeout: 60_000 }).toMatch(LINK)
+  return paymentIntentId
+}
 
-  const wrapper = '.vue-stripe-express-checkout-element'
-  await expect(page.locator(`${wrapper} iframe`).first()).toBeVisible({ timeout: 60_000 })
-  await expect.poll(() => walletLabels(page, wrapper), { timeout: 60_000 }).toMatch(/link/i)
-  const labels = await walletLabels(page, wrapper)
-  const googlePay = /google pay|gpay/i.test(labels)
-  test.info().annotations.push({
-    type: 'note',
-    description: `Link: yes. Google Pay: ${googlePay ? 'yes' : 'no (no card in this profile?)'}`
-  })
+test('express-checkout: shows Link and Google Pay', async ({ page, snap }) => {
+  await openExpressCheckout(page)
   await snap('express buttons')
-
-  if (!config.interactive) return
-  await handOver(page, await walletButton(page, wrapper, googlePay ? /google pay|gpay/i : /link/i))
-
-  await expect(page.getByRole('heading', { name: 'Payment successful!' })).toBeVisible()
-  await snap('paid')
-  expect((await stripe.paymentIntents.retrieve(paymentIntentId)).status).toBe('succeeded')
+  expect(
+    await walletLabels(page, EXPRESS),
+    'Google Pay needs a card in Google Pay for the CHROME_PROFILE_DIR account (README step 2)'
+  ).toMatch(GOOGLE_PAY)
 })
+
+for (const wallet of [
+  { name: 'Google Pay', pattern: GOOGLE_PAY },
+  { name: 'Link', pattern: LINK }
+]) {
+  test(`express-checkout: pay with ${wallet.name}`, async ({ page, stripe, snap }) => {
+    test.skip(!config.interactive, 'Set E2E_INTERACTIVE=1 to complete the payment by hand')
+    const paymentIntentId = await openExpressCheckout(page)
+    await handOver(page, await walletButton(page, EXPRESS, wallet.pattern))
+
+    await expect(page.getByRole('heading', { name: 'Payment successful!' })).toBeVisible()
+    await snap(`paid with ${wallet.name}`)
+    const intent = await stripe.paymentIntents.retrieve(paymentIntentId, {
+      expand: ['payment_method']
+    })
+    expect(intent.status).toBe('succeeded')
+    test.info().annotations.push({
+      type: 'note',
+      description: `${paymentIntentId} succeeded with ${
+        typeof intent.payment_method === 'object' ? intent.payment_method?.type : 'unknown'
+      }`
+    })
+  })
+}
 
 test('payment-request: canMakePayment finds a wallet', async ({ page, stripe, snap }) => {
   await page.goto(`${config.docsUrl}/live-demo/payment-request`)
