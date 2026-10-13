@@ -33,6 +33,10 @@ import {
 
 const pk = 'pk_test_123'
 const sessionUrl = ref('https://checkout.stripe.com/c/pay/cs_test_123')
+const clientSecret = ref<string | null>('pi_123_secret_456')
+// vue-tsc 3.3 reads `//` in an attribute of a v-if element as a comment and drops the
+// handler types (#637), so the fonts URL is bound from a constant, as the docs show.
+const fonts = [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Inter' }]
 const seen: unknown[] = []
 const log = (...args: unknown[]) => seen.push(...args)
 // Accepts a value of type T (or narrower), and rejects `any`.
@@ -134,6 +138,14 @@ log(
         <VueStripePaymentElement @change="(event) => isElementChange(event)" />
         <VueStripeExpressCheckoutElement ref="expressRef" />
       </VueStripeElements>
+
+      <VueStripeElements
+        v-if="clientSecret"
+        :client-secret="clientSecret"
+        :fonts="fonts"
+        @ready="(elements) => isElements(elements)"
+        @error="(message) => isString(message)"
+      />
 
       <VueStripeCheckout
         ref="checkoutRef"

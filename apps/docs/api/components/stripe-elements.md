@@ -130,11 +130,19 @@ The `appearance` prop (or `options.appearance`) themes every element in the grou
 Custom fonts load through `fonts` (or `options.fonts`): pass `{ cssSrc }` for a stylesheet or `{ family, src, weight, style }` for a font file, then name the family in `variables.fontFamily`:
 
 ```vue
-<VueStripeElements
-  :client-secret="secret"
-  :fonts="[{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]"
-  :appearance="{ variables: { fontFamily: 'Roboto, sans-serif' } }"
->
+<script setup lang="ts">
+const fonts = [{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]
+</script>
+
+<template>
+  <VueStripeElements
+    :client-secret="secret"
+    :fonts="fonts"
+    :appearance="{ variables: { fontFamily: 'Roboto, sans-serif' } }"
+  >
+    <!-- elements -->
+  </VueStripeElements>
+</template>
 ```
 
 Changes to `appearance` are applied to the mounted elements with `elements.update()`. Pass a stable object (a `ref` or `computed`), not a new inline object on every render, if the parent re-renders often. [Style elements](/guide/styling#_2-theme-the-fields-with-the-appearance-api) has full theme examples, including [switching themes at runtime](/guide/styling#switch-themes-at-runtime).
@@ -274,6 +282,10 @@ function onReady(elements: StripeElements) {
   // elements is fully typed
 }
 ```
+
+::: warning vue-tsc and `//` in a `v-if` element
+vue-tsc 3.3 reads `//` inside an attribute value of an element that has `v-if` as the start of a comment. A URL written inline there, such as `:fonts="[{ cssSrc: 'https://...' }]"`, makes every handler on that element lose its payload type (TS7006, implicit `any`). This happens with any component, not only `VueStripeElements`. Bind the value from a script constant instead, as in [Appearance API](#appearance-api).
+:::
 
 ## See Also
 
