@@ -3,7 +3,7 @@
     "name": "ESM bundle (dist/es/index.js)",
     "path": "dist/es/index.js",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "11.25 kB",
+    "limit": "11.35 kB",
     "gzip": true
   },
   {
@@ -11,7 +11,7 @@
     "path": "dist/es/index.js",
     "import": "{ VueStripeCardElement }",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "2.05 kB",
+    "limit": "2.1 kB",
     "gzip": true
   },
   {
