@@ -19,10 +19,11 @@ const settle = async () => {
   await flush()
 }
 
-// createLocalVue() keeps the plugin's global mixin out of the other smoke tests.
-const withPlugin = () => {
+// createLocalVue() keeps the plugin's global mixin out of the other smoke tests. The library
+// reuses one Stripe instance per key for the page's lifetime (#618), so each test uses its own key.
+const withPlugin = (publishableKey = 'pk_test_plugin') => {
   const localVue = createLocalVue()
-  localVue.use(createVueStripe({ publishableKey: 'pk_test_plugin' }))
+  localVue.use(createVueStripe({ publishableKey }))
   return localVue
 }
 
@@ -75,7 +76,7 @@ it('resolves useStripe() under the plugin, and a nested VueStripeProvider wins',
         ])
       }
     },
-    { localVue: withPlugin() }
+    { localVue: withPlugin('pk_test_plugin_nested') }
   )
   await settle()
   expect(loadStripe).toHaveBeenCalledTimes(2)
@@ -84,9 +85,9 @@ it('resolves useStripe() under the plugin, and a nested VueStripeProvider wins',
       .mocked(loadStripe)
       .mock.calls.map((call) => call[0])
       .sort()
-  ).toEqual(['pk_test_plugin', 'pk_test_provider'])
+  ).toEqual(['pk_test_plugin_nested', 'pk_test_provider'])
   // First consumer sits outside the provider, second inside it.
-  expect(seen.map((ref) => ref.value?.key)).toEqual(['pk_test_plugin', 'pk_test_provider'])
+  expect(seen.map((ref) => ref.value?.key)).toEqual(['pk_test_plugin_nested', 'pk_test_provider'])
 })
 
 it('starts the plugin load from a method composable and waits for it (#565)', async () => {
@@ -101,7 +102,7 @@ it('starts the plugin load from a method composable and waits for it (#565)', as
       },
       render: (h: CreateElement) => h('div')
     },
-    { localVue: withPlugin() }
+    { localVue: withPlugin('pk_test_plugin_565') }
   )
   expect(loadStripe).toHaveBeenCalledTimes(1)
   // Called before the load settles: waits instead of failing.
