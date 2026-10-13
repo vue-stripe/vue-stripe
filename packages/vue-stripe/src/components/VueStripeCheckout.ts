@@ -2,7 +2,7 @@ import { defineComponent, ref, type PropType, type Ref } from 'vue-demi'
 import { VueStripeCheckoutError } from '../utils/errors'
 import { hx } from '../utils/h'
 import { errorLogger } from '../utils/report'
-import type { VueStripeComponent } from '../utils/element-types'
+import type { ScopedSlot, VueStripeComponent } from '../utils/element-types'
 
 const checkoutProps = {
   /** Hosted Checkout Session URL (`session.url`) created on your server. */
@@ -19,6 +19,11 @@ type CheckoutExposed = {
   checkout: () => void
   /** `true` once the redirect has started. */
   loading: Ref<boolean>
+}
+
+/** Slot name -> the slot's props: the default slot replaces the button. */
+type CheckoutSlots = {
+  default?: ScopedSlot<{ checkout: () => void; loading: boolean; disabled: boolean }>
 }
 
 /** Event name -> payload. */
@@ -83,4 +88,9 @@ export default /* @__PURE__ */ defineComponent({
       )
     }
   }
-}) as unknown as VueStripeComponent<typeof checkoutProps, CheckoutExposed, CheckoutEvents>
+}) as unknown as VueStripeComponent<
+  typeof checkoutProps,
+  CheckoutExposed,
+  CheckoutEvents,
+  CheckoutSlots
+>

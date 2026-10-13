@@ -149,7 +149,7 @@ Pass `button-class` to use your own class instead:
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots).
 
 `InstanceType<typeof VueStripeCheckout>` also includes the exposed members. A template ref unwraps their refs, so `checkoutRef.value?.loading` is a `boolean`.
 

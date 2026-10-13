@@ -17,6 +17,7 @@ import { stripeInjectionKey } from './injection-keys'
 import { VueStripeProviderError } from './errors'
 import { renderElement } from './element-render'
 import { errorLogger } from './report'
+import type { StatusSlots, WithSlots } from './element-types'
 
 /** `stripe` prop of a disclosure: an instance, a Promise of one, or `null` (React Stripe.js parity). */
 export type DisclosureStripeProp = Stripe | PromiseLike<Stripe | null> | null
@@ -67,15 +68,18 @@ interface DisclosureDefinition<TOptions extends object> {
 }
 
 /** Public type of a disclosure component. */
-export type StripeDisclosureComponent<TOptions extends object> = DefineComponent<
-  { stripe?: DisclosureStripeProp | undefined; options?: TOptions | undefined },
-  { loading: Ref<boolean>; error: Ref<string | null> },
-  Record<never, never>,
-  Record<never, never>,
-  Record<never, never>,
-  ComponentOptionsMixin,
-  ComponentOptionsMixin,
-  { load: () => void; error: (error: DisclosureError) => void }
+export type StripeDisclosureComponent<TOptions extends object> = WithSlots<
+  DefineComponent<
+    { stripe?: DisclosureStripeProp | undefined; options?: TOptions | undefined },
+    { loading: Ref<boolean>; error: Ref<string | null> },
+    Record<never, never>,
+    Record<never, never>,
+    Record<never, never>,
+    ComponentOptionsMixin,
+    ComponentOptionsMixin,
+    { load: () => void; error: (error: DisclosureError) => void }
+  >,
+  StatusSlots
 >
 
 /**
