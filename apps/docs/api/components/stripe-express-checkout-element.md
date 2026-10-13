@@ -161,7 +161,7 @@ interface StripeExpressCheckoutElementReadyEvent {
 
 ### Click event
 
-`@click` fires when the customer clicks a wallet button. The component always listens to Stripe's `click` event, so Stripe waits for the handler: call `event.resolve()` (optionally with details) or `event.reject()` within one second of the event, or the payment sheet does not open.
+`@click` fires when the customer clicks a wallet button. The component subscribes to Stripe's `click` event only when you listen to `@click`; without a listener the sheet opens with the options the element was created with. With a listener, Stripe waits for it: call `event.resolve()` (optionally with details) or `event.reject()` within one second, or the payment sheet does not open. `@shippingaddresschange` and `@shippingratechange` work the same way, with 20 seconds to call `resolve()` or `reject()`.
 
 ```ts
 interface StripeExpressCheckoutElementClickEvent {
