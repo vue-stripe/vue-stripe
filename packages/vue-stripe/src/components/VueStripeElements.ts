@@ -23,6 +23,7 @@ import type { CaptureMethod, ElementsMode, SetupFutureUsage } from '../types'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
 import { statusShell } from '../utils/status-shell'
+import { errorLogger } from '../utils/report'
 import type { VueStripeComponent } from '../utils/element-types'
 
 /** Stripe.js 10.0.0 declares only `on('update-end')` on the Elements group; `off` is used when present. */
@@ -79,6 +80,7 @@ export default /* @__PURE__ */ defineComponent({
   setup(props, { emit, slots }) {
     const stripeInstance = injectStripe('VueStripeElements')
 
+    const logError = errorLogger(slots)
     const elements = shallowRef<StripeElements | null>(null)
     const loading = ref(true)
     const error = ref<string | null>(null)
@@ -145,7 +147,7 @@ export default /* @__PURE__ */ defineComponent({
         const errorMessage = err instanceof Error ? err.message : 'Failed to create elements'
         error.value = errorMessage
         loading.value = false
-        console.error('[Vue Stripe] Elements creation error:', errorMessage)
+        logError('Elements creation error', errorMessage)
         emit('error', errorMessage)
       }
     }
@@ -179,7 +181,7 @@ export default /* @__PURE__ */ defineComponent({
           (err: unknown) => {
             const message = err instanceof Error ? err.message : 'elements.update() failed'
             error.value = message
-            console.error('[Vue Stripe] Elements update error:', message)
+            logError('Elements update error', message)
             emit('error', message)
           }
         )
@@ -188,7 +190,7 @@ export default /* @__PURE__ */ defineComponent({
     )
 
     onMounted(() => {
-      if (stripeInstance.stripe.value && !elements.value) createElements()
+      if (stripeInstance.stripe.value && !elements.value && !error.value) createElements()
     })
 
     onBeforeUnmount(() => {

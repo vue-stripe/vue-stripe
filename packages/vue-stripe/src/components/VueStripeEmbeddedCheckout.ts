@@ -18,6 +18,7 @@ import type {
 } from '@stripe/stripe-js'
 import { injectStripe } from '../utils/inject-stripe'
 import { renderElement } from '../utils/element-render'
+import { errorLogger } from '../utils/report'
 import type { VueStripeComponent } from '../utils/element-types'
 
 // Stripe.js allows one Embedded Checkout per page; this is the instance holding it.
@@ -95,10 +96,11 @@ export default /* @__PURE__ */ defineComponent({
       if (owner === token) owner = null
     }
 
+    const logError = errorLogger(slots)
     const fail = (message: string) => {
       error.value = message
       loading.value = false
-      console.error('[Vue Stripe] Embedded Checkout error:', message)
+      logError('Embedded Checkout error', message)
       emit('error', message)
     }
 

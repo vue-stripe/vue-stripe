@@ -177,10 +177,8 @@ describe('VueStripeCheckoutElementsProvider (Stripe.js 10 Checkout Elements SDK)
     })
     expect(wrapper.find('.checkout-error').text()).toBe('Session expired')
     expect(provider().emitted('error')?.[0]).toEqual(['Session expired'])
-    expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/^\[Vue Stripe\]/),
-      'Session expired'
-    )
+    // Handled through the #error slot, so not also logged (#651).
+    expect(errorSpy).not.toHaveBeenCalled()
     errorSpy.mockRestore()
   })
 

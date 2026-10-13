@@ -16,6 +16,7 @@ import type { Stripe, StripeError } from '@stripe/stripe-js'
 import { stripeInjectionKey } from './injection-keys'
 import { VueStripeProviderError } from './errors'
 import { renderElement } from './element-render'
+import { errorLogger } from './report'
 
 /** `stripe` prop of a disclosure: an instance, a Promise of one, or `null` (React Stripe.js parity). */
 export type DisclosureStripeProp = Stripe | PromiseLike<Stripe | null> | null
@@ -122,6 +123,7 @@ export function createStripeDisclosure<TOptions extends object>(
 
       // Each request gets a number; only the latest one (and only while mounted) may render.
       let latest = 0
+      const logError = errorLogger(slots)
       const fail = (err: DisclosureError) => {
         error.value = err.message ?? `${componentName} failed to load`
         emit('error', err)
@@ -156,7 +158,7 @@ export function createStripeDisclosure<TOptions extends object>(
         } catch (err) {
           if (request !== latest) return
           const message = err instanceof Error ? err.message : String(err)
-          console.error(`[Vue Stripe] ${componentName} error:`, message)
+          logError(`${componentName} error`, message)
           fail({ message })
         } finally {
           if (request === latest) loading.value = false
