@@ -12,7 +12,11 @@ Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not support
 - **Client-side apps.** Vue Stripe is tested on Vue 2.7 in CI (the built package is mounted on Vue 2.7.16 and its types are checked) and with a complete client-side app built from these docs. Server rendering is tested on Nuxt 4 only; Nuxt 2 and other Vue 2 SSR setups are not tested.
 - **Samples are written for Vue 3.** The other pages show Vue 3 code; [step 6](#_6-adapt-samples-from-the-other-pages) lists the three changes Vue 2.7 needs.
 - **Vue 2 is end-of-life.** The Vue team ended Vue 2 support on 31 December 2023. Vue Stripe supports 2.7 for apps that are still migrating; start new projects on Vue 3.
-::: The samples assume Vite with `@vitejs/plugin-vue2`; on Vue CLI 5, read the key from `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, as in [Add your publishable key](/guide/installation#_3-add-your-publishable-key).
+:::
+
+::: tip Vue CLI 5
+The samples assume Vite with `@vitejs/plugin-vue2`. On Vue CLI 5, read the key from `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, as in [Add your publishable key](/guide/installation#_3-add-your-publishable-key).
+:::
 
 ## 1. Install the packages
 
@@ -162,7 +166,7 @@ See [Provide Stripe app-wide](/guide/plugin) for what the plugin does.
 
 ## 6. Adapt samples from the other pages
 
-The other pages write their samples for Vue 3. Three changes make them run and type-check on Vue 2.7:
+The other pages write their samples for Vue 3. Three changes make them run on Vue 2.7, and type-check with the `vue-tsc` setup in [step 7](#_7-optional-type-check-templates-with-vue-tsc):
 
 1. **Give every template one root element.** Vue 2 refuses a template with several top-level elements ("Component template should contain exactly one root element"), a `<template>` or `<slot>` root, or `v-for` on the root. Wrap the content in one element, such as a `<div>`. A `v-if` / `v-else-if` / `v-else` chain counts as one root.
 
@@ -198,6 +202,38 @@ The other pages write their samples for Vue 3. Three changes make them run and t
    ```
 
 3. **Read the publishable key the way your build tool exposes it.** The samples use Vite's `import.meta.env.VITE_*` variables; Vue CLI reads `process.env.VUE_APP_*`. The [key table](/guide/installation#_3-add-your-publishable-key) lists both.
+
+## 7. Optional: type-check templates with vue-tsc
+
+`vue-tsc` checks templates on Vue 2.7 when you tell it the Vue version. It needs TypeScript 5 (step 1).
+
+1. Install it:
+
+   ```bash
+   npm install -D vue-tsc
+   ```
+
+2. Set the target in `tsconfig.json`:
+
+   ```json
+   {
+     "vueCompilerOptions": {
+       "target": 2.7,
+       "checkUnknownComponents": true,
+       "checkUnknownDirectives": true
+     }
+   }
+   ```
+
+3. Run the check:
+
+   ```bash
+   npx vue-tsc --noEmit
+   ```
+
+With this setup `vue-tsc` checks the props you pass and every event handler's parameter against the payload, for example an `@error` handler on `VueStripeProvider` that does not take an `Error`.
+
+Leave `strictTemplates` and `checkUnknownProps` off. On Vue 2.7, `vue-tsc` does not count `ref` or `@event` listeners as known attributes of a component, so these options reject `<VueStripeCardElement ref="card" />` and `<VueStripePaymentElement @change="onChange" />` with TS2353 or TS2559. Any Vue 2.7 component gets the same errors, not only Vue Stripe's. `strictTemplates` turns on `checkUnknownProps`, so the two flags in step 2 are the strict checks that work on Vue 2.7.
 
 ## Result
 
