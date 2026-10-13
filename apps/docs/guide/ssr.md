@@ -4,7 +4,7 @@ Render pages that use Vue Stripe on the server: Nuxt 3, Quasar SSR, VitePress or
 
 Stripe.js only runs in the browser. Vue Stripe never loads it on the server: `VueStripeProvider` loads Stripe.js in `onMounted`, and the [plugin](/guide/plugin) loads it the first time a component reads it in the browser. During server rendering every provider renders its `#loading` slot, and the browser's first render matches it, so hydration does not mismatch. After hydration Stripe.js loads and the elements mount.
 
-No bundler setting is needed: the package loads in Node as it is. What you set up is where the keys live, and where the client secret is fetched.
+From 6.0.0-beta.1 no bundler setting is needed: the package loads in Node as it is. What you set up is where the keys live, and where the client secret is fetched.
 
 ## Nuxt 3
 
@@ -128,7 +128,7 @@ Import the stylesheet in `.vitepress/theme/index.ts`. Components can then be use
 
 ### The server fails with `ERR_UNSUPPORTED_DIR_IMPORT`
 
-Version `6.0.0-beta.0` imports `@stripe/stripe-js/pure` as a directory, which Node's ES module loader rejects when the server loads the package from `node_modules`. Update to a later version, or bundle the package for the server: `build.transpile: ['@vue-stripe/vue-stripe']` in Nuxt, `ssr.noExternal: ['@vue-stripe/vue-stripe']` in Vite (`vite.ssr.noExternal` in VitePress).
+Version `6.0.0-beta.0` imports `@stripe/stripe-js/pure` as a directory, which Node's ES module loader rejects when the server loads the package from `node_modules`. Update to 6.0.0-beta.1 or later. If you must stay on 6.0.0-beta.0, bundle the package for the server as a workaround: `build.transpile: ['@vue-stripe/vue-stripe']` in Nuxt, `ssr.noExternal: ['@vue-stripe/vue-stripe']` in Vite (`vite.ssr.noExternal` in VitePress).
 
 ### Hydration mismatch warnings
 

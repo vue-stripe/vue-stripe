@@ -44,7 +44,7 @@ On Vue 2.7, a warning about the unknown element `stripe-pricing-table` means `Vu
 
 ### Server rendering fails with `ERR_UNSUPPORTED_DIR_IMPORT`
 
-Version `6.0.0-beta.0` cannot be loaded by Node's ES module loader directly. Update Vue Stripe, or bundle it for the server (Nuxt `build.transpile`, Vite `ssr.noExternal`); see [Use Vue Stripe with Nuxt and SSR](/guide/ssr#the-server-fails-with-err-unsupported-dir-import).
+Version `6.0.0-beta.0` cannot be loaded by Node's ES module loader directly. Update to 6.0.0-beta.1 or later; on 6.0.0-beta.0, bundle it for the server as a workaround (Nuxt `build.transpile`, Vite `ssr.noExternal`). See [Use Vue Stripe with Nuxt and SSR](/guide/ssr#the-server-fails-with-err-unsupported-dir-import).
 
 ## Providers and composables
 
