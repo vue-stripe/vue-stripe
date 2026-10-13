@@ -6,7 +6,7 @@ description: "Use Vue Stripe in a Vue 2.7 app: install the packages, let vue-dem
 
 Run Vue Stripe in a Vue 2.7 app. The library ships one build for Vue 2.7 and Vue 3 through [vue-demi](https://github.com/vueuse/vue-demi); every component is a render function, so templates, `h()` and the Options API all work.
 
-Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not supported; upgrade to 2.7 first.
+Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not supported; upgrade to 2.7 first. The samples assume Vite with `@vitejs/plugin-vue2`; on Vue CLI 5, read the key from `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, as in [Add your publishable key](/guide/installation#_3-add-your-publishable-key).
 
 ## 1. Install the packages
 
@@ -66,7 +66,7 @@ import { VueStripeProvider, VueStripeElements, VueStripeCardElement } from '@vue
 export default {
   components: { VueStripeProvider, VueStripeElements, VueStripeCardElement },
   data: () => ({
-    publishableKey: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY,
+    publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
     complete: false
   }),
   methods: {
@@ -102,13 +102,52 @@ import '@vue-stripe/vue-stripe/style.css'
 import App from './App.vue'
 
 Vue.use(createVueStripe({
-  publishableKey: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
+  publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 }))
 
 new Vue({ render: (h) => h(App) }).$mount('#app')
 ```
 
 See [Provide Stripe app-wide](/guide/plugin) for what the plugin does.
+
+## 6. Adapt samples from the other pages
+
+The other pages write their samples for Vue 3. Three changes make them run and type-check on Vue 2.7:
+
+1. **Give every template one root element.** Vue 2 refuses a template with several top-level elements ("Component template should contain exactly one root element"), a `<template>` or `<slot>` root, or `v-for` on the root. Wrap the content in one element, such as a `<div>`. A `v-if` / `v-else-if` / `v-else` chain counts as one root.
+
+   ```vue
+   <!-- Vue 3 only -->
+   <template>
+     <button :disabled="loading" @click="pay">Pay</button>
+     <p v-if="error">{{ error }}</p>
+   </template>
+
+   <!-- Vue 2.7 and Vue 3 -->
+   <template>
+     <div>
+       <button :disabled="loading" @click="pay">Pay</button>
+       <p v-if="error">{{ error }}</p>
+     </div>
+   </template>
+   ```
+
+2. **Type `defineEmits` with call signatures.** Vue 2.7 runs the Vue 3.3 shorthand `defineEmits<{ success: [] }>()`, but `vue-tsc` rejects every `emit()` call with "This expression is not callable". The call-signature form type-checks on both versions:
+
+   ```ts
+   import type { SetupIntent } from '@vue-stripe/vue-stripe'
+
+   // Vue 3.3+ only
+   const emit = defineEmits<{ success: [setupIntent: SetupIntent]; error: [message: string] }>()
+
+   // Vue 2.7 and Vue 3
+   const emit = defineEmits<{
+     (e: 'success', setupIntent: SetupIntent): void
+     (e: 'error', message: string): void
+   }>()
+   ```
+
+3. **Read the publishable key the way your build tool exposes it.** The samples use Vite's `import.meta.env.VITE_*` variables; Vue CLI reads `process.env.VUE_APP_*`. The [key table](/guide/installation#_3-add-your-publishable-key) lists both.
 
 ## Result
 

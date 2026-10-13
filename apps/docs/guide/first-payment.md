@@ -291,9 +291,11 @@ async function pay() {
 </script>
 
 <template>
-  <button :disabled="loading" @click="pay">Pay €10</button>
-  <p v-if="status">Payment {{ status }}</p>
-  <p v-if="error">{{ error }}</p>
+  <div>
+    <button :disabled="loading" @click="pay">Pay €10</button>
+    <p v-if="status">Payment {{ status }}</p>
+    <p v-if="error">{{ error }}</p>
+  </div>
 </template>
 
 <style scoped>
