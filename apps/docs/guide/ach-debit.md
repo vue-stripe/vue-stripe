@@ -114,13 +114,14 @@ Before you confirm, show the customer the mandate text and get their agreement; 
 
 When the customer enters the routing and account number by hand instead of logging in to the bank, Stripe verifies the account with micro-deposits. After confirming, the PaymentIntent is in `requires_action` with `next_action.type === 'verify_with_microdeposits'`, and Stripe sends two small deposits (or one with a code) that arrive in one to two business days.
 
-Stripe emails the customer a link to its hosted verification page by default (`next_action.verify_with_microdeposits.hosted_verification_url`). To verify on your own page instead, collect the amounts or the code and pass them to [`useVerifyMicrodepositsForPayment`](/api/composables/use-verify-microdeposits-for-payment):
+Stripe emails the customer a link to its hosted verification page by default (`next_action.verify_with_microdeposits.hosted_verification_url`). To verify on your own page instead, collect the amounts or the code and pass them to [`useVerifyMicrodepositsForPayment`](/api/composables/use-verify-microdeposits-for-payment). Ask for the code when `next_action.verify_with_microdeposits.microdeposit_type` is `'descriptor_code'`, and for the two amounts when it is `'amounts'`:
 
 ```vue
 <!-- VerifyAccount.vue: rendered inside <VueStripeProvider> -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useVerifyMicrodepositsForPayment } from '@vue-stripe/vue-stripe'
+import type { VerifyMicrodepositsForPaymentData } from '@stripe/stripe-js'
 
 const props = defineProps<{ clientSecret: string }>()
 const { verifyMicrodepositsForPayment, loading, error } = useVerifyMicrodepositsForPayment()
@@ -128,9 +129,11 @@ const descriptorCode = ref('')
 const verified = ref(false)
 
 async function verify() {
-  const { paymentIntent } = await verifyMicrodepositsForPayment(props.clientSecret, {
+  // Stripe.js 10.0.0 types only `amounts` here; Stripe also accepts `descriptor_code`
+  const data: VerifyMicrodepositsForPaymentData & { descriptor_code?: string } = {
     descriptor_code: descriptorCode.value // or: amounts: [32, 45]
-  })
+  }
+  const { paymentIntent } = await verifyMicrodepositsForPayment(props.clientSecret, data)
   verified.value = paymentIntent?.status === 'processing'
 }
 </script>
