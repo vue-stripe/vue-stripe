@@ -6,10 +6,12 @@ export function usePageTracking() {
   const { trackComponentView, trackUserJourney, trackPageView } = useAnalytics()
   const route = useRoute()
 
+  // The tutorial is the entry point; installing into your own app and the background
+  // reading on what Vue Stripe is are optional follow-ups.
   const journeySteps = [
-    { path: '/guide/introduction', name: 'getting_started', step: 1 },
+    { path: '/guide/first-payment', name: 'getting_started', step: 1 },
     { path: '/guide/installation', name: 'getting_started', step: 2 },
-    { path: '/guide/first-payment', name: 'getting_started', step: 3 }
+    { path: '/guide/introduction', name: 'getting_started', step: 3 }
   ]
 
   const detectComponentType = (path: string): 'api' | 'guide' | null => {

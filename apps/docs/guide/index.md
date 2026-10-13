@@ -1,74 +1,66 @@
-# Guide
+# Documentation overview
 
-Welcome to the Vue Stripe guide. This documentation will help you integrate Stripe payments into your Vue.js application.
+The Vue Stripe documentation has four sections. Each one serves a different need, so start with the one that matches what you are doing right now.
 
-## Learning Path
+## Tutorials
 
-We recommend following these pages in order:
+Lessons that take you from an empty folder to a working result, one step at a time. Start here if you have not used Vue Stripe before: [Take your first test payment](/guide/first-payment).
 
-### Getting Started
+## How-to guides
 
-1. [Introduction](/guide/introduction) - What Vue Stripe is and why you'd use it
-2. [Installation](/guide/installation) - Set up the library in your project
-3. [Your First Payment](/guide/first-payment) - Build a working payment form
+Steps for a specific goal, such as accepting SEPA Direct Debit or embedding Stripe Checkout. They assume Vue Stripe is installed and you know what you want to build. The [index below](#i-want-to) lists them by goal.
 
-### Core Concepts
+## Reference
 
-4. [Understanding the Architecture](/guide/architecture) - Learn how components work together
-5. [Choosing Your Approach](/guide/approaches) - Pick the right solution for your use case
+The props, events, slots, exposed members and return values of every component, composable and type. Open the [reference overview](/api/), or look up a Stripe.js method in [Stripe.js coverage](/coverage) to find the export that wraps it.
 
-### Building Payment Forms
+## Explanation
 
-6. [Payment Element](/guide/payment-element) - The recommended all-in-one solution
-7. [Card Element](/guide/card-element) - For card-only payments
-8. [Express Checkout](/guide/express-checkout) - Apple Pay, Google Pay, and Link
+Background on how Vue Stripe and Stripe fit together, and why. Read these when you want to understand a choice rather than make it work:
 
-### Checkout Sessions
+- [About Vue Stripe](/guide/introduction)
+- [How Vue Stripe works](/guide/architecture)
+- [Choosing an integration](/guide/approaches)
+- [How confirming works](/guide/confirming-payments)
 
-9. [Checkout](/guide/checkout) - Redirect to Stripe's hosted page
-10. [Embedded Checkout](/guide/embedded-checkout) - Stripe's Checkout page inside yours
-11. [Custom Checkout](/guide/custom-checkout) - Your own page on a Checkout Session, with Elements
-12. [Checkout Form (beta)](/guide/checkout-form) - Stripe's complete checkout form as one element
+## I want to...
 
-### Payment Flows
+### Set up
 
-13. [Confirming Payments](/guide/confirming-payments) - Which composable confirms what
-14. [Tokens and Payment Methods](/guide/tokens) - Collect now, confirm on your server or later
+- [Install and set up](/guide/installation) Vue Stripe in a Vite, Vue CLI, Quasar or Laravel app
+- [Upgrade from v5 to v6](/guide/migration-v6)
 
-### Reference
+### Accept payments with Elements
 
-Each component and composable has detailed API documentation:
+- [Accept a payment](/guide/payment-element) with the Payment Element, which offers cards, wallets, bank debits and local methods
+- [Add Apple Pay, Google Pay and Link](/guide/express-checkout) buttons
+- [Add Link to checkout](/guide/link-authentication) so returning customers pay with saved details
+- [Collect a shipping or billing address](/guide/address-element)
+- [Accept card payments](/guide/card-element) with the Card Element
+- [Show buy-now-pay-later messaging](/guide/payment-method-messaging) next to a price
+- [Confirm payments on your server](/guide/tokens) with a ConfirmationToken, or create a PaymentMethod or Token
 
-- [Components](/api/#components) - StripeProvider, VueStripeElements, element components
-- [Composables](/api/#composables) - useStripe, useStripeElements, usePaymentIntent, the method confirmers, and more
-- [Plugin](/api/plugin) - `createVueStripe()`, Stripe for the whole app without a provider component
+### Accept bank debits
 
-## Quick Links
+- [Accept SEPA Direct Debit](/guide/iban-element) with an IBAN
+- [Accept BECS Direct Debit](/guide/au-bank-account-element) from Australian bank accounts
 
-| I want to... | Go to... |
-|--------------|----------|
-| Accept any payment method | [Payment Element](/guide/payment-element) |
-| Accept only cards | [Card Element](/guide/card-element) |
-| Add Apple Pay / Google Pay | [Express Checkout](/guide/express-checkout) |
-| Redirect to Stripe's page | [Checkout](/guide/checkout) |
-| Keep Stripe's checkout on my page | [Embedded Checkout](/guide/embedded-checkout) or [Checkout Form](/guide/checkout-form) |
-| Build my own page on a Checkout Session | [Custom Checkout](/guide/custom-checkout) |
-| Confirm a Card, IBAN or bank payment | [Confirming Payments](/guide/confirming-payments) |
-| Confirm the payment on my server | [Tokens and Payment Methods](/guide/tokens) |
-| Save a card for later | [Saving Payment Methods](/guide/setup-intent) |
-| Show issued card details | [Issuing Elements](/guide/issuing) |
-| Understand the component tree | [Architecture](/guide/architecture) |
+### Use Stripe Checkout
 
-## Prerequisites
+- [Redirect to Stripe Checkout](/guide/checkout), the page Stripe hosts
+- [Embed Stripe Checkout](/guide/embedded-checkout) in your own page
+- [Build your own page on a Checkout Session](/guide/custom-checkout) with Elements
+- [Add the Checkout Form](/guide/checkout-form) (beta), Stripe's whole checkout form as one element
 
-Before using Vue Stripe, you should:
+### Save cards and bill repeatedly
 
-- Have a [Stripe account](https://dashboard.stripe.com/register)
-- Know basic Vue.js (components, props, events)
-- Understand async/await and Promises
+- [Save a payment method for later](/guide/setup-intent)
+- [Embed a pricing table](/guide/pricing-table)
 
-## Getting Help
+### Beyond payments
 
-- Check the [API Reference](/api/) for detailed documentation
-- Look at the [Live Demos](/live-demo/) for complete code samples
-- Report issues on [GitHub](https://github.com/vue-stripe/vue-stripe/issues)
+- [Display issued card details](/guide/issuing) to Stripe Issuing cardholders
+
+## Live demos
+
+The [live demos](/live-demo/) run each integration in test mode, so you can see how it behaves before you build it. Report problems on [GitHub](https://github.com/vue-stripe/vue-stripe/issues).

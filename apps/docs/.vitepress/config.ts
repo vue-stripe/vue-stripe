@@ -1,5 +1,7 @@
 import { defineConfigWithTheme, loadEnv, type DefaultTheme, type HeadConfig } from 'vitepress'
 import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
+import { existsSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { coverage } from './theme/data/stripe-coverage'
 
 // Build the "Stripe.js Coverage NN%" nav label from the single coverage data source,
@@ -9,6 +11,286 @@ const coveredCount = coverageItems.filter((i) => i.status === 'covered').length
 const trackableCount = coverageItems.filter((i) => i.status !== 'deprecated').length
 const coveragePercent = trackableCount ? Math.floor((coveredCount / trackableCount) * 100) : 0
 const coverageNavLabel = `Stripe.js Coverage ${coveragePercent}%`
+
+// The docs follow Diataxis (https://diataxis.fr/): tutorials, how-to guides, reference and
+// explanation. Files keep their URLs, so the four sections are drawn by the nav and sidebars:
+// /api/ and /coverage are reference, and /guide/ holds the other three, told apart by slug.
+const tutorialSlugs = ['first-payment', 'tutorial-']
+const explanationSlugs = [
+  'introduction',
+  'architecture',
+  'approaches',
+  'payment-objects',
+  'confirming-payments',
+  'stripe-js-loading',
+  'stripe-js-versions'
+]
+const tutorialMatch = `^/guide/(${tutorialSlugs.join('|')})`
+const explanationMatch = `^/guide/(${explanationSlugs.join('|')})$`
+// Every other /guide/ page, the documentation overview at /guide/ included, is a how-to guide.
+const howToMatch = `^/guide/(?!(${tutorialSlugs.join('|')}|(${explanationSlugs.join('|')})$))`
+
+// Sidebar entries may name pages that are still being written. Hide those until their
+// Markdown file exists (the OG image step reads every linked file and would fail the build),
+// and say so in the build output. A group left with no entries is hidden too.
+const docsRoot = fileURLToPath(new URL('../', import.meta.url))
+const pageExists = (link: string) =>
+  existsSync(`${docsRoot}${link.slice(1)}${link.endsWith('/') ? 'index' : ''}.md`)
+const withPages = (items: DefaultTheme.SidebarItem[]): DefaultTheme.SidebarItem[] =>
+  items.flatMap((item) => {
+    if (item.link && !pageExists(item.link)) {
+      console.warn(`[Vue Stripe docs] Sidebar entry hidden, no page yet: ${item.link}`)
+      return []
+    }
+    if (!item.items) return [item]
+    const children = withPages(item.items)
+    return children.length || item.link ? [{ ...item, items: children }] : []
+  })
+
+const guideSidebar: DefaultTheme.SidebarItem[] = withPages([
+  {
+    text: 'Start here',
+    items: [{ text: 'Documentation overview', link: '/guide/' }]
+  },
+  {
+    text: 'Tutorials',
+    items: [{ text: 'Take your first test payment', link: '/guide/first-payment' }]
+  },
+  {
+    text: 'How-to guides',
+    items: [
+      {
+        text: 'Set up',
+        collapsed: false,
+        items: [
+          { text: 'Install and set up', link: '/guide/installation' },
+          { text: 'Use Vue Stripe on Vue 2.7', link: '/guide/vue-2' },
+          { text: 'Use Vue Stripe with Nuxt and SSR', link: '/guide/ssr' },
+          { text: 'Provide Stripe app-wide (plugin)', link: '/guide/plugin' },
+          { text: 'Upgrade from v5 to v6', link: '/guide/migration-v6' }
+        ]
+      },
+      {
+        text: 'Accept payments with Elements',
+        collapsed: false,
+        items: [
+          { text: 'Accept a payment (Payment Element)', link: '/guide/payment-element' },
+          { text: 'Collect details before creating an Intent', link: '/guide/deferred-intent' },
+          { text: 'Add Apple Pay, Google Pay and Link', link: '/guide/express-checkout' },
+          { text: 'Add Link to checkout', link: '/guide/link-authentication' },
+          { text: 'Collect a shipping or billing address', link: '/guide/address-element' },
+          { text: 'Accept card payments (Card Element)', link: '/guide/card-element' },
+          { text: 'Show buy-now-pay-later messaging', link: '/guide/payment-method-messaging' },
+          { text: 'Confirm payments on your server', link: '/guide/tokens' },
+          { text: 'Handle errors and declines', link: '/guide/error-handling' }
+        ]
+      },
+      {
+        text: 'Bank debits',
+        collapsed: false,
+        items: [
+          { text: 'Accept SEPA Direct Debit', link: '/guide/iban-element' },
+          { text: 'Accept BECS Direct Debit', link: '/guide/au-bank-account-element' },
+          { text: 'Accept ACH Direct Debit', link: '/guide/ach-debit' }
+        ]
+      },
+      {
+        text: 'Use Stripe Checkout',
+        collapsed: false,
+        items: [
+          { text: 'Redirect to Stripe Checkout', link: '/guide/checkout' },
+          { text: 'Embed Stripe Checkout', link: '/guide/embedded-checkout' },
+          { text: 'Build your own page on a Checkout Session', link: '/guide/custom-checkout' },
+          { text: 'Add the Checkout Form (beta)', link: '/guide/checkout-form' }
+        ]
+      },
+      {
+        text: 'Save cards and bill repeatedly',
+        collapsed: false,
+        items: [
+          { text: 'Save a payment method for later', link: '/guide/setup-intent' },
+          { text: 'Start a subscription', link: '/guide/subscriptions' },
+          { text: 'Embed a pricing table', link: '/guide/pricing-table' }
+        ]
+      },
+      {
+        text: 'Customize, test and run',
+        collapsed: false,
+        items: [
+          { text: 'Style elements', link: '/guide/styling' },
+          { text: 'Test your integration', link: '/guide/testing' },
+          { text: 'Fulfil orders with webhooks', link: '/guide/webhooks' },
+          { text: 'Troubleshoot common problems', link: '/guide/troubleshooting' }
+        ]
+      },
+      {
+        text: 'Beyond payments',
+        collapsed: false,
+        items: [
+          { text: 'Display issued card details', link: '/guide/issuing' },
+          { text: "Verify a customer's identity", link: '/guide/identity' }
+        ]
+      }
+    ]
+  },
+  {
+    text: 'Explanation',
+    items: [
+      { text: 'About Vue Stripe', link: '/guide/introduction' },
+      { text: 'How Vue Stripe works', link: '/guide/architecture' },
+      { text: 'Choosing an integration', link: '/guide/approaches' },
+      { text: 'Payment objects: Intents, Sessions, tokens', link: '/guide/payment-objects' },
+      { text: 'How confirming works', link: '/guide/confirming-payments' },
+      { text: 'How Stripe.js is loaded', link: '/guide/stripe-js-loading' },
+      { text: 'Stripe.js versions and what v6 changed', link: '/guide/stripe-js-versions' }
+    ]
+  }
+])
+
+const referenceSidebar: DefaultTheme.SidebarItem[] = withPages([
+  {
+    text: 'Reference',
+    items: [
+      { text: 'Overview', link: '/api/' },
+      { text: 'Stripe.js coverage', link: '/coverage' },
+      { text: 'Types and errors', link: '/api/types' }
+    ]
+  },
+  {
+    text: 'Provider components',
+    items: [
+      { text: 'VueStripeProvider', link: '/api/components/stripe-provider' },
+      { text: 'VueStripeElements', link: '/api/components/stripe-elements' }
+    ]
+  },
+  {
+    text: 'Element components',
+    items: [
+      { text: 'VueStripePaymentElement', link: '/api/components/stripe-payment-element' },
+      {
+        text: 'VueStripeExpressCheckoutElement',
+        link: '/api/components/stripe-express-checkout-element'
+      },
+      { text: 'VueStripeCardElement', link: '/api/components/stripe-card-element' },
+      { text: 'Split Card Elements', link: '/api/components/stripe-split-card-elements' },
+      { text: 'VueStripeAddressElement', link: '/api/components/stripe-address-element' },
+      {
+        text: 'VueStripeLinkAuthenticationElement',
+        link: '/api/components/stripe-link-authentication-element'
+      },
+      {
+        text: 'VueStripePaymentMethodMessagingElement',
+        link: '/api/components/stripe-payment-method-messaging-element'
+      },
+      { text: 'VueStripeTaxIdElement', link: '/api/components/stripe-tax-id-element' },
+      {
+        text: 'VueStripeCurrencySelectorElement',
+        link: '/api/components/stripe-currency-selector-element'
+      },
+      {
+        text: 'VueStripeContactDetailsElement',
+        link: '/api/components/stripe-contact-details-element'
+      },
+      { text: 'VueStripeTermsElement (beta)', link: '/api/components/stripe-terms-element' },
+      {
+        text: 'VueStripeLinkSignupElement (beta)',
+        link: '/api/components/stripe-link-signup-element'
+      }
+    ]
+  },
+  {
+    text: 'Regional elements',
+    items: [
+      { text: 'VueStripeIbanElement', link: '/api/components/stripe-iban-element' },
+      {
+        text: 'VueStripeAuBankAccountElement',
+        link: '/api/components/stripe-au-bank-account-element'
+      }
+    ]
+  },
+  {
+    text: 'Issuing',
+    items: [{ text: 'Issuing Elements', link: '/api/components/stripe-issuing-elements' }]
+  },
+  {
+    text: 'Checkout and subscriptions',
+    items: [
+      { text: 'VueStripeCheckout', link: '/api/components/stripe-checkout' },
+      { text: 'VueStripeEmbeddedCheckout', link: '/api/components/stripe-embedded-checkout' },
+      {
+        text: 'VueStripeCheckoutElementsProvider',
+        link: '/api/components/stripe-checkout-provider'
+      },
+      {
+        text: 'VueStripeCheckoutFormProvider (beta)',
+        link: '/api/components/stripe-checkout-form-provider'
+      },
+      { text: 'VueStripeCheckoutForm (beta)', link: '/api/components/stripe-checkout-form' },
+      { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' }
+    ]
+  },
+  {
+    text: 'Disclosures',
+    items: [
+      {
+        text: 'VueStripeFinancialAccountDisclosure',
+        link: '/api/components/stripe-financial-account-disclosure'
+      },
+      { text: 'VueStripeIssuingDisclosure', link: '/api/components/stripe-issuing-disclosure' },
+      { text: 'VueStripeTreasuryDisclosure', link: '/api/components/stripe-treasury-disclosure' }
+    ]
+  },
+  {
+    text: 'Composables',
+    items: [
+      { text: 'useStripe', link: '/api/composables/use-stripe' },
+      { text: 'useStripeElements', link: '/api/composables/use-stripe-elements' },
+      { text: 'usePaymentIntent', link: '/api/composables/use-payment-intent' },
+      { text: 'useSetupIntent', link: '/api/composables/use-setup-intent' },
+      { text: 'useStripeCheckout', link: '/api/composables/use-stripe-checkout' },
+      { text: 'useCheckoutSession', link: '/api/composables/use-checkout-session' },
+      { text: 'useCheckoutForm (beta)', link: '/api/composables/use-checkout-form' },
+      { text: 'useCreatePaymentMethod', link: '/api/composables/use-create-payment-method' },
+      { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' },
+      {
+        text: 'useCreateConfirmationToken',
+        link: '/api/composables/use-create-confirmation-token'
+      },
+      { text: 'useCreateToken', link: '/api/composables/use-create-token' },
+      { text: 'useHandleCardAction', link: '/api/composables/use-handle-card-action' },
+      {
+        text: 'useVerifyMicrodepositsForPayment',
+        link: '/api/composables/use-verify-microdeposits-for-payment'
+      },
+      {
+        text: 'useVerifyMicrodepositsForSetup',
+        link: '/api/composables/use-verify-microdeposits-for-setup'
+      },
+      { text: 'useRadarSession', link: '/api/composables/use-radar-session' },
+      { text: 'useEphemeralKeyNonce', link: '/api/composables/use-ephemeral-key-nonce' },
+      {
+        text: 'Method confirmers',
+        link: '/api/composables/confirm/',
+        collapsed: true,
+        items: [
+          { text: 'Cards', link: '/api/composables/confirm/cards' },
+          { text: 'Bank debits', link: '/api/composables/confirm/bank-debits' },
+          { text: 'Redirects and bank transfers', link: '/api/composables/confirm/redirects' },
+          { text: 'Wallets', link: '/api/composables/confirm/wallets' },
+          { text: 'Buy now, pay later', link: '/api/composables/confirm/bnpl' },
+          { text: 'Vouchers', link: '/api/composables/confirm/vouchers' }
+        ]
+      },
+      { text: 'useFinancialConnections', link: '/api/composables/use-financial-connections' },
+      { text: 'useIdentity', link: '/api/composables/use-identity' },
+      { text: 'usePaymentRequest', link: '/api/composables/use-payment-request' }
+    ]
+  },
+  {
+    text: 'Plugin',
+    items: [{ text: 'createVueStripe', link: '/api/plugin' }]
+  }
+])
 
 // Load environment variables from .env files (for local dev)
 const envFromFile = loadEnv('', process.cwd())
@@ -131,9 +413,11 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     },
 
     nav: [
-      { text: 'Guide', link: '/guide/introduction' },
-      { text: 'API', link: '/api/' },
-      { text: 'Live Demo', link: '/live-demo/' },
+      { text: 'Tutorials', link: '/guide/first-payment', activeMatch: tutorialMatch },
+      { text: 'How-to guides', link: '/guide/', activeMatch: howToMatch },
+      { text: 'Reference', link: '/api/', activeMatch: '^/(api|coverage)(/|$)' },
+      { text: 'Explanation', link: '/guide/introduction', activeMatch: explanationMatch },
+      { text: 'Live demos', link: '/live-demo/', activeMatch: '^/live-demo/' },
       { text: coverageNavLabel, link: '/coverage' },
       {
         text: 'Links',
@@ -144,223 +428,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
       }
     ],
 
+    // One sidebar per URL prefix. Tutorials, how-to guides and explanation all live under
+    // /guide/ and share one sidebar: VitePress picks a sidebar by prefix match, so per-page
+    // keys ('/guide/checkout' also matches '/guide/checkout-form') would be fragile.
     sidebar: {
-      '/guide/': [
-        {
-          text: 'Getting Started',
-          items: [
-            { text: 'Introduction', link: '/guide/introduction' },
-            { text: 'Installation', link: '/guide/installation' },
-            { text: 'Your First Payment', link: '/guide/first-payment' },
-            { text: 'Migrating from v5', link: '/guide/migration-v6' }
-          ]
-        },
-        {
-          text: 'Core Concepts',
-          items: [
-            { text: 'Architecture', link: '/guide/architecture' },
-            { text: 'Choosing Your Approach', link: '/guide/approaches' }
-          ]
-        },
-        {
-          text: 'Payment Elements',
-          items: [
-            { text: 'Payment Element', link: '/guide/payment-element' },
-            { text: 'Card Element', link: '/guide/card-element' },
-            { text: 'Address Element', link: '/guide/address-element' },
-            { text: 'Link Authentication', link: '/guide/link-authentication' },
-            { text: 'Express Checkout', link: '/guide/express-checkout' },
-            { text: 'Payment Method Messaging', link: '/guide/payment-method-messaging' }
-          ]
-        },
-        {
-          text: 'Regional Elements',
-          items: [
-            { text: 'IBAN Element (SEPA)', link: '/guide/iban-element' },
-            { text: 'AU Bank Account Element (BECS)', link: '/guide/au-bank-account-element' }
-          ]
-        },
-        {
-          text: 'Payment Flows',
-          items: [
-            { text: 'Confirming Payments', link: '/guide/confirming-payments' },
-            { text: 'Tokens and Payment Methods', link: '/guide/tokens' }
-          ]
-        },
-        {
-          text: 'Subscriptions',
-          items: [{ text: 'Pricing Table', link: '/guide/pricing-table' }]
-        },
-        {
-          text: 'Issuing',
-          items: [{ text: 'Issuing Elements', link: '/guide/issuing' }]
-        },
-        {
-          text: 'Advanced',
-          items: [
-            { text: 'Saving Payment Methods', link: '/guide/setup-intent' },
-            { text: 'Checkout', link: '/guide/checkout' },
-            { text: 'Embedded Checkout', link: '/guide/embedded-checkout' },
-            { text: 'Custom Checkout', link: '/guide/custom-checkout' },
-            { text: 'Checkout Form (beta)', link: '/guide/checkout-form' }
-          ]
-        }
-      ],
-      '/api/': [
-        {
-          text: 'Overview',
-          items: [{ text: 'API Reference', link: '/api/' }]
-        },
-        {
-          text: 'Provider Components',
-          items: [
-            { text: 'VueStripeProvider', link: '/api/components/stripe-provider' },
-            { text: 'VueStripeElements', link: '/api/components/stripe-elements' }
-          ]
-        },
-        {
-          text: 'Element Components',
-          items: [
-            { text: 'VueStripePaymentElement', link: '/api/components/stripe-payment-element' },
-            {
-              text: 'VueStripeExpressCheckoutElement',
-              link: '/api/components/stripe-express-checkout-element'
-            },
-            { text: 'VueStripeCardElement', link: '/api/components/stripe-card-element' },
-            { text: 'Split Card Elements', link: '/api/components/stripe-split-card-elements' },
-            { text: 'VueStripeAddressElement', link: '/api/components/stripe-address-element' },
-            {
-              text: 'VueStripeLinkAuthenticationElement',
-              link: '/api/components/stripe-link-authentication-element'
-            },
-            {
-              text: 'VueStripePaymentMethodMessagingElement (BNPL)',
-              link: '/api/components/stripe-payment-method-messaging-element'
-            },
-            { text: 'VueStripeTaxIdElement', link: '/api/components/stripe-tax-id-element' },
-            {
-              text: 'VueStripeCurrencySelectorElement',
-              link: '/api/components/stripe-currency-selector-element'
-            },
-            {
-              text: 'VueStripeContactDetailsElement',
-              link: '/api/components/stripe-contact-details-element'
-            },
-            { text: 'VueStripeTermsElement (beta)', link: '/api/components/stripe-terms-element' },
-            {
-              text: 'VueStripeLinkSignupElement (beta)',
-              link: '/api/components/stripe-link-signup-element'
-            }
-          ]
-        },
-        {
-          text: 'Regional Elements',
-          items: [
-            { text: 'VueStripeIbanElement', link: '/api/components/stripe-iban-element' },
-            {
-              text: 'VueStripeAuBankAccountElement',
-              link: '/api/components/stripe-au-bank-account-element'
-            }
-          ]
-        },
-        {
-          text: 'Issuing',
-          items: [{ text: 'Issuing Elements', link: '/api/components/stripe-issuing-elements' }]
-        },
-        {
-          text: 'Checkout & Subscriptions',
-          items: [
-            { text: 'VueStripeCheckout', link: '/api/components/stripe-checkout' },
-            {
-              text: 'VueStripeEmbeddedCheckout',
-              link: '/api/components/stripe-embedded-checkout'
-            },
-            {
-              text: 'VueStripeCheckoutElementsProvider',
-              link: '/api/components/stripe-checkout-provider'
-            },
-            {
-              text: 'VueStripeCheckoutFormProvider (beta)',
-              link: '/api/components/stripe-checkout-form-provider'
-            },
-            { text: 'VueStripeCheckoutForm (beta)', link: '/api/components/stripe-checkout-form' },
-            { text: 'VueStripePricingTable', link: '/api/components/stripe-pricing-table' }
-          ]
-        },
-        {
-          text: 'Disclosures',
-          items: [
-            {
-              text: 'VueStripeFinancialAccountDisclosure',
-              link: '/api/components/stripe-financial-account-disclosure'
-            },
-            {
-              text: 'VueStripeIssuingDisclosure',
-              link: '/api/components/stripe-issuing-disclosure'
-            },
-            {
-              text: 'VueStripeTreasuryDisclosure',
-              link: '/api/components/stripe-treasury-disclosure'
-            }
-          ]
-        },
-        {
-          text: 'Composables',
-          items: [
-            { text: 'useStripe', link: '/api/composables/use-stripe' },
-            { text: 'useStripeElements', link: '/api/composables/use-stripe-elements' },
-            { text: 'usePaymentIntent', link: '/api/composables/use-payment-intent' },
-            { text: 'useSetupIntent', link: '/api/composables/use-setup-intent' },
-            { text: 'useStripeCheckout', link: '/api/composables/use-stripe-checkout' },
-            { text: 'useCheckoutSession', link: '/api/composables/use-checkout-session' },
-            { text: 'useCheckoutForm (beta)', link: '/api/composables/use-checkout-form' },
-            { text: 'useCreatePaymentMethod', link: '/api/composables/use-create-payment-method' },
-            { text: 'useHandleNextAction', link: '/api/composables/use-handle-next-action' },
-            {
-              text: 'useCreateConfirmationToken',
-              link: '/api/composables/use-create-confirmation-token'
-            },
-            { text: 'useCreateToken', link: '/api/composables/use-create-token' },
-            { text: 'useHandleCardAction', link: '/api/composables/use-handle-card-action' },
-            {
-              text: 'useVerifyMicrodepositsForPayment',
-              link: '/api/composables/use-verify-microdeposits-for-payment'
-            },
-            {
-              text: 'useVerifyMicrodepositsForSetup',
-              link: '/api/composables/use-verify-microdeposits-for-setup'
-            },
-            { text: 'useRadarSession', link: '/api/composables/use-radar-session' },
-            { text: 'useEphemeralKeyNonce', link: '/api/composables/use-ephemeral-key-nonce' },
-            {
-              text: 'Method confirmers',
-              link: '/api/composables/confirm/',
-              collapsed: true,
-              items: [
-                { text: 'Cards', link: '/api/composables/confirm/cards' },
-                { text: 'Bank debits', link: '/api/composables/confirm/bank-debits' },
-                {
-                  text: 'Redirects and bank transfers',
-                  link: '/api/composables/confirm/redirects'
-                },
-                { text: 'Wallets', link: '/api/composables/confirm/wallets' },
-                { text: 'Buy now, pay later', link: '/api/composables/confirm/bnpl' },
-                { text: 'Vouchers', link: '/api/composables/confirm/vouchers' }
-              ]
-            },
-            {
-              text: 'useFinancialConnections',
-              link: '/api/composables/use-financial-connections'
-            },
-            { text: 'useIdentity', link: '/api/composables/use-identity' },
-            { text: 'usePaymentRequest', link: '/api/composables/use-payment-request' }
-          ]
-        },
-        {
-          text: 'Plugin',
-          items: [{ text: 'createVueStripe', link: '/api/plugin' }]
-        }
-      ],
+      '/guide/': guideSidebar,
+      '/api/': referenceSidebar,
+      '/coverage': referenceSidebar,
       '/live-demo/': [
         {
           text: 'Live Demo',
@@ -477,7 +551,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
   // Add fallback OG image for pages without dynamic images
   transformHead({ pageData }) {
     // Pages that don't have dynamic OG images generated (not in sidebar)
-    const pagesWithoutDynamicOG = ['index.md', '404.md', 'guide/index.md']
+    const pagesWithoutDynamicOG = ['index.md', '404.md']
     const head: HeadConfig[] = []
 
     if (
