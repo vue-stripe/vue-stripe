@@ -1,0 +1,17 @@
+{
+  // tsc against the built dist/types the way a plain TypeScript consumer reads them (#660):
+  // the package's exports map, its types conditions and no skipLibCheck. The configs that
+  // extend this pick the module resolution and the Vue version: *.vue3.json let dist/types
+  // find vue-demi and vue next to the library (Vue 3.5) through their "exports", as in an
+  // app; *.vue2.json map them to this package's Vue 2.7 copies.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "skipLibCheck": false,
+    // TypeScript 6 default: an unresolvable side-effect import in dist/types fails (#622).
+    "noUncheckedSideEffectImports": true,
+    "noEmit": true,
+    "types": []
+  }
+}

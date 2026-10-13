@@ -129,16 +129,16 @@ Stripe refuses a default the session already sets: `email` on a session created 
 | `loading` | — | Until the Checkout SDK exists (Stripe.js still loading) |
 | `error` | `{ error }` | Initialization failed |
 
-The default slot renders early so element components can mount while the session actions are still loading. Its `loading` prop (and `useCheckoutSession().loading`) stays `true` until `loadActions()` resolves; `actions` and `session` are `null` until then.
+The default slot renders early so element components can mount while the session actions are still loading. Its `loading` prop (and `useCheckoutSession().loading`) stays `true` until `loadActions()` resolves; `actions` and `session` are `null` until then. Their types include `null`, so test them, not `loading`, before reading a member.
 
 ```vue
 <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
   <template #loading><div>Preparing checkout...</div></template>
   <template #error="{ error }"><div class="error">{{ error }}</div></template>
 
-  <template #default="{ session, loading }">
+  <template #default="{ session }">
     <VueStripePaymentElement />
-    <p v-if="!loading">Total: {{ session.total.total.amount }}</p>
+    <p v-if="session">Total: {{ session.total.total.amount }}</p>
   </template>
 </VueStripeCheckoutElementsProvider>
 ```
@@ -198,7 +198,7 @@ Access these via [`useCheckoutSession()`](/api/composables/use-checkout-session)
 
 ## TypeScript
 
-The component's props and event payloads are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events).
+The component's props, event payloads and slot props are typed on Vue 2.7 and Vue 3: `vue-tsc` checks a handler's parameter against the payload in [Events](#events), and a slot prop against [Slots](#slots).
 
 ```ts
 import type {

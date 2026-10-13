@@ -21,9 +21,14 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/es/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/es/index.js"
+      },
+      "require": {
+        "types": "./dist/types/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
     },
     "./style.css": "./dist/vue-stripe.css",
     "./package.json": "./package.json"
@@ -34,7 +39,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json",
+    "build": "vite build && tsc -p tsconfig.build.json && node scripts/declarations.mjs",
     "build:watch": "vite build --watch",
     "dev": "vite build --watch",
     "test": "vitest run",

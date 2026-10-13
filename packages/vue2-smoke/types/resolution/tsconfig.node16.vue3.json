@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "paths": {
+      // Vue 3.5's compiler-core types import @babel/types without depending on it; an app has
+      // 7 (from @babel/parser), this workspace hoists the ES-module-only 8, which the CommonJS
+      // chain through vue-demi cannot load under node16. This package depends on 7.
+      "@babel/types": ["../../node_modules/@babel/types"]
+    }
+  },
+  "files": ["consumer.mts", "consumer.cts"]
+}

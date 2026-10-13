@@ -17,5 +17,7 @@
       "vue": ["../node_modules/vue3"]
     }
   },
+  // As in the apps that report template type errors (#671).
+  "vueCompilerOptions": { "strictTemplates": true },
   "include": ["*.vue"]
 }
