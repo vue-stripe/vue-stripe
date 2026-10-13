@@ -245,7 +245,7 @@ Every element component and provider has `#loading` and `#error` slots. Use them
 </VueStripeProvider>
 ```
 
-An element's `#error` slot shows Stripe's validation message while the customer types (an incomplete card number, say) and load errors. Errors from confirming a payment are not shown there; see [Handle errors and declines](/guide/error-handling).
+An element's `#error` slot shows load and creation errors. The Card, split card, IBAN and BECS elements also show Stripe's validation message there while the customer types (an incomplete card number, say). The Payment, Address, Link Authentication and Tax ID elements show their validation messages inside the iframe instead, so their `#error` slot stays empty while the customer types. Errors from confirming a payment are not shown there either; see [Handle errors and declines](/guide/error-handling).
 
 ## Checkout Sessions and Checkout pages
 

@@ -98,7 +98,7 @@ Access these via a template ref:
 |--------|------|-------------|
 | `element` | `ShallowRef<StripePaymentMethodMessagingElement \| null>` | The Stripe element instance (`null` until created) |
 | `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
-| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `error` | `Ref<string \| null>` | Current creation error message |
 | `focus()` | `() => void` | Focus the element |
 | `blur()` | `() => void` | Blur the element |
 | `clear()` | `() => void` | Clear the element's value |

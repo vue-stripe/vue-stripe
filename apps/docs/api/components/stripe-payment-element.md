@@ -193,7 +193,7 @@ interface StripePaymentElementChangeEvent {
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
 | `#loading` | - | Rendered while the element is loading (default: "Loading payment form...") |
-| `#error` | `{ error: string }` | Rendered when the element has an error: the validation message from `@change`, a load error or a creation error |
+| `#error` | `{ error: string }` | Rendered when the element fails to load (`@loaderror`) or cannot be created. Not rendered for validation errors: the Payment Element shows them inside its iframe, and its `@change` payload has no `error` |
 
 ```vue
 <VueStripePaymentElement>
@@ -215,7 +215,7 @@ Access these via a template ref:
 |--------|------|-------------|
 | `element` | `ShallowRef<StripePaymentElement \| null>` | The Stripe element instance (`null` until created) |
 | `loading` | `Ref<boolean>` | `true` until the element emits `ready` |
-| `error` | `Ref<string \| null>` | Current error message (validation, load or creation error) |
+| `error` | `Ref<string \| null>` | Current load or creation error message; validation messages never reach it |
 | `focus()` | `() => void` | Focus the element |
 | `blur()` | `() => void` | Blur the element |
 | `clear()` | `() => void` | Clear the element's value |

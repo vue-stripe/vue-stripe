@@ -11,7 +11,7 @@ Errors reach your app at five points, each covered by a step below:
 | Where | Example | Where you see it |
 |-------|---------|------------------|
 | Loading Stripe.js | Network blocked, invalid publishable key | Provider `#error` slot and `@error` event |
-| Typing in an element | Incomplete card number, invalid IBAN | Element `@change` event and `#error` slot |
+| Typing in an element | Incomplete card number, invalid IBAN | Inside the Payment Element's iframe; `@change` and the `#error` slot of the Card, IBAN and BECS elements |
 | Confirming | Card declined, 3D Secure failed | `{ error }` result of the composable, and its `error` ref |
 | After confirming | A bank debit fails days later | Webhooks on your server |
 | Integration mistakes | A composable outside its provider | A thrown `VueStripeProviderError` / `VueStripeElementsError` / `VueStripeCheckoutError` |
@@ -48,7 +48,14 @@ With the [plugin](/guide/plugin) there is no provider: `VueStripeElements` shows
 
 ## 2. Show validation errors while the customer types
 
-Elements validate their fields as the customer types. Each element shows Stripe's message in its `#error` slot and emits `@change` with `complete` and `error`. Use `complete` to enable the pay button:
+Elements validate their fields as the customer types. Where the message appears depends on the element:
+
+| Element | Validation message | `@change` payload |
+|---------|--------------------|-------------------|
+| Payment, Address, Link Authentication, Tax ID | Shown by Stripe inside the iframe | `complete`, no `error` |
+| Card, split card (number, expiry, CVC), IBAN, AU BECS | In the element's `#error` slot | `complete` and `error` |
+
+Use `complete` to enable the pay button. With the Card Element, also show the message from the `#error` slot:
 
 ```vue
 <script setup>
@@ -71,7 +78,7 @@ const onChange = (event) => {
 </template>
 ```
 
-The Payment Element also checks its fields when you confirm: `usePaymentIntent` and `useSetupIntent` call `elements.submit()` first and resolve to `{ error }` (type `validation_error`) without contacting your server when a field is incomplete.
+With the Payment Element, nothing reaches the `#error` slot while the customer types; the fields show their own messages. It also checks its fields when you confirm: `usePaymentIntent` and `useSetupIntent` call `elements.submit()` first and resolve to `{ error }` (type `validation_error`) without contacting your server when a field is incomplete.
 
 If an element fails to load (for example, the Payment Element without a client secret or `mode`), it emits `@loaderror` and shows the message in the same `#error` slot.
 
