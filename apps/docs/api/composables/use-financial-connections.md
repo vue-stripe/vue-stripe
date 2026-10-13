@@ -17,6 +17,20 @@ Each method has the same name as the `stripe.*` method it wraps.
 
 Must be called within a `<VueStripeProvider>` or an app using [`createVueStripe()`](/api/plugin). No `<VueStripeElements>` is needed. Create the Financial Connections Session, PaymentIntent or SetupIntent on your server and pass its client secret.
 
+Stripe's Financial Connections flow needs `minimum-scale=1` in the page's viewport meta tag. Without it, opening the modal logs `[Stripe.js] The Financial Connections authentication flow requires "minimum-scale=1" to be set in your page's viewport meta tag.` The default templates of Vite, Vue CLI, Quasar and Nuxt leave it out. Set it in `index.html` (`public/index.html` with Vue CLI):
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+```
+
+In Nuxt, set it in `nuxt.config.ts`:
+
+```ts
+export default defineNuxtConfig({
+  app: { head: { viewport: 'width=device-width, initial-scale=1, minimum-scale=1' } }
+})
+```
+
 ::: tip Live demo
 The [ACH Direct Debit demo](/live-demo/ach-debit) links a test bank account with `collectBankAccountForPayment()` and confirms with `useConfirmUsBankAccountPayment()`.
 :::
