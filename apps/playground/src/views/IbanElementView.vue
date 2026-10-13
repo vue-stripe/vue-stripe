@@ -5,7 +5,8 @@ import {
   VueStripeProvider,
   VueStripeElements,
   VueStripeIbanElement,
-  useStripe
+  useConfirmSepaDebitPayment,
+  useConfirmSepaDebitSetup
 } from '@vue-stripe/vue-stripe'
 import type {
   StripeIbanElement as StripeIbanElementType,
@@ -36,12 +37,15 @@ const SepaPaymentForm = defineComponent({
   },
   emits: ['payment-success', 'payment-error', 'log'],
   setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const processing = ref(false)
+    // stripe.confirmSepaDebitSetup() / confirmSepaDebitPayment() through their composables;
+    // either call in flight drives the button state.
+    const { confirmSepaDebitSetup, loading: setupLoading } = useConfirmSepaDebitSetup()
+    const { confirmSepaDebitPayment, loading: paymentLoading } = useConfirmSepaDebitPayment()
+    const processing = computed(() => setupLoading.value || paymentLoading.value)
 
     const handleConfirmPayment = async () => {
-      if (!stripe.value || !props.ibanElement) {
-        emit('payment-error', 'Stripe or IBAN element not ready')
+      if (!props.ibanElement) {
+        emit('payment-error', 'IBAN element not ready')
         return
       }
 
@@ -50,7 +54,6 @@ const SepaPaymentForm = defineComponent({
         return
       }
 
-      processing.value = true
       emit('log', 'confirm', 'Starting SEPA Direct Debit confirmation...')
 
       try {
@@ -58,18 +61,15 @@ const SepaPaymentForm = defineComponent({
         const isSetupIntent = props.clientSecret.startsWith('seti_')
 
         if (isSetupIntent) {
-          const { error, setupIntent } = await stripe.value.confirmSepaDebitSetup(
-            props.clientSecret,
-            {
-              payment_method: {
-                sepa_debit: props.ibanElement,
-                billing_details: {
-                  name: 'Test Customer',
-                  email: 'test@example.com'
-                }
+          const { error, setupIntent } = await confirmSepaDebitSetup(props.clientSecret, {
+            payment_method: {
+              sepa_debit: props.ibanElement,
+              billing_details: {
+                name: 'Test Customer',
+                email: 'test@example.com'
               }
             }
-          )
+          })
 
           if (error) {
             emit('payment-error', error.message || 'Setup failed')
@@ -81,18 +81,15 @@ const SepaPaymentForm = defineComponent({
             emit('log', 'info', `SetupIntent status: ${setupIntent?.status}`)
           }
         } else {
-          const { error, paymentIntent } = await stripe.value.confirmSepaDebitPayment(
-            props.clientSecret,
-            {
-              payment_method: {
-                sepa_debit: props.ibanElement,
-                billing_details: {
-                  name: 'Test Customer',
-                  email: 'test@example.com'
-                }
+          const { error, paymentIntent } = await confirmSepaDebitPayment(props.clientSecret, {
+            payment_method: {
+              sepa_debit: props.ibanElement,
+              billing_details: {
+                name: 'Test Customer',
+                email: 'test@example.com'
               }
             }
-          )
+          })
 
           if (error) {
             emit('payment-error', error.message || 'Payment failed')
@@ -111,8 +108,6 @@ const SepaPaymentForm = defineComponent({
         const message = err instanceof Error ? err.message : 'Confirmation failed'
         emit('payment-error', message)
         emit('log', 'error', message)
-      } finally {
-        processing.value = false
       }
     }
 
