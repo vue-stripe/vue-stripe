@@ -10,6 +10,10 @@ The Checkout Form is a Stripe beta. Your Stripe account needs access to the Chec
 Use VueStripeCheckoutForm when you want Stripe's full checkout UI on your own page with the least code. To lay out the fields yourself, use [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) with individual elements instead.
 :::
 
+::: tip Live demo
+The [Checkout Form demo](/live-demo/checkout-form) pays a Checkout Session with this component and `useCheckoutForm()`.
+:::
+
 ## Usage
 
 ```vue

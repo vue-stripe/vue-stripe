@@ -180,6 +180,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           ]
         },
         {
+          text: 'Payment Flows',
+          items: [
+            { text: 'Confirming Payments', link: '/guide/confirming-payments' },
+            { text: 'Tokens and Payment Methods', link: '/guide/tokens' }
+          ]
+        },
+        {
           text: 'Subscriptions',
           items: [{ text: 'Pricing Table', link: '/guide/pricing-table' }]
         },
@@ -365,18 +372,21 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             { text: 'Payment Element', link: '/live-demo/payment-element' },
             { text: 'Embedded Checkout', link: '/live-demo/embedded-checkout' },
             { text: 'Custom Checkout', link: '/live-demo/custom-checkout' },
+            { text: 'Checkout Form (beta)', link: '/live-demo/checkout-form' },
             { text: 'Card Element', link: '/live-demo/card-element' },
             { text: 'Split Card Elements', link: '/live-demo/split-card-elements' },
             { text: 'Link Authentication', link: '/live-demo/link-authentication' },
             { text: 'Express Checkout', link: '/live-demo/express-checkout' },
+            { text: 'Payment Request', link: '/live-demo/payment-request' },
             { text: 'Address Element', link: '/live-demo/address-element' }
           ]
         },
         {
-          text: 'Saving Cards',
+          text: 'Saving Cards and Tokens',
           items: [
             { text: 'Save a Card (SetupIntent)', link: '/live-demo/setup-intent' },
-            { text: 'Create Payment Method', link: '/live-demo/create-payment-method' }
+            { text: 'Create Payment Method', link: '/live-demo/create-payment-method' },
+            { text: 'Tokens', link: '/live-demo/tokens' }
           ]
         },
         {
@@ -387,8 +397,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
           text: 'Regional Payment Methods',
           items: [
             { text: 'SEPA Direct Debit', link: '/live-demo/iban-element' },
-            { text: 'BECS Direct Debit (Australia)', link: '/live-demo/becs-payment' }
+            { text: 'BECS Direct Debit (Australia)', link: '/live-demo/becs-payment' },
+            { text: 'ACH Direct Debit (US)', link: '/live-demo/ach-debit' }
           ]
+        },
+        {
+          text: 'Identity',
+          items: [{ text: 'Identity Verification', link: '/live-demo/identity' }]
         },
         {
           text: 'Subscriptions',

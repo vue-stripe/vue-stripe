@@ -4,6 +4,10 @@ Turn card details, bank account details, PII, or Connect account / person detail
 
 Tokens are the legacy way to collect payment details; new integrations create a PaymentMethod ([`useCreatePaymentMethod`](/api/composables/use-create-payment-method)) or a ConfirmationToken ([`useCreateConfirmationToken`](/api/composables/use-create-confirmation-token)). Use `createToken` for Connect account and person tokens, PII tokens, CVC recollection, or an existing Charges / Sources integration. Must be called within a `<VueStripeProvider>` or an app that installs [`createVueStripe()`](/api/plugin).
 
+::: tip Live demo
+The [Tokens demo](/live-demo/tokens) creates a card Token from the Card Element.
+:::
+
 ## Usage
 
 ```vue

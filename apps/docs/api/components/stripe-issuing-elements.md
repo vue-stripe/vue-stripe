@@ -6,6 +6,10 @@ Six components that wrap Stripe's [Issuing Elements](https://docs.stripe.com/iss
 The [Issuing Elements guide](/guide/issuing) explains the ephemeral key nonce flow end to end, with a server endpoint.
 :::
 
+::: info No live demo
+Issuing Elements need an account onboarded to Stripe Issuing and an issued card. The docs' live demos run on an account without Issuing, so these elements have no live demo; the [Issuing guide](/guide/issuing) walks through the full flow.
+:::
+
 | Component | Stripe.js element type | Events |
 |-----------|------------------------|--------|
 | `VueStripeIssuingCardNumberDisplayElement` | `issuingCardNumberDisplay` | `@ready` |

@@ -12,6 +12,7 @@ Stripe offers several ways to collect payments. Here's how to choose the right o
 | **Checkout (Hosted)** | Fastest launch | Low | Easiest |
 | **Embedded Checkout** | Stripe's Checkout form on your own page | Low | Easiest |
 | **Elements with Checkout Sessions** | Own page, Stripe-managed totals/tax/discounts | High | Medium |
+| **Checkout Form** (beta) | Stripe's complete form as one element on your page | Low | Easy |
 
 ## Payment Element (Recommended)
 
@@ -171,10 +172,42 @@ Keep Checkout Sessions on the server (Stripe computes line items, tax, discounts
 - Same element components as `VueStripeElements`
 
 **Cons:**
-- Only the Payment, Address, Express Checkout, Tax ID and Currency Selector elements are available
+- Only the Payment, Address, Express Checkout, Contact Details, Tax ID, Currency Selector, Terms and Link Signup elements are available
 - Requires a server-created session
 
-[Learn more about VueStripeCheckoutElementsProvider →](/api/components/stripe-checkout-provider)
+[Learn more about Custom Checkout →](/guide/custom-checkout)
+
+## Checkout Form (beta)
+
+Stripe's whole checkout form (contact details, addresses, wallets, payment method, total and Pay button) as one element on your page, backed by a Checkout Session created with `ui_mode: 'form'`:
+
+```vue
+<VueStripeProvider :publishable-key="key">
+  <VueStripeCheckoutFormProvider :client-secret="clientSecret">
+    <VueStripeCheckoutForm @confirm="onConfirm" /> <!-- onConfirm calls useCheckoutForm().confirm() -->
+  </VueStripeCheckoutFormProvider>
+</VueStripeProvider>
+```
+
+**Pros:**
+- Customers stay on your site, in your page layout
+- One element instead of a field-by-field form
+- Session features (tax, discounts, shipping, Adaptive Pricing) as with the other Checkout Sessions
+
+**Cons:**
+- Stripe beta: your account needs access to `ui_mode: 'form'`
+- The form's fields and order are Stripe's
+
+[Learn more about the Checkout Form →](/guide/checkout-form)
+
+## Composables Without a Form
+
+Some flows need no element at all, only a composable inside `VueStripeProvider`:
+
+- **Bank accounts**: [`useFinancialConnections`](/api/composables/use-financial-connections) opens Stripe's bank login modal (ACH Direct Debit, Financial Connections data).
+- **Identity**: [`useIdentity`](/api/composables/use-identity) opens Stripe Identity's verification modal.
+- **Wallet sheet behind your own button**: [`usePaymentRequest`](/api/composables/use-payment-request) (prefer the Express Checkout Element for new integrations).
+- **Confirming on your server**: [`useCreateConfirmationToken`](/api/composables/use-create-confirmation-token) with the Payment Element, then [`useHandleNextAction`](/api/composables/use-handle-next-action). See [Tokens and Payment Methods](/guide/tokens).
 
 ## Decision Flowchart
 
@@ -182,7 +215,7 @@ Keep Checkout Sessions on the server (Stripe computes line items, tax, discounts
 Do you need custom UI?
 │
 ├─ No → Use Stripe Checkout (Hosted),
-│        or Embedded Checkout to keep customers on your site
+│        or Embedded Checkout / Checkout Form (beta) to keep customers on your site
 │
 └─ Yes → Do you need multiple payment methods?
           │
@@ -231,3 +264,5 @@ Choose your approach and dive deeper:
 - [Payment Element Guide](/guide/payment-element) - The recommended approach
 - [Card Element Guide](/guide/card-element) - For card-only payments
 - [Express Checkout Guide](/guide/express-checkout) - Add wallet payments
+- [Custom Checkout Guide](/guide/custom-checkout) - Your own page on a Checkout Session
+- [Confirming Payments](/guide/confirming-payments) - Which composable confirms what

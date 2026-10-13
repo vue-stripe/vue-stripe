@@ -9,6 +9,6 @@ pageClass: coverage-page
 
 How much of Stripe.js does Vue Stripe wrap? This page compares our components and composables against Stripe.js elements, checkout flows, and payment/setup methods, so you can see at a glance what ships today.
 
-Anything not yet wrapped is still reachable through the raw `stripe` / `elements` instance returned by `useStripe()` and `useStripeElements()` — and the list grows as new features land.
+Every Stripe.js 10 element and method that Stripe still supports has a component or composable. Rows marked deprecated were removed or deprecated by Stripe and are intentionally not wrapped. When a new Stripe.js release adds something, it appears here as soon as it is classified; until a wrapper ships, the raw `stripe` / `elements` instances from `useStripe()` and `useStripeElements()` reach it.
 
 <StripeCoverage />

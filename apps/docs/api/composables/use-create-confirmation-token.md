@@ -4,6 +4,10 @@ Create a [ConfirmationToken](https://docs.stripe.com/api/confirmation_tokens) fr
 
 Use it in the [finalize payments on the server](https://docs.stripe.com/payments/finalize-payments-on-the-server) flow: render the Payment Element with a deferred intent (`mode`, `amount` and `currency` props on `VueStripeElements`), create the token in the browser, then create and confirm the intent on your server with `confirmation_token`. If the intent then needs an action (3D Secure), finish it with [`useHandleNextAction`](/api/composables/use-handle-next-action). Must be called within a `<VueStripeProvider>` or an app that installs [`createVueStripe()`](/api/plugin).
 
+::: tip Live demo
+The [Tokens demo](/live-demo/tokens) creates a ConfirmationToken from a deferred-intent Payment Element.
+:::
+
 ## Usage
 
 ```vue

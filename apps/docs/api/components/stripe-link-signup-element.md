@@ -17,6 +17,10 @@ The Link Signup Element requires beta access: contact [Stripe support](https://s
 With the flag set, a sandbox account without Link Signup access gets a mounted element that emits `@ready` and renders no visible content.
 :::
 
+::: info No live demo
+The docs' live demos run on a Stripe account without this beta, so the Link Signup Element has no live demo.
+:::
+
 ## Usage
 
 ```vue

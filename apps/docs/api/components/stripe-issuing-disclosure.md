@@ -6,6 +6,10 @@ Renders the legal disclosure Stripe requires for an Issuing card program. It is 
 Stripe answers with an error unless your account has onboarded to Stripe Issuing. In a sandbox account without it, Stripe returns an `invalid_request_error` ("Unrecognized request URL (GET: /v1/disclosures/...)"), which this component emits through `@error` and shows in the `#error` slot.
 :::
 
+::: info No live demo
+The docs' live demos run on an account that has not onboarded to Stripe Issuing, so this disclosure has no live demo.
+:::
+
 ## Usage
 
 ```vue

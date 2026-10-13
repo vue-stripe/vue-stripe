@@ -6,6 +6,10 @@ Shows the terms the customer agrees to by paying. Use it inside a [VueStripeChec
 The Terms Element requires beta access: contact [Stripe support](https://support.stripe.com/). Access is granted to the Stripe account, not through a `betas` flag. Without it, Stripe.js mounts the element and then emits `@loaderror` with the message "You cannot use the Terms Element without being gated into this functionality. Please contact Stripe to request access." (observed with a Checkout Session in a sandbox account); the message is shown through the `#error` slot.
 :::
 
+::: info No live demo
+The docs' live demos run on a Stripe account without this beta, so the Terms Element has no live demo.
+:::
+
 ## Usage
 
 ```vue

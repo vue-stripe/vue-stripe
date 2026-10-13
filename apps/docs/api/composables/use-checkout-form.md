@@ -10,6 +10,10 @@ The Checkout Form SDK (`stripe.initCheckoutFormSdk()`, `ui_mode: 'form'`) is a S
 Must be called within a `VueStripeCheckoutFormProvider`, which itself must be inside a `VueStripeProvider`. Calling it elsewhere, including inside a `VueStripeCheckoutElementsProvider`, throws `VueStripeCheckoutError`.
 :::
 
+::: tip Live demo
+The [Checkout Form demo](/live-demo/checkout-form) confirms the form with `confirm({ formConfirmEvent })`.
+:::
+
 ## Usage
 
 ```vue

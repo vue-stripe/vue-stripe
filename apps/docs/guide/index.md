@@ -23,12 +23,25 @@ We recommend following these pages in order:
 7. [Card Element](/guide/card-element) - For card-only payments
 8. [Express Checkout](/guide/express-checkout) - Apple Pay, Google Pay, and Link
 
+### Checkout Sessions
+
+9. [Checkout](/guide/checkout) - Redirect to Stripe's hosted page
+10. [Embedded Checkout](/guide/embedded-checkout) - Stripe's Checkout page inside yours
+11. [Custom Checkout](/guide/custom-checkout) - Your own page on a Checkout Session, with Elements
+12. [Checkout Form (beta)](/guide/checkout-form) - Stripe's complete checkout form as one element
+
+### Payment Flows
+
+13. [Confirming Payments](/guide/confirming-payments) - Which composable confirms what
+14. [Tokens and Payment Methods](/guide/tokens) - Collect now, confirm on your server or later
+
 ### Reference
 
 Each component and composable has detailed API documentation:
 
 - [Components](/api/#components) - StripeProvider, VueStripeElements, element components
-- [Composables](/api/#composables) - useStripe, useStripeElements, usePaymentIntent
+- [Composables](/api/#composables) - useStripe, useStripeElements, usePaymentIntent, the method confirmers, and more
+- [Plugin](/api/plugin) - `createVueStripe()`, Stripe for the whole app without a provider component
 
 ## Quick Links
 
@@ -38,6 +51,12 @@ Each component and composable has detailed API documentation:
 | Accept only cards | [Card Element](/guide/card-element) |
 | Add Apple Pay / Google Pay | [Express Checkout](/guide/express-checkout) |
 | Redirect to Stripe's page | [Checkout](/guide/checkout) |
+| Keep Stripe's checkout on my page | [Embedded Checkout](/guide/embedded-checkout) or [Checkout Form](/guide/checkout-form) |
+| Build my own page on a Checkout Session | [Custom Checkout](/guide/custom-checkout) |
+| Confirm a Card, IBAN or bank payment | [Confirming Payments](/guide/confirming-payments) |
+| Confirm the payment on my server | [Tokens and Payment Methods](/guide/tokens) |
+| Save a card for later | [Saving Payment Methods](/guide/setup-intent) |
+| Show issued card details | [Issuing Elements](/guide/issuing) |
 | Understand the component tree | [Architecture](/guide/architecture) |
 
 ## Prerequisites

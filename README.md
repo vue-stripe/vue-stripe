@@ -52,7 +52,9 @@ Thank you for understanding, and for continuing to support Vue Stripe.
 - **Stripe.js 10** — Payment, Express Checkout, Address, Tax ID, Currency Selector and more, plus Checkout Sessions with Elements
 - **TypeScript First** — Full TypeScript support with comprehensive types
 - **Modern Elements** — Payment Element supporting 40+ payment methods
-- **Composition API** — Composables for confirming payments and driving Checkout Sessions
+- **Composition API** — Composables for confirming payments (one per Stripe.js confirm method), tokens, Financial Connections, Identity and Checkout Sessions
+- **Every Checkout** — Hosted Checkout, Embedded Checkout, Custom Checkout and the Checkout Form (beta)
+- **100% Stripe.js coverage** — Every Stripe.js 10 element and method has a component or composable ([coverage](https://vuestripe.com/coverage))
 - **Customizable** — Full support for Stripe's Appearance API
 - **Well Tested** — Comprehensive test suite
 - **SSR Ready** — Support for Nuxt 3 and server-side rendering

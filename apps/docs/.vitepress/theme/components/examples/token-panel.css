@@ -1,0 +1,48 @@
+/* Shared by the ConfirmationToken, Token and Radar Session panels of the Tokens demo. */
+.token-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.action-btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: #635bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.action-btn:hover:not(.disabled) {
+  opacity: 0.9;
+}
+.action-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.result {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: var(--vp-c-green-soft);
+  border: 1px solid var(--vp-c-green-1);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+}
+.result dt {
+  color: var(--vp-c-text-2);
+}
+.result dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.error-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--vp-c-danger-1);
+}
