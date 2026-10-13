@@ -38,7 +38,10 @@ export interface ElementDefinition {
   checkout?: (sdk: StripeCheckoutElementsSdk, options: Record<string, unknown>) => StripeElementLike
   /** Creator inside VueStripeCheckoutFormProvider; omit when the Checkout Form SDK lacks the element. */
   checkoutForm?: (sdk: StripeCheckoutFormSdk, options: Record<string, unknown>) => StripeElementLike
-  /** `false` when `elements.create()` has no such type (the Checkout Form): Elements contexts are ignored. */
+  /**
+   * `false` when `elements.create()` cannot build the type (the Checkout Form, the Currency
+   * Selector): Elements contexts are skipped, and one alone reports the element unavailable.
+   */
   elements?: boolean
   /** Extra members for the component's public instance (e.g. getValue). */
   expose?: (element: Ref<StripeElementLike | null>) => Record<string, unknown>

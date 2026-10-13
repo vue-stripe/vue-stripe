@@ -106,7 +106,8 @@ describe('VueStripeCheckoutForm (Checkout Form SDK, beta)', () => {
     )
   })
 
-  it('ignores an Elements context: elements.create() has no Checkout Form', () => {
+  it('reports that it is not available inside VueStripeElements: elements.create() has no Checkout Form', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const elements = makeMockElements()
     const Host = defineComponent({
       setup() {
@@ -118,10 +119,22 @@ describe('VueStripeCheckoutForm (Checkout Form SDK, beta)', () => {
         return () => h(VueStripeCheckoutForm)
       }
     })
-    expect(() => mount(Host)).toThrow(
-      'VueStripeCheckoutForm must be used within VueStripeCheckoutFormProvider'
-    )
+    const wrapper = mount(Host)
+    await flushPromises()
     expect(elements.create).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain(
+      'VueStripeCheckoutForm is not available inside VueStripeElements; use it within VueStripeCheckoutFormProvider'
+    )
+    expect(wrapper.findComponent(VueStripeCheckoutForm).emitted('loaderror')?.[0]).toEqual([
+      {
+        elementType: 'checkoutForm',
+        error: {
+          message:
+            'VueStripeCheckoutForm is not available inside VueStripeElements; use it within VueStripeCheckoutFormProvider'
+        }
+      }
+    ])
+    errorSpy.mockRestore()
   })
 
   it('reports that it is not available inside VueStripeCheckoutElementsProvider', async () => {

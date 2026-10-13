@@ -69,14 +69,21 @@ export function createStripeElement<
 
       // An Elements context always wins: inject() returns the nearest provider of each key,
       // so a VueStripeElements nested inside a Checkout provider drives its own children.
-      // Definitions without an Elements type (the Checkout Form) ignore it.
-      const elementsCtx = def.elements === false ? null : inject(stripeElementsInjectionKey, null)
+      // Definitions whose type elements.create() cannot build (`elements: false`) skip it,
+      // and report it as unavailable when no Checkout context is above them.
+      const anyElementsCtx = inject(stripeElementsInjectionKey, null)
+      const elementsCtx = def.elements === false ? null : anyElementsCtx
       const checkoutCtx = inject(stripeCheckoutInjectionKey, null)
       const formCtx = inject(stripeCheckoutFormInjectionKey, null)
-      if (!elementsCtx && !checkoutCtx && !formCtx) {
+      const checkoutParents = def.checkout ? ['VueStripeCheckoutElementsProvider'] : []
+      if (def.checkoutForm) checkoutParents.push('VueStripeCheckoutFormProvider')
+      if (!anyElementsCtx && !checkoutCtx && !formCtx) {
         const parents =
-          def.elements === false ? [] : ['VueStripeElements', 'VueStripeCheckoutElementsProvider']
-        if (def.checkoutForm) parents.push('VueStripeCheckoutFormProvider')
+          def.elements === false
+            ? checkoutParents
+            : ['VueStripeElements', 'VueStripeCheckoutElementsProvider'].concat(
+                def.checkoutForm ? ['VueStripeCheckoutFormProvider'] : []
+              )
         throw new VueStripeElementsError(
           `${componentName} must be used within ${parents.join(' or ')}`
         )
@@ -136,7 +143,12 @@ export function createStripeElement<
           )
         }
         const formSdk = formCtx?.checkout.value
-        if (!formSdk) return null
+        if (!formSdk) {
+          if (checkoutCtx || formCtx) return null
+          throw new VueStripeElementsError(
+            `${componentName} is not available inside VueStripeElements; use it within ${checkoutParents.join(' or ')}`
+          )
+        }
         if (!def.checkoutForm) {
           throw new VueStripeElementsError(
             `${componentName} is not available inside VueStripeCheckoutFormProvider`
