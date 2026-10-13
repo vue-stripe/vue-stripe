@@ -64,7 +64,8 @@ export function useStripeElements(): UseStripeElementsReturn {
 
   /**
    * Looks up the element of a type created on this Elements group (`elements.getElement()`).
-   * Returns `null` when there is none, or before the group exists.
+   * Returns `null` when there is none, before the group exists, or where Stripe throws for a
+   * type the account cannot use (the Link Signup Element without its beta).
    */
   const getElement = ((elementType: string, options?: unknown) => {
     const group = elementsContext.elements.value
@@ -74,7 +75,11 @@ export function useStripeElements(): UseStripeElementsReturn {
       type: string,
       opts?: unknown
     ) => StripeElement | null
-    return lookup(elementType, options)
+    try {
+      return lookup(elementType, options)
+    } catch {
+      return null
+    }
   }) as StripeElements['getElement']
 
   return {

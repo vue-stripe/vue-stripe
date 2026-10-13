@@ -324,6 +324,14 @@ describe('useStripeElements().getElement', () => {
     expect(api.getElement('card')).toBeNull()
   })
 
+  it('returns null where Stripe throws for a type the account cannot use (#635)', async () => {
+    const { api, elementsInstance } = await mountWithElements()
+    elementsInstance.getElement.mockImplementationOnce(() => {
+      throw new Error('A valid Element name must be provided.')
+    })
+    expect(api.getElement('linkSignup')).toBeNull()
+  })
+
   it('returns null before Elements exists', async () => {
     const { provide, shallowRef, ref: vref } = await import('vue-demi')
     const { stripeElementsInjectionKey } = await import('../../src/utils/injection-keys')

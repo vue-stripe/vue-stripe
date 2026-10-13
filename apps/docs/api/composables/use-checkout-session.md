@@ -119,9 +119,9 @@ Each action is forwarded to `actions` (Stripe's `StripeCheckoutLoadActionsSucces
 | `getBillingAddressElement()` / `getShippingAddressElement()` | The billing / shipping Address Element, or `null` |
 | `getExpressCheckoutElement()` | The Express Checkout Element, or `null` |
 | `getCurrencySelectorElement()` / `getTaxIdElement()` | The Currency Selector / Tax ID Element, or `null` |
-| `getTermsElement()` / `getLinkSignupElement()` | The Terms / Link Signup Element (Stripe beta), or `null` |
+| `getTermsElement()` / `getLinkSignupElement()` | The Terms / Link Signup Element (Stripe beta), or `null`, also on an account without the beta |
 
-These call the SDK handle, which exists before the actions load. Called before the SDK exists, `changeAppearance` and `loadFonts` log a `[Vue Stripe]` warning and do nothing, and the getters return `null`. Inside a component you can also take the element from the component's exposed `element` ref.
+These call the SDK handle, which exists before the actions load. Called before the SDK exists, `changeAppearance` and `loadFonts` log a `[Vue Stripe]` warning and do nothing, and the getters return `null`. Stripe.js throws an `IntegrationError` from `getTermsElement()` and `getLinkSignupElement()` on an account without the beta; the getters catch it and return `null`. Inside a component you can also take the element from the component's exposed `element` ref.
 
 ::: info Result shape
 The actions resolve to Stripe's discriminated result: `{ type: 'success'; session }` on success or `{ type: 'error'; error }` on failure. They never reject: when Stripe.js throws an integration error instead of resolving (for example `confirm()` on a session with no email, or `updateLineItemQuantity()` on a session without `adjustable_quantity`), the action resolves to `{ type: 'error', error: { message, code: null } }` with Stripe's message. Always branch on `result.type`.

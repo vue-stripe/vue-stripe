@@ -29,7 +29,7 @@ const { elements, loading, error } = useStripeElements()
 | `elements` | `Readonly<Ref<StripeElements \| null>>` | The Elements instance |
 | `submit` | `() => Promise<ElementsSubmitResult>` | Triggers form validation and collects data required for wallets (Apple Pay, Google Pay). Call before `confirmPayment`/`confirmSetup` |
 | `fetchUpdates` | `() => Promise<{ error?: { message: string; status?: string } }>` | Re-fetches the Elements' data from Stripe after you updated the Intent on your server (e.g. a new amount). Wraps `elements.fetchUpdates()` |
-| `getElement` | `StripeElements['getElement']` | Looks up the element of a type created on this Elements group, e.g. `getElement('payment')`. Typed through Stripe's per-type overloads; returns `null` when there is none |
+| `getElement` | `StripeElements['getElement']` | Looks up the element of a type created on this Elements group, e.g. `getElement('payment')`. Typed through Stripe's per-type overloads; returns `null` when there is none, or for a type the account can't use |
 | `loading` | `Readonly<Ref<boolean>>` | True while Elements is initializing |
 | `error` | `Readonly<Ref<string \| null>>` | Error message if initialization failed |
 
@@ -58,6 +58,8 @@ const payment = getElement('payment') // StripePaymentElement | null
 const shipping = getElement('address', { mode: 'shipping' }) // StripeAddressElement | null
 payment?.collapse()
 ```
+
+Where Stripe.js throws instead of returning `null`, as `getElement('linkSignup')` does on an account without the Link Signup beta, `getElement` returns `null`.
 
 It reads the current group on every call, so after `VueStripeElements` re-creates the group (a new `clientSecret` or amount) it returns the element remounted on the new group. To know when an `appearance` / `locale` update has been applied, listen to [`@update-end`](/api/components/stripe-elements#update-end) on `VueStripeElements`.
 
