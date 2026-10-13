@@ -150,6 +150,38 @@ describe('VueStripeCheckoutFormProvider (Stripe.js 10 Checkout Form SDK, beta)',
     expect(seen.value).toMatchObject({ checkout: checkoutForm, actions, loading: false })
   })
 
+  it('reports a rejected loadActions() through @error, #error and loading (#590)', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const checkoutForm = makeMockCheckoutForm()
+    checkoutForm.loadActions.mockRejectedValue(
+      new Error('You cannot update the email because a `customer_email` is already set.')
+    )
+    const { wrapper, provider, injected } = await mountWith(undefined, checkoutForm, {
+      error: ({ error }: { error: string }) => h('div', { class: 'checkout-error' }, error)
+    })
+    const message = 'You cannot update the email because a `customer_email` is already set.'
+    expect(wrapper.find('.checkout-error').text()).toBe(message)
+    expect(provider().emitted('error')?.[0]).toEqual([message])
+    expect(injected.value?.error.value).toBe(message)
+    expect(injected.value?.loading.value).toBe(false)
+    expect(injected.value?.session.value).toBe(null)
+    errorSpy.mockRestore()
+  })
+
+  it('keeps session null until loadActions() resolves (#590)', async () => {
+    const checkoutForm = makeMockCheckoutForm()
+    let resolveActions!: (value: unknown) => void
+    const actions = (await checkoutForm.loadActions()).actions
+    checkoutForm.loadActions.mockReturnValue(new Promise((r) => (resolveActions = r)))
+    const { injected } = await mountWith(undefined, checkoutForm)
+    const onChange = checkoutForm.on.mock.calls.find((c) => c[0] === 'change')?.[1]
+    onChange?.(makeMockCheckoutSession({ email: 'early@b.com' }))
+    expect(injected.value?.session.value).toBe(null)
+    resolveActions({ type: 'success', actions })
+    await flushPromises()
+    expect(injected.value?.session.value).not.toBe(null)
+  })
+
   it('emits error and renders #error when loadActions resolves { type: "error" }', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const checkoutForm = makeMockCheckoutForm()

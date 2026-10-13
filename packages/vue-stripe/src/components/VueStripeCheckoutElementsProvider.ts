@@ -103,21 +103,30 @@ export default /* @__PURE__ */ defineComponent({
 
         sdk.on('change', (next) => {
           if (unmounted) return
-          session.value = markRaw(next)
+          // `session` stays null until the actions load, like `actions`.
+          if (actions.value) session.value = markRaw(next)
           emit('change', next)
         })
 
-        void sdk.loadActions().then((result) => {
-          if (unmounted) return
-          if (result.type === 'error') {
-            fail(result.error.message)
-            return
+        // loadActions() rejects (rather than resolving { type: 'error' }) when Stripe
+        // refuses an option, e.g. defaultValues.email on a session with customer_email.
+        sdk.loadActions().then(
+          (result) => {
+            if (unmounted) return
+            if (result.type === 'error') {
+              fail(result.error.message)
+              return
+            }
+            actions.value = markRaw(result.actions)
+            session.value = markRaw(result.actions.getSession())
+            loading.value = false
+            emit('ready', result.actions)
+          },
+          (err: unknown) => {
+            if (unmounted) return
+            fail(err instanceof Error ? err.message : String(err))
           }
-          actions.value = markRaw(result.actions)
-          session.value = markRaw(result.actions.getSession())
-          loading.value = false
-          emit('ready', result.actions)
-        })
+        )
       } catch (err) {
         started = false
         checkout.value = null

@@ -111,13 +111,15 @@ interface DefaultValues {
 }
 ```
 
+Stripe refuses a default the session already sets: `email` on a session created with `customer_email` (or a `customer` with an email) makes `loadActions()` fail, and the provider reports it through `@error` and the `#error` slot.
+
 ## Events
 
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@ready` | `StripeCheckoutLoadActionsSuccess` | Emitted once `loadActions()` resolves. Payload is the session actions object |
 | `@change` | `StripeCheckoutSession` | Emitted on every Stripe `change` event with the new session snapshot |
-| `@error` | `string` | Emitted if `initCheckoutElementsSdk()` throws, `loadActions()` returns an error, or no client secret is given |
+| `@error` | `string` | Emitted if `initCheckoutElementsSdk()` throws, `loadActions()` returns an error or rejects, or no client secret is given. `loading` turns `false` |
 
 ## Slots
 
