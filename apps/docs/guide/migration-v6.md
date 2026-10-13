@@ -14,6 +14,10 @@ For most apps, the upgrade takes three steps:
 npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 ```
 
+::: tip v6 is in beta
+Until 6.0.0 is released, v6 is published under the `next` tag: `npm install @vue-stripe/vue-stripe@next @stripe/stripe-js@^10`.
+:::
+
 ```ts
 // main.ts: once, anywhere before the components render
 import '@vue-stripe/vue-stripe/style.css'
