@@ -83,10 +83,11 @@ The options are passed to `loadStripe(publishableKey, { stripeAccount, locale, d
 
 ## Provided values
 
-The plugin provides two values app-wide, under the same injection keys `VueStripeProvider` uses:
+The plugin provides two values app-wide, the same two `VueStripeProvider` [provides](/api/components/stripe-provider#provides):
 
 ```ts
-// Config (stripeConfigInjectionKey), read by VueStripePricingTable
+// Config (VueStripeConfig) under the exported stripeConfigInjectionKey,
+// read by VueStripePricingTable and by inject(stripeConfigInjectionKey)
 {
   publishableKey: '...',
   stripeAccount: '...', // optional
@@ -94,7 +95,7 @@ The plugin provides two values app-wide, under the same injection keys `VueStrip
   locale: '...'         // optional
 }
 
-// Stripe context (stripeInjectionKey), read by useStripe(), VueStripeElements, ...
+// Stripe context (internal key), read by useStripe(), VueStripeElements, ...
 {
   stripe: Ref<Stripe | null>,  // null until Stripe.js has loaded
   loading: Ref<boolean>,       // true until loadStripe() settles

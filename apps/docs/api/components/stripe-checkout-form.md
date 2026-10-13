@@ -154,6 +154,7 @@ const logValue = async () => {
     {{ view.label }}
   </button>
   <VueStripeCheckoutForm ref="formRef" :options="{ layout: 'compact' }" @change="onChange" />
+  <button type="button" @click="logValue">Log value</button>
 </template>
 ```
 
@@ -163,12 +164,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-checkout-form vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-checkout-form-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-checkout-form-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-checkout-form-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-checkout-form-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-checkout-form-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-checkout-form-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading checkout form...</div>
+  </div>
 </div>
 ```
 
@@ -182,13 +187,14 @@ Style the form's inside with the provider's `appearance` prop (or `useCheckoutFo
 
 ## TypeScript
 
-```ts
+The form's types (`StripeCheckoutForm`, `StripeCheckoutFormOptions`, `StripeCheckoutFormChangeEvent`, `StripeCheckoutFormConfirmEvent`, `StripeCheckoutFormValue`) are exported from `@vue-stripe/vue-stripe`:
+
+```vue
+<script setup lang="ts">
+import { VueStripeCheckoutForm } from '@vue-stripe/vue-stripe'
 import type {
-  StripeCheckoutForm,
-  StripeCheckoutFormChangeEvent,
   StripeCheckoutFormConfirmEvent,
-  StripeCheckoutFormOptions,
-  StripeCheckoutFormValue
+  StripeCheckoutFormOptions
 } from '@vue-stripe/vue-stripe'
 
 const options: StripeCheckoutFormOptions = {
@@ -199,6 +205,11 @@ const options: StripeCheckoutFormOptions = {
 const onConfirm = (event: StripeCheckoutFormConfirmEvent) => {
   console.log(event.source)
 }
+</script>
+
+<template>
+  <VueStripeCheckoutForm :options="options" @confirm="onConfirm" />
+</template>
 ```
 
 ## See Also

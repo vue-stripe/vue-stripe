@@ -4,11 +4,15 @@ description: "Vue composables that confirm bank redirect and bank transfer payme
 
 # Redirect and bank transfer confirmers
 
-Confirm a PaymentIntent or SetupIntent with a bank redirect (Bancontact, EPS, FPX, giropay, iDEAL, Przelewy24, Sofort, Pay by Bank) or a bank transfer (Multibanco, customer balance). Redirect methods send the customer to their bank to authorize the payment and back to your `return_url`; on that page, read the `payment_intent_client_secret` query parameter and retrieve the PaymentIntent with [`usePaymentIntent`](/api/composables/use-payment-intent) to show the outcome.
+Confirm a PaymentIntent or SetupIntent with a bank redirect (Bancontact, EPS, FPX, iDEAL, Przelewy24, Pay by Bank, and the deprecated giropay and Sofort) or a bank transfer (Multibanco, customer balance). Redirect methods send the customer to their bank to authorize the payment and back to your `return_url`; on that page, read the `payment_intent_client_secret` query parameter and retrieve the PaymentIntent with [`usePaymentIntent`](/api/composables/use-payment-intent) to show the outcome.
+
+::: warning giropay and Sofort are deprecated by Stripe
+Stripe no longer accepts giropay or Sofort payments. `confirmGiropayPayment()` and `confirmSofortPayment()` resolve to `{ error: { code: 'payment_method_not_available', message: 'Giropay is deprecated and can no longer be used for payment acceptance. ...' } }` (Sofort: the same message with "Sofort"), even when Stripe still lets you create the PaymentIntent. In a sandbox in October 2026, `confirmSofortSetup()` still redirected to Stripe's Sofort test setup page. The composables remain because Stripe.js 10 still has the methods. Use another redirect method, or the [Payment Element](/api/components/stripe-payment-element), which offers only the methods Stripe accepts.
+:::
 
 Stripe removed the standalone iDEAL, EPS, FPX and P24 bank elements in Stripe.js Clover (8.0), but the confirmers remain: pass billing details (and the bank, if you collect it yourself) or the ID of a PaymentMethod you created.
 
-Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider).
+Each composable returns the Stripe.js method under its own name plus `loading` and `error`; see [Method confirmers](/api/composables/confirm/) for the shared behavior. Call it in a component inside [`VueStripeProvider`](/api/components/stripe-provider). [What each method needs](/api/composables/confirm/#what-each-method-needs) lists the Intent currency and the `data` each method requires, and [Test your integration](/guide/testing#redirects-qr-codes-bnpl-and-vouchers) what each method does in test mode.
 
 ## When to use
 
@@ -123,6 +127,8 @@ confirmFpxPayment(
 
 Wraps [`stripe.confirmGiropayPayment()`](https://docs.stripe.com/js/payment_intents/confirm_giropay_payment). Use `stripe.confirmGiropayPayment` in the [giropay Payments with Payment Methods](https://docs.stripe.com/payments/giropay#web) flow when the customer submits your payment form. When called, it will confirm the `PaymentIntent` with `data` you provide, and it will automatically redirect the customer to authorize the transaction.
 
+Deprecated by Stripe: the call resolves to a `payment_method_not_available` error ([see above](#redirect-and-bank-transfer-confirmers)).
+
 ```ts
 const { confirmGiropayPayment, loading, error } = useConfirmGiropayPayment()
 
@@ -182,6 +188,8 @@ confirmP24Payment(
 
 Wraps [`stripe.confirmSofortPayment()`](https://docs.stripe.com/js/payment_intents/confirm_sofort_payment). Use `stripe.confirmSofortPayment` in the [Sofort Payments with Payment Methods](https://docs.stripe.com/payments/sofort) flow when the customer submits your payment form. When called, it will confirm the `PaymentIntent` with `data` you provide.
 
+Deprecated by Stripe: the call resolves to a `payment_method_not_available` error ([see above](#redirect-and-bank-transfer-confirmers)).
+
 ```ts
 const { confirmSofortPayment, loading, error } = useConfirmSofortPayment()
 
@@ -196,6 +204,8 @@ confirmSofortPayment(
 ### useConfirmSofortSetup
 
 Wraps `stripe.confirmSofortSetup()`. Use `stripe.confirmSofortSetup` in the [Set up future payments](https://docs.stripe.com/payments/sofort/set-up-payment) flow to use SOFORT bank details to set up a SEPA Direct Debit payment method for future payments. When called, it will confirm a `SetupIntent` with `data` you provide, and it will automatically redirect the customer to authorize the transaction.
+
+Stripe has deprecated Sofort. In a sandbox in October 2026 the setup flow still redirected; payments are refused ([see above](#redirect-and-bank-transfer-confirmers)).
 
 ```ts
 const { confirmSofortSetup, loading, error } = useConfirmSofortSetup()

@@ -228,6 +228,11 @@ export {
 // Export plugin
 export { createVueStripe } from './plugin'
 
+// The resolved provider/plugin config, for descendants that need the publishable key
+// (the Stripe instance itself is read with useStripe())
+export { stripeConfigInjectionKey } from './utils/injection-keys'
+export type { VueStripeConfig } from './utils/injection-keys'
+
 // Re-export Stripe.js for convenience: the pure entry's loadStripe (plus
 // setLoadParameters), so importing the library injects no Stripe.js <script>,
 // with concurrent calls sharing one script load (see utils/load-stripe.ts).

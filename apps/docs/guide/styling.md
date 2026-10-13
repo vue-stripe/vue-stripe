@@ -161,14 +161,20 @@ Every element component renders the same markup around Stripe's iframe:
 ```html
 <div class="vue-stripe-payment-element vue-stripe-element">
   <!-- only when there is an error -->
-  <div class="vue-stripe-payment-element-error vue-stripe-element-error">...</div>
+  <div class="vue-stripe-payment-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; while loading it also has
        vue-stripe-payment-element-loading and vue-stripe-element-loading -->
   <div class="vue-stripe-payment-element-mount vue-stripe-element-mount"></div>
   <!-- only while loading -->
-  <div class="vue-stripe-payment-element-loader vue-stripe-element-loader">...</div>
+  <div class="vue-stripe-payment-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading payment form...</div>
+  </div>
 </div>
 ```
+
+The text sits in its own inner `div`: `vue-stripe-error-message` and `vue-stripe-loading-message`, which the stylesheet styles separately from the boxes around them. A `#error` or `#loading` slot replaces that inner `div` with your content.
 
 Each part has a shared class (`vue-stripe-element`, `vue-stripe-element-mount`, `-error`, `-loader`, `-loading`) and an element-specific one. The element-specific classes do not all follow one pattern: some use Stripe's camelCase element type and the Link Authentication Element has a short name. They keep the names v5 used, so existing CSS still applies. The wrapper class of each component, which the `-mount`, `-error`, `-loader` and `-loading` suffixes are added to:
 

@@ -14,6 +14,7 @@ Run the card action (3D Secure) of a PaymentIntent that you confirm on the serve
 <script setup lang="ts">
 import { useHandleCardAction } from '@vue-stripe/vue-stripe'
 
+const props = defineProps<{ clientSecret: string }>()
 const { handleCardAction, loading, error } = useHandleCardAction()
 
 // clientSecret of a PaymentIntent in status requires_action
@@ -24,6 +25,11 @@ const authenticate = async (clientSecret: string) => {
   }
 }
 </script>
+
+<template>
+  <button :disabled="loading" @click="authenticate(props.clientSecret)">Authenticate</button>
+  <p v-if="error">{{ error }}</p>
+</template>
 ```
 
 ## Return Value

@@ -154,6 +154,9 @@ const stripeElement = (): StripeIbanElement | null => ibanRef.value?.element ?? 
 
 <template>
   <VueStripeIbanElement ref="ibanRef" />
+  <button type="button" @click="focus">Focus</button>
+  <button type="button" @click="clear">Clear</button>
+  <p v-if="stripeElement()">The Stripe element exists</p>
 </template>
 ```
 
@@ -163,12 +166,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-iban-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-iban-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-iban-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-iban-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-iban-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-iban-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-iban-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading IBAN form...</div>
+  </div>
 </div>
 ```
 
@@ -182,7 +189,8 @@ Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-ib
 
 ## TypeScript
 
-```ts
+```vue
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeIbanElement } from '@vue-stripe/vue-stripe'
 import type {
@@ -202,6 +210,16 @@ const handleChange = (event: StripeIbanElementChangeEvent) => {
 
 const ibanRef = ref<InstanceType<typeof VueStripeIbanElement> | null>(null)
 const iban = (): StripeIbanElement | null => ibanRef.value?.element ?? null
+</script>
+
+<template>
+  <VueStripeIbanElement
+    ref="ibanRef"
+    :options="options"
+    @change="handleChange"
+  />
+  <p v-if="iban()">The Stripe element exists</p>
+</template>
 ```
 
 ## See Also

@@ -12,14 +12,14 @@ Find the message or symptom you see, then apply the fix. Errors that Vue Stripe 
 
 `VueStripeProvider` received no key, usually because the environment variable is empty in the browser:
 
-- Check the variable prefix your build tool exposes to client code (`VITE_`, `VUE_APP_`, `NUXT_PUBLIC_`); see [Install and set up](/guide/installation#_3-add-your-publishable-key).
+- Check the variable prefix your build tool exposes to client code (`VITE_`, `VUE_APP_`, `NUXT_PUBLIC_`, `QCLI_` in Quasar); see [Install and set up](/guide/installation#_3-add-your-publishable-key).
 - Restart the dev server after editing `.env` files; most tools read them only at startup.
 
 ### The provider shows an error instead of loading
 
 The provider's `#error` slot (or its default error text) means Stripe.js could not load or rejected the key at load time:
 
-- **Blocked script**: an ad blocker, privacy extension or Content Security Policy blocked `https://js.stripe.com`. Allow Stripe's hosts in your CSP as listed in [Stripe's CSP guide](https://docs.stripe.com/security/guide#content-security-policy) (at least `https://js.stripe.com` in `script-src` and `frame-src`), and test in a clean browser profile.
+- **Blocked script**: an ad blocker, privacy extension or Content Security Policy blocked `https://js.stripe.com`. Allow Stripe's hosts in your CSP as listed in [Stripe's CSP guide](https://docs.stripe.com/security/guide#content-security-policy) (at least `https://js.stripe.com` in `script-src` and `frame-src`), and test in a clean browser profile. A policy with `default-src` also needs `https://api.stripe.com` in `connect-src`, plus the stylesheet's host when you pass `fonts` or call `loadFonts()`. A new Quasar app ships such a policy in `index.html`; [Use Vue Stripe with Quasar](/guide/quasar#_4-allow-stripe-in-the-content-security-policy) shows one that works.
 - **Secret key**: a secret key (`sk_...`) is rejected by Stripe.js when it loads; never send it to the browser. Use the publishable key, `pk_test_...` or `pk_live_...`.
 
 A wrong or revoked publishable key does not show here: Stripe.js accepts any key when it loads, and the provider renders its children. See the next section.
@@ -28,7 +28,9 @@ A wrong or revoked publishable key does not show here: Stripe.js accepts any key
 
 The publishable key is wrong, revoked or malformed. Stripe.js only checks it on the first request, so the provider loads and the first element reports the error through `@loaderror` and its `#error` slot (a composable call resolves `{ error }` instead). Copy the publishable key again from the [API keys page](https://dashboard.stripe.com/apikeys), with no spaces or line breaks, in the mode (test or live) you want.
 
-### Elements show "No such payment_intent" or a key error
+### Elements show "The client_secret provided does not match any associated PaymentIntent on this account"
+
+The full message is "The client_secret provided does not match any associated PaymentIntent on this account. Ensure the publishable key used belongs to the same account that created the PaymentIntent." With Stripe.js 10 the element reports it through `@loaderror` and its `#error` slot, after Stripe retries for about 15 seconds. ("No such payment_intent" comes from `retrievePaymentIntent()` or `handleNextAction()` with an unknown PaymentIntent ID, not from the elements.)
 
 The client secret and the publishable key belong to different Stripe accounts or modes. Create the PaymentIntent with the secret key of the same account, in the same mode (test or live), as the publishable key in the browser.
 

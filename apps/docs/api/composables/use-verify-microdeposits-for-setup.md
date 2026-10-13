@@ -27,6 +27,12 @@ const verifyWithCode = async (code: string) => {
 const verifyWithAmounts = (amounts: number[]) =>
   verifyMicrodepositsForSetup(props.clientSecret, { amounts })
 </script>
+
+<template>
+  <button :disabled="loading" @click="verifyWithCode('SM11AA')">Verify with code</button>
+  <button :disabled="loading" @click="verifyWithAmounts([32, 45])">Verify with amounts</button>
+  <p v-if="error">{{ error }}</p>
+</template>
 ```
 
 ## Return Value

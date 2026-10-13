@@ -1,4 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { defineComponent, h, inject } from 'vue-demi'
 import { readFileSync, readdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -22,8 +24,10 @@ import type {
   UsePaymentRequestReturn,
   PaymentRequestEventHandler,
   PaymentRequestOptions,
-  CanMakePaymentResult
+  CanMakePaymentResult,
+  VueStripeConfig
 } from '../src'
+import { flushPromises } from './setup'
 
 describe('public API exports', () => {
   it('exports the plugin, loader and error classes', () => {
@@ -32,6 +36,27 @@ describe('public API exports', () => {
     expect(typeof VueStripe.VueStripeProviderError).toBe('function')
     expect(typeof VueStripe.VueStripeElementsError).toBe('function')
     expect(typeof VueStripe.VueStripeCheckoutError).toBe('function')
+  })
+
+  it('exports stripeConfigInjectionKey, which descendants inject for the resolved config', async () => {
+    let config: VueStripeConfig | null = null
+    const Child = defineComponent({
+      setup() {
+        config = inject(VueStripe.stripeConfigInjectionKey, null)
+        return () => h('div')
+      }
+    })
+    mount(VueStripe.VueStripeProvider, {
+      props: { publishableKey: 'pk_test_config', stripeAccount: 'acct_123', locale: 'fr' },
+      slots: { default: () => h(Child) }
+    })
+    await flushPromises()
+    expect(typeof VueStripe.stripeConfigInjectionKey).toBe('symbol')
+    expect(config).toMatchObject({
+      publishableKey: 'pk_test_config',
+      stripeAccount: 'acct_123',
+      locale: 'fr'
+    })
   })
 
   it('exports composables (incl. aliases)', () => {

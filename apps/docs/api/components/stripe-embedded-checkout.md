@@ -31,7 +31,7 @@ import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 const fetchClientSecret = () =>
-  fetch('/api/checkout-session', { method: 'POST' })
+  fetch('/api/embedded-checkout-session', { method: 'POST' })
     .then((response) => response.json())
     .then((data) => data.clientSecret)
 
@@ -163,9 +163,15 @@ The component renders the same parts as the element components, so the shared `v
 
 ```html
 <div class="vue-stripe-embedded-checkout vue-stripe-element">
-  <div class="vue-stripe-embedded-checkout-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-embedded-checkout-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <div class="vue-stripe-embedded-checkout-mount vue-stripe-element-mount"><!-- Stripe iframe --></div>
-  <div class="vue-stripe-embedded-checkout-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-embedded-checkout-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading checkout...</div>
+  </div>
 </div>
 ```
 
@@ -183,15 +189,17 @@ The component's props, event payloads and slot props are typed on Vue 2.7 and Vu
 
 `InstanceType<typeof VueStripeEmbeddedCheckout>` also includes the exposed members. A template ref unwraps their refs, so `checkoutRef.value?.checkout` is a `StripeEmbeddedCheckout | null`.
 
-```ts
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
 import { VueStripeEmbeddedCheckout } from '@vue-stripe/vue-stripe'
 import type {
-  VueStripeEmbeddedCheckoutProps,
   StripeEmbeddedCheckout,
-  StripeEmbeddedCheckoutOptions,
-  StripeEmbeddedCheckoutAnalyticsEventUnion,
-  StripeEmbeddedCheckoutLineItemsChangeEvent
+  StripeEmbeddedCheckoutAnalyticsEventUnion
 } from '@vue-stripe/vue-stripe'
+
+const props = defineProps<{ clientSecret: string }>()
+const checkoutRef = ref<InstanceType<typeof VueStripeEmbeddedCheckout> | null>(null)
 
 const onReady = (checkout: StripeEmbeddedCheckout): void => {
   console.log('mounted', checkout)
@@ -199,6 +207,17 @@ const onReady = (checkout: StripeEmbeddedCheckout): void => {
 const onAnalytics = (event: StripeEmbeddedCheckoutAnalyticsEventUnion): void => {
   console.log(event.eventType)
 }
+</script>
+
+<template>
+  <VueStripeEmbeddedCheckout
+    ref="checkoutRef"
+    :client-secret="props.clientSecret"
+    @ready="onReady"
+    @analytics="onAnalytics"
+  />
+  <p v-if="checkoutRef?.checkout">Checkout is mounted</p>
+</template>
 ```
 
 ## See Also

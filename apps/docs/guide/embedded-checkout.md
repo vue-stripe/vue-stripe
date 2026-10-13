@@ -165,7 +165,7 @@ The embedded page can't ask your server to approve a line item change: Stripe's 
 
 ## Track the checkout funnel
 
-`@analytics` forwards Stripe's analytics events (`rendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed`), so you can track the funnel without reaching into the iframe:
+`@analytics` forwards Stripe's analytics events (`checkoutRendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed`), so you can track the funnel without reaching into the iframe:
 
 ```vue
 <VueStripeEmbeddedCheckout
@@ -173,6 +173,8 @@ The embedded page can't ask your server to approve a line item change: Stripe's 
   @analytics="(event) => track(event.eventType, event.details)"
 />
 ```
+
+Stripe may send no analytics events at all on a sandbox account: several test setups saw none, through `@analytics` or a direct `stripe.createEmbeddedCheckoutPage({ onAnalyticsEvent })` call, while `@complete` fired, so you may not be able to test the tracking there.
 
 Test data: see [Test your integration](/guide/testing#cards).
 
