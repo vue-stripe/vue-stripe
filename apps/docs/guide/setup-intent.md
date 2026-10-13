@@ -9,18 +9,20 @@ Save a customer's payment method without charging it, with a SetupIntent, the Pa
 ## Before you begin
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
-- A Stripe Customer (`cus_...`) for the person whose payment method you save.
+- A Stripe Customer (`cus_...`) for the person whose payment method you save, stored with your user record. The server sample reads it from `req.user.stripeCustomerId`.
 - Your app can reach your server's `/api` routes during development ([Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server)).
 
 ## 1. Create a SetupIntent on your server
 
 ```js
-// Node.js / Express
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+// Node.js (Express-style handler)
+import Stripe from 'stripe'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 app.post('/api/create-setup-intent', async (req, res) => {
   const setupIntent = await stripe.setupIntents.create({
-    customer: req.body.customerId,
+    customer: req.user.stripeCustomerId, // the signed-in customer, never an ID from the browser
     automatic_payment_methods: { enabled: true }
   })
 
@@ -51,12 +53,14 @@ const status = ref<'idle' | 'success' | 'error'>('idle')
 const errorMessage = ref('')
 
 onMounted(async () => {
-  const response = await fetch('/api/create-setup-intent', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ customerId: 'cus_xxx' })
-  })
-  setupSecret.value = (await response.json()).clientSecret
+  try {
+    const response = await fetch('/api/create-setup-intent', { method: 'POST' })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    setupSecret.value = (await response.json()).clientSecret
+  } catch {
+    status.value = 'error'
+    errorMessage.value = 'Could not start saving your card. Please reload the page.'
+  }
 })
 </script>
 

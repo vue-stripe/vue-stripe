@@ -24,12 +24,13 @@ To produce each error on purpose, use the cards in [Test your integration](/guid
 `VueStripeProvider` renders its `#error` slot instead of its children when Stripe.js cannot load, and emits `@error` with an `Error`:
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
+import CheckoutForm from './CheckoutForm.vue' // your payment form
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
-const reportLoadError = (error) => {
+const reportLoadError = (error: Error) => {
   // Send it to your error monitoring
   console.error('Stripe.js failed to load', error)
 }
@@ -63,12 +64,13 @@ Elements validate their fields as the customer types. Where the message appears 
 Use `complete` to enable the pay button. With the Card Element, also show the message from the `#error` slot:
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCardElement } from '@vue-stripe/vue-stripe'
+import type { StripeCardElementChangeEvent } from '@stripe/stripe-js'
 
 const complete = ref(false)
-const onChange = (event) => {
+const onChange = (event: StripeCardElementChangeEvent) => {
   complete.value = event.complete
 }
 </script>
@@ -79,7 +81,7 @@ const onChange = (event) => {
       <p class="field-error" role="alert">{{ error }}</p>
     </template>
   </VueStripeCardElement>
-  <PayButton :disabled="!complete" />
+  <button type="submit" :disabled="!complete">Pay</button>
 </template>
 ```
 
@@ -246,7 +248,7 @@ For a SetupIntent, read `setup_intent_client_secret` and call `retrieveSetupInte
 Problems with a hosted Checkout Session itself (expired, already paid) are shown by Stripe on its page. What remains for you is your own endpoint that creates the session: check `response.ok` before you render the button or the provider, and show your own message when it fails.
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { VueStripeCheckout } from '@vue-stripe/vue-stripe'
 
@@ -263,7 +265,7 @@ onMounted(async () => {
 })
 
 // VueStripeCheckoutError: clicked before the session URL arrived
-const onCheckoutError = (error) => console.error(error.message)
+const onCheckoutError = (error: Error) => console.error(error.message)
 </script>
 
 <template>
@@ -281,7 +283,8 @@ const onCheckoutError = (error) => console.error(error.message)
 To retry the pricing table after a load error, remount it by changing its `key`:
 
 ```vue
-<script setup>
+<!-- PricingPage.vue: rendered inside <VueStripeProvider> -->
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripePricingTable } from '@vue-stripe/vue-stripe'
 

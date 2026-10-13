@@ -42,6 +42,8 @@ const success = ref(false)
 
 Take the Stripe element from the component's exposed `element` through a template ref and pass it to `confirmCardPayment()`. Stripe runs 3D Secure when the card needs it.
 
+The Card Element shows its own validation message ("Your card number is invalid.") above the field, in its `#error` slot, so the form only shows the errors that come back from confirming.
+
 ```vue
 <!-- CardForm.vue: rendered inside VueStripeElements -->
 <script setup lang="ts">
@@ -60,7 +62,6 @@ const errorMessage = ref('')
 
 const handleChange = (event: StripeCardElementChangeEvent) => {
   cardComplete.value = event.complete
-  errorMessage.value = event.error?.message || ''
 }
 
 const handleSubmit = async () => {
@@ -101,7 +102,7 @@ const handleSubmit = async () => {
 
 ## Use separate number, expiry and CVC fields
 
-For a custom layout, render the three split elements in the same `VueStripeElements` group. Confirm with the card number element; Stripe reads expiry and CVC from the other two.
+For a custom layout, render the three split elements in the same `VueStripeElements` group. Confirm with the card number element; Stripe reads expiry and CVC from the other two. Each element shows its own validation message, so the form shows only the other errors. Render `SplitCardForm` in place of `CardForm` in step 1.
 
 ```vue
 <!-- SplitCardForm.vue: rendered inside VueStripeElements -->
@@ -115,14 +116,27 @@ import {
 } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{ clientSecret: string }>()
+const emit = defineEmits<{ (e: 'success'): void }>()
 
 const numberRef = ref<InstanceType<typeof VueStripeCardNumberElement> | null>(null)
-const { confirmCardPayment, loading, error } = useConfirmCardPayment()
+const { confirmCardPayment, loading } = useConfirmCardPayment()
+const errorMessage = ref('')
 
 const handleSubmit = async () => {
   const card = numberRef.value?.element
   if (!card) return
-  await confirmCardPayment(props.clientSecret, { payment_method: { card } })
+  errorMessage.value = ''
+
+  const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
+    payment_method: { card }
+  })
+
+  if (error) {
+    // The elements already show validation errors, such as an incomplete number
+    if (error.type !== 'validation_error') errorMessage.value = error.message || 'Payment failed'
+  } else if (paymentIntent?.status === 'succeeded') {
+    emit('success')
+  }
 }
 </script>
 
@@ -140,8 +154,8 @@ const handleSubmit = async () => {
         <VueStripeCardCvcElement />
       </div>
     </div>
-    <p v-if="error" class="error">{{ error }}</p>
-    <button type="submit" :disabled="loading">Pay</button>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <button type="submit" :disabled="loading">{{ loading ? 'Processing...' : 'Pay' }}</button>
   </form>
 </template>
 ```
