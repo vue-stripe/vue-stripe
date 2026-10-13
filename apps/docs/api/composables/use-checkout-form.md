@@ -93,7 +93,7 @@ Each action is forwarded to `actions` (Stripe's `StripeCheckoutFormLoadActionsSu
 | `updateShippingOption(id)` | Select a shipping rate |
 | `runServerUpdate(fn)` | Run your own server update and refresh the session afterwards |
 | `validateElements()` | Validate the form |
-| `addOptionalLineItem(priceId)` / `removeOptionalLineItem(priceId)` | Toggle optional items configured on the session |
+| `addOptionalLineItem(priceId)` / `removeOptionalLineItem(priceId)` | Toggle optional items configured on the session. Stripe rejects `optional_items` on `form` sessions, so on those they resolve `{ type: 'error' }` with `"<action> is not available for this Checkout Session"` |
 
 The form collects the email, phone number, addresses and tax ID itself, so the Form SDK has no `updateEmail`, `updatePhoneNumber`, `updateBillingAddress`, `updateShippingAddress` or `updateTaxIdInfo`. Use [`useCheckoutSession`](/api/composables/use-checkout-session) with `VueStripeCheckoutElementsProvider` if you need to set those from code.
 

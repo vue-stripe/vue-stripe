@@ -82,7 +82,7 @@ Enter these in [`VueStripeAuBankAccountElement`](/guide/au-bank-account-element)
 
 In Stripe's Financial Connections test modal (opened by [`useFinancialConnections`](/guide/ach-debit)), pick **Test (Non-OAuth)** as the bank, accept the terms and choose the **Success** account.
 
-To test entering account details by hand, choose to enter them manually and use routing number `110000000` with:
+To test entering account details by hand, use manual entry. The modal only offers it after a bank search finds nothing: search for a bank that does not exist, then choose to enter the details manually. Use routing number `110000000` with:
 
 | Account number | Outcome |
 |----------------|---------|

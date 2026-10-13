@@ -221,7 +221,7 @@ Starting with Stripe.js Clover (8.0), saved payment methods are on by default: a
 
 ## Update the session
 
-[`useCheckoutSession()`](/api/composables/use-checkout-session) forwards every session action: promotion codes, line item quantities, shipping options, contact details, optional items and server updates. Each one returns `{ type: 'success', session }` or `{ type: 'error', error }`, and the reactive `session` updates when the action finishes:
+[`useCheckoutSession()`](/api/composables/use-checkout-session) forwards every session action: promotion codes, line item quantities, shipping options, contact details and server updates. Each one resolves to `{ type: 'success', session }` or `{ type: 'error', error }` and never rejects, even when Stripe.js throws (the throw becomes the error result); optional items are not available on `elements` sessions, so those two actions resolve an error, and the reactive `session` updates when the action finishes:
 
 ```ts
 const { applyPromotionCode } = useCheckoutSession()

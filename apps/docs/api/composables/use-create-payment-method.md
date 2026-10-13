@@ -53,7 +53,7 @@ type CreatePaymentMethodResult = PaymentMethodResult | VueStripeErrorResult
 | `loading` | `Readonly<Ref<boolean>>` | `true` while the request is in flight. |
 | `error` | `Readonly<Ref<string \| null>>` | The error message if creation failed. |
 
-When Stripe.js has not loaded yet, or the Stripe call throws, `createPaymentMethod` does not reject: it resolves to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`). A failed `elements.submit()` resolves to `{ error }` with Stripe's submit error.
+When Stripe.js is not available (the plugin's load failed, for example; a call made while it loads waits for it), or the Stripe call throws, `createPaymentMethod` does not reject: it resolves to a `VueStripeErrorResult`, `{ error: { message } }` (e.g. `{ error: { message: 'Stripe not initialized' } }`). A failed `elements.submit()` resolves to `{ error }` with Stripe's submit error.
 
 ## Options
 

@@ -163,7 +163,7 @@ No other element component works inside `VueStripeCheckoutFormProvider`: the for
 
 ## Change the order
 
-The form collects the email, phone number, addresses and tax ID itself, so `useCheckoutForm()` has no `updateEmail` or address updates. It keeps the actions that change the order: `applyPromotionCode`, `updateLineItemQuantity`, `updateShippingOption`, `addOptionalLineItem` / `removeOptionalLineItem` and `runServerUpdate`. The full list is in the [useCheckoutForm API](/api/composables/use-checkout-form).
+The form collects the email, phone number, addresses and tax ID itself, so `useCheckoutForm()` has no `updateEmail` or address updates. It keeps the actions that change the order: `applyPromotionCode`, `updateLineItemQuantity`, `updateShippingOption` and `runServerUpdate`. (`addOptionalLineItem` / `removeOptionalLineItem` exist on the composable but resolve an error: Stripe does not accept optional items on `form` sessions.) The full list is in the [useCheckoutForm API](/api/composables/use-checkout-form).
 
 Test data: see [Test your integration](/guide/testing#cards).
 
