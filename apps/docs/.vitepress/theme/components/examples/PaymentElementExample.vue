@@ -138,6 +138,7 @@ function reset() {
                 <ConfirmPaymentButton
                   :can-confirm="canConfirm"
                   :confirming="confirming"
+                  :client-secret="clientSecret!"
                   :amount="selectedProduct?.price?.amount"
                   :currency="selectedProduct?.price?.currency"
                   @confirm-start="confirming = true"

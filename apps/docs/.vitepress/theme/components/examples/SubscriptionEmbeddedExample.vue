@@ -227,6 +227,7 @@ function reset() {
               <ConfirmSubscriptionButton
                 :can-confirm="canConfirm"
                 :confirming="confirming"
+                :client-secret="clientSecret"
                 @confirm-start="confirming = true"
                 @confirm-end="confirming = false"
                 @success="step = 'complete'"

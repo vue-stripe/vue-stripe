@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// Rendered inside VueStripeElements so useStripe/useStripeElements can inject the Stripe context.
+// Rendered inside VueStripeElements so useStripeElements/useConfirmCardPayment can inject the Stripe context.
 import { computed } from 'vue'
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+import { useConfirmCardPayment, useStripeElements } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{
   canConfirm: boolean
@@ -18,8 +18,8 @@ const emit = defineEmits<{
   error: [message: string | null]
 }>()
 
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+const { getElement } = useStripeElements()
+const { confirmCardPayment } = useConfirmCardPayment()
 
 function formatPrice(amount: number | null | undefined, currency: string | undefined) {
   if (!amount || !currency) return ''
@@ -35,11 +35,10 @@ async function confirmPayment() {
   emit('confirm-start')
   emit('error', null)
   try {
-    if (!stripe.value || !elements.value) throw new Error('Stripe not initialized')
-    const cardElement = elements.value.getElement('card')
+    const cardElement = getElement('card')
     if (!cardElement) throw new Error('Card element not found')
 
-    const { error, paymentIntent } = await stripe.value.confirmCardPayment(props.clientSecret, {
+    const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
       payment_method: { card: cardElement }
     })
     if (error) throw new Error(error.message)

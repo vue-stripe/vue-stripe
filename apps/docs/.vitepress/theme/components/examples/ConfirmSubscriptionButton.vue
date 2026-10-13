@@ -1,11 +1,12 @@
 <script setup lang="ts">
-// Rendered inside VueStripeElements so useStripe/useStripeElements can inject the Stripe context.
+// Rendered inside VueStripeElements so usePaymentIntent can inject the Stripe and Elements context.
 import { computed } from 'vue'
-import { useStripe, useStripeElements } from '@vue-stripe/vue-stripe'
+import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{
   canConfirm: boolean
   confirming: boolean
+  clientSecret: string
 }>()
 
 const emit = defineEmits<{
@@ -15,8 +16,7 @@ const emit = defineEmits<{
   error: [message: string | null]
 }>()
 
-const { stripe } = useStripe()
-const { elements } = useStripeElements()
+const { confirmPayment: confirm } = usePaymentIntent()
 
 const disabled = computed(() => !props.canConfirm || props.confirming)
 
@@ -24,19 +24,9 @@ async function confirmPayment() {
   emit('confirm-start')
   emit('error', null)
   try {
-    if (!stripe.value || !elements.value) {
-      throw new Error('Stripe not initialized')
-    }
-
-    // First submit the elements form
-    const { error: submitError } = await elements.value.submit()
-    if (submitError) {
-      throw new Error(submitError.message)
-    }
-
-    // Then confirm the payment
-    const { error } = await stripe.value.confirmPayment({
-      elements: elements.value,
+    // usePaymentIntent submits the elements form, then confirms the payment
+    const { error } = await confirm({
+      clientSecret: props.clientSecret,
       confirmParams: {
         return_url: window.location.href
       },

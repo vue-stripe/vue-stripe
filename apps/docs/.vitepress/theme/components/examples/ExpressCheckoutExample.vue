@@ -4,8 +4,7 @@ import {
   VueStripeProvider,
   VueStripeElements,
   VueStripeExpressCheckoutElement,
-  useStripe,
-  useStripeElements
+  usePaymentIntent
 } from '@vue-stripe/vue-stripe'
 import ProductSelector from './ProductSelector.vue'
 import PaymentStatus from './PaymentStatus.vue'
@@ -48,15 +47,13 @@ const ExpressForm = defineComponent({
   props: { clientSecret: { type: String, required: true } },
   emits: ['done', 'error'],
   setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const { elements } = useStripeElements()
+    const { confirmPayment } = usePaymentIntent()
     const available = ref<boolean | null>(null)
 
     async function onConfirm() {
       try {
-        if (!stripe.value || !elements.value) throw new Error('Stripe not initialized')
-        const { error: err, paymentIntent } = await stripe.value.confirmPayment({
-          elements: elements.value,
+        // usePaymentIntent runs elements.submit() before confirming.
+        const { error: err, paymentIntent } = await confirmPayment({
           clientSecret: props.clientSecret,
           confirmParams: { return_url: window.location.href },
           redirect: 'if_required'
