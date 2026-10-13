@@ -133,12 +133,16 @@ The component renders this markup around Stripe's iframe:
 
 ```html
 <div class="vue-stripe-paymentMethodMessaging-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-paymentMethodMessaging-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-paymentMethodMessaging-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus vue-stripe-paymentMethodMessaging-element-loading / vue-stripe-element-loading while loading -->
   <div class="vue-stripe-paymentMethodMessaging-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-paymentMethodMessaging-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-paymentMethodMessaging-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading payment method messaging...</div>
+  </div>
 </div>
 ```
 

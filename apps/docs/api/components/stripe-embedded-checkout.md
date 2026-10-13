@@ -161,9 +161,15 @@ The component renders the same parts as the element components, so the shared `v
 
 ```html
 <div class="vue-stripe-embedded-checkout vue-stripe-element">
-  <div class="vue-stripe-embedded-checkout-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-embedded-checkout-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <div class="vue-stripe-embedded-checkout-mount vue-stripe-element-mount"><!-- Stripe iframe --></div>
-  <div class="vue-stripe-embedded-checkout-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-embedded-checkout-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading checkout...</div>
+  </div>
 </div>
 ```
 

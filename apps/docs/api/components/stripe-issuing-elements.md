@@ -213,14 +213,20 @@ Each component renders this markup around Stripe's iframe (`<type>` is `issuing-
 
 ```html
 <div class="vue-stripe-<type>-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-<type>-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-<type>-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus -loading classes while loading -->
   <div class="vue-stripe-<type>-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-<type>-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-<type>-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading card number...</div>
+  </div>
 </div>
 ```
+
+The default loading text names the element: "Loading card number...", "Loading CVC...", "Loading expiry date...", "Loading PIN...", "Loading copy button..." or "Loading Add to Wallet button...".
 
 The default styles ship in the package stylesheet (`import '@vue-stripe/vue-stripe/style.css'`). Style the text inside the iframes with `options.style`.
 

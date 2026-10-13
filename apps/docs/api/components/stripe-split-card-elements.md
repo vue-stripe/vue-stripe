@@ -224,14 +224,20 @@ Each component renders this markup around Stripe's iframe (`<type>` is `cardNumb
 
 ```html
 <div class="vue-stripe-<type>-element vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-<type>-element-error vue-stripe-element-error">...</div>
+  <!-- only when there is an error; an #error slot replaces the inner div -->
+  <div class="vue-stripe-<type>-element-error vue-stripe-element-error">
+    <div class="vue-stripe-error-message">The error message</div>
+  </div>
   <!-- Stripe mounts its iframe here; plus -loading classes while loading -->
   <div class="vue-stripe-<type>-element-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-<type>-element-loader vue-stripe-element-loader">...</div>
+  <!-- only while loading; a #loading slot replaces the inner div -->
+  <div class="vue-stripe-<type>-element-loader vue-stripe-element-loader">
+    <div class="vue-stripe-loading-message">Loading card number...</div>
+  </div>
 </div>
 ```
+
+The default loading text is "Loading card number...", "Loading card expiry..." or "Loading card CVC...".
 
 The default styles for these classes ship in the package stylesheet. Import it once in your app:
 
