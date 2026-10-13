@@ -170,7 +170,35 @@ Every element component renders the same markup around Stripe's iframe:
 </div>
 ```
 
-Each part has a shared class (`vue-stripe-element`, `-mount`, `-error`, `-loader`, `-loading`) and an element-specific one built from the element type: `vue-stripe-payment-element`, `vue-stripe-card-element`, `vue-stripe-cardNumber-element`, `vue-stripe-iban-element`, `vue-stripe-au-bank-account-element`, `vue-stripe-express-checkout-element`, and so on (the Link Authentication Element uses `vue-stripe-link-auth`). Each component's API page shows its classes under "Styling".
+Each part has a shared class (`vue-stripe-element`, `vue-stripe-element-mount`, `-error`, `-loader`, `-loading`) and an element-specific one. The element-specific classes do not all follow one pattern: some use Stripe's camelCase element type and the Link Authentication Element has a short name. They keep the names v5 used, so existing CSS still applies. The wrapper class of each component, which the `-mount`, `-error`, `-loader` and `-loading` suffixes are added to:
+
+| Component | Wrapper class |
+|-----------|---------------|
+| `VueStripePaymentElement` | `vue-stripe-payment-element` |
+| `VueStripeExpressCheckoutElement` | `vue-stripe-express-checkout-element` |
+| `VueStripeAddressElement` | `vue-stripe-address-element` |
+| `VueStripeLinkAuthenticationElement` | `vue-stripe-link-auth` |
+| `VueStripeContactDetailsElement` | `vue-stripe-contact-details-element` |
+| `VueStripeTaxIdElement` | `vue-stripe-tax-id-element` |
+| `VueStripeCurrencySelectorElement` | `vue-stripe-currency-selector-element` |
+| `VueStripeLinkSignupElement` | `vue-stripe-link-signup-element` |
+| `VueStripeTermsElement` | `vue-stripe-terms-element` |
+| `VueStripePaymentMethodMessagingElement` | `vue-stripe-paymentMethodMessaging-element` |
+| `VueStripeCheckoutForm` | `vue-stripe-checkout-form` |
+| `VueStripeCardElement` | `vue-stripe-card-element` |
+| `VueStripeCardNumberElement` | `vue-stripe-cardNumber-element` |
+| `VueStripeCardExpiryElement` | `vue-stripe-cardExpiry-element` |
+| `VueStripeCardCvcElement` | `vue-stripe-cardCvc-element` |
+| `VueStripeIbanElement` | `vue-stripe-iban-element` |
+| `VueStripeAuBankAccountElement` | `vue-stripe-au-bank-account-element` |
+| `VueStripeIssuingCardNumberDisplayElement` | `vue-stripe-issuing-card-number-display-element` |
+| `VueStripeIssuingCardExpiryDisplayElement` | `vue-stripe-issuing-card-expiry-display-element` |
+| `VueStripeIssuingCardCvcDisplayElement` | `vue-stripe-issuing-card-cvc-display-element` |
+| `VueStripeIssuingCardPinDisplayElement` | `vue-stripe-issuing-card-pin-display-element` |
+| `VueStripeIssuingCardCopyButtonElement` | `vue-stripe-issuing-card-copy-button-element` |
+| `VueStripeIssuingAddToWalletButtonElement` | `vue-stripe-issuing-add-to-wallet-button-element` |
+
+So the Card Number Element's iframe is mounted in `vue-stripe-cardNumber-element-mount`, and the Link Authentication Element's error box is `vue-stripe-link-auth-error`. Each component's API page also shows its markup under "Styling".
 
 Target the shared classes to restyle every element, or the specific ones for a single element:
 
