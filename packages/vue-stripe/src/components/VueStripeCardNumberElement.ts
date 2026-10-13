@@ -3,7 +3,7 @@ import type {
   StripeCardNumberElementChangeEvent,
   StripeCardNumberElementOptions
 } from '@stripe/stripe-js'
-import type { BaseElementEvents } from '../utils/element-factory'
+import type { BaseElementEvents, CreateOnly } from '../utils/element-factory'
 import { createStripeElement } from '../utils/element-factory'
 
 type CardNumberEvents = BaseElementEvents<
@@ -20,5 +20,9 @@ export default /* @__PURE__ */ createStripeElement<
 >({
   elementType: 'cardNumber',
   componentName: 'VueStripeCardNumberElement',
+  createOnly: { disableLink: true, preferredNetwork: true } satisfies CreateOnly<
+    StripeCardNumberElementOptions,
+    StripeCardNumberElement
+  >,
   loadingText: 'Loading card number...'
 })

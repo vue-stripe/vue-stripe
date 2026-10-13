@@ -215,11 +215,11 @@ describe('createStripeElement', () => {
     expect(element.update).toHaveBeenCalledTimes(1)
   })
 
-  it('strips keys Stripe cannot update via updateOptions()', async () => {
+  it('keeps the createOnly keys out of update() (#616)', async () => {
     const Comp = createStripeElement({
       elementType: 'address',
       componentName: 'X',
-      updateOptions: ({ mode: _mode, ...rest }) => rest
+      createOnly: { mode: true }
     })
     const { element, options } = mountUnder(Comp, { props: { mode: 'billing' } })
     await flushPromises()

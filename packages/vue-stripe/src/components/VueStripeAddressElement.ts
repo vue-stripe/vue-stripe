@@ -27,8 +27,8 @@ export default /* @__PURE__ */ createStripeElement<
   componentName: 'VueStripeAddressElement',
   events: [...BASE_EVENTS, 'loaderstart', 'loaderror'],
   defaultOptions: () => ({ mode: 'shipping' }),
-  // Stripe rejects `mode` in update() ("Mode cannot be updated").
-  updateOptions: ({ mode: _mode, ...rest }) => rest,
+  // Stripe rejects `mode` in update() ("Mode cannot be updated"), though the type allows it.
+  createOnly: { mode: true },
   checkout: (sdk, options) => {
     const checkoutOptions = pick(options, ['contacts', 'display', 'fields'])
     const element =

@@ -87,6 +87,8 @@ Saved payment methods are on by default with Checkout Sessions since Stripe.js C
 
 ::: info Updating options
 Changes to `options` are applied to the mounted element with `element.update()`, and only when they really change: a re-render that passes a new but deep-equal object (e.g. an inline `:options="{ ... }"`) does not call `update()`.
+
+`wallets` is read when the element is created and never passed to `update()`, because Stripe.js doesn't accept it there. To change it, re-mount the component (e.g. with a `:key`).
 :::
 
 ### Options Object

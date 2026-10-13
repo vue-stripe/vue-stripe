@@ -126,8 +126,9 @@ export function createStripeElement<
         }
       }
 
+      // Create-only keys stay out of update(); changing one needs a re-mount (`:key`).
       const updatable = (options: Record<string, unknown>) =>
-        def.updateOptions ? def.updateOptions({ ...options }) : { ...options }
+        Object.fromEntries(Object.entries(options).filter(([key]) => !def.createOnly?.[key]))
       // Last options applied to the element, so equal re-renders do not call update().
       let applied = ''
 
