@@ -69,7 +69,7 @@ const pay = async () => {
   }
 
   // 2. Create the PaymentIntent on your server
-  const response = await fetch('/api/create-payment-intent', { method: 'POST' })
+  const response = await fetch('/api/create-order-payment-intent', { method: 'POST' })
   if (!response.ok) {
     message.value = 'Could not start the payment. Please try again.'
     return
@@ -98,12 +98,12 @@ const pay = async () => {
 The PaymentIntent must match what the Elements group was created with: the same amount, currency and payment method settings. Compute the amount from the order on the server; never take it from the browser.
 
 ```js
-// POST /api/create-payment-intent (Node, stripe-node)
+// POST /api/create-order-payment-intent (Node, stripe-node)
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
-app.post('/api/create-payment-intent', async (req, res) => {
+app.post('/api/create-order-payment-intent', async (req, res) => {
   const order = await loadOrderForSession(req) // your code
   const paymentIntent = await stripe.paymentIntents.create({
     amount: order.total, // 1099
