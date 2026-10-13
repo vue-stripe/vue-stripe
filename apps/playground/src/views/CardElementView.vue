@@ -10,7 +10,7 @@ import type {
   PaymentIntent,
   StripeCardElement as StripeCardElementType,
   StripeCardElementChangeEvent
-} from '@stripe/stripe-js'
+} from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,

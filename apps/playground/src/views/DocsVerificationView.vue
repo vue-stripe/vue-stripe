@@ -6,15 +6,18 @@
  * to ensure they work correctly when users copy them.
  */
 import { ref, computed, inject } from 'vue'
-import type { Stripe, StripeElements, StripeAddressElementChangeEvent } from '@stripe/stripe-js'
 import {
   VueStripeProvider,
   VueStripeElements,
   VueStripePaymentElement,
   VueStripeCardElement,
   VueStripeAddressElement,
-  VueStripeExpressCheckoutElement
+  VueStripeExpressCheckoutElement,
+  type ConfirmPaymentResult,
+  type StripeAddressElementChangeEvent,
+  type StripeCardElement
 } from '@vue-stripe/vue-stripe'
+import PaymentActions from '@/components/docs/PaymentActions.vue'
 
 // Publishable key comes from the shared playground config (set via the header
 // "Add Key" dialog / localStorage) — never hardcode a key in source.
@@ -34,11 +37,11 @@ const selectedExample = ref<string>('first-payment')
 const clientSecretInput = ref('')
 const clientSecret = ref('')
 
-// State for examples
-const loading = ref(false)
+// State for examples. The components' events only drive the status badges; confirming and
+// element lookups go through PaymentActions (usePaymentIntent / useStripeElements).
 const errorMessage = ref('')
-const stripeInstance = ref<Stripe | null>(null)
-const elementsInstance = ref<StripeElements | null>(null)
+const stripeLoaded = ref(false)
+const elementsReady = ref(false)
 const addressComplete = ref(false)
 
 const setClientSecret = () => {
@@ -48,61 +51,38 @@ const setClientSecret = () => {
 const resetExample = () => {
   clientSecret.value = ''
   clientSecretInput.value = ''
-  stripeInstance.value = null
-  elementsInstance.value = null
-  loading.value = false
+  stripeLoaded.value = false
+  elementsReady.value = false
   errorMessage.value = ''
   addressComplete.value = false
 }
 
-// Event handlers - exact pattern from documentation
-const onStripeLoad = (stripe: Stripe) => {
-  stripeInstance.value = stripe
+const onStripeLoad = () => {
+  stripeLoaded.value = true
 }
 
-const onElementsReady = (elements: StripeElements) => {
-  elementsInstance.value = elements
+const onElementsReady = () => {
+  elementsReady.value = true
 }
 
-// First Payment / Payment Element submit handler
-const handleSubmit = async () => {
-  if (!stripeInstance.value || !elementsInstance.value) return
+// PaymentActions' slot `confirm`: usePaymentIntent().confirmPayment for a return URL.
+type Confirm = (
+  returnUrl: string,
+  redirect?: 'if_required' | 'always'
+) => Promise<ConfirmPaymentResult>
 
-  loading.value = true
-  errorMessage.value = ''
+const returnUrl = () => `${window.location.origin}/docs-verification`
 
-  const { error } = await stripeInstance.value.confirmPayment({
-    elements: elementsInstance.value,
-    confirmParams: {
-      return_url: `${window.location.origin}/docs-verification`
-    },
-    redirect: 'if_required'
-  })
-
-  if (error) {
-    errorMessage.value = error.message || 'Payment failed'
-    loading.value = false
-  }
+// First Payment / Payment Element submit handler (errors show through the slot's `error`)
+const handleSubmit = async (confirm: Confirm) => {
+  await confirm(returnUrl())
 }
 
-// Card Element submit handler
-const handleCardSubmit = async () => {
-  if (!stripeInstance.value || !elementsInstance.value) return
-
-  loading.value = true
-  errorMessage.value = ''
-
-  const cardElement = elementsInstance.value.getElement('card')
-
-  if (!cardElement) {
-    errorMessage.value = 'Card element not found'
-    loading.value = false
-    return
-  }
-
-  // For card element, we'd normally call confirmCardPayment with a clientSecret
-  // For this test, we just verify the element loaded
-  loading.value = false
+// Card Element submit handler: look the element up with useStripeElements().getElement().
+// For card element, we'd normally call useConfirmCardPayment() with a clientSecret;
+// for this test, we just verify the element loaded.
+const handleCardSubmit = (getElement: (type: 'card') => StripeCardElement | null) => {
+  errorMessage.value = getElement('card') ? '' : 'Card element not found'
 }
 
 // Address Element change handler
@@ -110,19 +90,10 @@ const onAddressChange = (event: StripeAddressElementChangeEvent) => {
   addressComplete.value = event.complete
 }
 
-// Express Checkout confirm handler
-// The confirm event does not carry an `elements` instance, so confirm with the
-// one captured from VueStripeElements' ready event.
-const handleExpressConfirm = async () => {
-  if (!stripeInstance.value || !elementsInstance.value) return
-
-  const { error } = await stripeInstance.value.confirmPayment({
-    elements: elementsInstance.value,
-    confirmParams: {
-      return_url: `${window.location.origin}/docs-verification`
-    }
-  })
-
+// Express Checkout confirm handler: the confirm event does not carry an `elements` instance;
+// usePaymentIntent() confirms with the injected one.
+const handleExpressConfirm = async (confirm: Confirm) => {
+  const { error } = await confirm(returnUrl(), 'always')
   if (error) {
     console.error(error.message)
   }
@@ -184,26 +155,28 @@ const addressOptions = {
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
           <VueStripeElements :client-secret="clientSecret" @ready="onElementsReady">
-            <form @submit.prevent="handleSubmit">
-              <VueStripePaymentElement />
+            <PaymentActions v-slot="{ confirm, loading, error }" :client-secret="clientSecret">
+              <form @submit.prevent="handleSubmit(confirm)">
+                <VueStripePaymentElement />
 
-              <div v-if="errorMessage" class="error">
-                {{ errorMessage }}
-              </div>
+                <div v-if="error" class="error">
+                  {{ error }}
+                </div>
 
-              <button type="submit" :disabled="loading">
-                {{ loading ? 'Processing...' : 'Pay $10.00' }}
-              </button>
-            </form>
+                <button type="submit" :disabled="loading">
+                  {{ loading ? 'Processing...' : 'Pay $10.00' }}
+                </button>
+              </form>
+            </PaymentActions>
           </VueStripeElements>
         </VueStripeProvider>
 
         <div class="status">
-          <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
+          <span :class="stripeLoaded ? 'success' : 'pending'">
+            Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
-          <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
+          <span :class="elementsReady ? 'success' : 'pending'">
+            Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
         </div>
       </div>
@@ -218,21 +191,23 @@ const addressOptions = {
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
           <VueStripeElements :client-secret="clientSecret" @ready="onElementsReady">
-            <form @submit.prevent="handleSubmit">
-              <VueStripePaymentElement />
-              <button type="submit" :disabled="loading">
-                {{ loading ? 'Processing...' : 'Pay' }}
-              </button>
-            </form>
+            <PaymentActions v-slot="{ confirm, loading }" :client-secret="clientSecret">
+              <form @submit.prevent="handleSubmit(confirm)">
+                <VueStripePaymentElement />
+                <button type="submit" :disabled="loading">
+                  {{ loading ? 'Processing...' : 'Pay' }}
+                </button>
+              </form>
+            </PaymentActions>
           </VueStripeElements>
         </VueStripeProvider>
 
         <div class="status">
-          <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
+          <span :class="stripeLoaded ? 'success' : 'pending'">
+            Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
-          <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
+          <span :class="elementsReady ? 'success' : 'pending'">
+            Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
         </div>
       </div>
@@ -247,21 +222,24 @@ const addressOptions = {
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
           <VueStripeElements @ready="onElementsReady">
-            <form @submit.prevent="handleCardSubmit">
-              <VueStripeCardElement />
-              <button type="submit" :disabled="loading">
-                {{ loading ? 'Processing...' : 'Pay' }}
-              </button>
-            </form>
+            <PaymentActions v-slot="{ getElement, loading }">
+              <form @submit.prevent="handleCardSubmit(getElement)">
+                <VueStripeCardElement />
+                <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
+                <button type="submit" :disabled="loading">
+                  {{ loading ? 'Processing...' : 'Pay' }}
+                </button>
+              </form>
+            </PaymentActions>
           </VueStripeElements>
         </VueStripeProvider>
 
         <div class="status">
-          <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
+          <span :class="stripeLoaded ? 'success' : 'pending'">
+            Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
-          <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
+          <span :class="elementsReady ? 'success' : 'pending'">
+            Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
         </div>
       </div>
@@ -282,11 +260,11 @@ const addressOptions = {
         </VueStripeProvider>
 
         <div class="status">
-          <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
+          <span :class="stripeLoaded ? 'success' : 'pending'">
+            Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
-          <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
+          <span :class="elementsReady ? 'success' : 'pending'">
+            Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
           <span :class="addressComplete ? 'success' : 'pending'">
             Address: {{ addressComplete ? 'Complete' : 'Incomplete' }}
@@ -304,16 +282,18 @@ const addressOptions = {
 
         <VueStripeProvider :publishable-key="publishableKey" @load="onStripeLoad">
           <VueStripeElements :client-secret="clientSecret" @ready="onElementsReady">
-            <VueStripeExpressCheckoutElement @confirm="handleExpressConfirm" />
+            <PaymentActions v-slot="{ confirm }" :client-secret="clientSecret">
+              <VueStripeExpressCheckoutElement @confirm="handleExpressConfirm(confirm)" />
+            </PaymentActions>
           </VueStripeElements>
         </VueStripeProvider>
 
         <div class="status">
-          <span :class="stripeInstance ? 'success' : 'pending'">
-            Stripe: {{ stripeInstance ? 'Loaded' : 'Loading...' }}
+          <span :class="stripeLoaded ? 'success' : 'pending'">
+            Stripe: {{ stripeLoaded ? 'Loaded' : 'Loading...' }}
           </span>
-          <span :class="elementsInstance ? 'success' : 'pending'">
-            Elements: {{ elementsInstance ? 'Ready' : 'Loading...' }}
+          <span :class="elementsReady ? 'success' : 'pending'">
+            Elements: {{ elementsReady ? 'Ready' : 'Loading...' }}
           </span>
         </div>
 
@@ -329,8 +309,8 @@ const addressOptions = {
       <ul>
         <li>Selected: {{ selectedExample }}</li>
         <li>Client Secret Set: {{ !!clientSecret }}</li>
-        <li>Stripe Loaded: {{ !!stripeInstance }}</li>
-        <li>Elements Ready: {{ !!elementsInstance }}</li>
+        <li>Stripe Loaded: {{ stripeLoaded }}</li>
+        <li>Elements Ready: {{ elementsReady }}</li>
       </ul>
     </div>
   </div>

@@ -4,11 +4,9 @@ import {
   VueStripeProvider,
   VueStripeElements,
   VueStripePaymentElement,
-  useSetupIntent,
-  useStripe,
-  useStripeElements
+  useSetupIntent
 } from '@vue-stripe/vue-stripe'
-import type { SetupIntent, StripePaymentElementChangeEvent } from '@stripe/stripe-js'
+import type { SetupIntent, StripePaymentElementChangeEvent } from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -31,25 +29,12 @@ const SetupForm = defineComponent({
   },
   emits: ['setup-success', 'setup-error'],
   setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const { elements } = useStripeElements()
+    // confirmSetup runs elements.submit() on the injected Elements before
+    // stripe.confirmSetup(); a submit (validation) error comes back as `result.error`.
     const { confirmSetup, loading, error } = useSetupIntent()
 
     const handleSubmit = async () => {
-      if (!stripe.value || !elements.value) {
-        emit('setup-error', 'Stripe not ready')
-        return
-      }
-
       try {
-        // IMPORTANT: Must call elements.submit() before confirmCardSetup
-        const { error: submitError } = await elements.value.submit()
-        if (submitError) {
-          emit('setup-error', submitError.message)
-          return
-        }
-
-        // Confirm the setup using the composable
         const result = await confirmSetup({
           clientSecret: props.clientSecret,
           confirmParams: {

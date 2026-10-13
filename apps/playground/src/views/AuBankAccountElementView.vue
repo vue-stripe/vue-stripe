@@ -5,12 +5,12 @@ import {
   VueStripeProvider,
   VueStripeElements,
   VueStripeAuBankAccountElement,
-  useStripe
+  useConfirmAuBecsDebitPayment
 } from '@vue-stripe/vue-stripe'
 import type {
   StripeAuBankAccountElement as StripeAuBankAccountElementType,
   StripeAuBankAccountElementChangeEvent
-} from '@stripe/stripe-js'
+} from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -39,12 +39,12 @@ const BecsPaymentForm = defineComponent({
   },
   emits: ['payment-success', 'payment-error', 'log'],
   setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const processing = ref(false)
+    // stripe.confirmAuBecsDebitPayment() through its composable; `loading` drives the button.
+    const { confirmAuBecsDebitPayment, loading: processing } = useConfirmAuBecsDebitPayment()
 
     const handleConfirmPayment = async () => {
-      if (!stripe.value || !props.auBankAccountElement) {
-        emit('payment-error', 'Stripe or AU Bank Account element not ready')
+      if (!props.auBankAccountElement) {
+        emit('payment-error', 'AU Bank Account element not ready')
         return
       }
 
@@ -53,22 +53,18 @@ const BecsPaymentForm = defineComponent({
         return
       }
 
-      processing.value = true
       emit('log', 'confirm', 'Starting BECS Direct Debit payment confirmation...')
 
       try {
-        const { error, paymentIntent } = await stripe.value.confirmAuBecsDebitPayment(
-          props.clientSecret,
-          {
-            payment_method: {
-              au_becs_debit: props.auBankAccountElement,
-              billing_details: {
-                name: 'Test Customer',
-                email: 'test@example.com'
-              }
+        const { error, paymentIntent } = await confirmAuBecsDebitPayment(props.clientSecret, {
+          payment_method: {
+            au_becs_debit: props.auBankAccountElement,
+            billing_details: {
+              name: 'Test Customer',
+              email: 'test@example.com'
             }
           }
-        )
+        })
 
         if (error) {
           emit('payment-error', error.message || 'Payment failed')
@@ -86,8 +82,6 @@ const BecsPaymentForm = defineComponent({
         const message = err instanceof Error ? err.message : 'Confirmation failed'
         emit('payment-error', message)
         emit('log', 'error', message)
-      } finally {
-        processing.value = false
       }
     }
 

@@ -4,13 +4,12 @@ import {
   VueStripeProvider,
   VueStripeElements,
   VueStripePaymentElement,
-  useStripe,
-  useStripeElements
+  usePaymentIntent
 } from '@vue-stripe/vue-stripe'
 import type {
   StripePaymentElementChangeEvent,
   StripePaymentElementOptions
-} from '@stripe/stripe-js'
+} from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -35,47 +34,22 @@ const PaymentForm = defineComponent({
   },
   emits: ['payment-success', 'payment-error'],
   setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const { elements } = useStripeElements()
-
-    const processing = ref(false)
+    // usePaymentIntent().confirmPayment runs elements.submit() on the injected Elements
+    // before stripe.confirmPayment(); `loading` drives the button state.
+    const { confirmPayment, loading: processing } = usePaymentIntent()
 
     const handleSubmit = async () => {
-      if (!stripe.value || !elements.value) {
-        emit('payment-error', 'Stripe not ready')
-        return
-      }
-
-      processing.value = true
-
-      try {
-        // IMPORTANT: Must call elements.submit() before confirmPayment
-        const { error: submitError } = await elements.value.submit()
-        if (submitError) {
-          emit('payment-error', submitError.message)
-          processing.value = false
-          return
+      const { error, paymentIntent } = await confirmPayment({
+        clientSecret: props.clientSecret,
+        confirmParams: {
+          return_url: window.location.href
         }
+      })
 
-        // Now confirm the payment
-        const { error, paymentIntent } = await stripe.value.confirmPayment({
-          elements: elements.value,
-          clientSecret: props.clientSecret,
-          confirmParams: {
-            return_url: window.location.href
-          },
-          redirect: 'if_required'
-        })
-
-        if (error) {
-          emit('payment-error', error.message)
-        } else if (paymentIntent?.status === 'succeeded') {
-          emit('payment-success')
-        }
-      } catch (err: unknown) {
-        emit('payment-error', (err instanceof Error && err.message) || 'Payment failed')
-      } finally {
-        processing.value = false
+      if (error) {
+        emit('payment-error', error.message || 'Payment failed')
+      } else if (paymentIntent?.status === 'succeeded') {
+        emit('payment-success')
       }
     }
 

@@ -6,7 +6,7 @@ import {
   VueStripeCardNumberElement,
   VueStripeCardExpiryElement,
   VueStripeCardCvcElement,
-  useStripe
+  useConfirmCardPayment
 } from '@vue-stripe/vue-stripe'
 import { CreditCard } from 'lucide-vue-next'
 import type {
@@ -15,7 +15,7 @@ import type {
   StripeCardExpiryElementChangeEvent,
   StripeCardNumberElement as StripeCardNumberElementType,
   StripeCardNumberElementChangeEvent
-} from '@stripe/stripe-js'
+} from '@vue-stripe/vue-stripe'
 import {
   Card,
   CardHeader,
@@ -182,21 +182,20 @@ const PaymentButton = defineComponent({
   },
   emits: ['payment-success', 'payment-error', 'payment-processing'],
   setup(props, { emit }) {
-    const { stripe } = useStripe()
-    const processing = ref(false)
+    // stripe.confirmCardPayment() through its composable; `loading` drives the button state.
+    const { confirmCardPayment, loading: processing } = useConfirmCardPayment()
 
     const handlePayment = async () => {
-      if (!stripe.value || !props.cardNumberElement) {
-        emit('payment-error', 'Stripe not initialized')
+      if (!props.cardNumberElement) {
+        emit('payment-error', 'Card number element not ready')
         return
       }
 
-      processing.value = true
       emit('payment-processing')
 
       try {
         // For split elements, use the cardNumber element
-        const { error, paymentIntent } = await stripe.value.confirmCardPayment(props.clientSecret, {
+        const { error, paymentIntent } = await confirmCardPayment(props.clientSecret, {
           payment_method: {
             card: props.cardNumberElement
           }
@@ -211,8 +210,6 @@ const PaymentButton = defineComponent({
         }
       } catch (err: unknown) {
         emit('payment-error', (err instanceof Error && err.message) || 'Payment failed')
-      } finally {
-        processing.value = false
       }
     }
 
