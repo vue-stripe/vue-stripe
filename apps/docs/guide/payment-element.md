@@ -1,190 +1,33 @@
-# Payment Element
+# Accept a payment with the Payment Element
 
-The Payment Element is Stripe's recommended way to collect payments. It dynamically displays 40+ payment methods based on your customer's location, currency, and device.
+Collect a payment with `VueStripePaymentElement` and confirm it with [`usePaymentIntent()`](/api/composables/use-payment-intent). The Payment Element shows every payment method you enable in the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods) that fits the customer's location, currency and device.
 
-## Basic Setup
+## Before you begin
 
-The page loads Stripe and creates the Elements group; a child component rendered inside them shows the Payment Element and confirms with [`usePaymentIntent()`](/api/composables/use-payment-intent):
+- Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+- Your server has an endpoint that creates a PaymentIntent and returns its `client_secret`.
 
-```vue
-<!-- PaymentPage.vue -->
-<script setup>
-import { ref, onMounted } from 'vue'
-import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
-import PaymentForm from './PaymentForm.vue'
+## 1. Create a PaymentIntent on your server
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = ref('')
+```ts
+// POST /api/create-payment-intent (Node, stripe-node)
+import Stripe from 'stripe'
 
-onMounted(async () => {
-  // Fetch from your backend
-  const response = await fetch('/api/create-payment-intent')
-  const data = await response.json()
-  clientSecret.value = data.clientSecret
-})
-</script>
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
-<template>
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
-      <PaymentForm :client-secret="clientSecret" />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
-
-```vue
-<!-- PaymentForm.vue: rendered inside VueStripeElements -->
-<script setup>
-import { VueStripePaymentElement, usePaymentIntent } from '@vue-stripe/vue-stripe'
-
-const props = defineProps({
-  clientSecret: { type: String, required: true }
-})
-
-const { confirmPayment } = usePaymentIntent()
-
-const handleSubmit = async () => {
-  // Runs elements.submit() for you, then confirms
-  const { error } = await confirmPayment({
-    clientSecret: props.clientSecret,
-    confirmParams: {
-      return_url: `${window.location.origin}/complete`
-    },
-    redirect: 'always'
+export async function createPaymentIntent() {
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: 2000,
+    currency: 'usd',
+    automatic_payment_methods: { enabled: true }
   })
-
-  if (error) {
-    console.error(error.message)
-  }
-}
-</script>
-
-<template>
-  <form @submit.prevent="handleSubmit">
-    <VueStripePaymentElement />
-    <button type="submit">Pay</button>
-  </form>
-</template>
-```
-
-## Customizing Appearance
-
-Use Stripe's Appearance API via `VueStripeElements`:
-
-```vue
-<VueStripeElements
-  :client-secret="clientSecret"
-  :options="{
-    appearance: {
-      theme: 'stripe',
-      variables: {
-        colorPrimary: '#0570de',
-        colorBackground: '#ffffff',
-        colorText: '#30313d',
-        colorDanger: '#df1b41',
-        fontFamily: 'Ideal Sans, system-ui, sans-serif',
-        spacingUnit: '4px',
-        borderRadius: '4px'
-      },
-      rules: {
-        '.Input': {
-          border: '1px solid #e6e6e6'
-        },
-        '.Input:focus': {
-          border: '1px solid #0570de',
-          boxShadow: '0 0 0 1px #0570de'
-        }
-      }
-    }
-  }"
->
-  <VueStripePaymentElement />
-</VueStripeElements>
-```
-
-## Pre-filling Customer Data
-
-```vue
-<VueStripePaymentElement
-  :options="{
-    defaultValues: {
-      billingDetails: {
-        name: customer.name,
-        email: customer.email,
-        phone: customer.phone,
-        address: {
-          line1: customer.address,
-          city: customer.city,
-          state: customer.state,
-          postal_code: customer.zip,
-          country: customer.country
-        }
-      }
-    }
-  }"
-/>
-```
-
-## Handling Payment Confirmation
-
-Confirm with [`usePaymentIntent()`](/api/composables/use-payment-intent), called in a component inside `VueStripeElements`. It validates the form with `elements.submit()` first, then confirms with the injected Elements group.
-
-```js
-const { confirmPayment } = usePaymentIntent()
-```
-
-### Standard Flow (with redirect)
-
-```js
-const { error } = await confirmPayment({
-  clientSecret,
-  confirmParams: {
-    return_url: 'https://yoursite.com/payment-complete'
-  },
-  redirect: 'always'
-})
-
-// If error, show it (user stays on page)
-// If success, user is redirected to return_url
-```
-
-### Without Redirect
-
-For SPA flows where you don't want to redirect, use `redirect: 'if_required'` (the composable's default):
-
-```js
-const { error, paymentIntent } = await confirmPayment({
-  clientSecret,
-  confirmParams: {
-    return_url: 'https://yoursite.com/payment-complete'
-  },
-  redirect: 'if_required'
-})
-
-if (error) {
-  // Show error
-} else if (paymentIntent.status === 'succeeded') {
-  // Payment succeeded, show success UI
+  return { clientSecret: paymentIntent.client_secret }
 }
 ```
 
-::: warning
-Some payment methods (like bank redirects) always require a redirect. Use `redirect: 'if_required'` to handle both cases.
-:::
+## 2. Load Stripe and create the Elements group
 
-## Payment Methods
-
-Enable payment methods in your [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods). The Payment Element automatically shows enabled methods.
-
-Common payment methods:
-- **Cards** - Visa, Mastercard, Amex, etc.
-- **Wallets** - Apple Pay, Google Pay, Link
-- **Bank debits** - ACH, SEPA, BACS
-- **Bank redirects** - iDEAL, Bancontact, Sofort
-- **Buy now, pay later** - Klarna, Afterpay, Affirm
-
-## Complete Example with Error Handling
+The page fetches the client secret, then renders `VueStripeProvider` and `VueStripeElements`. The form goes in a child component, because composables find the Elements group through the providers above them.
 
 ```vue
 <!-- PaymentPage.vue -->
@@ -196,58 +39,32 @@ import PaymentForm from './PaymentForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = ref('')
-const loading = ref(true)
 const errorMessage = ref('')
 
 onMounted(async () => {
   try {
-    const response = await fetch('/api/create-payment-intent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: 2000 })
-    })
+    const response = await fetch('/api/create-payment-intent', { method: 'POST' })
     const data = await response.json()
     clientSecret.value = data.clientSecret
-  } catch (err) {
+  } catch {
     errorMessage.value = 'Failed to initialize payment'
-  } finally {
-    loading.value = false
   }
 })
 </script>
 
 <template>
-  <div class="payment-form">
-    <div v-if="loading">Loading payment form...</div>
-
-    <VueStripeProvider v-else :publishable-key="publishableKey">
-      <VueStripeElements
-        v-if="clientSecret"
-        :client-secret="clientSecret"
-        :options="{ appearance: { theme: 'stripe' } }"
-      >
-        <PaymentForm :client-secret="clientSecret" />
-      </VueStripeElements>
-
-      <div v-else-if="errorMessage" class="error">
-        {{ errorMessage }}
-      </div>
-    </VueStripeProvider>
-  </div>
+  <p v-if="errorMessage">{{ errorMessage }}</p>
+  <VueStripeProvider v-else :publishable-key="publishableKey">
+    <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
+      <PaymentForm :client-secret="clientSecret" />
+    </VueStripeElements>
+  </VueStripeProvider>
 </template>
-
-<style scoped>
-.payment-form {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.error {
-  color: #df1b41;
-  font-size: 14px;
-}
-</style>
 ```
+
+## 3. Render the Payment Element and confirm
+
+`confirmPayment()` runs `elements.submit()` for you, then confirms with the injected Elements group.
 
 ```vue
 <!-- PaymentForm.vue: rendered inside VueStripeElements -->
@@ -277,13 +94,9 @@ const handleSubmit = async () => {
     redirect: 'always'
   })
 
+  // With redirect: 'always', success leaves the page; only errors return here
   if (error) {
-    const type = 'type' in error ? error.type : undefined
-    if (type === 'card_error' || type === 'validation_error') {
-      errorMessage.value = error.message || 'Payment failed'
-    } else {
-      errorMessage.value = 'An unexpected error occurred'
-    }
+    errorMessage.value = error.message || 'Payment failed'
   }
 }
 </script>
@@ -291,52 +104,62 @@ const handleSubmit = async () => {
 <template>
   <form @submit.prevent="handleSubmit">
     <VueStripePaymentElement @change="handleChange" />
-
-    <div v-if="errorMessage" class="error">
-      {{ errorMessage }}
-    </div>
-
-    <button
-      type="submit"
-      :disabled="processing || !isComplete"
-    >
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <button type="submit" :disabled="processing || !isComplete">
       {{ processing ? 'Processing...' : 'Pay $20.00' }}
     </button>
   </form>
 </template>
-
-<style scoped>
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-button {
-  background: #5469d4;
-  color: #fff;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.error {
-  color: #df1b41;
-  font-size: 14px;
-}
-</style>
 ```
 
-## Next Steps
+The customer is sent to `return_url` after a successful payment. Read the result there from the `payment_intent_client_secret` query parameter with `retrievePaymentIntent()` from the same composable.
 
-- [Express Checkout](/guide/express-checkout) — Add Apple Pay and Google Pay
-- [Appearance API](/api/components/stripe-elements#appearance-api) — Theme and style your payment form
-- [Error Handling](/api/composables/use-payment-intent#error-handling) — Handle all error cases
-- [API Reference](/api/components/stripe-payment-element) — Full props, events, and options
+## Stay on the page when no redirect is needed
+
+Pass `redirect: 'if_required'` (the composable's default) to get the result back without leaving the page. Payment methods that need a redirect, such as bank redirects, still go to `return_url`, so keep it set.
+
+```ts
+const { error, paymentIntent } = await confirmPayment({
+  clientSecret: props.clientSecret,
+  confirmParams: {
+    return_url: `${window.location.origin}/payment-complete`
+  },
+  redirect: 'if_required'
+})
+
+if (error) {
+  errorMessage.value = error.message || 'Payment failed'
+} else if (paymentIntent?.status === 'succeeded') {
+  // Show your success state
+}
+```
+
+## Pre-fill customer details
+
+Pass known billing details through `defaultValues`:
+
+```vue
+<VueStripePaymentElement
+  :options="{
+    defaultValues: {
+      billingDetails: {
+        name: customer.name,
+        email: customer.email,
+        address: { postal_code: customer.zip, country: customer.country }
+      }
+    }
+  }"
+/>
+```
+
+To change colors and fonts, pass an `appearance` object to `VueStripeElements`; see the [Appearance API](/api/components/stripe-elements#appearance-api).
+
+Test data: see Test your integration.
+
+## See also
+
+- [Add Apple Pay, Google Pay and Link buttons](/guide/express-checkout)
+- [Payment Element API](/api/components/stripe-payment-element): props, events and options
+- [usePaymentIntent API](/api/composables/use-payment-intent): confirm options and result
+- [Live demo](/live-demo/payment-element)
+- [Stripe docs: payment methods](https://docs.stripe.com/payments/payment-methods/overview)

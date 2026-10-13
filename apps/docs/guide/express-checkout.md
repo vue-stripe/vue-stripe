@@ -1,290 +1,51 @@
-# Express Checkout Element
+# Add Apple Pay, Google Pay and Link buttons
 
-The Express Checkout Element displays one-click payment buttons for Apple Pay, Google Pay, and Link. It provides the fastest checkout experience for customers with saved payment methods.
+Show one-click wallet buttons with `VueStripeExpressCheckoutElement` and confirm the payment with [`usePaymentIntent()`](/api/composables/use-payment-intent). The element shows only the wallets the customer's browser and device support.
 
-## Basic Setup
+## Before you begin
+
+- A page that already loads Stripe and creates a PaymentIntent, as in [Accept a payment with the Payment Element](/guide/payment-element).
+- Apple Pay, Google Pay and Link enabled in the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods).
+- HTTPS. Apple Pay and Google Pay only render over HTTPS, also in development; use a tunnel such as [ngrok](https://ngrok.com) to test locally. Apple Pay also needs your domain [registered with Stripe](https://dashboard.stripe.com/settings/payment_method_domains).
+
+## 1. Wrap the buttons in the providers
 
 ```vue
 <!-- ExpressPage.vue -->
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import ExpressPay from './ExpressPay.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = 'pi_..._secret_...' // From your backend
+const props = defineProps<{ clientSecret: string }>() // from your server
 </script>
 
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements :client-secret="clientSecret">
-      <ExpressPay :client-secret="clientSecret" />
+    <VueStripeElements :client-secret="props.clientSecret">
+      <ExpressPay :client-secret="props.clientSecret" />
     </VueStripeElements>
   </VueStripeProvider>
 </template>
 ```
 
+## 2. Render the element and confirm on `@confirm`
+
+The `confirm` event has no `elements` field. `usePaymentIntent()` uses the Elements group from `VueStripeElements` and calls `elements.submit()` first, so call it in a component rendered inside that wrapper.
+
 ```vue
 <!-- ExpressPay.vue: rendered inside VueStripeElements -->
-<script setup>
-import { VueStripeExpressCheckoutElement, usePaymentIntent } from '@vue-stripe/vue-stripe'
-
-const props = defineProps({
-  clientSecret: { type: String, required: true }
-})
-
-const { confirmPayment } = usePaymentIntent()
-
-const handleConfirm = async () => {
-  // The confirm event has no `elements` field: usePaymentIntent() uses the
-  // Elements group created by VueStripeElements (and calls elements.submit() first).
-  const { error } = await confirmPayment({
-    clientSecret: props.clientSecret,
-    confirmParams: {
-      return_url: `${window.location.origin}/complete`
-    },
-    redirect: 'always'
-  })
-
-  if (error) {
-    console.error(error.message)
-  }
-}
-</script>
-
-<template>
-  <VueStripeExpressCheckoutElement @confirm="handleConfirm" />
-</template>
-```
-
-::: tip Why a child component?
-Composables find the Stripe and Elements instances through the providers above them, so `usePaymentIntent()` must run in a component rendered *inside* `VueStripeElements`, not in the one that renders it.
-:::
-
-## How It Works
-
-The Express Checkout Element:
-1. Detects available payment methods (Apple Pay on Safari/iOS, Google Pay on Chrome/Android)
-2. Shows only the buttons that are available for the customer
-3. Handles the wallet authentication flow
-4. Returns the payment result for you to confirm
-
-::: warning HTTPS Required
-Apple Pay and Google Pay only work over HTTPS, even in development. Use a tool like [ngrok](https://ngrok.com) or [localhost.run](https://localhost.run) for local testing.
-:::
-
-### Handling the Click Event
-
-Use `@click` to customize the payment sheet:
-
-```vue
-<VueStripeExpressCheckoutElement
-  @click="handleClick"
-  @confirm="handleConfirm"
-/>
-
-<script setup>
-const handleClick = ({ resolve }) => {
-  // Customize what appears in the payment sheet
-  resolve({
-    // Business name shown in the sheet
-    business: { name: 'My Store' },
-    // Show/hide email field
-    emailRequired: true,
-    // Show/hide phone field
-    phoneNumberRequired: false,
-    // Enable shipping address collection
-    shippingAddressRequired: true,
-    // Allowed shipping countries
-    allowedShippingCountries: ['US', 'CA', 'GB'],
-    // Shipping options
-    shippingRates: [
-      {
-        id: 'standard',
-        displayName: 'Standard Shipping',
-        amount: 500 // $5.00
-      },
-      {
-        id: 'express',
-        displayName: 'Express Shipping',
-        amount: 1500 // $15.00
-      }
-    ]
-  })
-}
-</script>
-```
-
-### Dynamic Shipping Rates
-
-Update shipping rates when the address changes:
-
-```vue
-<script setup>
-const handleShippingAddressChange = async ({ address, resolve }) => {
-  // Fetch shipping rates for this address from your backend
-  const rates = await fetchShippingRates(address)
-
-  resolve({
-    shippingRates: rates.map(rate => ({
-      id: rate.id,
-      displayName: rate.name,
-      amount: rate.price,
-      deliveryEstimate: {
-        minimum: { unit: 'day', value: rate.minDays },
-        maximum: { unit: 'day', value: rate.maxDays }
-      }
-    }))
-  })
-}
-</script>
-
-<template>
-  <VueStripeExpressCheckoutElement
-    @click="handleClick"
-    @confirm="handleConfirm"
-    @shippingaddresschange="handleShippingAddressChange"
-  />
-</template>
-```
-
-## Combining with Payment Element
-
-A common pattern is to show Express Checkout above the Payment Element. This form is rendered inside `VueStripeElements`; `handleExpressConfirm` and `handleSubmit` both call `usePaymentIntent().confirmPayment()` as in the [complete example](#complete-example):
-
-```vue
-<template>
-  <div class="checkout-form">
-    <!-- Express Checkout at top -->
-    <VueStripeExpressCheckoutElement
-      @confirm="handleExpressConfirm"
-      @ready="handleExpressReady"
-    />
-
-    <!-- Divider (only show if express checkout is available) -->
-    <div v-if="hasExpressCheckout" class="divider">
-      <span>Or pay with card</span>
-    </div>
-
-    <!-- Payment Element below -->
-    <form @submit.prevent="handleSubmit">
-      <VueStripePaymentElement />
-      <button type="submit">Pay $20.00</button>
-    </form>
-  </div>
-</template>
-
-<script setup>
-const hasExpressCheckout = ref(false)
-
-const handleExpressReady = ({ availablePaymentMethods }) => {
-  // Check if any express payment methods are available
-  hasExpressCheckout.value =
-    availablePaymentMethods?.applePay ||
-    availablePaymentMethods?.googlePay ||
-    availablePaymentMethods?.link
-}
-</script>
-
-<style scoped>
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 24px 0;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #e6e6e6;
-}
-
-.divider span {
-  padding: 0 16px;
-  color: #6b7280;
-  font-size: 14px;
-}
-</style>
-```
-
-## Complete Example
-
-```vue
-<!-- CheckoutPage.vue -->
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
-import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
-import CheckoutForm from './CheckoutForm.vue'
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const clientSecret = ref('')
-
-onMounted(async () => {
-  const response = await fetch('/api/create-payment-intent', {
-    method: 'POST',
-    body: JSON.stringify({ amount: 2000 })
-  })
-  const data = await response.json()
-  clientSecret.value = data.clientSecret
-})
-</script>
-
-<template>
-  <div class="checkout">
-    <VueStripeProvider :publishable-key="publishableKey">
-      <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
-        <CheckoutForm :client-secret="clientSecret" />
-      </VueStripeElements>
-
-      <div v-else>Loading...</div>
-    </VueStripeProvider>
-  </div>
-</template>
-```
-
-```vue
-<!-- CheckoutForm.vue: rendered inside VueStripeElements -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  VueStripeExpressCheckoutElement,
-  VueStripePaymentElement,
-  usePaymentIntent
-} from '@vue-stripe/vue-stripe'
-import type {
-  StripeExpressCheckoutElementClickEvent,
-  StripeExpressCheckoutElementReadyEvent
-} from '@stripe/stripe-js'
+import { VueStripeExpressCheckoutElement, usePaymentIntent } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{ clientSecret: string }>()
 
-const { confirmPayment, loading: processing } = usePaymentIntent()
-const hasExpressCheckout = ref(false)
+const { confirmPayment } = usePaymentIntent()
 const errorMessage = ref('')
 
-const handleExpressReady = ({ availablePaymentMethods }: StripeExpressCheckoutElementReadyEvent) => {
-  hasExpressCheckout.value = Boolean(
-    availablePaymentMethods?.applePay || availablePaymentMethods?.googlePay
-  )
-}
-
-const handleClick = ({ resolve }: StripeExpressCheckoutElementClickEvent) => {
-  resolve({
-    business: { name: 'My Store' },
-    shippingAddressRequired: true,
-    shippingRates: [
-      { id: 'free', displayName: 'Free Shipping', amount: 0 },
-      { id: 'express', displayName: 'Express', amount: 1000 }
-    ]
-  })
-}
-
-// Both buttons confirm the same PaymentIntent with the injected Elements group
-const pay = async () => {
-  errorMessage.value = ''
-
+const handleConfirm = async () => {
   const { error } = await confirmPayment({
     clientSecret: props.clientSecret,
     confirmParams: {
@@ -300,26 +61,110 @@ const pay = async () => {
 </script>
 
 <template>
-  <!-- Express Checkout -->
-  <VueStripeExpressCheckoutElement
-    @ready="handleExpressReady"
-    @click="handleClick"
-    @confirm="pay"
-  />
+  <VueStripeExpressCheckoutElement @confirm="handleConfirm" />
+  <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+</template>
+```
 
-  <!-- Divider -->
-  <div v-if="hasExpressCheckout" class="divider">
-    <span>Or pay with card</span>
-  </div>
+## 3. Configure the payment sheet on `@click`
 
-  <!-- Regular Payment Form -->
+If you listen to `@click`, call `resolve()` within one second, or the sheet does not open. Pass the sheet options there:
+
+```ts
+import type { StripeExpressCheckoutElementClickEvent } from '@stripe/stripe-js'
+
+const handleClick = ({ resolve }: StripeExpressCheckoutElementClickEvent) => {
+  resolve({
+    business: { name: 'My Store' },
+    emailRequired: true,
+    shippingAddressRequired: true,
+    allowedShippingCountries: ['US', 'CA', 'GB'],
+    shippingRates: [
+      { id: 'standard', displayName: 'Standard shipping', amount: 500 },
+      { id: 'express', displayName: 'Express shipping', amount: 1500 }
+    ]
+  })
+}
+```
+
+```vue
+<VueStripeExpressCheckoutElement @click="handleClick" @confirm="handleConfirm" />
+```
+
+## Update shipping rates when the address changes
+
+Listen to `@shippingaddresschange`, fetch rates for the address and pass them to `resolve()`:
+
+```ts
+import type { StripeExpressCheckoutElementShippingAddressChangeEvent } from '@stripe/stripe-js'
+
+const handleShippingAddressChange = async ({
+  address,
+  resolve
+}: StripeExpressCheckoutElementShippingAddressChangeEvent) => {
+  const rates = await fetchShippingRates(address) // your server
+  resolve({
+    shippingRates: rates.map((rate) => ({
+      id: rate.id,
+      displayName: rate.name,
+      amount: rate.price
+    }))
+  })
+}
+```
+
+```vue
+<VueStripeExpressCheckoutElement
+  @click="handleClick"
+  @confirm="handleConfirm"
+  @shippingaddresschange="handleShippingAddressChange"
+/>
+```
+
+## Show the buttons above the Payment Element
+
+Both elements confirm the same PaymentIntent. Use `@ready` to show the "Or pay with card" divider only when a wallet is available.
+
+```vue
+<!-- CheckoutForm.vue: rendered inside VueStripeElements -->
+<script setup lang="ts">
+import { ref } from 'vue'
+import {
+  VueStripeExpressCheckoutElement,
+  VueStripePaymentElement,
+  usePaymentIntent
+} from '@vue-stripe/vue-stripe'
+import type { StripeExpressCheckoutElementReadyEvent } from '@stripe/stripe-js'
+
+const props = defineProps<{ clientSecret: string }>()
+
+const { confirmPayment, loading: processing } = usePaymentIntent()
+const hasWallet = ref(false)
+const errorMessage = ref('')
+
+const handleReady = ({ availablePaymentMethods }: StripeExpressCheckoutElementReadyEvent) => {
+  hasWallet.value = Boolean(availablePaymentMethods)
+}
+
+const pay = async () => {
+  errorMessage.value = ''
+  const { error } = await confirmPayment({
+    clientSecret: props.clientSecret,
+    confirmParams: { return_url: `${window.location.origin}/complete` },
+    redirect: 'always'
+  })
+  if (error) errorMessage.value = error.message || 'Payment failed'
+}
+</script>
+
+<template>
+  <VueStripeExpressCheckoutElement @ready="handleReady" @confirm="pay" />
+
+  <p v-if="hasWallet" class="divider">Or pay with card</p>
+
   <form @submit.prevent="pay">
     <VueStripePaymentElement />
-
-    <div v-if="errorMessage" class="error">
-      {{ errorMessage }}
-    </div>
-
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     <button type="submit" :disabled="processing">
       {{ processing ? 'Processing...' : 'Pay $20.00' }}
     </button>
@@ -327,19 +172,22 @@ const pay = async () => {
 </template>
 ```
 
-## With Checkout Sessions
+## Use the buttons on a Checkout Session
 
-Inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider), the element is created from the Checkout Session. `@click`, `@shippingaddresschange` and `@shippingratechange` never fire there (the session owns line items and shipping); confirm with the session instead:
+Inside [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider) the element is created from the Checkout Session. The session owns line items and shipping, so `@click`, `@shippingaddresschange` and `@shippingratechange` never fire. Confirm with [`useCheckoutSession()`](/api/composables/use-checkout-session):
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { VueStripeExpressCheckoutElement, useCheckoutSession } from '@vue-stripe/vue-stripe'
+import type { StripeExpressCheckoutElementConfirmEvent } from '@stripe/stripe-js'
 
 const { confirm } = useCheckoutSession()
 
-const handleConfirm = async (event) => {
+const handleConfirm = async (event: StripeExpressCheckoutElementConfirmEvent) => {
   const result = await confirm({ expressCheckoutConfirmEvent: event })
-  if (result.type === 'error') console.error(result.error.message)
+  if (result.type === 'error') {
+    // Show result.error.message
+  }
 }
 </script>
 
@@ -348,26 +196,10 @@ const handleConfirm = async (event) => {
 </template>
 ```
 
-## Testing
+Test data: see Test your integration.
 
-### Apple Pay
-- Use Safari on macOS or iOS
-- Must have a card in Apple Wallet
-- Use test mode cards: Any card will work in test mode
+## See also
 
-### Google Pay
-- Use Chrome
-- Must have a card saved in Google Pay
-- Works in test mode with any saved card
-
-### Link
-- Works in any browser
-- Uses Stripe's Link service
-- Auto-fills for returning customers
-
-## Next Steps
-
-- [Payment Element](/guide/payment-element) — The full payment form
-- [Appearance API](/api/components/stripe-elements#appearance-api) — Style your checkout
-- [Error Handling](/api/composables/use-payment-intent#error-handling) — Handle edge cases
-- [API Reference](/api/components/stripe-express-checkout-element) — Full props, events, and options
+- [Express Checkout Element API](/api/components/stripe-express-checkout-element): props, events and options
+- [Accept a payment with the Payment Element](/guide/payment-element)
+- [Live demo](/live-demo/express-checkout)

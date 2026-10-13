@@ -1,20 +1,13 @@
-# Custom Checkout
+# Build your own checkout page on a Checkout Session
 
-Custom Checkout puts Stripe Elements on your own page while a **Checkout Session** keeps the order: line items, discounts, taxes, shipping and currency stay on the session. You choose the layout; Stripe calculates totals and runs the payment. Stripe calls this "Elements with the Checkout Sessions API", and Stripe.js exposes it as the Checkout Elements SDK (`stripe.initCheckoutElementsSdk()`).
+Put Stripe Elements on your own page while a Checkout Session keeps the order: line items, discounts, taxes, shipping and currency stay on the session. You choose the layout; Stripe calculates totals and runs the payment. Stripe calls this "Elements with the Checkout Sessions API", and Stripe.js exposes it as the Checkout Elements SDK (`stripe.initCheckoutElementsSdk()`). To compare it with hosted, embedded and Payment Element integrations, see [Choosing an integration](/guide/approaches).
 
-## Which Checkout Should I Use?
+## Before you begin
 
-| Approach | Where the customer pays | Who renders the page | Order data lives in |
-|----------|------------------------|----------------------|---------------------|
-| [Stripe Checkout](/guide/checkout) | `checkout.stripe.com` | Stripe | Checkout Session |
-| [Embedded Checkout](/guide/embedded-checkout) | Your page (Stripe iframe) | Stripe | Checkout Session |
-| **Custom Checkout** | Your page | You, with Stripe Elements | Checkout Session |
-| [Checkout Form](/guide/checkout-form) (beta) | Your page | Stripe, as one form element | Checkout Session |
-| [Payment Element](/guide/payment-element) | Your page | You, with Stripe Elements | Your server (PaymentIntent) |
+- Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+- A Stripe secret key on your server and a Price (`price_...`) in your Stripe account.
 
-Choose Custom Checkout when you want your own UI but don't want to recompute tax, discounts or shipping yourself.
-
-## How It Works
+## How the steps fit together
 
 ```mermaid
 sequenceDiagram
@@ -30,7 +23,7 @@ sequenceDiagram
     Stripe-->>Browser: success, or redirect to return_url
 ```
 
-## Step 1: Create the Session (Server)
+## 1. Create the session on your server
 
 Create the session with `ui_mode: 'elements'` and a `return_url`, and send `client_secret` to the browser. There is no `success_url` or `cancel_url` because the customer never leaves your page unless a payment method needs a redirect.
 
@@ -54,14 +47,15 @@ app.post('/api/checkout-session', async (req, res) => {
 
 Stripe replaces `{CHECKOUT_SESSION_ID}` with the session ID when it redirects.
 
-## Step 2: Wrap the Page in the Provider
+## 2. Wrap the page in the provider
 
 `VueStripeCheckoutElementsProvider` calls `stripe.initCheckoutElementsSdk()` and makes the session available to the components inside it. `client-secret` accepts a string or a **Promise**. Pass the Promise from your request so the elements can mount while the session is being created.
 
 ```vue
 <!-- CheckoutPage.vue -->
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import CheckoutForm from './CheckoutForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -85,7 +79,7 @@ const clientSecret = fetch('/api/checkout-session', { method: 'POST' })
 
 `fetchClientSecret` (a function returning a Promise) is still accepted for v5 code. The previous name, `VueStripeCheckoutProvider`, still works as a deprecated alias.
 
-## Step 3: Build the Form
+## 3. Build the form
 
 Inside the provider, element components are created from the Checkout session (`checkout.createPaymentElement()` and so on) instead of `stripe.elements()`, so you don't need `VueStripeElements`. `useCheckoutSession()` gives you the reactive session and its actions.
 
@@ -133,7 +127,7 @@ Things to know about this form:
 - **The Address Element needs `mode`.** Use `'billing'` or `'shipping'`. A shipping address also updates shipping rates and taxes on the session.
 - **`loading` stays `true`** until the session actions have loaded. Any action called before that resolves to `{ type: 'error', error: { message: 'Checkout session is not ready yet' } }` instead of throwing.
 
-## Step 4: Confirm
+## 4. Confirm
 
 `confirm()` validates every mounted element, attaches the email and addresses, and confirms the payment.
 
@@ -144,7 +138,7 @@ await confirm()
 // Stay on the page when no redirect is needed (cards, most wallets)
 const result = await confirm({ redirect: 'if_required' })
 if (result.type === 'success') {
-  console.log(result.session.status) // the updated session
+  // result.session is the updated session; show your success state
 }
 ```
 
@@ -154,9 +148,9 @@ If the session was created with a `return_url`, call `confirm()` **without** `re
 
 On the return page, read `session_id` from the URL and retrieve the session on your server (`stripe.checkout.sessions.retrieve(id)`) to show the outcome. Fulfil orders from the `checkout.session.completed` webhook, not from the return page.
 
-## Optional Elements
+## Add optional elements
 
-### Currency Selector
+### Currency selector
 
 With [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing), customers can pay in their local currency. Pass `adaptive-pricing` to the provider and render the selector. The chosen currency is on `session.value.currency`, and the totals are recalculated.
 
@@ -186,7 +180,7 @@ Business customers can enter a VAT/GST number. Create the session with `tax_id_c
 
 The Tax ID element is a Stripe beta; your account needs access. See the [Tax ID API](/api/components/stripe-tax-id-element).
 
-### Contact Details
+### Contact details
 
 `VueStripeContactDetailsElement` collects the customer's email and writes it to the session (`session.value.email`), in place of your own input plus `updateEmail()`. No beta is needed. See the [Contact Details API](/api/components/stripe-contact-details-element).
 
@@ -201,11 +195,11 @@ The Tax ID element is a Stripe beta; your account needs access. See the [Tax ID 
 
 `VueStripeTermsElement` shows the terms the customer accepts by paying, and `VueStripeLinkSignupElement` offers to save their details with Link. Both are Stripe betas: the Terms element needs access on your account, the Link Signup element also needs a beta flag on `VueStripeProvider`. See the [Terms API](/api/components/stripe-terms-element) and the [Link Signup API](/api/components/stripe-link-signup-element).
 
-### Express Checkout
+### Express Checkout buttons
 
-`VueStripeExpressCheckoutElement` also works inside the provider. Confirm from its `confirm` event with `confirm({ expressCheckoutConfirmEvent: event })`. See the [Express Checkout guide](/guide/express-checkout).
+`VueStripeExpressCheckoutElement` also works inside the provider. Confirm from its `confirm` event with `confirm({ expressCheckoutConfirmEvent: event })`. See [Add Apple Pay, Google Pay and Link buttons](/guide/express-checkout#use-the-buttons-on-a-checkout-session).
 
-## Saved Payment Methods
+## Turn off saved payment methods
 
 Starting with Stripe.js Clover (8.0), saved payment methods are on by default: a session created for an existing Customer offers that customer's saved payment methods and a "save for next time" checkbox. Turn either off with `elementsOptions.savedPaymentMethod` (`'auto'` or `'never'`):
 
@@ -220,27 +214,25 @@ Starting with Stripe.js Clover (8.0), saved payment methods are on by default: a
 
 `elementsOptions` also takes `appearance`, `fonts`, `loader` and `syncAddressCheckbox`. To change the appearance after load, call `changeAppearance()` from `useCheckoutSession()`.
 
-## Updating the Session
+## Update the session
 
-`useCheckoutSession()` forwards every session action. Each one returns `{ type: 'success', session }` or `{ type: 'error', error }`, and the reactive `session` updates when the action finishes.
+[`useCheckoutSession()`](/api/composables/use-checkout-session) forwards every session action: promotion codes, line item quantities, shipping options, contact details, optional items and server updates. Each one returns `{ type: 'success', session }` or `{ type: 'error', error }`, and the reactive `session` updates when the action finishes:
 
-| Action | Use |
-|--------|-----|
-| `applyPromotionCode(code)` / `removePromotionCode()` | Discount codes |
-| `updateLineItemQuantity({ lineItem, quantity })` | Cart quantity |
-| `updateShippingOption(id)` | Pick a shipping rate |
-| `updateEmail(email)` / `updatePhoneNumber(phone)` | Contact details |
-| `updateTaxIdInfo(info)` | Tax ID without the element |
-| `addOptionalLineItem(priceId)` / `removeOptionalLineItem(priceId)` | Optional items (upsells) |
-| `validateElements()` | Validate every element without confirming |
-| `runServerUpdate(fn)` | Update the session on your server, then refresh it in the browser |
+```ts
+const { applyPromotionCode } = useCheckoutSession()
 
-The full list is in the [useCheckoutSession API](/api/composables/use-checkout-session).
+const result = await applyPromotionCode('SPRING25')
+if (result.type === 'error') {
+  // Show result.error.message
+}
+```
 
-## Next Steps
+Test data: see Test your integration.
 
-- [Live Demo](/live-demo/custom-checkout): pay a test session end to end
+## See also
+
 - [VueStripeCheckoutElementsProvider API](/api/components/stripe-checkout-provider)
-- [Checkout Form](/guide/checkout-form) (beta): Stripe renders the whole form for you
-- [useCheckoutSession API](/api/composables/use-checkout-session)
+- [useCheckoutSession API](/api/composables/use-checkout-session): state and every session action
+- [Add the Checkout Form (beta)](/guide/checkout-form): Stripe renders the whole form for you
+- [Live demo](/live-demo/custom-checkout): pay a test session end to end
 - [Stripe: Elements with the Checkout Sessions API](https://docs.stripe.com/payments/quickstart-checkout-sessions)

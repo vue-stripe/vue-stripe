@@ -1,6 +1,6 @@
-# Issuing Elements
+# Display issued card details
 
-If you issue cards with [Stripe Issuing](https://docs.stripe.com/issuing), your cardholders need to see their card details. Issuing Elements show the card number, CVC, expiry date and PIN inside Stripe-hosted iframes, so the details never pass through your page or your server and stay out of your PCI scope.
+Show cardholders the details of cards you issue with [Stripe Issuing](https://docs.stripe.com/issuing). Issuing Elements show the card number, CVC, expiry date and PIN inside Stripe-hosted iframes, so the details never pass through your page or your server and stay out of your PCI scope.
 
 Vue Stripe wraps the six Issuing elements as components. Their reference is on one page: [Issuing Elements API](/api/components/stripe-issuing-elements).
 
@@ -13,7 +13,14 @@ Vue Stripe wraps the six Issuing elements as components. Their reference is on o
 | `VueStripeIssuingCardCopyButtonElement` | A copy-to-clipboard button for one of the above |
 | `VueStripeIssuingAddToWalletButtonElement` | An Add to Wallet button (Stripe private preview) |
 
-## How It Works
+## Before you begin
+
+- Issuing is enabled on your Stripe account, and you have an issued card (`ic_...`).
+- Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+
+In a sandbox, test cards created in the Dashboard or with the API work; there every card shows its number and CVC. In live mode the number and CVC are available for virtual cards only, unless Stripe enables physical card details for your account.
+
+## How the steps fit together
 
 Stripe.js fetches the card details with an **ephemeral key**: a short-lived key, scoped to one card, that your server creates with your secret key. The browser proves it asked for that key with a single-use **nonce**.
 
@@ -32,9 +39,7 @@ sequenceDiagram
     B->>API: Stripe-hosted iframes fetch the card details
 ```
 
-You need Issuing enabled on your Stripe account and an issued card (`ic_...`). In a sandbox, test cards created in the Dashboard or with the API work; there every card shows its number and CVC. In live mode the number and CVC are available for virtual cards only, unless Stripe enables physical card details for your account.
-
-## 1. Server: create the ephemeral key
+## 1. Create the ephemeral key on your server
 
 Your endpoint receives the card ID and the nonce, checks that the signed-in user may see that card, and returns the ephemeral key secret. Stripe needs API version `2020-03-02` or later for the key; Stripe's own example pins `2026-09-30.endive`, the Endive release that Stripe.js 10 belongs to.
 
@@ -60,7 +65,7 @@ export async function createIssuingEphemeralKey(user: { id: string }, body: { ca
 Anyone who can call it for a card ID can read that card's number and CVC. Check the session and the card's owner before you create the key. To show the PIN, Stripe also requires two-factor authentication before the page that renders `VueStripeIssuingCardPinDisplayElement`.
 :::
 
-## 2. Client: create the nonce and fetch the key
+## 2. Create the nonce and fetch the key
 
 Create the nonce with [`useEphemeralKeyNonce()`](/api/composables/use-ephemeral-key-nonce), which wraps `stripe.createEphemeralKeyNonce()`, in a component inside `<VueStripeProvider>`. It returns Stripe's result untouched and tracks `loading` and `error`.
 
@@ -83,7 +88,7 @@ async function loadIssuingCard(cardId: string) {
 }
 ```
 
-## 3. Client: retrieve the card
+## 3. Retrieve the card
 
 Stripe's guide calls `stripe.retrieveIssuingCard()` with the key before it creates Issuing Elements; with the `issuing_elements_2` beta (Connect, physical card details) element creation fails without it ("Issuing card has not been retrieved."). Stripe.js 10.0.0 does not declare this method, so call it on the Stripe instance from [`useStripe()`](/api/composables/use-stripe) through a narrow type:
 
@@ -189,7 +194,7 @@ const onCopied = () => {
 
 The copy button is a transparent iframe that fills its parent: give the parent a size and an icon, and use `@click` for "Copied" feedback.
 
-## Refreshing the key
+## Refresh the key
 
 Ephemeral keys expire after 15 minutes. For longer sessions, run steps 2 and 3 again and assign the new values to `card`: each component passes the changed `options` to `element.update()`.
 
@@ -204,11 +209,11 @@ const timer = setInterval(async () => {
 onUnmounted(() => clearInterval(timer))
 ```
 
-## Showing the PIN
+## Show the PIN
 
 `VueStripeIssuingCardPinDisplayElement` takes the same options as the other displays. Stripe requires you to put two-factor authentication in front of any page that shows a PIN, and may suspend access to the element otherwise. Issuing Elements do not integrate with Stripe's Issuing verifications, so the 2FA step is yours to build.
 
-## Add to Wallet
+## Add an Add to Wallet button
 
 `VueStripeIssuingAddToWalletButtonElement` is a Stripe private preview. Pass the betas Stripe lists for it on the provider, and the same card options plus `wallet`:
 
@@ -233,12 +238,12 @@ onUnmounted(() => clearInterval(timer))
 
 `@success` fires when the wallet flow completes. Follow Apple's and Google's badge guidelines when you place the button.
 
-## Connect
+## Show cards of a connected account
 
 To show cards of a connected account, set `stripe-account` on `<VueStripeProvider>` and create the ephemeral key with the `stripeAccount` request option on your server. Stripe must enable Issuing Elements for connected accounts first; ask Stripe support.
 
-## See Also
+## See also
 
-- [Issuing Elements API](/api/components/stripe-issuing-elements) - props, events, slots and exposed members
-- [Architecture](/guide/architecture) - how the provider and Elements context reach the components
+- [Issuing Elements API](/api/components/stripe-issuing-elements): props, events, slots and exposed members
+- [How Vue Stripe works](/guide/architecture): how the provider and Elements context reach the components
 - [Stripe docs: Using Issuing Elements](https://docs.stripe.com/issuing/elements)

@@ -1,22 +1,18 @@
-# Checkout Form
+# Add the Checkout Form (beta)
 
-The Checkout Form puts Stripe's **complete checkout form** on your page: contact details, addresses, shipping, tax ID, express checkout wallets, the payment method, the order total and the Pay button come as one element. A **Checkout Session** keeps the order, so Stripe calculates totals, tax, discounts and shipping. Stripe.js exposes it as the Checkout Form SDK (`stripe.initCheckoutFormSdk()`, `ui_mode: 'form'`).
+Put Stripe's complete checkout form on your page with `VueStripeCheckoutForm`: contact details, addresses, shipping, tax ID, express checkout wallets, the payment method, the order total and the Pay button come as one element. A Checkout Session keeps the order, so Stripe calculates totals, tax, discounts and shipping. Stripe.js exposes it as the Checkout Form SDK (`stripe.initCheckoutFormSdk()`, `ui_mode: 'form'`). To compare it with the other Checkout integrations, see [Choosing an integration](/guide/approaches).
 
 ::: warning Beta: requires Stripe access
 The Checkout Form is a Stripe beta. Your Stripe account needs access to `ui_mode: 'form'`; contact [Stripe support](https://support.stripe.com/). Some options have their own gate: the `compact` layout is a separate private preview. Without access, Stripe's error appears in the component's `#error` slot instead of the form.
 :::
 
-## Which Checkout Should I Use?
+## Before you begin
 
-| Approach | Where the customer pays | Who renders the form | Code you write |
-|----------|------------------------|----------------------|----------------|
-| [Stripe Checkout](/guide/checkout) | `checkout.stripe.com` | Stripe | A redirect |
-| **Checkout Form** (beta) | Your page | Stripe, as one element | Provider, form, confirm handler |
-| [Custom Checkout](/guide/custom-checkout) | Your page | You, with individual Elements | Every field and the Pay button |
+- Your Stripe account has access to the Checkout Form beta (see above).
+- Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).
+- A Stripe secret key on your server and a Price (`price_...`) in your Stripe account.
 
-Choose the Checkout Form when you want the customer to stay on your page but do not need to arrange the fields yourself.
-
-## How It Works
+## How the steps fit together
 
 ```mermaid
 sequenceDiagram
@@ -34,7 +30,7 @@ sequenceDiagram
     Stripe-->>Browser: success, or redirect to return_url
 ```
 
-## Step 1: Create the Session (Server)
+## 1. Create the session on your server
 
 Create the session with `ui_mode: 'form'` and a `return_url`. `ui_mode: 'form'` needs Stripe API version `2026-03-25.dahlia` or later; older versions answer *"Invalid ui_mode: form"*.
 
@@ -56,7 +52,7 @@ app.post('/api/checkout-session', async (req, res) => {
 })
 ```
 
-## Step 2: Wrap the Page in the Provider
+## 2. Wrap the page in the provider
 
 `VueStripeCheckoutFormProvider` calls `stripe.initCheckoutFormSdk()` and makes the session available to the components inside it. `client-secret` accepts a string or a **Promise**, so the form can mount while the session is being created.
 
@@ -76,8 +72,9 @@ app.post('/api/checkout-session', async (req, res) => {
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider, VueStripeCheckoutFormProvider } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import PayForm from './PayForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -88,7 +85,7 @@ const clientSecret = fetch('/api/checkout-session', { method: 'POST' })
 </script>
 ```
 
-## Step 3: Render the Form and Confirm
+## 3. Render the form and confirm
 
 `VueStripeCheckoutForm` renders the whole form, including the Pay button. When the customer clicks Pay (or authorizes a wallet), the form emits `@confirm`. Pass that event to `confirm()` from `useCheckoutForm()`:
 
@@ -118,7 +115,7 @@ const onConfirm = async (event) => {
 
 Nothing is charged until you call `confirm`. Payment methods that need a redirect (bank authentication, some wallets) leave the page and come back to `return_url`.
 
-## Reading the Form
+## Read the form values
 
 `@change` reports whether the form is complete and its current values; `getValue()` on a template ref reads them on demand:
 
@@ -134,8 +131,8 @@ const onChange = (event) => {
 }
 
 const readEmail = async () => {
-  const value = await formRef.value?.getValue()
-  console.log(value?.value.customerDetails.email)
+  const result = await formRef.value?.getValue()
+  return result?.value.customerDetails.email
 }
 </script>
 
@@ -146,7 +143,7 @@ const readEmail = async () => {
 
 In the `compact` layout (private preview), the change event also lists the form's `views`; call `formRef.value.setView(index)` to move between them.
 
-## Currency Selector
+## Place the currency selector yourself
 
 With [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing), the form shows its own currency picker. To place it elsewhere on the page, render a `VueStripeCurrencySelectorElement` inside the provider; the form then leaves its built-in picker out:
 
@@ -159,14 +156,16 @@ With [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-prici
 
 No other element component works inside `VueStripeCheckoutFormProvider`: the form already contains them.
 
-## Session Actions
+## Change the order
 
 The form collects the email, phone number, addresses and tax ID itself, so `useCheckoutForm()` has no `updateEmail` or address updates. It keeps the actions that change the order: `applyPromotionCode`, `updateLineItemQuantity`, `updateShippingOption`, `addOptionalLineItem` / `removeOptionalLineItem` and `runServerUpdate`. The full list is in the [useCheckoutForm API](/api/composables/use-checkout-form).
 
-## Next Steps
+Test data: see Test your integration.
+
+## See also
 
 - [VueStripeCheckoutFormProvider API](/api/components/stripe-checkout-form-provider)
 - [VueStripeCheckoutForm API](/api/components/stripe-checkout-form)
 - [useCheckoutForm API](/api/composables/use-checkout-form)
+- [Build your own checkout page on a Checkout Session](/guide/custom-checkout): arrange individual elements instead
 - [Live demo](/live-demo/checkout-form): pay with the Checkout Form in this site's sandbox
-- [Custom Checkout](/guide/custom-checkout): build the form from individual elements instead

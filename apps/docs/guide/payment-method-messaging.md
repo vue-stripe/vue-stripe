@@ -1,30 +1,26 @@
-# Payment Method Messaging
+# Show buy-now-pay-later messaging
 
-The Payment Method Messaging Element tells customers which Buy Now, Pay Later (BNPL) options they can use for the current price, for example "4 interest-free payments of $30.00 with Klarna". It covers Affirm, Klarna and Afterpay/Clearpay, and shows only the ones that apply to the amount, currency and country you pass.
+Show customers which buy-now-pay-later (BNPL) options fit the current price, for example "4 interest-free payments of $30.00 with Klarna", with `VueStripePaymentMethodMessagingElement`. It covers Affirm, Klarna and Afterpay/Clearpay and shows only the ones that apply to the amount, currency and country you pass.
 
-It is **display-only**: it collects nothing and cannot confirm a payment. Put it on product, cart and pricing pages, and collect the payment later with the [Payment Element](/guide/payment-element) or [Stripe Checkout](/guide/checkout).
+The element only displays a message. Put it on product, cart and pricing pages, and collect the payment later with the [Payment Element](/guide/payment-element) or [Stripe Checkout](/guide/checkout).
 
-## When to Use
+## Before you begin
 
-| Page | Why |
-|------|-----|
-| Product page | Shows the installment price next to the full price |
-| Cart | Updates as the cart total changes |
-| Pricing page | Makes higher-priced plans easier to accept |
+- The BNPL methods you advertise are enabled in the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods). A provider that is not enabled is never shown.
+- Your checkout (Payment Element or Checkout Session) allows the same methods, so customers can choose what you advertise.
 
-Stripe removed the older `affirmMessage` and `afterpayClearpayMessage` elements in Stripe.js Clover (8.0). This element replaces both.
-
-## Basic Usage
+## 1. Render the element
 
 The element needs `VueStripeElements`, but no client secret: it does not take part in a payment.
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import {
   VueStripeProvider,
   VueStripeElements,
   VueStripePaymentMethodMessagingElement
 } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </script>
@@ -47,27 +43,22 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 `amount` is in the smallest currency unit (cents for USD), so `12000` is $120.00. `currency` is an upper-case ISO code.
 
-## Keeping the Amount in Sync
+## 2. Keep the amount in sync with the price
 
 The component calls `element.update()` whenever `options` changes, so pass a computed value and the message follows the price:
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
-import {
-  VueStripeProvider,
-  VueStripeElements,
-  VueStripePaymentMethodMessagingElement
-} from '@vue-stripe/vue-stripe'
+import { VueStripePaymentMethodMessagingElement } from '@vue-stripe/vue-stripe'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const unitPrice = 4000 // $40.00
 const quantity = ref(1)
 
 const messagingOptions = computed(() => ({
   amount: unitPrice * quantity.value,
-  currency: 'USD',
-  countryCode: 'US'
+  currency: 'USD' as const,
+  countryCode: 'US' as const
 }))
 </script>
 
@@ -76,40 +67,14 @@ const messagingOptions = computed(() => ({
     Quantity
     <input v-model.number="quantity" type="number" min="1" />
   </label>
-
-  <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeElements>
-      <VueStripePaymentMethodMessagingElement :options="messagingOptions" />
-    </VueStripeElements>
-  </VueStripeProvider>
+  <!-- Rendered inside VueStripeProvider and VueStripeElements -->
+  <VueStripePaymentMethodMessagingElement :options="messagingOptions" />
 </template>
 ```
 
-## Options
+Each provider has its own amount limits and supported countries; outside them the element shows nothing for that provider. See [Stripe's reference](https://docs.stripe.com/js/element/payment_method_messaging_element) for the supported combinations and every option.
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `amount` | `number` | Required. Price in the smallest currency unit. |
-| `currency` | `'USD' \| 'EUR' \| 'GBP' \| ...` | Required. Upper-case ISO currency code. |
-| `countryCode` | `'US' \| 'GB' \| 'DE' \| ...` | The customer's country. Decides which providers can be offered. |
-| `paymentMethodTypes` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | Limit the providers shown. Replaces the deprecated `paymentMethods`. |
-| `paymentMethodOrder` | same as above | Fixed display order. By default Stripe orders them per customer. |
-| `logoColor` | `'black' \| 'white' \| 'color'` | Provider logo color. Defaults to black. |
+## See also
 
-See [Stripe's reference](https://docs.stripe.com/js/element/payment_method_messaging_element) for the supported currency and country combinations.
-
-## Events
-
-The element emits only `@ready`. There is no `change` event because there is no input.
-
-## Requirements
-
-- Turn on the BNPL methods you advertise in the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods). A provider that is not enabled is never shown.
-- Each provider has its own amount limits and supported countries. Outside them, the element shows nothing for that provider.
-- Advertise only methods the customer can actually choose at checkout, so the Payment Element or Checkout Session should allow the same methods.
-
-## Next Steps
-
-- [Payment Element Guide](/guide/payment-element) collects the BNPL payment.
-- [Live Demo](/live-demo/payment-method-messaging) lets you change the amount, currency and country.
-- [API Reference](/api/components/stripe-payment-method-messaging-element)
+- [Payment Method Messaging Element API](/api/components/stripe-payment-method-messaging-element): props, events and options
+- [Live demo](/live-demo/payment-method-messaging): change the amount, currency and country
