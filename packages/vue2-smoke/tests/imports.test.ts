@@ -1,4 +1,7 @@
+import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import { dirname } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
 import { expect, it } from 'vitest'
 // Aliased to vue-demi/lib/v2.7/index.mjs by vitest.config.ts. The allowlist comes
@@ -33,6 +36,25 @@ it('the published bundles load Stripe.js only through the side-effect-free pure 
       ...bundle.matchAll(/(?:from\s*|require\()\s*['"](@stripe\/stripe-js[^'"]*)['"]/g)
     ].map((match) => match[1])
     expect(specifiers.length, entry).toBeGreaterThan(0)
-    expect(new Set(specifiers), entry).toEqual(new Set(['@stripe/stripe-js/pure']))
+    // The ES build names the file: @stripe/stripe-js has no "exports" map, and Node's ESM
+    // loader rejects the bare directory import '@stripe/stripe-js/pure'.
+    const expected = entry.includes('cjs')
+      ? '@stripe/stripe-js/pure'
+      : '@stripe/stripe-js/pure/index.mjs'
+    expect(new Set(specifiers), entry).toEqual(new Set([expected]))
   }
+})
+
+it('the ESM bundle imports in plain Node, as SSR without bundling does', () => {
+  // Vite SSR externals, Nuxt dev (vite-node) and Nitro load the package with Node's own ESM
+  // loader. Run that import in a separate Node process from the library's own directory.
+  const entry = require
+    .resolve('@vue-stripe/vue-stripe')
+    .replace(/cjs[\\/]index\.js$/, 'es/index.js')
+  const script = `const m = await import(${JSON.stringify(pathToFileURL(entry).href)}); console.log(typeof m.VueStripeProvider)`
+  const out = execFileSync(process.execPath, ['--input-type=module', '-e', script], {
+    cwd: dirname(entry),
+    encoding: 'utf8'
+  })
+  expect(out.trim()).toBe('object')
 })
