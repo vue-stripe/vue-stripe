@@ -90,7 +90,7 @@ Inside the provider, element components are created from the Checkout session (`
 
 ```vue
 <!-- CheckoutForm.vue -->
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import {
   VueStripePaymentElement,
