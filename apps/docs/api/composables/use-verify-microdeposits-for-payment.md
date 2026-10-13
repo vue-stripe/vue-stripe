@@ -53,6 +53,8 @@ verifyMicrodepositsForPayment(
 ): Promise<PaymentIntentResult>
 ```
 
+Stripe's [reference](https://docs.stripe.com/js/payment_intents/verify_microdeposits_for_payment) also lists `data.descriptor_code`, the six-character code starting with `SM`, and Stripe accepts it at runtime. Stripe.js 10.0.0's `VerifyMicrodepositsForPaymentData` declares only `amounts`, so a `descriptor_code` object literal fails type-checking; widen the type as in [Accept ACH Direct Debit](/guide/ach-debit#_4-verify-with-micro-deposits).
+
 ## See Also
 
 - [useVerifyMicrodepositsForSetup](/api/composables/use-verify-microdeposits-for-setup) - The SetupIntent variant

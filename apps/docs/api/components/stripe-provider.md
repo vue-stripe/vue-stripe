@@ -59,7 +59,7 @@ import type { StripeConstructorOptions } from '@stripe/stripe-js'
 const options: StripeConstructorOptions = {
   stripeAccount: 'acct_...',
   locale: 'auto',
-  betas: ['custom_checkout_tax_id_1'],
+  betas: ['elements_link_signup_beta_1'],
   developerTools: { assistant: { enabled: false } }
 }
 ```
@@ -68,7 +68,7 @@ const options: StripeConstructorOptions = {
 <!-- betas as a prop (wins over options.betas) -->
 <VueStripeProvider
   :publishable-key="publishableKey"
-  :betas="['custom_checkout_tax_id_1']"
+  :betas="['elements_link_signup_beta_1']"
 >
   <!-- ... -->
 </VueStripeProvider>

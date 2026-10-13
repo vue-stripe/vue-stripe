@@ -123,7 +123,7 @@ export default /* @__PURE__ */ defineComponent({
         const elementsOptions: Record<string, unknown> = { ...props.options }
         // Removed in Stripe.js Endive: Stripe rejects `paymentMethodTypes` as an
         // integration error. Mode-based Elements: use options.allowedPaymentMethodTypes;
-        // clientSecret flow: set payment_method_types on the Intent or use Dashboard settings.
+        // clientSecret flow: set allowed_payment_method_types on the Intent or use Dashboard settings.
         delete elementsOptions['paymentMethodTypes']
 
         // Intent-based flow vs deferred Intent flow (mode / currency / amount).

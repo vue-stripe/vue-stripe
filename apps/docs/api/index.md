@@ -36,7 +36,7 @@ Every export of `@vue-stripe/vue-stripe`: components, composables, the plugin an
 | [VueStripeAddressElement](/api/components/stripe-address-element) | Address Element: shipping or billing address |
 | [VueStripeLinkAuthenticationElement](/api/components/stripe-link-authentication-element) | Link Authentication Element: email and Link sign-in |
 | [VueStripePaymentMethodMessagingElement](/api/components/stripe-payment-method-messaging-element) | Payment Method Messaging Element: buy-now-pay-later messaging |
-| [VueStripeTaxIdElement](/api/components/stripe-tax-id-element) | Tax ID Element: business name and tax ID (Checkout Sessions, beta) |
+| [VueStripeTaxIdElement](/api/components/stripe-tax-id-element) | Tax ID Element: business name and tax ID (Checkout Sessions) |
 | [VueStripeCurrencySelectorElement](/api/components/stripe-currency-selector-element) | Currency Selector Element (Checkout Sessions, Adaptive Pricing) |
 | [VueStripeContactDetailsElement](/api/components/stripe-contact-details-element) | Contact Details Element: customer email (Checkout Sessions or Elements) |
 | [VueStripeTermsElement](/api/components/stripe-terms-element) | Terms Element: terms the customer accepts (Stripe beta) |

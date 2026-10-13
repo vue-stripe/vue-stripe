@@ -162,7 +162,7 @@ Test Vue Stripe components with real Stripe integrations. These live demos conne
 Some components need Stripe access that the demo account does not have, so they have no live demo. Their API pages describe what Stripe returns without access:
 
 - [VueStripeTermsElement](/api/components/stripe-terms-element) and [VueStripeLinkSignupElement](/api/components/stripe-link-signup-element): Stripe betas.
-- [VueStripeTaxIdElement](/api/components/stripe-tax-id-element): a Stripe beta flag.
+- [VueStripeTaxIdElement](/api/components/stripe-tax-id-element): no demo yet, though it needs no beta flag. [Build your own checkout page](/guide/custom-checkout#tax-id) shows how to add it.
 - [Issuing Elements](/api/components/stripe-issuing-elements) and the [Issuing](/api/components/stripe-issuing-disclosure), [Treasury](/api/components/stripe-treasury-disclosure) and [Financial Account](/api/components/stripe-financial-account-disclosure) disclosures: an account onboarded to Stripe Issuing or Treasury.
 - [VueStripePricingTable](/api/components/stripe-pricing-table): a pricing table created in your Stripe Dashboard. The [Pricing Table guide](/guide/pricing-table) shows how to set one up.
 

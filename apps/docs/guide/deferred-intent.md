@@ -115,7 +115,7 @@ app.post('/api/create-payment-intent', async (req, res) => {
 })
 ```
 
-If you passed `allowedPaymentMethodTypes` in step 1, create the Intent with the same list as `payment_method_types` instead of `automatic_payment_methods`. Fulfil the order from the `payment_intent.succeeded` [webhook](/guide/webhooks).
+If you passed `allowedPaymentMethodTypes` in step 1, create the Intent with the same list as `allowed_payment_method_types` instead of `automatic_payment_methods`. Fulfil the order from the `payment_intent.succeeded` [webhook](/guide/webhooks).
 
 ## Variations
 

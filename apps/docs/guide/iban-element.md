@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
     currency: 'eur',
-    payment_method_types: ['sepa_debit']
+    allowed_payment_method_types: ['sepa_debit']
   })
 
   return Response.json({ clientSecret: paymentIntent.client_secret })
@@ -99,6 +99,10 @@ const handleSubmit = async () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ amount: 1000 })
   })
+  if (!response.ok) {
+    errorMessage.value = 'Could not start the payment. Please try again.'
+    return
+  }
   const { clientSecret } = await response.json()
 
   const { error, paymentIntent } = await confirmSepaDebitPayment(clientSecret, {
