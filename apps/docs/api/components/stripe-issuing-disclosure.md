@@ -4,26 +4,25 @@ description: "VueStripeIssuingDisclosure reference: render the legal disclosure 
 
 # VueStripeIssuingDisclosure
 
-Renders the legal disclosure Stripe requires for an Issuing card program. It is the Vue port of React Stripe.js 7's `IssuingDisclosure`: it calls `stripe.createIssuingDisclosure(options)` and mounts the HTML element Stripe.js returns. Vue Stripe does not ship any legal text of its own.
+Shows cardholders the legal disclosure of a Stripe Issuing card program: the text Stripe generates for your program, its public card program name and an optional link of yours. The component calls `stripe.createIssuingDisclosure(options)` and mounts the HTML element Stripe.js returns, so the wording always comes from Stripe. It is the Vue port of React Stripe.js 7's `IssuingDisclosure`.
 
-::: warning Account requirement
-Stripe answers with an error unless your account has onboarded to Stripe Issuing. In a sandbox account without it, Stripe returns an `invalid_request_error` ("Unrecognized request URL (GET: /v1/disclosures/...)"), which this component emits through `@error` and shows in the `#error` slot.
-:::
-
-::: info No live demo
-The docs' live demos run on an account that has not onboarded to Stripe Issuing, so this disclosure has no live demo.
-:::
+| | |
+|---|---|
+| Stripe product | Stripe Issuing (cards your platform issues) |
+| Stripe.js method | `stripe.createIssuingDisclosure()`, not in the Stripe.js 10.0.0 type definitions |
+| Account requirement | Onboarded to Issuing. Other accounts get `invalid_request_error` ("Unrecognized request URL (GET: /v1/disclosures/...)") through `@error` |
+| Live demo | None: the demo account has not onboarded to Issuing |
+| Related | [Issuing Elements](/api/components/stripe-issuing-elements) display the card itself; [Display issued card details](/guide/issuing) |
 
 ## Usage
+
+Place the disclosure where a cardholder applies for or activates a card, next to the card program's terms:
 
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeIssuingDisclosure
-      :options="options"
-      @load="onLoad"
-      @error="onError"
-    />
+    <h2>Apply for the Rocket Card</h2>
+    <VueStripeIssuingDisclosure :options="disclosure" @error="onError" />
   </VueStripeProvider>
 </template>
 
@@ -32,70 +31,46 @@ import { VueStripeProvider, VueStripeIssuingDisclosure } from '@vue-stripe/vue-s
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const options = {
+const disclosure = {
   issuingProgramID: 'iprg_123',
   publicCardProgramName: 'Rocket Card',
-  learnMoreLink: 'https://example.com/card'
+  learnMoreLink: 'https://example.com/rocket-card'
 }
 
-const onLoad = () => console.log('Disclosure rendered')
 const onError = (error) => console.error(error.message)
 </script>
-```
-
-Like the React component, it also accepts a `stripe` prop (a `Stripe` instance, a Promise of one, or `null`), so it works without `VueStripeProvider`:
-
-```vue
-<script setup>
-// The library re-exports Stripe.js' loadStripe
-import { loadStripe, VueStripeIssuingDisclosure } from '@vue-stripe/vue-stripe'
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
-</script>
-
-<template>
-  <VueStripeIssuingDisclosure :stripe="stripePromise" />
-</template>
 ```
 
 ## Props
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `stripe` | `Stripe \| PromiseLike<Stripe \| null> \| null` | No | Stripe instance to use. Defaults to the one from the surrounding `VueStripeProvider`; without either, the component throws `VueStripeProviderError`. While it is `null` nothing is requested |
-| `options` | `IssuingDisclosureOptions` | No | Disclosure options (below) |
+| `stripe` | `Stripe \| PromiseLike<Stripe \| null> \| null` | No | Stripe instance, for use without `VueStripeProvider` (for example `loadStripe(key)`). Defaults to the provider's; with neither, the component throws `VueStripeProviderError`. Nothing is requested while it is `null` |
+| `options` | `IssuingDisclosureOptions` | No | Which card program the disclosure is for (below) |
 
 ### Options
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `issuingProgramID` | `string` | ID of the Issuing program to show the disclosure for |
-| `publicCardProgramName` | `string` | Public name of the Issuing card program |
-| `learnMoreLink` | `string` | A supplemental link where your users can learn more |
+| `issuingProgramID` | `string` | ID of the Issuing program (`iprg_...`) whose disclosure Stripe returns |
+| `publicCardProgramName` | `string` | The card program's public name, as cardholders know it |
+| `learnMoreLink` | `string` | A link of yours where cardholders can read more about the card program |
 
-```ts
-interface IssuingDisclosureOptions {
-  issuingProgramID?: string
-  publicCardProgramName?: string
-  learnMoreLink?: string
-}
-```
-
-Changing an option requests the disclosure again and replaces the rendered text. Re-renders with equal option values (an inline `:options="{ ... }"`) do not.
+A change to any option requests the disclosure again and replaces the text. An inline `:options="{ ... }"` with unchanged values does not.
 
 ## Events
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `@load` | - | Emitted after the disclosure content is mounted (React `onLoad`) |
-| `@error` | `StripeError \| { message: string }` | Emitted when Stripe returns an error, or `{ message }` when the call fails (React `onError`) |
+| `@load` | - | The disclosure is mounted (React `onLoad`) |
+| `@error` | `StripeError \| { message: string }` | Stripe refused the request, or the call failed (React `onError`) |
 
 ## Slots
 
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
-| `#loading` | - | Rendered while the disclosure loads (default: "Loading disclosure...") |
-| `#error` | `{ error: string }` | Rendered when the disclosure could not be created |
+| `#loading` | - | While the disclosure loads (default: "Loading disclosure...") |
+| `#error` | `{ error: string }` | When no disclosure could be created |
 
 ## Exposed Properties
 
@@ -104,40 +79,19 @@ Changing an option requests the disclosure again and replaces the rendered text.
 | `loading` | `Ref<boolean>` | `true` until the disclosure is mounted or fails |
 | `error` | `Ref<string \| null>` | Current error message |
 
-## Styling
+## CSS classes
 
-```html
-<div class="vue-stripe-issuing-disclosure vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-issuing-disclosure-error vue-stripe-element-error">...</div>
-  <!-- the HTML element returned by stripe.createIssuingDisclosure() goes here -->
-  <div class="vue-stripe-issuing-disclosure-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-issuing-disclosure-loader vue-stripe-element-loader">...</div>
-</div>
-```
-
-The default styles ship in the package stylesheet (`import '@vue-stripe/vue-stripe/style.css'`).
+The root is `vue-stripe-issuing-disclosure`; Stripe's element goes into `vue-stripe-issuing-disclosure-mount`, and the `-error` and `-loader` children hold the slots. Each also carries the shared `vue-stripe-element*` class, styled by `@vue-stripe/vue-stripe/style.css`.
 
 ## TypeScript
 
 ```ts
-import { VueStripeIssuingDisclosure } from '@vue-stripe/vue-stripe'
 import type { IssuingDisclosureOptions, DisclosureError } from '@vue-stripe/vue-stripe'
-
-const options: IssuingDisclosureOptions = {
-  issuingProgramID: 'iprg_123',
-  publicCardProgramName: 'Rocket Card',
-  learnMoreLink: 'https://example.com/card'
-}
-
-const handleError = (error: DisclosureError) => console.error(error.message)
 ```
 
-`stripe.createIssuingDisclosure()` is not in the Stripe.js 10.0.0 type definitions; React Stripe.js 7 calls it the same way. If the loaded Stripe.js has no such method, the component emits `@error` with `{ message: 'stripe.createIssuingDisclosure() is not available in this Stripe.js version' }`.
+If the loaded Stripe.js has no `createIssuingDisclosure`, `@error` receives `{ message: 'stripe.createIssuingDisclosure() is not available in this Stripe.js version' }`.
 
 ## See Also
 
-- [VueStripeFinancialAccountDisclosure](/api/components/stripe-financial-account-disclosure)
-- [VueStripeTreasuryDisclosure](/api/components/stripe-treasury-disclosure)
-- [VueStripeProvider](/api/components/stripe-provider) - Loads Stripe.js
+- [VueStripeFinancialAccountDisclosure](/api/components/stripe-financial-account-disclosure): the disclosure for financial accounts
+- [VueStripeProvider](/api/components/stripe-provider): loads Stripe.js

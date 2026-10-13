@@ -1,59 +1,19 @@
 ---
 description: "VueStripeTreasuryDisclosure reference: render the legal disclosure Stripe requires for Treasury financial accounts in a Vue app, via createTreasuryDisclosure."
+canonical: /api/components/stripe-financial-account-disclosure
 ---
 
 # VueStripeTreasuryDisclosure
 
-Renders the legal disclosure Stripe requires for Treasury financial accounts. It is the Vue port of React Stripe.js 7's `TreasuryDisclosure`: it calls `stripe.createTreasuryDisclosure(options)` and mounts the HTML element Stripe.js returns. Vue Stripe does not ship any legal text of its own.
-
-::: warning Account requirement
-Stripe answers with an error unless your account has onboarded to Treasury. In a sandbox account without it, Stripe returns an `invalid_request_error` ("Unrecognized request URL (GET: /v1/disclosures/...)"), which this component emits through `@error` and shows in the `#error` slot.
-:::
-
-::: info No live demo
-The docs' live demos run on an account that has not onboarded to Treasury, so this disclosure has no live demo.
-:::
+The financial account disclosure under the product's former name, Stripe Treasury. It calls `stripe.createTreasuryDisclosure(options)` where [VueStripeFinancialAccountDisclosure](/api/components/stripe-financial-account-disclosure) calls `stripe.createFinancialAccountDisclosure(options)`; the options, events, slots and exposed members are the same, so that page is the full reference. It is the Vue port of React Stripe.js 7's `TreasuryDisclosure`, which React Stripe.js documents with the same options as `FinancialAccountDisclosure`.
 
 ## Usage
 
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeTreasuryDisclosure
-      :options="options"
-      @load="onLoad"
-      @error="onError"
-    />
+    <VueStripeTreasuryDisclosure :options="{ businessName: 'Rocket Rides' }" />
   </VueStripeProvider>
-</template>
-
-<script setup>
-import { VueStripeProvider, VueStripeTreasuryDisclosure } from '@vue-stripe/vue-stripe'
-import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const options = {
-  businessName: 'Rocket Rides',
-  learnMoreLink: 'https://example.com/treasury'
-}
-
-const onLoad = () => console.log('Disclosure rendered')
-const onError = (error) => console.error(error.message)
-</script>
-```
-
-Like the React component, it also accepts a `stripe` prop (a `Stripe` instance, a Promise of one, or `null`), so it works without `VueStripeProvider`:
-
-```vue
-<script setup>
-// The library re-exports Stripe.js' loadStripe
-import { loadStripe, VueStripeTreasuryDisclosure } from '@vue-stripe/vue-stripe'
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
-</script>
-
-<template>
-  <VueStripeTreasuryDisclosure :stripe="stripePromise" />
 </template>
 ```
 
@@ -61,79 +21,18 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `stripe` | `Stripe \| PromiseLike<Stripe \| null> \| null` | No | Stripe instance to use. Defaults to the one from the surrounding `VueStripeProvider`; without either, the component throws `VueStripeProviderError`. While it is `null` nothing is requested |
-| `options` | `TreasuryDisclosureOptions` | No | Disclosure options (below) |
-
-### Options
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `businessName` | `string` | Your business name as it should appear in the disclosure. Inferred from the Stripe account when omitted |
-| `learnMoreLink` | `string` | A supplemental link where your users can learn more |
-
-```ts
-interface TreasuryDisclosureOptions {
-  businessName?: string
-  learnMoreLink?: string
-}
-```
-
-Changing an option requests the disclosure again and replaces the rendered text. Re-renders with equal option values (an inline `:options="{ ... }"`) do not.
+| `stripe` | `Stripe \| PromiseLike<Stripe \| null> \| null` | No | As on VueStripeFinancialAccountDisclosure |
+| `options` | `TreasuryDisclosureOptions` | No | `businessName` and `learnMoreLink`, as on VueStripeFinancialAccountDisclosure |
 
 ## Events
 
-| Event | Payload | Description |
-|-------|---------|-------------|
-| `@load` | - | Emitted after the disclosure content is mounted (React `onLoad`) |
-| `@error` | `StripeError \| { message: string }` | Emitted when Stripe returns an error, or `{ message }` when the call fails (React `onError`) |
-
-## Slots
-
-| Slot | Slot Props | Description |
-|------|-----------|-------------|
-| `#loading` | - | Rendered while the disclosure loads (default: "Loading disclosure...") |
-| `#error` | `{ error: string }` | Rendered when the disclosure could not be created |
+`@load` and `@error`, with the same payloads as VueStripeFinancialAccountDisclosure. The `#loading` and `#error` slots are the same too.
 
 ## Exposed Properties
 
 | Member | Type | Description |
 |--------|------|-------------|
-| `loading` | `Ref<boolean>` | `true` until the disclosure is mounted or fails |
-| `error` | `Ref<string \| null>` | Current error message |
+| `loading` | `Ref<boolean>` | `true` while the request is pending |
+| `error` | `Ref<string \| null>` | Error message, or `null` |
 
-## Styling
-
-```html
-<div class="vue-stripe-treasury-disclosure vue-stripe-element">
-  <!-- only when there is an error (#error slot) -->
-  <div class="vue-stripe-treasury-disclosure-error vue-stripe-element-error">...</div>
-  <!-- the HTML element returned by stripe.createTreasuryDisclosure() goes here -->
-  <div class="vue-stripe-treasury-disclosure-mount vue-stripe-element-mount"></div>
-  <!-- only while loading (#loading slot) -->
-  <div class="vue-stripe-treasury-disclosure-loader vue-stripe-element-loader">...</div>
-</div>
-```
-
-The default styles ship in the package stylesheet (`import '@vue-stripe/vue-stripe/style.css'`).
-
-## TypeScript
-
-```ts
-import { VueStripeTreasuryDisclosure } from '@vue-stripe/vue-stripe'
-import type { TreasuryDisclosureOptions, DisclosureError } from '@vue-stripe/vue-stripe'
-
-const options: TreasuryDisclosureOptions = {
-  businessName: 'Rocket Rides',
-  learnMoreLink: 'https://example.com/treasury'
-}
-
-const handleError = (error: DisclosureError) => console.error(error.message)
-```
-
-`stripe.createTreasuryDisclosure()` is not in the Stripe.js 10.0.0 type definitions; React Stripe.js 7 calls it the same way. If the loaded Stripe.js has no such method, the component emits `@error` with `{ message: 'stripe.createTreasuryDisclosure() is not available in this Stripe.js version' }`.
-
-## See Also
-
-- [VueStripeFinancialAccountDisclosure](/api/components/stripe-financial-account-disclosure)
-- [VueStripeIssuingDisclosure](/api/components/stripe-issuing-disclosure)
-- [VueStripeProvider](/api/components/stripe-provider) - Loads Stripe.js
+The root class is `vue-stripe-treasury-disclosure`. Types: `TreasuryDisclosureOptions`, `DisclosureError`. Without `stripe.createTreasuryDisclosure` in the loaded Stripe.js, `@error` gets `{ message: 'stripe.createTreasuryDisclosure() is not available in this Stripe.js version' }`.
