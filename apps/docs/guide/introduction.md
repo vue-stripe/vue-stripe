@@ -1,97 +1,74 @@
-# Introduction
+# About Vue Stripe
 
-Vue Stripe is a Vue.js library that wraps [Stripe.js](https://stripe.com/docs/js) and [Stripe Elements](https://stripe.com/docs/payments/elements) into Vue components and composables.
+Vue Stripe is a Vue library for the browser side of a Stripe integration. It wraps [Stripe.js](https://docs.stripe.com/js) 10 (the Endive release) in Vue components and composables. Components cover Stripe's Elements and its embedded Checkout UIs. Composables cover the Stripe.js methods that confirm payments, create tokens and run next actions. One build runs on Vue 3 and Vue 2.7.
 
-## What is Stripe Elements?
+This page explains what the library covers, what it leaves to you, and why it is built the way it is. To start building, take the [first test payment tutorial](/guide/first-payment) or go straight to the [installation guide](/guide/installation).
 
-Stripe Elements are pre-built UI components that help you collect payment information securely. Instead of building payment forms from scratch, you use Stripe's components that:
+## What Vue Stripe wraps
 
-- **Handle sensitive data securely** - Card numbers never touch your servers
-- **Support 100+ payment methods** - Cards, wallets, bank transfers, and more
-- **Adapt to your customer's location** - Show relevant payment methods automatically
-- **Look professional** - Pre-styled and customizable
+Stripe.js is the script Stripe hosts at `js.stripe.com`. It renders the payment fields inside Stripe-hosted iframes and talks to Stripe's API with your publishable key. Using it from Vue directly means a lot of glue code. You load the script once, keep a `Stripe` instance and an Elements group somewhere your components can reach, mount each element into a DOM node after render, attach and detach event listeners, call `update()` when options change, `destroy()` on unmount, and track loading and error state for every call a button makes.
 
-## What does Vue Stripe provide?
+Vue Stripe does that glue work and nothing more. The objects stay Stripe's own:
 
-Vue Stripe bridges the gap between Stripe.js and Vue.js by providing:
+- `VueStripeProvider` holds the `Stripe` instance that `loadStripe()` returns.
+- `VueStripeElements` holds the Elements group that `stripe.elements()` returns.
+- Each element component, such as `VueStripePaymentElement`, holds one element that `elements.create()` returns.
+- Each composable, such as `usePaymentIntent()` or `useConfirmCardPayment()`, wraps one Stripe.js method and adds `loading` and `error` refs.
 
-### 1. Vue Components
-Instead of manually creating and mounting Stripe elements, you use Vue components:
+Because the components follow Stripe's object model, Stripe's own documentation still applies. An option Stripe documents for `elements.create('payment', options)` goes in the Payment Element's `options` prop. A result Stripe documents for `stripe.confirmPayment()` is what `confirmPayment()` resolves to. The types come from `@stripe/stripe-js`, and the library re-exports the ones its components and composables use.
 
-```vue
-<!-- Without Vue Stripe -->
-<script>
-const stripe = await loadStripe('pk_test_...')
-const elements = stripe.elements()
-const paymentElement = elements.create('payment')
-paymentElement.mount('#payment-element')
-</script>
-<template>
-  <div id="payment-element"></div>
-</template>
+Every element and method in Stripe.js 10 has a component or composable. The [Stripe.js coverage page](/coverage) maps each one to its wrapper, and the [reference](/api/) documents every export.
 
-<!-- With Vue Stripe -->
-<template>
-  <VueStripeProvider :publishable-key="pk">
-    <VueStripeElements :client-secret="secret">
-      <VueStripePaymentElement />
-    </VueStripeElements>
-  </VueStripeProvider>
-</template>
-```
+## What it leaves to you
 
-### 2. Reactive Composables
-Access Stripe instances with Vue's reactivity:
+Vue Stripe runs only in the browser. Everything that needs your secret key happens on your server, with Stripe's server library or the API:
 
-```js
-import { watch } from 'vue'
-import { useStripe } from '@vue-stripe/vue-stripe'
+- creating PaymentIntents, SetupIntents, Checkout Sessions and Customers,
+- confirming on the server, when you choose that flow,
+- receiving webhooks and fulfilling orders.
 
-const { stripe, loading, error } = useStripe()
+The guides show server code next to the Vue code where a flow needs it. [Payment objects](/guide/payment-objects) explains what each server-side object is for, and [What runs where](/guide/security) explains which key and which secret belong on which side.
 
-// stripe.value is reactive - use in templates or watchers
-watch(stripe, (newStripe) => {
-  if (newStripe) {
-    console.log('Stripe ready!')
-  }
-})
-```
+Vue Stripe has no payment UI of its own, either. Stripe renders the fields, and the [Appearance API](/api/components/stripe-elements#appearance-api) styles them. The library only adds a thin wrapper around each element for its loading and error states. That wrapper is styled by a small stylesheet, `@vue-stripe/vue-stripe/style.css`, which you import once.
 
-### 3. Vue 3 and Vue 2.7
-One build runs on Vue 3 and Vue 2.7 (through [vue-demi](https://github.com/vueuse/vue-demi)); CI mounts it on both. See [Installation](/guide/installation#vue-2-7) for the Vue 2.7 setup.
+## Design choices
 
-### 4. All of Stripe.js
-Every Stripe.js 10 element and method has a component or composable (see the [coverage page](/coverage)), so your components never reach for the raw `stripe` object:
+### Providers and composables, not a global object
 
-| Area | What Vue Stripe gives you |
-|------|---------------------------|
-| Elements | [Payment](/guide/payment-element), [Express Checkout](/guide/express-checkout), [Card](/guide/card-element) (single or split), [Address](/guide/address-element), [Link Authentication](/guide/link-authentication), [Payment Method Messaging](/guide/payment-method-messaging), [IBAN](/guide/iban-element), [AU BECS](/guide/au-bank-account-element), [Contact Details](/api/components/stripe-contact-details-element), [Tax ID](/api/components/stripe-tax-id-element), [Currency Selector](/api/components/stripe-currency-selector-element), [Terms](/api/components/stripe-terms-element) and [Link Signup](/api/components/stripe-link-signup-element) |
-| Checkout | [Hosted Checkout](/guide/checkout) redirect, [Embedded Checkout](/guide/embedded-checkout), [Custom Checkout](/guide/custom-checkout) on a Checkout Session, the [Checkout Form](/guide/checkout-form) (beta) and the [Pricing Table](/guide/pricing-table) |
-| Confirming | [`usePaymentIntent`](/api/composables/use-payment-intent), [`useSetupIntent`](/api/composables/use-setup-intent), one [`useConfirm<Method>`](/api/composables/confirm/) composable per payment method, [`useHandleNextAction`](/api/composables/use-handle-next-action): see [Confirming Payments](/guide/confirming-payments) |
-| Tokens | [`useCreateConfirmationToken`](/api/composables/use-create-confirmation-token), [`useCreatePaymentMethod`](/api/composables/use-create-payment-method), [`useCreateToken`](/api/composables/use-create-token), [`useRadarSession`](/api/composables/use-radar-session): see [Tokens and Payment Methods](/guide/tokens) |
-| Beyond payments | [Financial Connections](/api/composables/use-financial-connections), [Identity](/api/composables/use-identity), the [Payment Request API](/api/composables/use-payment-request), [Issuing Elements](/guide/issuing) and the Issuing, Treasury and Financial Account [disclosures](/api/components/stripe-issuing-disclosure) |
-| App setup | [`VueStripeProvider`](/api/components/stripe-provider) per page, or the [`createVueStripe()`](/api/plugin) plugin for the whole app |
+Stripe state lives in Vue's provide/inject tree. A provider supplies the `Stripe` instance, an Elements provider supplies the group, and components and composables below them inject what they need. This keeps several Stripe accounts or Elements groups on one page apart, and it matches how Stripe scopes its own objects. An element belongs to one group, and `confirmPayment()` confirms what that group collected. [How Vue Stripe works](/guide/architecture) follows the chain in detail.
 
-## How this guide is structured
+For apps that use Stripe on many pages, the [`createVueStripe()`](/api/plugin) plugin provides the `Stripe` instance app-wide instead. [Choosing an integration](/guide/approaches#plugin-or-provider) compares the two.
 
-This documentation is organized to build your knowledge progressively:
+### A composable for every call
 
-1. **Installation** - Set up the library in your project (Vue 3, Vue 2.7, Nuxt)
-2. **Your First Payment** - Build a working payment form
-3. **Understanding the Architecture** - Learn how components work together
-4. **Choosing Your Approach** - Pick the right elements or Checkout flavor for your use case
-5. **Building Payment Forms** - Deep dive into each element
-6. **Payment Flows** - Confirming payments, tokens, and server-side confirmation
-7. **Checkout and Advanced** - Saving payment methods, Checkout Sessions, Issuing
+You could call methods on the raw `stripe` object from `useStripe()`. The composables exist because almost every call needs the same extras. A Pay button needs a `loading` flag to disable itself and an `error` message to show. The Payment Element needs `elements.submit()` to run before `confirmPayment()`. The call needs the Elements group from the nearest provider. The composables do this the same way everywhere, so a component never has to hold the raw instance.
 
-Every flow you can try in this site's sandbox is on the [Live Demo](/live-demo/) pages.
+The method composables pass their arguments to Stripe.js unchanged and return Stripe's result unchanged. Stripe's documentation for `stripe.confirmSepaDebitPayment()` is the documentation for `useConfirmSepaDebitPayment()`.
 
-## Prerequisites
+### Stripe.js loads only when needed
 
-Before you begin, you should:
+The library imports Stripe.js through the `@stripe/stripe-js/pure` entry, so importing Vue Stripe loads nothing. Stripe.js is requested when the first provider mounts, and providers that mount together share one load. [How Stripe.js is loaded](/guide/stripe-js-loading) explains the reasons and the trade-offs, including Stripe's advanced fraud signals.
 
-- Have a [Stripe account](https://dashboard.stripe.com/register) (test mode is fine)
-- Know the basics of Vue.js (components, props, events)
-- Have a Vue 3 or Vue 2.7 project set up
+### One build for Vue 3 and Vue 2.7
 
-Ready? Let's [install the library](/guide/installation).
+Every component is a render function written against [vue-demi](https://github.com/vueuse/vue-demi), with no single-file components in the library. vue-demi resolves to Vue 3 or Vue 2.7 at install time, so one published build serves both. CI mounts that build on Vue 2.7 to check it. Vue 2.6 and older are not supported, because the components rely on APIs that arrived in 2.7. See [Installation](/guide/installation#vue-2-7) for the Vue 2.7 setup.
+
+### Stripe objects stay out of Vue's reactivity
+
+The `Stripe` instance, the Elements group and each element are held in shallow refs and never made deeply reactive. Vue's proxies would wrap Stripe's internal state, so an element passed back to Stripe would no longer be the object Stripe created. The composables return these objects through `computed()` rather than `readonly()` for the same reason: on Vue 2.7, `readonly()` copies plain objects.
+
+### Errors that name the missing piece
+
+Using a component or composable outside the provider it needs throws a typed error that names the wrapper it expected (`VueStripeProviderError`, `VueStripeElementsError` or `VueStripeCheckoutError`). Every console message from the library starts with `[Vue Stripe]`, so its messages are easy to tell apart from Stripe.js's.
+
+## Relation to Stripe.js versions
+
+Stripe ships Stripe.js in named release trains, and each major version of `@stripe/stripe-js` loads one train. Vue Stripe 6 requires `@stripe/stripe-js` 10, which loads Endive. When Stripe removes an element or a method in a new train, Vue Stripe removes its wrapper in the matching major release, because there is nothing left to wrap. [Stripe.js versions](/guide/stripe-js-versions) covers what Clover, Dahlia and Endive changed, and why some v5 components are gone.
+
+## Where to go next
+
+- [Take your first test payment](/guide/first-payment): the tutorial, start to finish.
+- [How-to guides](/guide/): one page per task.
+- [Reference](/api/): every component, composable and type.
+- [How Vue Stripe works](/guide/architecture) and [Choosing an integration](/guide/approaches): the rest of the explanation.
+- [Live demos](/live-demo/): every flow running against Stripe's test mode.

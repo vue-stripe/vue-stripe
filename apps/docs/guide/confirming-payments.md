@@ -1,140 +1,85 @@
-# Confirming Payments
+# How confirming works
 
-Collecting payment details is half of a payment; the other half is **confirming** the PaymentIntent or SetupIntent with them. Vue Stripe has a composable for every way Stripe.js confirms, so a component never needs the raw `stripe` instance for it. This page helps you pick the right one.
+Collecting payment details is half of a payment. The other half is **confirming**: telling Stripe to attach those details to a PaymentIntent or SetupIntent and try the payment. This page explains what happens during that step, why the Payment Element has to be submitted first, what redirects and next actions are, and why some payment methods are still undecided when confirmation returns.
 
-## Which Composable?
+## What confirming does
 
-| You collect details with | Confirm with | Live demo |
-|--------------------------|--------------|-----------|
-| The Payment Element | [`usePaymentIntent().confirmPayment`](/api/composables/use-payment-intent), [`useSetupIntent().confirmSetup`](/api/composables/use-setup-intent) | [Payment Element](/live-demo/payment-element), [Save a Card](/live-demo/setup-intent) |
-| A Checkout Session (`ui_mode: 'elements'`) | [`useCheckoutSession().confirm`](/api/composables/use-checkout-session) | [Custom Checkout](/live-demo/custom-checkout) |
-| The Checkout Form (`ui_mode: 'form'`) | [`useCheckoutForm().confirm`](/api/composables/use-checkout-form) | [Checkout Form](/live-demo/checkout-form) |
-| The Card, IBAN or BECS element, Stripe's bank modal, or a saved PaymentMethod ID | A [method confirmer](/api/composables/confirm/): `useConfirmCardPayment`, `useConfirmSepaDebitPayment`, `useConfirmAuBecsDebitPayment`, `useConfirmUsBankAccountPayment`, ... | [Card Element](/live-demo/card-element), [SEPA](/live-demo/iban-element), [BECS](/live-demo/becs-payment), [ACH](/live-demo/ach-debit) |
-| Anything, and your **server** confirms | [`useCreateConfirmationToken`](/api/composables/use-create-confirmation-token) to collect, then [`useHandleNextAction`](/api/composables/use-handle-next-action) for 3D Secure | [Tokens](/live-demo/tokens) |
+A PaymentIntent starts out without a payment method. Confirming gives it one (from an element, a saved PaymentMethod or a ConfirmationToken) and asks Stripe to collect the money. Stripe then moves the Intent to its next status:
 
-Every composable returns `loading` and `error` refs next to its method, so the button state and the error message need no extra code.
+- `succeeded`: the money is collected (or, for a SetupIntent, the payment method is ready for later use).
+- `requires_action`: the customer has to do something first, such as 3D Secure or paying a voucher.
+- `processing`: the payment method takes time to settle, as bank debits do.
+- `requires_capture`: the payment is authorized and waits for your server to capture it.
+- `requires_payment_method`: the attempt failed, and the customer can try again with other details.
 
-## Payment Element: `usePaymentIntent` and `useSetupIntent`
+[Payment objects](/guide/payment-objects#the-life-of-a-paymentintent) follows these statuses in detail. What matters here is that a confirm call can end in any of them. Only `succeeded` means the money is collected.
 
-One call covers every payment method the Payment Element shows. `confirmPayment` runs `elements.submit()` first (Stripe requires it) and reads the Elements group from the nearest `VueStripeElements`:
+## Which composable confirms
 
-```vue
-<!-- PayButton.vue: rendered inside <VueStripeElements> -->
-<script setup lang="ts">
-import { usePaymentIntent } from '@vue-stripe/vue-stripe'
+What you collect with decides which composable confirms. Every one of them returns `loading` and `error` refs next to its method:
 
-const props = defineProps<{ clientSecret: string }>()
-const { confirmPayment, loading, error } = usePaymentIntent()
+| You collect details with | Confirm with |
+|--------------------------|--------------|
+| The Payment Element in `VueStripeElements` | [`usePaymentIntent().confirmPayment`](/api/composables/use-payment-intent) or [`useSetupIntent().confirmSetup`](/api/composables/use-setup-intent) |
+| Elements in a Checkout Session (`ui_mode: 'elements'`) | [`useCheckoutSession().confirm`](/api/composables/use-checkout-session) |
+| The Checkout Form (`ui_mode: 'form'`) | [`useCheckoutForm().confirm`](/api/composables/use-checkout-form) |
+| A single-purpose element (Card, IBAN, BECS), Stripe's bank modal, or a saved PaymentMethod | The [method confirmer](/api/composables/confirm/) for that payment method, such as `useConfirmCardPayment` or `useConfirmSepaDebitPayment` |
+| Any of the above, with your **server** confirming | [`useCreateConfirmationToken`](/api/composables/use-create-confirmation-token), then [`useHandleNextAction`](/api/composables/use-handle-next-action) if Stripe asks for an action |
 
-const pay = async () => {
-  const { paymentIntent } = await confirmPayment({
-    clientSecret: props.clientSecret,
-    confirmParams: { return_url: `${window.location.origin}/complete` },
-    // Cards stay on the page; bank redirects and some wallets still leave.
-    redirect: 'if_required'
-  })
-  if (paymentIntent?.status === 'succeeded') {
-    // show the receipt
-  }
-}
-</script>
+The Payment Element and the Checkout Sessions handle every payment method they show through one call. Stripe.js also has a separate confirm method for each payment method, such as `confirmCardPayment` or `confirmSepaDebitSetup`. Vue Stripe wraps all 46 of them as method confirmers. They exist for integrations that collect one payment method with its own element or form, or that charge a PaymentMethod saved earlier with no element at all. They take Stripe's arguments unchanged, so Stripe's documentation for each method applies as written.
 
-<template>
-  <button :disabled="loading" @click="pay">Pay</button>
-  <p v-if="error">{{ error }}</p>
-</template>
-```
+## Why the Payment Element is submitted first
 
-`useSetupIntent().confirmSetup` works the same way for saving a payment method. Pass `skipSubmit: true` only when you already called `submit()` from [`useStripeElements()`](/api/composables/use-stripe-elements) yourself, for example to validate before creating the Intent on your server.
+Stripe requires `elements.submit()` before it confirms details from the Payment Element (and before it creates a ConfirmationToken). Submitting validates every element in the group and shows field errors inline. It also collects what some payment methods need at the moment of the click, such as a wallet's payment sheet, which browsers allow only in direct response to a user gesture.
 
-## One Payment Method: the Method Confirmers
+`usePaymentIntent()`, `useSetupIntent()` and `useCreateConfirmationToken()` call `submit()` for you, then confirm. If validation fails, they return the validation error as `{ error }` and don't confirm. You opt out with `skipSubmit: true` only when your own code already submitted. The usual reason is the deferred-Intent flow: submit the form, then ask your server to create the Intent, then confirm. Submitting first means the customer sees validation errors before your server does any work.
 
-Stripe.js has a `confirm<Method>Payment` / `confirm<Method>Setup` method for each payment method, and Vue Stripe wraps all 46 of them: `useConfirmCardPayment`, `useConfirmSepaDebitSetup`, `useConfirmKlarnaPayment`, and so on. Use them with the single-purpose elements, with a PaymentMethod you saved earlier, or with a button for one payment method.
+## Redirects
 
-Pass the element itself, which every element component exposes on its template ref:
+Some payment methods can't finish inside your page. Bank redirects such as iDEAL or Bancontact send the customer to their bank, and some wallets and buy-now-pay-later methods open the provider's own page. After the customer approves, Stripe sends the browser to the `return_url` you passed in `confirmParams`. It adds the Intent's ID, its client secret and a `redirect_status` to the URL.
 
-```vue
-<!-- CardPayment.vue: rendered inside <VueStripeElements> -->
-<script setup lang="ts">
-import { ref } from 'vue'
-import { VueStripeCardElement, useConfirmCardPayment } from '@vue-stripe/vue-stripe'
+Stripe.js's `redirect` option decides what happens for payment methods that don't need to leave:
 
-const props = defineProps<{ clientSecret: string }>()
-const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
-const { confirmCardPayment, loading, error } = useConfirmCardPayment()
+- `'if_required'` (Vue Stripe's default) keeps the customer on your page when the payment method allows it. The promise resolves with the Intent, so your code shows the result.
+- `'always'` sends every customer to `return_url`, even after a card payment. The page that `return_url` loads shows the result for every payment method.
 
-const pay = async () => {
-  const card = cardRef.value?.element
-  if (!card) return
-  // Runs 3D Secure in a modal when the card needs it.
-  const { paymentIntent } = await confirmCardPayment(props.clientSecret, {
-    payment_method: { card, billing_details: { name: 'Jenny Rosen' } }
-  })
-  return paymentIntent?.status
-}
-</script>
+With `'if_required'` you still need a `return_url` page, because some payment methods always redirect. That page reads the client secret from its URL and retrieves the Intent, for example with `usePaymentIntent().retrievePaymentIntent()`, before it shows a result. Checkout Sessions work the same way: `useCheckoutSession().confirm()` redirects to the session's return URL after success unless you pass `redirect: 'if_required'`.
 
-<template>
-  <VueStripeCardElement ref="cardRef" />
-  <button :disabled="loading" @click="pay">Pay</button>
-  <p v-if="error">{{ error }}</p>
-</template>
-```
+A redirect means the confirming page is gone when the payment finishes, so code after the `await` may never run. Don't put order fulfilment there. Fulfil from a webhook, which arrives whether or not the customer comes back.
 
-From a component that does not render the element, `getElement('card')` from [`useStripeElements()`](/api/composables/use-stripe-elements) finds it in the same Elements group. A saved PaymentMethod needs no element at all: `confirmCardPayment(clientSecret, { payment_method: 'pm_123' })`.
+## Next actions
 
-The confirmers take Stripe's own arguments and return Stripe's own result, typed from `@stripe/stripe-js`. The [method confirmer overview](/api/composables/confirm/) lists every family: cards, bank debits, redirects and bank transfers, wallets, buy now pay later, and vouchers.
+A bank can ask for more before it approves a payment. The most common case is 3D Secure authentication for a card. When confirmation runs in the browser, Stripe.js handles this inside the confirm call: it opens the bank's challenge in a modal, waits, and resolves with the final status. Your code sees one `await`.
 
-## Bank Accounts: Collect, Then Confirm
+When your server confirms, there is no browser call for Stripe to hold open. The Intent comes back to your server as `requires_action`. Your server sends its client secret to the browser, and [`useHandleNextAction`](/api/composables/use-handle-next-action) runs the same challenge there. [Confirm payments on your server](/guide/tokens#confirmationtoken-confirm-on-your-server) shows the whole round trip.
 
-ACH Direct Debit and Canadian pre-authorized debits link the bank account in Stripe's Financial Connections modal instead of an element. Collect with [`useFinancialConnections()`](/api/composables/use-financial-connections), then confirm with the method confirmer once the customer accepts the mandate:
+[`useHandleCardAction`](/api/composables/use-handle-card-action) belongs to Stripe's older manual-confirmation flow (`confirmation_method: 'manual'`), where the server confirms a second time after 3D Secure. It remains for existing integrations. New ones use `useHandleNextAction`.
 
-```ts
-const { collectBankAccountForPayment } = useFinancialConnections()
-const { confirmUsBankAccountPayment } = useConfirmUsBankAccountPayment()
+## Payment methods that settle later
 
-// 1. Stripe's modal links the account and attaches it to the PaymentIntent
-const { paymentIntent } = await collectBankAccountForPayment({
-  clientSecret,
-  params: {
-    payment_method_type: 'us_bank_account',
-    payment_method_data: { billing_details: { name, email } }
-  }
-})
+For a card, the bank answers within seconds, and confirmation returns `succeeded` or a decline. Other payment methods don't answer that quickly:
 
-// 2. After the customer accepts the mandate text
-if (paymentIntent?.status === 'requires_confirmation') {
-  await confirmUsBankAccountPayment(clientSecret) // 'processing' until the debit clears
-}
-```
+- **Bank debits** (SEPA Direct Debit, BECS Direct Debit, ACH Direct Debit) return `processing`. The debit is submitted to the banking network, and Stripe learns whether it succeeded only days later.
+- **Vouchers** (OXXO, Boleto, Konbini) return `requires_action` with instructions for paying in cash or online. The Intent waits until the customer pays, or until the voucher expires.
+- **ACH with micro-deposits**: when the customer types account details instead of logging in to their bank, Stripe sends two small deposits. The Intent waits until the customer enters the amounts through [`useVerifyMicrodepositsForPayment`](/api/composables/use-verify-microdeposits-for-payment).
 
-When the customer types the account number instead of logging in to the bank, Stripe verifies it with two micro-deposits. Collect the amounts on a page of your own and pass them to [`useVerifyMicrodepositsForPayment`](/api/composables/use-verify-microdeposits-for-payment) (or [`...ForSetup`](/api/composables/use-verify-microdeposits-for-setup)). Try the whole flow in the [ACH Direct Debit demo](/live-demo/ach-debit).
+For these methods, a successful confirm call means "accepted for processing", not "paid". Show the customer that the payment is on its way, and act on the `payment_intent.succeeded` or `payment_intent.payment_failed` webhook. [Payment objects](/guide/payment-objects#payments-that-settle-later) explains why settlement takes time and what mandates are for.
 
-## Confirming on the Server
+ACH Direct Debit and Canadian pre-authorized debits also differ in how the details are collected. The bank account is linked in Stripe's Financial Connections modal ([`useFinancialConnections`](/api/composables/use-financial-connections)) instead of an element. The customer then accepts a mandate, and only then is the Intent confirmed with `useConfirmUsBankAccountPayment`. The [ACH Direct Debit demo](/live-demo/ach-debit) runs the whole flow.
 
-Some integrations confirm on the server: to run their own checks before charging, or to call other services in between. The browser then collects the details and finishes any action the bank asks for:
+## Two error styles
 
-1. [`useCreateConfirmationToken`](/api/composables/use-create-confirmation-token) submits the Payment Element and returns a ConfirmationToken.
-2. Your server creates and confirms the PaymentIntent with `confirmation_token`.
-3. If the PaymentIntent comes back `requires_action`, [`useHandleNextAction`](/api/composables/use-handle-next-action) runs 3D Secure (or any other action) with its client secret.
+The composables report failures in one of two ways, and the difference follows what each one wraps.
 
-The [Tokens and Payment Methods guide](/guide/tokens#confirmationtoken-confirm-on-your-server) walks through it with server code.
+`usePaymentIntent`, `useSetupIntent`, `useCreatePaymentMethod`, `useHandleNextAction`, `useFinancialConnections` and `useIdentity` do more than pass a call through: they submit the form, choose an Elements group or check for the Stripe instance. They always **resolve**. A decline, a validation error, a missing Stripe instance and a thrown exception all come back as `{ error }`, so one `if (result.error)` check covers every failure.
 
-[`useHandleCardAction`](/api/composables/use-handle-card-action) belongs to the older manual-confirmation flow (`confirmation_method: 'manual'`), where the server confirms a second time after 3D Secure. Keep it for an existing integration; new ones use `useHandleNextAction`.
+The method confirmers and the other single-method composables (`useCreateToken`, `useCreateConfirmationToken`, `useHandleCardAction`, `useVerifyMicrodeposits*`, `useRadarSession`, `useEphemeralKeyNonce`) are thin wrappers that behave like the Stripe.js method they wrap. A decline resolves as `{ error }`, as it does in Stripe.js. Something Stripe.js throws, such as an invalid argument, **rejects**, and so does a call made before Stripe.js has loaded. Both cases also set the composable's `error` ref.
 
-## Results and Errors
+Either way, the `error` ref holds the latest message, so a template can show it without inspecting results. Inside `VueStripeProvider`, Stripe.js has always loaded by the time your component renders, so a "not loaded" error only happens in code outside it or with the plugin before the load finishes. The [method confirmer reference](/api/composables/confirm/#return-value) lists the exact contract.
 
-Every confirm method resolves to Stripe's result: `{ paymentIntent }` / `{ setupIntent }` or `{ error }`. Check `error` on the result, or bind the composable's `error` ref in the template:
+## Related pages
 
-| Composable | Stripe.js not loaded or Stripe.js throws |
-|------------|------------------------------------------|
-| `usePaymentIntent`, `useSetupIntent`, `useHandleNextAction`, `useFinancialConnections` | Resolves to `{ error: { message } }`, so one `if (result.error)` check covers every failure. |
-| Method confirmers, `useCreateToken`, `useCreateConfirmationToken`, `useHandleCardAction`, `useVerifyMicrodeposits*` | Rejects (after setting `error`), like the Stripe.js method it wraps. |
-
-Inside a `VueStripeProvider`, Stripe.js has always loaded by the time your component renders, so the first case only matters for code that runs outside it.
-
-## Next Steps
-
-- [Method confirmers](/api/composables/confirm/): every `useConfirm<Method>` composable
-- [Tokens and Payment Methods](/guide/tokens): collect now, charge later or on the server
-- [Saving Payment Methods](/guide/setup-intent): SetupIntents and `useSetupIntent`
+- [Accept a payment with the Payment Element](/guide/payment-element): `usePaymentIntent` in a working form.
+- [Confirm payments on your server](/guide/tokens): ConfirmationTokens and `useHandleNextAction`.
+- [Save a payment method for later](/guide/setup-intent): `useSetupIntent`.
+- [Method confirmers](/api/composables/confirm/): every `useConfirm<Method>` composable.
