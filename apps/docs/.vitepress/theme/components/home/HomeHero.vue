@@ -26,7 +26,7 @@ import GitHubStarsCTA from '../GitHubStarsCTA.vue'
       </p>
 
       <div class="hero-actions">
-        <a class="hero-btn is-brand" :href="withBase('/guide/introduction')">Get started</a>
+        <a class="hero-btn is-brand" :href="withBase('/guide/first-payment')">Get started</a>
         <a class="hero-btn is-alt" :href="withBase('/live-demo/')">Try the live demos</a>
         <GitHubStarsCTA />
       </div>
