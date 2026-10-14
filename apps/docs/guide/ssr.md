@@ -370,11 +370,36 @@ Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answe
 
    An unknown or mistyped `session_id` makes `retrieve()` throw. The route answers 404 with `createError()`, as the Express route does, so Nitro does not log it as an unhandled error, and the page shows its fallback message.
 
-   This page needs no Stripe.js, so it renders on the server. It works because the payment page is `checkout/index.vue` (step 5); next to a `checkout.vue` it would render as that page's child.
+   This page needs no Stripe.js, so it renders on the server. It works because the payment page is `checkout/index.vue` (step 5); next to a `checkout.vue` it would render as that page's child. With `nuxi generate`, turn off server rendering for it, as [Static hosting with `nuxi generate`](#static-hosting-with-nuxi-generate) explains.
 
 ### Render on the client only
 
 You don't have to, but if you prefer to send no Stripe markup from the server, wrap the form in `<ClientOnly>` (with a `#fallback` template) or move it into a component named `*.client.vue`.
+
+### Static hosting with `nuxi generate`
+
+`nuxi generate` prerenders every page into `.output/public` for a static host. The server routes are not part of it: `server/api/*` and `server/routes/*` run only in the server that `nuxi build` creates. On a static host `POST /api/payment-intent` answers 404, so the payment page shows "Could not start the payment", `/custom-checkout` shows "Checkout could not load: ... 404 Not Found", and Stripe's webhook events have nowhere to go.
+
+Without a server only the browser side works: Stripe.js loads, and `/payment-complete` reads the PaymentIntent in the browser. Everything that uses your secret key needs a server. Choose one:
+
+- **Keep the server.** Deploy with `nuxi build`: to a Node server, as in [step 2](#_2-configure-nuxt), or to a host that runs the server routes as serverless or edge functions, with that host's [deployment preset](https://nuxt.com/deploy).
+- **Run the server routes elsewhere.** Generate the site, and call the routes on your API server by their full URL: add `apiBase: ''` to `runtimeConfig.public`, set `NUXT_PUBLIC_API_BASE` to the API server's origin (such as `https://api.example.com`), and pass `baseURL: config.public.apiBase` to every `useFetch()` and `$fetch()` that calls it. The API server must allow your site's origin (CORS), build `return_url` from your site's URL instead of `getRequestURL(event)`, and receive the webhooks.
+
+`nuxi generate` reads `.env` and writes the `public` values, `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` among them, into the generated pages. Set them before you generate; changing them later needs a new `nuxi generate`.
+
+The Checkout Session return page needs one more change. `app/pages/checkout/complete.vue` reads the session while it renders. `nuxi generate` prerenders it once, without a `session_id`, writes "We could not check the payment status" into the HTML and its payload, and the browser shows that for every session, paid or not. Turn off server rendering for that page, so the browser renders it and reads the session itself:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  routeRules: {
+    '/checkout/complete': { ssr: false }
+  }
+  // ...css, runtimeConfig
+})
+```
+
+`nuxi generate` then writes an empty shell for `/checkout/complete`, and the page renders in the browser with the real `session_id`. Switching the page's `useFetch()` to `server: false` instead is not enough: a prerendered page hydrates at its prerendered URL, so `route.query.session_id` is still empty when the request starts.
 
 ## Quasar SSR
 
