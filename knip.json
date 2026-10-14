@@ -19,7 +19,9 @@
     "apps/backend": {
       "ignore": ["src/components/ui/**"]
     },
-    "apps/docs": {},
+    "apps/docs": {
+      "entry": [".vitepress/theme/data/*.data.ts"]
+    },
     "tools/browser-e2e": {
       "ignoreBinaries": ["cloudflared"]
     }
