@@ -131,17 +131,23 @@ The `appearance` prop (or `options.appearance`) themes every element in the grou
 Custom fonts load through `fonts` (or `options.fonts`): pass `{ cssSrc }` for a stylesheet or `{ family, src, weight, style }` for a font file, then name the family in `variables.fontFamily`:
 
 ```vue
+<!-- Rendered inside VueStripeProvider -->
 <script setup lang="ts">
-const fonts = [{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]
+import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
+import type { CssFontSource } from '@vue-stripe/vue-stripe'
+
+defineProps<{ clientSecret: string }>()
+
+const fonts: CssFontSource[] = [{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]
 </script>
 
 <template>
   <VueStripeElements
-    :client-secret="secret"
+    :client-secret="clientSecret"
     :fonts="fonts"
     :appearance="{ variables: { fontFamily: 'Roboto, sans-serif' } }"
   >
-    <!-- elements -->
+    <VueStripePaymentElement />
   </VueStripeElements>
 </template>
 ```

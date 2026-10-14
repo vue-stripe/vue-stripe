@@ -55,8 +55,12 @@ Providers with the same `loadStripe()` arguments (key, options and `advancedFrau
 
 Every `StripeConstructorOptions` key from `@stripe/stripe-js` (`stripeAccount`, `apiVersion`, `locale`, `betas`, `developerTools`) is a prop; `apiVersion` is [ignored](#api-version). The `options` prop accepts the same keys and is passed to `loadStripe()`. When a dedicated prop is also set, the prop wins:
 
-```ts
+```vue
+<script setup lang="ts">
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 import type { StripeConstructorOptions } from '@stripe/stripe-js'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // A few of the StripeConstructorOptions keys
 const options: StripeConstructorOptions = {
@@ -65,6 +69,13 @@ const options: StripeConstructorOptions = {
   betas: ['elements_link_signup_beta_1'],
   developerTools: { assistant: { enabled: false } }
 }
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey" :options="options">
+    <!-- ... -->
+  </VueStripeProvider>
+</template>
 ```
 
 ```vue
