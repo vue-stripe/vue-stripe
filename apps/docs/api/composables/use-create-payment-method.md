@@ -8,22 +8,43 @@ Create a [PaymentMethod](https://docs.stripe.com/api/payment_methods) with the r
 
 Must be called within a `<VueStripeProvider>` or an app that installs [`createVueStripe()`](/api/plugin). When called without `elements` or a manual `type`, the Elements instance provided by `<VueStripeElements>` is used automatically (the Payment Element flow).
 
+Stripe allows the Payment Element flow only for an Elements group created with `paymentMethodCreation: 'manual'`. Pass it in `options` on `VueStripeElements`, with a deferred Intent (`mode`, `currency`, `amount`) or a `client-secret`. Without it, `createPaymentMethod()` resolves to Stripe's error: "To use createPaymentMethod with the Payment Element, your elements instance must be created with paymentMethodCreation: 'manual'."
+
 ## Usage
 
 ```vue
+<!-- Parent: the Elements group allows manual PaymentMethod creation -->
+<VueStripeElements
+  mode="payment"
+  :amount="2000"
+  currency="usd"
+  :options="{ paymentMethodCreation: 'manual' }"
+>
+  <VueStripePaymentElement />
+  <SaveButton />
+</VueStripeElements>
+```
+
+```vue
+<!-- SaveButton.vue: rendered inside VueStripeElements -->
 <script setup>
 import { useCreatePaymentMethod } from '@vue-stripe/vue-stripe'
 
 const { createPaymentMethod, loading, error } = useCreatePaymentMethod()
 
 const onSubmit = async () => {
-  // Payment Element flow — uses the injected elements automatically
+  // Payment Element flow: uses the injected elements automatically
   const { paymentMethod, error } = await createPaymentMethod()
   if (paymentMethod) {
     console.log(paymentMethod.id) // pm_xxx
   }
 }
 </script>
+
+<template>
+  <button type="button" :disabled="loading" @click="onSubmit">Save payment method</button>
+  <p v-if="error">{{ error }}</p>
+</template>
 ```
 
 With a Card Element, pass the element instance explicitly:
@@ -61,7 +82,7 @@ When Stripe.js is not available (the plugin's load failed, for example; a call m
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `elements` | `StripeElements` | Elements group to read from. Defaults to the one provided by `<VueStripeElements>` when `type` is not set |
+| `elements` | `StripeElements` | Elements group to read from. Defaults to the one provided by `<VueStripeElements>` when `type` is not set. The group must be created with `paymentMethodCreation: 'manual'` |
 | `type` | `string` | Manual flow: the payment method type (e.g. `'card'`) |
 | `skipSubmit` | `boolean` | Skip the automatic `elements.submit()` before creating (Payment Element flow only). Defaults to `false` |
 | ...rest | | Any other `stripe.createPaymentMethod()` param (`card`, `billing_details`, `params`, ...) |
