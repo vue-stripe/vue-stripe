@@ -19,10 +19,17 @@ let inFlight: Promise<unknown> | null = null
  * fails only its own call, while a script that fails to load fails them all.
  * Later calls go straight to the pure loader.
  */
+// Every instance Vue Stripe hands out, the loadStripe re-export's included, carries the
+// library's Stripe partner details.
+const register = (stripe: Stripe | null) => {
+  stripe?.registerAppInfo(STRIPE_PARTNER_DETAILS)
+  return stripe
+}
+
 export const loadStripe: typeof pureLoadStripe = /* @__PURE__ */ Object.assign(
   (...args: Parameters<typeof pureLoadStripe>) => {
-    if (inFlight) return inFlight.then(() => pureLoadStripe(...args))
-    const load = pureLoadStripe(...args)
+    if (inFlight) return inFlight.then(() => pureLoadStripe(...args)).then(register)
+    const load = pureLoadStripe(...args).then(register)
     const script = load.catch((err: unknown) => {
       // window.Stripe is set: the script loaded and only this call's Stripe() threw.
       if (!(globalThis as { Stripe?: unknown }).Stripe) throw err
@@ -98,6 +105,5 @@ async function createInstance(
   if (!stripe) {
     throw new VueStripeProviderError('Failed to initialize Stripe')
   }
-  stripe.registerAppInfo(STRIPE_PARTNER_DETAILS)
   return stripe
 }
