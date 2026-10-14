@@ -598,6 +598,15 @@ export default defineConfigWithTheme<ThemeConfig>({
     ssr: {
       noExternal: ['@vue-stripe/vue-stripe']
     },
+    resolve: {
+      alias: [
+        // "Last updated" with its date in the static HTML (theme/components/LastUpdated.vue).
+        {
+          find: /^.*\/VPDocFooterLastUpdated\.vue$/,
+          replacement: fileURLToPath(new URL('./theme/components/LastUpdated.vue', import.meta.url))
+        }
+      ]
+    },
     server: {
       fs: {
         allow: ['../..']
