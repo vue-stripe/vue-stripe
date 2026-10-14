@@ -4,7 +4,7 @@ import type {
   StripeContactDetailsElementOptions
 } from '@stripe/stripe-js'
 import type { BaseElementEvents, LoadStartEvent, LoadErrorEvent } from '../utils/element-factory'
-import { BASE_EVENTS, createStripeElement } from '../utils/element-factory'
+import { createStripeElement } from '../utils/element-factory'
 
 type ContactDetailsEvents = BaseElementEvents<
   StripeContactDetailsElement,
@@ -27,7 +27,7 @@ export default /* @__PURE__ */ createStripeElement<
 >({
   elementType: 'contactDetails',
   componentName: 'VueStripeContactDetailsElement',
-  events: [...BASE_EVENTS, 'loaderstart', 'loaderror'],
+  events: ['ready', 'change', 'focus', 'blur', 'escape', 'loaderstart', 'loaderror'],
   checkout: (sdk) => sdk.createContactDetailsElement(),
   className: 'vue-stripe-contact-details-element',
   loadingText: 'Loading contact details...'

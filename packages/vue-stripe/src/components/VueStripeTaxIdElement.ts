@@ -4,7 +4,7 @@ import type {
   StripeTaxIdElementOptions
 } from '@stripe/stripe-js'
 import type { BaseElementEvents, LoadStartEvent, LoadErrorEvent } from '../utils/element-factory'
-import { BASE_EVENTS, createStripeElement } from '../utils/element-factory'
+import { createStripeElement } from '../utils/element-factory'
 
 type TaxIdEvents = BaseElementEvents<StripeTaxIdElement, StripeTaxIdElementChangeEvent> & {
   loaderstart: LoadStartEvent<'taxId'>
@@ -25,7 +25,7 @@ export default /* @__PURE__ */ createStripeElement<
 >({
   elementType: 'taxId',
   componentName: 'VueStripeTaxIdElement',
-  events: [...BASE_EVENTS, 'loaderstart', 'loaderror'],
+  events: ['ready', 'change', 'focus', 'blur', 'escape', 'loaderstart', 'loaderror'],
   checkout: (sdk, options) => sdk.createTaxIdElement(options),
   expose: (element) => ({ getValue: () => element.value?.getValue?.() }),
   className: 'vue-stripe-tax-id-element',

@@ -9,7 +9,7 @@ import type {
   LoadErrorEvent,
   NetworksChangeEvent
 } from '../utils/element-factory'
-import { BASE_EVENTS, createStripeElement } from '../utils/element-factory'
+import { createStripeElement } from '../utils/element-factory'
 
 type CardEvents = BaseElementEvents<StripeCardElement, StripeCardElementChangeEvent> & {
   networkschange: NetworksChangeEvent<'card'>
@@ -25,7 +25,7 @@ export default /* @__PURE__ */ createStripeElement<
 >({
   elementType: 'card',
   componentName: 'VueStripeCardElement',
-  events: [...BASE_EVENTS, 'networkschange', 'loaderror'],
+  events: ['ready', 'change', 'focus', 'blur', 'escape', 'networkschange', 'loaderror'],
   createOnly: { disableLink: true, preferredNetwork: true } satisfies CreateOnly<
     StripeCardElementOptions,
     StripeCardElement

@@ -13,7 +13,7 @@ import type {
   LoadStartEvent,
   LoadErrorEvent
 } from '../utils/element-factory'
-import { BASE_EVENTS, createStripeElement, pick } from '../utils/element-factory'
+import { createStripeElement, pick } from '../utils/element-factory'
 
 type PaymentEvents = BaseElementEvents<StripePaymentElement, StripePaymentElementChangeEvent> & {
   loaderstart: LoadStartEvent<'payment'>
@@ -38,7 +38,11 @@ export default /* @__PURE__ */ createStripeElement<
   componentName: 'VueStripePaymentElement',
   // Stripe.js 10 union. There is no `loaderstop` event (the v5 component listened for one).
   events: [
-    ...BASE_EVENTS,
+    'ready',
+    'change',
+    'focus',
+    'blur',
+    'escape',
     'loaderstart',
     'loaderror',
     'availablepaymentmethodschange',
