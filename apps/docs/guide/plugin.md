@@ -79,23 +79,33 @@ The composables work in any component below the app root, as they do below a pro
 ```vue
 <!-- PayButton.vue: rendered inside <VueStripeElements> -->
 <script setup lang="ts">
+import { ref } from 'vue'
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
 const props = defineProps<{ clientSecret: string }>()
 const { confirmPayment, loading, error } = usePaymentIntent()
+const paid = ref(false)
 
-const pay = () =>
-  confirmPayment({
+const pay = async () => {
+  // Card payments finish on this page; methods that need a redirect come back to return_url
+  const { paymentIntent } = await confirmPayment({
     clientSecret: props.clientSecret,
-    confirmParams: { return_url: `${window.location.origin}/complete` }
+    confirmParams: { return_url: `${window.location.origin}/payment-complete` }
   })
+  if (paymentIntent?.status === 'succeeded') paid.value = true
+}
 </script>
 
 <template>
-  <button :disabled="loading" @click="pay">Pay</button>
-  <p v-if="error">{{ error }}</p>
+  <p v-if="paid">Payment received.</p>
+  <template v-else>
+    <button :disabled="loading" @click="pay">Pay</button>
+    <p v-if="error">{{ error }}</p>
+  </template>
 </template>
 ```
+
+`confirmPayment()` keeps the customer on the page when the payment method allows it (`redirect: 'if_required'` by default), so handle its result: a succeeded PaymentIntent cannot be confirmed again. Build the page at `return_url` with `CompletePage.vue` from [Check the result on the return page](/guide/error-handling#_4-check-the-result-on-the-return-page).
 
 To show Stripe.js loading state somewhere without Elements, read it from `useStripe()`:
 
