@@ -400,10 +400,10 @@ A route in `routes/api.php` also skips the CSRF check and needs no exemption; it
 Forward test-mode events to it with the Stripe CLI, and put the `whsec_...` secret that the command prints in `STRIPE_WEBHOOK_SECRET`:
 
 ```bash
-stripe listen --forward-to localhost:8000/stripe/webhook
+stripe listen --events payment_intent.succeeded,checkout.session.completed --forward-to localhost:8000/stripe/webhook
 ```
 
-Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A payment on `/hosted-checkout` also sends `checkout.session.completed`. A request with a wrong signature gets 400.
+`--events` names the two events the controller handles; Stripe CLI 1.53 refuses to start `listen` without an event selection. Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A payment on `/hosted-checkout` also sends `checkout.session.completed`. A request with a wrong signature gets 400.
 
 ## Result
 

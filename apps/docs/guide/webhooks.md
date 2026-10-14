@@ -95,11 +95,15 @@ Stripe retries an event until your endpoint answers with a `2xx` status, and can
 
 ## 4. Test locally with the Stripe CLI
 
-Forward test-mode events to your local server:
+Forward test-mode events to your local server, naming the events from step 2:
 
 ```bash
-stripe listen --forward-to localhost:3000/webhook
+stripe listen \
+  --events checkout.session.completed,checkout.session.async_payment_succeeded,checkout.session.async_payment_failed,payment_intent.succeeded,payment_intent.processing,payment_intent.payment_failed \
+  --forward-to localhost:3000/webhook
 ```
+
+The Stripe CLI needs the event selection: version 1.53 refuses to start `listen` without `--events`, `--all-snapshot` or `--all-thin`, with "must specify events to forward". Use `--all-snapshot` instead of `--events` to forward every event while you explore.
 
 Set `STRIPE_WEBHOOK_SECRET` to the `whsec_...` secret that `stripe listen` prints, then pay in your app with a [test card](/guide/testing) and watch the events arrive. To send a single event without paying, trigger it:
 
