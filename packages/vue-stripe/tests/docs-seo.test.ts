@@ -7,6 +7,7 @@ import {
   breadcrumbs,
   firstCommitDates,
   ogImageAlt,
+  routeOf,
   sectionOf,
   sidebarTrail,
   type DocSection
@@ -14,7 +15,8 @@ import {
 import {
   coverageMarkdown,
   homeMarkdown,
-  parseFrontmatter
+  parseFrontmatter,
+  toPlainMarkdown
 } from '../../../apps/docs/.vitepress/llms'
 import { coverage } from '../../../apps/docs/.vitepress/theme/data/stripe-coverage'
 
@@ -279,6 +281,26 @@ describe('docs SEO head and share cards', () => {
     // No Vue component or layout tags outside the code fences.
     const prose = markdown.replace(/^```[\s\S]*?^```/gm, '')
     expect(prose).not.toMatch(/<\/?(template|HomeHero|HomeSection|main)\b/)
+  })
+})
+
+describe('Markdown copies', () => {
+  it('a same-page link names its page, so it still works in llms-full.txt', () => {
+    const body = 'See [Events](#events) and [Slots](/api/x#slots).\n\n```md\n[Kept](#kept)\n```'
+    expect(toPlainMarkdown(body, {}, '/api/components/stripe-provider')).toBe(
+      `See [Events](${SITE_URL}/api/components/stripe-provider#events) and [Slots](${SITE_URL}/api/x#slots).\n\n\`\`\`md\n[Kept](#kept)\n\`\`\``
+    )
+  })
+
+  it('no page keeps a bare #fragment link in its Markdown copy', () => {
+    const problems = pages
+      .filter((p) => p.path !== 'index.md')
+      .flatMap((p) => {
+        const { body } = parseFrontmatter(p.source)
+        const prose = toPlainMarkdown(body, {}, routeOf(p.path)).replace(/^```[\s\S]*?^```/gm, '')
+        return [...prose.matchAll(/\]\((#[^)]*)\)/g)].map((m) => `${p.path}: ${m[1]}`)
+      })
+    expect(problems, problems.join('\n')).toEqual([])
   })
 })
 

@@ -82,8 +82,16 @@ export function parseFrontmatter(source: string): { data: Record<string, string>
 
 const absolute = (href: string) => (href.startsWith('/') ? SITE_URL + href : href)
 
-/** Turns a docs page body into plain Markdown, leaving code blocks untouched. */
-export function toPlainMarkdown(body: string, components: Record<string, string> = {}): string {
+/**
+ * Turns a docs page body into plain Markdown, leaving code blocks untouched. With the page's
+ * `route`, a same-page link (`[Events](#events)`) names its page too, so it still points there
+ * from /llms-full.txt, where every page shares one file.
+ */
+export function toPlainMarkdown(
+  body: string,
+  components: Record<string, string> = {},
+  route?: string
+): string {
   // The live-demo index lays out its links as HTML cards.
   const text = body
     .replace(
@@ -149,6 +157,9 @@ export function toPlainMarkdown(body: string, components: Record<string, string>
             `![${/alt="([^"]*)"/.exec(img)?.[1] ?? ''}](${absolute(/src="([^"]*)"/.exec(img)?.[1] ?? '')})`
         )
         .replace(/\]\((\/[^)]*)\)/g, (_, href: string) => `](${absolute(href)})`)
+        .replace(/\]\((#[^)]*)\)/g, (link, fragment: string) =>
+          route ? `](${absolute(route)}${fragment})` : link
+        )
     )
   }
   return out
@@ -466,8 +477,8 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
       const { data, body } = parseFrontmatter(
         readFileSync(join(siteConfig.srcDir, relativePath), 'utf8')
       )
-      const markdown = toPlainMarkdown(body, options.components)
       const route = routeOf(relativePath)
+      const markdown = toPlainMarkdown(body, options.components, route)
       const heading = /^# (.*)$/m.exec(markdown)?.[1]?.replace(/`/g, '')
       return {
         relativePath,
