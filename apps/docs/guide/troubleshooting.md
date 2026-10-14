@@ -15,6 +15,10 @@ Find the message or symptom you see, then apply the fix. Errors that Vue Stripe 
 - Check the variable prefix your build tool exposes to client code (`VITE_`, `VUE_APP_`, `NUXT_PUBLIC_`, `QCLI_` in Quasar); see [Install and set up](/guide/installation#_3-add-your-publishable-key).
 - Restart the dev server after editing `.env` files; most tools read them only at startup.
 
+### Elements show "Expected publishable key to be of type string"
+
+The full message is "Expected publishable key to be of type string, got type undefined instead.", and the console logs it as `[Vue Stripe] Initialization error`. The [plugin](/guide/plugin) received no key. Unlike `VueStripeProvider`, the plugin does not throw: the page renders, and the error appears in the browser when Stripe.js loads. The causes and fixes are the ones above.
+
 ### The provider shows an error instead of loading
 
 The provider's `#error` slot (or its default error text) means Stripe.js could not load or rejected the key at load time:

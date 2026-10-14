@@ -31,7 +31,7 @@ STRIPE_SECRET_KEY=sk_test_...
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
-Vite gives app code only the `VITE_` variable, and `vite build` writes its value into the client and server bundles, so the publishable key must be set when you build. The secret key stays in the Node server, which reads the file in step 4.
+Vite gives app code only the `VITE_` variable, and `vite build` writes its value into the client and server bundles, so the publishable key must be set when you build ([without it](#the-page-shows-expected-publishable-key-to-be-of-type-string-or-the-payment-form-is-missing), the elements show an error). The secret key stays in the Node server, which reads the file in step 4.
 
 ## 3. Create the app per request
 
@@ -225,9 +225,14 @@ Add a route for `/checkout/complete` in `src/main.ts` that checks the session, a
 
 Node prints `TypeError: Failed to parse URL from /api/...` and the next request is refused. A component started a request in setup during server rendering. Fetch in `onMounted`, or pass a function in `fetch-client-secret`.
 
-### Every page answers 500 "publishableKey or stripeKey is required"
+### The page shows "Expected publishable key to be of type string", or the payment form is missing
 
-A `VueStripeProvider` rendered on the server with an empty key. Set `VITE_STRIPE_PUBLISHABLE_KEY` in `.env.local` and restart `npm run dev`, or run `npm run build` again: the production bundle keeps the value it was built with.
+`VITE_STRIPE_PUBLISHABLE_KEY` was not set when the server started or when you built the app. What you see depends on how the page gets Stripe:
+
+- **With the plugin** (step 3), the server answers 200 and renders the page. In the browser each element shows Stripe.js' message "Expected publishable key to be of type string, got type undefined instead.", which the console logs as `[Vue Stripe] Initialization error`.
+- **With `VueStripeProvider`**, the provider throws "publishableKey or stripeKey is required" while the server renders the page. The development server answers 500 with the stack trace. The production server answers 200: it logs `[VueStripeProviderError]` and renders nothing in the provider's place, and in the browser the provider throws again, so the payment form is missing.
+
+Set `VITE_STRIPE_PUBLISHABLE_KEY` in `.env.local` and restart `npm run dev`, or run `npm run build` again: the production bundle keeps the value it was built with.
 
 ### The server does not start: "Neither apiKey nor config.authenticator provided"
 

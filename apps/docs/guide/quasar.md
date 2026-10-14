@@ -16,7 +16,7 @@ npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 
 ## 2. Add your publishable key
 
-Quasar passes to client code only the variables whose name starts with `QCLI_`. A `VITE_` variable is `undefined` in a Quasar app, and the provider or plugin then throws "publishableKey or stripeKey is required". Put the key in `.env` at the project root:
+Quasar passes to client code only the variables whose name starts with `QCLI_`. A `VITE_` variable is `undefined` in a Quasar app, and TypeScript does not flag it. With the plugin from step 3 the page still renders, and each element shows Stripe.js' message "Expected publishable key to be of type string, got type undefined instead.", which the console logs as `[Vue Stripe] Initialization error`. A `VueStripeProvider` throws "publishableKey or stripeKey is required" instead, and its part of the page stays empty. Put the key in `.env` at the project root:
 
 ```bash
 # .env
@@ -105,7 +105,24 @@ The guides send the customer back to your app after a redirect: the Payment Elem
   }
   ```
 
-  The guides' URLs then work unchanged. Your production host must answer every route with `index.html`, for example `quasar serve dist/spa --history`.
+  The guides' URLs then work unchanged. Your production host must answer every route with `index.html`, and it must send `/api` to your server on the same origin: the proxy from step 5 runs in `quasar dev` only. To try the build on your machine, use the static server of the global Quasar CLI, `@quasar/cli`. A new project does not install it, and the project's own `quasar` command has no `serve` (it prints `Unrecognized command "serve"`), so run it with `npx`. `--history` answers every route with `index.html`, and `--proxy` loads a file that forwards `/api`:
+
+  ```js
+  // serve-proxy.js
+  export default ({ app, proxy }) => {
+    app.all('/api/*', (c) => {
+      const { pathname, search } = new URL(c.req.url)
+      return proxy(`http://localhost:3000${pathname}${search}`, c.req)
+    })
+  }
+  ```
+
+  ```bash
+  quasar build
+  npx @quasar/cli serve dist/spa --history --proxy serve-proxy.js
+  ```
+
+  On a production host, a reverse proxy in front of the static files does the same; see [Send API requests to your server](/guide/installation#_5-send-api-requests-to-your-server).
 
 - **Keep the hash router** and put the route after `#`:
 
@@ -117,14 +134,14 @@ The guides send the customer back to your app after a redirect: the Payment Elem
 
   Stripe adds its parameters before the `#` (`/?payment_intent=...&redirect_status=succeeded#/payment-complete`), so the return page reads them from `window.location.search` as in the guides.
 
-  A Checkout Session URL is different. You set it on your server in [Redirect to Stripe Checkout](/guide/checkout#_1-create-a-checkout-session-on-your-server), [Embed Stripe Checkout](/guide/embedded-checkout#_1-create-the-session-on-your-server) and [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_1-create-the-session-on-your-server), and Stripe redirects to it as written, replacing only `{CHECKOUT_SESSION_ID}`. Put the query before the `#`:
+  A Checkout Session URL is different. You set it on your server in [Redirect to Stripe Checkout](/guide/checkout#_1-create-a-checkout-session-on-your-server), [Embed Stripe Checkout](/guide/embedded-checkout#_1-create-the-session-on-your-server), [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_1-create-the-session-on-your-server) and [Add the Checkout Form (beta)](/guide/checkout-form#_1-create-the-session-on-your-server), and Stripe redirects to it as written, replacing only `{CHECKOUT_SESSION_ID}`. Put the query before the `#`:
 
   ```js
   // Redirect to Stripe Checkout
   success_url: 'https://example.com/?session_id={CHECKOUT_SESSION_ID}#/success',
   cancel_url: 'https://example.com/#/cancel'
 
-  // Embedded Checkout, and your own checkout page
+  // Embedded Checkout, the Checkout Form, and your own checkout page
   return_url: 'https://example.com/?session_id={CHECKOUT_SESSION_ID}#/checkout/complete'
   ```
 
@@ -147,9 +164,10 @@ const errorMessage = ref('')
 onMounted(async () => {
   try {
     const response = await fetch('/api/create-payment-intent', { method: 'POST' })
-    const data = await response.json()
-    clientSecret.value = data.clientSecret
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    clientSecret.value = (await response.json()).clientSecret
   } catch {
+    // An error answer, or no answer at all (server down, offline)
     errorMessage.value = 'Failed to initialize payment'
   }
 })
