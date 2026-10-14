@@ -80,7 +80,7 @@ There are **no `.vue` files** in `packages/vue-stripe/src`. Styles live in `src/
 
 - All Vue imports in source come from `vue-demi`, never `vue` (lint + conventions test).
 - Render functions go through `hx()` (`src/utils/h.ts`), which translates flat Vue 3 props into Vue 2's `{ class, style, ref, attrs, on }`. Template refs are string refs (`$refs['mount']`). Stripe objects live in `shallowRef` / `markRaw`.
-- `vite.config.ts` externalizes `vue-demi` + `@stripe/stripe-js`; there is no SFC tooling. Build emits ES, CJS, UMD, `.d.ts` (via `tsc`) and the stylesheet.
+- `vite.config.ts` externalizes `vue-demi` + `@stripe/stripe-js` for the ES and CJS builds; there is no SFC tooling. The UMD build is a second pass (`vite build --mode umd`) that bundles the `@stripe/stripe-js` loader, so a `<script>` page needs only Vue and vue-demi. Build emits ES, CJS, UMD, `.d.ts` (via `tsc`) and the stylesheet.
 - `packages/vue2-smoke` mounts the built `dist/` on Vue 2.7.16 and asserts the bundle imports only names Vue 2.7's vue-demi exports (CI job "Vue 2.7 compatibility"). Peer range: `vue ^2.7.0 || ^3.0.0`.
 
 ### Tests
