@@ -1,13 +1,32 @@
 <script setup lang="ts">
-// Four usage figures under the hero. They come from the build's fetch (../../data/usage.data.ts)
-// and are not fetched again here, so the home page makes no extra requests; /usage refreshes
-// them live. A figure the build could not fetch is left out, and with fewer than three left
-// the strip is not shown at all.
-import { computed } from 'vue'
+// Four usage figures under the hero. The build's numbers (../../data/usage.data.ts) are in the
+// static HTML; in the browser they are fetched again, as on /usage, and updated in place. A
+// figure that neither could fetch is left out, and with fewer than three left the strip is
+// not shown at all.
+import { computed, onMounted, shallowRef } from 'vue'
 import { withBase } from 'vitepress'
 import DocIcon, { type DocIconName } from '../DocIcon.vue'
-import { data as usage } from '../../data/usage.data'
-import { formatCompact, formatCount, formatDay } from '../../data/usage'
+import { data as built } from '../../data/usage.data'
+import {
+  fetchUsage,
+  formatCompact,
+  formatCount,
+  formatDay,
+  hasAnyFigure,
+  mergeUsage,
+  type UsageData
+} from '../../data/usage'
+
+const usage = shallowRef<UsageData>(built)
+
+onMounted(() => {
+  fetchUsage({ since: built })
+    .then((fresh) => {
+      if (hasAnyFigure(fresh)) usage.value = mergeUsage(usage.value, fresh)
+    })
+    // Offline or rate-limited: the build's numbers stay.
+    .catch(() => {})
+})
 
 interface Stat {
   id: string
@@ -17,7 +36,7 @@ interface Stat {
 }
 
 const stats = computed(() => {
-  const { npm, github } = usage
+  const { npm, github } = usage.value
   const all: (Stat | null)[] = [
     npm.allTime !== null
       ? { id: 'all', icon: 'package', value: formatCompact(npm.allTime), label: 'npm downloads' }
