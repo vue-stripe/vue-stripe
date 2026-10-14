@@ -25,7 +25,7 @@ Initializes **Elements with Checkout Sessions** via `stripe.initCheckoutElements
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import CheckoutForm from './CheckoutForm.vue'
@@ -37,7 +37,7 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const fetchClientSecret = () =>
   fetch('/api/checkout-elements-session', { method: 'POST' })
     .then((res) => res.json())
-    .then((data) => data.clientSecret)
+    .then((data: { clientSecret: string }) => data.clientSecret)
 </script>
 ```
 
@@ -46,15 +46,20 @@ A Promise in `client-secret` works too, with two limits: a request that fails be
 ```vue
 <!-- CheckoutForm.vue -->
 <template>
+  <VueStripeContactDetailsElement />
   <VueStripePaymentElement :options="{ layout: 'accordion' }" />
   <p v-if="session">Total: {{ session.total.total.amount }}</p>
   <button :disabled="loading || !session?.canConfirm" @click="pay">Pay</button>
   <p v-if="message">{{ message }}</p>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
-import { VueStripePaymentElement, useCheckoutSession } from '@vue-stripe/vue-stripe'
+import {
+  VueStripeContactDetailsElement,
+  VueStripePaymentElement,
+  useCheckoutSession
+} from '@vue-stripe/vue-stripe'
 
 const { session, confirm, loading } = useCheckoutSession()
 const message = ref('')
@@ -66,6 +71,8 @@ const pay = async () => {
 }
 </script>
 ```
+
+`session.canConfirm` stays `false` until the session has the customer's email. [`VueStripeContactDetailsElement`](/api/components/stripe-contact-details-element) collects it and writes it to the session. If your server creates the session with `customer_email`, you can leave it out; the [custom checkout guide](/guide/custom-checkout#_3-build-the-form) lists the other ways to set the email.
 
 ## Props
 
