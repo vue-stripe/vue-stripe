@@ -179,10 +179,12 @@ Forward test-mode events to your local server with the [Stripe CLI](https://docs
 
 ```bash
 stripe login
-stripe listen --forward-to localhost:3000/webhook
+stripe listen \
+  --events payment_intent.succeeded,payment_intent.processing,payment_intent.payment_failed,checkout.session.completed \
+  --forward-to localhost:3000/webhook
 ```
 
-`stripe listen` prints a signing secret (`whsec_...`); give it to your webhook handler while you test. Every test payment you make now reaches your server. To send one event without making a payment, trigger it:
+List the events your handler reads in `--events`, or pass `--all-snapshot` to forward every event. Stripe CLI 1.53 refuses to start `listen` without one of them ("must specify events to forward"). `stripe listen` prints a signing secret (`whsec_...`); give it to your webhook handler while you test. Every test payment you make now sends those events to your server. To send one event without making a payment, trigger it:
 
 ```bash
 stripe trigger payment_intent.succeeded

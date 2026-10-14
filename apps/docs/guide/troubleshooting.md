@@ -170,6 +170,10 @@ The Elements group has neither a client secret nor `mode`. Pass `client-secret` 
 
 Stripe needs `confirmParams.return_url` with `redirect: 'always'`, and with `redirect: 'if_required'` (the composables' default) as soon as the customer picks a payment method that redirects. Always pass an absolute URL, such as `` `${window.location.origin}/complete` ``.
 
+### The console says "Your Elements integration is using an older API"
+
+Stripe.js logs this warning once per page load when the Payment Element runs on a PaymentIntent client secret, as in [Accept a payment with the Payment Element](/guide/payment-element). It comes from Stripe.js, not from Vue Stripe, and it is advice, not an error: the integration is supported and payments work, so no change is needed. Stripe recommends Checkout Sessions for new integrations. The same form on a Checkout Session is in [Build your own checkout page on a Checkout Session](/guide/custom-checkout), and [Choosing an integration](/guide/approaches) compares the two.
+
 ### Apple Pay or Google Pay buttons don't appear
 
 Wallets need HTTPS, a registered domain and a browser with a saved card. See [Test your integration](/guide/testing#wallets-apple-pay-and-google-pay).

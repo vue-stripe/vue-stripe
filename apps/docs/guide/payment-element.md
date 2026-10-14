@@ -118,6 +118,8 @@ const handleSubmit = async () => {
 
 The error message stays until the customer clicks Pay again; `handleChange` only tracks whether the form is complete, because Stripe sends a `change` event right after a decline. The customer is sent to `return_url` after a successful payment. Read the result there from the `payment_intent_client_secret` query parameter with `retrievePaymentIntent()` from the same composable.
 
+When the element loads, Stripe.js logs "Your Elements integration is using an older API" in the browser console. That is expected for a Payment Element on a PaymentIntent, and needs no change; [Troubleshoot common problems](/guide/troubleshooting#the-console-says-your-elements-integration-is-using-an-older-api) explains it.
+
 ## Stay on the page when no redirect is needed
 
 Pass `redirect: 'if_required'` (the composable's default) to get the result back without leaving the page. Payment methods that need a redirect, such as bank redirects, still go to `return_url`, so keep it set.

@@ -81,6 +81,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Server only
     stripeSecretKey: '',
+    stripeWebhookSecret: '',
     public: {
       stripePublishableKey: ''
     }
@@ -92,10 +93,13 @@ Set the keys in `.env`. Nuxt maps `NUXT_`-prefixed variables onto `runtimeConfig
 
 ```bash
 NUXT_STRIPE_SECRET_KEY=sk_test_...
+NUXT_STRIPE_WEBHOOK_SECRET=whsec_...
 NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
-`nuxi dev` reads `.env`; the production server does not. Set the two variables in the server's environment, or pass the file to Node when you start the build:
+You get the `whsec_...` webhook secret in [step 7](#_7-receive-webhooks); leave it empty until then.
+
+`nuxi dev` reads `.env`; the production server does not. Set the variables in the server's environment, or pass the file to Node when you start the build:
 
 ```bash
 npx nuxi build
@@ -153,11 +157,12 @@ Fetch the client secret in the browser (`server: false`), so a page render does 
 import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
 
 const config = useRuntimeConfig()
-const { data } = await useFetch('/api/payment-intent', { method: 'POST', server: false })
+const { data, error } = await useFetch('/api/payment-intent', { method: 'POST', server: false })
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="config.public.stripePublishableKey">
+  <p v-if="error">Could not start the payment. Please reload the page.</p>
+  <VueStripeProvider v-else :publishable-key="config.public.stripePublishableKey">
     <VueStripeElements v-if="data?.clientSecret" :client-secret="data.clientSecret">
       <!-- app/components/PaymentForm.vue renders the Payment Element and calls usePaymentIntent() -->
       <PaymentForm :client-secret="data.clientSecret" />
@@ -169,6 +174,8 @@ const { data } = await useFetch('/api/payment-intent', { method: 'POST', server:
 `PaymentForm` is the component from [Accept a payment with the Payment Element](/guide/payment-element#_3-render-the-payment-element-and-confirm). With the plugin from step 3, drop the `VueStripeProvider` wrapper.
 
 Name the file `checkout/index.vue`, not `checkout.vue`. Nuxt treats `app/pages/checkout/complete.vue`, the Checkout Session return page below, as a child route of `checkout.vue`, and because that page has no `<NuxtPage />`, `/checkout/complete` would show the payment form again.
+
+When the server route fails (a wrong secret key, Stripe unreachable), `useFetch` sets `error` and leaves `data` empty; the page then shows the message instead of an empty form.
 
 Check `data?.clientSecret`, not only `data`. `useFetch` takes its type from the server route, and stripe-node types `client_secret` as `string | null`, so `nuxi typecheck` rejects `data.clientSecret` as a `client-secret` until the template has ruled out `null`.
 
@@ -219,6 +226,52 @@ const config = useRuntimeConfig()
 ```
 
 With the plugin, render `<PaymentStatus />` without the provider. Use this page to inform the customer only; fulfil orders from [webhooks](/guide/webhooks).
+
+### 7. Receive webhooks
+
+Fulfil orders from a server route, as [Fulfil orders with webhooks](/guide/webhooks) explains. Verify the signature against the raw body, which `readRawBody()` returns, and read the signing secret from `runtimeConfig` (step 2):
+
+```ts
+// server/routes/webhook.post.ts (POST /webhook)
+import Stripe from 'stripe'
+
+export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig()
+  const stripe = new Stripe(config.stripeSecretKey)
+
+  let stripeEvent: Stripe.Event
+  try {
+    stripeEvent = stripe.webhooks.constructEvent(
+      (await readRawBody(event)) ?? '',
+      getHeader(event, 'stripe-signature') ?? '',
+      config.stripeWebhookSecret
+    )
+  } catch {
+    throw createError({ statusCode: 400, statusMessage: 'Webhook signature check failed' })
+  }
+
+  switch (stripeEvent.type) {
+    case 'payment_intent.succeeded':
+      // fulfil the order for stripeEvent.data.object
+      break
+    case 'checkout.session.completed':
+      // fulfil the order for stripeEvent.data.object
+      break
+  }
+
+  return { received: true }
+})
+```
+
+Don't use `readBody()`: it parses the JSON, and the parsed body no longer matches the signature. `readRawBody()` and `getHeader()` return `string | undefined`, which `constructEvent()` does not accept, hence the `?? ''`; a request without a body or signature then fails the check with 400. Read the secret with `useRuntimeConfig()`, not `process.env`, which `nuxi typecheck` does not know in a server route.
+
+Forward test-mode events to the route with the Stripe CLI, and put the `whsec_...` secret that the command prints in `NUXT_STRIPE_WEBHOOK_SECRET` (`nuxi dev` restarts by itself when `.env` changes):
+
+```bash
+stripe listen --events payment_intent.succeeded,checkout.session.completed --forward-to localhost:3000/webhook
+```
+
+Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. The webhook guide lists [the events for each integration](/guide/webhooks#_2-handle-the-events-for-your-integration).
 
 ### Build the page on a Checkout Session instead
 
@@ -289,8 +342,12 @@ With the plugin, render `<PaymentStatus />` without the provider. Use this page 
        throw createError({ statusCode: 400, statusMessage: 'Missing session_id' })
      }
 
-     const session = await stripe.checkout.sessions.retrieve(session_id)
-     return { status: session.status, paymentStatus: session.payment_status }
+     try {
+       const session = await stripe.checkout.sessions.retrieve(session_id)
+       return { status: session.status, paymentStatus: session.payment_status }
+     } catch {
+       throw createError({ statusCode: 404, statusMessage: 'No such Checkout Session' })
+     }
    })
    ```
 
@@ -311,11 +368,38 @@ With the plugin, render `<PaymentStatus />` without the provider. Use this page 
    </template>
    ```
 
-   This page needs no Stripe.js, so it renders on the server. It works because the payment page is `checkout/index.vue` (step 5); next to a `checkout.vue` it would render as that page's child.
+   An unknown or mistyped `session_id` makes `retrieve()` throw. The route answers 404 with `createError()`, as the Express route does, so Nitro does not log it as an unhandled error, and the page shows its fallback message.
+
+   This page needs no Stripe.js, so it renders on the server. It works because the payment page is `checkout/index.vue` (step 5); next to a `checkout.vue` it would render as that page's child. With `nuxi generate`, turn off server rendering for it, as [Static hosting with `nuxi generate`](#static-hosting-with-nuxi-generate) explains.
 
 ### Render on the client only
 
 You don't have to, but if you prefer to send no Stripe markup from the server, wrap the form in `<ClientOnly>` (with a `#fallback` template) or move it into a component named `*.client.vue`.
+
+### Static hosting with `nuxi generate`
+
+`nuxi generate` prerenders every page into `.output/public` for a static host. The server routes are not part of it: `server/api/*` and `server/routes/*` run only in the server that `nuxi build` creates. On a static host `POST /api/payment-intent` answers 404, so the payment page shows "Could not start the payment", `/custom-checkout` shows "Checkout could not load: ... 404 Not Found", and Stripe's webhook events have nowhere to go.
+
+Without a server only the browser side works: Stripe.js loads, and `/payment-complete` reads the PaymentIntent in the browser. Everything that uses your secret key needs a server. Choose one:
+
+- **Keep the server.** Deploy with `nuxi build`: to a Node server, as in [step 2](#_2-configure-nuxt), or to a host that runs the server routes as serverless or edge functions, with that host's [deployment preset](https://nuxt.com/deploy).
+- **Run the server routes elsewhere.** Generate the site, and call the routes on your API server by their full URL: add `apiBase: ''` to `runtimeConfig.public`, set `NUXT_PUBLIC_API_BASE` to the API server's origin (such as `https://api.example.com`), and pass `baseURL: config.public.apiBase` to every `useFetch()` and `$fetch()` that calls it. The API server must allow your site's origin (CORS), build `return_url` from your site's URL instead of `getRequestURL(event)`, and receive the webhooks.
+
+`nuxi generate` reads `.env` and writes the `public` values, `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` among them, into the generated pages. Set them before you generate; changing them later needs a new `nuxi generate`.
+
+The Checkout Session return page needs one more change. `app/pages/checkout/complete.vue` reads the session while it renders. `nuxi generate` prerenders it once, without a `session_id`, writes "We could not check the payment status" into the HTML and its payload, and the browser shows that for every session, paid or not. Turn off server rendering for that page, so the browser renders it and reads the session itself:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  routeRules: {
+    '/checkout/complete': { ssr: false }
+  }
+  // ...css, runtimeConfig
+})
+```
+
+`nuxi generate` then writes an empty shell for `/checkout/complete`, and the page renders in the browser with the real `session_id`. Switching the page's `useFetch()` to `server: false` instead is not enough: a prerendered page hydrates at its prerendered URL, so `route.query.session_id` is still empty when the request starts.
 
 ## Quasar SSR
 

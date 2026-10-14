@@ -232,6 +232,7 @@ use App\Http\Controllers\StripeController;
 Route::middleware('auth')->group(function () {
     Route::post('/stripe/setup-intent', [StripeController::class, 'createSetupIntent']);
     Route::inertia('/save-card', 'SaveCard');
+    Route::inertia('/account/cards', 'AccountCards');
 });
 ```
 
@@ -247,6 +248,8 @@ const response = await fetch('/stripe/setup-intent', {
 ```
 
 Without the header the request fails with 419. A guest who opens `/save-card` is sent to the login page.
+
+`/account/cards` is the `return_url` of `SaveCardButton.vue`. Cards save on `/save-card`, but payment methods that redirect, such as Naver Pay or Kakao Pay, come back to `/account/cards` after the customer approves; without the route Laravel answers 404. `resources/js/pages/AccountCards.vue` is `SetupStatus.vue` from [Show the result on the return page](/guide/setup-intent#_4-show-the-result-on-the-return-page). The plugin from step 3 provides Stripe, so it needs no `VueStripeProvider`. Both pages are inside the `auth` group, so the Laravel 13 kit renders them in its dashboard layout.
 
 ## 5. Render the payment pages
 
@@ -400,10 +403,10 @@ A route in `routes/api.php` also skips the CSRF check and needs no exemption; it
 Forward test-mode events to it with the Stripe CLI, and put the `whsec_...` secret that the command prints in `STRIPE_WEBHOOK_SECRET`:
 
 ```bash
-stripe listen --forward-to localhost:8000/stripe/webhook
+stripe listen --events payment_intent.succeeded,checkout.session.completed --forward-to localhost:8000/stripe/webhook
 ```
 
-Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A payment on `/hosted-checkout` also sends `checkout.session.completed`. A request with a wrong signature gets 400.
+`--events` names the two events the controller handles; Stripe CLI 1.53 refuses to start `listen` without an event selection. Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A payment on `/hosted-checkout` also sends `checkout.session.completed`. A request with a wrong signature gets 400.
 
 ## Result
 

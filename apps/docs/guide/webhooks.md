@@ -41,7 +41,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 app.use(express.json()) // your other routes come after the webhook route
 ```
 
-In other frameworks, pass the unparsed body to `constructEvent()`: `await request.text()` in a Next.js route handler, `await readRawBody(event)` in a Nuxt server route, `$request->getContent()` in Laravel.
+In other frameworks, pass the unparsed body to `constructEvent()`: `await request.text()` in a Next.js route handler, `await readRawBody(event)` in a Nuxt server route, `$request->getContent()` in Laravel. [Receive webhooks](/guide/ssr#_7-receive-webhooks) in the SSR guide has a typed Nuxt route, with the signing secret in `runtimeConfig`.
 
 ::: tip Laravel
 Laravel's CSRF check answers Stripe's POST with 419 before your code runs, so exempt the webhook route in `bootstrap/app.php` (or put it in `routes/api.php`). [Receive webhooks](/guide/laravel#_6-receive-webhooks) in the Laravel guide has the route and a controller with `\Stripe\Webhook::constructEvent()`.
@@ -95,11 +95,15 @@ Stripe retries an event until your endpoint answers with a `2xx` status, and can
 
 ## 4. Test locally with the Stripe CLI
 
-Forward test-mode events to your local server:
+Forward test-mode events to your local server, naming the events from step 2:
 
 ```bash
-stripe listen --forward-to localhost:3000/webhook
+stripe listen \
+  --events checkout.session.completed,checkout.session.async_payment_succeeded,checkout.session.async_payment_failed,payment_intent.succeeded,payment_intent.processing,payment_intent.payment_failed \
+  --forward-to localhost:3000/webhook
 ```
+
+The Stripe CLI needs the event selection: version 1.53 refuses to start `listen` without `--events`, `--all-snapshot` or `--all-thin`, with "must specify events to forward". Use `--all-snapshot` instead of `--events` to forward every event while you explore.
 
 Set `STRIPE_WEBHOOK_SECRET` to the `whsec_...` secret that `stripe listen` prints, then pay in your app with a [test card](/guide/testing) and watch the events arrive. To send a single event without paying, trigger it:
 
@@ -122,8 +126,12 @@ The webhook does the work; the page the customer returns to only reports it. For
 ```js
 // success_url: 'https://example.com/success?session_id={CHECKOUT_SESSION_ID}'
 app.get('/api/checkout-status', async (req, res) => {
-  const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
-  res.json({ status: session.status, paymentStatus: session.payment_status })
+  try {
+    const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+    res.json({ status: session.status, paymentStatus: session.payment_status })
+  } catch {
+    res.status(404).json({ error: 'No such Checkout Session' })
+  }
 })
 ```
 
