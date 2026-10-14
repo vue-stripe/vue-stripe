@@ -81,6 +81,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Server only
     stripeSecretKey: '',
+    stripeWebhookSecret: '',
     public: {
       stripePublishableKey: ''
     }
@@ -92,10 +93,13 @@ Set the keys in `.env`. Nuxt maps `NUXT_`-prefixed variables onto `runtimeConfig
 
 ```bash
 NUXT_STRIPE_SECRET_KEY=sk_test_...
+NUXT_STRIPE_WEBHOOK_SECRET=whsec_...
 NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
-`nuxi dev` reads `.env`; the production server does not. Set the two variables in the server's environment, or pass the file to Node when you start the build:
+You get the `whsec_...` webhook secret in [step 7](#_7-receive-webhooks); leave it empty until then.
+
+`nuxi dev` reads `.env`; the production server does not. Set the variables in the server's environment, or pass the file to Node when you start the build:
 
 ```bash
 npx nuxi build
@@ -222,6 +226,52 @@ const config = useRuntimeConfig()
 ```
 
 With the plugin, render `<PaymentStatus />` without the provider. Use this page to inform the customer only; fulfil orders from [webhooks](/guide/webhooks).
+
+### 7. Receive webhooks
+
+Fulfil orders from a server route, as [Fulfil orders with webhooks](/guide/webhooks) explains. Verify the signature against the raw body, which `readRawBody()` returns, and read the signing secret from `runtimeConfig` (step 2):
+
+```ts
+// server/routes/webhook.post.ts (POST /webhook)
+import Stripe from 'stripe'
+
+export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig()
+  const stripe = new Stripe(config.stripeSecretKey)
+
+  let stripeEvent: Stripe.Event
+  try {
+    stripeEvent = stripe.webhooks.constructEvent(
+      (await readRawBody(event)) ?? '',
+      getHeader(event, 'stripe-signature') ?? '',
+      config.stripeWebhookSecret
+    )
+  } catch {
+    throw createError({ statusCode: 400, statusMessage: 'Webhook signature check failed' })
+  }
+
+  switch (stripeEvent.type) {
+    case 'payment_intent.succeeded':
+      // fulfil the order for stripeEvent.data.object
+      break
+    case 'checkout.session.completed':
+      // fulfil the order for stripeEvent.data.object
+      break
+  }
+
+  return { received: true }
+})
+```
+
+Don't use `readBody()`: it parses the JSON, and the parsed body no longer matches the signature. `readRawBody()` and `getHeader()` return `string | undefined`, which `constructEvent()` does not accept, hence the `?? ''`; a request without a body or signature then fails the check with 400. Read the secret with `useRuntimeConfig()`, not `process.env`, which `nuxi typecheck` does not know in a server route.
+
+Forward test-mode events to the route with the Stripe CLI, and put the `whsec_...` secret that the command prints in `NUXT_STRIPE_WEBHOOK_SECRET` (`nuxi dev` restarts by itself when `.env` changes):
+
+```bash
+stripe listen --events payment_intent.succeeded,checkout.session.completed --forward-to localhost:3000/webhook
+```
+
+Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. The webhook guide lists [the events for each integration](/guide/webhooks#_2-handle-the-events-for-your-integration).
 
 ### Build the page on a Checkout Session instead
 
