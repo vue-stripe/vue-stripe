@@ -13,15 +13,26 @@ Stripe.js removed `stripe.redirectToCheckout()` in Stripe.js Clover, so the clie
 ## Usage
 
 ```vue
-<script setup>
+<script setup lang="ts">
+import { ref } from 'vue'
 import { useStripeCheckout } from '@vue-stripe/vue-stripe'
 
 const { redirectToCheckout, loading, error } = useStripeCheckout()
+const failed = ref(false)
 
 const checkout = async () => {
+  failed.value = false
   const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+  if (!response.ok) {
+    failed.value = true
+    return
+  }
   const { url } = await response.json() // your server returns session.url
-  await redirectToCheckout({ url })
+  try {
+    await redirectToCheckout({ url })
+  } catch {
+    // The response had no url: error.value holds the message
+  }
 }
 </script>
 
@@ -29,7 +40,8 @@ const checkout = async () => {
   <button :disabled="loading" @click="checkout">
     {{ loading ? 'Redirecting...' : 'Checkout' }}
   </button>
-  <p v-if="error">{{ error }}</p>
+  <p v-if="failed">Could not start checkout. Please try again.</p>
+  <p v-else-if="error">{{ error }}</p>
 </template>
 ```
 
