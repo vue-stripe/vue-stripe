@@ -4,7 +4,7 @@ import type {
   StripeAddressElementOptions
 } from '@stripe/stripe-js'
 import type { BaseElementEvents, LoadStartEvent, LoadErrorEvent } from '../utils/element-factory'
-import { BASE_EVENTS, createStripeElement, pick } from '../utils/element-factory'
+import { createStripeElement, pick } from '../utils/element-factory'
 
 type AddressEvents = BaseElementEvents<StripeAddressElement, StripeAddressElementChangeEvent> & {
   loaderstart: LoadStartEvent<'address'>
@@ -25,7 +25,7 @@ export default /* @__PURE__ */ createStripeElement<
 >({
   elementType: 'address',
   componentName: 'VueStripeAddressElement',
-  events: [...BASE_EVENTS, 'loaderstart', 'loaderror'],
+  events: ['ready', 'change', 'focus', 'blur', 'escape', 'loaderstart', 'loaderror'],
   defaultOptions: () => ({ mode: 'shipping' }),
   // Stripe rejects `mode` in update() ("Mode cannot be updated"), though the type allows it.
   createOnly: { mode: true },

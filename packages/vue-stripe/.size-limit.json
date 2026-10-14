@@ -19,7 +19,7 @@
     "path": "dist/es/index.js",
     "import": "{ useStripe }",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "380 B",
+    "limit": "340 B",
     "gzip": true
   },
   {
@@ -27,7 +27,7 @@
     "path": "dist/es/index.js",
     "import": "{ useConfirmCardPayment }",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "670 B",
+    "limit": "640 B",
     "gzip": true
   }
 ]

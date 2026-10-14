@@ -4,7 +4,7 @@ import type {
   StripeLinkAuthenticationElementOptions
 } from '@stripe/stripe-js'
 import type { BaseElementEvents, LoadStartEvent, LoadErrorEvent } from '../utils/element-factory'
-import { BASE_EVENTS, createStripeElement } from '../utils/element-factory'
+import { createStripeElement } from '../utils/element-factory'
 
 type LinkAuthenticationEvents = BaseElementEvents<
   StripeLinkAuthenticationElement,
@@ -23,7 +23,7 @@ export default /* @__PURE__ */ createStripeElement<
 >({
   elementType: 'linkAuthentication',
   componentName: 'VueStripeLinkAuthenticationElement',
-  events: [...BASE_EVENTS, 'loaderstart', 'loaderror'],
+  events: ['ready', 'change', 'focus', 'blur', 'escape', 'loaderstart', 'loaderror'],
   className: 'vue-stripe-link-auth',
   loadingText: 'Loading...'
 })
