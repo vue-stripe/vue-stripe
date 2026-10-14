@@ -23,7 +23,7 @@ Put the key in `.env.local` inside the site directory, next to `.vitepress/`:
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
-VitePress reads env files from its source directory, the one you pass to `vitepress dev` (or `srcDir` if you set it), not from the folder that holds `package.json`. A `.env.local` in the project root is ignored: the key is `undefined`, `VueStripeProvider` throws "publishableKey or stripeKey is required", and the page renders blank.
+VitePress reads env files from its source directory, the one you pass to `vitepress dev` (or `srcDir` if you set it), not from the folder that holds `package.json`. A `.env.local` in the project root is ignored, and the key is `undefined`. A `VueStripeProvider`, such as the one in `PaymentPage.vue` (step 6), then throws "publishableKey or stripeKey is required" and the payment form is missing; `vitepress build` logs the error for each such page and still succeeds. Elements that get Stripe from the plugin show Stripe.js' message "Expected publishable key to be of type string, got type undefined instead."
 
 ## 3. Import the stylesheet and install the plugin
 
