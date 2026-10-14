@@ -145,10 +145,16 @@
 .coverage-page .VPDoc .container {
   max-width: 1152px !important;
 }
-.coverage-page .VPDoc .content {
+/* /usage (pageClass: usage-page) gets room for its figures, short of the coverage grid's width. */
+.usage-page .VPDoc .container {
+  max-width: 960px !important;
+}
+.coverage-page .VPDoc .content,
+.usage-page .VPDoc .content {
   max-width: 100% !important;
 }
-.coverage-page .VPDoc .content-container {
+.coverage-page .VPDoc .content-container,
+.usage-page .VPDoc .content-container {
   max-width: 100% !important;
 }
 

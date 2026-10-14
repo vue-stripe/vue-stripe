@@ -290,8 +290,10 @@ export function seoHead(
       : url
   const description = pageData.description || siteData.description
   // Sidebar pages get a generated image from the OG image plugin (in buildEnd); the home
-  // page uses the static one.
-  const image = isHome ? HOME_IMAGE : ogImageOf(relativePath)
+  // page, and pages no sidebar links (the plugin draws no card for them), use the static one.
+  const trail = sidebarTrail(route, opts.sidebars)
+  const staticImage = isHome || trail.length === 0
+  const image = staticImage ? HOME_IMAGE : ogImageOf(relativePath)
   const dateModified = pageData.lastUpdated ? new Date(pageData.lastUpdated).toISOString() : ''
   const datePublished = isHome ? '' : datePublishedOf(siteConfig.srcDir, relativePath)
 
@@ -309,7 +311,7 @@ export function seoHead(
   ]
 
   // The plugin writes the other pages' image tags; finishOgTags adds their alt text.
-  if (isHome) {
+  if (staticImage) {
     head.push(
       ['meta', { property: 'og:image', content: image }],
       ['meta', { property: 'og:image:width', content: '1200' }],
@@ -344,7 +346,7 @@ export function seoHead(
               route,
               title: pageData.title,
               section,
-              trail: sidebarTrail(route, opts.sidebars)
+              trail
             })
           })
     )
