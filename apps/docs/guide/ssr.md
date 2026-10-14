@@ -54,7 +54,7 @@ const fetchClientSecret = () =>
 
 ### Set the publishable key where the server can read it
 
-`VueStripeProvider` throws "publishableKey or stripeKey is required" during setup when its key is empty. On the server that turns the whole response into an HTTP 500 before any browser code runs. The server process needs the key in production as well as in development; each setup below says where it reads it from. The [plugin](/guide/plugin) does not throw: with an empty key the page renders, and the error appears in the browser when Stripe.js loads.
+`VueStripeProvider` throws "publishableKey or stripeKey is required" during setup when its key is empty. In Nuxt, and on a Vite development server, that turns the whole response into an HTTP 500 before any browser code runs. A Vite SSR production server and `vitepress build` log the error instead and render nothing in the provider's place, so the page answers 200 without its payment form. The server process needs the key in production as well as in development; each setup below says where it reads it from. The [plugin](/guide/plugin) does not throw: with an empty key the page renders, and the error appears in the browser when Stripe.js loads.
 
 <a id="nuxt-3"></a>
 
@@ -361,7 +361,7 @@ Node prints `TypeError: Failed to parse URL from /api/...` and stops. A componen
 
 ### Every page answers 500 "publishableKey or stripeKey is required"
 
-The server rendered `VueStripeProvider` with an empty key. In Nuxt's production server, set `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` in the environment or start it with `node --env-file=.env` ([step 2](#_2-configure-nuxt)). In a Vite SSR app, the key must be set when you run `vite build` ([Use Vue Stripe in a Vite SSR app](/guide/vite-ssr)).
+The server rendered `VueStripeProvider` with an empty key. In Nuxt's production server, set `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` in the environment or start it with `node --env-file=.env` ([step 2](#_2-configure-nuxt)). A Vite SSR app answers 500 from its development server only, and its key must be set when you run `vite build`; see [the Vite SSR troubleshooting entry](/guide/vite-ssr#the-page-shows-expected-publishable-key-to-be-of-type-string-or-the-payment-form-is-missing).
 
 ### The server fails with `ERR_UNSUPPORTED_DIR_IMPORT`
 
