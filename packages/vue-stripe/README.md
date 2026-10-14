@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="https://raw.githubusercontent.com/vue-stripe/vue-stripe/main/.github/assets/stripe_partner_badge_verified_blurple.png" alt="Stripe Partner" width="98"/></a>
-  <a href="https://opencollective.com/vue-stripe-checkout"><img src="https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors" alt="Financial Contributors on Open Collective"/></a>
+  <a href="https://github.com/sponsors/jofftiquez"><img src="https://img.shields.io/github/sponsors/jofftiquez?style=flat-square&label=sponsors" alt="GitHub Sponsors"/></a>
   <a href="https://www.npmjs.com/package/@vue-stripe/vue-stripe"><img src="https://img.shields.io/npm/v/@vue-stripe/vue-stripe.svg?style=flat-square" alt="npm version"/></a>
   <img src="https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square" alt="npm bundle size"/>
   <img src="https://img.shields.io/npm/dw/@vue-stripe/vue-stripe?style=flat-square" alt="npm downloads"/>

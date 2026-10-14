@@ -53,7 +53,7 @@ const columns: { title: string; links: FooterLink[] }[] = [
         text: 'Report an issue',
         link: 'https://github.com/vue-stripe/vue-stripe/issues/new/choose'
       },
-      { text: 'Sponsor on Open Collective', link: 'https://opencollective.com/vue-stripe-checkout' }
+      { text: 'Sponsor on GitHub', link: 'https://github.com/sponsors/jofftiquez' }
     ]
   }
 ]

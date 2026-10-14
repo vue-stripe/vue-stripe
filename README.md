@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://stripe.com/partners/vue-stripe" target="_blank"><img src="./.github/assets/stripe_partner_badge_verified_blurple.png" alt="Stripe Partner" width="98"/></a>
-  <a href="https://opencollective.com/vue-stripe-checkout"><img src="https://opencollective.com/vue-stripe-checkout/all/badge.svg?label=financial+contributors" alt="Financial Contributors on Open Collective"/></a>
+  <a href="https://github.com/sponsors/jofftiquez"><img src="https://img.shields.io/github/sponsors/jofftiquez?style=flat-square&label=sponsors" alt="GitHub Sponsors"/></a>
   <a href="https://www.npmjs.com/package/@vue-stripe/vue-stripe"><img src="https://img.shields.io/npm/v/@vue-stripe/vue-stripe.svg?style=flat-square" alt="npm version"/></a>
   <img src="https://img.shields.io/bundlephobia/min/@vue-stripe/vue-stripe?style=flat-square" alt="npm bundle size"/>
   <img src="https://img.shields.io/npm/dw/@vue-stripe/vue-stripe?style=flat-square" alt="npm downloads"/>
@@ -198,34 +198,13 @@ pnpm lint
 
 ## Contributors
 
-### Code Contributors
-
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)]
 
-<a href="https://github.com/jofftiquez/vue-stripe-checkout/graphs/contributors"><img src="https://opencollective.com/vue-stripe-checkout/contributors.svg?width=890&button=false" /></a>
+<a href="https://github.com/vue-stripe/vue-stripe/graphs/contributors"><img src="https://contrib.rocks/image?repo=vue-stripe/vue-stripe" alt="Vue Stripe contributors" /></a>
 
-### Financial Contributors
+## Sponsors
 
-Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/vue-stripe-checkout/contribute)]
-
-#### Individuals
-
-<a href="https://opencollective.com/vue-stripe-checkout"><img src="https://opencollective.com/vue-stripe-checkout/individuals.svg?width=890"></a>
-
-#### Organizations
-
-Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/vue-stripe-checkout/contribute)]
-
-<a href="https://opencollective.com/vue-stripe-checkout/organization/0/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/0/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/1/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/1/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/2/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/2/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/3/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/3/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/4/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/4/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/5/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/5/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/6/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/6/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/7/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/7/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/8/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/8/avatar.svg"></a>
-<a href="https://opencollective.com/vue-stripe-checkout/organization/9/website"><img src="https://opencollective.com/vue-stripe-checkout/organization/9/avatar.svg"></a>
+If Vue Stripe saves you time, you can support its maintenance through [GitHub Sponsors](https://github.com/sponsors/jofftiquez).
 
 ## License
 
