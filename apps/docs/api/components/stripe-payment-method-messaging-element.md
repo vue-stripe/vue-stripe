@@ -123,7 +123,10 @@ const stripeElement = (): StripePaymentMethodMessagingElement | null => messagin
 </script>
 
 <template>
-  <VueStripePaymentMethodMessagingElement ref="messagingRef" />
+  <VueStripePaymentMethodMessagingElement
+    ref="messagingRef"
+    :options="{ amount: 1099, currency: 'USD', countryCode: 'US' }"
+  />
   <button type="button" @click="focus">Focus</button>
   <button type="button" @click="clear">Clear</button>
   <p v-if="stripeElement()">The Stripe element exists</p>
