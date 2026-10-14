@@ -6,6 +6,7 @@ import { createMermaidRenderer } from 'vitepress-mermaid-renderer'
 import './styles/vars.css'
 import CopyForLLM from './components/CopyForLLM.vue'
 import StripeCoverage from './components/StripeCoverage.vue'
+import UsageStats from './components/UsageStats.vue'
 import DocIcon from './components/DocIcon.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import NotFound from './components/NotFound.vue'
@@ -126,6 +127,7 @@ export default {
     app.component('IbanElementExample', IbanElementExample)
     app.component('ExpressCheckoutExample', ExpressCheckoutExample)
     app.component('StripeCoverage', StripeCoverage)
+    app.component('UsageStats', UsageStats)
     app.component('DocIcon', DocIcon)
     // Home page sections (index.md uses layout: page and composes these)
     app.component('HomeHero', HomeHero)

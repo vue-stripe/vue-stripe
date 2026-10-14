@@ -72,7 +72,7 @@ Stripe ships Stripe.js in named release trains, and each major version of `@stri
 
 ## Who maintains it
 
-[Joff Tiquez](https://jofftiquez.dev) created Vue Stripe in 2017 and has maintained it since. Joff is also on [GitHub](https://github.com/jofftiquez) and [X](https://x.com/jrtiquez). The code, issues and releases are on [GitHub](https://github.com/vue-stripe/vue-stripe), and the package is published to npm as [`@vue-stripe/vue-stripe`](https://www.npmjs.com/package/@vue-stripe/vue-stripe).
+[Joff Tiquez](https://jofftiquez.dev) created Vue Stripe in 2017 and has maintained it since. Joff is also on [GitHub](https://github.com/jofftiquez) and [X](https://x.com/jrtiquez). The code, issues and releases are on [GitHub](https://github.com/vue-stripe/vue-stripe), and the package is published to npm as [`@vue-stripe/vue-stripe`](https://www.npmjs.com/package/@vue-stripe/vue-stripe). [Vue Stripe by the numbers](/usage) shows its downloads, GitHub stars and CDN hits.
 
 ## Where to go next
 

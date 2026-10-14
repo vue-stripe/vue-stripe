@@ -11,6 +11,18 @@ import {
   INTEGRATIONS_LEDE,
   INTEGRATIONS_TITLE
 } from './theme/data/home'
+import {
+  GITHUB_PAGE,
+  JSDELIVR_PAGE,
+  LEGACY_PACKAGE,
+  NPM_PAGE,
+  PACKAGE,
+  formatCount,
+  formatDay,
+  hasAnyFigure,
+  usageFigures,
+  type UsageData
+} from './theme/data/usage'
 import { SITE_URL, routeOf, sectionOf, type DocSection } from './seo'
 
 // Build-time Markdown for language models (https://llmstxt.org): /llms.txt indexes every page
@@ -157,6 +169,41 @@ export function coverageMarkdown(coverage: CoverageCategory[]): string {
       ].join('\n')
     })
     .join('\n\n')
+}
+
+/** The /usage numbers as Markdown, as of the build (the page itself refreshes them). */
+export function usageMarkdown(data: UsageData): string {
+  if (!hasAnyFigure(data)) {
+    return `**Live numbers unavailable.** They could not be fetched when this file was built. See [${PACKAGE} on npm](${NPM_PAGE}), [vue-stripe/vue-stripe on GitHub](${GITHUB_PAGE}) and [${PACKAGE} on jsDelivr](${JSDELIVR_PAGE}).`
+  }
+  const value = (n: number | null) => (n === null ? 'Not available' : formatCount(n))
+  const { npm, legacy } = data
+  const rows = [
+    [`npm downloads, all time (\`${PACKAGE}\`)`, value(npm.allTime)],
+    [
+      `npm downloads, all time, including the legacy \`${LEGACY_PACKAGE}\` package`,
+      npm.allTime !== null && legacy.allTime !== null
+        ? formatCount(npm.allTime + legacy.allTime)
+        : 'Not available'
+    ],
+    ...usageFigures(data).map((f) => [f.label, value(f.value)])
+  ]
+  const latest = npm.weekly[npm.weekly.length - 1]
+  return [
+    `Numbers as of ${data.fetchedAt ? formatDay(data.fetchedAt) : 'the last build'}${
+      npm.through ? `; npm counts run through ${formatDay(npm.through)}` : ''
+    }.`,
+    '',
+    '| Figure | Value |',
+    '| --- | --- |',
+    ...rows.map(([label, n]) => `| ${label} | ${n} |`),
+    ...(latest
+      ? [
+          '',
+          `Latest full week (${formatDay(latest.start)} to ${formatDay(latest.end)}): ${formatCount(latest.downloads)} npm downloads.`
+        ]
+      : [])
+  ].join('\n')
 }
 
 /**

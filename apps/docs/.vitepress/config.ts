@@ -14,7 +14,8 @@ import {
   seoHead,
   type DocSection
 } from './seo'
-import { coverageMarkdown, parseFrontmatter, writeLlmsFiles } from './llms'
+import { coverageMarkdown, parseFrontmatter, usageMarkdown, writeLlmsFiles } from './llms'
+import { loadUsage } from './theme/data/usage'
 
 // Build the "Stripe.js Coverage NN%" nav label from the single coverage data source,
 // so the toolbar stays in sync with the /coverage page automatically.
@@ -541,7 +542,8 @@ export default defineConfigWithTheme<ThemeConfig>({
         text: 'Links',
         items: [
           { text: 'GitHub', link: 'https://github.com/vue-stripe/vue-stripe' },
-          { text: 'NPM', link: 'https://www.npmjs.com/package/@vue-stripe/vue-stripe' }
+          { text: 'NPM', link: 'https://www.npmjs.com/package/@vue-stripe/vue-stripe' },
+          { text: 'Usage and downloads', link: '/usage' }
         ]
       }
     ],
@@ -651,7 +653,11 @@ export default defineConfigWithTheme<ThemeConfig>({
       sections: docSections,
       sidebars,
       header: llmsHeader,
-      components: { StripeCoverage: coverageMarkdown(coverage) }
+      components: {
+        StripeCoverage: coverageMarkdown(coverage),
+        // The same numbers the page was built with (one fetch per build).
+        UsageStats: usageMarkdown(await loadUsage())
+      }
     })
   }
 })
