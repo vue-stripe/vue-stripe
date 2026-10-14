@@ -54,7 +54,7 @@ Stripe replaces `{CHECKOUT_SESSION_ID}` with the session ID when it redirects.
 
 ## 2. Wrap the page in the provider
 
-`VueStripeCheckoutElementsProvider` calls `stripe.initCheckoutElementsSdk()` and makes the session available to the components inside it. `client-secret` accepts a string or a **Promise**. Pass the Promise from your request so the elements can mount while the session is being created. If the page is rendered on a server (Nuxt, Vite SSR, Quasar SSR), don't create this Promise at the top of `<script setup>`: the request starts during server rendering and stops a plain Node SSR server, so pass `fetch-client-secret` instead, as in [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser).
+`VueStripeCheckoutElementsProvider` calls `stripe.initCheckoutElementsSdk()` and makes the session available to the components inside it. Pass the request for the client secret as a function in `fetch-client-secret`: the provider calls it in the browser only, once Stripe.js has loaded.
 
 ```vue
 <!-- CheckoutPage.vue -->
@@ -65,14 +65,16 @@ import CheckoutForm from './CheckoutForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
-const clientSecret = fetch('/api/checkout-elements-session', { method: 'POST' })
-  .then((response) => response.json())
-  .then((data) => data.clientSecret)
+// Called by the provider in the browser only, once Stripe.js has loaded
+const fetchClientSecret = () =>
+  fetch('/api/checkout-elements-session', { method: 'POST' })
+    .then((response) => response.json())
+    .then((data: { clientSecret: string }) => data.clientSecret)
 </script>
 
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+    <VueStripeCheckoutElementsProvider :fetch-client-secret="fetchClientSecret">
       <CheckoutForm />
 
       <template #loading>Loading checkout...</template>
@@ -82,7 +84,7 @@ const clientSecret = fetch('/api/checkout-elements-session', { method: 'POST' })
 </template>
 ```
 
-`fetch-client-secret` takes a function returning a Promise instead. The provider calls it only in the browser, after Stripe.js loads, so use it when the page is rendered on the server ([Use Vue Stripe with Nuxt and SSR](/guide/ssr#build-the-page-on-a-checkout-session-instead)). The previous name, `VueStripeCheckoutProvider`, still works as a deprecated alias.
+`client-secret` also takes the client secret as a string, or as a Promise that you start at the top of `<script setup>`. The function is safer: a Promise that rejects before the provider mounts is reported as an uncaught rejection ([Errors](/api/components/stripe-checkout-provider#errors)), and on a server-rendered page (Nuxt, Vite SSR, Quasar SSR) the request starts during server rendering, which stops a plain Node SSR server ([Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser)). The previous name, `VueStripeCheckoutProvider`, still works as a deprecated alias.
 
 ## 3. Build the form
 
@@ -161,7 +163,7 @@ With [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-prici
 
 ```vue
 <VueStripeCheckoutElementsProvider
-  :client-secret="clientSecret"
+  :fetch-client-secret="fetchClientSecret"
   :adaptive-pricing="{ allowed: true }"
 >
   <VueStripeCurrencySelectorElement />
@@ -177,7 +179,7 @@ Business customers can enter a VAT/GST number. Create the session with `tax_id_c
 
 ```vue
 <VueStripeProvider :publishable-key="publishableKey">
-  <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+  <VueStripeCheckoutElementsProvider :fetch-client-secret="fetchClientSecret">
     <VueStripeTaxIdElement />
   </VueStripeCheckoutElementsProvider>
 </VueStripeProvider>
@@ -190,7 +192,7 @@ To verify tax IDs as the customer types, pass `:options="{ verification: { taxId
 `VueStripeContactDetailsElement` collects the customer's email and writes it to the session (`session.value.email`), in place of your own input plus `updateEmail()`. No beta is needed. See the [Contact Details API](/api/components/stripe-contact-details-element).
 
 ```vue
-<VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+<VueStripeCheckoutElementsProvider :fetch-client-secret="fetchClientSecret">
   <VueStripeContactDetailsElement />
   <VueStripePaymentElement />
 </VueStripeCheckoutElementsProvider>
@@ -210,7 +212,7 @@ Starting with Stripe.js Clover (8.0), saved payment methods are on by default: a
 
 ```vue
 <VueStripeCheckoutElementsProvider
-  :client-secret="clientSecret"
+  :fetch-client-secret="fetchClientSecret"
   :elements-options="{
     savedPaymentMethod: { enableSave: 'never', enableRedisplay: 'auto' }
   }"

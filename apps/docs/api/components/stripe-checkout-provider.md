@@ -41,7 +41,7 @@ const fetchClientSecret = () =>
 </script>
 ```
 
-A Promise in `client-secret` works too, but not one created at the top of `<script setup>` in a server-rendered page: see [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser).
+A Promise in `client-secret` works too, with two limits: a request that fails before the provider mounts is reported as an uncaught rejection (see [Errors](#errors)), and on a server-rendered page the request would start on the server (see [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser)).
 
 ```vue
 <!-- CheckoutForm.vue -->

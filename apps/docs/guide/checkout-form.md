@@ -91,7 +91,7 @@ const fetchClientSecret = () =>
 </script>
 ```
 
-`client-secret` also takes the client secret as a string, or as a Promise that you start at the top of `<script setup>`. Don't use the Promise when the page is rendered on a server (Nuxt, Vite SSR, Quasar SSR): the request starts during server rendering, and in a plain Node SSR server it stops the process. See [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser).
+`client-secret` also takes the client secret as a string, or as a Promise that you start at the top of `<script setup>`. The function is safer: a Promise that rejects before the provider mounts is reported as an uncaught rejection ([Errors](/api/components/stripe-checkout-form-provider#errors)), and on a server-rendered page (Nuxt, Vite SSR, Quasar SSR) the request starts during server rendering, which stops a plain Node SSR server. See [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser).
 
 ## 3. Render the form and confirm
 
