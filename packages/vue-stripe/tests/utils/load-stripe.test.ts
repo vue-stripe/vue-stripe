@@ -96,6 +96,27 @@ describe(
       expect(stripeScripts()).toHaveLength(1)
     })
 
+    it('registers the Vue Stripe partner details on every instance, the loadStripe re-export included', async () => {
+      const { loadStripe, loadStripeInstance } = await freshLoader()
+
+      const fromProvider = loadStripeInstance('pk_test_partner_provider', {})
+      const fromApp = loadStripe('pk_test_partner_app')
+      await settled(Promise.resolve())
+      const instance = finishScriptLoad()
+      await settled(fromProvider)
+      await settled(fromApp)
+
+      // The literal ID is the Stripe Verified Partner attribution: changing it must fail here.
+      const details = expect.objectContaining({
+        name: 'vue-stripe',
+        url: 'https://vuestripe.com',
+        partner_id: 'pp_partner_IqtOXpBSuz0IE2'
+      })
+      expect(instance.registerAppInfo).toHaveBeenNthCalledWith(1, details)
+      expect(instance.registerAppInfo).toHaveBeenNthCalledWith(2, details)
+      expect(instance.registerAppInfo).toHaveBeenCalledTimes(2)
+    })
+
     it('applies advancedFraudSignals: false to the first load and keeps it for concurrent ones', async () => {
       const { loadStripeInstance } = await freshLoader()
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
