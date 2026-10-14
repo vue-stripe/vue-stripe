@@ -22,6 +22,8 @@ Each layer provides one object under its own injection key, a `Symbol`, so two l
 
 ```mermaid
 flowchart TD
+    accTitle: The Vue Stripe provider chain
+    accDescr: VueStripeProvider provides stripeInjectionKey. VueStripeElements injects stripe and provides stripeElementsInjectionKey. VueStripePaymentElement, VueStripeAddressElement and usePaymentIntent inject elements, and usePaymentIntent also injects stripe.
     subgraph Provider["VueStripeProvider"]
         P1["<b>provides</b> stripeInjectionKey<br/>{ stripe, loading, error }"]
     end

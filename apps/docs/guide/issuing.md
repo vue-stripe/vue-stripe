@@ -35,6 +35,8 @@ Stripe.js fetches the card details with an **ephemeral key**: a short-lived key,
 
 ```mermaid
 sequenceDiagram
+    accTitle: Issuing card details sequence
+    accDescr: The browser creates an ephemeral key nonce and posts it with the card ID to your server, the server checks the user owns the card, creates an ephemeral key with the Stripe API and returns its secret, and the browser renders the Issuing components, whose Stripe iframes fetch the card details.
     participant B as Browser (Stripe.js)
     participant S as Your server
     participant API as Stripe API

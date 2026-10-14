@@ -35,6 +35,8 @@ The Payment Element can also start without an Intent. With `mode`, `amount` and 
 
 ```mermaid
 stateDiagram-v2
+    accTitle: The statuses of a PaymentIntent
+    accDescr: A PaymentIntent starts in requires_payment_method. Attaching a payment method moves it to requires_confirmation, and confirming moves it to requires_action or processing. After the customer completes an action it is processing, and processing ends in succeeded, or in requires_capture until your server captures it when capture_method is manual. A failed action or a declined payment returns it to requires_payment_method. An Intent waiting for a payment method or for capture can be canceled.
     [*] --> requires_payment_method: your server creates it
     requires_payment_method --> requires_confirmation: payment method attached
     requires_payment_method --> requires_action: confirmed

@@ -12,6 +12,7 @@ import DocIcon from './components/DocIcon.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import NotFound from './components/NotFound.vue'
 import SearchKeyHint from './components/SearchKeyHint.vue'
+import MermaidLabels from './components/MermaidLabels.vue'
 import HomeHero from './components/home/HomeHero.vue'
 import HomeFeatures from './components/home/HomeFeatures.vue'
 import HomeIntegrations from './components/home/HomeIntegrations.vue'
@@ -96,8 +97,8 @@ export default {
     return h(DefaultTheme.Layout, null, {
       // Copy for LLMs button near the title on doc pages
       'doc-before': () => h(CopyForLLM),
-      // Analytics tracking and the search hint fix (invisible components)
-      'layout-top': () => [h(AnalyticsWrapper), h(SearchKeyHint)],
+      // Analytics tracking, the search hint fix and the diagram labels (invisible components)
+      'layout-top': () => [h(AnalyticsWrapper), h(SearchKeyHint), h(MermaidLabels)],
       // Site footer on every page (replaces the default two-line footer)
       'layout-bottom': () => h(SiteFooter),
       // The 404 page, with a main landmark and links to every section

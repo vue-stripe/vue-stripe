@@ -182,6 +182,20 @@ describe('docs SEO', () => {
     expect(problems, problems.join('\n')).toEqual([])
   })
 
+  it('every Mermaid diagram has an accTitle and accDescr, its name for screen readers', () => {
+    const diagrams = pages.flatMap((p) =>
+      [...p.source.matchAll(/^```mermaid\n([\s\S]*?)^```/gm)].map((m) => ({
+        path: p.path,
+        code: m[1]!
+      }))
+    )
+    expect(diagrams.length).toBeGreaterThan(0)
+    const problems = diagrams
+      .filter((d) => !/^\s*accTitle: \S/m.test(d.code) || !/^\s*accDescr: \S/m.test(d.code))
+      .map((d) => `${d.path}: a diagram without accTitle and accDescr`)
+    expect(problems, problems.join('\n')).toEqual([])
+  })
+
   it('ignores # lines inside code blocks when counting H1s', () => {
     expect(h1s('---\ntitle: x\n---\n\n# Title\n\n```sh\n# a comment\n```\n')).toEqual(['Title'])
     expect(h1s('# One\n\n# Two\n')).toHaveLength(2)
