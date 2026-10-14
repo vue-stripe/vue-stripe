@@ -16,7 +16,7 @@ npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
 
 ## 2. Add your publishable key
 
-Quasar passes to client code only the variables whose name starts with `QCLI_`. A `VITE_` variable is `undefined` in a Quasar app, and the provider or plugin then throws "publishableKey or stripeKey is required". Put the key in `.env` at the project root:
+Quasar passes to client code only the variables whose name starts with `QCLI_`. A `VITE_` variable is `undefined` in a Quasar app, and TypeScript does not flag it. With the plugin from step 3 the page still renders, and each element shows Stripe.js' message "Expected publishable key to be of type string, got type undefined instead.", which the console logs as `[Vue Stripe] Initialization error`. A `VueStripeProvider` throws "publishableKey or stripeKey is required" instead, and its part of the page stays empty. Put the key in `.env` at the project root:
 
 ```bash
 # .env
