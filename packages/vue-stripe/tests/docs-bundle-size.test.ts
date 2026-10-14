@@ -204,6 +204,9 @@ describe('/guide/bundle-size numbers', () => {
       }[]
       expect(data.budgets.map((b) => b.name)).toEqual(budgets.map((b) => b.name))
       expect(data.budgets[0]!.size).toBe(data.total!.gzip)
+      // The UMD build carries the @stripe/stripe-js loader on top of every export (#714).
+      const umdBudget = data.budgets.find((b) => b.name.startsWith('UMD bundle'))!
+      expect(umdBudget.size).toBeGreaterThan(data.total!.gzip + data.stripeLoader!.size.gzip * 0.5)
 
       const parts = bundleSizeMarkdown(data)
       expect(parts['BundleSize#summary']).toContain(formatSize(data.total!.gzip, 2))

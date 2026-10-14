@@ -7,6 +7,13 @@
     "gzip": true
   },
   {
+    "name": "UMD bundle (dist/umd/index.js), with the @stripe/stripe-js loader",
+    "path": "dist/umd/index.js",
+    "ignore": ["vue-demi"],
+    "limit": "13.25 kB",
+    "gzip": true
+  },
+  {
     "name": "Tree-shaken: import { VueStripeCardElement }",
     "path": "dist/es/index.js",
     "import": "{ VueStripeCardElement }",
