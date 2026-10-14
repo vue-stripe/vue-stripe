@@ -78,11 +78,14 @@ export default {
   Layout: () => {
     const { isDark } = useData()
 
-    // Initialize Mermaid renderer with theme support
+    // Initialize Mermaid renderer with theme support. The dark theme's edge labels are #ccc on
+    // #585858 (4.43:1); a darker label background gives 6.46:1.
     const initMermaid = () => {
-      createMermaidRenderer({
-        theme: isDark.value ? 'dark' : 'default'
-      })
+      createMermaidRenderer(
+        isDark.value
+          ? { theme: 'dark', themeVariables: { edgeLabelBackground: '#404040' } }
+          : { theme: 'default' }
+      )
     }
 
     // Initial Mermaid setup

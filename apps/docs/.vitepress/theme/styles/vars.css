@@ -74,9 +74,12 @@
   --vp-c-bg-elv: #202127;
   --vp-c-bg-soft: #202127;
 
+  /* text-3 is lighter than VitePress's 0.38 (3.2:1) so muted text (the footer's legal lines,
+     the coverage table, the home and usage notes) meets 4.5:1 on every dark background:
+     5.2:1 on bg-soft, 5.35:1 on bg, 5.5:1 on bg-alt. */
   --vp-c-text-1: rgba(255, 255, 245, 0.86);
   --vp-c-text-2: rgba(235, 235, 245, 0.6);
-  --vp-c-text-3: rgba(235, 235, 245, 0.38);
+  --vp-c-text-3: rgba(235, 235, 245, 0.56);
 
   --vp-c-divider: rgba(84, 84, 88, 0.65);
   --vp-c-border: rgba(82, 82, 89, 0.68);

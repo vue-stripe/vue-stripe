@@ -588,9 +588,10 @@ export default defineConfigWithTheme<ThemeConfig>({
 
   markdown: {
     theme: {
-      // The high-contrast variant: github-light's orange, red and green tokens are under 4.5:1.
+      // The high-contrast variants: github-light's orange, red and green tokens and
+      // github-dark's comments (3.75:1) are under 4.5:1.
       light: 'github-light-high-contrast',
-      dark: 'github-dark'
+      dark: 'github-dark-high-contrast'
     }
   },
 
