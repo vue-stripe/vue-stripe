@@ -50,7 +50,7 @@ The [`createVueStripe()` plugin](/api/plugin) provides Stripe to the whole app a
 ## What these numbers leave out
 
 - **Vue.** It is a peer dependency, so your app already has it and the numbers never count it. The same goes for `vue-demi`, the small module that lets one build run on Vue 3 and Vue 2.7 by re-exporting your app's Vue.
-- **Stripe.js.** Stripe.js itself is never in your bundle. Stripe requires it to be loaded from `js.stripe.com`, and the `@stripe/stripe-js` loader adds that script tag at runtime ([How Stripe.js is loaded](/guide/stripe-js-loading) explains when). `@stripe/stripe-js` is a peer dependency you install next to Vue Stripe, and Vue Stripe imports only its `pure` loader. The table below gives that loader's own size.
+- **Stripe.js.** Stripe.js itself is never in your bundle. Stripe requires it to be loaded from `js.stripe.com`, and the `@stripe/stripe-js` loader adds that script tag at runtime ([How Stripe.js is loaded](/guide/stripe-js-loading) explains when). `@stripe/stripe-js` is a peer dependency you install next to Vue Stripe, and Vue Stripe imports only its `pure` loader. The table below gives that loader's own size. The UMD build is the exception: it includes the loader (see below).
 - **The stylesheet.** The element styles are a separate CSS file, `@vue-stripe/vue-stripe/style.css`, which your app imports once. It is measured on its own below.
 
 <BundleSize part="other" />
@@ -60,7 +60,7 @@ The [`createVueStripe()` plugin](/api/plugin) provides Stripe to the whole app a
 The package ships two more builds, and neither of them tree-shakes. Each is one file with every export in it.
 
 - **CommonJS** (`dist/cjs/index.cjs`) is what `require('@vue-stripe/vue-stripe')` loads: Node, test runners and tools that don't read ES modules. On a server its size doesn't matter. In a browser bundle it would, so check that your bundler takes the ES build. Any bundler that reads `exports` or `module` does.
-- **UMD** (`dist/umd/index.js`) is for a `<script>` tag, loaded from unpkg or jsDelivr. It defines a `VueStripe` global with every export, because no bundler runs to leave anything out.
+- **UMD** (`dist/umd/index.js`) is for a `<script>` tag, loaded from unpkg or jsDelivr. It defines a `VueStripe` global with every export, because no bundler runs to leave anything out. It also includes the `@stripe/stripe-js` `pure` loader, which publishes no file for a `<script>` tag, so the page needs only Vue and vue-demi before it ([Without a bundler](/guide/installation#without-a-bundler)). Stripe.js itself still loads from `js.stripe.com`.
 
 Their sizes are in the table above.
 
@@ -87,7 +87,7 @@ In the report, look for `@vue-stripe/vue-stripe`: only the exports you use, and 
 
 ## The size budget in CI
 
-The library has a size budget, and CI enforces it. `packages/vue-stripe/.size-limit.json` sets a limit, minified and gzipped, for the whole ES build and for three single imports. [size-limit](https://github.com/ai/size-limit) checks them on every pull request and again before each release is published, and a change that goes over a limit fails. CI also comments each pull request with the size change against its base branch. To check locally, run `pnpm size` in the repository.
+The library has a size budget, and CI enforces it. `packages/vue-stripe/.size-limit.json` sets a limit, minified and gzipped, for the whole ES build, the whole UMD build (with the `@stripe/stripe-js` loader in it) and three single imports. [size-limit](https://github.com/ai/size-limit) checks them on every pull request and again before each release is published, and a change that goes over a limit fails. CI also comments each pull request with the size change against its base branch. To check locally, run `pnpm size` in the repository.
 
 <BundleSize part="budgets" />
 

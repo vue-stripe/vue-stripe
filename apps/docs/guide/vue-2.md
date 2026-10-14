@@ -6,7 +6,7 @@ description: "Use Vue Stripe in a Vue 2.7 app: install the packages, let vue-dem
 
 Run Vue Stripe in a Vue 2.7 app. The library ships one build for Vue 2.7 and Vue 3 through [vue-demi](https://github.com/vueuse/vue-demi); every component is a render function, so templates, `h()` and the Options API all work.
 
-Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not supported; upgrade to 2.7 first.
+Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not supported; upgrade to 2.7 first. These steps assume a bundler (Vite or Vue CLI); for a page that loads Vue from a `<script>` tag, see [Without a bundler](/guide/installation#without-a-bundler).
 
 ::: info What Vue 2.7 support covers
 - **Client-side apps.** Vue Stripe is tested on Vue 2.7 in CI (the built package is mounted on Vue 2.7.16 and its types are checked) and with a complete client-side app built from these docs. Server rendering is tested on Nuxt 4 only; Nuxt 2 and other Vue 2 SSR setups are not tested.

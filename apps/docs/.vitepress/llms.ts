@@ -316,7 +316,11 @@ export function bundleSizeMarkdown(data: BundleSizes): Record<string, string> {
     ...(builds.cjs
       ? [`| CommonJS build, \`dist/cjs/index.cjs\` | ${sizeCells(builds.cjs)} |`]
       : []),
-    ...(builds.umd ? [`| UMD build, \`dist/umd/index.js\` | ${sizeCells(builds.umd)} |`] : [])
+    ...(builds.umd
+      ? [
+          `| UMD build, \`dist/umd/index.js\`, with the \`@stripe/stripe-js\` loader | ${sizeCells(builds.umd)} |`
+        ]
+      : [])
   ].join('\n')
 
   const budgets = data.budgets.length
