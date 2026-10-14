@@ -48,14 +48,14 @@ Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret`
 | `amount` | `number` | No | Amount in the smallest currency unit (e.g. cents for USD). Required for `'payment'` and `'subscription'` modes |
 | `setupFutureUsage` | `'off_session' \| 'on_session'` | No | Indicates intent to save the payment method for future use |
 | `captureMethod` | `'automatic' \| 'automatic_async' \| 'manual'` | No | Controls when to capture funds from the customer's account |
-| `appearance` | `Appearance` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance`. Changes are applied live with `elements.update()` |
+| `appearance` | `Appearance` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance`. Changes are applied live with `elements.update()`; a new but deep-equal object is not a change |
 | `fonts` | `(CssFontSource \| CustomFontSource)[]` | No | Custom fonts to load into the Elements iframe. Convenience prop — equivalent to `options.fonts` |
 | `locale` | `string` | No | Locale to display Elements in (e.g. `'en'`, `'fr'`, `'auto'`). Convenience prop — equivalent to `options.locale`. Changes are applied live with `elements.update()` |
 | `options` | `StripeElementsOptions` | No | Any other option passed to `stripe.elements()` (e.g. `allowedPaymentMethodTypes` in the mode-based flow, `loader`) |
 
 \* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation; see [Collect payment details before creating an Intent](/guide/deferred-intent).
 
-A new `clientSecret`, `mode`, `currency`, `amount` or `setupFutureUsage` calls `stripe.elements()` again to create a new Elements group. Changes to the `appearance` and `locale` props are applied to the existing group with `elements.update()`, so mounted elements keep what the customer typed (keys inside `options` are read when the group is created).
+A new `clientSecret`, `mode`, `currency`, `amount` or `setupFutureUsage` calls `stripe.elements()` again to create a new Elements group. Changes to the `appearance` and `locale` props are applied to the existing group with `elements.update()`, so mounted elements keep what the customer typed (keys inside `options` are read when the group is created). The values are compared by content: a re-render that passes a new but deep-equal object (e.g. an inline `:appearance="{ ... }"`) does not call `update()`.
 
 ::: warning `paymentMethodTypes` was removed in v6
 Stripe.js Endive rejects `paymentMethodTypes` on `stripe.elements()` as an integration error, so `VueStripeElements` no longer has this prop (and drops the key if it appears in `options`). Choose the payment methods instead with:
@@ -146,7 +146,7 @@ const fonts = [{ cssSrc: 'https://fonts.googleapis.com/css?family=Roboto' }]
 </template>
 ```
 
-Changes to `appearance` are applied to the mounted elements with `elements.update()`. Pass a stable object (a `ref` or `computed`), not a new inline object on every render, if the parent re-renders often. [Style elements](/guide/styling#_2-theme-the-fields-with-the-appearance-api) has full theme examples, including [switching themes at runtime](/guide/styling#switch-themes-at-runtime).
+Changes to `appearance` are applied to the mounted elements with `elements.update()`, including changes made in place to a reactive object. An inline object is safe: a re-render that rebuilds it with the same content does not update Elements. [Style elements](/guide/styling#_2-theme-the-fields-with-the-appearance-api) has full theme examples, including [switching themes at runtime](/guide/styling#switch-themes-at-runtime).
 
 ## Events
 
@@ -190,7 +190,7 @@ import { computed, ref } from 'vue'
 import { VueStripeElements, VueStripePaymentElement } from '@vue-stripe/vue-stripe'
 
 const theme = ref<'stripe' | 'night'>('stripe')
-// A computed keeps the object stable across re-renders, so only a theme change updates Elements.
+// Only a change of content updates Elements; an inline object with the same content does not.
 const appearance = computed(() => ({ theme: theme.value }))
 const applying = ref(false)
 

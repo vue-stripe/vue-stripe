@@ -172,9 +172,11 @@ export default /* @__PURE__ */ defineComponent({
     )
 
     // Appearance / locale are applied with elements.update() so the mounted elements keep
-    // their state. elements.update() returns a Promise since Stripe.js Dahlia.
+    // their state. elements.update() returns a Promise since Stripe.js Dahlia. Watching a
+    // snapshot skips a new but deep-equal object (an inline :appearance on a parent re-render),
+    // which would otherwise update, emit update-end and can loop through a re-rendering handler.
     watch(
-      () => [props.appearance, props.locale],
+      () => JSON.stringify([props.appearance, props.locale]),
       () => {
         if (!elements.value) return
         const updateOptions: Record<string, unknown> = {}
@@ -188,8 +190,7 @@ export default /* @__PURE__ */ defineComponent({
             emit('error', message)
           }
         )
-      },
-      { deep: true }
+      }
     )
 
     onMounted(() => {
