@@ -120,4 +120,4 @@ One composable per Stripe.js `confirm<Method>Payment` and `confirm<Method>Setup`
 | Export | Description |
 |--------|-------------|
 | [createVueStripe](/api/plugin) | Vue plugin that provides Stripe to the whole app, in place of `VueStripeProvider` |
-| `loadStripe` | The `@stripe/stripe-js/pure` loader, with the same signature and `setLoadParameters`, sharing one Stripe.js load with every provider on the page. See [How Stripe.js is loaded](/guide/stripe-js-loading#one-script-many-instances) |
+| `loadStripe` | A wrapper around the `@stripe/stripe-js/pure` loader, with the same signature and `setLoadParameters`. It shares one Stripe.js load with every provider on the page, creates a new `Stripe` instance on every call, and registers Vue Stripe's app info (`stripe.registerAppInfo()`) on it. See [How Stripe.js is loaded](/guide/stripe-js-loading#one-script-many-instances) |
