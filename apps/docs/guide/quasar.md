@@ -4,7 +4,7 @@ description: "Set up Vue Stripe in a Quasar app: the QCLI_ key prefix, a boot fi
 
 # Use Vue Stripe with Quasar
 
-Set up Vue Stripe in a Quasar CLI app built with Vite (`@quasar/app-vite`), in SPA or SSR mode. A Quasar app differs from a plain Vite app in six places: the key's prefix, the missing `main.ts`, a Content Security Policy in `index.html`, the dev proxy, the default hash router and, in SSR mode, where requests may start.
+Set up Vue Stripe in a Quasar CLI app built with Vite (`@quasar/app-vite`), in SPA or SSR mode. A Quasar app differs from a plain Vite app in six places: the key's prefix, the missing `main.ts`, the Content Security Policy that some starters put in `index.html`, the dev proxy, the default hash router and, in SSR mode, where requests may start.
 
 These steps were tested with Quasar 2.35 and `@quasar/app-vite` 3.10 in SPA and SSR mode, in development and in a production build. For Quasar's webpack mode (`@quasar/app-webpack`), see the key table in [Install and set up](/guide/installation#_3-add-your-publishable-key); the other steps are the same.
 
@@ -53,7 +53,7 @@ The [plugin](/guide/plugin) makes Stripe available to every page, so the pages b
 
 ## 4. Allow Stripe in the Content Security Policy
 
-The starter's `index.html` has a Content Security Policy that allows scripts from your own origin only. It blocks Stripe.js: the provider shows "Failed to load Stripe.js" and the console names the `script-src` directive. Replace the `<meta http-equiv="Content-Security-Policy">` tag with one that adds Stripe's hosts:
+A starter created without ESLint has a Content Security Policy in `index.html` that allows scripts from your own origin only. It blocks Stripe.js: the provider shows "Failed to load Stripe.js" and the console names the `script-src` directive. If your `index.html` has a `<meta http-equiv="Content-Security-Policy">` tag, replace it with one that adds Stripe's hosts:
 
 ```html
 <!-- index.html -->
@@ -68,6 +68,8 @@ These are the Stripe.js directives from [Stripe's CSP list](https://docs.stripe.
 - **`fonts` on `VueStripeElements`, or `loadFonts()`**: the stylesheet's host in `connect-src`, for example `https://fonts.googleapis.com`.
 - **Link**: `https://link.com https://*.link.com` in `frame-src` and `connect-src`, and `https://*.link.com` in `img-src`.
 - **Address Element with your own Google Maps key**: `https://maps.googleapis.com` in `script-src` and `connect-src`.
+
+A starter created with the ESLint preset has no such tag, and Stripe.js loads without changes. To give it a policy, add the tag above to the `<head>` of `index.html`.
 
 If you set the policy as a response header on your server instead, remove the meta tag and put the same directives in the header.
 
@@ -92,7 +94,7 @@ The proxy also runs in `quasar dev -m ssr`, where it would send `/api` past your
 
 ## 6. Make `return_url` reach your return page
 
-The guides send the customer back to `${window.location.origin}/payment-complete` after a redirect, and the return page reads Stripe's query parameters from `window.location.search`. That path only reaches your route with history-mode routing. The Quasar starter uses the hash router, so the customer lands on the home page and the return page never runs. Choose one:
+The guides send the customer back to your app after a redirect: the Payment Element guides to `${window.location.origin}/payment-complete`, set in the browser, and the Checkout guides to the `success_url` or `return_url` of the Checkout Session, set on your server. The return page reads the query parameters from `window.location.search`. These paths only reach your route with history-mode routing. The Quasar starter uses the hash router, so the customer lands on the home page and the return page never runs. Choose one:
 
 - **Switch to history mode** (SSR mode needs it anyway, because the server only sees the path):
 
@@ -103,7 +105,7 @@ The guides send the customer back to `${window.location.origin}/payment-complete
   }
   ```
 
-  Your production host must then answer every route with `index.html`, for example `quasar serve dist/spa --history`.
+  The guides' URLs then work unchanged. Your production host must answer every route with `index.html`, for example `quasar serve dist/spa --history`.
 
 - **Keep the hash router** and put the route after `#`:
 
@@ -114,6 +116,19 @@ The guides send the customer back to `${window.location.origin}/payment-complete
   ```
 
   Stripe adds its parameters before the `#` (`/?payment_intent=...&redirect_status=succeeded#/payment-complete`), so the return page reads them from `window.location.search` as in the guides.
+
+  A Checkout Session URL is different. You set it on your server in [Redirect to Stripe Checkout](/guide/checkout#_1-create-a-checkout-session-on-your-server), [Embed Stripe Checkout](/guide/embedded-checkout#_1-create-the-session-on-your-server) and [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_1-create-the-session-on-your-server), and Stripe redirects to it as written, replacing only `{CHECKOUT_SESSION_ID}`. Put the query before the `#`:
+
+  ```js
+  // Redirect to Stripe Checkout
+  success_url: 'https://example.com/?session_id={CHECKOUT_SESSION_ID}#/success',
+  cancel_url: 'https://example.com/#/cancel'
+
+  // Embedded Checkout, and your own checkout page
+  return_url: 'https://example.com/?session_id={CHECKOUT_SESSION_ID}#/checkout/complete'
+  ```
+
+  Written after the route (`/#/success?session_id=...`), `session_id` ends up in the hash, where `window.location.search` does not see it, and the return page cannot check the payment.
 
 ## 7. Render a payment form
 
@@ -150,7 +165,20 @@ onMounted(async () => {
 </template>
 ```
 
-`PaymentForm.vue` is the form from [Accept a payment with the Payment Element](/guide/payment-element#_3-render-the-payment-element-and-confirm); save it in `src/components/`. Add both pages to `src/router/routes.ts`, for example as `pay` and `payment-complete`, then pay with a [test card](/guide/testing#cards).
+`PaymentForm.vue` is the form from [Accept a payment with the Payment Element](/guide/payment-element#_3-render-the-payment-element-and-confirm); save it in `src/components/`. If you kept the hash router, change its `return_url` as in step 6.
+
+The return page is `CompletePage.vue` from [Check the result on the return page](/guide/error-handling#_4-check-the-result-on-the-return-page); save it in `src/pages/`. The plugin from step 3 gives it Stripe, so it needs no `VueStripeProvider`. Add both pages to the children of the layout route in `src/router/routes.ts`:
+
+```ts
+// src/router/routes.ts
+children: [
+  { path: '', component: () => import('@/pages/IndexPage.vue') },
+  { path: 'pay', component: () => import('@/pages/PaymentPage.vue') },
+  { path: 'payment-complete', component: () => import('@/pages/CompletePage.vue') }
+]
+```
+
+Open `/pay` (`/#/pay` with the hash router) and pay with a [test card](/guide/testing#cards). After the payment, the return page shows "Payment received."
 
 ## 8. Run in SSR mode
 
@@ -218,7 +246,7 @@ The middleware uses the context API (`c.json()`) of Hono, the webserver Quasar s
   import CheckoutForm from '@/components/CheckoutForm.vue'
 
   const fetchClientSecret = () =>
-    fetch('/api/checkout-session', { method: 'POST' })
+    fetch('/api/checkout-elements-session', { method: 'POST' })
       .then((response) => response.json())
       .then((data) => data.clientSecret)
   </script>
@@ -235,13 +263,13 @@ The middleware uses the context API (`c.json()`) of Hono, the webserver Quasar s
   </template>
   ```
 
-  `CheckoutForm.vue` is the form from [Build the form](/guide/custom-checkout#_3-build-the-form), and `/api/checkout-session` is a second route in the middleware that creates the session as in [step 1 of that guide](/guide/custom-checkout#_1-create-the-session-on-your-server).
+  `CheckoutForm.vue` is the form from [Build the form](/guide/custom-checkout#_3-build-the-form), and `/api/checkout-elements-session` is a second route in the middleware that creates the session as in [step 1 of that guide](/guide/custom-checkout#_1-create-the-session-on-your-server).
 
 - To render a part of the page in the browser only, wrap it in [`<q-no-ssr>`](https://quasar.dev/vue-components/no-ssr). Code inside it does not run on the server, so a sample that starts its request in `setup` is safe there.
 
 ## Result
 
-Stripe.js loads under the starter's Content Security Policy, the key comes from a `QCLI_` variable, every page can use the elements through the plugin, and the customer returns to your return page after a redirect. In SSR mode the server renders the page without loading Stripe.js, serves `/api` itself, and no request starts during server rendering.
+Stripe.js loads under your Content Security Policy, the key comes from a `QCLI_` variable, every page can use the elements through the plugin, and the customer returns to your return page after a redirect. In SSR mode the server renders the page without loading Stripe.js, serves `/api` itself, and no request starts during server rendering.
 
 ## See also
 
