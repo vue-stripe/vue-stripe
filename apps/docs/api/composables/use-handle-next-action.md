@@ -11,18 +11,28 @@ Useful when you confirm an intent server-side and only need the client to comple
 ## Usage
 
 ```vue
-<script setup>
+<script setup lang="ts">
+import { ref } from 'vue'
 import { useHandleNextAction } from '@vue-stripe/vue-stripe'
 
+// clientSecret of a PaymentIntent your server confirmed, in status requires_action
+const props = defineProps<{ clientSecret: string }>()
 const { handleNextAction, loading, error } = useHandleNextAction()
+const paid = ref(false)
 
-const finish = async (clientSecret) => {
-  const { paymentIntent, error } = await handleNextAction({ clientSecret })
-  if (paymentIntent?.status === 'succeeded') {
-    // done
-  }
+const finish = async () => {
+  const { paymentIntent } = await handleNextAction({ clientSecret: props.clientSecret })
+  if (paymentIntent?.status === 'succeeded') paid.value = true
 }
 </script>
+
+<template>
+  <p v-if="paid">Payment received.</p>
+  <template v-else>
+    <button :disabled="loading" @click="finish">Complete payment</button>
+    <p v-if="error">{{ error }}</p>
+  </template>
+</template>
 ```
 
 ## Return Value

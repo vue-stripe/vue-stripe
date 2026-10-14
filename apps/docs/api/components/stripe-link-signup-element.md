@@ -7,7 +7,12 @@ description: "VueStripeLinkSignupElement reference (beta): offer customers to sa
 Offers customers to save their details with [Link](https://stripe.com/payments/link) for faster checkout next time. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createLinkSignupElement(options)`), or inside [VueStripeElements](/api/components/stripe-elements) (`elements.create('linkSignup', options)`).
 
 ::: danger Stripe beta
-The Link Signup Element requires beta access: contact [Stripe support](https://support.stripe.com/). Stripe.js also needs the `elements_link_signup_beta_1` flag on the Stripe instance. Without it, creating the element throws, reported through `@loaderror` and the `#error` slot. The error does not name the flag; Stripe.js 10 reports an unknown element type: "A valid Element name must be provided. Valid Elements are: card, cardNumber, ... ; you passed: linkSignup." That message means the flag is missing. Pass it with the [`betas`](/api/components/stripe-provider#props) prop:
+The Link Signup Element requires beta access: contact [Stripe support](https://support.stripe.com/). Stripe.js also needs the `elements_link_signup_beta_1` flag on the Stripe instance. Without it, creating the element throws, reported through `@loaderror` and the `#error` slot. The message depends on the parent:
+
+- Inside `VueStripeCheckoutElementsProvider`, Stripe.js names the flag: "The Link Signup Element requires the "elements_link_signup_beta_1" beta. Pass it to the Stripe constructor: ..."
+- Inside `VueStripeElements`, it does not; Stripe.js 10 reports an unknown element type: "A valid Element name must be provided. Valid Elements are: card, cardNumber, ... ; you passed: linkSignup." That message also means the flag is missing.
+
+Pass the flag with the [`betas`](/api/components/stripe-provider#props) prop:
 
 ```vue
 <VueStripeProvider
@@ -43,12 +48,13 @@ Vue Stripe's tests and dogfood runs use a Stripe account without access to the L
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   VueStripeProvider,
   VueStripeCheckoutElementsProvider,
   VueStripeLinkSignupElement
 } from '@vue-stripe/vue-stripe'
+import type { StripeLinkSignupElement } from '@stripe/stripe-js'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -58,7 +64,7 @@ const linkSignupOptions = {
   defaultValues: { email: 'jenny@example.com', name: 'Jenny Rosen' }
 }
 
-const onReady = (element) => console.log('Link signup ready', element)
+const onReady = (element: StripeLinkSignupElement) => console.log('Link signup ready', element)
 </script>
 ```
 

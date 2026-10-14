@@ -19,14 +19,15 @@ Loads Stripe.js and provides the `Stripe` instance to every component and compos
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
+import type { Stripe } from '@stripe/stripe-js'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
-const onLoad = (stripe) => console.log('Stripe.js loaded', stripe)
-const onError = (error) => console.error('Stripe.js failed to load', error)
+const onLoad = (stripe: Stripe) => console.log('Stripe.js loaded', stripe)
+const onError = (error: Error) => console.error('Stripe.js failed to load', error)
 </script>
 ```
 
@@ -54,8 +55,12 @@ Providers with the same `loadStripe()` arguments (key, options and `advancedFrau
 
 Every `StripeConstructorOptions` key from `@stripe/stripe-js` (`stripeAccount`, `apiVersion`, `locale`, `betas`, `developerTools`) is a prop; `apiVersion` is [ignored](#api-version). The `options` prop accepts the same keys and is passed to `loadStripe()`. When a dedicated prop is also set, the prop wins:
 
-```ts
+```vue
+<script setup lang="ts">
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 import type { StripeConstructorOptions } from '@stripe/stripe-js'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // A few of the StripeConstructorOptions keys
 const options: StripeConstructorOptions = {
@@ -64,6 +69,13 @@ const options: StripeConstructorOptions = {
   betas: ['elements_link_signup_beta_1'],
   developerTools: { assistant: { enabled: false } }
 }
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey" :options="options">
+    <!-- ... -->
+  </VueStripeProvider>
+</template>
 ```
 
 ```vue
@@ -111,7 +123,7 @@ The `apiVersion` prop and the `apiVersion` key in `options` are deprecated and k
 The provider calls `loadStripe.setLoadParameters({ advancedFraudSignals: false })` from `@stripe/stripe-js/pure` before it loads Stripe.js, which is then requested as `https://js.stripe.com/endive/stripe.js?advancedFraudSignals=false`. The setting only takes effect if this provider is the first thing on the page to load Stripe.js:
 
 - Set it on every `VueStripeProvider` and on [`createVueStripe()`](/api/plugin) in the app. If another loader already started Stripe.js with the signals on, the provider logs a `[Vue Stripe]` warning and uses that Stripe.js. When several providers load with the signals off, Stripe.js logs that "existing script parameters will be used" for each load after the first; that script already has the parameter, so the notice is harmless.
-- Do not import the default `@stripe/stripe-js` entry at runtime (type imports are fine), and do not add a Stripe.js `<script>` tag. Both load Stripe.js with the signals on. Import `loadStripe` from `@vue-stripe/vue-stripe` instead: it is the `@stripe/stripe-js/pure` loader (with `setLoadParameters`), and it shares one Stripe.js load with every provider on the page.
+- Do not import the default `@stripe/stripe-js` entry at runtime (type imports are fine), and do not add a Stripe.js `<script>` tag. Both load Stripe.js with the signals on. Import `loadStripe` from `@vue-stripe/vue-stripe` instead: it wraps the `@stripe/stripe-js/pure` loader (same signature, with `setLoadParameters`), shares one Stripe.js load with every provider on the page, and registers Vue Stripe's app info on each instance it creates.
 
 ### Stripe.js Release Train
 

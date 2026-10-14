@@ -40,24 +40,25 @@ The [ACH Direct Debit demo](/live-demo/ach-debit) links a test bank account with
 ### Link financial accounts
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { useFinancialConnections } from '@vue-stripe/vue-stripe'
 
+// clientSecret of a Financial Connections Session created on your server
+const props = defineProps<{ sessionClientSecret: string }>()
 const { collectFinancialConnectionsAccounts, loading, error } = useFinancialConnections()
 
-// clientSecret of a Financial Connections Session created on your server
-const linkAccounts = async (clientSecret) => {
-  const { financialConnectionsSession, error } = await collectFinancialConnectionsAccounts({
-    clientSecret
+const linkAccounts = async () => {
+  const { financialConnectionsSession } = await collectFinancialConnectionsAccounts({
+    clientSecret: props.sessionClientSecret
   })
-  if (error) return
+  if (!financialConnectionsSession) return // error is set
   // An empty list means the customer closed the modal without linking an account
   console.log(financialConnectionsSession.accounts)
 }
 </script>
 
 <template>
-  <button :disabled="loading" @click="linkAccounts(sessionClientSecret)">Link your bank</button>
+  <button :disabled="loading" @click="linkAccounts">Link your bank</button>
   <p v-if="error">{{ error }}</p>
 </template>
 ```

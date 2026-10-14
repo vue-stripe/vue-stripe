@@ -14,13 +14,13 @@ BECS Direct Debit requires you to show the Direct Debit Request service agreemen
 
 ```vue
 <!-- BecsForm.vue: rendered inside VueStripeProvider > VueStripeElements -->
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeAuBankAccountElement, useConfirmAuBecsDebitPayment } from '@vue-stripe/vue-stripe'
 
-const props = defineProps({ clientSecret: String, name: String, email: String })
+const props = defineProps<{ clientSecret: string; name: string; email: string }>()
 
-const becsRef = ref(null)
+const becsRef = ref<InstanceType<typeof VueStripeAuBankAccountElement> | null>(null)
 const complete = ref(false)
 const mandateAccepted = ref(false)
 const { confirmAuBecsDebitPayment, loading } = useConfirmAuBecsDebitPayment()

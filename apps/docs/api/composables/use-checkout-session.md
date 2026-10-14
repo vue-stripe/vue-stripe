@@ -13,17 +13,18 @@ Must be called within a `VueStripeCheckoutElementsProvider` (or its deprecated a
 ## Usage
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { useCheckoutSession } from '@vue-stripe/vue-stripe'
 
 const {
   session,            // reactive snapshot
   confirm,
   updateEmail,
-  applyPromotionCode,
   loading,
   error
 } = useCheckoutSession()
+
+const onEmailChange = (event: Event) => updateEmail((event.target as HTMLInputElement).value)
 
 const onPay = async () => {
   // The session was created with return_url on the server, so no returnUrl here.
@@ -36,7 +37,7 @@ const onPay = async () => {
 
 <template>
   <p v-if="session">Total: {{ session.total.total.amount }}</p>
-  <input :value="session?.email" @change="e => updateEmail(e.target.value)" />
+  <input :value="session?.email" type="email" @change="onEmailChange" />
   <button :disabled="loading || !session?.canConfirm" @click="onPay">Pay</button>
   <p v-if="error">{{ error }}</p>
 </template>
@@ -153,12 +154,13 @@ if (result.type === 'error') {
 From the Express Checkout Element, pass Stripe's confirm event:
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { VueStripeExpressCheckoutElement, useCheckoutSession } from '@vue-stripe/vue-stripe'
+import type { StripeExpressCheckoutElementConfirmEvent } from '@stripe/stripe-js'
 
 const { confirm } = useCheckoutSession()
 
-const onConfirm = async (event) => {
+const onConfirm = async (event: StripeExpressCheckoutElementConfirmEvent) => {
   const result = await confirm({ expressCheckoutConfirmEvent: event })
   if (result.type === 'error') console.error(result.error.message)
 }

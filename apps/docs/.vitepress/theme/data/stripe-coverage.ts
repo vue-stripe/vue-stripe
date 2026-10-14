@@ -30,7 +30,7 @@ export interface CoverageItem {
   artifact?: string
   /** Roadmap issue number (when status === 'planned'). */
   issue?: number
-  /** Why a deprecated row is not wrapped and what replaces it (shown on the page). */
+  /** Shown on the page: why a deprecated row is not wrapped and what replaces it, or a detail of a covered row. */
   note?: string
   /**
    * The @stripe/stripe-js type members this row accounts for, as
@@ -67,11 +67,12 @@ export const coverage: CoverageCategory[] = [
         surface: ['loadStripe']
       },
       {
-        // The provider and createVueStripe() register Vue Stripe as the wrapper library.
+        // Every instance Vue Stripe creates registers it as the wrapper library.
         name: 'Wrapper library registration',
         api: 'stripe.registerAppInfo()',
         status: 'covered',
         artifact: 'VueStripeProvider',
+        note: 'Also registered on the instances from createVueStripe() and the exported loadStripe.',
         surface: ['Stripe.registerAppInfo']
       },
       {

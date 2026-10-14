@@ -80,7 +80,7 @@ Enter these in [`VueStripeAuBankAccountElement`](/guide/au-bank-account-element)
 
 ## ACH Direct Debit (US)
 
-In Stripe's Financial Connections test modal (opened by [`useFinancialConnections`](/guide/ach-debit)), pick **Test (Non-OAuth)** as the bank, accept the terms and choose the **Success** account.
+In Stripe's Financial Connections test modal (opened by [`useFinancialConnections`](/guide/ach-debit)), pick **Test (Non-OAuth)** as the bank and accept the terms. If the modal then shows Link's "Sign up or log in" screen, choose **Continue as guest**. Then choose the **Success** account, **Connect account** and **Done**.
 
 To test entering account details by hand, use manual entry. The modal only offers it after a bank search finds nothing: search for a bank that does not exist, then choose to enter the details manually. Use routing number `110000000` with:
 

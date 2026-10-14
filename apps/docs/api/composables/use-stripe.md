@@ -11,7 +11,7 @@ Returns the `Stripe` instance and its loading and error state. Call it in a comp
 
 ```vue
 <!-- StripeStatus.vue, rendered inside VueStripeProvider -->
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useStripe } from '@vue-stripe/vue-stripe'
 

@@ -33,19 +33,21 @@ Vue Stripe's tests and dogfood runs use a Stripe account without access to the T
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   VueStripeProvider,
   VueStripeCheckoutElementsProvider,
   VueStripeTermsElement
 } from '@vue-stripe/vue-stripe'
+import type { StripeError, StripeTermsElement } from '@stripe/stripe-js'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = '<checkout-session-client-secret>'
 
-const onReady = (element) => console.log('Terms ready', element)
-const onLoadError = (event) => console.error('Terms failed to load', event.error.message)
+const onReady = (element: StripeTermsElement) => console.log('Terms ready', element)
+const onLoadError = (event: { error: StripeError }) =>
+  console.error('Terms failed to load', event.error.message)
 </script>
 ```
 

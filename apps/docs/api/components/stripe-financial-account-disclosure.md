@@ -33,7 +33,7 @@ Show the disclosure in the flow where a business opens its financial account on 
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeProvider, VueStripeFinancialAccountDisclosure } from '@vue-stripe/vue-stripe'
 
@@ -46,8 +46,8 @@ const openAccount = () => fetch('/api/financial-accounts', { method: 'POST' })
 Without `VueStripeProvider`, pass a Stripe instance or promise instead:
 
 ```vue
-<script setup>
-// The library re-exports Stripe.js' loadStripe
+<script setup lang="ts">
+// Vue Stripe's loadStripe shares one Stripe.js load with the providers
 import { loadStripe, VueStripeFinancialAccountDisclosure } from '@vue-stripe/vue-stripe'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)

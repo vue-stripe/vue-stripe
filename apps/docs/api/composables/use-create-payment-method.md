@@ -27,14 +27,14 @@ Stripe allows the Payment Element flow only for an Elements group created with `
 
 ```vue
 <!-- SaveButton.vue: rendered inside VueStripeElements -->
-<script setup>
+<script setup lang="ts">
 import { useCreatePaymentMethod } from '@vue-stripe/vue-stripe'
 
 const { createPaymentMethod, loading, error } = useCreatePaymentMethod()
 
 const onSubmit = async () => {
   // Payment Element flow: uses the injected elements automatically
-  const { paymentMethod, error } = await createPaymentMethod()
+  const { paymentMethod } = await createPaymentMethod()
   if (paymentMethod) {
     console.log(paymentMethod.id) // pm_xxx
   }

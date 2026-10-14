@@ -67,6 +67,7 @@ const props = defineProps<{ clientSecret: string; email: string; disabled: boole
 
 const { confirmPayment, loading } = usePaymentIntent()
 const errorMessage = ref('')
+const paid = ref(false)
 
 const pay = async () => {
   const { error, paymentIntent } = await confirmPayment({
@@ -81,14 +82,18 @@ const pay = async () => {
   if (error) {
     errorMessage.value = error.message || 'Payment failed'
   } else if (paymentIntent?.status === 'succeeded') {
-    // Show your success state
+    // A succeeded PaymentIntent cannot be confirmed again
+    paid.value = true
   }
 }
 </script>
 
 <template>
-  <button type="button" :disabled="disabled || loading" @click="pay">Pay now</button>
-  <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+  <p v-if="paid">Payment received.</p>
+  <template v-else>
+    <button type="button" :disabled="disabled || loading" @click="pay">Pay now</button>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+  </template>
 </template>
 ```
 

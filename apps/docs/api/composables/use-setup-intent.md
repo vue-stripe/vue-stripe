@@ -11,12 +11,14 @@ Confirms a SetupIntent with `stripe.confirmSetup()`, using the Elements group fr
 
 ```vue
 <!-- SaveCardButton.vue, rendered inside VueStripeElements next to VueStripePaymentElement -->
-<script setup>
+<script setup lang="ts">
+import { ref } from 'vue'
 import { useSetupIntent } from '@vue-stripe/vue-stripe'
 
-const props = defineProps({ clientSecret: { type: String, required: true } })
+const props = defineProps<{ clientSecret: string }>()
 
 const { confirmSetup, loading, error } = useSetupIntent()
+const saved = ref(false)
 
 const save = async () => {
   const result = await confirmSetup({
@@ -24,15 +26,18 @@ const save = async () => {
     confirmParams: { return_url: `${window.location.origin}/account/cards` }
   })
 
-  if (result.setupIntent?.status === 'succeeded') {
-    // Saved without a redirect; result.setupIntent.payment_method is the saved method
-  }
+  // Saved without a redirect; result.setupIntent.payment_method is the saved method.
+  // A succeeded SetupIntent cannot be confirmed again.
+  if (result.setupIntent?.status === 'succeeded') saved.value = true
 }
 </script>
 
 <template>
-  <button :disabled="loading" @click="save">{{ loading ? 'Saving...' : 'Save card' }}</button>
-  <p v-if="error">{{ error }}</p>
+  <p v-if="saved">Card saved.</p>
+  <template v-else>
+    <button :disabled="loading" @click="save">{{ loading ? 'Saving...' : 'Save card' }}</button>
+    <p v-if="error">{{ error }}</p>
+  </template>
 </template>
 ```
 

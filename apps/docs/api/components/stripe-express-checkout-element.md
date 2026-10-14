@@ -18,7 +18,7 @@ Renders wallet buttons (Apple Pay, Google Pay, Link, PayPal, Amazon Pay, Klarna)
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
 import ExpressButtons from './ExpressButtons.vue'
@@ -30,16 +30,20 @@ const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 
 ```vue
 <!-- ExpressButtons.vue -->
-<script setup>
+<script setup lang="ts">
 import { VueStripeExpressCheckoutElement, usePaymentIntent } from '@vue-stripe/vue-stripe'
+import type {
+  StripeExpressCheckoutElementClickEvent,
+  StripeExpressCheckoutElementConfirmEvent
+} from '@stripe/stripe-js'
 
-const props = defineProps({ clientSecret: String })
+const props = defineProps<{ clientSecret: string }>()
 const { confirmPayment } = usePaymentIntent()
 
 // Stripe waits for resolve() before it opens the payment sheet
-const onClick = (event) => event.resolve()
+const onClick = (event: StripeExpressCheckoutElementClickEvent) => event.resolve()
 
-const onConfirm = async (event) => {
+const onConfirm = async (event: StripeExpressCheckoutElementConfirmEvent) => {
   const { error } = await confirmPayment({
     clientSecret: props.clientSecret,
     confirmParams: { return_url: window.location.href },
@@ -69,12 +73,13 @@ Under Checkout Sessions, `@click`, `@shippingaddresschange` and `@shippingratech
 :::
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { VueStripeExpressCheckoutElement, useCheckoutSession } from '@vue-stripe/vue-stripe'
+import type { StripeExpressCheckoutElementConfirmEvent } from '@stripe/stripe-js'
 
 const { confirm } = useCheckoutSession()
 
-const onConfirm = async (event) => {
+const onConfirm = async (event: StripeExpressCheckoutElementConfirmEvent) => {
   const result = await confirm({ expressCheckoutConfirmEvent: event })
   if (result.type === 'error') console.error(result.error.message)
 }

@@ -12,27 +12,40 @@ The flow: create a nonce for the card in the browser, send it to your server, cr
 
 ```vue
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useEphemeralKeyNonce } from '@vue-stripe/vue-stripe'
 
-const props = defineProps<{ issuingCard: string }>() // ic_...
+const props = defineProps<{ cardId: string }>() // ic_...
+const emit = defineEmits<{
+  // The options the Issuing Elements need
+  ready: [card: { issuingCard: string; nonce: string; ephemeralKeySecret: string }]
+}>()
 const { createEphemeralKeyNonce, loading, error } = useEphemeralKeyNonce()
+const keyError = ref('')
 
 const reveal = async () => {
-  const { nonce } = await createEphemeralKeyNonce({ issuingCard: props.issuingCard })
+  keyError.value = ''
+  const { nonce } = await createEphemeralKeyNonce({ issuingCard: props.cardId })
   if (!nonce) return // error is set
-  const res = await fetch('/api/ephemeral-key', {
+  // The route from the Issuing guide, step 1
+  const response = await fetch('/api/issuing/ephemeral-keys', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ issuingCard: props.issuingCard, nonce })
+    body: JSON.stringify({ cardId: props.cardId, nonce })
   })
-  const { ephemeralKeySecret } = await res.json()
-  return { issuingCard: props.issuingCard, nonce, ephemeralKeySecret }
+  if (!response.ok) {
+    keyError.value = `Could not load the card (HTTP ${response.status})`
+    return
+  }
+  const { ephemeralKeySecret } = await response.json()
+  emit('ready', { issuingCard: props.cardId, nonce, ephemeralKeySecret })
 }
 </script>
 
 <template>
   <button :disabled="loading" @click="reveal">Show card details</button>
   <p v-if="error">{{ error }}</p>
+  <p v-if="keyError">{{ keyError }}</p>
 </template>
 ```
 

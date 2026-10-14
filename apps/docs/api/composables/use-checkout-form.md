@@ -22,15 +22,16 @@ The [Checkout Form demo](/live-demo/checkout-form) confirms the form with `confi
 ## Usage
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCheckoutForm, useCheckoutForm } from '@vue-stripe/vue-stripe'
+import type { StripeCheckoutFormConfirmEvent } from '@vue-stripe/vue-stripe'
 
 const { session, confirm, loading, error } = useCheckoutForm()
 const message = ref('')
 
 // The form's Pay button fires @confirm; hand its event to Stripe.
-const onConfirm = async (event) => {
+const onConfirm = async (event: StripeCheckoutFormConfirmEvent) => {
   const result = await confirm({ formConfirmEvent: event })
   if (result.type === 'error') message.value = result.error.message
 }

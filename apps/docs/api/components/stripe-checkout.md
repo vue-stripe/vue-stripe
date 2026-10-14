@@ -22,10 +22,11 @@ Stripe.js removed `stripe.redirectToCheckout()` in Stripe.js Clover, so the clie
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import { ref, onMounted } from 'vue'
 import { VueStripeCheckout } from '@vue-stripe/vue-stripe'
+import type { VueStripeCheckoutError } from '@vue-stripe/vue-stripe'
 
 const sessionUrl = ref('')
 
@@ -35,7 +36,7 @@ onMounted(async () => {
   sessionUrl.value = (await response.json()).url
 })
 
-const onCheckoutError = (error) => console.error(error.message)
+const onCheckoutError = (error: VueStripeCheckoutError) => console.error(error.message)
 </script>
 ```
 

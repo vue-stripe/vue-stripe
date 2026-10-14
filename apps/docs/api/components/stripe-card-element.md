@@ -17,7 +17,7 @@ A single card field that collects the card number, expiry date, CVC and (optiona
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
 import CardForm from './CardForm.vue'
@@ -29,24 +29,30 @@ const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 
 ```vue
 <!-- CardForm.vue -->
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCardElement, useConfirmCardPayment } from '@vue-stripe/vue-stripe'
 
-const props = defineProps({ clientSecret: String })
-const cardRef = ref(null)
+const props = defineProps<{ clientSecret: string }>()
+const cardRef = ref<InstanceType<typeof VueStripeCardElement> | null>(null)
 const complete = ref(false)
+const paid = ref(false)
 const { confirmCardPayment, loading, error } = useConfirmCardPayment()
 
 const pay = async () => {
   const card = cardRef.value?.element
   if (!card) return
-  await confirmCardPayment(props.clientSecret, { payment_method: { card } })
+  const { paymentIntent } = await confirmCardPayment(props.clientSecret, {
+    payment_method: { card }
+  })
+  // A succeeded PaymentIntent cannot be confirmed again
+  if (paymentIntent?.status === 'succeeded') paid.value = true
 }
 </script>
 
 <template>
-  <form @submit.prevent="pay">
+  <p v-if="paid">Payment received.</p>
+  <form v-else @submit.prevent="pay">
     <VueStripeCardElement
       ref="cardRef"
       :options="{ hidePostalCode: true }"

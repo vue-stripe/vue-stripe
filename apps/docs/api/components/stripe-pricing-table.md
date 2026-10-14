@@ -20,7 +20,7 @@ Embeds a Stripe pricing table that you configure in the Stripe Dashboard. The co
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import { VueStripeProvider, VueStripePricingTable } from '@vue-stripe/vue-stripe'
 
@@ -29,7 +29,7 @@ const pricingTableId = 'prctbl_1234567890'
 const userEmail = 'customer@example.com'
 
 const onLoad = () => console.log('Pricing table loaded')
-const onError = (error) => console.error('Pricing table failed to load', error)
+const onError = (error: Error) => console.error('Pricing table failed to load', error)
 </script>
 ```
 

@@ -18,22 +18,28 @@ The [Tokens demo](/live-demo/tokens) creates a ConfirmationToken from a deferred
 <!-- PayOnServer.vue: rendered inside <VueStripeProvider> and
      <VueStripeElements mode="payment" :amount="1099" currency="usd"> -->
 <script setup lang="ts">
+import { ref } from 'vue'
 import { VueStripePaymentElement, useCreateConfirmationToken } from '@vue-stripe/vue-stripe'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const { createConfirmationToken, loading, error } = useCreateConfirmationToken()
+const result = ref('')
 
 const pay = async () => {
+  result.value = ''
   // Runs elements.submit() first, then stripe.createConfirmationToken({ elements })
   const { confirmationToken } = await createConfirmationToken({
     params: { return_url: 'https://example.com/order/complete' }
   })
   if (!confirmationToken) return // error is set
-  await fetch('/api/confirm', {
+  // POST /api/pay from the tokens guide: answers { status, clientSecret } or { error }
+  const response = await fetch('/api/pay', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ confirmationToken: confirmationToken.id })
   })
+  const data = await response.json()
+  result.value = response.ok ? `Payment ${data.status}` : data.error
 }
 </script>
 
@@ -41,8 +47,11 @@ const pay = async () => {
   <VueStripePaymentElement />
   <button :disabled="loading" @click="pay">Pay</button>
   <p v-if="error">{{ error }}</p>
+  <p v-if="result">{{ result }}</p>
 </template>
 ```
+
+The sample posts to the server route from [Confirm payments on your server](/guide/tokens#_3-create-and-confirm-the-paymentintent-on-your-server). When it answers `requires_action` (3D Secure), finish the payment with `useHandleNextAction()`, as in [step 2 of that guide](/guide/tokens#_2-create-the-token-and-send-it-to-your-server).
 
 ## Options
 

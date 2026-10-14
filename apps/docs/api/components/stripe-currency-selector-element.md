@@ -4,14 +4,17 @@ description: "VueStripeCurrencySelectorElement reference: let customers choose t
 
 # VueStripeCurrencySelectorElement
 
-Lets customers choose the currency they pay in. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createCurrencySelectorElement()`, no beta needed) or inside a [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider) (created with the Checkout Form SDK's `createCurrencySelectorElement()`; the form then leaves out its built-in currency picker). It is created a tick after it mounts, so a `VueStripeCheckoutForm` rendered after it in the same update exists first: Stripe.js logs an uncaught `TypeError` when the selector is created before the form. It needs a Checkout Session with [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing) enabled. Stripe.js does not create it in a plain Elements group ("The `currencySelector` Element cannot be created without using Custom Checkout"), so inside [VueStripeElements](/api/components/stripe-elements) alone it does not call `elements.create()`: it reports "VueStripeCurrencySelectorElement is not available inside VueStripeElements" through `@loaderror` and the `#error` slot. Inside a `VueStripeElements` nested in a Checkout provider, it uses the Checkout SDK.
+Lets customers choose the currency they pay in. Use it inside a [VueStripeCheckoutElementsProvider](/api/components/stripe-checkout-provider) (created with `checkout.createCurrencySelectorElement()`, no beta needed) or inside a [VueStripeCheckoutFormProvider](/api/components/stripe-checkout-form-provider) (created with the Checkout Form SDK's `createCurrencySelectorElement()`; the form then leaves out its built-in currency picker). It is created a tick after it mounts, so a `VueStripeCheckoutForm` rendered after it in the same update exists first: Stripe.js logs an uncaught `TypeError` when the selector is created before the form. It needs a Checkout Session with [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing) enabled, and `VueStripeCheckoutElementsProvider` must allow it with [`:adaptive-pricing="{ allowed: true }"`](/api/components/stripe-checkout-provider#props). Without that prop Stripe.js refuses the element ("You cannot use the Currency Selector Element without allowing Adaptive Pricing"), reported through `@loaderror` and the `#error` slot. Stripe.js does not create it in a plain Elements group ("The `currencySelector` Element cannot be created without using Custom Checkout"), so inside [VueStripeElements](/api/components/stripe-elements) alone it does not call `elements.create()`: it reports "VueStripeCurrencySelectorElement is not available inside VueStripeElements" through `@loaderror` and the `#error` slot. Inside a `VueStripeElements` nested in a Checkout provider, it uses the Checkout SDK.
 
 ## Usage
 
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+    <VueStripeCheckoutElementsProvider
+      :client-secret="clientSecret"
+      :adaptive-pricing="{ allowed: true }"
+    >
       <VueStripeCurrencySelectorElement
         @ready="onReady"
         @loaderror="onLoadError"
@@ -20,19 +23,21 @@ Lets customers choose the currency they pay in. Use it inside a [VueStripeChecko
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   VueStripeProvider,
   VueStripeCheckoutElementsProvider,
   VueStripeCurrencySelectorElement
 } from '@vue-stripe/vue-stripe'
+import type { StripeCurrencySelectorElement, StripeError } from '@stripe/stripe-js'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = '<checkout-session-client-secret>'
 
-const onReady = (element) => console.log('Currency selector ready', element)
-const onLoadError = (event) => console.error('Failed to load', event.error)
+const onReady = (element: StripeCurrencySelectorElement) =>
+  console.log('Currency selector ready', element)
+const onLoadError = (event: { error: StripeError }) => console.error('Failed to load', event.error)
 </script>
 ```
 
@@ -94,6 +99,8 @@ Access these via a template ref:
 
 The component owns the element's lifecycle: it creates, mounts and destroys the element. Removing the component (for example with `v-if`) destroys the element, which takes the place of Stripe's `element.unmount()`; for a one-time listener use Vue's `.once` modifier (`@ready.once`) instead of `element.once()`.
 
+Render the sample below inside a `VueStripeCheckoutElementsProvider` with `:adaptive-pricing="{ allowed: true }"`, as in [Usage](#usage).
+
 Refs are unwrapped on the template ref, so `currencyRef.value.element` is a `StripeCurrencySelectorElement | null`. Type the template ref with the component type and the element with the Stripe type:
 
 ```vue
@@ -145,6 +152,8 @@ import '@vue-stripe/vue-stripe/style.css'
 Target `.vue-stripe-element*` to style every element at once, or `.vue-stripe-currency-selector-element*` for this one.
 
 ## TypeScript
+
+Render this component inside a `VueStripeCheckoutElementsProvider` with `:adaptive-pricing="{ allowed: true }"`, as in [Usage](#usage).
 
 ```vue
 <script setup lang="ts">

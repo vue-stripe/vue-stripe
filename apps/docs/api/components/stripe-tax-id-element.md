@@ -28,23 +28,28 @@ Stripe's [Tax ID guide](https://docs.stripe.com/tax/advanced/tax-ids?payment-ui=
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   VueStripeProvider,
   VueStripeCheckoutElementsProvider,
   VueStripeTaxIdElement
 } from '@vue-stripe/vue-stripe'
+import type {
+  StripeTaxIdElement,
+  StripeTaxIdElementChangeEvent,
+  StripeTaxIdElementOptions
+} from '@stripe/stripe-js'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = '<checkout-session-client-secret>'
 
-const taxIdOptions = {
+const taxIdOptions: StripeTaxIdElementOptions = {
   fields: { businessName: 'auto' }
 }
 
-const onReady = (element) => console.log('Tax ID ready', element)
-const onChange = (event) => console.log('Complete:', event.complete)
+const onReady = (element: StripeTaxIdElement) => console.log('Tax ID ready', element)
+const onChange = (event: StripeTaxIdElementChangeEvent) => console.log('Complete:', event.complete)
 </script>
 ```
 

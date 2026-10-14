@@ -19,9 +19,11 @@ The [Payment Request demo](/live-demo/payment-request) shows the `canMakePayment
 ## Usage
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { usePaymentRequest, useConfirmCardPayment } from '@vue-stripe/vue-stripe'
 
+// clientSecret of a PaymentIntent created on your server
+const props = defineProps<{ clientSecret: string }>()
 const { confirmCardPayment } = useConfirmCardPayment()
 const { canMakePayment, loading, error, show, on } = usePaymentRequest({
   country: 'US',
@@ -32,16 +34,15 @@ const { canMakePayment, loading, error, show, on } = usePaymentRequest({
 })
 
 on('paymentmethod', async (event) => {
-  // clientSecret of a PaymentIntent created on your server
   const { paymentIntent, error: confirmError } = await confirmCardPayment(
-    clientSecret,
+    props.clientSecret,
     { payment_method: event.paymentMethod.id },
     { handleActions: false }
   )
   // Tell the browser to close its payment interface.
   event.complete(confirmError ? 'fail' : 'success')
   // 3D Secure and other next actions run after the interface has closed.
-  if (paymentIntent?.status === 'requires_action') await confirmCardPayment(clientSecret)
+  if (paymentIntent?.status === 'requires_action') await confirmCardPayment(props.clientSecret)
 })
 
 on('cancel', () => {

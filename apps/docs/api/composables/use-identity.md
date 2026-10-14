@@ -16,22 +16,23 @@ The [Identity Verification demo](/live-demo/identity) opens the verification mod
 ## Usage
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { useIdentity } from '@vue-stripe/vue-stripe'
 
+// clientSecret of a VerificationSession created on your server
+const props = defineProps<{ sessionClientSecret: string }>()
 const { verifyIdentity, loading, error } = useIdentity()
 
-// clientSecret of a VerificationSession created on your server
-const verify = async (clientSecret) => {
-  const { error } = await verifyIdentity(clientSecret)
-  if (error) return
+const verify = async () => {
+  const result = await verifyIdentity(props.sessionClientSecret)
+  if (result.error) return // error is set
   // The customer submitted their details. Listen for the identity.verification_session.*
   // webhooks on your server for the outcome.
 }
 </script>
 
 <template>
-  <button :disabled="loading" @click="verify(sessionClientSecret)">Verify my identity</button>
+  <button :disabled="loading" @click="verify">Verify my identity</button>
   <p v-if="error">{{ error }}</p>
 </template>
 ```

@@ -18,26 +18,26 @@ Embeds Stripe's prebuilt Checkout page in your site with `stripe.createEmbeddedC
     <VueStripeEmbeddedCheckout
       :fetch-client-secret="fetchClientSecret"
       @ready="onReady"
-      @complete="onComplete"
       @error="onError"
     />
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider, VueStripeEmbeddedCheckout } from '@vue-stripe/vue-stripe'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
+// The session from the Embedded Checkout guide sets return_url, so Stripe
+// redirects there after payment. For @complete, see "Redirect or @complete" below.
 const fetchClientSecret = () =>
   fetch('/api/embedded-checkout-session', { method: 'POST' })
     .then((response) => response.json())
-    .then((data) => data.clientSecret)
+    .then((data: { clientSecret: string }) => data.clientSecret)
 
 const onReady = () => console.log('Embedded Checkout is on the page')
-const onComplete = () => console.log('Checkout Session completed')
-const onError = (message) => console.error(message)
+const onError = (message: string) => console.error(message)
 </script>
 ```
 
@@ -91,16 +91,23 @@ interface VueStripeEmbeddedCheckoutProps {
 | `@error` | `string` | No client secret was given, `fetchClientSecret` rejected or resolved no client secret, another Embedded Checkout is already mounted, or `createEmbeddedCheckoutPage` failed (for example a session that is not `ui_mode: 'embedded_page'`). `@ready` is not emitted then |
 
 ::: tip Redirect or `@complete`
-By default (`redirect_on_completion: 'always'`) Stripe sends the customer to your `return_url` after payment. To stay on the page and react to `@complete`, create the session with `redirect_on_completion: 'if_required'` (redirect-based payment methods still use `return_url`) or `'never'` (omit `return_url`). Listen to `@complete` only for such a session: with `'always'`, Stripe.js logs a warning that the `onComplete` handler will never be called.
+By default (`redirect_on_completion: 'always'`) Stripe sends the customer to your `return_url` after payment. To stay on the page and react to `@complete`, create the session with `redirect_on_completion: 'if_required'` (redirect-based payment methods still use `return_url`) or `'never'` (omit `return_url`). Listen to `@complete` only for such a session: with `'always'`, Stripe.js logs a warning that the `onComplete` handler will never be called. [Stay on the page](/guide/embedded-checkout#stay-on-the-page) shows the session and the `@complete` handler.
 :::
 
 ### Tracking analytics events
 
 ```vue
-<script setup>
-const onAnalytics = (event) => {
+<!-- Rendered inside VueStripeProvider -->
+<script setup lang="ts">
+import { VueStripeEmbeddedCheckout } from '@vue-stripe/vue-stripe'
+import type { StripeEmbeddedCheckoutAnalyticsEventUnion } from '@vue-stripe/vue-stripe'
+
+defineProps<{ clientSecret: string }>()
+
+const onAnalytics = (event: StripeEmbeddedCheckoutAnalyticsEventUnion) => {
   if (event.eventType === 'checkoutSubmitted') {
-    analytics.track('checkout_submitted', { amount: event.details.amount })
+    // Send it to your analytics tool
+    console.log('checkout_submitted', event.details.amount)
   }
 }
 </script>
