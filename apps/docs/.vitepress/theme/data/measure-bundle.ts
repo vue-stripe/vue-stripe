@@ -75,10 +75,13 @@ const CONCURRENCY = 8
 
 const gzip = (code: string | Buffer) => gzipSync(code, { level: 9 }).length
 
-/** Rolldown with size-limit's settings, on an entry module given as source. */
-async function bundle(code: string, options: { cwd: string; external?: RegExp }) {
+/**
+ * Rolldown with size-limit's settings, on an entry module given as source, or on a built
+ * file itself (`input`), as size-limit bundles a check that has a `path` and no `import`.
+ */
+async function bundle(code: string, options: { cwd: string; external?: RegExp; input?: string }) {
   const build = await rolldown({
-    input: ENTRY,
+    input: options.input ?? ENTRY,
     cwd: options.cwd,
     treeshake: true,
     ...(options.external ? { external: options.external } : {}),
@@ -310,8 +313,21 @@ export async function measureBundleSizes(options: MeasureOptions = {}): Promise<
       const checks = JSON.parse(limits.toString('utf8')) as {
         name: string
         limit: string
+        path?: string
         import?: string
+        ignore?: string[]
       }[]
+      // A whole file other than the ES build (the UMD build): bundled as it is, with the
+      // check's own `ignore` list left external.
+      const fileSizeOf = async (path: string, ignore: string[] = []) => {
+        const escaped = ignore.map((i) => i.replace(/[|\\{}()[\]^$+*?.-]/g, '\\$&'))
+        const { code } = await bundle('', {
+          cwd: libraryDir,
+          input: join(libraryDir, path),
+          ...(escaped.length ? { external: new RegExp(`^(${escaped.join('|')})($|/)`) } : {})
+        })
+        return gzip(code) - gzip('')
+      }
       for (const check of checks) {
         const limit = parseLimit(check.limit)
         if (limit === null) continue
@@ -319,7 +335,11 @@ export async function measureBundleSizes(options: MeasureOptions = {}): Promise<
           ?.replace(/[{}]/g, '')
           .split(',')
           .map((n) => n.trim())
-        const size = imported ? (await sizeOf(imported)).gzip : total.gzip
+        const size = imported
+          ? (await sizeOf(imported)).gzip
+          : check.path && check.path !== 'dist/es/index.js'
+            ? await fileSizeOf(check.path, check.ignore)
+            : total.gzip
         budgets.push({ name: check.name, limit, size })
       }
     }

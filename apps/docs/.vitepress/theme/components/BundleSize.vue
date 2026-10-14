@@ -261,7 +261,10 @@ const words = (name: string) => name.split(/(?=[A-Z])/)
           <tr v-if="data.builds.umd">
             <th scope="row">
               UMD build, <code>dist/umd/index.js</code>
-              <span class="size-row-note">Every export, for a script tag; does not tree-shake</span>
+              <span class="size-row-note">
+                Every export and the <code>@stripe/stripe-js</code> loader, for a script tag; does
+                not tree-shake
+              </span>
             </th>
             <td class="size-num size-min">{{ formatSize(data.builds.umd.minified, 2) }}</td>
             <td class="size-num size-strong">{{ formatSize(data.builds.umd.gzip, 2) }}</td>

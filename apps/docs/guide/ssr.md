@@ -54,7 +54,7 @@ const fetchClientSecret = () =>
 
 ### Set the publishable key where the server can read it
 
-`VueStripeProvider` throws "publishableKey or stripeKey is required" during setup when its key is empty. On the server that turns the whole response into an HTTP 500 before any browser code runs. The server process needs the key in production as well as in development; each setup below says where it reads it from. The [plugin](/guide/plugin) does not throw: with an empty key the page renders, and the error appears in the browser when Stripe.js loads.
+`VueStripeProvider` throws "publishableKey or stripeKey is required" during setup when its key is empty. On the server that turns the whole response into an HTTP 500 before any browser code runs. The server process needs the key in production as well as in development; each setup below says where it reads it from. The [plugin](/guide/plugin) does not throw: with an empty key the page renders, and the error appears in the browser when Stripe.js loads (`VueStripePricingTable` shows it through its `#error` slot from the server render on).
 
 <a id="nuxt-3"></a>
 

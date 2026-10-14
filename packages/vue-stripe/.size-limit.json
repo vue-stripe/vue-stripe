@@ -3,7 +3,14 @@
     "name": "ESM bundle (dist/es/index.js)",
     "path": "dist/es/index.js",
     "ignore": ["vue-demi", "@stripe/stripe-js"],
-    "limit": "11.59 kB",
+    "limit": "11.64 kB",
+    "gzip": true
+  },
+  {
+    "name": "UMD bundle (dist/umd/index.js), with the @stripe/stripe-js loader",
+    "path": "dist/umd/index.js",
+    "ignore": ["vue-demi"],
+    "limit": "13.25 kB",
     "gzip": true
   },
   {

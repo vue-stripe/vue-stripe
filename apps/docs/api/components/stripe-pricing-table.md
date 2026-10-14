@@ -42,7 +42,7 @@ const onError = (error) => console.error('Pricing table failed to load', error)
 | `customerSessionClientSecret` | `string` | No | Client secret of a Customer Session, for existing customers |
 | `clientReferenceId` | `string` | No | Reference ID for reconciling with your internal systems |
 
-The props are passed to the web component as the `pricing-table-id`, `customer-email`, `customer-session-client-secret` and `client-reference-id` attributes; the publishable key comes from the provider or plugin. Outside both, the component throws a `VueStripeProviderError`.
+The props are passed to the web component as the `pricing-table-id`, `customer-email`, `customer-session-client-secret` and `client-reference-id` attributes; the publishable key comes from the provider or plugin. Outside both, the component throws a `VueStripeProviderError`. Under the plugin with an empty `publishableKey` (usually an environment variable that did not reach the build), it does not throw: it shows "VueStripePricingTable: publishableKey is empty. Check the key given to createVueStripe()." through the `#error` slot, on the server as well, and emits `@error` with a `VueStripeProviderError` in the browser. It then loads no script and renders no `<stripe-pricing-table>`.
 
 ### Props Interface
 
@@ -80,16 +80,16 @@ frame-src https://js.stripe.com;
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@load` | - | Emitted when the pricing table script loads successfully |
-| `@error` | `Error` | Emitted when the script fails to load (network error, CSP blocking). The message is also shown through the `#error` slot |
+| `@error` | `Error` | Emitted when the script fails to load (network error, CSP blocking), or on mount when the plugin's publishable key is empty. The message is also shown through the `#error` slot |
 
-`@error` reports only script load failures. An invalid or deleted pricing table ID is handled by Stripe's web component, not by `@error`. A failed script tag is removed, and every table waiting on it gets `@error`. To retry after a load error, remount the component by changing its `key`: the remount adds a new script tag and emits `@load` once it loads. [Handle errors and declines](/guide/error-handling#_5-handle-checkout-errors) shows how.
+Apart from an empty key, `@error` reports only script load failures. An invalid or deleted pricing table ID is handled by Stripe's web component, not by `@error`. A failed script tag is removed, and every table waiting on it gets `@error`. To retry after a load error, remount the component by changing its `key`: the remount adds a new script tag and emits `@load` once it loads. [Handle errors and declines](/guide/error-handling#_5-handle-checkout-errors) shows how.
 
 ## Slots
 
 | Slot | Slot Props | Description |
 |------|-----------|-------------|
 | `#loading` | - | Rendered while the pricing table script loads (default: "Loading pricing table...") |
-| `#error` | `{ error: string }` | Rendered when the script fails to load |
+| `#error` | `{ error: string }` | Rendered when the script fails to load or the plugin's publishable key is empty |
 
 ```vue
 <VueStripePricingTable pricing-table-id="prctbl_...">
