@@ -3,6 +3,21 @@
 > **Release notes for v5.4.0 and later are published on [GitHub Releases](https://github.com/vue-stripe/vue-stripe/releases).**
 > The 6.0.0 beta entries point to the v6 notes; the older entries are kept for historical reference (through v5.3.0).
 
+## 6.0.0-beta.3 (pre-release)
+
+Release candidate after two docs-only dogfood rounds across Nuxt 4, Vite + Vue 3, Vue 2.7 and Vue 3 on Vue CLI, Quasar, VitePress, custom Vite SSR and Laravel + Inertia (120 issues, all fixed). Library changes since beta.2:
+
+- The CommonJS build is `dist/cjs/index.cjs`, so `require()` returns the exports; the type declarations resolve under `node16`/`nodenext` (ESM and CJS) and no longer import a stylesheet.
+- Providers fail independently, providers with the same arguments share one Stripe instance, and the deprecated `apiVersion` is ignored with a warning instead of breaking the Stripe.js load.
+- Every load or creation failure reaches `@error` / `#error`: Payment Method Messaging, Express Checkout without an Intent, Embedded Checkout `fetch-client-secret`, the Currency Selector, and a rejected Checkout `loadActions()`. `[Vue Stripe]` console errors are logged only when the app does not handle the failure.
+- Composables under `createVueStripe()` start and wait for the Stripe.js load; `loading` stays true until the last overlapping call settles; Checkout session actions always resolve `{ type }`.
+- Create-only element options are never sent to `update()`; the Express Checkout element has no `clear()` in its type; the split card number forwards `networkschange` and `loaderror`.
+- Provider, Checkout provider and pricing table states are keyed, so slot roots never keep the library's markup; on Vue 2.7 an element error no longer reuses the Stripe mount node.
+- Typed slot props on every component, Stripe.js types for the `VueStripeElements` props, and `stripeConfigInjectionKey` is exported.
+- The default stylesheet sizes card, IBAN and BECS fields as `border-box`.
+
+Docs: new guides for Quasar, Laravel and Inertia, VitePress and Vite SSR; per-method requirements for the 46 confirmers; every TypeScript sample compiles on its own. Notes: the [v6.0.0-beta.3 GitHub Release](https://github.com/vue-stripe/vue-stripe/releases/tag/v6.0.0-beta.3).
+
 ## 6.0.0-beta.2 (pre-release)
 
 - Express Checkout: the `click`, `shippingaddresschange` and `shippingratechange` events are passed to Stripe only when you listen for them. Stripe waits for `resolve()` once a handler is attached, so an Express Checkout Element without `@click` never opened its payment sheet.
