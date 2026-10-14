@@ -8,6 +8,11 @@ on:
       # Library changes redeploy the live demos.
       - 'packages/vue-stripe/**'
       - '.github/workflows/docs.yml'
+  # /usage carries npm, GitHub and jsDelivr numbers fetched at build time; rebuild weekly so
+  # the deployed page (and its /usage.md) stays current. Scheduled runs build the default
+  # branch, the same one pushes deploy from.
+  schedule:
+    - cron: '17 6 * * 1'
   workflow_dispatch:
 
 permissions:
