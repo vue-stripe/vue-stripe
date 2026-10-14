@@ -117,14 +117,14 @@ The guides send the customer back to your app after a redirect: the Payment Elem
 
   Stripe adds its parameters before the `#` (`/?payment_intent=...&redirect_status=succeeded#/payment-complete`), so the return page reads them from `window.location.search` as in the guides.
 
-  A Checkout Session URL is different. You set it on your server in [Redirect to Stripe Checkout](/guide/checkout#_1-create-a-checkout-session-on-your-server), [Embed Stripe Checkout](/guide/embedded-checkout#_1-create-the-session-on-your-server) and [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_1-create-the-session-on-your-server), and Stripe redirects to it as written, replacing only `{CHECKOUT_SESSION_ID}`. Put the query before the `#`:
+  A Checkout Session URL is different. You set it on your server in [Redirect to Stripe Checkout](/guide/checkout#_1-create-a-checkout-session-on-your-server), [Embed Stripe Checkout](/guide/embedded-checkout#_1-create-the-session-on-your-server), [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_1-create-the-session-on-your-server) and [Add the Checkout Form (beta)](/guide/checkout-form#_1-create-the-session-on-your-server), and Stripe redirects to it as written, replacing only `{CHECKOUT_SESSION_ID}`. Put the query before the `#`:
 
   ```js
   // Redirect to Stripe Checkout
   success_url: 'https://example.com/?session_id={CHECKOUT_SESSION_ID}#/success',
   cancel_url: 'https://example.com/#/cancel'
 
-  // Embedded Checkout, and your own checkout page
+  // Embedded Checkout, the Checkout Form, and your own checkout page
   return_url: 'https://example.com/?session_id={CHECKOUT_SESSION_ID}#/checkout/complete'
   ```
 
