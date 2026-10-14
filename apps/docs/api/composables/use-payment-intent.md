@@ -11,12 +11,14 @@ Confirms a PaymentIntent with `stripe.confirmPayment()`, using the Elements grou
 
 ```vue
 <!-- PayButton.vue, rendered inside VueStripeElements next to VueStripePaymentElement -->
-<script setup>
+<script setup lang="ts">
+import { ref } from 'vue'
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
-const props = defineProps({ clientSecret: { type: String, required: true } })
+const props = defineProps<{ clientSecret: string }>()
 
 const { confirmPayment, loading, error } = usePaymentIntent()
+const paid = ref(false)
 
 const pay = async () => {
   const result = await confirmPayment({
@@ -24,15 +26,17 @@ const pay = async () => {
     confirmParams: { return_url: `${window.location.origin}/complete` }
   })
 
-  if (result.paymentIntent?.status === 'succeeded') {
-    // Paid without a redirect
-  }
+  // Paid without a redirect. A succeeded PaymentIntent cannot be confirmed again.
+  if (result.paymentIntent?.status === 'succeeded') paid.value = true
 }
 </script>
 
 <template>
-  <button :disabled="loading" @click="pay">{{ loading ? 'Processing...' : 'Pay' }}</button>
-  <p v-if="error">{{ error }}</p>
+  <p v-if="paid">Payment received.</p>
+  <template v-else>
+    <button :disabled="loading" @click="pay">{{ loading ? 'Processing...' : 'Pay' }}</button>
+    <p v-if="error">{{ error }}</p>
+  </template>
 </template>
 ```
 

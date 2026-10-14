@@ -19,7 +19,7 @@ Stripe's Payment Element: one form for cards, wallets, bank debits, buy-now-pay-
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import { ref } from 'vue'
 import {
@@ -27,13 +27,14 @@ import {
   VueStripeElements,
   VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
+import type { StripePaymentElementChangeEvent } from '@stripe/stripe-js'
 import PayButton from './PayButton.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 const isComplete = ref(false)
 
-const onChange = (event) => {
+const onChange = (event: StripePaymentElementChangeEvent) => {
   isComplete.value = event.complete
 }
 </script>
@@ -41,23 +42,31 @@ const onChange = (event) => {
 
 ```vue
 <!-- PayButton.vue -->
-<script setup>
+<script setup lang="ts">
+import { ref } from 'vue'
 import { usePaymentIntent } from '@vue-stripe/vue-stripe'
 
-const props = defineProps({ clientSecret: String, disabled: Boolean })
+const props = defineProps<{ clientSecret: string; disabled: boolean }>()
 const { confirmPayment, loading, error } = usePaymentIntent()
+const paid = ref(false)
 
-const pay = () =>
-  confirmPayment({
+const pay = async () => {
+  const { paymentIntent } = await confirmPayment({
     clientSecret: props.clientSecret,
     confirmParams: { return_url: window.location.href },
     redirect: 'if_required'
   })
+  // A succeeded PaymentIntent cannot be confirmed again
+  if (paymentIntent?.status === 'succeeded') paid.value = true
+}
 </script>
 
 <template>
-  <button :disabled="disabled || loading" @click="pay">Pay</button>
-  <p v-if="error">{{ error }}</p>
+  <p v-if="paid">Payment received.</p>
+  <template v-else>
+    <button :disabled="disabled || loading" @click="pay">Pay</button>
+    <p v-if="error">{{ error }}</p>
+  </template>
 </template>
 ```
 

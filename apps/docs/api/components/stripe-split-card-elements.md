@@ -23,7 +23,7 @@ Three components that render the card number, expiry date and CVC as separate fi
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
 import SplitCardForm from './SplitCardForm.vue'
@@ -35,7 +35,7 @@ const clientSecret = 'pi_xxx_secret_xxx' // From your backend
 
 ```vue
 <!-- SplitCardForm.vue -->
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import {
   VueStripeCardNumberElement,
@@ -44,20 +44,26 @@ import {
   useConfirmCardPayment
 } from '@vue-stripe/vue-stripe'
 
-const props = defineProps({ clientSecret: String })
-const numberRef = ref(null)
+const props = defineProps<{ clientSecret: string }>()
+const numberRef = ref<InstanceType<typeof VueStripeCardNumberElement> | null>(null)
+const paid = ref(false)
 const { confirmCardPayment, loading, error } = useConfirmCardPayment()
 
 const pay = async () => {
   // Only the number element: Stripe reads expiry and CVC from its siblings
   const card = numberRef.value?.element
   if (!card) return
-  await confirmCardPayment(props.clientSecret, { payment_method: { card } })
+  const { paymentIntent } = await confirmCardPayment(props.clientSecret, {
+    payment_method: { card }
+  })
+  // A succeeded PaymentIntent cannot be confirmed again
+  if (paymentIntent?.status === 'succeeded') paid.value = true
 }
 </script>
 
 <template>
-  <form @submit.prevent="pay">
+  <p v-if="paid">Payment received.</p>
+  <form v-else @submit.prevent="pay">
     <label>Card number</label>
     <VueStripeCardNumberElement ref="numberRef" :options="{ showIcon: true }" />
     <label>Expiry</label>
