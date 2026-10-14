@@ -167,7 +167,36 @@ The server finds a new build without a restart, so if it is still running from s
 
 For `VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`, as in [What every SSR app needs](/guide/ssr#fetch-client-secrets-in-the-browser). A Promise created at the top of `<script setup>` would start the request while VitePress builds the page.
 
-The session routes go in `server.mjs` next to the PaymentIntent route. Build their `return_url` or `success_url` from the site's address, kept in the server's `.env`:
+The steps below build a page on a Checkout Session with your own form, and the return page that every Checkout Session integration needs. Put the components in `docs/components/`:
+
+- `CheckoutPage.vue` from [What every SSR app needs](/guide/ssr#fetch-client-secrets-in-the-browser), and `CheckoutForm.vue` from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form).
+- `SuccessPage.vue` from [Redirect to Stripe Checkout](/guide/checkout#_3-show-the-outcome-on-the-success-page). It asks your server for the session's status in `onMounted`, so the build does not call the API.
+
+Then use them in Markdown pages. The return page goes in `docs/checkout/`, so its address is `/checkout/complete`:
+
+```md
+<!-- docs/checkout.md -->
+<script setup lang="ts">
+import CheckoutPage from './components/CheckoutPage.vue'
+</script>
+
+# Checkout
+
+<CheckoutPage />
+```
+
+```md
+<!-- docs/checkout/complete.md -->
+<script setup lang="ts">
+import SuccessPage from '../components/SuccessPage.vue'
+</script>
+
+# Order status
+
+<SuccessPage />
+```
+
+The session routes go in `server.mjs` next to the PaymentIntent route, before the `sirv` line. Build their `return_url` or `success_url` from the site's address, kept in the server's `.env`:
 
 ```bash
 # .env
@@ -185,7 +214,19 @@ app.post('/api/checkout-elements-session', async (req, res) => {
   })
   res.json({ clientSecret: session.client_secret })
 })
+
+// GET /api/checkout-status?session_id=cs_test_..., read by SuccessPage.vue
+app.get('/api/checkout-status', async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+    res.json({ status: session.status, paymentStatus: session.payment_status })
+  } catch {
+    res.status(404).json({ error: 'No such Checkout Session' })
+  }
+})
 ```
+
+Restart the server after editing `server.mjs`, open `/checkout`, and pay with the test card. Stripe redirects to `/checkout/complete`, which shows "Thank you! Your payment was received." For [Embed Stripe Checkout](/guide/embedded-checkout#_1-create-the-session-on-your-server), the [Checkout Form](/guide/checkout-form#_1-create-the-session-on-your-server) and [Redirect to Stripe Checkout](/guide/checkout#_1-create-a-checkout-session-on-your-server), point `return_url` (or `success_url` for the redirect) at the same `/checkout/complete?session_id={CHECKOUT_SESSION_ID}` page.
 
 `SITE_URL` is the address in the customer's browser: the `vitepress dev` address in development, `http://localhost:3000` while `server.mjs` serves the build on your machine, and your public URL in production. Don't build it from the request's `Host` header: the step 5 proxy rewrites `Host` to the API's address, so in development `req.get('host')` is `localhost:3000`, and Stripe would send the customer to the API server instead of the site.
 
