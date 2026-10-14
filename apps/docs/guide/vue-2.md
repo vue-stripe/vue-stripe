@@ -15,7 +15,7 @@ Before you start: the app runs Vue `^2.7.0`. Vue 2.6 and earlier are not support
 :::
 
 ::: tip Vue CLI 5
-The samples assume Vite with `@vitejs/plugin-vue2`. On Vue CLI 5, read the key from `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, as in [Add your publishable key](/guide/installation#_3-add-your-publishable-key).
+The samples assume Vite 7 with `@vitejs/plugin-vue2` ([step 1](#_1-install-the-packages)). On Vue CLI 5, read the key from `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, as in [Add your publishable key](/guide/installation#_3-add-your-publishable-key).
 :::
 
 ## 1. Install the packages
@@ -28,6 +28,27 @@ If the app uses TypeScript, it needs TypeScript 5.0 or later for the package's d
 
 ```bash
 npm install -D typescript@5
+```
+
+On Vite, single-file components compile with `@vitejs/plugin-vue2`. It supports Vite 3 to 7, while `npm create vite@latest` installs Vite 8, so install Vite 7 with it (on Vite 8, npm stops with "ERESOLVE unable to resolve dependency tree"):
+
+```bash
+npm install -D vite@7 @vitejs/plugin-vue2
+```
+
+Where another page shows a Vite config with `import vue from '@vitejs/plugin-vue'`, import `vue` from `@vitejs/plugin-vue2` instead. A Vue 2.7 app does not have `@vitejs/plugin-vue`, so Vite stops with `ERR_MODULE_NOT_FOUND`, and installing it does not help: it compiles components for Vue 3. With the [dev proxy](/guide/installation#_5-send-api-requests-to-your-server) for `/api`, the config reads:
+
+```ts
+// vite.config.ts
+import vue from '@vitejs/plugin-vue2'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    proxy: { '/api': 'http://localhost:3000' }
+  }
+})
 ```
 
 ## 2. Let vue-demi switch to Vue 2
