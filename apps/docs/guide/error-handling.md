@@ -198,7 +198,7 @@ const save = async () => {
 </script>
 
 <template>
-  <button :disabled="loading || saved" @click="save">Save card</button>
+  <button v-if="!saved" :disabled="loading" @click="save">Save card</button>
   <p v-if="message" role="alert">{{ message }}</p>
 </template>
 ```

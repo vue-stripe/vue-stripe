@@ -121,13 +121,13 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <button :disabled="disabled || loading || saved" @click="handleSave">
+  <button v-if="!saved" :disabled="disabled || loading" @click="handleSave">
     {{ loading ? 'Saving...' : 'Save card' }}
   </button>
 </template>
 ```
 
-The button stays disabled once the card is saved. A SetupIntent can be confirmed only once: a second click would get an error from Stripe, and the page would replace "Card saved." with it. To save another card, create a new SetupIntent.
+The button goes away once the card is saved, and the page shows "Card saved." in its place. A SetupIntent can be confirmed only once: a second click would get an error from Stripe, and the page would replace "Card saved." with it. To save another card, create a new SetupIntent.
 
 The succeeded SetupIntent's `payment_method` is attached to the customer. Store its ID with your customer record if you need it.
 
