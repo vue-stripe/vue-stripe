@@ -105,7 +105,7 @@ The guides send the customer back to your app after a redirect: the Payment Elem
   }
   ```
 
-  The guides' URLs then work unchanged. Your production host must answer every route with `index.html`, and it must send `/api` to your server on the same origin: the proxy from step 5 runs in `quasar dev` only. To try the build on your machine, use the static server of the global Quasar CLI, `@quasar/cli`. A new project does not install it, and the project's own `quasar` command has no `serve` ("Unrecognized command "serve""), so run it with `npx`. `--history` answers every route with `index.html`, and `--proxy` loads a file that forwards `/api`:
+  The guides' URLs then work unchanged. Your production host must answer every route with `index.html`, and it must send `/api` to your server on the same origin: the proxy from step 5 runs in `quasar dev` only. To try the build on your machine, use the static server of the global Quasar CLI, `@quasar/cli`. A new project does not install it, and the project's own `quasar` command has no `serve` (it prints `Unrecognized command "serve"`), so run it with `npx`. `--history` answers every route with `index.html`, and `--proxy` loads a file that forwards `/api`:
 
   ```js
   // serve-proxy.js
