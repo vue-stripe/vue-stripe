@@ -17,6 +17,10 @@ Vue Stripe wraps the six Issuing elements as components. Their reference is on o
 | `VueStripeIssuingCardCopyButtonElement` | A copy-to-clipboard button for one of the above |
 | `VueStripeIssuingAddToWalletButtonElement` | An Add to Wallet button (Stripe private preview) |
 
+::: info Not yet verified end to end
+Vue Stripe's tests and dogfood runs use a Stripe account without Stripe Issuing. They confirm what happens without access, as described on this page, but not a complete flow with access. See [what is not yet verified](/coverage#not-yet-verified-end-to-end), and [open an issue](https://github.com/vue-stripe/vue-stripe/issues/new/choose) if something does not work for you.
+:::
+
 ## Before you begin
 
 - Issuing is enabled on your Stripe account, and you have an issued card (`ic_...`).

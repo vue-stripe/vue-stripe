@@ -17,6 +17,10 @@ The Terms Element requires beta access: contact [Stripe support](https://support
 The docs' live demos run on a Stripe account without this beta, so the Terms Element has no live demo.
 :::
 
+::: info Not yet verified end to end
+Vue Stripe's tests and dogfood runs use a Stripe account without access to the Terms Element beta. They confirm what happens without access, as described on this page, but not a complete flow with access. See [what is not yet verified](/coverage#not-yet-verified-end-to-end), and [open an issue](https://github.com/vue-stripe/vue-stripe/issues/new/choose) if something does not work for you.
+:::
+
 ## Usage
 
 ```vue

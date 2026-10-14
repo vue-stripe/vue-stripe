@@ -7,6 +7,10 @@ canonical: /api/components/stripe-financial-account-disclosure
 
 The financial account disclosure under the product's former name, Stripe Treasury. It calls `stripe.createTreasuryDisclosure(options)` where [VueStripeFinancialAccountDisclosure](/api/components/stripe-financial-account-disclosure) calls `stripe.createFinancialAccountDisclosure(options)`; the options, events, slots and exposed members are the same, so that page is the full reference. It is the Vue port of React Stripe.js 7's `TreasuryDisclosure`, which React Stripe.js documents with the same options as `FinancialAccountDisclosure`.
 
+::: info Not yet verified end to end
+Vue Stripe's tests and dogfood runs use a Stripe account without Financial Accounts (formerly Treasury). They confirm what happens without access, as described on this page, but not a complete flow with access. See [what is not yet verified](/coverage#not-yet-verified-end-to-end), and [open an issue](https://github.com/vue-stripe/vue-stripe/issues/new/choose) if something does not work for you.
+:::
+
 ## Usage
 
 ```vue

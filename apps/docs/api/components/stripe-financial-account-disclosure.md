@@ -14,6 +14,10 @@ Shows your connected accounts the legal disclosure for financial accounts they o
 | Live demo | None: the demo account has not onboarded to Financial Accounts |
 | Same disclosure, older name | [VueStripeTreasuryDisclosure](/api/components/stripe-treasury-disclosure) calls `createTreasuryDisclosure()` with the same options |
 
+::: info Not yet verified end to end
+Vue Stripe's tests and dogfood runs use a Stripe account without Financial Accounts (formerly Treasury). They confirm what happens without access, as described on this page, but not a complete flow with access. See [what is not yet verified](/coverage#not-yet-verified-end-to-end), and [open an issue](https://github.com/vue-stripe/vue-stripe/issues/new/choose) if something does not work for you.
+:::
+
 ## Usage
 
 Show the disclosure in the flow where a business opens its financial account on your platform:

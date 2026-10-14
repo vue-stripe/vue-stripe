@@ -30,6 +30,10 @@ Requirements:
 - `<VueStripeElements>` with no `clientSecret` and no `mode`: Issuing Elements do not take part in a payment.
 - They are not available inside `<VueStripeCheckoutElementsProvider>` (Checkout Sessions have no Issuing Elements); there the component shows a "not available inside Checkout Sessions" error.
 
+::: info Not yet verified end to end
+Vue Stripe's tests and dogfood runs use a Stripe account without Stripe Issuing. They confirm what happens without access, as described on this page, but not a complete flow with access. See [what is not yet verified](/coverage#not-yet-verified-end-to-end), and [open an issue](https://github.com/vue-stripe/vue-stripe/issues/new/choose) if something does not work for you.
+:::
+
 ## Usage
 
 Create the nonce and the ephemeral key first, then render the elements. The components create their Stripe element when they mount, so render them only once `nonce` and `ephemeralKeySecret` are known.

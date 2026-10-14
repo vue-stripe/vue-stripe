@@ -14,6 +14,10 @@ Shows cardholders the legal disclosure of a Stripe Issuing card program: the tex
 | Live demo | None: the demo account has not onboarded to Issuing |
 | Related | [Issuing Elements](/api/components/stripe-issuing-elements) display the card itself; [Display issued card details](/guide/issuing) |
 
+::: info Not yet verified end to end
+Vue Stripe's tests and dogfood runs use a Stripe account without Stripe Issuing. They confirm what happens without access, as described on this page, but not a complete flow with access. See [what is not yet verified](/coverage#not-yet-verified-end-to-end), and [open an issue](https://github.com/vue-stripe/vue-stripe/issues/new/choose) if something does not work for you.
+:::
+
 ## Usage
 
 Place the disclosure where a cardholder applies for or activates a card, next to the card program's terms:

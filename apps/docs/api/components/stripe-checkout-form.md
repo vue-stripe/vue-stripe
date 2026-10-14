@@ -8,6 +8,8 @@ Renders Stripe's complete **Checkout Form**: contact details, addresses, shippin
 
 ::: warning Beta: requires Stripe access
 The Checkout Form is a Stripe beta. Your Stripe account needs access to the Checkout Form SDK; the `compact` layout is a separate private preview. Without access, Stripe's message appears in the `#error` slot and `@loaderror` fires.
+
+The `expanded` layout is verified end to end on the docs' demo account. The `compact` layout is [not yet verified](/coverage#not-yet-verified-end-to-end): that account has no access to its private preview.
 :::
 
 ::: tip Live demo
