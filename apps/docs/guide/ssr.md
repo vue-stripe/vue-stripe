@@ -153,11 +153,12 @@ Fetch the client secret in the browser (`server: false`), so a page render does 
 import { VueStripeProvider, VueStripeElements } from '@vue-stripe/vue-stripe'
 
 const config = useRuntimeConfig()
-const { data } = await useFetch('/api/payment-intent', { method: 'POST', server: false })
+const { data, error } = await useFetch('/api/payment-intent', { method: 'POST', server: false })
 </script>
 
 <template>
-  <VueStripeProvider :publishable-key="config.public.stripePublishableKey">
+  <p v-if="error">Could not start the payment. Please reload the page.</p>
+  <VueStripeProvider v-else :publishable-key="config.public.stripePublishableKey">
     <VueStripeElements v-if="data?.clientSecret" :client-secret="data.clientSecret">
       <!-- app/components/PaymentForm.vue renders the Payment Element and calls usePaymentIntent() -->
       <PaymentForm :client-secret="data.clientSecret" />
@@ -169,6 +170,8 @@ const { data } = await useFetch('/api/payment-intent', { method: 'POST', server:
 `PaymentForm` is the component from [Accept a payment with the Payment Element](/guide/payment-element#_3-render-the-payment-element-and-confirm). With the plugin from step 3, drop the `VueStripeProvider` wrapper.
 
 Name the file `checkout/index.vue`, not `checkout.vue`. Nuxt treats `app/pages/checkout/complete.vue`, the Checkout Session return page below, as a child route of `checkout.vue`, and because that page has no `<NuxtPage />`, `/checkout/complete` would show the payment form again.
+
+When the server route fails (a wrong secret key, Stripe unreachable), `useFetch` sets `error` and leaves `data` empty; the page then shows the message instead of an empty form.
 
 Check `data?.clientSecret`, not only `data`. `useFetch` takes its type from the server route, and stripe-node types `client_secret` as `string | null`, so `nuxi typecheck` rejects `data.clientSecret` as a `client-secret` until the template has ruled out `null`.
 
