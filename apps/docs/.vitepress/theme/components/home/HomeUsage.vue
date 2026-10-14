@@ -4,16 +4,19 @@
 // they are fetched again, as on /usage, and updated in place. A figure that neither could
 // fetch is left out, and with fewer than three left the usage row is not shown. The sizes are
 // measured when the site is built (../../data/bundle-size.data.ts); a build without the
-// library's dist has none, and leaves that row out.
-import { computed, onMounted, shallowRef } from 'vue'
+// library's dist has none, and leaves that row out. Each row counts up from 0 the first time
+// it scrolls into view (../../composables/useCountUp.ts).
+import { computed, onMounted, ref, shallowRef } from 'vue'
 import { withBase } from 'vitepress'
 import DocIcon, { type DocIconName } from '../DocIcon.vue'
 import { data as built } from '../../data/usage.data'
 import { data as sizes } from '../../data/bundle-size.data'
-import { homeSizeFigures } from '../../data/bundle-size'
+import { formatSizeLike, homeSizeFigures } from '../../data/bundle-size'
+import { useCountUp } from '../../composables/useCountUp'
 import {
   fetchUsage,
   formatCompact,
+  formatCompactLike,
   formatCount,
   formatDay,
   hasAnyFigure,
@@ -35,34 +38,35 @@ onMounted(() => {
 interface Stat {
   id: string
   icon: DocIconName
-  value: string
+  /** The figure, and how to print it (also mid-count, as `format(n)`). */
+  amount: number
+  format: (n: number) => string
   label: string
 }
+
+const compactStat = (id: string, icon: DocIconName, amount: number, label: string): Stat => ({
+  id,
+  icon,
+  amount,
+  format: (n) => (n === amount ? formatCompact(n) : formatCompactLike(n, amount)),
+  label
+})
+const countStat = (id: string, icon: DocIconName, amount: number, label: string): Stat => ({
+  id,
+  icon,
+  amount,
+  format: (n) => formatCount(Math.round(n)),
+  label
+})
 
 const stats = computed(() => {
   const { npm, github } = usage.value
   const all: (Stat | null)[] = [
-    npm.allTime !== null
-      ? { id: 'all', icon: 'package', value: formatCompact(npm.allTime), label: 'npm downloads' }
-      : null,
-    npm.lastWeek !== null
-      ? {
-          id: 'week',
-          icon: 'package',
-          value: formatCompact(npm.lastWeek),
-          label: 'downloads a week'
-        }
-      : null,
-    github.stars !== null
-      ? { id: 'stars', icon: 'star', value: formatCount(github.stars), label: 'GitHub stars' }
-      : null,
+    npm.allTime !== null ? compactStat('all', 'package', npm.allTime, 'npm downloads') : null,
+    npm.lastWeek !== null ? compactStat('week', 'package', npm.lastWeek, 'downloads a week') : null,
+    github.stars !== null ? countStat('stars', 'star', github.stars, 'GitHub stars') : null,
     github.contributors !== null
-      ? {
-          id: 'contributors',
-          icon: 'users',
-          value: formatCount(github.contributors),
-          label: 'contributors'
-        }
+      ? countStat('contributors', 'users', github.contributors, 'contributors')
       : null
   ]
   return all.filter((s): s is Stat => s !== null)
@@ -75,9 +79,23 @@ const SIZE_ICONS: Record<string, DocIconName> = {
   'use-stripe': 'zap'
 }
 const sizeStats: Stat[] = homeSizeFigures(sizes).map((f) => ({
-  ...f,
-  icon: SIZE_ICONS[f.id] ?? 'package'
+  id: f.id,
+  icon: SIZE_ICONS[f.id] ?? 'package',
+  amount: f.bytes,
+  format: (n) => (n === f.bytes ? f.value : formatSizeLike(n, f.bytes)),
+  label: f.label
 }))
+
+// Mid-count numbers for each row, or null to show the real values.
+const usageRow = ref<HTMLElement | null>(null)
+const sizeRow = ref<HTMLElement | null>(null)
+const usageCount = useCountUp(usageRow, () => stats.value.map((s) => s.amount))
+const sizeCount = useCountUp(sizeRow, () => sizeStats.map((s) => s.amount))
+/** What the aria-hidden copy of figure `i` shows while its row counts, or null. */
+const counted = (count: number[] | null, stat: Stat, i: number) => {
+  const n = count?.[i]
+  return n === undefined ? null : stat.format(n)
+}
 </script>
 
 <template>
@@ -89,12 +107,23 @@ const sizeStats: Stat[] = homeSizeFigures(sizes).map((f) => ({
     <h2 id="home-usage-title" class="visually-hidden">Vue Stripe in numbers</h2>
     <template v-if="stats.length >= 3">
       <ul
+        ref="usageRow"
         class="home-usage-list"
         aria-label="Usage"
         :style="{ '--home-usage-count': stats.length }"
       >
-        <li v-for="s in stats" :key="s.id" class="home-usage-stat">
-          <span class="home-usage-value">{{ s.value }}</span>
+        <li v-for="(s, i) in stats" :key="s.id" class="home-usage-stat">
+          <span class="home-usage-value">
+            <span :class="{ 'is-counting': counted(usageCount, s, i) !== null }">{{
+              s.format(s.amount)
+            }}</span>
+            <span
+              v-if="counted(usageCount, s, i) !== null"
+              class="home-usage-count"
+              aria-hidden="true"
+              >{{ counted(usageCount, s, i) }}</span
+            >
+          </span>
           <span class="home-usage-label">
             <DocIcon :name="s.icon" :size="14" />
             {{ s.label }}
@@ -108,12 +137,23 @@ const sizeStats: Stat[] = homeSizeFigures(sizes).map((f) => ({
     </template>
     <template v-if="sizeStats.length">
       <ul
+        ref="sizeRow"
         class="home-usage-list"
         aria-label="Bundle size, minified and gzipped"
         :style="{ '--home-usage-count': sizeStats.length }"
       >
-        <li v-for="s in sizeStats" :key="s.id" class="home-usage-stat">
-          <span class="home-usage-value">{{ s.value }}</span>
+        <li v-for="(s, i) in sizeStats" :key="s.id" class="home-usage-stat">
+          <span class="home-usage-value">
+            <span :class="{ 'is-counting': counted(sizeCount, s, i) !== null }">{{
+              s.format(s.amount)
+            }}</span>
+            <span
+              v-if="counted(sizeCount, s, i) !== null"
+              class="home-usage-count"
+              aria-hidden="true"
+              >{{ counted(sizeCount, s, i) }}</span
+            >
+          </span>
           <span class="home-usage-label">
             <DocIcon :name="s.icon" :size="14" />
             {{ s.label }}
@@ -202,6 +242,25 @@ const sizeStats: Stat[] = homeSizeFigures(sizes).map((f) => ({
   line-height: 1.1;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * While a row counts, the real value stays in place but transparent: it keeps the cell's
+ * width (no shifting) and is what screen readers read. The count is drawn over it.
+ */
+.home-usage-value {
+  position: relative;
+}
+
+.home-usage-value .is-counting {
+  color: transparent;
+}
+
+.home-usage-count {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
 }
 
 .home-usage-label {

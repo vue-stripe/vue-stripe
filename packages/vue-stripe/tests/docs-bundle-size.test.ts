@@ -8,6 +8,7 @@ import {
   emptyBundleSizes,
   extremes,
   formatSize,
+  formatSizeLike,
   groupExports,
   groupOf,
   hasSizes,
@@ -24,6 +25,7 @@ import {
   homeBundleSizeMarkdown,
   toPlainMarkdown
 } from '../../../apps/docs/.vitepress/llms'
+import { formatCompact, formatCompactLike } from '../../../apps/docs/.vitepress/theme/data/usage'
 
 /**
  * /guide/bundle-size and the home page show sizes the docs build measures from the library's
@@ -124,6 +126,20 @@ describe('/guide/bundle-size numbers', () => {
     expect(formatSize(375)).toBe('375 B')
     expect(formatSize(11583)).toBe('11.6 kB')
     expect(formatSize(11583, 2)).toBe('11.58 kB')
+  })
+
+  it("a count up to a figure keeps that figure's unit on the way", () => {
+    // Sizes: kilobytes all the way to 11.6 kB, bytes all the way to 330 B.
+    expect(formatSizeLike(0, 11584)).toBe('0.0 kB')
+    expect(formatSizeLike(512, 11584)).toBe('0.5 kB')
+    expect(formatSizeLike(11584, 11584)).toBe(formatSize(11584))
+    expect(formatSizeLike(164.6, 330)).toBe('165 B')
+    // Compact counts: millions all the way to 3.9M, thousands to 14.6K.
+    expect(formatCompactLike(0, 3_912_345)).toBe('0M')
+    expect(formatCompactLike(1_234_567, 3_912_345)).toBe('1.2M')
+    expect(formatCompactLike(3_912_345, 3_912_345)).toBe(formatCompact(3_912_345))
+    expect(formatCompactLike(500, 14_612)).toBe('0.5K')
+    expect(formatCompactLike(563.4, 999)).toBe('563')
   })
 
   it('a component tag with a part attribute takes that part of the Markdown', () => {

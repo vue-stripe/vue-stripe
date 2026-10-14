@@ -157,6 +157,15 @@ export function formatSize(bytes: number, digits = 1): string {
   return `${(bytes / 1000).toFixed(digits)} kB`
 }
 
+/**
+ * `bytes` in the unit `final` is shown in, for a count up to `final`: towards 11583 the count
+ * reads `0.0 kB`, `4.2 kB`, ... rather than switching from bytes to kilobytes on the way.
+ */
+export function formatSizeLike(bytes: number, final: number): string {
+  if (Math.abs(final) < 1000) return `${Math.round(bytes)} B`
+  return `${(bytes / 1000).toFixed(1)} kB`
+}
+
 const longDate = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: 'short',
@@ -169,6 +178,7 @@ export const formatMeasuredAt = (iso: string) => longDate.format(new Date(iso))
 /** One home page figure. */
 export interface SizeFigure {
   id: string
+  bytes: number
   value: string
   label: string
 }
@@ -179,17 +189,17 @@ export function homeSizeFigures(data: BundleSizes): SizeFigure[] {
   const payment = combination(data, 'payment-element')
   const embedded = combination(data, 'embedded-checkout')
   const useStripe = exportSize(data, 'useStripe')
+  const figure = (id: string, bytes: number, label: string): SizeFigure => ({
+    id,
+    bytes,
+    value: formatSize(bytes),
+    label
+  })
   const figures: (SizeFigure | null)[] = [
-    { id: 'total', value: formatSize(data.total.gzip), label: 'the whole library' },
-    payment
-      ? { id: 'payment', value: formatSize(payment.size.gzip), label: 'a Payment Element checkout' }
-      : null,
-    embedded
-      ? { id: 'embedded', value: formatSize(embedded.size.gzip), label: 'Embedded Checkout' }
-      : null,
-    useStripe
-      ? { id: 'use-stripe', value: formatSize(useStripe.gzip), label: 'useStripe alone' }
-      : null
+    figure('total', data.total.gzip, 'the whole library'),
+    payment ? figure('payment', payment.size.gzip, 'a Payment Element checkout') : null,
+    embedded ? figure('embedded', embedded.size.gzip, 'Embedded Checkout') : null,
+    useStripe ? figure('use-stripe', useStripe.gzip, 'useStripe alone') : null
   ]
   return figures.filter((f): f is SizeFigure => f !== null)
 }

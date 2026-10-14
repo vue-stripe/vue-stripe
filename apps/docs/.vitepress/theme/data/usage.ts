@@ -322,6 +322,20 @@ const monthYear = new Intl.DateTimeFormat('en-US', {
 
 export const formatCount = (n: number) => integer.format(n)
 export const formatCompact = (n: number) => compact.format(n)
+const COMPACT_UNITS: [number, string][] = [
+  [1e9, 'B'],
+  [1e6, 'M'],
+  [1e3, 'K']
+]
+const oneDecimal = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 })
+/**
+ * `n` in the compact unit of `final`, for a count up to `final`: towards 3.9M the count reads
+ * `0M`, `1.2M`, ... rather than `500K` on the way.
+ */
+export function formatCompactLike(n: number, final: number): string {
+  const [size, suffix] = COMPACT_UNITS.find(([size]) => Math.abs(final) >= size) ?? [1, '']
+  return size === 1 ? formatCount(Math.round(n)) : `${oneDecimal.format(n / size)}${suffix}`
+}
 /** `2026-10-12` or an ISO timestamp -> `Oct 12, 2026`. */
 export const formatDay = (day: string) =>
   longDate.format(new Date(day.length === 10 ? `${day}T00:00:00Z` : day))
