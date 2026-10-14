@@ -76,6 +76,7 @@ const pageFile = (link: string) =>
   `${docsRoot}${link.replace(/^\//, '')}${link === '' || link.endsWith('/') ? 'index' : ''}.md`
 const pageExists = (link: string) => existsSync(pageFile(link))
 // A page with `canonical:` frontmatter repeats another page, so the sitemap lists only that one.
+// That covers the stubs left at removed pages' old URLs (`noindex: true`) too.
 const canonicalElsewhere = (link: string) =>
   pageExists(link) && 'canonical' in parseFrontmatter(readFileSync(pageFile(link), 'utf8')).data
 const requirePages = (items: DefaultTheme.SidebarItem[]): DefaultTheme.SidebarItem[] =>

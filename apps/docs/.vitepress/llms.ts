@@ -473,10 +473,13 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
 
   const pages: Page[] = siteConfig.pages
     .filter((p) => p !== 'index.md' && p !== '404.md')
-    .map((relativePath) => {
-      const { data, body } = parseFrontmatter(
-        readFileSync(join(siteConfig.srcDir, relativePath), 'utf8')
-      )
+    .map((relativePath) => ({
+      relativePath,
+      ...parseFrontmatter(readFileSync(join(siteConfig.srcDir, relativePath), 'utf8'))
+    }))
+    // Stubs at removed pages' old URLs (`noindex: true`) are left out, like the 404 page.
+    .filter(({ data }) => data['noindex'] !== 'true')
+    .map(({ relativePath, data, body }) => {
       const route = routeOf(relativePath)
       const markdown = toPlainMarkdown(body, options.components, route)
       const heading = /^# (.*)$/m.exec(markdown)?.[1]?.replace(/`/g, '')

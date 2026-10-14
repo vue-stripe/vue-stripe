@@ -87,6 +87,8 @@ const pages = markdownFiles(docsDir).map((file) => {
     customLayout: data.layout === 'page' || data.layout === 'home',
     title: data.title ?? headings[0] ?? '',
     canonical: data.canonical,
+    // A stub left at a removed page's old URL.
+    noindex: data.noindex === 'true',
     headings,
     source
   }
@@ -159,9 +161,20 @@ describe('docs SEO', () => {
     expect(problems, problems.join('\n')).toEqual([])
   })
 
+  it('a noindex stub names the page that replaced it as canonical', () => {
+    const stubs = pages.filter((p) => p.noindex)
+    // The v5 iDEAL, P24, EPS and FPX element pages: a guide, a reference page and a demo each.
+    expect(stubs.length).toBeGreaterThanOrEqual(12)
+    const problems = stubs
+      .filter((p) => p.canonical === undefined || !/^search: false$/m.test(p.source))
+      .map((p) => `${p.path}: a noindex stub needs canonical: and search: false`)
+    expect(problems, problems.join('\n')).toEqual([])
+  })
+
   it('every live demo widget sits under an h2, so its h3 step headings nest', () => {
     const problems = pages
       .filter((p) => p.path.startsWith('live-demo/') && !p.path.endsWith('index.md'))
+      .filter((p) => !p.noindex)
       .filter((p) => {
         const before = p.source.split(/^<\w+Example\b/m)[0] ?? ''
         return !/^## /m.test(before) || !/^<\w+Example\b/m.test(p.source)
