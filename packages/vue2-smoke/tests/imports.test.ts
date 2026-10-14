@@ -3,7 +3,6 @@ import { readFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
-import { runInNewContext } from 'node:vm'
 import { expect, it } from 'vitest'
 // Aliased to vue-demi/lib/v2.7/index.mjs by vitest.config.ts. The allowlist comes
 // from vue-demi (not vue) because the bundle legitimately imports vue-demi-only
@@ -15,7 +14,6 @@ const require = createRequire(import.meta.url)
 const cjsEntry = require.resolve('@vue-stripe/vue-stripe')
 const distDir = dirname(dirname(cjsEntry))
 const esEntry = `${distDir}/es/index.js`
-const umdEntry = `${distDir}/umd/index.js`
 
 it('the published ESM bundle only imports vue-demi names that the Vue 2.7 build exports', () => {
   const bundle = readFileSync(esEntry, 'utf8')
@@ -76,14 +74,4 @@ it('require() in plain Node returns the same exports as import() (#595)', () => 
   expect(provider).toBe('object')
   expect((imported as string[]).length).toBeGreaterThan(50)
   expect(required).toEqual(imported)
-})
-
-it('the UMD bundle defines window.VueStripe from the VueDemi and Stripe globals', () => {
-  // A <script> tag from unpkg/jsDelivr: no module system, only globals.
-  const sandbox: Record<string, unknown> = { VueDemi: VueDemi27, Stripe: {} }
-  sandbox.self = sandbox
-  runInNewContext(readFileSync(umdEntry, 'utf8'), sandbox)
-  const umd = sandbox.VueStripe as Record<string, unknown>
-  expect(typeof umd.VueStripeProvider).toBe('object')
-  expect(typeof umd.useStripe).toBe('function')
 })

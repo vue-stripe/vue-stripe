@@ -25,47 +25,57 @@ const stylesheet = (): Plugin => ({
   }
 })
 
-export default defineConfig({
-  plugins: [stylesheet(), esmPureEntry()],
-  define: {
-    __VUE_STRIPE_VERSION__: JSON.stringify(pkg.version)
-  },
-  build: {
-    lib: {
-      entry,
-      name: 'VueStripe',
-      cssFileName: 'vue-stripe',
-      formats: ['es', 'cjs', 'umd'],
-      fileName: (format) => {
-        switch (format) {
-          case 'es':
-            return 'es/index.js'
-          case 'cjs':
-            return 'cjs/index.cjs'
-          case 'umd':
-            return 'umd/index.js'
-          default:
-            return 'index.js'
-        }
-      }
+// `vite build` emits the ES and CommonJS builds (and the stylesheet); `vite build --mode umd`
+// then adds the UMD build to the same dist/. The UMD build is for a <script> tag, where
+// @stripe/stripe-js has no global to read (it ships no browser build), so it bundles the
+// `pure` loader and needs only the Vue and VueDemi globals (#714). Stripe.js itself still
+// loads from js.stripe.com at runtime. Apps with a bundler install @stripe/stripe-js
+// themselves, so the ES and CJS builds keep it external.
+export default defineConfig(({ mode }) => {
+  const umd = mode === 'umd'
+  return {
+    plugins: umd ? [] : [stylesheet(), esmPureEntry()],
+    define: {
+      __VUE_STRIPE_VERSION__: JSON.stringify(pkg.version)
     },
-    rollupOptions: {
-      // Source imports Vue APIs only from vue-demi (enforced by lint), which picks Vue 2.7 or 3.
-      // Stripe.js is loaded through '@stripe/stripe-js/pure' (no <script> on import).
-      external: ['vue-demi', '@stripe/stripe-js', '@stripe/stripe-js/pure'],
-      output: {
-        globals: {
-          'vue-demi': 'VueDemi',
-          '@stripe/stripe-js': 'Stripe',
-          '@stripe/stripe-js/pure': 'Stripe'
+    build: {
+      lib: {
+        entry,
+        name: 'VueStripe',
+        cssFileName: 'vue-stripe',
+        formats: umd ? ['umd'] : ['es', 'cjs'],
+        fileName: (format) => {
+          switch (format) {
+            case 'es':
+              return 'es/index.js'
+            case 'cjs':
+              return 'cjs/index.cjs'
+            case 'umd':
+              return 'umd/index.js'
+            default:
+              return 'index.js'
+          }
         }
-      }
+      },
+      rollupOptions: {
+        // Source imports Vue APIs only from vue-demi (enforced by lint), which picks Vue 2.7 or 3.
+        // Stripe.js is loaded through '@stripe/stripe-js/pure' (no <script> on import).
+        external: umd ? ['vue-demi'] : ['vue-demi', '@stripe/stripe-js', '@stripe/stripe-js/pure'],
+        output: {
+          globals: { 'vue-demi': 'VueDemi' },
+          postBanner: umd
+            ? '/*! Includes the @stripe/stripe-js loader: MIT License, Copyright (c) 2017 Stripe */'
+            : undefined
+        }
+      },
+      outDir: 'dist',
+      // The second (UMD) build adds to the first one's output.
+      emptyOutDir: !umd
     },
-    outDir: 'dist'
-  },
-  resolve: {
-    alias: {
-      '@': resolve(import.meta.dirname, 'src')
+    resolve: {
+      alias: {
+        '@': resolve(import.meta.dirname, 'src')
+      }
     }
   }
 })

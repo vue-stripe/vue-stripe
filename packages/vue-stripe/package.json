@@ -39,7 +39,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json && node scripts/declarations.mjs",
+    "build": "vite build && vite build --mode umd && tsc -p tsconfig.build.json && node scripts/declarations.mjs",
     "build:watch": "vite build --watch",
     "dev": "vite build --watch",
     "test": "vitest run",
