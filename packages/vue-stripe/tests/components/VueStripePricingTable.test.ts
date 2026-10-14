@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { defineComponent, h, nextTick, ref } from 'vue-demi'
+import { createSSRApp, defineComponent, h, nextTick, ref } from 'vue-demi'
+import { renderToString } from 'vue/server-renderer'
 import VueStripePricingTable from '../../src/components/VueStripePricingTable'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
+import { createVueStripe } from '../../src/plugin'
+import { VueStripeProviderError } from '../../src/utils/errors'
 import { flushPromises } from '../setup'
 
 describe('VueStripePricingTable', () => {
@@ -404,6 +407,74 @@ describe('VueStripePricingTable', () => {
       // Stripe's web component is kept, not re-created.
       expect(wrapper.find('stripe-pricing-table').element).toBe(table)
       vi.restoreAllMocks()
+    })
+  })
+
+  // The usual cause: the environment variable holding the key did not reach the build.
+  describe('with createVueStripe() and an empty publishable key (#728)', () => {
+    const scripts = () => document.querySelectorAll('script[src*="pricing-table.js"]')
+    const mountWithPlugin = (publishableKey: string | undefined, options = {}) =>
+      mount(VueStripePricingTable, {
+        props: { pricingTableId: 'prctbl_test_123' },
+        global: { plugins: [createVueStripe({ publishableKey: publishableKey as string })] },
+        ...options
+      })
+
+    it.each([[''], [undefined]])(
+      'does not throw for %j: it reports the empty key through #error and @error',
+      async (key) => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const wrapper = mountWithPlugin(key)
+        await flushPromises()
+
+        const message = wrapper.find('.vue-stripe-pricing-table-error').text()
+        expect(message).toContain('publishableKey is empty')
+        expect(message).toContain('createVueStripe()')
+        expect(message).not.toContain('must be used within')
+        expect(wrapper.find('.vue-stripe-pricing-table-loading').exists()).toBe(false)
+        // Neither Stripe's web component nor its script: without a key both could only fail.
+        expect(wrapper.find('stripe-pricing-table').exists()).toBe(false)
+        expect(scripts()).toHaveLength(0)
+
+        const emitted = wrapper.emitted('error')
+        expect(emitted).toHaveLength(1)
+        const error = emitted![0]![0] as Error
+        expect(error).toBeInstanceOf(VueStripeProviderError)
+        expect(error.message).toBe(message)
+        expect(wrapper.emitted('load')).toBeUndefined()
+        // Unhandled (no listener, no #error slot): logged once with the prefix.
+        expect(consoleError).toHaveBeenCalledWith('[Vue Stripe] Pricing table error:', message)
+        expect((wrapper.vm as unknown as { error: string | null }).error).toBe(message)
+        consoleError.mockRestore()
+      }
+    )
+
+    it('renders a custom #error slot and logs nothing', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const wrapper = mountWithPlugin('', {
+        slots: { error: ({ error }: { error: string }) => h('p', { class: 'my-error' }, error) }
+      })
+      await flushPromises()
+      expect(wrapper.find('.my-error').text()).toContain('publishableKey is empty')
+      expect(consoleError).not.toHaveBeenCalled()
+      consoleError.mockRestore()
+    })
+
+    it('renders the error on the server instead of throwing (no HTTP 500)', async () => {
+      const app = createSSRApp({
+        render: () => h(VueStripePricingTable, { pricingTableId: 'prctbl_test_123' })
+      })
+      app.use(createVueStripe({ publishableKey: '' }))
+      const html = await renderToString(app)
+      expect(html).toContain('vue-stripe-pricing-table-error')
+      expect(html).toContain('publishableKey is empty')
+      expect(html).not.toContain('<stripe-pricing-table')
+    })
+
+    it('still throws the "must be used within" error with no provider and no plugin', () => {
+      expect(() =>
+        mount(VueStripePricingTable, { props: { pricingTableId: 'prctbl_test_123' } })
+      ).toThrow(VueStripeProviderError)
     })
   })
 })

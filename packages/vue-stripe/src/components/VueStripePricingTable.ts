@@ -90,18 +90,25 @@ export default /* @__PURE__ */ defineComponent({
   emits: ['load', 'error'] satisfies Array<keyof PricingTableEvents>,
   setup(props, { emit, expose, slots }) {
     const config = inject(stripeConfigInjectionKey, null)
-    if (!config?.publishableKey) {
+    if (!config) {
       throw new VueStripeProviderError(
         'VueStripePricingTable must be used within a VueStripeProvider component or an app using createVueStripe()'
       )
     }
     const publishableKey = config.publishableKey
-    const loading = ref(true)
-    const error = ref<string | null>(null)
+    // Only the plugin gets here without a key (VueStripeProvider throws on an empty one). Like
+    // the element components under the plugin, report it through #error and @error instead
+    // of throwing: a throw would fail the whole page, an HTTP 500 under SSR (#728).
+    const missingKey = publishableKey
+      ? null
+      : 'VueStripePricingTable: publishableKey is empty. Check the key given to createVueStripe().'
+    const loading = ref(!missingKey)
+    const error = ref(missingKey)
     const logError = errorLogger(slots)
 
     onMounted(async () => {
       try {
+        if (missingKey) throw new VueStripeProviderError(missingKey)
         loading.value = true
         error.value = null
         await loadPricingTableScript()
@@ -142,14 +149,19 @@ export default /* @__PURE__ */ defineComponent({
           : []
       return hx('div', { class: 'vue-stripe-pricing-table' }, [
         ...status,
-        hx('stripe-pricing-table', {
-          'pricing-table-id': props.pricingTableId,
-          'publishable-key': publishableKey,
-          'customer-email': props.customerEmail,
-          'customer-session-client-secret': props.customerSessionClientSecret,
-          'client-reference-id': props.clientReferenceId,
-          style: loading.value || error.value ? { display: 'none' } : undefined
-        })
+        // Without a key Stripe's web component could only fail, so it is left out.
+        ...(missingKey
+          ? []
+          : [
+              hx('stripe-pricing-table', {
+                'pricing-table-id': props.pricingTableId,
+                'publishable-key': publishableKey,
+                'customer-email': props.customerEmail,
+                'customer-session-client-secret': props.customerSessionClientSecret,
+                'client-reference-id': props.clientReferenceId,
+                style: loading.value || error.value ? { display: 'none' } : undefined
+              })
+            ])
       ])
     }
   }
