@@ -102,13 +102,18 @@ Run your API and `npx vitepress dev docs`, open `/payment`, and pay with the tes
 
 ## 6. Serve the API next to the built site
 
-`vitepress build docs` writes static files to `docs/.vitepress/dist`. There is no server behind them, and `vitepress preview` does not apply the dev proxy, so every `fetch('/api/...')` answers 404 and `PaymentPage` shows "Failed to initialize payment".
+`vitepress build docs` writes static files to `docs/.vitepress/dist`. There is no server behind them, and `vitepress preview` does not apply the dev proxy, so every `fetch('/api/...')` answers 404 and `PaymentPage` shows "Could not start the payment. Please reload the page."
 
-Serve the site and the API from one origin. One way is to let your Node API serve the built files:
+Serve the site and the API from one origin. One way is to let your Node API serve the built files. Install the server's packages: Express, Stripe's Node library, and `sirv`, the static file server that `vitepress preview` uses:
+
+```bash
+npm install express stripe sirv
+```
 
 ```js
-// server.js
+// server.mjs
 import express from 'express'
+import sirv from 'sirv'
 import Stripe from 'stripe'
 
 const app = express()
@@ -123,22 +128,49 @@ app.post('/api/create-payment-intent', async (req, res) => {
   res.json({ clientSecret: paymentIntent.client_secret })
 })
 
-// extensions: '/payment-complete' serves payment-complete.html, as cleanUrls expects
-app.use(express.static('docs/.vitepress/dist', { extensions: ['html'] }))
+// extensions: '/payment-complete' serves payment-complete.html, as cleanUrls expects,
+// also next to a directory of the same name (checkout.html and checkout/).
+// dev: look files up on each request, so the server starts before the first build
+// and serves a new build without a restart.
+app.use(sirv('docs/.vitepress/dist', { extensions: ['html'], dev: true }))
 
 app.listen(3000)
 ```
 
 ```bash
 npx vitepress build docs
-node --env-file=.env server.js
+node --env-file=.env server.mjs
 ```
+
+The `.mjs` extension makes Node load the file as an ES module whatever `"type"` your `package.json` sets; `npm init` writes `"type": "commonjs"`, under which `import` in a `.js` file fails with "Cannot use import statement outside a module". Don't serve the build with `express.static`: it answers 404 for a page such as `/checkout` when the build also has a `checkout/` directory, for example for a `/checkout/complete` return page.
 
 Keep `STRIPE_SECRET_KEY` in a `.env` file in the project root (outside `docs/`, so VitePress never reads it), or set it in the server's environment. In development the same server is the API that step 4 forwards to. A reverse proxy in front of the static host works as well, or call the API by its full URL and allow the site's origin with CORS on the server.
 
 ## Checkout Session pages
 
 For `VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`, as in [What every SSR app needs](/guide/ssr#fetch-client-secrets-in-the-browser). A Promise created at the top of `<script setup>` would start the request while VitePress builds the page.
+
+The session routes go in `server.mjs` next to the PaymentIntent route. Build their `return_url` or `success_url` from the site's address, kept in the server's `.env`:
+
+```bash
+# .env
+SITE_URL=http://localhost:5173
+```
+
+```js
+// server.mjs
+app.post('/api/checkout-elements-session', async (req, res) => {
+  const session = await stripe.checkout.sessions.create({
+    ui_mode: 'elements',
+    mode: 'payment',
+    line_items: [{ price: 'price_123', quantity: 1 }],
+    return_url: `${process.env.SITE_URL}/checkout/complete?session_id={CHECKOUT_SESSION_ID}`
+  })
+  res.json({ clientSecret: session.client_secret })
+})
+```
+
+`SITE_URL` is the address in the customer's browser: the `vitepress dev` address in development, `http://localhost:3000` while `server.mjs` serves the build on your machine, and your public URL in production. Don't build it from the request's `Host` header: the step 4 proxy rewrites `Host` to the API's address, so in development `req.get('host')` is `localhost:3000`, and Stripe would send the customer to the API server instead of the site.
 
 ## Result
 
