@@ -81,10 +81,12 @@ describe('VueStripeCheckoutFormProvider (Stripe.js 10 Checkout Form SDK, beta)',
     expect(stripe.initCheckoutElementsSdk).not.toHaveBeenCalled()
   })
 
-  it('accepts a Promise<string> clientSecret and passes it through untouched', async () => {
+  it('accepts a Promise<string> clientSecret and hands Stripe its checked result (#697)', async () => {
     const secret = Promise.resolve('cs_from_promise')
     const { stripe } = await mountWith({ clientSecret: secret })
-    expect(stripe.initCheckoutFormSdk.mock.calls[0]?.[0].clientSecret).toBe(secret)
+    await expect(stripe.initCheckoutFormSdk.mock.calls[0]?.[0].clientSecret).resolves.toBe(
+      'cs_from_promise'
+    )
   })
 
   it('wraps fetchClientSecret() into the clientSecret option', async () => {

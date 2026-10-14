@@ -18,6 +18,7 @@ import { stripeCheckoutFormInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
 import { statusShell } from '../utils/status-shell'
 import { errorLogger } from '../utils/report'
+import { checkedSecret } from '../utils/client-secret'
 import type { ScopedSlot, StatusSlots, VueStripeComponent } from '../utils/element-types'
 
 const checkoutFormProviderProps = {
@@ -103,18 +104,24 @@ export default /* @__PURE__ */ defineComponent({
 
     const logError = errorLogger(slots)
     const fail = (message: string) => {
+      if (unmounted) return
       error.value = message
       loading.value = false
       logError('Checkout Form init error', message)
       emit('error', message)
     }
+    // A clientSecret Promise is checked right away: it can reject before Stripe.js has loaded.
+    const secret =
+      !props.fetchClientSecret && props.clientSecret instanceof Promise
+        ? checkedSecret(props, fail)
+        : undefined
 
     const start = () => {
       const stripe = stripeInstance.stripe.value
-      if (started || !stripe) return
+      // error: the clientSecret Promise already failed.
+      if (started || !stripe || error.value) return
 
-      const clientSecret = props.fetchClientSecret ? props.fetchClientSecret() : props.clientSecret
-      if (!clientSecret) {
+      if (!props.clientSecret && !props.fetchClientSecret) {
         fail(
           'VueStripeCheckoutFormProvider requires a `clientSecret` (string or Promise) or `fetchClientSecret` prop'
         )
@@ -123,6 +130,7 @@ export default /* @__PURE__ */ defineComponent({
 
       started = true
       try {
+        const clientSecret = secret ?? checkedSecret(props, fail)
         const options: StripeCheckoutFormSdkOptions = { clientSecret }
         if (props.appearance) options.appearance = props.appearance
         if (props.loader) options.loader = props.loader
@@ -155,10 +163,7 @@ export default /* @__PURE__ */ defineComponent({
             loading.value = false
             emit('ready', result.actions)
           },
-          (err: unknown) => {
-            if (unmounted) return
-            fail(err instanceof Error ? err.message : String(err))
-          }
+          (err: unknown) => fail(err instanceof Error ? err.message : String(err))
         )
       } catch (err) {
         started = false

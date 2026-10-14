@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils'
 import {
   VueStripeCardNumberElement,
   VueStripeCheckout,
+  VueStripeCheckoutElementsProvider,
   VueStripeElements,
   VueStripeEmbeddedCheckout,
   VueStripeExpressCheckoutElement,
@@ -331,4 +332,39 @@ it('passes Embedded Checkout onComplete to Stripe only for a Vue 2 @complete lis
   ;(options()['onComplete'] as () => void)()
   expect(onComplete).toHaveBeenCalledTimes(1)
   listening.destroy()
+})
+
+it('reports a failing fetch-client-secret through Vue 2 @error and #error, nothing uncaught (#697)', async () => {
+  const unhandled: unknown[] = []
+  const onUnhandled = (reason: unknown) => unhandled.push(reason)
+  process.on('unhandledRejection', onUnhandled)
+  // Like Stripe.js: the secret is checked in a chain nothing handles.
+  stripe.initCheckoutElementsSdk.mockImplementation((options: { clientSecret: unknown }) => {
+    const secret = Promise.resolve(options.clientSecret).then((value) => {
+      if (typeof value !== 'string')
+        throw new Error('The client secret promise should always resolve with a string.')
+      return value
+    })
+    void secret.then(() => {})
+    return { on: vi.fn(), loadActions: () => secret.then(() => new Promise(() => {})) }
+  })
+  const onError = vi.fn()
+  const wrapper = mount({
+    render(h: CreateElement) {
+      return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+        h(VueStripeCheckoutElementsProvider as never, {
+          props: { fetchClientSecret: () => Promise.resolve(undefined) },
+          on: { error: onError },
+          scopedSlots: { error: ({ error }: { error: string }) => `Custom: ${error}` }
+        })
+      ])
+    }
+  })
+  await settle()
+  await settle()
+  process.off('unhandledRejection', onUnhandled)
+  const message = 'fetchClientSecret did not resolve to a client secret'
+  expect(onError).toHaveBeenCalledWith(message)
+  expect(wrapper.text()).toBe(`Custom: ${message}`)
+  expect(unhandled).toEqual([])
 })

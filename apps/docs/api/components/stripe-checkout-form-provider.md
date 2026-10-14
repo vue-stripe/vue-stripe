@@ -69,8 +69,8 @@ const onConfirm = async (event) => {
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `clientSecret` | `string \| Promise<string>` | No\* | Client secret of a `ui_mode: 'form'` Checkout Session, or a Promise resolving to it (passed to Stripe as is) |
-| `fetchClientSecret` | `() => Promise<string>` | No\* | Function returning the client secret. **Takes precedence** over `clientSecret` |
+| `clientSecret` | `string \| Promise<string>` | No\* | Client secret of a `ui_mode: 'form'` Checkout Session, or a Promise resolving to it. A Promise is checked before Stripe gets its value, see [Errors](#errors) |
+| `fetchClientSecret` | `() => Promise<string>` | No\* | Function returning the client secret. The provider calls it once Stripe.js has loaded and checks the result before Stripe gets it. **Takes precedence** over `clientSecret` |
 | `appearance` | `Omit<Appearance, 'rules'>` | No | [Appearance](https://docs.stripe.com/elements/appearance-api) of the form; the Form SDK does not accept `rules` |
 | `loader` | `'auto' \| 'always' \| 'never'` | No | Whether Stripe shows a loader while the form loads |
 | `fonts` | `Array<CssFontSource \| CustomFontSource>` | No | Custom fonts for the form |
@@ -100,7 +100,22 @@ The defaults go to the session as on [`VueStripeCheckoutElementsProvider`](/api/
 |-------|---------|-------------|
 | `@ready` | `StripeCheckoutFormLoadActionsSuccess` | Emitted once `loadActions()` resolves. Payload is the Form SDK actions object |
 | `@change` | `StripeCheckoutSession` | Emitted on every Stripe `change` event with the new session snapshot |
-| `@error` | `string` | Emitted if `initCheckoutFormSdk()` throws, `loadActions()` returns an error, or no client secret is given |
+| `@error` | `string` | Emitted if `fetchClientSecret` or a `clientSecret` Promise rejects or resolves no client secret, `initCheckoutFormSdk()` throws, `loadActions()` returns an error or rejects, or no client secret is given. `loading` turns `false`. See [Errors](#errors) |
+
+### Errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `VueStripeProviderError` (thrown) | Not inside `VueStripeProvider`, in an app without `createVueStripe()` | Wrap the provider in `VueStripeProvider` |
+| `requires a clientSecret (string or Promise) or fetchClientSecret prop` | Neither prop given | Pass one of them |
+| The rejection's message | `fetchClientSecret` or the `clientSecret` Promise rejected, for example `Failed to fetch` (connection refused) or a JSON `SyntaxError` (the route answered an HTML error page) | Fix the route, then re-mount the provider |
+| `fetchClientSecret did not resolve to a client secret`, `clientSecret did not resolve to a client secret` | The function or the Promise resolved an empty or non-string value, for example `undefined` when the route answered `500` with a JSON error body | Resolve the session's `client_secret` |
+| Stripe error message | `initCheckoutFormSdk()` threw or `loadActions()` failed: invalid or expired client secret, a session that is not `ui_mode: 'form'`, or a default the session refuses | Create a new session on your server, or drop the default |
+
+The provider checks the secret before Stripe.js gets it, so these failures reach only `@error` and `#error`. Two cases still log an uncaught error in the browser console:
+
+- A client secret string Stripe.js cannot parse (not of the form `{cs_id}_secret_{secret}`): Stripe.js reports it through `loadActions()` and also as its own `Uncaught (in promise) IntegrationError`.
+- A `clientSecret` Promise that rejects before the provider exists. Under `VueStripeProvider`, the provider mounts only once Stripe.js has loaded, so a request that fails fast rejects while nothing handles it. Pass `fetch-client-secret` instead: the provider calls it once Stripe.js has loaded.
 
 ## Slots
 
