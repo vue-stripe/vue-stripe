@@ -53,7 +53,7 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 | Option | Type | Description |
 |--------|------|-------------|
 | `amount` | `number` | Required. Price in the smallest currency unit |
-| `currency` | `'USD' \| 'EUR' \| 'GBP' \| ...` | Required. Upper-case ISO currency code (`AUD`, `CAD`, `CHF`, `CZK`, `DKK`, `EUR`, `GBP`, `NOK`, `NZD`, `PLN`, `SEK`, `USD`) |
+| `currency` | `'USD' \| 'EUR' \| 'GBP' \| ...` | Required. Upper-case ISO currency code: `AUD`, `CAD`, `CHF`, `CZK`, `DKK`, `EUR`, `GBP`, `NOK`, `NZD`, `PLN`, `RON`, `SEK` or `USD`. Stripe.js 10 accepts `RON`, but the `@stripe/stripe-js` 10.1.0 types leave it out, so TypeScript rejects it |
 | `countryCode` | `'US' \| 'GB' \| 'DE' \| ...` | The customer's country. Decides which providers can be offered. Optional, but pass it: without it Stripe uses the visitor's location, and for a country it doesn't support the element fails to load (`@loaderror`) |
 | `paymentMethodTypes` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | The providers to show. Optional in Stripe's types, but with Stripe.js Endive the element renders nothing without it |
 | `paymentMethodOrder` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | Fixed display order. By default Stripe orders them per customer |
