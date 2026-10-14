@@ -23,6 +23,17 @@ import {
   usageFigures,
   type UsageData
 } from './theme/data/usage'
+import {
+  addedRange,
+  extremes,
+  formatMeasuredAt,
+  formatSize,
+  groupExports,
+  hasSizes,
+  homeSizeFigures,
+  type BundleSizes,
+  type Size
+} from './theme/data/bundle-size'
 import { SITE_URL, routeOf, sectionOf, type DocSection } from './seo'
 
 // Build-time Markdown for language models (https://llmstxt.org): /llms.txt indexes every page
@@ -46,7 +57,10 @@ export interface LlmsOptions {
   sidebars: DefaultTheme.SidebarItem[][]
   /** The Markdown under the H1 of llms.txt and llms-full.txt (summary blockquote and facts). */
   header: string
-  /** Markdown that stands in for a component the page renders, e.g. the coverage table. */
+  /**
+   * Markdown that stands in for a component the page renders, e.g. the coverage table, keyed
+   * by component name, or by `Name#part` for a tag with a `part` attribute.
+   */
   components?: Record<string, string>
 }
 
@@ -105,9 +119,10 @@ export function toPlainMarkdown(body: string, components: Record<string, string>
     }
 
     // A line that is only a Vue component tag: substitute or drop it.
-    const component = /^\s*<\/?([A-Z][\w-]*)\b[^>]*>\s*$/.exec(line)?.[1]
+    const [, component, attributes = ''] = /^\s*<\/?([A-Z][\w-]*)\b([^>]*)>\s*$/.exec(line) ?? []
     if (component) {
-      const replacement = components[component]
+      const part = /\bpart="([\w-]+)"/.exec(attributes)?.[1]
+      const replacement = (part && components[`${component}#${part}`]) || components[component]
       if (replacement) out.push(replacement)
       continue
     }
@@ -217,6 +232,131 @@ export function usageMarkdown(data: UsageData): string {
         ]
       : [])
   ].join('\n')
+}
+
+/** The bundle size the home page shows, as one line linking to /guide/bundle-size. */
+export function homeBundleSizeMarkdown(data: BundleSizes): string {
+  const figures = homeSizeFigures(data)
+  if (!figures.length) return ''
+  const list = figures.map((f) => `${f.value} for ${f.label.replace(/^useStripe/, '`useStripe`')}`)
+  const last = list.pop()
+  return `Bundle size, minified and gzipped: ${list.length ? `${list.join(', ')} and ${last}` : last}${
+    data.version ? ` (\`${PACKAGE}\` ${data.version})` : ''
+  }. [How bundle size works](${absolute('/guide/bundle-size')}).`
+}
+
+const sizeCells = (size: Size) => `${formatSize(size.minified, 2)} | ${formatSize(size.gzip, 2)}`
+const code = (name: string) => `\`${name}\``
+
+/**
+ * The parts of /guide/bundle-size its component renders (`<BundleSize part="..." />`), as
+ * Markdown keyed `BundleSize#<part>`. Without measured sizes only the summary says why.
+ */
+export function bundleSizeMarkdown(data: BundleSizes): Record<string, string> {
+  if (!hasSizes(data)) {
+    return {
+      'BundleSize#summary': `**Sizes are measured when the site is built.** This copy was built without the library's \`dist\`, so it has no numbers. [The page on the site](${absolute('/guide/bundle-size')}) has them.`
+    }
+  }
+  const payment = data.combinations.find((c) => c.id === 'payment-element')
+  const useStripe = data.exports.find((e) => e.name === 'useStripe')
+  const ends = extremes(data.exports)
+  const range = addedRange(data.exports)
+  const measured = `Measured for \`${PACKAGE}\` ${data.version ?? ''} on ${
+    data.measuredAt ? formatMeasuredAt(data.measuredAt) : 'the last build'
+  } with ${data.bundler ?? 'Rolldown'}: each import bundled from the ES module build, tree-shaken and minified, with Vue and \`@stripe/stripe-js\` left out, then gzipped.`
+
+  const summary = [
+    '| What you import | Minified and gzipped |',
+    '| --- | --- |',
+    `| The whole library, every export | ${formatSize(data.total.gzip, 2)} |`,
+    ...(payment
+      ? [
+          `| A Payment Element checkout (${payment.imports.map(code).join(', ')}) | ${formatSize(payment.size.gzip, 2)} |`
+        ]
+      : []),
+    ...(useStripe ? [`| \`useStripe\` alone | ${formatSize(useStripe.gzip, 2)} |`] : []),
+    ...(ends
+      ? [
+          `| The smallest export, \`${ends.smallest.name}\` | ${formatSize(ends.smallest.gzip, 2)} |`,
+          `| The largest export, \`${ends.largest.name}\` | ${formatSize(ends.largest.gzip, 2)} |`
+        ]
+      : []),
+    '',
+    measured
+  ].join('\n')
+
+  const combinations = [
+    '| Integration | Imports | Minified | Minified and gzipped |',
+    '| --- | --- | --- | --- |',
+    ...data.combinations.map(
+      (c) => `| ${c.title} | ${c.imports.map(code).join(', ')} | ${sizeCells(c.size)} |`
+    )
+  ].join('\n')
+
+  const elements =
+    data.elements && range
+      ? `\`${data.elements.base}\` on its own is ${formatSize(data.elements.first, 2)}, of which ${formatSize(data.elements.first - data.elements.own, 2)} is the element factory and provider plumbing that every element shares and ${formatSize(data.elements.own)} its own definition. Each element after the first adds ${formatSize(range.min)} to ${formatSize(range.max)}, ${formatSize(range.median)} for the median element; the table under [Every export](${absolute('/guide/bundle-size#every-export')}) lists each one.`
+      : ''
+
+  const { stylesheet, stripeLoader, builds } = data
+  const other = [
+    '| File | Size | Gzipped |',
+    '| --- | --- | --- |',
+    ...(stylesheet
+      ? [
+          `| Stylesheet, \`${PACKAGE}/style.css\` | ${formatSize(stylesheet.raw, 2)} | ${formatSize(stylesheet.gzip, 2)} |`
+        ]
+      : []),
+    ...(stripeLoader
+      ? [
+          `| \`@stripe/stripe-js\` ${stripeLoader.version} loader (\`pure\` entry), minified | ${sizeCells(stripeLoader.size)} |`
+        ]
+      : []),
+    ...(builds.cjs
+      ? [`| CommonJS build, \`dist/cjs/index.cjs\` | ${sizeCells(builds.cjs)} |`]
+      : []),
+    ...(builds.umd ? [`| UMD build, \`dist/umd/index.js\` | ${sizeCells(builds.umd)} |`] : [])
+  ].join('\n')
+
+  const budgets = data.budgets.length
+    ? [
+        '| Check | Limit | Measured |',
+        '| --- | --- | --- |',
+        ...data.budgets.map(
+          (b) => `| ${b.name} | ${formatSize(b.limit, 2)} | ${formatSize(b.size, 2)} |`
+        )
+      ].join('\n')
+    : ''
+
+  const table = groupExports(data.exports)
+    .map((group) =>
+      [
+        `### ${group.title}`,
+        '',
+        '| Export | Minified | Minified and gzipped | Note |',
+        '| --- | --- | --- | --- |',
+        ...group.exports.map((e) => {
+          const name = e.link ? `[\`${e.name}\`](${absolute(e.link)})` : code(e.name)
+          const note = e.aliasOf
+            ? `Another name for \`${e.aliasOf}\``
+            : e.added !== undefined
+              ? `Adds ${formatSize(e.added)} after another element`
+              : ''
+          return `| ${name} | ${sizeCells(e)} | ${note} |`
+        })
+      ].join('\n')
+    )
+    .join('\n\n')
+
+  return {
+    'BundleSize#summary': summary,
+    'BundleSize#combinations': combinations,
+    'BundleSize#elements': elements,
+    'BundleSize#other': other,
+    'BundleSize#budgets': budgets,
+    'BundleSize#table': table
+  }
 }
 
 /**

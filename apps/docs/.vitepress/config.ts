@@ -15,13 +15,16 @@ import {
   type DocSection
 } from './seo'
 import {
+  bundleSizeMarkdown,
   coverageMarkdown,
+  homeBundleSizeMarkdown,
   homeUsageMarkdown,
   parseFrontmatter,
   usageMarkdown,
   writeLlmsFiles
 } from './llms'
 import { loadUsage } from './theme/data/usage'
+import { loadBundleSizes } from './theme/data/measure-bundle'
 
 // Build the "Stripe.js Coverage NN%" nav label from the single coverage data source,
 // so the toolbar stays in sync with the /coverage page automatically.
@@ -42,6 +45,7 @@ const explanationSlugs = [
   'payment-objects',
   'confirming-payments',
   'stripe-js-loading',
+  'bundle-size',
   'stripe-js-versions',
   'security'
 ]
@@ -183,6 +187,7 @@ const guideSidebar: DefaultTheme.SidebarItem[] = requirePages([
       { text: 'Payment objects: Intents, Sessions, tokens', link: '/guide/payment-objects' },
       { text: 'How confirming works', link: '/guide/confirming-payments' },
       { text: 'How Stripe.js is loaded', link: '/guide/stripe-js-loading' },
+      { text: 'Bundle size and tree-shaking', link: '/guide/bundle-size' },
       { text: 'Stripe.js versions and what v6 changed', link: '/guide/stripe-js-versions' },
       { text: 'What runs where: keys and PCI', link: '/guide/security' }
     ]
@@ -655,7 +660,7 @@ export default defineConfigWithTheme<ThemeConfig>({
     })
 
     // /llms.txt, /llms-full.txt and a .md copy of every page (./llms.ts).
-    const usage = await loadUsage()
+    const [usage, sizes] = await Promise.all([loadUsage(), loadBundleSizes()])
     writeLlmsFiles(siteConfig, {
       sections: docSections,
       sidebars,
@@ -664,7 +669,11 @@ export default defineConfigWithTheme<ThemeConfig>({
         StripeCoverage: coverageMarkdown(coverage),
         // The same numbers the page was built with (one fetch per build).
         UsageStats: usageMarkdown(usage),
-        HomeUsage: homeUsageMarkdown(usage)
+        ...bundleSizeMarkdown(sizes),
+        // The home page's numbers: the usage figures, then the bundle size.
+        HomeUsage: [homeUsageMarkdown(usage), homeBundleSizeMarkdown(sizes)]
+          .filter(Boolean)
+          .join('\n\n')
       }
     })
   }

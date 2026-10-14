@@ -1,10 +1,12 @@
 // Quick links for the /coverage page: where each Vue Stripe export is documented
 // (API reference), explained (guide) and running (live demo).
 //
-// API pages are derived from the export name, so a new component or composable gets its
-// link without an entry here. Guides and demos are listed explicitly below.
+// API pages are derived from the export name (./api-links.ts), so a new component or composable
+// gets its link without an entry here. Guides and demos are listed explicitly below.
 // packages/vue-stripe/tests/coverage-matrix.test.ts checks that every link points at an
 // existing page (and, for the confirm composables, at an existing heading).
+
+import { apiLinkIn } from './api-links'
 
 export interface DocLinks {
   api?: string
@@ -19,42 +21,8 @@ const confirmPages = import.meta.glob<string>('../../../api/composables/confirm/
   eager: true
 })
 
-const kebab = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
-
-// Components whose API page is not stripe-<kebab name>.
-const COMPONENT_PAGES: Record<string, string> = {
-  VueStripeCardNumberElement: 'stripe-split-card-elements',
-  VueStripeCardExpiryElement: 'stripe-split-card-elements',
-  VueStripeCardCvcElement: 'stripe-split-card-elements',
-  VueStripeCheckoutElementsProvider: 'stripe-checkout-provider',
-  VueStripeIssuingCardNumberDisplayElement: 'stripe-issuing-elements',
-  VueStripeIssuingCardCvcDisplayElement: 'stripe-issuing-elements',
-  VueStripeIssuingCardExpiryDisplayElement: 'stripe-issuing-elements',
-  VueStripeIssuingCardPinDisplayElement: 'stripe-issuing-elements',
-  VueStripeIssuingCardCopyButtonElement: 'stripe-issuing-elements',
-  VueStripeIssuingAddToWalletButtonElement: 'stripe-issuing-elements'
-}
-
 /** API reference path for a Vue Stripe export, or undefined when it has none. */
-export function apiLink(artifact: string): string | undefined {
-  if (artifact === 'createVueStripe') return '/api/plugin'
-  if (artifact.startsWith('VueStripe')) {
-    const page = COMPONENT_PAGES[artifact] ?? `stripe-${kebab(artifact.slice('VueStripe'.length))}`
-    return `/api/components/${page}`
-  }
-  if (/^useConfirm\w+(Payment|Setup)$/.test(artifact)) {
-    const heading = new RegExp(`^#{2,3} ${artifact}$`, 'm')
-    for (const [file, text] of Object.entries(confirmPages)) {
-      if (heading.test(text)) {
-        const family = file.split('/').pop()!.replace(/\.md$/, '')
-        return `/api/composables/confirm/${family}#${artifact.toLowerCase()}`
-      }
-    }
-    return undefined
-  }
-  if (artifact.startsWith('use')) return `/api/composables/${kebab(artifact)}`
-  return undefined
-}
+export const apiLink = (artifact: string): string | undefined => apiLinkIn(artifact, confirmPages)
 
 const GUIDES: Record<string, string> = {
   VueStripeProvider: '/guide/installation',

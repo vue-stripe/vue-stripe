@@ -1,12 +1,16 @@
 <script setup lang="ts">
-// Four usage figures under the hero. The build's numbers (../../data/usage.data.ts) are in the
-// static HTML; in the browser they are fetched again, as on /usage, and updated in place. A
-// figure that neither could fetch is left out, and with fewer than three left the strip is
-// not shown at all.
+// Vue Stripe in numbers, under the hero: a row of usage figures and a row of bundle sizes.
+// The build's usage numbers (../../data/usage.data.ts) are in the static HTML; in the browser
+// they are fetched again, as on /usage, and updated in place. A figure that neither could
+// fetch is left out, and with fewer than three left the usage row is not shown. The sizes are
+// measured when the site is built (../../data/bundle-size.data.ts); a build without the
+// library's dist has none, and leaves that row out.
 import { computed, onMounted, shallowRef } from 'vue'
 import { withBase } from 'vitepress'
 import DocIcon, { type DocIconName } from '../DocIcon.vue'
 import { data as built } from '../../data/usage.data'
+import { data as sizes } from '../../data/bundle-size.data'
+import { homeSizeFigures } from '../../data/bundle-size'
 import {
   fetchUsage,
   formatCompact,
@@ -63,24 +67,64 @@ const stats = computed(() => {
   ]
   return all.filter((s): s is Stat => s !== null)
 })
+
+const SIZE_ICONS: Record<string, DocIconName> = {
+  total: 'boxes',
+  payment: 'shopping-cart',
+  embedded: 'layout-template',
+  'use-stripe': 'zap'
+}
+const sizeStats: Stat[] = homeSizeFigures(sizes).map((f) => ({
+  ...f,
+  icon: SIZE_ICONS[f.id] ?? 'package'
+}))
 </script>
 
 <template>
-  <section v-if="stats.length >= 3" class="home-usage" aria-labelledby="home-usage-title">
+  <section
+    v-if="stats.length >= 3 || sizeStats.length"
+    class="home-usage"
+    aria-labelledby="home-usage-title"
+  >
     <h2 id="home-usage-title" class="visually-hidden">Vue Stripe in numbers</h2>
-    <ul class="home-usage-list" :style="{ '--home-usage-count': stats.length }">
-      <li v-for="s in stats" :key="s.id" class="home-usage-stat">
-        <span class="home-usage-value">{{ s.value }}</span>
-        <span class="home-usage-label">
-          <DocIcon :name="s.icon" :size="14" />
-          {{ s.label }}
-        </span>
-      </li>
-    </ul>
-    <p class="home-usage-more">
-      <a :href="withBase('/usage')">See all the numbers</a>
-      <span v-if="usage.fetchedAt"> (updated {{ formatDay(usage.fetchedAt) }})</span>
-    </p>
+    <template v-if="stats.length >= 3">
+      <ul
+        class="home-usage-list"
+        aria-label="Usage"
+        :style="{ '--home-usage-count': stats.length }"
+      >
+        <li v-for="s in stats" :key="s.id" class="home-usage-stat">
+          <span class="home-usage-value">{{ s.value }}</span>
+          <span class="home-usage-label">
+            <DocIcon :name="s.icon" :size="14" />
+            {{ s.label }}
+          </span>
+        </li>
+      </ul>
+      <p class="home-usage-more">
+        <a :href="withBase('/usage')">See all the numbers</a>
+        <span v-if="usage.fetchedAt"> (updated {{ formatDay(usage.fetchedAt) }})</span>
+      </p>
+    </template>
+    <template v-if="sizeStats.length">
+      <ul
+        class="home-usage-list"
+        aria-label="Bundle size, minified and gzipped"
+        :style="{ '--home-usage-count': sizeStats.length }"
+      >
+        <li v-for="s in sizeStats" :key="s.id" class="home-usage-stat">
+          <span class="home-usage-value">{{ s.value }}</span>
+          <span class="home-usage-label">
+            <DocIcon :name="s.icon" :size="14" />
+            {{ s.label }}
+          </span>
+        </li>
+      </ul>
+      <p class="home-usage-more">
+        <span>Minified and gzipped, tree-shaken. </span>
+        <a :href="withBase('/guide/bundle-size')">How bundle size works</a>
+      </p>
+    </template>
   </section>
 </template>
 
@@ -182,6 +226,7 @@ const stats = computed(() => {
 }
 
 .home-usage-more a {
+  white-space: nowrap;
   color: var(--vp-c-brand-1);
   font-weight: 500;
   text-decoration: none;
@@ -189,5 +234,10 @@ const stats = computed(() => {
 
 .home-usage-more a:hover {
   text-decoration: underline;
+}
+
+/* The bundle size row under the usage row. */
+.home-usage-more + .home-usage-list {
+  margin-top: 20px;
 }
 </style>
