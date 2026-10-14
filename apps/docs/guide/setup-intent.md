@@ -131,7 +131,54 @@ The button stays disabled once the card is saved. A SetupIntent can be confirmed
 
 The succeeded SetupIntent's `payment_method` is attached to the customer. Store its ID with your customer record if you need it.
 
-## 4. Charge the saved payment method later
+## 4. Show the result on the return page
+
+Cards and most wallets save on the page (`redirect: 'if_required'`), and the page shows "Card saved.". Payment methods that redirect, such as some bank and wallet methods, send the customer to the `return_url` from step 3, `/account/cards`, with `setup_intent_client_secret` and `redirect_status` in the query string. Give that URL a page, or the customer lands on a 404 after saving. Read the result there with `retrieveSetupIntent()`, in a component inside the provider:
+
+```vue
+<!-- SetupStatus.vue: rendered inside VueStripeProvider -->
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useSetupIntent } from '@vue-stripe/vue-stripe'
+
+const { retrieveSetupIntent } = useSetupIntent()
+const status = ref('')
+
+onMounted(async () => {
+  const clientSecret = new URLSearchParams(window.location.search).get('setup_intent_client_secret')
+  if (!clientSecret) return
+  const { setupIntent, error } = await retrieveSetupIntent(clientSecret)
+  status.value = error ? 'unknown' : (setupIntent?.status ?? 'unknown')
+})
+</script>
+
+<template>
+  <p v-if="status === 'succeeded'">Payment method saved.</p>
+  <p v-else-if="status === 'processing'">Your payment method is being saved. We will email you when it is ready.</p>
+  <p v-else-if="status === 'requires_payment_method'">Saving failed. Please try another payment method.</p>
+  <p v-else-if="status">We could not check whether your payment method was saved. Please contact us.</p>
+</template>
+```
+
+```vue
+<!-- CardsPage.vue: the page at /account/cards -->
+<script setup lang="ts">
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
+import SetupStatus from './SetupStatus.vue'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <SetupStatus />
+  </VueStripeProvider>
+</template>
+```
+
+With the [plugin](/guide/plugin), render `<SetupStatus />` without the provider. If `/account/cards` is already a page in your app, for example the list of saved cards, render `SetupStatus` at its top; or point `return_url` at another page that renders it. Use this page to inform the customer only; listen for `setup_intent.succeeded` in a [webhook](/guide/webhooks) to act on the saved method.
+
+## 5. Charge the saved payment method later
 
 On your server, create a PaymentIntent for the customer with the saved payment method and `off_session: true`:
 
