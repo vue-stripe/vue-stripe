@@ -21,6 +21,8 @@ The Checkout Form is a Stripe beta. Your Stripe account needs access to `ui_mode
 
 ```mermaid
 sequenceDiagram
+    accTitle: Checkout Form payment sequence
+    accDescr: The browser asks your server for a session, the server creates it with ui_mode form and returns the client secret, the browser creates the form with initCheckoutFormSdk, and on the confirm event confirms with Stripe, which reports success or redirects to return_url.
     participant Browser
     participant Server
     participant Stripe

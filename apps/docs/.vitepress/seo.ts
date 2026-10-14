@@ -298,6 +298,14 @@ export function seoHead(
   const datePublished = isHome ? '' : datePublishedOf(siteConfig.srcDir, relativePath)
 
   if (isNotFound) return [['meta', { name: 'robots', content: 'noindex, follow' }]]
+  // A stub left at a removed page's old URL (`noindex: true` with `canonical:` frontmatter)
+  // sends search engines and links on to its replacement and is not indexed itself.
+  if (pageData.frontmatter['noindex'] === true) {
+    return [
+      ['link', { rel: 'canonical', href: canonical }],
+      ['meta', { name: 'robots', content: 'noindex, follow' }]
+    ]
+  }
 
   const head: HeadConfig[] = [
     ['link', { rel: 'canonical', href: canonical }],

@@ -16,6 +16,8 @@ Collect payment details with the Payment Element, turn them into a ConfirmationT
 
 ```mermaid
 sequenceDiagram
+    accTitle: ConfirmationToken payment sequence
+    accDescr: The browser creates a ConfirmationToken from the Payment Element and posts it to your server, the server creates and confirms a PaymentIntent with it and returns the status, and the browser calls handleNextAction when the status is requires_action.
     participant Browser
     participant Server
     participant Stripe

@@ -84,7 +84,7 @@ By default the browser confirms the Intent, through `usePaymentIntent()`, `useSe
 
 `VueStripeProvider` and the `createVueStripe()` plugin both provide the `Stripe` instance under the same injection key. They differ in scope and in when Stripe.js loads.
 
-| | `VueStripeProvider` | `createVueStripe()` plugin |
+| Aspect | `VueStripeProvider` | `createVueStripe()` plugin |
 |---|---|---|
 | Scope | The subtree inside it | The whole app |
 | Stripe.js loads | When the provider mounts | The first time a component or composable needs it |
@@ -103,6 +103,8 @@ Use the plugin when Stripe appears on many unrelated pages with one key, so you 
 
 ```mermaid
 flowchart TD
+    accTitle: Choosing a Vue Stripe integration
+    accDescr: If Stripe lays out the whole checkout and the customer can leave your site, use Hosted Checkout. If they stay, use Embedded Checkout for an iframe page or the Checkout Form (beta) for one form element. If you lay out the form and Stripe should compute tax, discounts and shipping, use Custom Checkout. If your server sets the amount, use the Card Element for cards only and the Payment Element otherwise. Custom Checkout and the Payment Element can add Express Checkout for wallet buttons.
     A{"Should Stripe lay out<br/>the whole checkout?"} -->|Yes| B{"Can the customer<br/>leave your site?"}
     B -->|Yes| H["Hosted Checkout"]
     B -->|No| C{"Stripe's page in an iframe,<br/>or one form element in your layout?"}

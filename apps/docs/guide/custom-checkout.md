@@ -16,6 +16,8 @@ Put Stripe Elements on your own page while a Checkout Session keeps the order: l
 
 ```mermaid
 sequenceDiagram
+    accTitle: Custom checkout payment sequence
+    accDescr: The browser asks your server for a session, the server creates it with ui_mode elements and returns the client secret, the browser starts initCheckoutElementsSdk with it, then calls confirm, and Stripe reports success or redirects to return_url.
     participant Browser
     participant Server
     participant Stripe

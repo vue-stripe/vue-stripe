@@ -7,6 +7,7 @@ import {
   breadcrumbs,
   firstCommitDates,
   ogImageAlt,
+  routeOf,
   sectionOf,
   sidebarTrail,
   type DocSection
@@ -14,7 +15,8 @@ import {
 import {
   coverageMarkdown,
   homeMarkdown,
-  parseFrontmatter
+  parseFrontmatter,
+  toPlainMarkdown
 } from '../../../apps/docs/.vitepress/llms'
 import { coverage } from '../../../apps/docs/.vitepress/theme/data/stripe-coverage'
 
@@ -85,6 +87,8 @@ const pages = markdownFiles(docsDir).map((file) => {
     customLayout: data.layout === 'page' || data.layout === 'home',
     title: data.title ?? headings[0] ?? '',
     canonical: data.canonical,
+    // A stub left at a removed page's old URL.
+    noindex: data.noindex === 'true',
     headings,
     source
   }
@@ -157,9 +161,20 @@ describe('docs SEO', () => {
     expect(problems, problems.join('\n')).toEqual([])
   })
 
+  it('a noindex stub names the page that replaced it as canonical', () => {
+    const stubs = pages.filter((p) => p.noindex)
+    // The v5 iDEAL, P24, EPS and FPX element pages: a guide, a reference page and a demo each.
+    expect(stubs.length).toBeGreaterThanOrEqual(12)
+    const problems = stubs
+      .filter((p) => p.canonical === undefined || !/^search: false$/m.test(p.source))
+      .map((p) => `${p.path}: a noindex stub needs canonical: and search: false`)
+    expect(problems, problems.join('\n')).toEqual([])
+  })
+
   it('every live demo widget sits under an h2, so its h3 step headings nest', () => {
     const problems = pages
       .filter((p) => p.path.startsWith('live-demo/') && !p.path.endsWith('index.md'))
+      .filter((p) => !p.noindex)
       .filter((p) => {
         const before = p.source.split(/^<\w+Example\b/m)[0] ?? ''
         return !/^## /m.test(before) || !/^<\w+Example\b/m.test(p.source)
@@ -177,6 +192,20 @@ describe('docs SEO', () => {
           (m) => `${name}: <h${m[1]}>`
         )
       )
+    expect(problems, problems.join('\n')).toEqual([])
+  })
+
+  it('every Mermaid diagram has an accTitle and accDescr, its name for screen readers', () => {
+    const diagrams = pages.flatMap((p) =>
+      [...p.source.matchAll(/^```mermaid\n([\s\S]*?)^```/gm)].map((m) => ({
+        path: p.path,
+        code: m[1]!
+      }))
+    )
+    expect(diagrams.length).toBeGreaterThan(0)
+    const problems = diagrams
+      .filter((d) => !/^\s*accTitle: \S/m.test(d.code) || !/^\s*accDescr: \S/m.test(d.code))
+      .map((d) => `${d.path}: a diagram without accTitle and accDescr`)
     expect(problems, problems.join('\n')).toEqual([])
   })
 
@@ -279,6 +308,26 @@ describe('docs SEO head and share cards', () => {
     // No Vue component or layout tags outside the code fences.
     const prose = markdown.replace(/^```[\s\S]*?^```/gm, '')
     expect(prose).not.toMatch(/<\/?(template|HomeHero|HomeSection|main)\b/)
+  })
+})
+
+describe('Markdown copies', () => {
+  it('a same-page link names its page, so it still works in llms-full.txt', () => {
+    const body = 'See [Events](#events) and [Slots](/api/x#slots).\n\n```md\n[Kept](#kept)\n```'
+    expect(toPlainMarkdown(body, {}, '/api/components/stripe-provider')).toBe(
+      `See [Events](${SITE_URL}/api/components/stripe-provider#events) and [Slots](${SITE_URL}/api/x#slots).\n\n\`\`\`md\n[Kept](#kept)\n\`\`\``
+    )
+  })
+
+  it('no page keeps a bare #fragment link in its Markdown copy', () => {
+    const problems = pages
+      .filter((p) => p.path !== 'index.md')
+      .flatMap((p) => {
+        const { body } = parseFrontmatter(p.source)
+        const prose = toPlainMarkdown(body, {}, routeOf(p.path)).replace(/^```[\s\S]*?^```/gm, '')
+        return [...prose.matchAll(/\]\((#[^)]*)\)/g)].map((m) => `${p.path}: ${m[1]}`)
+      })
+    expect(problems, problems.join('\n')).toEqual([])
   })
 })
 

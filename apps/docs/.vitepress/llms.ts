@@ -82,8 +82,16 @@ export function parseFrontmatter(source: string): { data: Record<string, string>
 
 const absolute = (href: string) => (href.startsWith('/') ? SITE_URL + href : href)
 
-/** Turns a docs page body into plain Markdown, leaving code blocks untouched. */
-export function toPlainMarkdown(body: string, components: Record<string, string> = {}): string {
+/**
+ * Turns a docs page body into plain Markdown, leaving code blocks untouched. With the page's
+ * `route`, a same-page link (`[Events](#events)`) names its page too, so it still points there
+ * from /llms-full.txt, where every page shares one file.
+ */
+export function toPlainMarkdown(
+  body: string,
+  components: Record<string, string> = {},
+  route?: string
+): string {
   // The live-demo index lays out its links as HTML cards.
   const text = body
     .replace(
@@ -149,6 +157,9 @@ export function toPlainMarkdown(body: string, components: Record<string, string>
             `![${/alt="([^"]*)"/.exec(img)?.[1] ?? ''}](${absolute(/src="([^"]*)"/.exec(img)?.[1] ?? '')})`
         )
         .replace(/\]\((\/[^)]*)\)/g, (_, href: string) => `](${absolute(href)})`)
+        .replace(/\]\((#[^)]*)\)/g, (link, fragment: string) =>
+          route ? `](${absolute(route)}${fragment})` : link
+        )
     )
   }
   return out
@@ -214,7 +225,11 @@ export function usageMarkdown(data: UsageData): string {
         ? formatCount(npm.allTime + legacy.allTime)
         : 'Not available'
     ],
-    ...usageFigures(data).map((f) => [f.label, value(f.value)])
+    // The second line a figure card shows (the CDN hits of the past month) goes beside its value.
+    ...usageFigures(data).map((f) => [
+      f.label,
+      f.value !== null && f.detail ? `${value(f.value)} (${f.detail})` : value(f.value)
+    ])
   ]
   const latest = npm.weekly[npm.weekly.length - 1]
   return [
@@ -229,6 +244,21 @@ export function usageMarkdown(data: UsageData): string {
       ? [
           '',
           `Latest full week (${formatDay(latest.start)} to ${formatDay(latest.end)}): ${formatCount(latest.downloads)} npm downloads.`
+        ]
+      : []),
+    // The page's chart and its "Every week as a table", under the same heading.
+    ...(npm.weekly.length > 1
+      ? [
+          '',
+          '## Weekly npm downloads',
+          '',
+          `Downloads of \`${PACKAGE}\` in each of the past ${npm.weekly.length} weeks.`,
+          '',
+          '| Week | Downloads |',
+          '| --- | --- |',
+          ...npm.weekly.map(
+            (w) => `| ${formatDay(w.start)} to ${formatDay(w.end)} | ${formatCount(w.downloads)} |`
+          )
         ]
       : [])
   ].join('\n')
@@ -447,12 +477,15 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
 
   const pages: Page[] = siteConfig.pages
     .filter((p) => p !== 'index.md' && p !== '404.md')
-    .map((relativePath) => {
-      const { data, body } = parseFrontmatter(
-        readFileSync(join(siteConfig.srcDir, relativePath), 'utf8')
-      )
-      const markdown = toPlainMarkdown(body, options.components)
+    .map((relativePath) => ({
+      relativePath,
+      ...parseFrontmatter(readFileSync(join(siteConfig.srcDir, relativePath), 'utf8'))
+    }))
+    // Stubs at removed pages' old URLs (`noindex: true`) are left out, like the 404 page.
+    .filter(({ data }) => data['noindex'] !== 'true')
+    .map(({ relativePath, data, body }) => {
       const route = routeOf(relativePath)
+      const markdown = toPlainMarkdown(body, options.components, route)
       const heading = /^# (.*)$/m.exec(markdown)?.[1]?.replace(/`/g, '')
       return {
         relativePath,

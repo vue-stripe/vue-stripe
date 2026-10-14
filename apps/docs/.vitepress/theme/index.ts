@@ -12,6 +12,7 @@ import DocIcon from './components/DocIcon.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import NotFound from './components/NotFound.vue'
 import SearchKeyHint from './components/SearchKeyHint.vue'
+import MermaidLabels from './components/MermaidLabels.vue'
 import HomeHero from './components/home/HomeHero.vue'
 import HomeFeatures from './components/home/HomeFeatures.vue'
 import HomeIntegrations from './components/home/HomeIntegrations.vue'
@@ -77,11 +78,14 @@ export default {
   Layout: () => {
     const { isDark } = useData()
 
-    // Initialize Mermaid renderer with theme support
+    // Initialize Mermaid renderer with theme support. The dark theme's edge labels are #ccc on
+    // #585858 (4.43:1); a darker label background gives 6.46:1.
     const initMermaid = () => {
-      createMermaidRenderer({
-        theme: isDark.value ? 'dark' : 'default'
-      })
+      createMermaidRenderer(
+        isDark.value
+          ? { theme: 'dark', themeVariables: { edgeLabelBackground: '#404040' } }
+          : { theme: 'default' }
+      )
     }
 
     // Initial Mermaid setup
@@ -96,8 +100,8 @@ export default {
     return h(DefaultTheme.Layout, null, {
       // Copy for LLMs button near the title on doc pages
       'doc-before': () => h(CopyForLLM),
-      // Analytics tracking and the search hint fix (invisible components)
-      'layout-top': () => [h(AnalyticsWrapper), h(SearchKeyHint)],
+      // Analytics tracking, the search hint fix and the diagram labels (invisible components)
+      'layout-top': () => [h(AnalyticsWrapper), h(SearchKeyHint), h(MermaidLabels)],
       // Site footer on every page (replaces the default two-line footer)
       'layout-bottom': () => h(SiteFooter),
       // The 404 page, with a main landmark and links to every section

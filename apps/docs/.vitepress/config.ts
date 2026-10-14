@@ -76,6 +76,7 @@ const pageFile = (link: string) =>
   `${docsRoot}${link.replace(/^\//, '')}${link === '' || link.endsWith('/') ? 'index' : ''}.md`
 const pageExists = (link: string) => existsSync(pageFile(link))
 // A page with `canonical:` frontmatter repeats another page, so the sitemap lists only that one.
+// That covers the stubs left at removed pages' old URLs (`noindex: true`) too.
 const canonicalElsewhere = (link: string) =>
   pageExists(link) && 'canonical' in parseFrontmatter(readFileSync(pageFile(link), 'utf8')).data
 const requirePages = (items: DefaultTheme.SidebarItem[]): DefaultTheme.SidebarItem[] =>
@@ -588,15 +589,25 @@ export default defineConfigWithTheme<ThemeConfig>({
 
   markdown: {
     theme: {
-      // The high-contrast variant: github-light's orange, red and green tokens are under 4.5:1.
+      // The high-contrast variants: github-light's orange, red and green tokens and
+      // github-dark's comments (3.75:1) are under 4.5:1.
       light: 'github-light-high-contrast',
-      dark: 'github-dark'
+      dark: 'github-dark-high-contrast'
     }
   },
 
   vite: {
     ssr: {
       noExternal: ['@vue-stripe/vue-stripe']
+    },
+    resolve: {
+      alias: [
+        // "Last updated" with its date in the static HTML (theme/components/LastUpdated.vue).
+        {
+          find: /^.*\/VPDocFooterLastUpdated\.vue$/,
+          replacement: fileURLToPath(new URL('./theme/components/LastUpdated.vue', import.meta.url))
+        }
+      ]
     },
     server: {
       fs: {

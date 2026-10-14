@@ -6,7 +6,7 @@ description: "VueStripeIssuingDisclosure reference: render the legal disclosure 
 
 Shows cardholders the legal disclosure of a Stripe Issuing card program: the text Stripe generates for your program, its public card program name and an optional link of yours. The component calls `stripe.createIssuingDisclosure(options)` and mounts the HTML element Stripe.js returns, so the wording always comes from Stripe. It is the Vue port of React Stripe.js 7's `IssuingDisclosure`.
 
-| | |
+| Item | Details |
 |---|---|
 | Stripe product | Stripe Issuing (cards your platform issues) |
 | Stripe.js method | `stripe.createIssuingDisclosure()`, not in the Stripe.js 10.0.0 type definitions |

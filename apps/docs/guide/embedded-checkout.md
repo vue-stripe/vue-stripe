@@ -16,6 +16,8 @@ Put Stripe's prebuilt Checkout page inside your own page with `VueStripeEmbedded
 
 ```mermaid
 sequenceDiagram
+    accTitle: Embedded Checkout payment sequence
+    accDescr: The browser asks your server for a session, the server creates it with ui_mode embedded_page and returns the client secret, the browser mounts createEmbeddedCheckoutPage, the customer pays inside the iframe, and Stripe redirects to return_url or calls onComplete.
     participant Browser
     participant Server
     participant Stripe

@@ -74,9 +74,12 @@
   --vp-c-bg-elv: #202127;
   --vp-c-bg-soft: #202127;
 
+  /* text-3 is lighter than VitePress's 0.38 (3.2:1) so muted text (the footer's legal lines,
+     the coverage table, the home and usage notes) meets 4.5:1 on every dark background:
+     5.2:1 on bg-soft, 5.35:1 on bg, 5.5:1 on bg-alt. */
   --vp-c-text-1: rgba(255, 255, 245, 0.86);
   --vp-c-text-2: rgba(235, 235, 245, 0.6);
-  --vp-c-text-3: rgba(235, 235, 245, 0.38);
+  --vp-c-text-3: rgba(235, 235, 245, 0.56);
 
   --vp-c-divider: rgba(84, 84, 88, 0.65);
   --vp-c-border: rgba(82, 82, 89, 0.68);
@@ -136,6 +139,46 @@
   --vp-button-brand-active-border: transparent;
   --vp-button-brand-active-text: #fff;
   --vp-button-brand-active-bg: #5046e5;
+}
+
+/* Inline code and links in custom blocks take the block's accent colour, on the block's tint
+   (code doubles the tint). The light accents fall under 4.5:1 there: the Vue Stripe yellow in
+   warning blocks (1.25:1), the brand purple in tip blocks (4.38:1) and VitePress's red in
+   danger blocks (4.4:1). Darker shades of each reach 5.5:1 or more on the code tint. */
+.custom-block.warning {
+  --vp-c-warning-1: #7a5200;
+  --vp-c-warning-2: #8a5d00;
+}
+.custom-block.tip {
+  --vp-c-tip-1: #4338ca;
+  --vp-c-tip-2: #3c32b8;
+}
+.custom-block.danger {
+  --vp-c-danger-1: #9f1d22;
+  --vp-c-danger-2: #85181c;
+}
+/* Dark blocks keep their bright accents; only danger's red is lifted (4.24:1 to 5.48:1). */
+.dark .custom-block.warning {
+  --vp-c-warning-1: var(--vp-c-yellow-1);
+  --vp-c-warning-2: var(--vp-c-yellow-2);
+}
+.dark .custom-block.tip {
+  --vp-c-tip-1: var(--vp-c-brand-1);
+  --vp-c-tip-2: var(--vp-c-brand-2);
+}
+.dark .custom-block.danger {
+  --vp-c-danger-1: #ff8f9e;
+  --vp-c-danger-2: #ffa3af;
+}
+
+/* A code block in a custom block sits on the block's tint, where light-theme comments drop to
+   4.03:1 (in a tip block). Give it the opaque colour a code block has outside a block (its
+   translucent --vp-code-block-bg over the page), so it reads the same: comments 4.83:1. */
+.vp-doc .custom-block div[class*='language-'] {
+  background-color: #fafafa;
+}
+.dark .vp-doc .custom-block div[class*='language-'] {
+  background-color: #161619;
 }
 
 /* Full-width layout for the Stripe.js coverage page (pageClass: coverage-page).
