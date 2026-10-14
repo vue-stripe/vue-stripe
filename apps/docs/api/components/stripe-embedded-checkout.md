@@ -86,12 +86,12 @@ interface VueStripeEmbeddedCheckoutProps {
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@ready` | `StripeEmbeddedCheckout` | Emitted after the page is created and mounted |
-| `@complete` | none | Stripe's `onComplete`: the Checkout Session completed. Fires when Stripe does not redirect, see below |
-| `@analytics` | `StripeEmbeddedCheckoutAnalyticsEventUnion` | Stripe's `onAnalyticsEvent`: `checkoutRendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed` |
+| `@complete` | none | Stripe's `onComplete`: the Checkout Session completed. Fires when Stripe does not redirect, see below. The component passes `onComplete` to Stripe only when you listen to `@complete` |
+| `@analytics` | `StripeEmbeddedCheckoutAnalyticsEventUnion` | Stripe's `onAnalyticsEvent`: `checkoutRendered`, `deviceData`, `promotionCodeApplied`, `lineItemChange`, `checkoutSubmitted`, `checkoutSubmitFailed`. Passed to Stripe only when you listen to `@analytics` |
 | `@error` | `string` | No client secret was given, `fetchClientSecret` rejected or resolved no client secret, another Embedded Checkout is already mounted, or `createEmbeddedCheckoutPage` failed (for example a session that is not `ui_mode: 'embedded_page'`). `@ready` is not emitted then |
 
 ::: tip Redirect or `@complete`
-By default (`redirect_on_completion: 'always'`) Stripe sends the customer to your `return_url` after payment. To stay on the page and react to `@complete`, create the session with `redirect_on_completion: 'if_required'` (redirect-based payment methods still use `return_url`) or `'never'` (omit `return_url`).
+By default (`redirect_on_completion: 'always'`) Stripe sends the customer to your `return_url` after payment. To stay on the page and react to `@complete`, create the session with `redirect_on_completion: 'if_required'` (redirect-based payment methods still use `return_url`) or `'never'` (omit `return_url`). Listen to `@complete` only for such a session: with `'always'`, Stripe.js logs a warning that the `onComplete` handler will never be called.
 :::
 
 ### Tracking analytics events

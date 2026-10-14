@@ -183,13 +183,34 @@ describe('VueStripeEmbeddedCheckout (stripe.createEmbeddedCheckoutPage)', () => 
   })
 
   it('emits complete from onComplete and analytics from onAnalyticsEvent', async () => {
-    const { instances, options } = await mountWith()
+    const { instances, options } = await mountWith({
+      clientSecret: 'cs_test_123_secret_456',
+      onComplete: () => {},
+      onAnalytics: () => {}
+    })
     options().onComplete!()
     const event = { eventType: 'checkoutSubmitted', details: {}, clientMetadata: {} }
     options().onAnalyticsEvent!(event)
     const component = instances()[0]!
     expect(component.emitted('complete')).toHaveLength(1)
     expect(component.emitted('analytics')?.[0]).toEqual([event])
+  })
+
+  // #688: Stripe.js warns about an onComplete handler on every load of a session with
+  // redirect_on_completion: 'always', the default, so it gets one only for a @complete listener.
+  it('passes onComplete and onAnalyticsEvent to Stripe only when the parent listens', async () => {
+    const { options } = await mountWith()
+    expect('onComplete' in options()).toBe(false)
+    expect('onAnalyticsEvent' in options()).toBe(false)
+  })
+
+  it.each([
+    ['complete', 'onComplete'],
+    ['analytics', 'onAnalyticsEvent']
+  ])('passes only the callback for a @%s listener', async (event, callback) => {
+    const listener = `on${event[0]!.toUpperCase()}${event.slice(1)}`
+    const { options } = await mountWith({ clientSecret: 'cs_x', [listener]: () => {} })
+    expect(Object.keys(options()).sort()).toEqual(['clientSecret', callback].sort())
   })
 
   it('forwards onLineItemsChange and returns its ResultAction', async () => {

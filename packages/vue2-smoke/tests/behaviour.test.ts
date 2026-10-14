@@ -3,6 +3,7 @@ import {
   VueStripeCardNumberElement,
   VueStripeCheckout,
   VueStripeElements,
+  VueStripeEmbeddedCheckout,
   VueStripeExpressCheckoutElement,
   VueStripePricingTable,
   VueStripeProvider,
@@ -304,4 +305,30 @@ describe('console output for a handled load failure (#651)', () => {
     expect(logged(error)).toHaveLength(1)
     error.mockRestore()
   })
+})
+
+it('passes Embedded Checkout onComplete to Stripe only for a Vue 2 @complete listener (#688)', async () => {
+  const mountEmbedded = (on: Record<string, () => void>) =>
+    mount({
+      render(h: CreateElement) {
+        return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+          h(VueStripeEmbeddedCheckout as never, { props: { clientSecret: 'cs_x_secret_y' }, on })
+        ])
+      }
+    })
+  const options = () =>
+    stripe.createEmbeddedCheckoutPage.mock.calls.at(-1)?.[0] as unknown as Record<string, unknown>
+
+  const plain = mountEmbedded({})
+  await settle()
+  expect(Object.keys(options())).toEqual(['clientSecret'])
+  plain.destroy()
+
+  const onComplete = vi.fn()
+  const listening = mountEmbedded({ complete: onComplete })
+  await settle()
+  expect(Object.keys(options()).sort()).toEqual(['clientSecret', 'onComplete'])
+  ;(options()['onComplete'] as () => void)()
+  expect(onComplete).toHaveBeenCalledTimes(1)
+  listening.destroy()
 })

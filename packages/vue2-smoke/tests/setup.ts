@@ -30,6 +30,9 @@ export const stripe = {
   paymentRequest: vi.fn(() => paymentRequest),
   registerAppInfo: vi.fn(),
   initCheckoutElementsSdk: vi.fn(),
+  createEmbeddedCheckoutPage: vi.fn(() =>
+    Promise.resolve({ mount: vi.fn(), unmount: vi.fn(), destroy: vi.fn() })
+  ),
   confirmCardPayment: vi.fn(),
   createConfirmationToken: vi.fn()
 }

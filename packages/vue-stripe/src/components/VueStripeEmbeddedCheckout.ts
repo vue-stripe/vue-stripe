@@ -18,7 +18,7 @@ import type {
 } from '@stripe/stripe-js'
 import { injectStripe } from '../utils/inject-stripe'
 import { renderElement } from '../utils/element-render'
-import { errorLogger } from '../utils/report'
+import { errorLogger, listenerCheck } from '../utils/report'
 import type { VueStripeComponent } from '../utils/element-types'
 
 // Stripe.js allows one Embedded Checkout per page; this is the instance holding it.
@@ -97,6 +97,7 @@ export default /* @__PURE__ */ defineComponent({
     }
 
     const logError = errorLogger(slots)
+    const listens = listenerCheck()
     const fail = (message: string) => {
       error.value = message
       loading.value = false
@@ -121,10 +122,11 @@ export default /* @__PURE__ */ defineComponent({
       }
       owner = token
 
-      const options: StripeEmbeddedCheckoutOptions = {
-        onComplete: () => emit('complete'),
-        onAnalyticsEvent: (event) => emit('analytics', event)
-      }
+      // Callbacks only for listeners: Stripe.js warns about an onComplete it will never call,
+      // on every load of a session that redirects on completion (the default) (#688).
+      const options: StripeEmbeddedCheckoutOptions = {}
+      if (listens('complete')) options.onComplete = () => emit('complete')
+      if (listens('analytics')) options.onAnalyticsEvent = (event) => emit('analytics', event)
       const onLineItemsChange = props.onLineItemsChange
       if (onLineItemsChange) options.onLineItemsChange = (event) => onLineItemsChange(event)
 
