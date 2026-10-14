@@ -160,7 +160,7 @@ To save the bank account without charging it, create a SetupIntent with `allowed
 
 ## Test it
 
-In the test-mode modal, pick **Test (Non-OAuth)**, accept the terms and choose the **Success** account. To test micro-deposits, enter the details by hand with routing number `110000000` and account number `000123456789`, then verify with the amounts `32` and `45` or the code `SM11AA`. More test accounts are in [Test your integration](/guide/testing#ach-direct-debit-us).
+In the test-mode modal, pick **Test (Non-OAuth)** and accept the terms. If the modal then shows Link's "Sign up or log in" screen, choose **Continue as guest**. Then choose the **Success** account, **Connect account** and **Done**. To test micro-deposits, enter the details by hand with routing number `110000000` and account number `000123456789`, then verify with the amounts `32` and `45` or the code `SM11AA`. More test accounts are in [Test your integration](/guide/testing#ach-direct-debit-us).
 
 ## Result
 
