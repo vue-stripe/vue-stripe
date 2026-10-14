@@ -126,8 +126,12 @@ The webhook does the work; the page the customer returns to only reports it. For
 ```js
 // success_url: 'https://example.com/success?session_id={CHECKOUT_SESSION_ID}'
 app.get('/api/checkout-status', async (req, res) => {
-  const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
-  res.json({ status: session.status, paymentStatus: session.payment_status })
+  try {
+    const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+    res.json({ status: session.status, paymentStatus: session.payment_status })
+  } catch {
+    res.status(404).json({ error: 'No such Checkout Session' })
+  }
 })
 ```
 

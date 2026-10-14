@@ -342,8 +342,12 @@ Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answe
        throw createError({ statusCode: 400, statusMessage: 'Missing session_id' })
      }
 
-     const session = await stripe.checkout.sessions.retrieve(session_id)
-     return { status: session.status, paymentStatus: session.payment_status }
+     try {
+       const session = await stripe.checkout.sessions.retrieve(session_id)
+       return { status: session.status, paymentStatus: session.payment_status }
+     } catch {
+       throw createError({ statusCode: 404, statusMessage: 'No such Checkout Session' })
+     }
    })
    ```
 
@@ -363,6 +367,8 @@ Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answe
      <p v-else>We could not check the payment status. Please contact us.</p>
    </template>
    ```
+
+   An unknown or mistyped `session_id` makes `retrieve()` throw. The route answers 404 with `createError()`, as the Express route does, so Nitro does not log it as an unhandled error, and the page shows its fallback message.
 
    This page needs no Stripe.js, so it renders on the server. It works because the payment page is `checkout/index.vue` (step 5); next to a `checkout.vue` it would render as that page's child.
 
