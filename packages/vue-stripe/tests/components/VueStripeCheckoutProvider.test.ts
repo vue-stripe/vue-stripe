@@ -76,10 +76,12 @@ describe('VueStripeCheckoutElementsProvider (Stripe.js 10 Checkout Elements SDK)
     expect(stripe.initCheckoutElementsSdk).toHaveBeenCalledWith({ clientSecret: 'cs_test_secret' })
   })
 
-  it('accepts a Promise<string> clientSecret and passes it through untouched', async () => {
+  it('accepts a Promise<string> clientSecret and hands Stripe its checked result (#697)', async () => {
     const secret = Promise.resolve('cs_from_promise')
     const { stripe } = await mountWith({ clientSecret: secret })
-    expect(stripe.initCheckoutElementsSdk.mock.calls[0]?.[0].clientSecret).toBe(secret)
+    await expect(stripe.initCheckoutElementsSdk.mock.calls[0]?.[0].clientSecret).resolves.toBe(
+      'cs_from_promise'
+    )
   })
 
   it('wraps fetchClientSecret() into the clientSecret option', async () => {
