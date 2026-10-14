@@ -147,9 +147,10 @@ const errorMessage = ref('')
 onMounted(async () => {
   try {
     const response = await fetch('/api/create-payment-intent', { method: 'POST' })
-    const data = await response.json()
-    clientSecret.value = data.clientSecret
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    clientSecret.value = (await response.json()).clientSecret
   } catch {
+    // An error answer, or no answer at all (server down, offline)
     errorMessage.value = 'Failed to initialize payment'
   }
 })
