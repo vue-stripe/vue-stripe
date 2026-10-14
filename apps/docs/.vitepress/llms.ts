@@ -214,7 +214,11 @@ export function usageMarkdown(data: UsageData): string {
         ? formatCount(npm.allTime + legacy.allTime)
         : 'Not available'
     ],
-    ...usageFigures(data).map((f) => [f.label, value(f.value)])
+    // The second line a figure card shows (the CDN hits of the past month) goes beside its value.
+    ...usageFigures(data).map((f) => [
+      f.label,
+      f.value !== null && f.detail ? `${value(f.value)} (${f.detail})` : value(f.value)
+    ])
   ]
   const latest = npm.weekly[npm.weekly.length - 1]
   return [
@@ -229,6 +233,21 @@ export function usageMarkdown(data: UsageData): string {
       ? [
           '',
           `Latest full week (${formatDay(latest.start)} to ${formatDay(latest.end)}): ${formatCount(latest.downloads)} npm downloads.`
+        ]
+      : []),
+    // The page's chart and its "Every week as a table", under the same heading.
+    ...(npm.weekly.length > 1
+      ? [
+          '',
+          '## Weekly npm downloads',
+          '',
+          `Downloads of \`${PACKAGE}\` in each of the past ${npm.weekly.length} weeks.`,
+          '',
+          '| Week | Downloads |',
+          '| --- | --- |',
+          ...npm.weekly.map(
+            (w) => `| ${formatDay(w.start)} to ${formatDay(w.end)} | ${formatCount(w.downloads)} |`
+          )
         ]
       : [])
   ].join('\n')

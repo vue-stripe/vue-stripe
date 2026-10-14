@@ -112,6 +112,17 @@ describe('/usage numbers', () => {
     expect(usageMarkdown(data)).toContain('Live numbers unavailable')
   })
 
+  it('the Markdown carries the weekly table and the past-month CDN hits the page shows', async () => {
+    const data = await fetchUsage({ fetch: fakeFetch() })
+    const markdown = usageMarkdown(data)
+    expect(markdown).toContain('| CDN hits, past year | 3,461 (281 in the past month) |')
+    expect(markdown).toContain('\n## Weekly npm downloads\n')
+    expect(markdown).toContain('| Week | Downloads |')
+    const weeks = markdown.split('\n').filter((line) => / to .* \| \d[\d,]* \|$/.test(line))
+    expect(weeks).toHaveLength(52)
+    expect(weeks.at(-1)).toBe('| Oct 6, 2026 to Oct 12, 2026 | 7 |')
+  })
+
   it('a failing source blanks only its own figures', async () => {
     const data = await fetchUsage({ fetch: fakeFetch((url) => url.includes('api.github.com')) })
     expect(data.github).toEqual({ stars: null, forks: null, contributors: null })
