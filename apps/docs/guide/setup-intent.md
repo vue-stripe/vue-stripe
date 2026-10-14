@@ -89,6 +89,7 @@ onMounted(async () => {
 ```vue
 <!-- SaveCardButton.vue: rendered inside VueStripeElements -->
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useSetupIntent } from '@vue-stripe/vue-stripe'
 import type { SetupIntent } from '@vue-stripe/vue-stripe'
 
@@ -99,6 +100,7 @@ const emit = defineEmits<{
 }>()
 
 const { confirmSetup, loading } = useSetupIntent()
+const saved = ref(false)
 
 const handleSave = async () => {
   const result = await confirmSetup({
@@ -112,17 +114,20 @@ const handleSave = async () => {
   if (result.error) {
     emit('error', result.error.message || 'Failed to save card')
   } else if (result.setupIntent?.status === 'succeeded') {
+    saved.value = true
     emit('success', result.setupIntent)
   }
 }
 </script>
 
 <template>
-  <button :disabled="disabled || loading" @click="handleSave">
+  <button :disabled="disabled || loading || saved" @click="handleSave">
     {{ loading ? 'Saving...' : 'Save card' }}
   </button>
 </template>
 ```
+
+The button stays disabled once the card is saved. A SetupIntent can be confirmed only once: a second click would get an error from Stripe, and the page would replace "Card saved." with it. To save another card, create a new SetupIntent.
 
 The succeeded SetupIntent's `payment_method` is attached to the customer. Store its ID with your customer record if you need it.
 

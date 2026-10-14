@@ -170,6 +170,7 @@ import { useSetupIntent } from '@vue-stripe/vue-stripe'
 const props = defineProps<{ clientSecret: string }>()
 const { confirmSetup, loading } = useSetupIntent()
 const message = ref('')
+const saved = ref(false)
 
 const messages: Record<string, string> = {
   card_declined: 'Your card was declined. Please try another card.',
@@ -186,6 +187,7 @@ const save = async () => {
     redirect: 'if_required'
   })
   if (!error) {
+    saved.value = true // a SetupIntent is confirmed once; a second click would fail
     message.value = 'Card saved.'
     return
   }
@@ -196,7 +198,7 @@ const save = async () => {
 </script>
 
 <template>
-  <button :disabled="loading" @click="save">Save card</button>
+  <button :disabled="loading || saved" @click="save">Save card</button>
   <p v-if="message" role="alert">{{ message }}</p>
 </template>
 ```
