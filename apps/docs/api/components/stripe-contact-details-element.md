@@ -17,19 +17,25 @@ Collects the customer's email address. Use it inside a [VueStripeCheckoutElement
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   VueStripeProvider,
   VueStripeCheckoutElementsProvider,
   VueStripeContactDetailsElement
 } from '@vue-stripe/vue-stripe'
+import type {
+  StripeContactDetailsElement,
+  StripeContactDetailsElementChangeEvent
+} from '@stripe/stripe-js'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = '<checkout-session-client-secret>'
 
-const onReady = (element) => console.log('Contact details ready', element)
-const onChange = (event) => console.log(event.value.email, 'complete:', event.complete)
+const onReady = (element: StripeContactDetailsElement) =>
+  console.log('Contact details ready', element)
+const onChange = (event: StripeContactDetailsElementChangeEvent) =>
+  console.log(event.value.email, 'complete:', event.complete)
 </script>
 ```
 

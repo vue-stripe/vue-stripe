@@ -26,7 +26,7 @@ VueStripeLinkAuthenticationElement needs `VueStripeElements` with a `clientSecre
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import { ref } from 'vue'
 import {
@@ -35,13 +35,14 @@ import {
   VueStripeLinkAuthenticationElement,
   VueStripePaymentElement
 } from '@vue-stripe/vue-stripe'
+import type { StripeLinkAuthenticationElementChangeEvent } from '@stripe/stripe-js'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = 'pi_xxx_secret_xxx' // from your server
 const userEmail = 'jenny@example.com' // optional pre-fill
 
 const email = ref('')
-const onEmailChange = (event) => {
+const onEmailChange = (event: StripeLinkAuthenticationElementChangeEvent) => {
   if (event.complete) email.value = event.value.email
 }
 </script>

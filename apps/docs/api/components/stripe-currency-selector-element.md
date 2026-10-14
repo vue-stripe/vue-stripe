@@ -20,19 +20,21 @@ Lets customers choose the currency they pay in. Use it inside a [VueStripeChecko
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   VueStripeProvider,
   VueStripeCheckoutElementsProvider,
   VueStripeCurrencySelectorElement
 } from '@vue-stripe/vue-stripe'
+import type { StripeCurrencySelectorElement, StripeError } from '@stripe/stripe-js'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const clientSecret = '<checkout-session-client-secret>'
 
-const onReady = (element) => console.log('Currency selector ready', element)
-const onLoadError = (event) => console.error('Failed to load', event.error)
+const onReady = (element: StripeCurrencySelectorElement) =>
+  console.log('Currency selector ready', element)
+const onLoadError = (event: { error: StripeError }) => console.error('Failed to load', event.error)
 </script>
 ```
 

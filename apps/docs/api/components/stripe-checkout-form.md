@@ -39,17 +39,21 @@ The [Checkout Form demo](/live-demo/checkout-form) pays a Checkout Session with 
   <p v-if="message">{{ message }}</p>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCheckoutForm, useCheckoutForm } from '@vue-stripe/vue-stripe'
+import type {
+  StripeCheckoutFormChangeEvent,
+  StripeCheckoutFormConfirmEvent
+} from '@vue-stripe/vue-stripe'
 
 const { confirm } = useCheckoutForm()
 const message = ref('')
 
-const onChange = (event) => console.log('complete:', event.complete)
+const onChange = (event: StripeCheckoutFormChangeEvent) => console.log('complete:', event.complete)
 
 // Fired by the form's Pay button or a wallet: pass the event on to Stripe.
-const onConfirm = async (event) => {
+const onConfirm = async (event: StripeCheckoutFormConfirmEvent) => {
   const result = await confirm({ formConfirmEvent: event })
   if (result.type === 'error') message.value = result.error.message
 }

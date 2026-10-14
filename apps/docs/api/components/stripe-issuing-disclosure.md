@@ -30,7 +30,7 @@ Place the disclosure where a cardholder applies for or activates a card, next to
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider, VueStripeIssuingDisclosure } from '@vue-stripe/vue-stripe'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
@@ -41,7 +41,7 @@ const disclosure = {
   learnMoreLink: 'https://example.com/rocket-card'
 }
 
-const onError = (error) => console.error(error.message)
+const onError = (error: { message?: string }) => console.error(error.message)
 </script>
 ```
 

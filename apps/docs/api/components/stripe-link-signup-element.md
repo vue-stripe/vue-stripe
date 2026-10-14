@@ -43,12 +43,13 @@ Vue Stripe's tests and dogfood runs use a Stripe account without access to the L
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   VueStripeProvider,
   VueStripeCheckoutElementsProvider,
   VueStripeLinkSignupElement
 } from '@vue-stripe/vue-stripe'
+import type { StripeLinkSignupElement } from '@stripe/stripe-js'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -58,7 +59,7 @@ const linkSignupOptions = {
   defaultValues: { email: 'jenny@example.com', name: 'Jenny Rosen' }
 }
 
-const onReady = (element) => console.log('Link signup ready', element)
+const onReady = (element: StripeLinkSignupElement) => console.log('Link signup ready', element)
 </script>
 ```
 

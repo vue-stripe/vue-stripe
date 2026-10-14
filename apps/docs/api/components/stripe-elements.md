@@ -17,7 +17,7 @@ Creates a Stripe Elements group (`stripe.elements()`) and provides it to the ele
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import {
   VueStripeProvider,

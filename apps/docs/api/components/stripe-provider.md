@@ -19,14 +19,15 @@ Loads Stripe.js and provides the `Stripe` instance to every component and compos
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
+import type { Stripe } from '@stripe/stripe-js'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
-const onLoad = (stripe) => console.log('Stripe.js loaded', stripe)
-const onError = (error) => console.error('Stripe.js failed to load', error)
+const onLoad = (stripe: Stripe) => console.log('Stripe.js loaded', stripe)
+const onError = (error: Error) => console.error('Stripe.js failed to load', error)
 </script>
 ```
 

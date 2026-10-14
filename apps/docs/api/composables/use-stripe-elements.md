@@ -10,7 +10,7 @@ Returns the `StripeElements` group created by the nearest [`VueStripeElements`](
 
 ```vue
 <!-- PaymentStatus.vue, rendered inside VueStripeElements -->
-<script setup>
+<script setup lang="ts">
 import { useStripeElements } from '@vue-stripe/vue-stripe'
 
 const { elements, loading, error } = useStripeElements()
@@ -19,6 +19,7 @@ const { elements, loading, error } = useStripeElements()
 <template>
   <p v-if="loading">Preparing the payment form...</p>
   <p v-else-if="error">{{ error }}</p>
+  <p v-else-if="elements">The payment form is ready.</p>
 </template>
 ```
 

@@ -26,7 +26,7 @@ With neither `clientSecret` nor `mode` on `VueStripeElements`, Stripe.js Endive 
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import { ref } from 'vue'
 import {
@@ -34,11 +34,12 @@ import {
   VueStripeElements,
   VueStripeAddressElement
 } from '@vue-stripe/vue-stripe'
+import type { StripeAddressElementChangeEvent } from '@stripe/stripe-js'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const addressRef = ref(null)
+const addressRef = ref<InstanceType<typeof VueStripeAddressElement> | null>(null)
 
-const onChange = (event) => {
+const onChange = (event: StripeAddressElementChangeEvent) => {
   if (event.complete) console.log('Address:', event.value.address)
 }
 

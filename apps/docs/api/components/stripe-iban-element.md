@@ -14,13 +14,13 @@ SEPA Direct Debit requires you to show the customer mandate text before they pay
 
 ```vue
 <!-- SepaForm.vue: rendered inside VueStripeProvider > VueStripeElements -->
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeIbanElement, useConfirmSepaDebitPayment } from '@vue-stripe/vue-stripe'
 
-const props = defineProps({ clientSecret: String, name: String, email: String })
+const props = defineProps<{ clientSecret: string; name: string; email: string }>()
 
-const ibanRef = ref(null)
+const ibanRef = ref<InstanceType<typeof VueStripeIbanElement> | null>(null)
 const ibanComplete = ref(false)
 const { confirmSepaDebitPayment, loading } = useConfirmSepaDebitPayment()
 

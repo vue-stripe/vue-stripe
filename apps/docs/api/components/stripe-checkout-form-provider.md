@@ -29,7 +29,7 @@ The [Checkout Form demo](/live-demo/checkout-form) pays a Checkout Session with 
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { VueStripeProvider, VueStripeCheckoutFormProvider } from '@vue-stripe/vue-stripe'
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import PayForm from './PayForm.vue'
@@ -54,15 +54,16 @@ A Promise in `client-secret` works too, with two limits: a request that fails be
   <p v-if="message">{{ message }}</p>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeCheckoutForm, useCheckoutForm } from '@vue-stripe/vue-stripe'
+import type { StripeCheckoutFormConfirmEvent } from '@vue-stripe/vue-stripe'
 
 const { confirm } = useCheckoutForm()
 const message = ref('')
 
 // The form's Pay button (or a wallet) fires @confirm; hand the event to Stripe.
-const onConfirm = async (event) => {
+const onConfirm = async (event: StripeCheckoutFormConfirmEvent) => {
   const result = await confirm({ formConfirmEvent: event })
   if (result.type === 'error') message.value = result.error.message
 }

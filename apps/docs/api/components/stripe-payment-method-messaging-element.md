@@ -25,7 +25,7 @@ Displays buy-now-pay-later messaging (Affirm, Klarna, Afterpay / Clearpay) for a
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 import {
   VueStripeProvider,

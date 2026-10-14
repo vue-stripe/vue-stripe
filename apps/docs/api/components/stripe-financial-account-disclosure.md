@@ -33,7 +33,7 @@ Show the disclosure in the flow where a business opens its financial account on 
   </VueStripeProvider>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { VueStripeProvider, VueStripeFinancialAccountDisclosure } from '@vue-stripe/vue-stripe'
 
