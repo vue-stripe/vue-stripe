@@ -171,6 +171,19 @@ export function coverageMarkdown(coverage: CoverageCategory[]): string {
     .join('\n\n')
 }
 
+/** The home page's usage strip as one line: the same four figures, linking to /usage. */
+export function homeUsageMarkdown(data: UsageData): string {
+  const { npm, github } = data
+  const parts = [
+    npm.allTime !== null && `${formatCount(npm.allTime)} npm downloads of \`${PACKAGE}\``,
+    npm.lastWeek !== null && `${formatCount(npm.lastWeek)} downloads a week`,
+    github.stars !== null && `${formatCount(github.stars)} GitHub stars`,
+    github.contributors !== null && `${formatCount(github.contributors)} contributors`
+  ].filter((p): p is string => Boolean(p))
+  if (parts.length < 3) return ''
+  return `${parts.join(', ')}${data.fetchedAt ? ` (as of ${formatDay(data.fetchedAt)})` : ''}. [See all the numbers](${absolute('/usage')}).`
+}
+
 /** The /usage numbers as Markdown, as of the build (the page itself refreshes them). */
 export function usageMarkdown(data: UsageData): string {
   if (!hasAnyFigure(data)) {
@@ -211,7 +224,7 @@ export function usageMarkdown(data: UsageData): string {
  * index.md adds the hero's example project, one code fence per `<template #file>` slot, and
  * the live demo section.
  */
-export function homeMarkdown(body: string): string {
+export function homeMarkdown(body: string, components: Record<string, string> = {}): string {
   const link = (text: string, href: string) => `[${text}](${absolute(href)})`
   const code = new Map(
     // The fence, not the slot: a Vue file's own </template> line sits inside the fence.
@@ -228,6 +241,9 @@ export function homeMarkdown(body: string): string {
     ...HERO.actions.map((a) => `- ${link(a.text, a.link)}`),
     `- ${HERO.notice.text}: ${link(HERO.notice.linkText, HERO.notice.link)}`,
     '',
+    ...(components['HomeUsage']
+      ? ['## Vue Stripe in numbers', '', components['HomeUsage'], '']
+      : []),
     '## Features',
     '',
     ...FEATURES.map((f) => `- **${f.link ? link(f.title, f.link) : f.title}**: ${f.text}`),
@@ -317,7 +333,7 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
     title: 'Vue Stripe home page',
     description: homeSource.data['description'] ?? '',
     section: undefined,
-    markdown: homeMarkdown(homeSource.body)
+    markdown: homeMarkdown(homeSource.body, options.components)
   }
 
   const grouped = options.sections.map((section) => ({

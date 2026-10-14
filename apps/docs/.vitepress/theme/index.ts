@@ -15,6 +15,7 @@ import HomeHero from './components/home/HomeHero.vue'
 import HomeFeatures from './components/home/HomeFeatures.vue'
 import HomeIntegrations from './components/home/HomeIntegrations.vue'
 import HomeSection from './components/home/HomeSection.vue'
+import HomeUsage from './components/home/HomeUsage.vue'
 
 // Example components for interactive documentation
 import ProductSelector from './components/examples/ProductSelector.vue'
@@ -134,6 +135,7 @@ export default {
     app.component('HomeFeatures', HomeFeatures)
     app.component('HomeIntegrations', HomeIntegrations)
     app.component('HomeSection', HomeSection)
+    app.component('HomeUsage', HomeUsage)
     app.component('AuBankAccountPaymentExample', AuBankAccountPaymentExample)
     app.component('AchDebitExample', AchDebitExample)
     app.component('IdentityExample', IdentityExample)

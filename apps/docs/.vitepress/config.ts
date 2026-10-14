@@ -14,7 +14,13 @@ import {
   seoHead,
   type DocSection
 } from './seo'
-import { coverageMarkdown, parseFrontmatter, usageMarkdown, writeLlmsFiles } from './llms'
+import {
+  coverageMarkdown,
+  homeUsageMarkdown,
+  parseFrontmatter,
+  usageMarkdown,
+  writeLlmsFiles
+} from './llms'
 import { loadUsage } from './theme/data/usage'
 
 // Build the "Stripe.js Coverage NN%" nav label from the single coverage data source,
@@ -649,6 +655,7 @@ export default defineConfigWithTheme<ThemeConfig>({
     })
 
     // /llms.txt, /llms-full.txt and a .md copy of every page (./llms.ts).
+    const usage = await loadUsage()
     writeLlmsFiles(siteConfig, {
       sections: docSections,
       sidebars,
@@ -656,7 +663,8 @@ export default defineConfigWithTheme<ThemeConfig>({
       components: {
         StripeCoverage: coverageMarkdown(coverage),
         // The same numbers the page was built with (one fetch per build).
-        UsageStats: usageMarkdown(await loadUsage())
+        UsageStats: usageMarkdown(usage),
+        HomeUsage: homeUsageMarkdown(usage)
       }
     })
   }

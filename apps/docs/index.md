@@ -97,6 +97,8 @@ createServer(async (req, res) => {
 </template>
 </HomeHero>
 
+<HomeUsage />
+
 <HomeFeatures />
 
 <HomeIntegrations />
