@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h, inject, ref } from 'vue-demi'
+import { h, inject, reactive, ref } from 'vue-demi'
 import VueStripeElements from '../../src/components/VueStripeElements'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
 import { stripeElementsInjectionKey } from '../../src/utils/injection-keys'
@@ -602,5 +602,81 @@ describe('VueStripeElements creation failure is reported once', () => {
 
     expect(stripe.elements).toHaveBeenCalledTimes(1)
     expect(onError).toHaveBeenCalledTimes(1)
+  })
+})
+
+// #704: an inline :appearance is a new but deep-equal object on every parent render.
+describe('VueStripeElements live updates skip deep-equal props', () => {
+  const setup = async (render: () => ReturnType<typeof h>) => {
+    const { makeMockStripe, makeMockElements } = await import('../setup')
+    const group = makeMockElements()
+    const stripe = makeMockStripe()
+    stripe.elements.mockReturnValue(group)
+    const { loadStripe } = await import('@stripe/stripe-js')
+    vi.mocked(loadStripe).mockResolvedValueOnce(stripe as never)
+    mount(VueStripeProvider, {
+      props: { publishableKey: 'pk_test_123' },
+      slots: { default: render }
+    })
+    await flushPromises()
+    return { group }
+  }
+
+  it('does not call elements.update() when a parent re-render passes an equal inline appearance', async () => {
+    const tick = ref(0)
+    const { group } = await setup(() =>
+      h('div', [
+        h('span', String(tick.value)),
+        h(VueStripeElements, {
+          clientSecret: 'pi_1_secret_2',
+          appearance: { theme: 'stripe', variables: { colorPrimary: '#0570de' } },
+          locale: 'en'
+        })
+      ])
+    )
+    for (let i = 0; i < 5; i++) {
+      tick.value++
+      await flushPromises()
+    }
+    expect(group.update).not.toHaveBeenCalled()
+  })
+
+  it('does not loop when an @update-end handler re-renders the parent', async () => {
+    const theme = ref('stripe')
+    const log = ref<string[]>([])
+    const { group } = await setup(() =>
+      h('div', [
+        h('span', log.value.join(',')),
+        h(VueStripeElements, {
+          clientSecret: 'pi_1_secret_2',
+          appearance: { theme: theme.value },
+          onUpdateEnd: () => log.value.push('update-end')
+        })
+      ])
+    )
+    const handler = group.on.mock.calls.find(([event]) => event === 'update-end')?.[1] as () => void
+    group.update.mockImplementation(() => {
+      handler()
+      return Promise.resolve()
+    })
+    theme.value = 'night'
+    for (let i = 0; i < 5; i++) await flushPromises()
+
+    expect(group.update).toHaveBeenCalledTimes(1)
+    expect(group.update).toHaveBeenCalledWith({ appearance: { theme: 'night' } })
+    expect(log.value).toEqual(['update-end'])
+  })
+
+  it('still applies an appearance mutated in place', async () => {
+    const appearance = reactive({ theme: 'stripe', variables: { colorPrimary: '#0570de' } })
+    const { group } = await setup(() =>
+      h(VueStripeElements, { clientSecret: 'pi_1_secret_2', appearance })
+    )
+    appearance.variables.colorPrimary = '#ff0000'
+    await flushPromises()
+    expect(group.update).toHaveBeenCalledTimes(1)
+    expect(group.update).toHaveBeenCalledWith({
+      appearance: { theme: 'stripe', variables: { colorPrimary: '#ff0000' } }
+    })
   })
 })
