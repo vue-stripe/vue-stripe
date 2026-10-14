@@ -84,7 +84,7 @@ By default the browser confirms the Intent, through `usePaymentIntent()`, `useSe
 
 `VueStripeProvider` and the `createVueStripe()` plugin both provide the `Stripe` instance under the same injection key. They differ in scope and in when Stripe.js loads.
 
-| | `VueStripeProvider` | `createVueStripe()` plugin |
+| Aspect | `VueStripeProvider` | `createVueStripe()` plugin |
 |---|---|---|
 | Scope | The subtree inside it | The whole app |
 | Stripe.js loads | When the provider mounts | The first time a component or composable needs it |

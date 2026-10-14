@@ -108,7 +108,7 @@ A card network answers within seconds, so a card payment is decided by the time 
 
 How long that takes, and how long the customer can reverse it afterwards, depends on the scheme. These figures are from Stripe's documentation for each payment method, for standard settlement:
 
-| | Cards | SEPA Direct Debit | BECS Direct Debit | ACH Direct Debit |
+| Aspect | Cards | SEPA Direct Debit | BECS Direct Debit | ACH Direct Debit |
 |---|---|---|---|---|
 | Currency | Many | EUR | AUD | USD |
 | Status after confirming | `succeeded` (after any 3D Secure) | `processing` | `processing` | `processing` |

@@ -6,7 +6,7 @@ description: "VueStripeFinancialAccountDisclosure reference: render the legal di
 
 Shows your connected accounts the legal disclosure for financial accounts they open through your platform with Stripe Financial Accounts for platforms (formerly Stripe Treasury). Stripe writes the text and names your business in it. The component calls `stripe.createFinancialAccountDisclosure(options)` and mounts the HTML element Stripe.js returns. It is the Vue port of React Stripe.js 7's `FinancialAccountDisclosure`.
 
-| | |
+| Item | Details |
 |---|---|
 | Stripe product | Financial Accounts for platforms, on Stripe Connect |
 | Stripe.js method | `stripe.createFinancialAccountDisclosure()`, not in the Stripe.js 10.0.0 type definitions |
