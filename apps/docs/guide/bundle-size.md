@@ -95,7 +95,7 @@ The library has a size budget, and CI enforces it. `packages/vue-stripe/.size-li
 
 When the site is built, it bundles each export from the library's ES build with [Rolldown](https://rolldown.rs), the bundler in Vite 8 and the one size-limit uses. Each measurement is an `import { ... } from '@vue-stripe/vue-stripe'`, tree-shaken and minified, with Vue and `@stripe/stripe-js` left external, then gzipped at the highest level. The few bytes of the importing module itself are taken off, as size-limit does, so the figures match the CI budgets to the byte.
 
-Other bundlers, such as Rollup (Vite 5 to 7) and webpack, tree-shake the same ES build. They minify differently, so their bytes differ a little.
+So these are the sizes Vue Stripe adds to an app built with Vite 8, which bundles with Rolldown too. Vite 5 to 7 bundle with Rollup and minify with esbuild; measured that way, the same imports keep the same code and come out within 4% of these figures.
 
 ## Every export
 

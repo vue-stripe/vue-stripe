@@ -341,7 +341,7 @@ importers:
         specifier: ^3.9.10
         version: 3.9.10
       rolldown:
-        specifier: ~1.2.13
+        specifier: 1.2.13
         version: 1.2.13
       typescript:
         specifier: ^5.9.3
