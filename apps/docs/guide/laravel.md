@@ -4,9 +4,14 @@ description: "Set up Vue Stripe with Laravel and Inertia: keys in .env, the plug
 
 # Use Vue Stripe with Laravel and Inertia
 
-Set up Vue Stripe in a Laravel app that renders Vue pages with Inertia, and create the PaymentIntents, Checkout Sessions and webhooks on the Laravel side with [stripe-php](https://github.com/stripe/stripe-php). The Vue pages from the how-to guides then work unchanged.
+Set up Vue Stripe in a Laravel app that renders Vue pages with Inertia, and create the PaymentIntents, Checkout Sessions and webhooks on the Laravel side with [stripe-php](https://github.com/stripe/stripe-php). The Vue pages from the how-to guides then work as written, apart from requests that need the signed-in user (step 4).
 
-These steps were tested with Laravel 12 from the Vue starter kit (Inertia 2, Vite 6, `laravel-vite-plugin`) and stripe-php 22 on PHP 8.4, served by `php artisan serve`. The files and commands used below (`bootstrap/app.php`, `php artisan install:api`) exist from Laravel 11 on.
+The steps cover both Vue starter kits. Where they differ, in steps 3 and 5, the step shows both:
+
+- **Laravel 13 kit**: the kit that `laravel new my-app --vue` installs today, with Inertia 3 and Vite 8. Tested with Laravel 13.36 and `@inertiajs/vue3` 3.9.
+- **Laravel 12 kit**: `composer create-project laravel/vue-starter-kit:^1.0 my-app`, with Inertia 2, Vite 6 and Ziggy. Tested with kit v1.0.2 and Laravel 12.70.
+
+Both were tested with stripe-php 22 on PHP 8.4, served by `php artisan serve`. The files and commands used below (`bootstrap/app.php`, `php artisan install:api`) exist from Laravel 11 on.
 
 ## 1. Install the packages
 
@@ -42,17 +47,36 @@ You get `STRIPE_WEBHOOK_SECRET` in step 6; leave it empty until then.
 
 ## 3. Install the plugin in `createInertiaApp`
 
-Inertia creates the Vue app in `resources/js/app.ts`. Import the stylesheet there and install the [plugin](/guide/plugin) next to Inertia's own:
+Inertia creates the Vue app in `resources/js/app.ts`. Import the stylesheet there and install the [plugin](/guide/plugin) where the kit configures the app. Inertia 3 creates the app itself and passes it to `withApp`; with Inertia 2, your `setup()` creates it:
 
-```ts
+::: code-group
+
+```ts [Laravel 13 kit]
+// resources/js/app.ts
+import '@vue-stripe/vue-stripe/style.css'
+import { createVueStripe } from '@vue-stripe/vue-stripe'
+import { createInertiaApp } from '@inertiajs/vue3'
+// ...the kit's other imports
+
+void createInertiaApp({
+  // ...title, layout
+  withApp: (app) => {
+    app.use(createVueStripe({ publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY }))
+    // ...the kit's app.directive('focus', ...)
+  },
+  // ...progress
+})
+```
+
+```ts [Laravel 12 kit]
 // resources/js/app.ts
 import '../css/app.css'
 import '@vue-stripe/vue-stripe/style.css'
 import { createVueStripe } from '@vue-stripe/vue-stripe'
-// ...the starter kit's other imports
+// ...the kit's other imports
 
 createInertiaApp({
-  // ...
+  // ...title, resolve
   setup({ el, App, props, plugin }) {
     createApp({ render: () => h(App, props) })
       .use(plugin)
@@ -63,27 +87,23 @@ createInertiaApp({
 })
 ```
 
-The starter kit declares `ImportMetaEnv` in the same file with an index signature, which types every variable as `string | boolean | undefined`. Add the key to that declaration, or TypeScript rejects it as `publishableKey`:
+:::
 
-```ts
-interface ImportMetaEnv {
-  readonly VITE_APP_NAME: string
-  readonly VITE_STRIPE_PUBLISHABLE_KEY: string
-  // ...
-}
-```
+Don't add a `setup()` to the Laravel 13 kit: Inertia 3 accepts `setup` or `withApp`, not both, and the kit's `app.ts` imports neither `createApp` nor Ziggy.
+
+`publishableKey` needs no type declaration. Vite types the variables in `import.meta.env` as `any`, and the `ImportMetaEnv` declaration that both kits put inside `declare module 'vite/client'` (in `app.ts` in the Laravel 12 kit, in `resources/js/types/global.d.ts` in the Laravel 13 kit) does not narrow them.
 
 The plugin loads Stripe.js once, on the first page that needs it, and keeps it across Inertia visits.
 
 ## 4. Create the API routes
 
-The guides call `/api/...` with `fetch` POST requests and no CSRF token. A route in `routes/web.php` checks the CSRF token, so those requests fail with **419 Page Expired**. Put the routes in `routes/api.php` instead: Laravel serves them under the `/api` prefix, without the CSRF check. A new Laravel 11 or 12 app has no `routes/api.php`; create it with:
+The guides call `/api/...` with `fetch` POST requests and no CSRF token. A route in `routes/web.php` checks the CSRF token, so those requests fail with **419 Page Expired**. Put the routes in `routes/api.php` instead: Laravel serves them under the `/api` prefix, without the CSRF check. A new Laravel app has no `routes/api.php`, in either kit; create it with:
 
 ```bash
 php artisan install:api
 ```
 
-The command also installs Laravel Sanctum. Then add a controller with the two endpoints most guides use:
+The command also installs Laravel Sanctum. Then add a controller with the endpoints that [Accept a payment with the Payment Element](/guide/payment-element) and [Redirect to Stripe Checkout](/guide/checkout) call:
 
 ```php
 <?php
@@ -92,6 +112,9 @@ The command also installs Laravel Sanctum. Then add a controller with the two en
 namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Stripe\Exception\ApiErrorException;
+use Stripe\Exception\InvalidArgumentException;
 use Stripe\StripeClient;
 
 class StripeController extends Controller
@@ -120,10 +143,22 @@ class StripeController extends Controller
             'line_items' => [['price' => 'price_123', 'quantity' => 1]],
             'mode' => 'payment',
             'success_url' => url('/checkout/success').'?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => url('/checkout'),
+            'cancel_url' => url('/hosted-checkout'),
         ]);
 
         return response()->json(['url' => $session->url]);
+    }
+
+    // The page at success_url asks for the session's status: GET /api/checkout-status?session_id=cs_test_...
+    public function checkoutStatus(Request $request): JsonResponse
+    {
+        try {
+            $session = $this->stripe()->checkout->sessions->retrieve((string) $request->query('session_id'));
+        } catch (ApiErrorException|InvalidArgumentException) {
+            return response()->json(['error' => 'No such Checkout Session'], 404);
+        }
+
+        return response()->json(['status' => $session->status, 'paymentStatus' => $session->payment_status]);
     }
 }
 ```
@@ -134,13 +169,73 @@ use App\Http\Controllers\StripeController;
 
 Route::post('/create-payment-intent', [StripeController::class, 'createPaymentIntent']);
 Route::post('/create-checkout-session', [StripeController::class, 'createCheckoutSession']);
+Route::get('/checkout-status', [StripeController::class, 'checkoutStatus']);
 ```
 
-The two endpoints return what [Accept a payment with the Payment Element](/guide/payment-element) and [Redirect to Stripe Checkout](/guide/checkout) expect. The other guides' endpoints translate the same way: stripe-php takes the same parameters as stripe-node, written as PHP arrays.
+Replace `price_123` with a Price from your Stripe account. The endpoints return what the two guides expect. Other guides' endpoints translate the same way: stripe-php takes the same parameters as stripe-node, written as PHP arrays.
 
 ### Keep a route in `routes/web.php`
 
-Routes in `routes/api.php` have no session, so `$request->user()` is `null` there. When an endpoint needs the signed-in user, for example to attach a SetupIntent to the user's Customer, keep it in `routes/web.php` and send Laravel's CSRF token. Laravel puts it in the `XSRF-TOKEN` cookie; axios sends it back as a header by itself, `fetch` does not:
+Routes in `routes/api.php` have no session, so `$request->user()` is `null` there. When an endpoint needs the signed-in user, keep it in `routes/web.php` behind the `auth` middleware, and send Laravel's CSRF token with the request.
+
+For example, [Save a payment method for later](/guide/setup-intent) attaches the SetupIntent to the user's Stripe Customer. Store the Customer ID on the user:
+
+```bash
+php artisan make:migration add_stripe_customer_id_to_users_table --table=users
+```
+
+```php
+// database/migrations/..._add_stripe_customer_id_to_users_table.php
+public function up(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->string('stripe_customer_id')->nullable();
+    });
+}
+
+public function down(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->dropColumn('stripe_customer_id');
+    });
+}
+```
+
+Run `php artisan migrate`. Then add the endpoint to `StripeController`. It creates the Customer on the user's first visit:
+
+```php
+// app/Http/Controllers/StripeController.php
+
+    // Save a payment method for later
+    public function createSetupIntent(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user->stripe_customer_id) {
+            $customer = $this->stripe()->customers->create(['email' => $user->email, 'name' => $user->name]);
+            $user->forceFill(['stripe_customer_id' => $customer->id])->save();
+        }
+
+        $setupIntent = $this->stripe()->setupIntents->create([
+            'customer' => $user->stripe_customer_id, // the signed-in user's Customer, never an ID from the browser
+            'automatic_payment_methods' => ['enabled' => true],
+        ]);
+
+        return response()->json(['clientSecret' => $setupIntent->client_secret]);
+    }
+```
+
+```php
+// routes/web.php
+use App\Http\Controllers\StripeController;
+
+Route::middleware('auth')->group(function () {
+    Route::post('/stripe/setup-intent', [StripeController::class, 'createSetupIntent']);
+    Route::inertia('/save-card', 'SaveCard');
+});
+```
+
+`resources/js/pages/SaveCard.vue` is `SaveCardPage.vue` from the guide, with `SaveCardButton.vue` saved next to it and the fetch changed to this route. Laravel puts the CSRF token in the `XSRF-TOKEN` cookie; axios sends it back as a header by itself, `fetch` does not:
 
 ```ts
 const xsrfToken = decodeURIComponent(document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/)?.[1] ?? '')
@@ -151,14 +246,18 @@ const response = await fetch('/stripe/setup-intent', {
 })
 ```
 
-## 5. Render the payment page
+Without the header the request fails with 419. A guest who opens `/save-card` is sent to the login page.
 
-Add an Inertia route for the page and one for the return page:
+## 5. Render the payment pages
+
+Add Inertia routes for the Payment Element page and its return page, and for the hosted Checkout button and its success page:
 
 ```php
 // routes/web.php
 Route::inertia('/checkout', 'Checkout');
 Route::inertia('/payment-complete', 'PaymentComplete');
+Route::inertia('/hosted-checkout', 'HostedCheckout');
+Route::inertia('/checkout/success', 'CheckoutSuccess');
 ```
 
 Fetch the client secret when the page mounts, and render `VueStripeElements` once it has arrived:
@@ -177,10 +276,10 @@ const errorMessage = ref('')
 onMounted(async () => {
   try {
     const response = await fetch('/api/create-payment-intent', { method: 'POST' })
-    const data = await response.json()
-    clientSecret.value = data.clientSecret
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    clientSecret.value = (await response.json()).clientSecret
   } catch {
-    errorMessage.value = 'Failed to initialize payment'
+    errorMessage.value = 'Could not start the payment. Please reload the page.'
   }
 })
 </script>
@@ -193,7 +292,42 @@ onMounted(async () => {
 </template>
 ```
 
-`PaymentForm.vue` is the form from [Accept a payment with the Payment Element](/guide/payment-element#_3-render-the-payment-element-and-confirm); save it in `resources/js/components/`. Build `PaymentComplete.vue` with `retrievePaymentIntent()`, as in [Check the result on the return page](/guide/error-handling#_4-check-the-result-on-the-return-page). Run `npm run dev` next to `php artisan serve`, open `/checkout` and pay with a [test card](/guide/testing#cards).
+The other three pages come from the guides; save them in `resources/js/pages/` and the form in `resources/js/components/`:
+
+| File | Source |
+|------|--------|
+| `components/PaymentForm.vue` | The form from [Accept a payment with the Payment Element](/guide/payment-element#_3-render-the-payment-element-and-confirm) |
+| `pages/PaymentComplete.vue` | `CompletePage.vue` from [Check the result on the return page](/guide/error-handling#_4-check-the-result-on-the-return-page) |
+| `pages/HostedCheckout.vue` | The button from [Redirect to Stripe Checkout](/guide/checkout#_2-add-the-checkout-button) |
+| `pages/CheckoutSuccess.vue` | `SuccessPage.vue` from [Show the outcome on the success page](/guide/checkout#_3-show-the-outcome-on-the-success-page) |
+
+### Open the pages to guests (Laravel 13 kit)
+
+The Laravel 13 kit wraps every page except `Welcome` and the `auth/` pages in `AppLayout`. `AppLayout` shows the signed-in user's menu, so for a guest the layout fails before the page renders, and `/checkout` stays blank. Return no layout for the Stripe pages in `createInertiaApp`:
+
+```ts
+// resources/js/app.ts
+void createInertiaApp({
+  layout: (name) => {
+    switch (true) {
+      case name === 'Welcome':
+      case ['Checkout', 'PaymentComplete', 'HostedCheckout', 'CheckoutSuccess'].includes(name):
+        return null
+      // ...the kit's other cases
+    }
+  },
+  // ...
+})
+```
+
+To keep the pages inside the dashboard layout instead, put their routes in `Route::middleware('auth')->group(...)`, so only signed-in users reach them. The Laravel 12 kit applies no layout by itself, so its pages need neither change.
+
+### Try it
+
+Run `npm run dev` next to `php artisan serve`:
+
+1. Open `/checkout` and pay with a [test card](/guide/testing#cards). Stripe returns to `/payment-complete`, which shows "Payment received."
+2. Open `/hosted-checkout`, click the button and pay on Stripe's page. Stripe returns to `/checkout/success`, which shows "Thank you! Your payment was received."
 
 ### Why not pass the client secret as an Inertia prop
 
@@ -269,11 +403,11 @@ Forward test-mode events to it with the Stripe CLI, and put the `whsec_...` secr
 stripe listen --forward-to localhost:8000/stripe/webhook
 ```
 
-Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A request with a wrong signature gets 400.
+Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A payment on `/hosted-checkout` also sends `checkout.session.completed`. A request with a wrong signature gets 400.
 
 ## Result
 
-The Vue pages from the guides run inside Inertia with the plugin's Stripe instance, their `fetch` calls reach Laravel routes without a CSRF error, every visit to the checkout page gets a fresh PaymentIntent, and signed webhook events reach your controller.
+The Vue pages from the guides run inside Inertia with the plugin's Stripe instance, in either starter kit and for guests. Their `fetch` calls reach Laravel routes without a CSRF error, every visit to the checkout page gets a fresh PaymentIntent, hosted Checkout returns to a success page that checks the session, and signed webhook events reach your controller.
 
 ## See also
 
