@@ -17,25 +17,44 @@ The [Tokens demo](/live-demo/tokens) creates a Radar Session.
 
 ```vue
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRadarSession } from '@vue-stripe/vue-stripe'
 
 const { createRadarSession, loading, error } = useRadarSession()
+const sent = ref(false)
 
 const checkout = async () => {
+  sent.value = false
   const { radarSession } = await createRadarSession()
   if (!radarSession) return // error is set
-  await fetch('/api/pay', {
+  // Your own route: it keeps the ID with the order (see below)
+  const response = await fetch('/api/radar-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ radarSession: radarSession.id })
   })
+  sent.value = response.ok
 }
 </script>
 
 <template>
-  <button :disabled="loading" @click="checkout">Pay</button>
+  <button :disabled="loading" @click="checkout">Continue</button>
   <p v-if="error">{{ error }}</p>
+  <p v-if="sent">Radar session sent</p>
 </template>
+```
+
+`/api/radar-session` is your own route, not one from the guides. It stores the `rse_...` ID with the order, and your server passes it when it creates the PaymentIntent:
+
+```js
+// Node.js (stripe-node), where your server creates the PaymentIntent
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: 1099,
+  currency: 'usd',
+  payment_method: paymentMethodId,
+  confirm: true,
+  radar_options: { session: radarSessionId } // the ID the browser sent
+})
 ```
 
 ## Return Value
