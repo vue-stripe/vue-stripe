@@ -38,11 +38,12 @@ jobs:
       - name: Verify the tag matches packages/vue-stripe/package.json
         run: test "v$(node -p "require('./packages/vue-stripe/package.json').version")" = "$GITHUB_REF_NAME"
 
-      - name: Test (coverage thresholds + doc-contract + conventions)
-        run: pnpm --filter @vue-stripe/vue-stripe test:coverage
-
+      # The tree-shaking test bundles dist/es/index.js, so build first.
       - name: Build the library
         run: pnpm --filter @vue-stripe/vue-stripe build
+
+      - name: Test (coverage thresholds + doc-contract + conventions)
+        run: pnpm --filter @vue-stripe/vue-stripe test:coverage
 
       - name: Vue 2.7 smoke test
         run: pnpm --filter @vue-stripe/vue2-smoke test
