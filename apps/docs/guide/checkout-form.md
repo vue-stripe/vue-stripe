@@ -59,14 +59,14 @@ app.post('/api/checkout-form-session', async (req, res) => {
 
 ## 2. Wrap the page in the provider
 
-`VueStripeCheckoutFormProvider` calls `stripe.initCheckoutFormSdk()` and makes the session available to the components inside it. `client-secret` accepts a string or a **Promise**, so the form can mount while the session is being created.
+`VueStripeCheckoutFormProvider` calls `stripe.initCheckoutFormSdk()` and makes the session available to the components inside it. Pass the request for the client secret as a function in `fetch-client-secret`: the provider calls it in the browser only, once Stripe.js has loaded.
 
 ```vue
 <!-- CheckoutPage.vue -->
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
     <VueStripeCheckoutFormProvider
-      :client-secret="clientSecret"
+      :fetch-client-secret="fetchClientSecret"
       :appearance="{ theme: 'stripe' }"
     >
       <template #error="{ error }">
@@ -84,11 +84,14 @@ import PayForm from './PayForm.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
-const clientSecret = fetch('/api/checkout-form-session', { method: 'POST' })
-  .then((res) => res.json())
-  .then((data) => data.clientSecret)
+const fetchClientSecret = () =>
+  fetch('/api/checkout-form-session', { method: 'POST' })
+    .then((res) => res.json())
+    .then((data: { clientSecret: string }) => data.clientSecret)
 </script>
 ```
+
+`client-secret` also takes the client secret as a string, or as a Promise that you start at the top of `<script setup>`. The function is safer: a Promise that rejects before the provider mounts is reported as an uncaught rejection ([Errors](/api/components/stripe-checkout-form-provider#errors)), and on a server-rendered page (Nuxt, Vite SSR, Quasar SSR) the request starts during server rendering, which stops a plain Node SSR server. See [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser).
 
 ## 3. Render the form and confirm
 
@@ -168,7 +171,7 @@ In the `compact` layout (private preview), the change event also lists the form'
 With [Adaptive Pricing](https://docs.stripe.com/payments/checkout/adaptive-pricing), the form shows its own currency picker. To place it elsewhere on the page, render a `VueStripeCurrencySelectorElement` inside the provider; the form then leaves its built-in picker out:
 
 ```vue
-<VueStripeCheckoutFormProvider :client-secret="clientSecret">
+<VueStripeCheckoutFormProvider :fetch-client-secret="fetchClientSecret">
   <VueStripeCurrencySelectorElement />
   <VueStripeCheckoutForm @confirm="onConfirm" />
 </VueStripeCheckoutFormProvider>

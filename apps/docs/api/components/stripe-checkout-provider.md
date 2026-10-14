@@ -19,7 +19,7 @@ Initializes **Elements with Checkout Sessions** via `stripe.initCheckoutElements
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeCheckoutElementsProvider :client-secret="clientSecret">
+    <VueStripeCheckoutElementsProvider :fetch-client-secret="fetchClientSecret">
       <CheckoutForm />
     </VueStripeCheckoutElementsProvider>
   </VueStripeProvider>
@@ -33,11 +33,15 @@ import CheckoutForm from './CheckoutForm.vue'
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // From your backend: stripe.checkout.sessions.create({ ui_mode: 'elements', ... })
-const clientSecret = fetch('/api/checkout-elements-session', { method: 'POST' })
-  .then((res) => res.json())
-  .then((data) => data.clientSecret)
+// Called by the provider in the browser only, once Stripe.js has loaded
+const fetchClientSecret = () =>
+  fetch('/api/checkout-elements-session', { method: 'POST' })
+    .then((res) => res.json())
+    .then((data) => data.clientSecret)
 </script>
 ```
+
+A Promise in `client-secret` works too, with two limits: a request that fails before the provider mounts is reported as an uncaught rejection (see [Errors](#errors)), and on a server-rendered page the request would start on the server (see [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser)).
 
 ```vue
 <!-- CheckoutForm.vue -->

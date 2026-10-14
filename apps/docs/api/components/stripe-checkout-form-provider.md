@@ -23,7 +23,7 @@ The [Checkout Form demo](/live-demo/checkout-form) pays a Checkout Session with 
 ```vue
 <template>
   <VueStripeProvider :publishable-key="publishableKey">
-    <VueStripeCheckoutFormProvider :client-secret="clientSecret">
+    <VueStripeCheckoutFormProvider :fetch-client-secret="fetchClientSecret">
       <PayForm />
     </VueStripeCheckoutFormProvider>
   </VueStripeProvider>
@@ -37,11 +37,15 @@ import PayForm from './PayForm.vue'
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // From your backend: stripe.checkout.sessions.create({ ui_mode: 'form', ... })
-const clientSecret = fetch('/api/checkout-form-session', { method: 'POST' })
-  .then((res) => res.json())
-  .then((data) => data.clientSecret)
+// Called by the provider in the browser only, once Stripe.js has loaded
+const fetchClientSecret = () =>
+  fetch('/api/checkout-form-session', { method: 'POST' })
+    .then((res) => res.json())
+    .then((data) => data.clientSecret)
 </script>
 ```
+
+A Promise in `client-secret` works too, with two limits: a request that fails before the provider mounts is reported as an uncaught rejection (see [Errors](#errors)), and on a server-rendered page the request would start on the server (see [Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser)).
 
 ```vue
 <!-- PayForm.vue -->
