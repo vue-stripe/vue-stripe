@@ -203,21 +203,79 @@ onMounted(async () => {
 
 ## Build the page on a Checkout Session instead
 
-For `VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`, as the [CheckoutPage.vue sample](/guide/ssr#fetch-client-secrets-in-the-browser) does. Don't use a Promise created at the top of `<script setup>`: on the server, the relative `fetch('/api/checkout-elements-session')` rejects with "Failed to parse URL", and Node exits on the unhandled rejection. Add the session route to `server.js` next to the PaymentIntent route:
+For `VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`. The provider calls it in the browser only, once Stripe.js has loaded. Don't pass a Promise created at the top of `<script setup>` in `client-secret`: it starts the request on every server render, where the relative `fetch('/api/checkout-elements-session')` rejects with "Failed to parse URL". With the plugin from step 3 the provider handles that rejection and [logs it on every render](#the-server-logs-vue-stripe-checkout-init-error-failed-to-parse-url-on-every-render); inside a `VueStripeProvider` nothing handles it, and [the server process exits](#the-server-process-exits-after-one-request).
 
-```js
-app.post('/api/checkout-elements-session', async (req, res) => {
-  const session = await stripe.checkout.sessions.create({
-    ui_mode: 'elements',
-    mode: 'payment',
-    line_items: [{ price: 'price_123', quantity: 1 }],
-    return_url: `${req.protocol}://${req.get('host')}/checkout/complete?session_id={CHECKOUT_SESSION_ID}`
-  })
-  res.json({ clientSecret: session.client_secret })
-})
-```
+The steps below add a page on a Checkout Session with your own form at `/checkout`, next to the PaymentIntent page at `/`, and its return page at `/checkout/complete`.
 
-Add a route for `/checkout/complete` in `src/main.ts` that checks the session, as in [Embed Stripe Checkout](/guide/embedded-checkout#_3-handle-completion).
+1. Add the session routes to `server.js`, next to the PaymentIntent route:
+
+   ```js
+   // server.js
+   app.post('/api/checkout-elements-session', async (req, res) => {
+     const session = await stripe.checkout.sessions.create({
+       ui_mode: 'elements',
+       mode: 'payment',
+       line_items: [{ price: 'price_123', quantity: 1 }],
+       return_url: `${req.protocol}://${req.get('host')}/checkout/complete?session_id={CHECKOUT_SESSION_ID}`
+     })
+     res.json({ clientSecret: session.client_secret })
+   })
+
+   // GET /api/checkout-status?session_id=cs_test_..., read by CheckoutComplete.vue
+   app.get('/api/checkout-status', async (req, res) => {
+     try {
+       const session = await stripe.checkout.sessions.retrieve(req.query.session_id)
+       res.json({ status: session.status, paymentStatus: session.payment_status })
+     } catch {
+       res.status(404).json({ error: 'No such Checkout Session' })
+     }
+   })
+   ```
+
+   Replace `price_123` with the ID of a Price in your Stripe account. `server.js` serves the pages and the API on one origin, so the request's host is the address in the customer's browser.
+
+2. Save the page as `src/pages/SessionCheckoutPage.vue`. The plugin provides Stripe, so it needs no `VueStripeProvider`:
+
+   ```vue
+   <!-- src/pages/SessionCheckoutPage.vue -->
+   <script setup lang="ts">
+   import { VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
+   import CheckoutForm from '../components/CheckoutForm.vue'
+
+   // Called by the provider in the browser only, once Stripe.js has loaded.
+   const fetchClientSecret = () =>
+     fetch('/api/checkout-elements-session', { method: 'POST' })
+       .then((response) => response.json())
+       .then((data: { clientSecret: string }) => data.clientSecret)
+   </script>
+
+   <template>
+     <VueStripeCheckoutElementsProvider :fetch-client-secret="fetchClientSecret">
+       <CheckoutForm />
+
+       <template #loading>Loading checkout...</template>
+       <template #error="{ error }">Checkout could not load: {{ error }}</template>
+     </VueStripeCheckoutElementsProvider>
+   </template>
+   ```
+
+   `src/components/CheckoutForm.vue` is the form from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form).
+
+3. Use `SuccessPage.vue` from [Show the outcome on the success page](/guide/checkout#_3-show-the-outcome-on-the-success-page) as `src/pages/CheckoutComplete.vue`. It reads `session_id` from the URL and asks `/api/checkout-status` in `onMounted`, so the server render makes no request.
+
+4. Add both pages to the routes in `src/main.ts` (step 3):
+
+   ```ts
+   // src/main.ts
+   routes: [
+     { path: '/', component: () => import('./pages/CheckoutPage.vue') },
+     { path: '/payment-complete', component: () => import('./pages/PaymentComplete.vue') },
+     { path: '/checkout', component: () => import('./pages/SessionCheckoutPage.vue') },
+     { path: '/checkout/complete', component: () => import('./pages/CheckoutComplete.vue') }
+   ]
+   ```
+
+Restart `npm run dev` (Node does not reload `server.js` by itself), open `http://localhost:5173/checkout`, and pay with the test card `4242 4242 4242 4242`. Stripe redirects to `/checkout/complete?session_id=...`, which shows "Thank you! Your payment was received." For [Embed Stripe Checkout](/guide/embedded-checkout#_1-create-the-session-on-your-server) and the [Checkout Form](/guide/checkout-form#_1-create-the-session-on-your-server), point `return_url` at the same `/checkout/complete?session_id={CHECKOUT_SESSION_ID}` page.
 
 ## If something goes wrong
 
