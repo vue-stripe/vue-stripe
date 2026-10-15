@@ -10,7 +10,7 @@ For the upgrade steps, see [Upgrade from v5 to v6](/guide/migration-v6).
 
 ## How Stripe versions Stripe.js
 
-For years Stripe.js was a single evergreen script, `js.stripe.com/v3`. Stripe now also ships it in named **release trains**, two a year, alongside its API releases. Within a train, Stripe only makes changes that don't break integrations, and those reach every page automatically. Breaking changes, such as a removed element, a removed method or a changed default, wait for the next train. Each train also has its own server API versions, and Stripe recommends keeping your server on the same train as Stripe.js.
+For years Stripe.js was a single evergreen script, `js.stripe.com/v3`. Stripe now also ships it in named **release trains**, two a year, alongside its API releases. Within a train, Stripe only makes changes that don't break integrations, and those reach every page automatically. Breaking changes, such as a removed element, a removed method or a changed default, wait for the next train. Each train also has its own server API versions, and Stripe recommends keeping your server on the same train as Stripe.js. Upgrading from Vue Stripe 5 moves the browser to Endive; [Update your server](/guide/migration-v6#_4-update-your-server) in the upgrade guide lists what changes on the server and in which order.
 
 Each major version of the `@stripe/stripe-js` npm package loads exactly one train. Its types describe that train and no other:
 
