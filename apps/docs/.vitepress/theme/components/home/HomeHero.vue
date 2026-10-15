@@ -37,7 +37,9 @@ const onTabKey = (event: KeyboardEvent) => {
         <StripeBadge />
 
         <h1 class="hero-title">
-          <span class="hero-name">{{ HERO.name }}</span>
+          <span class="hero-name"
+            >{{ HERO.name }} <span class="hero-name-accent">{{ HERO.nameAccent }}</span></span
+          >
           {{ HERO.title }}
         </h1>
 
@@ -188,6 +190,21 @@ const onTabKey = (event: KeyboardEvent) => {
   color: var(--vp-c-brand-1);
 }
 
+/* "Endive" in a serif italic and Vue green (system fonts only: no extra font download) */
+.hero-name-accent {
+  --hero-accent: #18794e; /* 5.41:1 on the light background */
+
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, ui-serif, serif;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--hero-accent);
+}
+
+.dark .hero-name-accent {
+  --hero-accent: #42b883; /* 6.88:1 on the dark background */
+}
+
 .hero-lede {
   max-width: 62ch;
   margin: 24px 0 0;
@@ -250,26 +267,23 @@ const onTabKey = (event: KeyboardEvent) => {
   font-size: 15px;
 }
 
-/* Endive notice: small, quiet, one line, under the actions */
+/* Endive notice: a plain line of text under the actions */
 .hero-notice {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   margin-top: 24px;
-  padding: 4px 12px 4px 10px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 999px;
-  color: var(--vp-c-text-1);
-  font-size: 13px;
+  color: var(--vp-c-text-2);
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.6;
   text-decoration: none;
-  transition: border-color 0.15s;
 }
 
-.hero-notice:hover {
-  border-color: var(--vp-c-brand-1);
+.hero-notice:hover .hero-notice-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .hero-notice-dot {
@@ -570,8 +584,7 @@ const onTabKey = (event: KeyboardEvent) => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-btn,
-  .hero-notice {
+  .hero-btn {
     transition: none;
   }
 }

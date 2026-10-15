@@ -4,6 +4,8 @@ import type { DocIconName } from '../components/DocIcon.vue'
 
 export const HERO = {
   name: 'Vue Stripe',
+  // Shown after the name in the hero only (the Stripe.js 10 release name)
+  nameAccent: 'Endive',
   title: 'Stripe Elements and Checkout as Vue components',
   lede: 'Components and composables for every Stripe.js element and method, typed and tested on Vue 3 and Vue 2.7. Drop a provider into your app, render the Payment Element, and confirm with one composable.',
   actions: [
