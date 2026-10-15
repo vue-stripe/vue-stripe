@@ -91,6 +91,19 @@ export default /* @__PURE__ */ defineComponent({
     const loading = ref(true)
     const error = ref<string | null>(null)
 
+    // Under the createVueStripe() plugin alone: its Stripe.js load failed. The plugin logs
+    // it itself, so it is only reported here.
+    watch(
+      () => stripeInstance.error.value,
+      (message) => {
+        if (!message || elements.value) return
+        error.value = message
+        loading.value = false
+        emit('error', message)
+      },
+      { immediate: true }
+    )
+
     // `update-end` fires when an elements.update() call has been applied. The listener follows
     // the current group: a re-created group gets a new one, and a replaced group (which may have
     // no `off`) can no longer emit.

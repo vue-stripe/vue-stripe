@@ -12,6 +12,7 @@ import VueStripePricingTable from '../src/components/VueStripePricingTable'
 import type { VueStripeOptions } from '../src/types'
 import { useStripe } from '../src/composables/useStripe'
 import VueStripeCheckoutElementsProvider from '../src/components/VueStripeCheckoutElementsProvider'
+import VueStripeCheckoutFormProvider from '../src/components/VueStripeCheckoutFormProvider'
 import VueStripeElements from '../src/components/VueStripeElements'
 import VueStripePaymentElement from '../src/components/VueStripePaymentElement'
 import VueStripeProvider from '../src/components/VueStripeProvider'
@@ -354,6 +355,84 @@ describe('createVueStripe as a global provider (#424)', () => {
         await flushPromises()
 
         expect(wrapper.text()).toBe('slot: Network error')
+        consoleError.mockRestore()
+      })
+    }
+  )
+
+  // Same as #773 for the components that already showed the failure: they now emit it too,
+  // and the Checkout Form provider, which stayed on its loader, shows it.
+  describe.each([
+    ['VueStripeElements', VueStripeElements, 'elements', { clientSecret: 'pi_123_secret_456' }],
+    [
+      'VueStripeCheckoutElementsProvider',
+      VueStripeCheckoutElementsProvider,
+      'checkout',
+      { clientSecret: 'cs_123_secret_456' }
+    ],
+    [
+      'VueStripeCheckoutFormProvider',
+      VueStripeCheckoutFormProvider,
+      'checkout',
+      { clientSecret: 'cs_123_secret_456' }
+    ]
+  ] as const)(
+    '%s under the plugin when Stripe.js fails to load',
+    (_name, Component, prefix, props) => {
+      const mountFailing = async (options: Record<string, unknown>) => {
+        const { loadStripe } = await import('@stripe/stripe-js/pure')
+        vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
+        const wrapper = mount(Component as never, {
+          ...options,
+          global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] }
+        })
+        await flushPromises()
+        await flushPromises()
+        return wrapper
+      }
+
+      it('emits @error with the message and shows it, logged only by the plugin', async () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const wrapper = await mountFailing({ props: { ...props, onError: () => {} } })
+        expect(wrapper.emitted('error')).toEqual([['Network error']])
+        expect(wrapper.find(`.vue-stripe-${prefix}-error`).text()).toBe('Network error')
+        expect(wrapper.find(`.vue-stripe-${prefix}-loading`).exists()).toBe(false)
+        expect(consoleError.mock.calls).toEqual([
+          ['[Vue Stripe] Initialization error:', 'Network error']
+        ])
+        consoleError.mockRestore()
+      })
+
+      it('renders the #error slot with the message', async () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const wrapper = await mountFailing({
+          props,
+          slots: { error: ({ error }: { error: string }) => h('p', `slot: ${error}`) }
+        })
+        expect(wrapper.text()).toBe('slot: Network error')
+        consoleError.mockRestore()
+      })
+
+      it('reports a load that had already failed when it mounts', async () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const { loadStripe } = await import('@stripe/stripe-js/pure')
+        vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
+        const show = ref(false)
+        const onError = vi.fn()
+        mount(
+          {
+            setup() {
+              useStripe()
+              return () => (show.value ? h(Component as never, { ...props, onError }) : null)
+            }
+          },
+          { global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] } }
+        )
+        await flushPromises()
+        show.value = true
+        await flushPromises()
+        expect(onError).toHaveBeenCalledTimes(1)
+        expect(onError).toHaveBeenCalledWith('Network error')
         consoleError.mockRestore()
       })
     }

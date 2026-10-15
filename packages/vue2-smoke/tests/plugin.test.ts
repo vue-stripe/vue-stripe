@@ -6,6 +6,8 @@ import {
   useConfirmCardPayment,
   useStripe,
   VueStripeCardElement,
+  VueStripeCheckoutElementsProvider,
+  VueStripeCheckoutFormProvider,
   VueStripeElements,
   VueStripeEmbeddedCheckout,
   VueStripeFinancialAccountDisclosure,
@@ -167,6 +169,59 @@ it.each([
     expect(listening.find(`.vue-stripe-${slug}-loader`).exists()).toBe(false)
     expect(slotted.text()).toBe('slot: Blocked')
     // Only the plugin's own log, once per plugin.
+    expect(consoleError.mock.calls).toEqual([
+      ['[Vue Stripe] Initialization error:', 'Blocked'],
+      ['[Vue Stripe] Initialization error:', 'Blocked']
+    ])
+    consoleError.mockRestore()
+  }
+)
+
+// The same for the components that only showed the failure (and the Checkout Form provider).
+it.each([
+  ['VueStripeElements', VueStripeElements, 'elements', { clientSecret: 'pi_x_secret_y' }],
+  [
+    'VueStripeCheckoutElementsProvider',
+    VueStripeCheckoutElementsProvider,
+    'checkout',
+    { clientSecret: 'cs_x_secret_y' }
+  ],
+  [
+    'VueStripeCheckoutFormProvider',
+    VueStripeCheckoutFormProvider,
+    'checkout',
+    { clientSecret: 'cs_x_secret_y' }
+  ]
+])(
+  'emits a plugin load failure from %s through Vue 2 @error and #error',
+  async (name, Component, prefix, props) => {
+    vi.mocked(loadStripe).mockImplementation(() => Promise.reject(new Error('Blocked')))
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const onError = vi.fn()
+    const listening = mount(
+      {
+        render(h: CreateElement) {
+          return h(Component as never, { props, on: { error: onError } })
+        }
+      },
+      { localVue: withPlugin(`pk_test_load_listener_${name}`) }
+    )
+    const slotted = mount(
+      {
+        render(h: CreateElement) {
+          return h(Component as never, {
+            props,
+            scopedSlots: { error: ({ error }: { error: string }) => h('p', `slot: ${error}`) }
+          })
+        }
+      },
+      { localVue: withPlugin(`pk_test_load_slot_${name}`) }
+    )
+    await settle()
+    expect(onError).toHaveBeenCalledTimes(1)
+    expect(onError).toHaveBeenCalledWith('Blocked')
+    expect(listening.find(`.vue-stripe-${prefix}-error`).text()).toBe('Blocked')
+    expect(slotted.text()).toBe('slot: Blocked')
     expect(consoleError.mock.calls).toEqual([
       ['[Vue Stripe] Initialization error:', 'Blocked'],
       ['[Vue Stripe] Initialization error:', 'Blocked']

@@ -105,7 +105,7 @@ The defaults go to the session as on [`VueStripeCheckoutElementsProvider`](/api/
 |-------|---------|-------------|
 | `@ready` | `StripeCheckoutFormLoadActionsSuccess` | Emitted once `loadActions()` resolves. Payload is the Form SDK actions object |
 | `@change` | `StripeCheckoutSession` | Emitted on every Stripe `change` event with the new session snapshot |
-| `@error` | `string` | Emitted if `fetchClientSecret` or a `clientSecret` Promise rejects or resolves no client secret, `initCheckoutFormSdk()` throws, `loadActions()` returns an error or rejects, or no client secret is given. `loading` turns `false`. See [Errors](#errors) |
+| `@error` | `string` | Emitted if `fetchClientSecret` or a `clientSecret` Promise rejects or resolves no client secret, `initCheckoutFormSdk()` throws, `loadActions()` returns an error or rejects, or no client secret is given; also when Stripe.js fails to load under the [plugin](/guide/plugin) without a `VueStripeProvider` (the plugin logs that failure itself). `loading` turns `false`. See [Errors](#errors) |
 
 ### Errors
 

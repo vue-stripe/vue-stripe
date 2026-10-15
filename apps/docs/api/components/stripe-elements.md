@@ -159,7 +159,7 @@ Changes to `appearance` are applied to the mounted elements with `elements.updat
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@ready` | `StripeElements` | Emitted after the Elements instance is created. The payload is the `StripeElements` instance |
-| `@error` | `string` | Emitted when Elements creation fails, or when an `appearance` / `locale` update is rejected. The payload is the error message |
+| `@error` | `string` | Emitted when Elements creation fails, when an `appearance` / `locale` update is rejected, or, under the [plugin](/guide/plugin) without a `VueStripeProvider`, when Stripe.js fails to load (the plugin logs that failure itself). The payload is the error message |
 | `@update-end` | - | Emitted when an `elements.update()` call has been applied to the mounted elements (Stripe's `update-end` event), e.g. after an `appearance` or `locale` change |
 
 ::: info `elements.update()` is asynchronous
