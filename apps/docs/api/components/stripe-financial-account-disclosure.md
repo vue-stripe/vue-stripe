@@ -39,6 +39,7 @@ import { VueStripeProvider, VueStripeFinancialAccountDisclosure } from '@vue-str
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const disclosureShown = ref(false)
+// Your own route, which opens the financial account on your server
 const openAccount = () => fetch('/api/financial-accounts', { method: 'POST' })
 </script>
 ```

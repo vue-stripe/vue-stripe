@@ -38,7 +38,7 @@ A wrong or revoked publishable key does not show here: Stripe.js accepts any key
 
 ### Elements show "Invalid API Key provided"
 
-The publishable key is wrong, revoked or malformed. Stripe.js only checks it on the first request, so the provider loads and the first element reports the error through `@loaderror` and its `#error` slot (a composable call resolves `{ error }` instead). Copy the publishable key again from the [API keys page](https://dashboard.stripe.com/apikeys), with no spaces or line breaks, in the mode (test or live) you want.
+The publishable key is wrong, revoked or malformed. Stripe.js only checks it on the first request, so the provider loads. The Payment, Express Checkout and Link Authentication elements (and the Address Element in a group with a `clientSecret` or `mode`) report the error through `@loaderror` and their `#error` slot. The Card, split card, IBAN and AU BECS elements make no request when they load: they render normally, and the error appears only when the customer pays, in the `{ error }` of the confirm call. [`VueStripeProvider`](/api/components/stripe-provider#events) lists which elements report it at load. Copy the publishable key again from the [API keys page](https://dashboard.stripe.com/apikeys), with no spaces or line breaks, in the mode (test or live) you want.
 
 ### Elements show "The client_secret provided does not match any associated PaymentIntent on this account"
 

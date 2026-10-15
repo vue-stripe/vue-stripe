@@ -96,29 +96,46 @@ interface UseCreateConfirmationTokenReturn {
 ## TypeScript
 
 ```vue
+<!-- Rendered next to a <VueStripePaymentElement>, inside <VueStripeProvider> and
+     <VueStripeElements mode="payment" :amount="1099" currency="usd"> -->
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useCreateConfirmationToken } from '@vue-stripe/vue-stripe'
 import type {
   CreateConfirmationTokenOptions,
   UseCreateConfirmationTokenReturn
 } from '@vue-stripe/vue-stripe'
 
+// What POST /api/pay from the tokens guide answers
+type PayResult = { status?: string; clientSecret?: string; error?: string }
+
 const api: UseCreateConfirmationTokenReturn = useCreateConfirmationToken()
+const result = ref('')
 
 const pay = async () => {
+  result.value = ''
   const options: CreateConfirmationTokenOptions = { params: { return_url: location.href } }
   const { confirmationToken, error } = await api.createConfirmationToken(options)
-  if (error) return
-  // Send confirmationToken.id to your server, which confirms the PaymentIntent
-  await fetch('/api/confirm', { method: 'POST', body: confirmationToken.id })
+  if (error) return // api.error is set
+  // The server creates and confirms the PaymentIntent with the token
+  const response = await fetch('/api/pay', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ confirmationToken: confirmationToken.id })
+  })
+  const data: PayResult = await response.json()
+  result.value = response.ok ? `Payment ${data.status}` : (data.error ?? 'Payment failed.')
 }
 </script>
 
 <template>
   <button :disabled="api.loading.value" @click="pay">Pay</button>
   <p v-if="api.error.value">{{ api.error.value }}</p>
+  <p v-if="result">{{ result }}</p>
 </template>
 ```
+
+Like the Usage sample, it posts to [the tokens guide's `/api/pay` route](/guide/tokens#_3-create-and-confirm-the-paymentintent-on-your-server); a `requires_action` answer needs [`useHandleNextAction()`](/api/composables/use-handle-next-action).
 
 ## See Also
 
