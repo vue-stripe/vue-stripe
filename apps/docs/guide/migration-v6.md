@@ -174,4 +174,15 @@ Every element component now renders the same markup: a `vue-stripe-<name>-elemen
 - [ ] `@loadError` became `@loaderror`; `@loaderstop` is gone
 - [ ] CSS that targets `vue-stripe-link-auth-element` / `-loading` uses `-mount` / `-loader`
 
-v6 also adds events, elements and composable actions that need no changes; see the [release notes](https://github.com/vue-stripe/vue-stripe/releases).
+## What's new in v6
+
+These additions need no changes to v5 code:
+
+- **The plugin provides Stripe app-wide.** In v5, `createVueStripe()` only stored the key, and every page still needed a `VueStripeProvider`. In v6 the plugin loads Stripe.js the first time something needs it, so element components, `VueStripeElements` and the composables work without a provider. Pages that use the plugin's key can drop their `VueStripeProvider`. See [Provide Stripe app-wide](/guide/plugin).
+- **Element components inside Checkout Sessions.** Inside `VueStripeCheckoutElementsProvider`, `VueStripePaymentElement`, `VueStripeAddressElement`, `VueStripeExpressCheckoutElement` and others mount from the session, in place of `checkout.createPaymentElement()` calls ([Elements inside the provider](/api/components/stripe-checkout-provider#elements-inside-the-provider)).
+- **New elements:** Tax ID, Currency Selector, Contact Details, Terms and Link Signup (the last two are Stripe betas), the Issuing elements, and the Issuing, Treasury and Financial Account disclosures.
+- **New Checkout integrations:** `VueStripeEmbeddedCheckout`, and the Checkout Form (`VueStripeCheckoutFormProvider`, `VueStripeCheckoutForm`, `useCheckoutForm()`, a Stripe beta).
+- **New composables:** `useCreateConfirmationToken`, `useCreateToken`, `useHandleCardAction`, `useVerifyMicrodepositsForPayment`, `useVerifyMicrodepositsForSetup`, `useRadarSession`, `useEphemeralKeyNonce`, `useFinancialConnections`, `useIdentity`, `usePaymentRequest`, and one [method confirmer](/api/composables/confirm/) per Stripe.js `confirm<Method>Payment` and `confirm<Method>Setup` method.
+- **New events and actions:** `@change` on `VueStripeCheckoutElementsProvider`, and `actions`, `validateElements()`, `loadFonts()` and the element getters (`getPaymentElement()`, ...) on `useCheckoutSession()`.
+
+The [API reference](/api/) lists every export, and [Stripe.js coverage](/coverage) shows which export wraps each Stripe.js 10 element and method.
