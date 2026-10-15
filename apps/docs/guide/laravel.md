@@ -359,13 +359,14 @@ Verify the signature against the raw body, which `$request->getContent()` return
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Webhook;
 
 class StripeWebhookController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): JsonResponse
     {
         try {
             $event = Webhook::constructEvent(
