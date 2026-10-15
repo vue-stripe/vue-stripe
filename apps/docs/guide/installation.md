@@ -59,6 +59,7 @@ Store the publishable key in an environment variable that your build tool expose
 | Quasar in webpack mode (`@quasar/app-webpack` 4) | `.env` | `STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.STRIPE_PUBLISHABLE_KEY` |
 | Laravel with Vite | `.env` (not `.env.local`) | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
 | Nuxt | `.env` plus `runtimeConfig.public` in `nuxt.config.ts` | `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `useRuntimeConfig().public.stripePublishableKey` |
+| Astro | `.env` | `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY` |
 
 For Nuxt, declare the key in `nuxt.config.ts`; Nuxt fills it from `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` when the server starts, so the production server needs the variable in its environment, as [Configure Nuxt](/guide/ssr#_2-configure-nuxt) shows:
 
@@ -78,7 +79,7 @@ Quasar in webpack mode loads `.env` itself and passes its variables to the brows
 Quasar in Vite mode passes only `QCLI_` variables to the browser, so a `VITE_` variable is `undefined` there. In Laravel, keep `STRIPE_SECRET_KEY` and `VITE_STRIPE_PUBLISHABLE_KEY` in the same `.env`, and don't create a `.env.local`: with `APP_ENV=local`, Laravel loads it instead of `.env`, and every request fails. [Use Vue Stripe with Quasar](/guide/quasar) and [Use Vue Stripe with Laravel and Inertia](/guide/laravel) cover the rest of those setups.
 
 ::: tip Samples use Vite's variables
-Every sample in these docs reads the key as `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, write `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY`, in Rsbuild `import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY`, and in Nuxt `useRuntimeConfig().public.stripePublishableKey`. In Nuxt the `VITE_` variable is `undefined` with the `.env` from the table, so a pasted sample with `VueStripeProvider` answers 500 "publishableKey or stripeKey is required". Webpack compiles `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` to `undefined` without a warning, so a pasted sample builds and then fails in the browser. Rsbuild passes only `PUBLIC_` variables to the browser, so a `VITE_` key is `undefined` there and the page stays empty.
+Every sample in these docs reads the key as `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, write `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY`, in Rsbuild and Astro `import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY`, and in Nuxt `useRuntimeConfig().public.stripePublishableKey`. In Nuxt the `VITE_` variable is `undefined` with the `.env` from the table, so a pasted sample with `VueStripeProvider` answers 500 "publishableKey or stripeKey is required". Webpack compiles `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` to `undefined` without a warning, so a pasted sample builds and then fails in the browser. Rsbuild and Astro pass only `PUBLIC_` variables to the browser: in Rsbuild a `VITE_` key is `undefined` and the page stays empty, and in Astro it is defined while the page renders on the server but `undefined` in the browser, so the island stays on its loading state.
 :::
 
 ## 4. Check that Stripe.js loads
@@ -91,7 +92,7 @@ Render a `VueStripeProvider` with your key. It loads Stripe.js, shows its `#load
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
 // Vue CLI: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
-// Rsbuild: import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY
+// Rsbuild, Astro: import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY
 // Nuxt: useRuntimeConfig().public.stripePublishableKey
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </script>
@@ -155,6 +156,7 @@ Vite restarts by itself when its config changes; restart `vue-cli-service serve`
 
 - **Quasar** has no `vite.config.ts`: set the proxy in `devServer.proxy` of `quasar.config.ts`, as in [Use Vue Stripe with Quasar](/guide/quasar#_5-send-api-requests-to-your-server-in-development). In webpack mode the proxy is an array; see [Webpack mode](/guide/quasar#webpack-mode).
 - **Rsbuild**: `server.proxy` in `rsbuild.config.ts` takes the same object as Vite's, `{ '/api': 'http://localhost:3000' }`.
+- **Astro** has no `vite.config.ts` either: put the proxy under `vite.server.proxy` in `astro.config.mjs`, as in [Astro](#astro) below.
 - **Laravel** serves the app and its API from one origin, so it needs no proxy. But a `fetch` POST to a route in `routes/web.php` fails with 419 (CSRF): put the routes in `routes/api.php`, or send the CSRF token, as in [Use Vue Stripe with Laravel and Inertia](/guide/laravel#_4-create-the-api-routes).
 
 ## Other setups
@@ -174,6 +176,54 @@ Quasar apps, in SPA and SSR mode, need a few changes: see [Use Vue Stripe with Q
 ### Laravel and Inertia
 
 See [Use Vue Stripe with Laravel and Inertia](/guide/laravel) for the plugin in `createInertiaApp`, the stripe-php routes and webhooks.
+
+### Astro
+
+Astro renders Vue components as islands through `@astrojs/vue` (`npx astro add vue`). Four things differ from a Vite app:
+
+- **The key.** Astro passes only `PUBLIC_` variables to the browser, so use `PUBLIC_STRIPE_PUBLISHABLE_KEY` from the table in step 3.
+- **One island per Stripe tree.** Each island is a separate Vue app, and provide/inject does not cross from one island to another. Put `VueStripeProvider`, `VueStripeElements` and the form in one Vue component, and hydrate that component with `client:load`, `client:visible`, `client:idle` or `client:only="vue"`. Vue Stripe components written as nested islands in an `.astro` file compile, then throw "VueStripeElements must be used within a VueStripeProvider component or an app using createVueStripe()".
+
+  ```astro
+  ---
+  // src/pages/pay.astro
+  import PaymentCheckout from '../components/PaymentCheckout.vue'
+  ---
+
+  <PaymentCheckout client:load />
+  ```
+
+- **The plugin and the stylesheet.** Astro has no `main.ts`. `@astrojs/vue` runs the file named in its `appEntrypoint` option for every island; install the [plugin](/guide/plugin) and import the stylesheet there, and every island shares one Stripe instance. Without the plugin, keep only the stylesheet import there and put a `VueStripeProvider` in each island's component.
+
+  ```ts
+  // src/pages/_app.ts
+  import type { App } from 'vue'
+  import { createVueStripe } from '@vue-stripe/vue-stripe'
+  import '@vue-stripe/vue-stripe/style.css'
+
+  export default (app: App) => {
+    app.use(createVueStripe({ publishableKey: import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY }))
+  }
+  ```
+
+- **The API.** In development, forward `/api` to your server with `vite.server.proxy`:
+
+  ```js
+  // astro.config.mjs
+  import { defineConfig } from 'astro/config'
+  import vue from '@astrojs/vue'
+
+  export default defineConfig({
+    integrations: [vue({ appEntrypoint: '/src/pages/_app' })],
+    vite: {
+      server: {
+        proxy: { '/api': 'http://localhost:3000' }
+      }
+    }
+  })
+  ```
+
+  With an adapter such as `@astrojs/node`, the routes can be Astro endpoints in `src/pages/api/` instead, with `export const prerender = false`. Read the secret key there through `astro:env`, declared with `env: { schema: { STRIPE_SECRET_KEY: envField.string({ context: 'server', access: 'secret' }) } }` in `astro.config.mjs`, and import it with `import { STRIPE_SECRET_KEY } from 'astro:env/server'`. Astro reads that value at runtime, from `.env` in `astro dev` and from the server's environment in production. Don't read it as `import.meta.env.STRIPE_SECRET_KEY`: Astro writes non-public `import.meta.env` values into the server build in `dist/server`. `process.env.STRIPE_SECRET_KEY` also works on the Node adapter in production, but `astro dev` does not put `.env` values in `process.env`.
 
 ### Without a bundler
 

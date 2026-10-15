@@ -9,6 +9,7 @@ Render pages that use Vue Stripe on the server. This page lists what every serve
 - [Use Vue Stripe in a Vite SSR app](/guide/vite-ssr), for your own server with `vue/server-renderer`
 - [Use Vue Stripe in VitePress](/guide/vitepress)
 - [Quasar SSR](#quasar-ssr), below
+- [Astro](/guide/installation#astro), where each Vue island is a separate app
 
 Stripe.js only runs in the browser. Vue Stripe never loads it on the server: `VueStripeProvider` loads Stripe.js in `onMounted`, and the [plugin](/guide/plugin) loads it the first time a component reads it in the browser. During server rendering every provider renders its `#loading` slot, and the browser's first render matches it, so hydration does not mismatch. After hydration Stripe.js loads and the elements mount.
 
