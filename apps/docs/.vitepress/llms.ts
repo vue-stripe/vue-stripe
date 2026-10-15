@@ -34,6 +34,7 @@ import {
   type BundleSizes,
   type Size
 } from './theme/data/bundle-size'
+import { markdownPathOf } from './theme/data/markdown-copy'
 import { SITE_URL, routeOf, sectionOf, type DocSection } from './seo'
 
 // Build-time Markdown for language models (https://llmstxt.org): /llms.txt indexes every page
@@ -468,8 +469,7 @@ function pageDocument(page: Page): string {
   return `${page.markdown.slice(0, end)}\n\n${intro}${page.markdown.slice(end)}\n`
 }
 
-const markdownUrl = (route: string) =>
-  `${SITE_URL}${route.endsWith('/') ? `${route}index` : route}.md`
+const markdownUrl = (route: string) => `${SITE_URL}${markdownPathOf(route)}`
 
 export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): void {
   const sidebarLinks = options.sidebars.flatMap(flattenSidebar)
@@ -551,8 +551,9 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
   const outDir = siteConfig.outDir
   writeFileSync(join(outDir, 'llms.txt'), llms)
   writeFileSync(join(outDir, 'llms-full.txt'), full)
+  // Each page's copy, at the URL the "Copy for LLMs" button fetches.
   for (const page of [home, ...pages]) {
-    const file = join(outDir, page.relativePath)
+    const file = join(outDir, markdownPathOf(page.route))
     mkdirSync(dirname(file), { recursive: true })
     writeFileSync(file, pageDocument(page))
   }

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -16,8 +17,10 @@ import {
   coverageMarkdown,
   homeMarkdown,
   parseFrontmatter,
-  toPlainMarkdown
+  toPlainMarkdown,
+  writeLlmsFiles
 } from '../../../apps/docs/.vitepress/llms'
+import { markdownPathOf } from '../../../apps/docs/.vitepress/theme/data/markdown-copy'
 import { coverage } from '../../../apps/docs/.vitepress/theme/data/stripe-coverage'
 
 /**
@@ -328,6 +331,53 @@ describe('Markdown copies', () => {
         return [...prose.matchAll(/\]\((#[^)]*)\)/g)].map((m) => `${p.path}: ${m[1]}`)
       })
     expect(problems, problems.join('\n')).toEqual([])
+  })
+})
+
+describe('Copy for LLMs', () => {
+  const themeDir = join(docsDir, '.vitepress/theme')
+  const button = readFileSync(join(themeDir, 'components/CopyForLLM.vue'), 'utf8')
+
+  it('fetches the Markdown copy, not the page source', () => {
+    expect(button).toMatch(/fetchMarkdown\(withBase\(markdownPathOf\(/)
+    expect(button).not.toMatch(/import\.meta\.glob|\?raw/)
+  })
+
+  it("the copy at the button's URL is the processed Markdown of every page", () => {
+    const outDir = mkdtempSync(join(tmpdir(), 'vue-stripe-llms-'))
+    try {
+      const siteConfig = { srcDir: docsDir, outDir, pages: pages.map((p) => p.path) }
+      writeLlmsFiles(siteConfig as unknown as Parameters<typeof writeLlmsFiles>[0], {
+        sections: [],
+        sidebars: [],
+        header: '> Header'
+      })
+      const problems = pages
+        .filter((p) => !p.noindex)
+        .flatMap((p) => {
+          const file = join(outDir, markdownPathOf(routeOf(p.path)))
+          if (!existsSync(file)) return [`${p.path}: no copy at ${markdownPathOf(routeOf(p.path))}`]
+          const prose = readFileSync(file, 'utf8').replace(/^```[\s\S]*?^```/gm, '')
+          return [
+            /^---\n/.test(prose) && 'frontmatter',
+            /^:::/m.test(prose) && 'a ::: container',
+            /<BundleSize\b|<DocIcon\b/.test(prose) && 'a component tag',
+            /\]\(\/[^)]*\)/.test(prose) && 'a site-relative link',
+            /\]\(#[^)]*\)/.test(prose) && 'a bare #fragment link'
+          ]
+            .filter(Boolean)
+            .map((problem) => `${p.path}: ${problem}`)
+        })
+      expect(problems, problems.join('\n')).toEqual([])
+    } finally {
+      rmSync(outDir, { recursive: true, force: true })
+    }
+  })
+
+  it('names a section overview by its index.md', () => {
+    expect(markdownPathOf('/guide/testing')).toBe('/guide/testing.md')
+    expect(markdownPathOf('/guide/')).toBe('/guide/index.md')
+    expect(markdownPathOf('/')).toBe('/index.md')
   })
 })
 
