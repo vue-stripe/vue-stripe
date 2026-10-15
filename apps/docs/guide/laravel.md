@@ -11,6 +11,8 @@ The steps cover both Vue starter kits. Where they differ, in steps 3 and 5, the 
 - **Laravel 13 kit**: the kit that `laravel new my-app --vue` installs today, with Inertia 3 and Vite 8. Tested with Laravel 13.36 and `@inertiajs/vue3` 3.9.
 - **Laravel 12 kit**: `composer create-project laravel/vue-starter-kit:^1.0 my-app`, with Inertia 2, Vite 6 and Ziggy. Tested with kit v1.0.2 and Laravel 12.70.
 
+The Laravel 13 kit server-renders pages with Inertia SSR by default (`'ssr' => ['enabled' => true]` in `config/inertia.php`): in development through the Vite+ dev server, in production through `npm run build:ssr` and `php artisan inertia:start-ssr`. The steps work unchanged with SSR on.
+
 Both were tested with stripe-php 22 on PHP 8.4, served by `php artisan serve`. The files and commands used below (`bootstrap/app.php`, `php artisan install:api`) exist from Laravel 11 on.
 
 ## 1. Install the packages
