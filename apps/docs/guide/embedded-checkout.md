@@ -45,6 +45,7 @@ app.post('/api/embedded-checkout-session', async (req, res) => {
     ui_mode: 'embedded_page',
     mode: 'payment',
     line_items: [{ price: 'price_123', quantity: 1 }],
+    client_reference_id: 'order_123', // your own order ID, read back by the webhook
     return_url: 'https://example.com/checkout/complete?session_id={CHECKOUT_SESSION_ID}'
   })
 
@@ -67,7 +68,10 @@ import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 const fetchClientSecret = () =>
-  fetch('/api/embedded-checkout-session', { method: 'POST' })
+  fetch('/api/embedded-checkout-session', {
+    method: 'POST',
+    signal: AbortSignal.timeout(15000) // give up on a request that never answers
+  })
     .then((response) => response.json())
     .then((data) => data.clientSecret)
 </script>
@@ -82,13 +86,16 @@ const fetchClientSecret = () =>
 </template>
 ```
 
+When the request fails, or gets no answer within 15 seconds, the component renders its `#error` slot instead of loading forever ([Set a time limit on requests that never answer](/guide/error-handling#_6-set-a-time-limit-on-requests-that-never-answer)).
+
 That is the whole integration. Stripe handles the payment form, validation, 3D Secure and wallets.
 
 ## 3. Handle completion
 
 After a successful payment Stripe redirects the customer to your `return_url`. On that page, read `session_id` from the URL and ask your server for the session's status:
 
-```js
+::: code-group
+```js [JavaScript]
 // GET /api/checkout-status?session_id=cs_test_...
 app.get('/api/checkout-status', async (req, res) => {
   try {
@@ -99,6 +106,20 @@ app.get('/api/checkout-status', async (req, res) => {
   }
 })
 ```
+
+```ts [TypeScript]
+// GET /api/checkout-status?session_id=cs_test_...
+app.get('/api/checkout-status', async (req, res) => {
+  try {
+    // req.query values can be arrays or objects; String() gives retrieve() a string
+    const session = await stripe.checkout.sessions.retrieve(String(req.query.session_id))
+    res.json({ status: session.status, paymentStatus: session.payment_status })
+  } catch {
+    res.status(404).json({ error: 'No such Checkout Session' })
+  }
+})
+```
+:::
 
 `status: 'complete'` and `payment_status: 'paid'` mean the payment went through; [Redirect to Stripe Checkout](/guide/checkout#_3-show-the-outcome-on-the-success-page) has a return page that reads this route. Fulfil orders from the `checkout.session.completed` webhook, not from the return page, so a closed browser tab does not lose an order.
 
@@ -130,7 +151,10 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const done = ref(false)
 
 const fetchClientSecret = () =>
-  fetch('/api/embedded-checkout-session', { method: 'POST' })
+  fetch('/api/embedded-checkout-session', {
+    method: 'POST',
+    signal: AbortSignal.timeout(15000) // give up on a request that never answers
+  })
     .then((response) => response.json())
     .then((data) => data.clientSecret)
 </script>

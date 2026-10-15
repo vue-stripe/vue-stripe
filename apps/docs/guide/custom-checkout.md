@@ -45,6 +45,7 @@ app.post('/api/checkout-elements-session', async (req, res) => {
     ui_mode: 'elements',
     mode: 'payment',
     line_items: [{ price: 'price_123', quantity: 1 }],
+    client_reference_id: 'order_123', // your own order ID, read back by the webhook
     return_url: 'https://example.com/checkout/complete?session_id={CHECKOUT_SESSION_ID}'
   })
 
@@ -69,7 +70,10 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // Called by the provider in the browser only, once Stripe.js has loaded
 const fetchClientSecret = () =>
-  fetch('/api/checkout-elements-session', { method: 'POST' })
+  fetch('/api/checkout-elements-session', {
+    method: 'POST',
+    signal: AbortSignal.timeout(15000) // give up on a request that never answers
+  })
     .then((response) => response.json())
     .then((data: { clientSecret: string }) => data.clientSecret)
 </script>
@@ -85,6 +89,8 @@ const fetchClientSecret = () =>
   </VueStripeProvider>
 </template>
 ```
+
+When the request fails, or gets no answer within 15 seconds, the provider renders its `#error` slot instead of the form ([Set a time limit on requests that never answer](/guide/error-handling#_6-set-a-time-limit-on-requests-that-never-answer)).
 
 `client-secret` also takes the client secret as a string, or as a Promise that you start at the top of `<script setup>`. The function is safer: a Promise that rejects before the provider mounts is reported as an uncaught rejection ([Errors](/api/components/stripe-checkout-provider#errors)), and on a server-rendered page (Nuxt, Vite SSR, Quasar SSR) the request starts during server rendering, which logs an error on every render or, inside `VueStripeProvider`, stops a plain Node SSR server ([Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser)). The previous name, `VueStripeCheckoutProvider`, still works as a deprecated alias.
 

@@ -91,7 +91,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const server = createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/api/payment-intent') {
-    const paymentIntent = await stripe.paymentIntents.create({ amount: 1000, currency: 'eur' })
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 1000,
+      currency: 'eur',
+      metadata: { orderId: 'order_123' } // your own order ID, read back by the webhook
+    })
     console.log('Created', paymentIntent.id)
     res.setHeader('Content-Type', 'application/json')
     res.end(JSON.stringify({ clientSecret: paymentIntent.client_secret }))

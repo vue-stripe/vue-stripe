@@ -29,6 +29,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
   const session = await stripe.checkout.sessions.create({
     line_items: [{ price: 'price_xxx', quantity: 1 }], // decide the price on the server
     mode: 'payment', // or 'subscription' with a recurring price
+    client_reference_id: 'order_123', // your own order ID, read back by the webhook
     success_url: 'https://example.com/success?session_id={CHECKOUT_SESSION_ID}', // a page in your app
     cancel_url: 'https://example.com/cancel'
   })
@@ -37,11 +38,11 @@ app.post('/api/create-checkout-session', async (req, res) => {
 })
 ```
 
-Session options such as `customer_email`, `shipping_address_collection`, `allow_promotion_codes` and `automatic_tax` are set here too; see [Stripe's Checkout Session API](https://docs.stripe.com/api/checkout/sessions/create).
+The webhook that fulfils the order finds it from `client_reference_id` ([Fulfil orders with webhooks](/guide/webhooks#_2-handle-the-events-for-your-integration)). Session options such as `customer_email`, `shipping_address_collection`, `allow_promotion_codes` and `automatic_tax` are set here too; see [Stripe's Checkout Session API](https://docs.stripe.com/api/checkout/sessions/create).
 
 ## 2. Add the checkout button
 
-Fetch the session URL, then render `VueStripeCheckout`. If your endpoint fails, show your own message instead of the button; problems with the session itself (expired, already paid) are shown by Stripe on the hosted page.
+Fetch the session URL, then render `VueStripeCheckout`. If your endpoint fails, or the request gets no answer at all (server down, customer offline) or none within 15 seconds ([Set a time limit on requests that never answer](/guide/error-handling#_6-set-a-time-limit-on-requests-that-never-answer)), show your own message instead of the button; problems with the session itself (expired, already paid) are shown by Stripe on the hosted page.
 
 ```vue
 <script setup lang="ts">
@@ -53,12 +54,17 @@ const sessionUrl = ref('')
 const failed = ref(false)
 
 onMounted(async () => {
-  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
-  if (!response.ok) {
+  try {
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      signal: AbortSignal.timeout(15000) // give up on a request that never answers
+    })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    sessionUrl.value = (await response.json()).url
+  } catch {
+    // An error answer, no answer at all (server down, offline) or no answer in time
     failed.value = true
-    return
   }
-  sessionUrl.value = (await response.json()).url
 })
 </script>
 
@@ -99,12 +105,17 @@ const failed = ref(false)
 
 const handleCheckout = async () => {
   failed.value = false
-  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
-  if (!response.ok) {
+  try {
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      signal: AbortSignal.timeout(15000) // give up on a request that never answers
+    })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    redirectToUrl((await response.json()).url)
+  } catch {
+    // An error answer, no answer at all (server down, offline) or no answer in time
     failed.value = true
-    return
   }
-  redirectToUrl((await response.json()).url)
 }
 </script>
 
@@ -120,7 +131,8 @@ const handleCheckout = async () => {
 
 Stripe sends the customer to `success_url` after paying. The customer can also open that URL directly, so ask your server for the session's status before showing a confirmation. Add a route that reads the session and always answers, paid or not:
 
-```js
+::: code-group
+```js [JavaScript]
 // GET /api/checkout-status?session_id=cs_test_...
 app.get('/api/checkout-status', async (req, res) => {
   try {
@@ -131,6 +143,20 @@ app.get('/api/checkout-status', async (req, res) => {
   }
 })
 ```
+
+```ts [TypeScript]
+// GET /api/checkout-status?session_id=cs_test_...
+app.get('/api/checkout-status', async (req, res) => {
+  try {
+    // req.query values can be arrays or objects; String() gives retrieve() a string
+    const session = await stripe.checkout.sessions.retrieve(String(req.query.session_id))
+    res.json({ status: session.status, paymentStatus: session.payment_status })
+  } catch {
+    res.status(404).json({ error: 'No such Checkout Session' })
+  }
+})
+```
+:::
 
 Then render the page at `success_url` (`/success` here) in your app. It reads `session_id` from the URL and calls the route through your `/api` proxy:
 

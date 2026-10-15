@@ -29,7 +29,8 @@ export async function POST(request: Request) {
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
     currency: 'eur',
-    allowed_payment_method_types: ['sepa_debit']
+    allowed_payment_method_types: ['sepa_debit'],
+    metadata: { orderId: 'order_123' } // your own order ID, read back by the webhook
   })
 
   return Response.json({ clientSecret: paymentIntent.client_secret })

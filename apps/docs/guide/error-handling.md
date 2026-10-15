@@ -6,7 +6,7 @@ description: "Handle Stripe errors in a Vue app: Stripe.js load failures, valida
 
 Show customers a clear message when a payment cannot go through, and keep your app working when Stripe.js, an element or your server fails.
 
-Errors reach your app at five points, each covered by a step below:
+Errors reach your app at these points, each covered by a step below:
 
 | Where | Example | Where you see it |
 |-------|---------|------------------|
@@ -15,6 +15,7 @@ Errors reach your app at five points, each covered by a step below:
 | Typing in an element | Incomplete card number, invalid IBAN | Inside the Payment Element's iframe; `@change` and the `#error` slot of the Card, IBAN and BECS elements |
 | Confirming | Card declined, 3D Secure failed | `{ error }` result of the composable, and its `error` ref |
 | After confirming | A bank debit fails days later | Webhooks on your server |
+| A request that never answers | A client-secret route that hangs, a Stripe.js download a proxy holds open | Nothing: the loading state stays until you set a time limit |
 | Integration mistakes | A composable outside its provider | A thrown `VueStripeProviderError` / `VueStripeElementsError` / `VueStripeCheckoutError` |
 
 To produce each error on purpose, use the cards in [Test your integration](/guide/testing#declines-and-errors).
@@ -234,7 +235,7 @@ onMounted(async () => {
 </template>
 ```
 
-For a SetupIntent, read `setup_intent_client_secret` and call `retrieveSetupIntent()` from `useSetupIntent`. Use this page to inform the customer only; fulfil orders from [webhooks](/guide/webhooks), because a payment can still fail after `processing` and a customer can close the tab before the redirect.
+The return page is a route of its own, so it needs a `VueStripeProvider` of its own (or the [plugin](/guide/plugin)): [Show the result on the return page](/guide/payment-element#_4-show-the-result-on-the-return-page) shows the wrapper. For a SetupIntent, read `setup_intent_client_secret` and call `retrieveSetupIntent()` from `useSetupIntent`. Use this page to inform the customer only; fulfil orders from [webhooks](/guide/webhooks), because a payment can still fail after `processing` and a customer can close the tab before the redirect.
 
 ## 5. Handle Checkout errors
 
@@ -247,7 +248,7 @@ For a SetupIntent, read `setup_intent_client_secret` and call `retrieveSetupInte
 | `useCheckoutSession().confirm()` | Declined, validation error, expired session | Resolves to `{ type: 'error', error }` |
 | `VueStripePricingTable` | Stripe's pricing table script failed to load | `@error` with an `Error`, `#error` slot |
 
-Problems with a hosted Checkout Session itself (expired, already paid) are shown by Stripe on its page. What remains for you is your own endpoint that creates the session: check `response.ok` before you render the button or the provider, and show your own message when it fails.
+Problems with a hosted Checkout Session itself (expired, already paid) are shown by Stripe on its page. What remains for you is your own endpoint that creates the session: check `response.ok` before you render the button or the provider, catch a `fetch()` that rejects (server down, customer offline), and show your own message in both cases.
 
 ```vue
 <script setup lang="ts">
@@ -258,12 +259,17 @@ const sessionUrl = ref('')
 const failed = ref(false)
 
 onMounted(async () => {
-  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
-  if (!response.ok) {
+  try {
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      signal: AbortSignal.timeout(15000) // give up on a request that never answers (step 6)
+    })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    sessionUrl.value = (await response.json()).url
+  } catch {
+    // An error answer, no answer at all (server down, offline) or no answer in time
     failed.value = true
-    return
   }
-  sessionUrl.value = (await response.json()).url
 })
 
 // VueStripeCheckoutError: clicked before the session URL arrived
@@ -302,10 +308,62 @@ const attempt = ref(0)
 </template>
 ```
 
-## 6. Fix integration errors
+## 6. Set a time limit on requests that never answer
+
+A request can also hang: your server accepts the connection and never answers, or a proxy holds the Stripe.js download open. Neither is an error, so nothing reaches `@error` or `#error`. The components wait as long as the browser does, and the customer sees a loading state with no way out. Set your own time limit.
+
+For your own requests, pass `signal: AbortSignal.timeout()` to `fetch()`. When the time is up the browser aborts the request, and `fetch()` rejects with a `TimeoutError`, the same path as a server that is down:
+
+- A page that fetches in `onMounted`, such as the Payment Element page or the hosted Checkout page in step 5, shows its message from the `catch`.
+- A `fetch-client-secret` function (Embedded Checkout, Checkout Elements and Checkout Form providers) passes the rejection to the component, which emits `@error` and renders its `#error` slot.
+
+```ts
+const fetchClientSecret = () =>
+  fetch('/api/embedded-checkout-session', {
+    method: 'POST',
+    signal: AbortSignal.timeout(15000) // 15 seconds
+  })
+    .then((response) => response.json())
+    .then((data: { clientSecret: string }) => data.clientSecret)
+```
+
+The `#error` slot then receives the browser's own message ("signal timed out" in Chrome), so write your own text in the slot rather than showing `error` alone.
+
+Stripe.js has no time limit either: while its download is pending, the provider shows its `#loading` slot. Start a timer, and change what the slot says when the download is slow. Keep the provider mounted, so the page carries on if the script arrives late:
+
+```vue
+<script setup lang="ts">
+import { onMounted, onUnmounted, ref } from 'vue'
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
+import CheckoutForm from './CheckoutForm.vue' // your payment form
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const slow = ref(false)
+let timer: ReturnType<typeof setTimeout> | undefined
+
+onMounted(() => {
+  timer = setTimeout(() => (slow.value = true), 15000)
+})
+onUnmounted(() => clearTimeout(timer))
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <template #loading>
+      <p v-if="slow">Payments are taking a long time to load. Check your connection and reload the page.</p>
+      <p v-else>Loading payments...</p>
+    </template>
+    <CheckoutForm />
+  </VueStripeProvider>
+</template>
+```
+
+Ask for a reload rather than remounting the provider: a remounted provider waits for the download that is already pending.
+
+## 7. Fix integration errors
 
 Vue Stripe throws a typed error during setup when a component or composable is used in the wrong place: `VueStripeProviderError` (no provider or plugin above it, no publishable key), `VueStripeElementsError` (an element outside `VueStripeElements`) or `VueStripeCheckoutError` (`useCheckoutSession` outside its provider). These are programming mistakes, not runtime conditions to handle: the message names the missing wrapper. [Troubleshoot common problems](/guide/troubleshooting) lists each one with its fix.
 
 ## Result
 
-Customers see a message they can act on for every failed payment, load and validation failures show your own UI, and payments that fail after confirmation are caught by your webhook handler.
+Customers see a message they can act on for every failed payment, load and validation failures show your own UI, requests that never answer end in your own message instead of an endless loading state, and payments that fail after confirmation are caught by your webhook handler.
