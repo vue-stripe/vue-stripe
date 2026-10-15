@@ -50,6 +50,7 @@ Work through the table row by row. The last column gives the reason in short; [S
 | `useStripeCheckout().redirectToCheckout({ sessionId })` / `({ lineItems, ... })`, `LegacyCheckoutOptions` | `redirectToCheckout({ url })` (typed `CheckoutRedirectOptions`) or `redirectToUrl(url)` | Same |
 | `<VueStripeCheckoutProvider :client-secret="string">` | `<VueStripeCheckoutElementsProvider :client-secret="stringOrPromise">`. The old name is a deprecated alias, and `fetchClientSecret` is still accepted | `initCheckout` became `initCheckoutElementsSdk` |
 | `VueStripeCheckoutProvider` `@ready(checkout)` | `@ready(actions)`, plus a new `@change(session)` | Session methods moved to `loadActions()` |
+| `VueStripeCheckoutProvider` renders its default slot once the session is ready, and `#loading` until then | The default slot renders before the session's actions load, and `#loading` shows only while Stripe.js loads. Actions called before `@ready` resolve to an error ([Checkout Sessions with Elements](#checkout-sessions-with-elements)) | Stripe.js creates the Checkout SDK synchronously (Clover) |
 | `useCheckoutSession().checkout` is a `StripeCheckout` with the session methods | `checkout` is a `StripeCheckoutElementsSdk`; session methods are on `actions` (and still forwarded by `useCheckoutSession()`) | Same |
 | Checkout Session `ui_mode: 'custom'` | `ui_mode: 'elements'`, which needs API version `2026-03-25.dahlia` or later on your server (step 4) | Stripe renamed the value (Dahlia) |
 | `StripeCheckout` type | `StripeCheckoutElementsSdk` / `StripeCheckoutLoadActionsSuccess` from `@stripe/stripe-js` | Same |
@@ -101,7 +102,38 @@ See [Redirect to Stripe Checkout](/guide/checkout) for the server code.
 >
 ```
 
-Inside the provider, `useCheckoutSession()` keeps the v5 method names (`confirm`, `applyPromotionCode`, `updateEmail`, ...), so most forms only need the rename. A session created with `return_url` must be confirmed without `returnUrl`; Stripe rejects a second one. See [Build your own checkout page on a Checkout Session](/guide/custom-checkout).
+Inside the provider, `useCheckoutSession()` keeps the v5 method names (`confirm`, `applyPromotionCode`, `updateEmail`, ...). What changed is when they work.
+
+In v5 the provider showed `#loading` until the session was ready and rendered your form after that. In v6 it renders your form as soon as Stripe.js has loaded, so elements can mount while the session loads, and the session's actions arrive later. Until the provider emits `@ready`:
+
+- `loading` from `useCheckoutSession()` (and the default slot's `loading` prop) is `true`.
+- `session` and `actions` are `null`.
+- Every action resolves to `{ type: 'error', error: { message: 'Checkout session is not ready yet' } }`. It does not throw and logs nothing.
+- `#loading` is not shown: it covers only the Stripe.js load. Use `loading` for a spinner while the session loads.
+
+A v5 form that calls an action when it mounts, such as `updateEmail()` for a signed-in customer, now gets that error and the email is never set, so `session.canConfirm` stays `false`. Run the call once the actions have loaded:
+
+```ts
+// v5: the form mounted after the session was ready
+const { updateEmail } = useCheckoutSession()
+
+onMounted(() => updateEmail(user.email))
+
+// v6: wait for the actions
+const { actions, updateEmail } = useCheckoutSession()
+
+watch(
+  actions,
+  (ready) => {
+    if (ready) updateEmail(user.email)
+  },
+  { immediate: true }
+)
+```
+
+The provider's `@ready` handler works too, since it receives the actions: `@ready="(actions) => actions.updateEmail(user.email)"`. Read `session` with a `null` check, and keep buttons that call actions disabled while `loading` is `true`. The provider's [Slots](/api/components/stripe-checkout-provider#slots) section has the details.
+
+A Payment Element that v5 code created itself with `checkout.createPaymentElement()` still mounts, because `checkout` exists from the first render. A session created with `return_url` must be confirmed without `returnUrl`; Stripe rejects a second one. See [Build your own checkout page on a Checkout Session](/guide/custom-checkout).
 
 ## 4. Update your server
 
@@ -136,6 +168,7 @@ Every element component now renders the same markup: a `vue-stripe-<name>-elemen
 - [ ] No `payment-method-types` prop on `VueStripeElements`
 - [ ] `VueStripeCheckout` gets `session-url`; the server creates the session
 - [ ] `VueStripeCheckoutProvider` is renamed, and its `@ready` handler takes `actions`
+- [ ] Code that calls a Checkout Session action on mount waits for `@ready` or for `actions` from `useCheckoutSession()`
 - [ ] The server sends no `payment_method_types`
 - [ ] The server runs `stripe` 23 (API version `2026-09-30.endive`) and creates Checkout Sessions with `ui_mode: 'elements'`
 - [ ] `@loadError` became `@loaderror`; `@loaderstop` is gone
