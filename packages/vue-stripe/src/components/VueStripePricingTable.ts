@@ -159,7 +159,9 @@ export default /* @__PURE__ */ defineComponent({
                 'customer-email': props.customerEmail,
                 'customer-session-client-secret': props.customerSessionClientSecret,
                 'client-reference-id': props.clientReferenceId,
-                style: loading.value || error.value ? { display: 'none' } : undefined
+                // `hidden`, not an inline style: a server-rendered style="display:none" breaks a
+                // CSP without 'unsafe-inline' in style-src (#784).
+                hidden: loading.value || !!error.value
               })
             ])
       ])

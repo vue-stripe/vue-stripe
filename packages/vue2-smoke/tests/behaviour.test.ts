@@ -143,6 +143,30 @@ it('renders <stripe-pricing-table> with its attributes', async () => {
   script.mockRestore()
 })
 
+it('hides <stripe-pricing-table> with `hidden`, not an inline style, until the script loads (#784)', async () => {
+  let load!: () => void
+  const script = vi.spyOn(document.head, 'appendChild').mockImplementation((node) => {
+    load = () => (node as HTMLScriptElement).onload?.(new Event('load'))
+    return node
+  })
+  const wrapper = mount({
+    render(h: CreateElement) {
+      return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+        h(VueStripePricingTable as never, { props: { pricingTableId: 'prctbl_784' } })
+      ])
+    }
+  })
+  await settle()
+  const table = () => wrapper.find('stripe-pricing-table').element as HTMLElement
+  expect(table().hidden).toBe(true)
+  expect(table().hasAttribute('style')).toBe(false)
+  load()
+  await settle()
+  expect(table().hasAttribute('hidden')).toBe(false)
+  expect(table().hasAttribute('style')).toBe(false)
+  script.mockRestore()
+})
+
 it('runs a method confirmer composable under Vue 2', async () => {
   const result = { paymentIntent: { id: 'pi_123', status: 'succeeded' } }
   stripe.confirmCardPayment.mockResolvedValueOnce(result)
@@ -333,6 +357,40 @@ it('passes Embedded Checkout onComplete to Stripe only for a Vue 2 @complete lis
   ;(options()['onComplete'] as () => void)()
   expect(onComplete).toHaveBeenCalledTimes(1)
   listening.destroy()
+})
+
+it('reports a rejected stripe prop promise through Vue 2 disclosure @error, nothing uncaught (#774)', async () => {
+  const unhandled: unknown[] = []
+  const onUnhandled = (reason: unknown) => unhandled.push(reason)
+  process.on('unhandledRejection', onUnhandled)
+  const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+  const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  const onError = vi.fn()
+  const blocked = () => Promise.reject(new Error('Failed to load Stripe.js'))
+  const wrapper = mount({
+    render(h: CreateElement) {
+      return h('div', [
+        h(VueStripeIssuingDisclosure as never, {
+          props: { stripe: blocked() },
+          on: { error: onError }
+        }),
+        h(VueStripeIssuingDisclosure as never, { props: { stripe: blocked() } })
+      ])
+    }
+  })
+  await settle()
+  process.off('unhandledRejection', onUnhandled)
+  expect(onError).toHaveBeenCalledWith({ message: 'Failed to load Stripe.js' })
+  expect(wrapper.findAll('.vue-stripe-issuing-disclosure-error').length).toBe(2)
+  expect(wrapper.find('.vue-stripe-issuing-disclosure-loader').exists()).toBe(false)
+  // Logged once, by the disclosure nothing listens to; no Vue watcher warning.
+  expect(consoleError.mock.calls).toEqual([
+    ['[Vue Stripe] VueStripeIssuingDisclosure error:', 'Failed to load Stripe.js']
+  ])
+  expect(consoleWarn).not.toHaveBeenCalled()
+  expect(unhandled).toEqual([])
+  consoleError.mockRestore()
+  consoleWarn.mockRestore()
 })
 
 it('reports a failing fetch-client-secret through Vue 2 @error and #error, nothing uncaught (#697)', async () => {

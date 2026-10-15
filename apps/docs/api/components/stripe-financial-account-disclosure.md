@@ -80,7 +80,7 @@ New option values fetch the disclosure again; equal values from a re-render do n
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@load` | - | The disclosure text is on the page (React `onLoad`) |
-| `@error` | `StripeError \| { message: string }` | Stripe's error, or `{ message }` when the call throws (React `onError`) |
+| `@error` | `StripeError \| { message: string }` | Stripe's error, or `{ message }` when the call throws (React `onError`). Also `{ message }` when Stripe.js cannot load: a `stripe` promise that rejects (`loadStripe()` with Stripe.js blocked), or the [plugin](/guide/plugin)'s load failing without a `stripe` prop. The plugin logs its own failure, so the disclosure does not log it again |
 
 ## Slots
 

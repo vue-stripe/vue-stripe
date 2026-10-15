@@ -19,7 +19,11 @@ const providerProps = {
   stripeAccount: { type: String as PropType<string | undefined>, default: undefined },
   /** @deprecated Ignored: versioned Stripe.js (Endive) refuses `apiVersion`, so it is not passed to `loadStripe()`. */
   apiVersion: { type: String as PropType<string | undefined>, default: undefined },
-  locale: { type: String as PropType<string | undefined>, default: undefined },
+  /** One of Stripe's supported locales (`'auto'`, `'en'`, `'fr'`, ...), as in `createVueStripe()`. */
+  locale: {
+    type: String as PropType<StripeConstructorOptions['locale']>,
+    default: undefined
+  },
   /** Stripe beta flags, e.g. the Tax ID Element's beta (forwarded to `loadStripe`). */
   betas: { type: Array as PropType<string[] | undefined>, default: undefined },
   /** Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }` (forwarded to `loadStripe`). */
@@ -81,7 +85,7 @@ export default /* @__PURE__ */ defineComponent({
         if (props.developerTools) options.developerTools = props.developerTools
         if (stripeAccount) options.stripeAccount = stripeAccount
         if (apiVersion) options.apiVersion = apiVersion
-        if (locale) options.locale = locale as NonNullable<StripeConstructorOptions['locale']>
+        if (locale) options.locale = locale
 
         stripe.value = await loadStripeInstance(key, options, props.advancedFraudSignals)
         emit('load', stripe.value)

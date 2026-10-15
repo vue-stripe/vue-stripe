@@ -427,6 +427,11 @@
   width: 100%;
 }
 
+/* Backs up `hidden` against a :host display rule of Stripe's custom element (#784). */
+.vue-stripe-pricing-table > [hidden] {
+  display: none;
+}
+
 .vue-stripe-pricing-table-loading {
   color: #6c757d;
   padding: 1rem;

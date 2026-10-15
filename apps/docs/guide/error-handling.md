@@ -47,7 +47,7 @@ const reportLoadError = (error: Error) => {
 </template>
 ```
 
-With the [plugin](/guide/plugin) there is no provider: `VueStripeElements` shows the load error in its own `#error` slot, and `useStripe().error` holds the message.
+With the [plugin](/guide/plugin) there is no provider: `VueStripeElements`, the Checkout providers, `VueStripeEmbeddedCheckout` and the disclosures show the load error in their own `#error` slot and emit it with `@error`, and `useStripe().error` holds the message.
 
 ::: info What the library logs
 Vue Stripe logs a load or creation failure as a `[Vue Stripe]` `console.error` only when nothing in your app handles it. Once you listen for the component's error event (`@error`, or `@loaderror` on an element) or render its `#error` slot, the library leaves reporting to you, so the console and any error monitoring that collects `console.error` see each failure once. This applies to the providers, `VueStripeElements`, the element components, `VueStripePricingTable`, `VueStripeCheckout`, `VueStripeEmbeddedCheckout` and the disclosures. The plugin has no event to listen to, so it always logs a Stripe.js load failure.

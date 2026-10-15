@@ -12,9 +12,14 @@ import VueStripePricingTable from '../src/components/VueStripePricingTable'
 import type { VueStripeOptions } from '../src/types'
 import { useStripe } from '../src/composables/useStripe'
 import VueStripeCheckoutElementsProvider from '../src/components/VueStripeCheckoutElementsProvider'
+import VueStripeCheckoutFormProvider from '../src/components/VueStripeCheckoutFormProvider'
 import VueStripeElements from '../src/components/VueStripeElements'
 import VueStripePaymentElement from '../src/components/VueStripePaymentElement'
 import VueStripeProvider from '../src/components/VueStripeProvider'
+import VueStripeEmbeddedCheckout from '../src/components/VueStripeEmbeddedCheckout'
+import VueStripeFinancialAccountDisclosure from '../src/components/VueStripeFinancialAccountDisclosure'
+import VueStripeIssuingDisclosure from '../src/components/VueStripeIssuingDisclosure'
+import VueStripeTreasuryDisclosure from '../src/components/VueStripeTreasuryDisclosure'
 import { flushPromises, makeMockStripe, type MockStripe, type MockStripeElements } from './setup'
 import { useRadarSession } from '../src/composables/useRadarSession'
 import { usePaymentIntent } from '../src/composables/usePaymentIntent'
@@ -279,6 +284,159 @@ describe('createVueStripe as a global provider (#424)', () => {
     expect(wrapper.find('.vue-stripe-checkout-error').text()).toBe('Network error')
     consoleError.mockRestore()
   })
+
+  // #773: these four stayed on their loader with no #error and no @error.
+  const LOAD_FAILURE_CASES = [
+    ['VueStripeEmbeddedCheckout', VueStripeEmbeddedCheckout, 'embedded-checkout', 'Network error'],
+    [
+      'VueStripeFinancialAccountDisclosure',
+      VueStripeFinancialAccountDisclosure,
+      'financial-account-disclosure',
+      { message: 'Network error' }
+    ],
+    [
+      'VueStripeIssuingDisclosure',
+      VueStripeIssuingDisclosure,
+      'issuing-disclosure',
+      { message: 'Network error' }
+    ],
+    [
+      'VueStripeTreasuryDisclosure',
+      VueStripeTreasuryDisclosure,
+      'treasury-disclosure',
+      { message: 'Network error' }
+    ]
+  ] as const
+
+  describe.each(LOAD_FAILURE_CASES)(
+    '%s under the plugin when Stripe.js fails to load (#773)',
+    (_name, Component, slug, payload) => {
+      const props =
+        slug === 'embedded-checkout'
+          ? { fetchClientSecret: () => Promise.resolve('cs_test_secret_x') }
+          : {}
+
+      it('emits @error, ends loading and shows the message', async () => {
+        const { loadStripe } = await import('@stripe/stripe-js/pure')
+        vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+        const wrapper = mount(Component as never, {
+          props: { ...props, onError: () => {} },
+          global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] }
+        })
+        await flushPromises()
+        await flushPromises()
+
+        expect(wrapper.emitted('error')).toEqual([[payload]])
+        expect(wrapper.find(`.vue-stripe-${slug}-error`).text()).toBe('Network error')
+        expect(wrapper.find(`.vue-stripe-${slug}-loader`).exists()).toBe(false)
+        expect((wrapper.vm as unknown as { loading: boolean }).loading).toBe(false)
+        // The plugin logs the load failure; the component does not log it a second time.
+        expect(consoleError).toHaveBeenCalledTimes(1)
+        expect(consoleError).toHaveBeenCalledWith(
+          '[Vue Stripe] Initialization error:',
+          'Network error'
+        )
+        consoleError.mockRestore()
+      })
+
+      it('renders the #error slot with the message', async () => {
+        const { loadStripe } = await import('@stripe/stripe-js/pure')
+        vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+        const wrapper = mount(Component as never, {
+          props,
+          slots: { error: ({ error }: { error: string }) => h('p', `slot: ${error}`) },
+          global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] }
+        })
+        await flushPromises()
+        await flushPromises()
+
+        expect(wrapper.text()).toBe('slot: Network error')
+        consoleError.mockRestore()
+      })
+    }
+  )
+
+  // Same as #773 for the components that already showed the failure: they now emit it too,
+  // and the Checkout Form provider, which stayed on its loader, shows it.
+  describe.each([
+    ['VueStripeElements', VueStripeElements, 'elements', { clientSecret: 'pi_123_secret_456' }],
+    [
+      'VueStripeCheckoutElementsProvider',
+      VueStripeCheckoutElementsProvider,
+      'checkout',
+      { clientSecret: 'cs_123_secret_456' }
+    ],
+    [
+      'VueStripeCheckoutFormProvider',
+      VueStripeCheckoutFormProvider,
+      'checkout',
+      { clientSecret: 'cs_123_secret_456' }
+    ]
+  ] as const)(
+    '%s under the plugin when Stripe.js fails to load',
+    (_name, Component, prefix, props) => {
+      const mountFailing = async (options: Record<string, unknown>) => {
+        const { loadStripe } = await import('@stripe/stripe-js/pure')
+        vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
+        const wrapper = mount(Component as never, {
+          ...options,
+          global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] }
+        })
+        await flushPromises()
+        await flushPromises()
+        return wrapper
+      }
+
+      it('emits @error with the message and shows it, logged only by the plugin', async () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const wrapper = await mountFailing({ props: { ...props, onError: () => {} } })
+        expect(wrapper.emitted('error')).toEqual([['Network error']])
+        expect(wrapper.find(`.vue-stripe-${prefix}-error`).text()).toBe('Network error')
+        expect(wrapper.find(`.vue-stripe-${prefix}-loading`).exists()).toBe(false)
+        expect(consoleError.mock.calls).toEqual([
+          ['[Vue Stripe] Initialization error:', 'Network error']
+        ])
+        consoleError.mockRestore()
+      })
+
+      it('renders the #error slot with the message', async () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const wrapper = await mountFailing({
+          props,
+          slots: { error: ({ error }: { error: string }) => h('p', `slot: ${error}`) }
+        })
+        expect(wrapper.text()).toBe('slot: Network error')
+        consoleError.mockRestore()
+      })
+
+      it('reports a load that had already failed when it mounts', async () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const { loadStripe } = await import('@stripe/stripe-js/pure')
+        vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
+        const show = ref(false)
+        const onError = vi.fn()
+        mount(
+          {
+            setup() {
+              useStripe()
+              return () => (show.value ? h(Component as never, { ...props, onError }) : null)
+            }
+          },
+          { global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] } }
+        )
+        await flushPromises()
+        show.value = true
+        await flushPromises()
+        expect(onError).toHaveBeenCalledTimes(1)
+        expect(onError).toHaveBeenCalledWith('Network error')
+        consoleError.mockRestore()
+      })
+    }
+  )
 
   it('reports loadStripe resolving null as an error', async () => {
     const { loadStripe } = await import('@stripe/stripe-js/pure')

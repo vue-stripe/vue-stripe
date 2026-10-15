@@ -164,6 +164,7 @@ export type {
   StripeCardNumberElementChangeEvent,
   StripeCardNumberElementOptions,
   StripeConstructorOptions,
+  StripeElementLocale,
   StripeElementsOptionsClientSecret,
   StripeElementsOptionsMode,
   StripeElementsUpdateOptions,

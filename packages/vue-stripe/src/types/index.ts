@@ -12,6 +12,7 @@ import type {
   StripeElementChangeEvent,
   ConfirmPaymentData,
   StripeConstructorOptions,
+  StripeElementLocale,
   StripeCheckoutElementsSdk,
   StripeCheckoutElementsSdkOptions,
   StripeCheckoutLoadActionsSuccess,
@@ -61,6 +62,7 @@ export type {
   StripeCardNumberElementChangeEvent,
   StripeCardNumberElementOptions,
   StripeConstructorOptions,
+  StripeElementLocale,
   StripeElementsOptionsClientSecret,
   StripeElementsOptionsMode,
   StripeElementsUpdateOptions,
@@ -209,7 +211,7 @@ export interface VueStripeProviderProps {
   stripeAccount?: string
   /** @deprecated Ignored: versioned Stripe.js (Endive) refuses `apiVersion`, so it is not passed to `loadStripe()`. */
   apiVersion?: string
-  locale?: string
+  locale?: StripeConstructorOptions['locale']
   betas?: string[]
   developerTools?: StripeConstructorOptions['developerTools']
   advancedFraudSignals?: boolean
@@ -273,7 +275,7 @@ export interface VueStripeElementsProps {
   /**
    * Locale to display the Elements in (e.g. 'en', 'fr', 'auto').
    */
-  locale?: string | undefined
+  locale?: StripeElementLocale | undefined
   /**
    * Additional options passed to stripe.elements().
    */

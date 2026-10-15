@@ -21,4 +21,11 @@ describe('styles.css', () => {
       sized.filter((r) => !/box-sizing:\s*border-box/.test(r.body)).map((r) => r.selector)
     ).toEqual([])
   })
+
+  // #784: the pricing table is hidden with `hidden`, which an author rule must back up, as a
+  // custom element's own :host display rule would beat the browser's [hidden] rule.
+  it('hides a hidden <stripe-pricing-table>', () => {
+    const rule = rules.find((r) => r.selector === '.vue-stripe-pricing-table > [hidden]')
+    expect(rule?.body).toMatch(/display:\s*none/)
+  })
 })

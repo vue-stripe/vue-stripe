@@ -94,13 +94,22 @@ export default /* @__PURE__ */ defineComponent({
     let unmounted = false
 
     const logError = errorLogger(slots)
-    const fail = (message: string) => {
+    // `log: false` for the plugin's Stripe.js load failure, which the plugin logs itself.
+    const fail = (message: string, log = true) => {
       if (unmounted) return
       error.value = message
       loading.value = false
-      logError('Checkout init error', message)
+      if (log) logError('Checkout init error', message)
       emit('error', message)
     }
+    // Under the createVueStripe() plugin alone: its Stripe.js load failed.
+    watch(
+      () => stripeInstance.error.value,
+      (message) => {
+        if (message && !started) fail(message, false)
+      },
+      { immediate: true }
+    )
     // A clientSecret Promise is checked right away: it can reject before Stripe.js has loaded.
     const secret =
       !props.fetchClientSecret && props.clientSecret instanceof Promise

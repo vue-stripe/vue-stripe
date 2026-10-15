@@ -50,7 +50,7 @@ Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret`
 | `captureMethod` | `'automatic' \| 'automatic_async' \| 'manual'` | No | Controls when to capture funds from the customer's account |
 | `appearance` | `Appearance` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance`. Changes are applied live with `elements.update()`; a new but deep-equal object is not a change |
 | `fonts` | `(CssFontSource \| CustomFontSource)[]` | No | Custom fonts to load into the Elements iframe. Convenience prop — equivalent to `options.fonts` |
-| `locale` | `string` | No | Locale to display Elements in (e.g. `'en'`, `'fr'`, `'auto'`). Convenience prop — equivalent to `options.locale`. Changes are applied live with `elements.update()`. Which Checkout integrations follow a locale: [Locale](/api/components/stripe-provider#locale) |
+| `locale` | `StripeElementLocale` | No | Locale to display Elements in: one of Stripe's supported locales (`'auto'`, `'en'`, `'fr'`, ...); a value outside the list is a type error. Convenience prop — equivalent to `options.locale`. Changes are applied live with `elements.update()`. Which Checkout integrations follow a locale: [Locale](/api/components/stripe-provider#locale) |
 | `options` | `StripeElementsOptions` | No | Any other option passed to `stripe.elements()` (e.g. `allowedPaymentMethodTypes` in the mode-based flow, `loader`) |
 
 \* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation; see [Collect payment details before creating an Intent](/guide/deferred-intent).
@@ -168,7 +168,7 @@ Changes to `appearance` are applied to the mounted elements with `elements.updat
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@ready` | `StripeElements` | Emitted after the Elements instance is created. The payload is the `StripeElements` instance |
-| `@error` | `string` | Emitted when Elements creation fails, or when an `appearance` / `locale` update is rejected. The payload is the error message |
+| `@error` | `string` | Emitted when Elements creation fails, when an `appearance` / `locale` update is rejected, or, under the [plugin](/guide/plugin) without a `VueStripeProvider`, when Stripe.js fails to load (the plugin logs that failure itself). The payload is the error message |
 | `@update-end` | - | Emitted when an `elements.update()` call has been applied to the mounted elements (Stripe's `update-end` event), e.g. after an `appearance` or `locale` change |
 
 ::: info `elements.update()` is asynchronous

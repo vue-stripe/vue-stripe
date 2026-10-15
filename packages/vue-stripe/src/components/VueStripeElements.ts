@@ -13,6 +13,7 @@ import type {
   Appearance,
   CssFontSource,
   CustomFontSource,
+  StripeElementLocale,
   StripeElements,
   StripeElementsOptions,
   StripeElementsOptionsClientSecret,
@@ -54,7 +55,8 @@ const elementsProps = {
     type: Array as PropType<Array<CssFontSource | CustomFontSource> | undefined>,
     default: undefined
   },
-  locale: { type: String as PropType<string | undefined>, default: undefined },
+  /** One of Stripe's supported Elements locales (`'auto'`, `'en'`, `'fr'`, ...). */
+  locale: { type: String as PropType<StripeElementLocale | undefined>, default: undefined },
   /** Any other `stripe.elements()` option (e.g. allowedPaymentMethodTypes in mode-based flows). */
   options: {
     type: Object as PropType<StripeElementsOptions | Record<string, unknown> | undefined>,
@@ -88,6 +90,19 @@ export default /* @__PURE__ */ defineComponent({
     const elements = shallowRef<StripeElements | null>(null)
     const loading = ref(true)
     const error = ref<string | null>(null)
+
+    // Under the createVueStripe() plugin alone: its Stripe.js load failed. The plugin logs
+    // it itself, so it is only reported here.
+    watch(
+      () => stripeInstance.error.value,
+      (message) => {
+        if (!message || elements.value) return
+        error.value = message
+        loading.value = false
+        emit('error', message)
+      },
+      { immediate: true }
+    )
 
     // `update-end` fires when an elements.update() call has been applied. The listener follows
     // the current group: a re-created group gets a new one, and a replaced group (which may have
