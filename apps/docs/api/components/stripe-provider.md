@@ -142,7 +142,12 @@ export const STRIPE_JS_TRAIN: ReleaseTrain = 'endive'
 | `@load` | `Stripe` | Emitted when Stripe.js loads successfully |
 | `@error` | `Error` | Emitted when Stripe.js fails to load (network error, blocked script) or rejects the key at load time (a secret key). The message is also shown through the `#error` slot. Without an `@error` listener or `#error` slot, the provider also logs it as a `[Vue Stripe]` console error |
 
-Stripe.js does not validate a publishable key when it loads: with a wrong, revoked or malformed key the provider emits `@load` and renders its default slot. The key fails on the first request to Stripe, as `Invalid API Key provided` in the first element's `@loaderror` and `#error` slot, or in the `{ error }` of the first composable call. Only a secret key (`sk_...`) fails the load. A load failure is not cached, so re-mounting the provider tries again. A failure tied to one provider's arguments, such as a secret key, reaches only that provider; other providers mounting at the same time load normally. A script that fails to load fails every provider waiting for it.
+Stripe.js does not validate a publishable key when it loads: with a wrong, revoked or malformed key the provider emits `@load` and renders its default slot. The key fails on the first request to Stripe, and not every element makes one when it mounts:
+
+- The Payment, Express Checkout and Link Authentication elements, and the Address Element in a group with a `clientSecret` or `mode`, request an Elements session when they mount. They emit `@loaderror` and show `Invalid API Key provided` in their `#error` slot. The Payment Method Messaging Element also emits `@loaderror`, but without Stripe's message: its `error` reads "Element failed to load".
+- The Card Element, the split card elements (number, expiry, CVC), the IBAN and AU BECS elements, and the Address Element in a group without a `clientSecret` or `mode` make no request. They emit `@ready`, accept input and show no error. The key fails only when the customer pays: `confirmCardPayment()` (or another composable call) resolves `{ error }` with `Invalid API Key provided`, and sets the composable's `error`.
+
+Only a secret key (`sk_...`) fails the load. A load failure is not cached, so re-mounting the provider tries again. A failure tied to one provider's arguments, such as a secret key, reaches only that provider; other providers mounting at the same time load normally. A script that fails to load fails every provider waiting for it.
 
 ## Slots
 

@@ -11,7 +11,7 @@ Errors reach your app at five points, each covered by a step below:
 | Where | Example | Where you see it |
 |-------|---------|------------------|
 | Loading Stripe.js | Network blocked, a secret key passed as the publishable key | Provider `#error` slot and `@error` event |
-| First request to Stripe | Invalid publishable key (Stripe.js only checks it when it calls the API) | "Invalid API Key provided" from the first element's `@loaderror` / `#error`, or the first composable call's `error` |
+| First request to Stripe | Invalid publishable key (Stripe.js only checks it when it calls the API) | "Invalid API Key provided" from the Payment, Express Checkout or Link Authentication element's `@loaderror` / `#error`, or the first composable call's `error` (the Card, IBAN and BECS elements render normally and fail only at confirm) |
 | Typing in an element | Incomplete card number, invalid IBAN | Inside the Payment Element's iframe; `@change` and the `#error` slot of the Card, IBAN and BECS elements |
 | Confirming | Card declined, 3D Secure failed | `{ error }` result of the composable, and its `error` ref |
 | After confirming | A bank debit fails days later | Webhooks on your server |
