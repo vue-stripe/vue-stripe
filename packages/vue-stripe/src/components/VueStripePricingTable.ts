@@ -11,7 +11,7 @@ import {
 } from 'vue-demi'
 import { stripeConfigInjectionKey } from '../utils/injection-keys'
 import { VueStripeProviderError } from '../utils/errors'
-import { hx } from '../utils/h'
+import { hx, renderAfterSetupError } from '../utils/h'
 import { errorLogger } from '../utils/report'
 import type { VueStripeComponent } from '../utils/element-types'
 
@@ -164,7 +164,8 @@ export default /* @__PURE__ */ defineComponent({
             ])
       ])
     }
-  }
+  },
+  render: renderAfterSetupError
 }) as unknown as VueStripeComponent<
   typeof pricingTableProps,
   PricingTableExposed,

@@ -22,6 +22,7 @@ import type {
 import type { CaptureMethod, ElementsMode, SetupFutureUsage } from '../types'
 import { stripeElementsInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
+import { renderAfterSetupError } from '../utils/h'
 import { statusShell } from '../utils/status-shell'
 import { errorLogger } from '../utils/report'
 import type { ScopedSlot, StatusSlots, VueStripeComponent } from '../utils/element-types'
@@ -224,7 +225,8 @@ export default /* @__PURE__ */ defineComponent({
         {},
         'Initializing Elements...'
       )
-  }
+  },
+  render: renderAfterSetupError
 }) as unknown as VueStripeComponent<
   typeof elementsProps,
   Record<never, never>,

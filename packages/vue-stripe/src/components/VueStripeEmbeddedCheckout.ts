@@ -17,6 +17,7 @@ import type {
   StripeEmbeddedCheckoutOptions
 } from '@stripe/stripe-js'
 import { injectStripe } from '../utils/inject-stripe'
+import { renderAfterSetupError } from '../utils/h'
 import { renderElement } from '../utils/element-render'
 import { errorLogger, listenerCheck } from '../utils/report'
 import type { VueStripeComponent } from '../utils/element-types'
@@ -188,7 +189,8 @@ export default /* @__PURE__ */ defineComponent({
         slots,
         'Loading checkout...'
       )
-  }
+  },
+  render: renderAfterSetupError
 }) as unknown as VueStripeComponent<
   typeof embeddedCheckoutProps,
   EmbeddedCheckoutExposed,

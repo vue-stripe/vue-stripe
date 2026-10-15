@@ -14,10 +14,14 @@ let inFlight: Promise<unknown> | null = null
  * while Stripe.js is loading share that load. The pure entry of
  * @stripe/stripe-js 10.0.0 does not memoize it: a second call during the load
  * re-injects the script and drops the first call's listeners, so the first call
- * never settles. Waiting calls run once the script settles: each creates its own
+ * never settles. 10.1.0 shares the load itself, but the peer range still allows
+ * 10.0.0 and the ES and CJS builds use the app's copy, so the wrapper stays until
+ * the range starts at 10.1.0 (on 10.1.0 it only waits on a load that is shared
+ * anyway). Waiting calls run once the script settles: each creates its own
  * instance from `window.Stripe`, so an argument `Stripe()` rejects (a secret key)
  * fails only its own call, while a script that fails to load fails them all.
- * Later calls go straight to the pure loader.
+ * Later calls go straight to the pure loader. tests/utils/load-stripe.test.ts
+ * runs against both versions.
  */
 // Every instance Vue Stripe hands out, the loadStripe re-export's included, carries the
 // library's Stripe partner details.

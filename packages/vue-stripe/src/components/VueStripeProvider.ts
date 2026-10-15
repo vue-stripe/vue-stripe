@@ -8,6 +8,7 @@ import {
 import { VueStripeProviderError } from '../utils/errors'
 import { loadStripeInstance } from '../utils/load-stripe'
 import { statusShell } from '../utils/status-shell'
+import { renderAfterSetupError } from '../utils/h'
 import { errorLogger } from '../utils/report'
 import type { ScopedSlot, StatusSlots, VueStripeComponent } from '../utils/element-types'
 
@@ -109,7 +110,8 @@ export default /* @__PURE__ */ defineComponent({
         {},
         'Loading Stripe...'
       )
-  }
+  },
+  render: renderAfterSetupError
 }) as unknown as VueStripeComponent<
   typeof providerProps,
   Record<never, never>,

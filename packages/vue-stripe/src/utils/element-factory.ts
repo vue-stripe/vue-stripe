@@ -25,6 +25,7 @@ import {
 import { VueStripeElementsError } from './errors'
 import { renderElement } from './element-render'
 import { errorLogger, listenerCheck } from './report'
+import { renderAfterSetupError } from './h'
 
 export type * from './element-types'
 
@@ -258,7 +259,8 @@ export function createStripeElement<
           slots,
           loadingText
         )
-    }
+    },
+    render: renderAfterSetupError
   })
   // The runtime component is typed loosely; callers get the precise public type.
   return component as unknown as StripeElementComponent<

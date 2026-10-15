@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h, inject } from 'vue-demi'
+import { createApp, createSSRApp, h, inject } from 'vue-demi'
+import { renderToString } from 'vue/server-renderer'
+import { loadStripe } from '@stripe/stripe-js/pure'
 import VueStripeProvider from '../../src/components/VueStripeProvider'
+import { VueStripeProviderError } from '../../src/utils/errors'
 import { stripeInjectionKey } from '../../src/utils/injection-keys'
 import { flushPromises } from '../setup'
 
@@ -328,5 +331,61 @@ describe('VueStripeProvider', () => {
         props: {}
       })
     }).toThrow('publishableKey or stripeKey is required')
+  })
+
+  // #745: an app error handler (Nuxt installs one) catches the missing-key throw, and Vue
+  // then renders the component without its setup() render function. The throw stays, but
+  // Vue must not follow it with "missing template or render function".
+  describe('missing key under an app error handler (#745)', () => {
+    const missingRender = (warn: ReturnType<typeof vi.spyOn>) =>
+      warn.mock.calls.filter((args) => /missing template or render function/.test(args.join(' ')))
+
+    it('reports the throw to the handler, renders nothing and adds no Vue warning', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const errorHandler = vi.fn()
+      // createApp, not mount(): test-utils rethrows any error raised while mounting.
+      const app = createApp({
+        render: () =>
+          h('main', [h(VueStripeProvider, {}, () => h('p', { class: 'child' }, 'child'))])
+      })
+      app.config.errorHandler = errorHandler
+      const root = document.createElement('div')
+      app.mount(root)
+      await flushPromises()
+
+      expect(errorHandler).toHaveBeenCalledTimes(1)
+      expect(errorHandler.mock.calls[0]![0]).toBeInstanceOf(VueStripeProviderError)
+      expect((errorHandler.mock.calls[0]![0] as Error).message).toBe(
+        'publishableKey or stripeKey is required'
+      )
+      expect(root.innerHTML).toBe('<main><!----></main>')
+      expect(loadStripe).not.toHaveBeenCalled()
+      expect(missingRender(warn)).toEqual([])
+      app.unmount()
+      warn.mockRestore()
+    })
+
+    it('does the same when rendered on the server', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const errorHandler = vi.fn()
+      const app = createSSRApp({
+        render: () => h('main', [h(VueStripeProvider, { stripeKey: '' })])
+      })
+      app.config.errorHandler = errorHandler
+      const html = await renderToString(app)
+
+      expect(errorHandler).toHaveBeenCalledTimes(1)
+      expect(errorHandler.mock.calls[0]![0]).toBeInstanceOf(VueStripeProviderError)
+      expect(html).toBe('<main><!----></main>')
+      expect(missingRender(warn)).toEqual([])
+      warn.mockRestore()
+    })
+
+    it('still fails a server render that has no error handler (the documented 500)', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const app = createSSRApp({ render: () => h(VueStripeProvider, {}) })
+      await expect(renderToString(app)).rejects.toThrow(VueStripeProviderError)
+      warn.mockRestore()
+    })
   })
 })

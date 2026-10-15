@@ -16,6 +16,7 @@ import type {
 } from '@stripe/stripe-js'
 import { stripeCheckoutFormInjectionKey } from '../utils/injection-keys'
 import { injectStripe } from '../utils/inject-stripe'
+import { renderAfterSetupError } from '../utils/h'
 import { statusShell } from '../utils/status-shell'
 import { errorLogger } from '../utils/report'
 import { checkedSecret } from '../utils/client-secret'
@@ -203,7 +204,8 @@ export default /* @__PURE__ */ defineComponent({
         },
         'Initializing Checkout Form...'
       )
-  }
+  },
+  render: renderAfterSetupError
 }) as unknown as VueStripeComponent<
   typeof checkoutFormProviderProps,
   Record<never, never>,
