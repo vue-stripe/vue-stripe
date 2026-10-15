@@ -159,7 +159,7 @@ module.exports = {
 
 Vite restarts by itself when its config changes; restart `vue-cli-service serve` yourself. On Vue 2.7, use the "Vite, Vue 2.7" tab: a Vue 2.7 app compiles its components with `@vitejs/plugin-vue2`, and the Vue 3 config stops with `ERR_MODULE_NOT_FOUND` there. `@vitejs/plugin-vue2` supports Vite 3 to 7, so keep the app on Vite 7 ([Use Vue Stripe on Vue 2.7](/guide/vue-2#_1-install-the-packages)). Nuxt server routes (`server/api/`) and other setups that serve the app and its API from one origin need nothing here. In production, serve the API on the app's origin too, for example behind the same reverse proxy, or call it by its full URL and allow the app's origin with CORS on the server.
 
-- **Quasar** has no `vite.config.ts`: set the proxy in `devServer.proxy` of `quasar.config.ts`, as in [Use Vue Stripe with Quasar](/guide/quasar#_5-send-api-requests-to-your-server-in-development).
+- **Quasar** has no `vite.config.ts`: set the proxy in `devServer.proxy` of `quasar.config.ts`, as in [Use Vue Stripe with Quasar](/guide/quasar#_5-send-api-requests-to-your-server-in-development). In webpack mode the proxy is an array; see [Webpack mode](/guide/quasar#webpack-mode).
 - **Laravel** serves the app and its API from one origin, so it needs no proxy. But a `fetch` POST to a route in `routes/web.php` fails with 419 (CSRF): put the routes in `routes/api.php`, or send the CSRF token, as in [Use Vue Stripe with Laravel and Inertia](/guide/laravel#_4-create-the-api-routes).
 
 ## Other setups
