@@ -37,7 +37,8 @@ app.post('/api/ach-payment-intent', async (req, res) => {
       us_bank_account: {
         financial_connections: { permissions: ['payment_method'] }
       }
-    }
+    },
+    metadata: { orderId: 'order_123' } // your own order ID, read back by the webhook
   })
   res.json({ clientSecret: paymentIntent.client_secret })
 })

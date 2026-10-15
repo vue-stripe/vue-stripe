@@ -29,7 +29,8 @@ export async function POST(request: Request) {
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
     currency: 'aud', // BECS only supports AUD
-    allowed_payment_method_types: ['au_becs_debit']
+    allowed_payment_method_types: ['au_becs_debit'],
+    metadata: { orderId: 'order_123' } // your own order ID, read back by the webhook
   })
 
   return Response.json({ clientSecret: paymentIntent.client_secret })

@@ -120,7 +120,8 @@ app.post('/api/create-payment-intent', async (req, res) => {
   const paymentIntent = await stripe.paymentIntents.create({
     amount: 2000, // decide the amount on the server
     currency: 'usd',
-    automatic_payment_methods: { enabled: true }
+    automatic_payment_methods: { enabled: true },
+    metadata: { orderId: 'order_123' } // your own order ID, read back by the webhook
   })
   res.json({ clientSecret: paymentIntent.client_secret })
 })

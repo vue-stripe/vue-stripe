@@ -189,7 +189,8 @@ const paymentIntent = await stripe.paymentIntents.create({
   customer: 'cus_xxx',
   payment_method: paymentMethodId, // from the SetupIntent
   off_session: true,
-  confirm: true
+  confirm: true,
+  metadata: { orderId: 'order_123' } // your own order ID, read back by the webhook
 })
 ```
 

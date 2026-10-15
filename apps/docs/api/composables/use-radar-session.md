@@ -53,7 +53,8 @@ const paymentIntent = await stripe.paymentIntents.create({
   currency: 'usd',
   payment_method: paymentMethodId,
   confirm: true,
-  radar_options: { session: radarSessionId } // the ID the browser sent
+  radar_options: { session: radarSessionId }, // the ID the browser sent
+  metadata: { orderId: 'order_123' } // your own order ID, read back by the webhook
 })
 ```
 

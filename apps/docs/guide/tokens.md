@@ -140,7 +140,8 @@ app.post('/api/pay', async (req, res) => {
       automatic_payment_methods: { enabled: true },
       confirm: true,
       confirmation_token: req.body.confirmationToken,
-      return_url: 'https://example.com/complete'
+      return_url: 'https://example.com/complete',
+      metadata: { orderId: 'order_123' } // your own order ID, read back by the webhook
     })
     res.json({ status: paymentIntent.status, clientSecret: paymentIntent.client_secret })
   } catch (err) {
