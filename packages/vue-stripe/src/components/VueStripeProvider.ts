@@ -8,6 +8,7 @@ import {
 import { VueStripeProviderError } from '../utils/errors'
 import { loadStripeInstance } from '../utils/load-stripe'
 import { statusShell } from '../utils/status-shell'
+import { renderAfterSetupError } from '../utils/h'
 import { errorLogger } from '../utils/report'
 import type { ScopedSlot, StatusSlots, VueStripeComponent } from '../utils/element-types'
 
@@ -110,10 +111,7 @@ export default /* @__PURE__ */ defineComponent({
         'Loading Stripe...'
       )
   },
-  // setup() returns the real render function. This one renders only after setup() threw
-  // and an app error handler (Nuxt's, for one) caught it: without it, Vue follows the
-  // missing-key error with "missing template or render function" (#745).
-  render: () => null
+  render: renderAfterSetupError
 }) as unknown as VueStripeComponent<
   typeof providerProps,
   Record<never, never>,

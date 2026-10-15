@@ -6,6 +6,7 @@ import {
   VueStripeElements,
   VueStripeEmbeddedCheckout,
   VueStripeExpressCheckoutElement,
+  VueStripeIssuingDisclosure,
   VueStripePricingTable,
   VueStripeProvider,
   useConfirmCardPayment,
@@ -369,28 +370,62 @@ it('reports a failing fetch-client-secret through Vue 2 @error and #error, nothi
   expect(unhandled).toEqual([])
 })
 
-it('hands a missing key to Vue.config.errorHandler with no follow-up mount warning (#745)', async () => {
-  const { default: Vue } = await import('vue')
-  const error = vi.spyOn(console, 'error').mockImplementation(() => {})
-  const errorHandler = vi.fn()
-  const previous = Vue.config.errorHandler
-  Vue.config.errorHandler = errorHandler
-  try {
-    const vm = new Vue({
-      render: (h: CreateElement) => h('main', [h(VueStripeProvider as never, { props: {} })])
-    }).$mount()
-    await settle()
+// #745: a setup() throw caught by Vue.config.errorHandler must not be followed by Vue 2's
+// "Failed to mount component: template or render function not defined".
+it.each([
+  [
+    'VueStripeProvider without a key',
+    VueStripeProvider,
+    {},
+    'publishableKey or stripeKey is required'
+  ],
+  [
+    'an element component without VueStripeElements',
+    VueStripeCardNumberElement,
+    {},
+    'VueStripeCardNumberElement must be used within VueStripeElements or VueStripeCheckoutElementsProvider'
+  ],
+  [
+    'a disclosure without a provider',
+    VueStripeIssuingDisclosure,
+    {},
+    'VueStripeIssuingDisclosure needs a `stripe` prop, a VueStripeProvider ancestor or an app using createVueStripe()'
+  ],
+  [
+    'VueStripeElements without a provider',
+    VueStripeElements,
+    {},
+    'VueStripeElements must be used within a VueStripeProvider component or an app using createVueStripe()'
+  ],
+  [
+    'VueStripeCheckoutElementsProvider without a provider',
+    VueStripeCheckoutElementsProvider,
+    { clientSecret: 'cs_test_x_secret_y' },
+    'VueStripeCheckoutElementsProvider must be used within a VueStripeProvider component or an app using createVueStripe()'
+  ]
+])(
+  'hands %s to Vue.config.errorHandler with no follow-up mount warning (#745)',
+  async (_, component, props, message) => {
+    const { default: Vue } = await import('vue')
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const errorHandler = vi.fn()
+    const previous = Vue.config.errorHandler
+    Vue.config.errorHandler = errorHandler
+    try {
+      const vm = new Vue({
+        render: (h: CreateElement) => h('main', [h(component as never, { props })])
+      }).$mount()
+      await settle()
 
-    expect(errorHandler).toHaveBeenCalledTimes(1)
-    expect((errorHandler.mock.calls[0]![0] as Error).message).toBe(
-      'publishableKey or stripeKey is required'
-    )
-    expect((vm.$el as HTMLElement).outerHTML).toBe('<main><!----></main>')
-    const mountWarnings = error.mock.calls.filter(([m]) => /render function/.test(String(m)))
-    expect(mountWarnings).toEqual([])
-    vm.$destroy()
-  } finally {
-    Vue.config.errorHandler = previous
-    error.mockRestore()
+      expect(errorHandler).toHaveBeenCalledTimes(1)
+      expect((errorHandler.mock.calls[0]![0] as Error).message).toBe(message)
+      expect((vm.$el as HTMLElement).outerHTML).toBe('<main><!----></main>')
+      const mountWarnings = error.mock.calls.filter(([m]) => /render function/.test(String(m)))
+      expect(mountWarnings).toEqual([])
+      vm.$destroy()
+    } finally {
+      Vue.config.errorHandler = previous
+      error.mockRestore()
+    }
   }
-})
+)

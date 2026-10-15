@@ -25,3 +25,11 @@ export function hx(tag: string | object, props: Props = {}, children?: unknown) 
   if (Object.keys(on).length) data['on'] = on
   return h(tag as string, data, children as never)
 }
+
+/**
+ * `render` option of every component whose setup() throws (a missing wrapper or key).
+ * setup()'s own render function wins; Vue uses this one only after an app error handler
+ * (Nuxt's, for one) caught the throw, and without it follows the error with "missing
+ * template or render function" (Vue 2.7: "Failed to mount component") (#745).
+ */
+export const renderAfterSetupError = () => null

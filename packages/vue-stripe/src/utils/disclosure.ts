@@ -17,6 +17,7 @@ import { stripeInjectionKey } from './injection-keys'
 import { VueStripeProviderError } from './errors'
 import { renderElement } from './element-render'
 import { errorLogger } from './report'
+import { renderAfterSetupError } from './h'
 import type { StatusSlots, WithSlots } from './element-types'
 
 /** `stripe` prop of a disclosure: an instance, a Promise of one, or `null` (React Stripe.js parity). */
@@ -186,7 +187,8 @@ export function createStripeDisclosure<TOptions extends object>(
           slots,
           'Loading disclosure...'
         )
-    }
+    },
+    render: renderAfterSetupError
   })
   // The runtime component is typed loosely; callers get the precise public type.
   return component as unknown as StripeDisclosureComponent<TOptions>
