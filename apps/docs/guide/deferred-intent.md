@@ -23,7 +23,7 @@ import {
 import PayButton from './PayButton.vue'
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const cartTotal = 1099 // in cents, from your cart
+const cartTotal = 1099 // in the currency's smallest unit (cents for USD), from your cart
 </script>
 
 <template>
@@ -35,6 +35,8 @@ const cartTotal = 1099 // in cents, from your cart
   </VueStripeProvider>
 </template>
 ```
+
+`amount` is in the currency's smallest unit: `1099` with `usd` is $10.99, but for a zero-decimal currency such as JPY, `2000` is ¥2,000. Three-decimal and a few other currencies have their own rules; see [Amounts and currencies](/api/components/stripe-elements#amounts-and-currencies).
 
 The Payment Element shows the payment methods enabled in your Dashboard that support this amount and currency. To limit them, pass `:options="{ allowedPaymentMethodTypes: ['card', 'sepa_debit'] }"` to `VueStripeElements`.
 

@@ -45,7 +45,7 @@ Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret`
 | `clientSecret` | `string` | No* | Client secret from PaymentIntent or SetupIntent. When provided, Elements uses the intent-based flow |
 | `mode` | `'payment' \| 'setup' \| 'subscription'` | No | Mode for deferred intent creation (without `clientSecret`). Required when `clientSecret` is not provided |
 | `currency` | `string` | No | Currency code (e.g. `'usd'`, `'eur'`) for deferred intent creation. Required when using `mode` without `clientSecret` |
-| `amount` | `number` | No | Amount in the smallest currency unit (e.g. cents for USD). Required for `'payment'` and `'subscription'` modes |
+| `amount` | `number` | No | Amount in the smallest currency unit (e.g. cents for USD, whole yen for JPY; see [Amounts and currencies](#amounts-and-currencies)). Required for `'payment'` and `'subscription'` modes |
 | `setupFutureUsage` | `'off_session' \| 'on_session'` | No | Indicates intent to save the payment method for future use |
 | `captureMethod` | `'automatic' \| 'automatic_async' \| 'manual'` | No | Controls when to capture funds from the customer's account |
 | `appearance` | `Appearance` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance`. Changes are applied live with `elements.update()`; a new but deep-equal object is not a change |
@@ -56,6 +56,15 @@ Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret`
 \* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation; see [Collect payment details before creating an Intent](/guide/deferred-intent).
 
 A new `clientSecret`, `mode`, `currency`, `amount` or `setupFutureUsage` calls `stripe.elements()` again to create a new Elements group. Changes to the `appearance` and `locale` props are applied to the existing group with `elements.update()`, so mounted elements keep what the customer typed (keys inside `options` are read when the group is created). The values are compared by content: a re-render that passes a new but deep-equal object (e.g. an inline `:appearance="{ ... }"`) does not call `update()`.
+
+### Amounts and currencies
+
+`amount`, like every amount in the Stripe API, is an integer in the currency's smallest unit. Which unit that is depends on the currency ([Stripe: Supported currencies](https://docs.stripe.com/currencies#zero-decimal)):
+
+- Most currencies have two decimals: `1099` with `usd` is $10.99, with `eur` €10.99.
+- Zero-decimal currencies such as JPY and KRW have no smaller unit: `2000` with `jpy` is ¥2,000. Multiplying the price by 100, as for cents, charges 100 times too much.
+- Three-decimal currencies (BHD, JOD, KWD, OMR, TND) count thousandths, and Stripe requires the last digit to be 0: `5120` with `kwd` is 5.120 KWD.
+- A few currencies are special cases. ISK and HUF take two decimals in the API: `50000` with `isk` is 500 ISK, and `500000` with `huf` is 5,000 HUF. `Intl.NumberFormat` formats ISK without decimals, so a price label that divides by its fraction digits shows 50,000 ISK. Stripe's page lists these cases, TWD among them, with their rules.
 
 ::: warning `paymentMethodTypes` was removed in v6
 Stripe.js Endive rejects `paymentMethodTypes` on `stripe.elements()` as an integration error, so `VueStripeElements` no longer has this prop (and drops the key if it appears in `options`). Choose the payment methods instead with:
