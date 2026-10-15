@@ -42,7 +42,8 @@ import { SITE_URL, routeOf, sectionOf, type DocSection } from './seo'
 // page is also written next to its HTML as Markdown (/guide/testing -> /guide/testing.md),
 // and the dev server answers the same URL with the same text (config.ts).
 // The Markdown is the page source with frontmatter, Vue components and VitePress-only syntax
-// turned into plain Markdown, and site links made absolute.
+// turned into plain Markdown, and site links made absolute, pointing at the pages' Markdown
+// copies (markdownLink).
 
 interface Page {
   relativePath: string
@@ -107,6 +108,19 @@ export function installCommand(pkg: {
 }
 
 const absolute = (href: string) => (href.startsWith('/') ? SITE_URL + href : href)
+
+/**
+ * A site link as the copies write it: a page's Markdown copy (`/guide/testing#step` ->
+ * `https://vuestripe.com/guide/testing.md#step`, a section overview `/api/` -> `/api/index.md`),
+ * so a reader of the Markdown stays on Markdown. A link to a file (`/images/logo.png`) is only
+ * made absolute, and a link off the site is kept.
+ */
+export function markdownLink(href: string): string {
+  if (!href.startsWith('/')) return href
+  const [, path = '', rest = ''] = /^([^?#]*)(.*)$/.exec(href) ?? []
+  if (/\.\w+$/.test(path)) return absolute(href)
+  return `${SITE_URL}${markdownPathOf(path)}${rest}`
+}
 
 /**
  * Turns a docs page body into plain Markdown, leaving code blocks untouched. With the page's
@@ -182,9 +196,9 @@ export function toPlainMarkdown(
           (img) =>
             `![${/alt="([^"]*)"/.exec(img)?.[1] ?? ''}](${absolute(/src="([^"]*)"/.exec(img)?.[1] ?? '')})`
         )
-        .replace(/\]\((\/[^)]*)\)/g, (_, href: string) => `](${absolute(href)})`)
+        .replace(/\]\((\/[^)]*)\)/g, (_, href: string) => `](${markdownLink(href)})`)
         .replace(/\]\((#[^)]*)\)/g, (link, fragment: string) =>
-          route ? `](${absolute(route)}${fragment})` : link
+          route ? `](${markdownLink(route + fragment)})` : link
         )
     )
   }
@@ -233,7 +247,7 @@ export function homeUsageMarkdown(data: UsageData): string {
     github.contributors !== null && `${formatCount(github.contributors)} contributors`
   ].filter((p): p is string => Boolean(p))
   if (parts.length < 3) return ''
-  return `${parts.join(', ')}${data.fetchedAt ? ` (as of ${formatDay(data.fetchedAt)})` : ''}. [See all the numbers](${absolute('/usage')}).`
+  return `${parts.join(', ')}${data.fetchedAt ? ` (as of ${formatDay(data.fetchedAt)})` : ''}. [See all the numbers](${markdownLink('/usage')}).`
 }
 
 /** The /usage numbers as Markdown, as of the build (the page itself refreshes them). */
@@ -298,7 +312,7 @@ export function homeBundleSizeMarkdown(data: BundleSizes): string {
   const last = list.pop()
   return `Bundle size, minified and gzipped: ${list.length ? `${list.join(', ')} and ${last}` : last}${
     data.version ? ` (\`${PACKAGE}\` ${data.version})` : ''
-  }. [How bundle size works](${absolute('/guide/bundle-size')}).`
+  }. [How bundle size works](${markdownLink('/guide/bundle-size')}).`
 }
 
 const sizeCells = (size: Size) => `${formatSize(size.minified, 2)} | ${formatSize(size.gzip, 2)}`
@@ -310,6 +324,7 @@ const code = (name: string) => `\`${name}\``
  */
 export function bundleSizeMarkdown(data: BundleSizes): Record<string, string> {
   if (!hasSizes(data)) {
+    // The HTML page, not its copy: the copy built here has no numbers either.
     return {
       'BundleSize#summary': `**Sizes are measured when the site is built.** This copy was built without the library's \`dist\`, so it has no numbers. [The page on the site](${absolute('/guide/bundle-size')}) has them.`
     }
@@ -352,7 +367,7 @@ export function bundleSizeMarkdown(data: BundleSizes): Record<string, string> {
 
   const elements =
     data.elements && range
-      ? `\`${data.elements.base}\` on its own is ${formatSize(data.elements.first, 2)}, of which ${formatSize(data.elements.first - data.elements.own, 2)} is the element factory and provider plumbing that every element shares and ${formatSize(data.elements.own)} its own definition. Each element after the first adds ${formatSize(range.min)} to ${formatSize(range.max)}, ${formatSize(range.median)} for the median element; the table under [Every export](${absolute('/guide/bundle-size#every-export')}) lists each one.`
+      ? `\`${data.elements.base}\` on its own is ${formatSize(data.elements.first, 2)}, of which ${formatSize(data.elements.first - data.elements.own, 2)} is the element factory and provider plumbing that every element shares and ${formatSize(data.elements.own)} its own definition. Each element after the first adds ${formatSize(range.min)} to ${formatSize(range.max)}, ${formatSize(range.median)} for the median element; the table under [Every export](${markdownLink('/guide/bundle-size#every-export')}) lists each one.`
       : ''
 
   const { stylesheet, stripeLoader, builds } = data
@@ -397,7 +412,7 @@ export function bundleSizeMarkdown(data: BundleSizes): Record<string, string> {
         '| Export | Minified | Minified and gzipped | Note |',
         '| --- | --- | --- | --- |',
         ...group.exports.map((e) => {
-          const name = e.link ? `[\`${e.name}\`](${absolute(e.link)})` : code(e.name)
+          const name = e.link ? `[\`${e.name}\`](${markdownLink(e.link)})` : code(e.name)
           const note = e.aliasOf
             ? `Another name for \`${e.aliasOf}\``
             : e.added !== undefined
@@ -425,7 +440,7 @@ export function bundleSizeMarkdown(data: BundleSizes): Record<string, string> {
  * the live demo section.
  */
 export function homeMarkdown(body: string, components: Record<string, string> = {}): string {
-  const link = (text: string, href: string) => `[${text}](${absolute(href)})`
+  const link = (text: string, href: string) => `[${text}](${markdownLink(href)})`
   const code = new Map(
     // The fence, not the slot: a Vue file's own </template> line sits inside the fence.
     [...body.matchAll(/^<template #(\w+)>\s*\n(```[^\n]*\n[\s\S]*?\n```)\s*\n<\/template>/gm)].map(
@@ -543,8 +558,6 @@ export function pageMarkdownCopy(
   return page && pageDocument(page)
 }
 
-const markdownUrl = (route: string) => `${SITE_URL}${markdownPathOf(route)}`
-
 export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): void {
   const sidebarLinks = options.sidebars.flatMap(flattenSidebar)
   const order = new Map(sidebarLinks.map((l, i) => [l.link, i]))
@@ -580,13 +593,14 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
     '',
     '## Start here',
     '',
-    `- [${home.title}](${markdownUrl(home.route)}): ${home.description}`,
+    `- [${home.title}](${markdownLink(home.route)}): ${home.description}`,
     '',
     ...grouped.flatMap(({ section, pages }) => [
       `## ${section.name}`,
       '',
       ...pages.map(
-        (p) => `- [${p.title}](${markdownUrl(p.route)})${p.description ? `: ${p.description}` : ''}`
+        (p) =>
+          `- [${p.title}](${markdownLink(p.route)})${p.description ? `: ${p.description}` : ''}`
       ),
       ''
     ])

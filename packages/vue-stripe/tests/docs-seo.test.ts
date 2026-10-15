@@ -17,6 +17,7 @@ import {
   coverageMarkdown,
   homeMarkdown,
   installCommand,
+  markdownLink,
   pageMarkdownCopy,
   parseFrontmatter,
   toPlainMarkdown,
@@ -320,8 +321,21 @@ describe('Markdown copies', () => {
   it('a same-page link names its page, so it still works in llms-full.txt', () => {
     const body = 'See [Events](#events) and [Slots](/api/x#slots).\n\n```md\n[Kept](#kept)\n```'
     expect(toPlainMarkdown(body, {}, '/api/components/stripe-provider')).toBe(
-      `See [Events](${SITE_URL}/api/components/stripe-provider#events) and [Slots](${SITE_URL}/api/x#slots).\n\n\`\`\`md\n[Kept](#kept)\n\`\`\``
+      `See [Events](${SITE_URL}/api/components/stripe-provider.md#events) and [Slots](${SITE_URL}/api/x.md#slots).\n\n\`\`\`md\n[Kept](#kept)\n\`\`\``
     )
+  })
+
+  // A Markdown reader that follows a link stays on Markdown; "URL plus .md" is a 404 for a
+  // section overview (/api/.md), so the copies name its index.md (#767).
+  it('links a site page by its Markdown copy, and keeps files and other sites as they are', () => {
+    expect(markdownLink('/guide/testing')).toBe(`${SITE_URL}/guide/testing.md`)
+    expect(markdownLink('/api/#compatibility')).toBe(`${SITE_URL}/api/index.md#compatibility`)
+    expect(markdownLink('/api/composables/confirm/#return-value')).toBe(
+      `${SITE_URL}/api/composables/confirm/index.md#return-value`
+    )
+    expect(markdownLink('/')).toBe(`${SITE_URL}/index.md`)
+    expect(markdownLink('/images/logo.png')).toBe(`${SITE_URL}/images/logo.png`)
+    expect(markdownLink('https://docs.stripe.com/js')).toBe('https://docs.stripe.com/js')
   })
 
   it('no page keeps a bare #fragment link in its Markdown copy', () => {
@@ -407,6 +421,48 @@ describe('Copy for LLMs', () => {
       expect(problems, problems.join('\n')).toEqual([])
       expect(pages.some((p) => p.noindex)).toBe(true)
       expect(pageMarkdownCopy('guide/no-such-page.md', docsDir)).toBeNull()
+    } finally {
+      rmSync(outDir, { recursive: true, force: true })
+    }
+  })
+
+  it('every site link in the copies, llms.txt and llms-full.txt opens a written file', () => {
+    const outDir = mkdtempSync(join(tmpdir(), 'vue-stripe-llms-'))
+    try {
+      const siteConfig = { srcDir: docsDir, outDir, pages: pages.map((p) => p.path) }
+      writeLlmsFiles(siteConfig as unknown as Parameters<typeof writeLlmsFiles>[0], {
+        sections: [],
+        sidebars: [],
+        header: '> Header',
+        components: { StripeCoverage: coverageMarkdown(coverage) }
+      })
+      const written = (dir: string): string[] =>
+        readdirSync(dir).flatMap((name) => {
+          const path = join(dir, name)
+          return statSync(path).isDirectory() ? written(path) : [path]
+        })
+      const files = written(outDir)
+      let links = 0
+      const problems = files.flatMap((file) => {
+        const prose = readFileSync(file, 'utf8').replace(/^```[\s\S]*?^```/gm, '')
+        return [...prose.matchAll(/\]\((https:\/\/vuestripe\.com[^)\s]*)\)/g)].flatMap(
+          ([, href]) => {
+            links++
+            const path = new URL(href!).pathname
+            // A page by its copy; anything else is a file the site serves from public/.
+            const target = path.endsWith('.md') ? join(outDir, path) : join(docsDir, 'public', path)
+            return existsSync(target) ? [] : [`${relative(outDir, file)}: ${href}`]
+          }
+        )
+      })
+      expect(problems, problems.join('\n')).toEqual([])
+      expect(links).toBeGreaterThan(1000)
+      const pageLinks = files.flatMap((file) =>
+        [...readFileSync(file, 'utf8').matchAll(/\]\((https:\/\/vuestripe\.com[^)\s]*)\)/g)]
+          .map(([, href]) => new URL(href!).pathname)
+          .filter((path) => !/\.\w+$/.test(path))
+      )
+      expect(pageLinks, 'site links to an HTML page').toEqual([])
     } finally {
       rmSync(outDir, { recursive: true, force: true })
     }
