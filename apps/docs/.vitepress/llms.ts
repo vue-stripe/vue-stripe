@@ -81,6 +81,31 @@ export function parseFrontmatter(source: string): { data: Record<string, string>
   return { data, body: source.slice(block.length) }
 }
 
+/**
+ * The install command of the llms.txt header, with version ranges from the library's
+ * package.json. A bare `npm install` takes npm's `latest` tag, which stays on the previous
+ * major while this one is a prerelease, so a prerelease `6.0.0-beta.6` gets `^6.0.0-beta.6`
+ * (the latest 6.x beta, then the latest 6.x) and a release gets `^6`. `@stripe/stripe-js`
+ * gets the peer range, `^10.0.0` written `^10` as in the installation guide.
+ */
+export function installCommand(pkg: {
+  name: string
+  version: string
+  peerDependencies: Record<string, string>
+}): string {
+  const major = /^\d+/.exec(pkg.version)?.[0]
+  if (!major) throw new Error(`[Vue Stripe docs] Unexpected package version: ${pkg.version}`)
+  const range = pkg.version.includes('-') ? `^${pkg.version}` : `^${major}`
+  const stripeJs = (pkg.peerDependencies['@stripe/stripe-js'] ?? '').replace(
+    /^\^(\d+)\.0\.0$/,
+    '^$1'
+  )
+  if (!/^\S+$/.test(stripeJs)) {
+    throw new Error(`[Vue Stripe docs] Unexpected @stripe/stripe-js peer range: ${stripeJs}`)
+  }
+  return `npm install ${pkg.name}@${range} @stripe/stripe-js@${stripeJs}`
+}
+
 const absolute = (href: string) => (href.startsWith('/') ? SITE_URL + href : href)
 
 /**

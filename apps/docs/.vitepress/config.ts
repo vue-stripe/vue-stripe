@@ -26,6 +26,7 @@ import {
   coverageMarkdown,
   homeBundleSizeMarkdown,
   homeUsageMarkdown,
+  installCommand,
   pageMarkdownCopy,
   parseFrontmatter,
   usageMarkdown,
@@ -421,7 +422,7 @@ const llmsHeader = `> Vue Stripe (${pkg.name}) is a Vue library for the browser 
 Vue Stripe was created in 2017 by ${maintainer.name} (${maintainer.sameAs.join(', ')}), who still maintains it. It is MIT licensed and a Stripe Verified Partner.
 
 - Package: \`${pkg.name}\` ${pkg.version} on npm (${NPM_URL})
-- Install: \`npm install ${pkg.name} @stripe/stripe-js\`, then import \`${pkg.name}/style.css\` once
+- Install: \`${installCommand(pkg)}\`, then import \`${pkg.name}/style.css\` once
 - Peer dependencies: ${Object.entries(pkg.peerDependencies)
   .map(([dep, range]) => `${dep} ${range}`)
   .join(', ')}

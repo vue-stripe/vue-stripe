@@ -16,6 +16,7 @@ import {
 import {
   coverageMarkdown,
   homeMarkdown,
+  installCommand,
   pageMarkdownCopy,
   parseFrontmatter,
   toPlainMarkdown,
@@ -470,5 +471,50 @@ describe('llms-full coverage table', () => {
       .filter((item) => item.note && !markdown.includes(item.note))
       .map((item) => `${item.name} (${item.status}): ${item.note}`)
     expect(missing, missing.join('\n')).toEqual([])
+  })
+})
+
+// npm's `latest` stays on the previous major while this one is a prerelease, so an install
+// line without ranges installs Vue Stripe 5 and its style.css import fails (#763).
+describe('llms.txt install line', () => {
+  const pkg = JSON.parse(
+    readFileSync(join(docsDir, '../../packages/vue-stripe/package.json'), 'utf8')
+  ) as { name: string; version: string; peerDependencies: Record<string, string> }
+  const peers = { '@stripe/stripe-js': '^10.0.0' }
+
+  it('pins a prerelease to a range that starts at it, and a release to its major', () => {
+    expect(
+      installCommand({
+        name: '@vue-stripe/vue-stripe',
+        version: '6.0.0-beta.6',
+        peerDependencies: peers
+      })
+    ).toBe('npm install @vue-stripe/vue-stripe@^6.0.0-beta.6 @stripe/stripe-js@^10')
+    expect(
+      installCommand({ name: '@vue-stripe/vue-stripe', version: '6.1.2', peerDependencies: peers })
+    ).toBe('npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10')
+  })
+
+  it('is the line the llms.txt header uses', () => {
+    const config = readFileSync(join(docsDir, '.vitepress/config.ts'), 'utf8')
+    expect(config).toContain('- Install: \\`${installCommand(pkg)}\\`')
+  })
+
+  it('selects the same majors as the installation guide', () => {
+    const [, range = '', stripeJs = ''] =
+      /@vue-stripe\/vue-stripe@(\S+) @stripe\/stripe-js@(\S+)$/.exec(installCommand(pkg)) ?? []
+    const major = `^${/^\d+/.exec(pkg.version)?.[0]}.`
+    expect(range.startsWith(major) || range === major.slice(0, -1)).toBe(true)
+    const guide = readFileSync(join(docsDir, 'guide/installation.md'), 'utf8')
+    const commands = [
+      ...guide.matchAll(
+        /^(?:npm install|pnpm add|yarn add) @vue-stripe\/vue-stripe@(\S+) @stripe\/stripe-js@(\S+)$/gm
+      )
+    ]
+    expect(commands).toHaveLength(3)
+    for (const [line, guideRange = '', guideStripeJs = ''] of commands) {
+      expect(guideRange.startsWith(major) || guideRange === major.slice(0, -1), line).toBe(true)
+      expect(guideStripeJs, line).toBe(stripeJs)
+    }
   })
 })
