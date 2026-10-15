@@ -111,7 +111,7 @@ npx nuxi build
 node --env-file=.env .output/server/index.mjs
 ```
 
-Without them every page that renders `VueStripeProvider` answers 500 "publishableKey or stripeKey is required", and the server routes fail with an empty secret key.
+Without them every page that renders `VueStripeProvider` answers 500 "publishableKey or stripeKey is required", and the server routes fail with an empty secret key. With the plugin from step 3 instead, the pages answer 200, and each element shows Stripe.js' message "Please call Stripe() with your publishable key. You used an empty string.": the plugin gets the `''` default from `nuxt.config.ts`.
 
 ### 3. Provide Stripe
 
