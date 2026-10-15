@@ -154,6 +154,70 @@ describe.each(CASES)('%s', (name, Disclosure, method, slug, options) => {
     consoleError.mockRestore()
   })
 
+  // #774: a rejected `stripe` promise (loadStripe() with Stripe.js blocked) was an uncaught
+  // error plus Vue's "Unhandled error during execution of watcher getter", on a loader for good.
+  describe('a stripe prop promise that rejects (#774)', () => {
+    const rejected = () => Promise.reject(new Error('Failed to load Stripe.js'))
+
+    it('emits @error with { message }, ends loading and stays out of the console', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const wrapper = await mountWithProp(Disclosure, { stripe: rejected(), onError: () => {} })
+      expect(wrapper.emitted('error')).toEqual([[{ message: 'Failed to load Stripe.js' }]])
+      expect(wrapper.find(`.vue-stripe-${slug}-disclosure-error`).text()).toBe(
+        'Failed to load Stripe.js'
+      )
+      expect(wrapper.find(`.vue-stripe-${slug}-disclosure-loader`).exists()).toBe(false)
+      expect((wrapper.vm as unknown as { loading: boolean }).loading).toBe(false)
+      expect(consoleError).not.toHaveBeenCalled()
+      expect(consoleWarn).not.toHaveBeenCalled()
+      consoleError.mockRestore()
+      consoleWarn.mockRestore()
+    })
+
+    it('logs one [Vue Stripe] error when nothing handles it', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      await mountWithProp(Disclosure, { stripe: rejected() })
+      expect(consoleError).toHaveBeenCalledTimes(1)
+      expect(consoleError).toHaveBeenCalledWith(
+        `[Vue Stripe] ${name} error:`,
+        'Failed to load Stripe.js'
+      )
+      expect(consoleWarn).not.toHaveBeenCalled()
+      consoleError.mockRestore()
+      consoleWarn.mockRestore()
+    })
+
+    it('renders the #error slot for a promise set after mount', async () => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const wrapper = mount(Disclosure, {
+        props: { stripe: null },
+        slots: { error: ({ error }: { error: string }) => h('p', `slot: ${error}`) }
+      })
+      await flushPromises()
+      await wrapper.setProps({ stripe: rejected() })
+      await flushPromises()
+      await flushPromises()
+      expect(wrapper.text()).toBe('slot: Failed to load Stripe.js')
+      expect(consoleWarn).not.toHaveBeenCalled()
+      consoleWarn.mockRestore()
+    })
+
+    it('ignores a rejection that arrives after a newer stripe prop', async () => {
+      let rejectFirst!: (err: Error) => void
+      const first = new Promise<never>((_resolve, reject) => (rejectFirst = reject))
+      const stripe = stripeWith(method, () => Promise.resolve({ htmlElement: legalText('Fresh') }))
+      const wrapper = await mountWithProp(Disclosure, { stripe: first })
+      await wrapper.setProps({ stripe })
+      await flushPromises()
+      rejectFirst(new Error('Stale failure'))
+      await flushPromises()
+      expect(wrapper.emitted('error')).toBeUndefined()
+      expect(wrapper.text()).toContain('Fresh')
+    })
+  })
+
   it('ignores a rejection that arrives after a newer request', async () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const pending: Array<{ resolve: (v: unknown) => void; reject: (e: unknown) => void }> = []
@@ -196,6 +260,19 @@ describe.each(CASES)('%s', (name, Disclosure, method, slug, options) => {
     expect(wrapper.findAll('.stripe-disclosure-content')).toHaveLength(1)
     expect(wrapper.text()).toContain('Version 2')
     expect(wrapper.text()).not.toContain('Version 1')
+  })
+
+  it('does not reload for an inline options object on a parent re-render', async () => {
+    const stripe = stripeWith(method, () => Promise.resolve({ htmlElement: legalText('x') }))
+    const tick = ref(0)
+    const host = mount({
+      render: () => h('div', [h(Disclosure, { stripe, options: { ...options } }), `${tick.value}`])
+    })
+    await flushPromises()
+    tick.value++
+    await flushPromises()
+    expect(host.text()).toContain('1')
+    expect(stripe[method]).toHaveBeenCalledTimes(1)
   })
 
   it('ignores a result that arrives after a newer request or after unmount', async () => {

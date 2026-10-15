@@ -134,16 +134,25 @@ export function createStripeDisclosure<TOptions extends object>(
       const fail = (err: DisclosureError) => {
         const message = err.message ?? `${componentName} failed to load`
         error.value = message
+        loading.value = false
         logError(`${componentName} error`, message)
         emit('error', err)
       }
+      const messageOf = (err: unknown) => (err instanceof Error ? err.message : String(err))
 
       const create = async () => {
         const request = ++latest
         const source = stripeSource()
         const options = Object.fromEntries(optionKeys.map((key) => [key, props.options?.[key]]))
+        let resolved: Stripe | null | undefined
+        try {
+          resolved = await source
+        } catch (err) {
+          // A `stripe` promise that rejects: loadStripe() with Stripe.js blocked (#774).
+          if (request === latest) fail({ message: messageOf(err) })
+          return
+        }
         // toRaw: a Stripe instance kept in a deep ref() arrives as a reactive proxy.
-        const resolved = await source
         const stripe = resolved ? toRaw(resolved) : null
         if (request !== latest || !stripe) return
         loading.value = true
@@ -166,13 +175,18 @@ export function createStripeDisclosure<TOptions extends object>(
           }
         } catch (err) {
           if (request !== latest) return
-          fail({ message: err instanceof Error ? err.message : String(err) })
+          fail({ message: messageOf(err) })
         } finally {
           if (request === latest) loading.value = false
         }
       }
 
-      watch([stripeSource, optionsKey], () => void create())
+      const reload = () => void create()
+      // The source sits in an array: Vue attaches its own handler to a Promise a watch getter
+      // returns, and reports its rejection as an unhandled watcher getter error (#774). A
+      // separate watch for the options, so an inline `:options` re-render does not reload.
+      watch(() => [stripeSource()], reload)
+      watch(optionsKey, reload)
       onMounted(() => void create())
       onUnmounted(() => {
         latest++
