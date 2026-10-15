@@ -53,7 +53,7 @@ export default defineConfig({
 
 ## 2. Let vue-demi switch to Vue 2
 
-vue-demi selects the Vue 2.7 build in its `postinstall` script. pnpm 10 and later do not run dependency build scripts by default, so allow vue-demi's script, or switch it by hand:
+vue-demi selects the Vue 2.7 build in its `postinstall` script. npm and yarn run the script without extra configuration. pnpm 10 and later do not run dependency build scripts by default, so allow vue-demi's script:
 
 ::: code-group
 ```json [pnpm 10 (package.json)]
@@ -68,13 +68,19 @@ vue-demi selects the Vue 2.7 build in its `postinstall` script. pnpm 10 and late
 allowBuilds:
   vue-demi: true
 ```
-
-```bash [any package manager]
-npx vue-demi-switch 2.7
-```
 :::
 
-Run `pnpm install` again after changing the pnpm setting. npm and yarn run the script without extra configuration.
+Run `pnpm install` again after changing the pnpm setting. On pnpm 12, `pnpm approve-builds vue-demi` writes the `allowBuilds` entry and runs the script in one step.
+
+If the script still does not run (for example, installs run with `--ignore-scripts`), switch vue-demi by hand. This command works with any package manager: it finds the vue-demi copy that Vue Stripe uses and runs vue-demi's own `vue-demi-switch` script from it.
+
+```bash
+node -e "process.argv[2] = '2.7'; require(require.resolve('vue-demi/bin/vue-demi-switch.js', { paths: [require.resolve('@vue-stripe/vue-stripe/package.json')] }))"
+```
+
+It prints `[vue-demi] Switched for Vue 2.7 (entry: "vue")`. A fresh install (a new clone, CI, or a deleted `node_modules`) puts vue-demi back on its Vue 3 build, so run the command again after every fresh install, or use the pnpm setting above, which is saved with the project.
+
+Do not run `npx vue-demi-switch 2.7`. vue-demi is a dependency of Vue Stripe, not of your app, so the `vue-demi-switch` command is not in your app's `node_modules/.bin`: `npx` offers to download an unrelated package of that name from the npm registry, and `pnpm exec` stops with "Command not found".
 
 ## 3. Import the stylesheet
 
@@ -260,4 +266,4 @@ Leave `strictTemplates` and `checkUnknownProps` off. On Vue 2.7, `vue-tsc` does 
 
 The components render and mount Stripe's iframes as they do on Vue 3. The `Vue 2.7 compatibility` CI job mounts the published bundle on Vue 2.7.16 for every change to the library.
 
-If imports from `vue-demi` fail or components render nothing, vue-demi is still on its Vue 3 build: repeat step 2. More fixes are in [Troubleshoot common problems](/guide/troubleshooting#vue-2-7-components-do-not-render).
+If Vite stops with `"Fragment" is not exported by ".../vue-demi/lib/index.mjs"` (or `No matching export ... for import "Fragment"` from the dev server), or components render nothing, vue-demi is still on its Vue 3 build: repeat step 2. More fixes are in [Troubleshoot common problems](/guide/troubleshooting#vue-2-7-components-do-not-render).
