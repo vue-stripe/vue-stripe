@@ -168,28 +168,69 @@ See [Use Vue Stripe with Laravel and Inertia](/guide/laravel) for the plugin in 
 
 A page with no build step loads the UMD build from unpkg or jsDelivr. Add three `<script>` tags in this order: Vue, vue-demi, then Vue Stripe. The `VueStripe` global holds every export. The UMD build includes the `@stripe/stripe-js` loader, so the page needs no script for it; Stripe.js itself loads from `js.stripe.com` when the provider mounts.
 
-```html
-<link rel="stylesheet" href="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5/dist/vue-stripe.css" />
-<div id="app"></div>
-<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-<script src="https://unpkg.com/vue-demi@0.14/lib/index.iife.js"></script>
-<script src="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5"></script>
-<script>
-  const { VueStripeProvider, VueStripeElements, VueStripeCardElement } = VueStripe
+::: code-group
+```html [Vue 3]
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5/dist/vue-stripe.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/vue-demi@0.14/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5"></script>
+    <script>
+      const { VueStripeProvider, VueStripeElements, VueStripeCardElement } = VueStripe
 
-  Vue.createApp({
-    components: { VueStripeProvider, VueStripeElements, VueStripeCardElement },
-    template: `
-      <VueStripeProvider publishable-key="pk_test_...">
-        <VueStripeElements>
-          <VueStripeCardElement />
-        </VueStripeElements>
-      </VueStripeProvider>`
-  }).mount('#app')
-</script>
+      Vue.createApp({
+        components: { VueStripeProvider, VueStripeElements, VueStripeCardElement },
+        template: `
+          <VueStripeProvider publishable-key="pk_test_...">
+            <VueStripeElements>
+              <VueStripeCardElement />
+            </VueStripeElements>
+          </VueStripeProvider>`
+      }).mount('#app')
+    </script>
+  </body>
+</html>
 ```
 
-On Vue 2.7, load `https://unpkg.com/vue@2.7.16/dist/vue.min.js` instead, and mount with `new Vue({ components: { ... }, template: ... }).$mount('#app')` in place of `Vue.createApp(...).mount('#app')`; vue-demi picks its Vue 2 build from the `Vue` global. Pin exact versions in production, so that a new release cannot change the page.
+```html [Vue 2.7]
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5/dist/vue-stripe.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="https://unpkg.com/vue@2.7.16/dist/vue.min.js"></script>
+    <script src="https://unpkg.com/vue-demi@0.14/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5"></script>
+    <script>
+      const { VueStripeProvider, VueStripeElements, VueStripeCardElement } = VueStripe
+
+      new Vue({
+        components: { VueStripeProvider, VueStripeElements, VueStripeCardElement },
+        template: `
+          <VueStripeProvider publishable-key="pk_test_...">
+            <VueStripeElements>
+              <VueStripeCardElement />
+            </VueStripeElements>
+          </VueStripeProvider>`
+      }).$mount('#app')
+    </script>
+  </body>
+</html>
+```
+:::
+
+The only differences on Vue 2.7 are the Vue script and `new Vue(...).$mount('#app')` in place of `Vue.createApp(...).mount('#app')`; vue-demi picks its Vue 2 build from the `Vue` global. Keep the viewport `<meta>` tag: without it, Stripe.js warns `Elements requires "width=device-width" be set in your page's viewport meta tag`. Pin exact versions in production, so that a new release cannot change the page.
 
 ### App-wide plugin
 
