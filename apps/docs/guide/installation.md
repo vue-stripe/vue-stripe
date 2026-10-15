@@ -225,6 +225,14 @@ Astro renders Vue components as islands through `@astrojs/vue` (`npx astro add v
 
   With an adapter such as `@astrojs/node`, the routes can be Astro endpoints in `src/pages/api/` instead, with `export const prerender = false`. Read the secret key there through `astro:env`, declared with `env: { schema: { STRIPE_SECRET_KEY: envField.string({ context: 'server', access: 'secret' }) } }` in `astro.config.mjs`, and import it with `import { STRIPE_SECRET_KEY } from 'astro:env/server'`. Astro reads that value at runtime, from `.env` in `astro dev` and from the server's environment in production. Don't read it as `import.meta.env.STRIPE_SECRET_KEY`: Astro writes non-public `import.meta.env` values into the server build in `dist/server`. `process.env.STRIPE_SECRET_KEY` also works on the Node adapter in production, but `astro dev` does not put `.env` values in `process.env`.
 
+### Ionic and Capacitor
+
+An Ionic Vue app is a Vite app, so the steps above apply as they are. Inside Capacitor's native web view, one thing differs. It follows from Capacitor's documented behavior and has **not been verified on a device** for these docs:
+
+- Capacitor opens a navigation to another domain in the system browser, not in the web view. That covers hosted Checkout (`session.url`) and the pages of redirect-based payment methods, such as bank redirects. Elements in the page, Embedded Checkout and 3D Secure, which Stripe.js opens in an iframe, stay in the web view.
+- To keep those pages in the web view, list their hosts in `server.allowNavigation` of `capacitor.config.ts`, for example `allowNavigation: ['checkout.stripe.com']`. Capacitor's [configuration reference](https://capacitorjs.com/docs/config) marks this option as not intended for production.
+- The guides build `return_url` from `window.location.origin`. In the web view that origin is the app's own (`https://localhost` on Android, `capacitor://localhost` on iOS), which the system browser cannot open. If a payment finishes in the system browser, send the customer to an `https` page on your own domain that opens the app again, for example through a universal link (iOS) or an app link (Android).
+
 ### Without a bundler
 
 A page with no build step loads the UMD build from unpkg or jsDelivr. Add three `<script>` tags in this order: Vue, vue-demi, then Vue Stripe. The `VueStripe` global holds every export. The UMD build includes the `@stripe/stripe-js` loader, so the page needs no script for it; Stripe.js itself loads from `js.stripe.com` when the provider mounts.
