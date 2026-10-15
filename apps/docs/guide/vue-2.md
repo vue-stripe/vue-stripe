@@ -266,4 +266,4 @@ Leave `strictTemplates` and `checkUnknownProps` off. On Vue 2.7, `vue-tsc` does 
 
 The components render and mount Stripe's iframes as they do on Vue 3. The `Vue 2.7 compatibility` CI job mounts the published bundle on Vue 2.7.16 for every change to the library.
 
-If imports from `vue-demi` fail or components render nothing, vue-demi is still on its Vue 3 build: repeat step 2. More fixes are in [Troubleshoot common problems](/guide/troubleshooting#vue-2-7-components-do-not-render).
+If Vite stops with `"Fragment" is not exported by ".../vue-demi/lib/index.mjs"` (or `No matching export ... for import "Fragment"` from the dev server), or components render nothing, vue-demi is still on its Vue 3 build: repeat step 2. More fixes are in [Troubleshoot common problems](/guide/troubleshooting#vue-2-7-components-do-not-render).

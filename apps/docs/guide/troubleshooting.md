@@ -54,9 +54,20 @@ Use a module resolution that reads package `exports`, such as `"moduleResolution
 
 Up to 6.0.0-beta.2, the declarations fail under `node16` / `nodenext`: TS2834 ("Relative import paths need explicit file extensions") inside `dist/types`, exports such as `useStripe` missing or typed `any`, and TS1479 in a CommonJS file. Update the package, or use `"moduleResolution": "bundler"` on those versions.
 
-### Vue 2.7: components do not render
+### Vue 2.7: "Fragment" is not exported by vue-demi, or components do not render {#vue-2-7-components-do-not-render}
 
-vue-demi is still on its Vue 3 build because its `postinstall` script did not run (pnpm 10+ skips dependency scripts). Allow vue-demi's script in the pnpm settings, or switch vue-demi by hand with the `node -e` command in [Use Vue Stripe on Vue 2.7](/guide/vue-2#_2-let-vue-demi-switch-to-vue-2). `npx vue-demi-switch` does not work: the command is not in your app's `node_modules/.bin`, so `npx` offers an unrelated registry package instead.
+On Vite, the app does not start: the dev server prints the first message and exits during dependency optimization, and `vite build` fails with the second (with npm; with pnpm the paths start with `node_modules/.pnpm/`):
+
+```text
+✘ [ERROR] No matching export in "node_modules/@vue-stripe/vue-stripe/node_modules/vue-demi/lib/index.mjs" for import "Fragment"
+
+    node_modules/@vue-stripe/vue-stripe/dist/es/index.js:1:9:
+
+error during build:
+node_modules/@vue-stripe/vue-stripe/dist/es/index.js (1:9): "Fragment" is not exported by "node_modules/@vue-stripe/vue-stripe/node_modules/vue-demi/lib/index.mjs", imported by "node_modules/@vue-stripe/vue-stripe/dist/es/index.js".
+```
+
+The message names Vue Stripe's `dist/es/index.js`, but the library is fine: vue-demi is still on its Vue 3 build because its `postinstall` script did not run (pnpm 10+ skips dependency scripts). Allow vue-demi's script in the pnpm settings, or switch vue-demi by hand with the `node -e` command in [Use Vue Stripe on Vue 2.7](/guide/vue-2#_2-let-vue-demi-switch-to-vue-2). `npx vue-demi-switch` does not work: the command is not in your app's `node_modules/.bin`, so `npx` offers an unrelated registry package instead.
 
 On Vue 2.7, a warning about the unknown element `stripe-pricing-table` means `Vue.config.ignoredElements` is missing it.
 
