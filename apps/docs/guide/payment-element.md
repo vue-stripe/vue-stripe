@@ -51,10 +51,14 @@ const errorMessage = ref('')
 
 onMounted(async () => {
   try {
-    const response = await fetch('/api/create-payment-intent', { method: 'POST' })
+    const response = await fetch('/api/create-payment-intent', {
+      method: 'POST',
+      signal: AbortSignal.timeout(15000) // give up on a request that never answers
+    })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     clientSecret.value = (await response.json()).clientSecret
   } catch {
+    // An error answer, no answer at all (server down, offline) or no answer in time
     errorMessage.value = 'Could not start the payment. Please reload the page.'
   }
 })
@@ -69,6 +73,8 @@ onMounted(async () => {
   </VueStripeProvider>
 </template>
 ```
+
+The `catch` also covers a request that never answers: after 15 seconds `AbortSignal.timeout()` aborts it and the page shows its message instead of staying empty ([Set a time limit on requests that never answer](/guide/error-handling#_6-set-a-time-limit-on-requests-that-never-answer)).
 
 ## 3. Render the Payment Element and confirm
 

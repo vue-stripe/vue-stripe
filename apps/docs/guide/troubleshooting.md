@@ -36,6 +36,10 @@ The provider's `#error` slot (or its default error text) means Stripe.js could n
 
 A wrong or revoked publishable key does not show here: Stripe.js accepts any key when it loads, and the provider renders its children. See the next section.
 
+### The page stays on its loading state
+
+A request that never answers is not an error, so no `#error` slot or `@error` event reports it: a client-secret route that accepts the connection and never responds keeps the page on its loading state, and a Stripe.js download that a proxy holds open keeps the provider on `#loading`. Give your own requests a time limit with `AbortSignal.timeout()`, and tell the customer when Stripe.js is slow, as [Set a time limit on requests that never answer](/guide/error-handling#_6-set-a-time-limit-on-requests-that-never-answer) shows.
+
 ### Elements show "Invalid API Key provided"
 
 The publishable key is wrong, revoked or malformed. Stripe.js only checks it on the first request, so the provider loads. The Payment, Express Checkout and Link Authentication elements (and the Address Element in a group with a `clientSecret` or `mode`) report the error through `@loaderror` and their `#error` slot. The Card, split card, IBAN and AU BECS elements make no request when they load: they render normally, and the error appears only when the customer pays, in the `{ error }` of the confirm call. [`VueStripeProvider`](/api/components/stripe-provider#events) lists which elements report it at load. Copy the publishable key again from the [API keys page](https://dashboard.stripe.com/apikeys), with no spaces or line breaks, in the mode (test or live) you want.

@@ -42,7 +42,7 @@ The webhook that fulfils the order finds it from `client_reference_id` ([Fulfil 
 
 ## 2. Add the checkout button
 
-Fetch the session URL, then render `VueStripeCheckout`. If your endpoint fails, or the request gets no answer at all (server down, customer offline), show your own message instead of the button; problems with the session itself (expired, already paid) are shown by Stripe on the hosted page.
+Fetch the session URL, then render `VueStripeCheckout`. If your endpoint fails, or the request gets no answer at all (server down, customer offline) or none within 15 seconds ([Set a time limit on requests that never answer](/guide/error-handling#_6-set-a-time-limit-on-requests-that-never-answer)), show your own message instead of the button; problems with the session itself (expired, already paid) are shown by Stripe on the hosted page.
 
 ```vue
 <script setup lang="ts">
@@ -55,11 +55,14 @@ const failed = ref(false)
 
 onMounted(async () => {
   try {
-    const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      signal: AbortSignal.timeout(15000) // give up on a request that never answers
+    })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     sessionUrl.value = (await response.json()).url
   } catch {
-    // An error answer, or no answer at all (server down, offline)
+    // An error answer, no answer at all (server down, offline) or no answer in time
     failed.value = true
   }
 })
@@ -103,11 +106,14 @@ const failed = ref(false)
 const handleCheckout = async () => {
   failed.value = false
   try {
-    const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      signal: AbortSignal.timeout(15000) // give up on a request that never answers
+    })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     redirectToUrl((await response.json()).url)
   } catch {
-    // An error answer, or no answer at all (server down, offline)
+    // An error answer, no answer at all (server down, offline) or no answer in time
     failed.value = true
   }
 }

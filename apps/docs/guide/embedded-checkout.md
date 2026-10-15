@@ -68,7 +68,10 @@ import '@vue-stripe/vue-stripe/style.css' // once, e.g. in main.ts
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 const fetchClientSecret = () =>
-  fetch('/api/embedded-checkout-session', { method: 'POST' })
+  fetch('/api/embedded-checkout-session', {
+    method: 'POST',
+    signal: AbortSignal.timeout(15000) // give up on a request that never answers
+  })
     .then((response) => response.json())
     .then((data) => data.clientSecret)
 </script>
@@ -82,6 +85,8 @@ const fetchClientSecret = () =>
   </VueStripeProvider>
 </template>
 ```
+
+When the request fails, or gets no answer within 15 seconds, the component renders its `#error` slot instead of loading forever ([Set a time limit on requests that never answer](/guide/error-handling#_6-set-a-time-limit-on-requests-that-never-answer)).
 
 That is the whole integration. Stripe handles the payment form, validation, 3D Secure and wallets.
 
@@ -146,7 +151,10 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const done = ref(false)
 
 const fetchClientSecret = () =>
-  fetch('/api/embedded-checkout-session', { method: 'POST' })
+  fetch('/api/embedded-checkout-session', {
+    method: 'POST',
+    signal: AbortSignal.timeout(15000) // give up on a request that never answers
+  })
     .then((response) => response.json())
     .then((data) => data.clientSecret)
 </script>
