@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { DefaultTheme, SiteConfig } from 'vitepress'
 import type { CoverageCategory } from './theme/data/stripe-coverage'
@@ -39,7 +39,8 @@ import { SITE_URL, routeOf, sectionOf, type DocSection } from './seo'
 
 // Build-time Markdown for language models (https://llmstxt.org): /llms.txt indexes every page
 // with its description, /llms-full.txt holds the whole documentation in one file, and each
-// page is also written next to its HTML as Markdown (/guide/testing -> /guide/testing.md).
+// page is also written next to its HTML as Markdown (/guide/testing -> /guide/testing.md),
+// and the dev server answers the same URL with the same text (config.ts).
 // The Markdown is the page source with frontmatter, Vue components and VitePress-only syntax
 // turned into plain Markdown, and site links made absolute.
 
@@ -48,7 +49,6 @@ interface Page {
   route: string
   title: string
   description: string
-  section: DocSection | undefined
   markdown: string
 }
 
@@ -469,33 +469,66 @@ function pageDocument(page: Page): string {
   return `${page.markdown.slice(0, end)}\n\n${intro}${page.markdown.slice(end)}\n`
 }
 
+/**
+ * Reads a page (`guide/testing.md`, relative to the docs' srcDir) into its Markdown. Null when
+ * it has no copy: the 404 page, a stub at a removed page's old URL (`noindex: true`) or a
+ * missing file.
+ */
+function readPage(
+  relativePath: string,
+  srcDir: string,
+  components: Record<string, string> = {}
+): Page | null {
+  const file = join(srcDir, relativePath)
+  if (relativePath === '404.md' || !existsSync(file)) return null
+  const { data, body } = parseFrontmatter(readFileSync(file, 'utf8'))
+  if (relativePath === 'index.md') {
+    return {
+      relativePath,
+      route: '/',
+      title: 'Vue Stripe home page',
+      description: data['description'] ?? '',
+      markdown: homeMarkdown(body, components)
+    }
+  }
+  if (data['noindex'] === 'true') return null
+  const route = routeOf(relativePath)
+  const markdown = toPlainMarkdown(body, components, route)
+  const heading = /^# (.*)$/m.exec(markdown)?.[1]?.replace(/`/g, '')
+  return {
+    relativePath,
+    route,
+    title: data['title'] ?? heading ?? route,
+    description: data['description'] ?? '',
+    markdown
+  }
+}
+
+/**
+ * A page's Markdown copy, the file at its `markdownPathOf(route)` URL, or null for a page
+ * without one (the 404 page, a `noindex` stub, a missing file). The build writes this text and
+ * the dev server serves it, so the two cannot drift.
+ */
+export function pageMarkdownCopy(
+  relativePath: string,
+  srcDir: string,
+  components: Record<string, string> = {}
+): string | null {
+  const page = readPage(relativePath, srcDir, components)
+  return page && pageDocument(page)
+}
+
 const markdownUrl = (route: string) => `${SITE_URL}${markdownPathOf(route)}`
 
 export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): void {
   const sidebarLinks = options.sidebars.flatMap(flattenSidebar)
   const order = new Map(sidebarLinks.map((l, i) => [l.link, i]))
 
+  // Stubs at removed pages' old URLs (`noindex: true`) are left out, like the 404 page.
   const pages: Page[] = siteConfig.pages
-    .filter((p) => p !== 'index.md' && p !== '404.md')
-    .map((relativePath) => ({
-      relativePath,
-      ...parseFrontmatter(readFileSync(join(siteConfig.srcDir, relativePath), 'utf8'))
-    }))
-    // Stubs at removed pages' old URLs (`noindex: true`) are left out, like the 404 page.
-    .filter(({ data }) => data['noindex'] !== 'true')
-    .map(({ relativePath, data, body }) => {
-      const route = routeOf(relativePath)
-      const markdown = toPlainMarkdown(body, options.components, route)
-      const heading = /^# (.*)$/m.exec(markdown)?.[1]?.replace(/`/g, '')
-      return {
-        relativePath,
-        route,
-        title: data['title'] ?? heading ?? route,
-        description: data['description'] ?? '',
-        section: sectionOf(route, options.sections),
-        markdown
-      }
-    })
+    .filter((p) => p !== 'index.md')
+    .map((p) => readPage(p, siteConfig.srcDir, options.components))
+    .filter((p): p is Page => p !== null)
     .sort(
       (a, b) =>
         (order.get(a.route) ?? Infinity) - (order.get(b.route) ?? Infinity) ||
@@ -503,21 +536,15 @@ export function writeLlmsFiles(siteConfig: SiteConfig, options: LlmsOptions): vo
     )
 
   // The home page leads both files, as the overview of everything else.
-  const homeSource = parseFrontmatter(readFileSync(join(siteConfig.srcDir, 'index.md'), 'utf8'))
-  const home: Page = {
-    relativePath: 'index.md',
-    route: '/',
-    title: 'Vue Stripe home page',
-    description: homeSource.data['description'] ?? '',
-    section: undefined,
-    markdown: homeMarkdown(homeSource.body, options.components)
-  }
+  const home = readPage('index.md', siteConfig.srcDir, options.components)
+  if (!home) throw new Error(`[Vue Stripe docs] ${join(siteConfig.srcDir, 'index.md')} is missing`)
 
+  const sectionOfPage = (p: Page) => sectionOf(p.route, options.sections)
   const grouped = options.sections.map((section) => ({
     section,
-    pages: pages.filter((p) => p.section === section)
+    pages: pages.filter((p) => sectionOfPage(p) === section)
   }))
-  const unsorted = pages.filter((p) => !p.section)
+  const unsorted = pages.filter((p) => !sectionOfPage(p))
   if (unsorted.length)
     grouped.push({ section: { name: 'Other', link: '/', match: '' }, pages: unsorted })
 
