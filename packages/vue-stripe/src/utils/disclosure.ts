@@ -128,8 +128,12 @@ export function createStripeDisclosure<TOptions extends object>(
       // Each request gets a number; only the latest one (and only while mounted) may render.
       let latest = 0
       const logError = errorLogger(slots)
+      // Stripe's `{ error }` result and a rejected call are both load failures: each one is
+      // logged unless the app handles it, like every other component (#761).
       const fail = (err: DisclosureError) => {
-        error.value = err.message ?? `${componentName} failed to load`
+        const message = err.message ?? `${componentName} failed to load`
+        error.value = message
+        logError(`${componentName} error`, message)
         emit('error', err)
       }
 
@@ -161,9 +165,7 @@ export function createStripeDisclosure<TOptions extends object>(
           }
         } catch (err) {
           if (request !== latest) return
-          const message = err instanceof Error ? err.message : String(err)
-          logError(`${componentName} error`, message)
-          fail({ message })
+          fail({ message: err instanceof Error ? err.message : String(err) })
         } finally {
           if (request === latest) loading.value = false
         }

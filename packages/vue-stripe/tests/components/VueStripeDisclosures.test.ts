@@ -110,7 +110,8 @@ describe.each(CASES)('%s', (name, Disclosure, method, slug, options) => {
     expect(wrapper.emitted('error')).toBeUndefined()
   })
 
-  it('emits error with the Stripe error and shows its message', async () => {
+  it('emits error with the Stripe error, shows its message and logs it (#761)', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const error = { type: 'invalid_request_error', message: 'Not enabled for this account' }
     const stripe = stripeWith(method, () => Promise.resolve({ error }))
     const wrapper = await mountWithProp(Disclosure, { stripe })
@@ -119,6 +120,12 @@ describe.each(CASES)('%s', (name, Disclosure, method, slug, options) => {
     expect(wrapper.find(`.vue-stripe-${slug}-disclosure-error`).text()).toContain(
       'Not enabled for this account'
     )
+    expect(consoleError).toHaveBeenCalledTimes(1)
+    expect(consoleError).toHaveBeenCalledWith(
+      `[Vue Stripe] ${name} error:`,
+      'Not enabled for this account'
+    )
+    consoleError.mockRestore()
   })
 
   it('reports a rejected call as an error', async () => {
@@ -140,6 +147,10 @@ describe.each(CASES)('%s', (name, Disclosure, method, slug, options) => {
     const silent = stripeWith(method, () => Promise.resolve({ error: { type: 'api_error' } }))
     const second = await mountWithProp(Disclosure, { stripe: silent })
     expect(second.text()).toContain(`${name} failed to load`)
+    expect(consoleError).toHaveBeenLastCalledWith(
+      `[Vue Stripe] ${name} error:`,
+      `${name} failed to load`
+    )
     consoleError.mockRestore()
   })
 

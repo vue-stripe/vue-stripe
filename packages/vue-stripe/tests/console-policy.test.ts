@@ -11,6 +11,8 @@ import VueStripeEmbeddedCheckout from '../src/components/VueStripeEmbeddedChecko
 import VueStripeCheckoutElementsProvider from '../src/components/VueStripeCheckoutElementsProvider'
 import VueStripeCheckoutFormProvider from '../src/components/VueStripeCheckoutFormProvider'
 import VueStripeIssuingDisclosure from '../src/components/VueStripeIssuingDisclosure'
+import VueStripeFinancialAccountDisclosure from '../src/components/VueStripeFinancialAccountDisclosure'
+import VueStripeTreasuryDisclosure from '../src/components/VueStripeTreasuryDisclosure'
 import { flushPromises, makeMockElements, makeMockStripe } from './setup'
 
 // #651: a failure the app handles (an error listener or an #error slot) is not also logged.
@@ -191,7 +193,32 @@ const CASES: Case[] = [
       await settle()
       return wrapper
     }
-  }
+  },
+  // #761: Stripe answers a disclosure request it refuses (an account that is not onboarded)
+  // with `{ error }` rather than a rejection; that is a load failure too.
+  ...(
+    [
+      [
+        'VueStripeFinancialAccountDisclosure',
+        VueStripeFinancialAccountDisclosure,
+        'createFinancialAccountDisclosure'
+      ],
+      ['VueStripeIssuingDisclosure', VueStripeIssuingDisclosure, 'createIssuingDisclosure'],
+      ['VueStripeTreasuryDisclosure', VueStripeTreasuryDisclosure, 'createTreasuryDisclosure']
+    ] as const
+  ).map(([component, Disclosure, method]): Case => ({
+    name: `${component} Stripe error`,
+    label: new RegExp(`^\\[Vue Stripe\\] ${component} error:`),
+    handlings: ['none', 'listener', 'slot'],
+    run: async (handling) => {
+      const error = { type: 'invalid_request_error', message: 'Unrecognized request URL' }
+      const stripe = { ...makeMockStripe(), [method]: vi.fn(() => Promise.resolve({ error })) }
+      const { props, slots } = handled(handling)
+      const wrapper = mount(Disclosure as Component, { props: { stripe, ...props }, slots })
+      await settle()
+      return wrapper
+    }
+  }))
 ]
 
 describe('console output for failures the app handles (#651)', () => {
