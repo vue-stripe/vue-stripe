@@ -70,7 +70,7 @@ defineProps<{ clientSecret: string }>()
 </template>
 ```
 
-`VueStripeElements` shows its `#loading` slot until Stripe.js has loaded, and its `#error` slot if Stripe.js fails to load. `VueStripeCheckoutElementsProvider` and `VueStripePricingTable` also work under the plugin.
+`VueStripeElements` shows its `#loading` slot until Stripe.js has loaded, and its `#error` slot if Stripe.js fails to load. `VueStripeCheckoutElementsProvider` and `VueStripePricingTable` also work under the plugin. `VueStripeEmbeddedCheckout` and the disclosures show their `#error` slot and emit `@error` when Stripe.js fails to load.
 
 ## 3. Use the composables
 

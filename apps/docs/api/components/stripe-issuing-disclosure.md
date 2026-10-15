@@ -67,7 +67,7 @@ A change to any option requests the disclosure again and replaces the text. An i
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `@load` | - | The disclosure is mounted (React `onLoad`) |
-| `@error` | `StripeError \| { message: string }` | Stripe refused the request, or the call failed (React `onError`) |
+| `@error` | `StripeError \| { message: string }` | Stripe refused the request, or the call failed (React `onError`). Also `{ message }` when Stripe.js cannot load: a `stripe` promise that rejects, or the [plugin](/guide/plugin)'s load failing without a `stripe` prop |
 
 ## Slots
 
