@@ -468,6 +468,9 @@ importers:
       size-limit:
         specifier: ^14.2.0
         version: 14.2.0
+      stripe-js-10.0.0:
+        specifier: npm:@stripe/stripe-js@10.0.0
+        version: '@stripe/stripe-js@10.0.0'
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -2324,6 +2327,10 @@ packages:
     engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     peerDependencies:
       size-limit: 14.2.0
+
+  '@stripe/stripe-js@10.0.0':
+    resolution: {integrity: sha512-y5LKFTtnz1ciM+IQfrDfHcpjGlsm5Ao4onaUn4scurI/B6rNhrmV+ScTPDo+3Ges5oF8ol4tBkBAIZyVXVBIXw==}
+    engines: {node: '>=12.16'}
 
   '@stripe/stripe-js@10.1.0':
     resolution: {integrity: sha512-sLRPukMKMxvRVrgV3Za8LM0Yd2azrixQjfaiuzS8Fivlu/Gt7VbBuRiRZJIvfL3XxAw+FdfdmhHSvjAfLG3lkA==}
@@ -7770,6 +7777,8 @@ snapshots:
     dependencies:
       rolldown: 1.2.13
       size-limit: 14.2.0
+
+  '@stripe/stripe-js@10.0.0': {}
 
   '@stripe/stripe-js@10.1.0': {}
 
