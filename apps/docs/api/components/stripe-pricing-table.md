@@ -75,6 +75,8 @@ script-src https://js.stripe.com;
 frame-src https://js.stripe.com;
 ```
 
+The component needs no `style-src` entry: until the script has loaded it hides `<stripe-pricing-table>` with the `hidden` attribute, not an inline style, so server-rendered pages pass a nonce-based policy without `'unsafe-inline'`.
+
 ## Events
 
 | Event | Payload | Description |

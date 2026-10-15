@@ -411,6 +411,80 @@ describe('VueStripePricingTable', () => {
   })
 
   // The usual cause: the environment variable holding the key did not reach the build.
+  // #784: a server-rendered style="display:none;" broke a CSP without 'unsafe-inline'.
+  describe('hides the custom element without an inline style (#784)', () => {
+    const scriptOutcome = (outcome: 'onload' | 'onerror') => {
+      const settle: Array<() => void> = []
+      const originalCreateElement = document.createElement.bind(document)
+      vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+        const element = originalCreateElement(tagName)
+        if (tagName === 'script') settle.push(() => element[outcome]?.({} as Event))
+        return element
+      })
+      return () => settle.forEach((fn) => fn())
+    }
+    const mountTable = () =>
+      mount(VueStripePricingTable, {
+        props: { pricingTableId: 'prctbl_test_123', onError: () => {} },
+        global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] }
+      })
+
+    afterEach(() => vi.restoreAllMocks())
+
+    it('renders `hidden`, not a style attribute, on the server', async () => {
+      const app = createSSRApp({
+        render: () => h(VueStripePricingTable, { pricingTableId: 'prctbl_test_123' })
+      })
+      app.use(createVueStripe({ publishableKey: 'pk_test_123' }))
+      const html = await renderToString(app)
+      expect(html).toMatch(/<stripe-pricing-table [^>]*\bhidden\b/)
+      expect(html).not.toContain('style=')
+
+      // Hydrates without a mismatch, still hidden while the script loads.
+      scriptOutcome('onload')
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const container = document.createElement('div')
+      container.innerHTML = html
+      const client = createSSRApp({
+        render: () => h(VueStripePricingTable, { pricingTableId: 'prctbl_test_123' })
+      })
+      client.use(createVueStripe({ publishableKey: 'pk_test_123' }))
+      client.mount(container)
+      await flushPromises()
+      expect(container.querySelector<HTMLElement>('stripe-pricing-table')!.hidden).toBe(true)
+      expect(consoleWarn).not.toHaveBeenCalled()
+      expect(consoleError).not.toHaveBeenCalled()
+      client.unmount()
+    })
+
+    it('is hidden while the script loads and shown once it has loaded', async () => {
+      const load = scriptOutcome('onload')
+      const wrapper = mountTable()
+      await flushPromises()
+      const table = () => wrapper.find('stripe-pricing-table').element as HTMLElement
+      expect(table().hidden).toBe(true)
+      expect(table().hasAttribute('style')).toBe(false)
+      load()
+      await flushPromises()
+      expect(table().hidden).toBe(false)
+      expect(table().hasAttribute('hidden')).toBe(false)
+      expect(table().hasAttribute('style')).toBe(false)
+    })
+
+    it('stays hidden after a script load error', async () => {
+      const fail = scriptOutcome('onerror')
+      const wrapper = mountTable()
+      await flushPromises()
+      fail()
+      await flushPromises()
+      expect(wrapper.find('.vue-stripe-pricing-table-error').exists()).toBe(true)
+      const table = wrapper.find('stripe-pricing-table').element as HTMLElement
+      expect(table.hidden).toBe(true)
+      expect(table.hasAttribute('style')).toBe(false)
+    })
+  })
+
   describe('with createVueStripe() and an empty publishable key (#728)', () => {
     const scripts = () => document.querySelectorAll('script[src*="pricing-table.js"]')
     const mountWithPlugin = (publishableKey: string | undefined, options = {}) =>

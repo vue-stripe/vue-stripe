@@ -143,6 +143,30 @@ it('renders <stripe-pricing-table> with its attributes', async () => {
   script.mockRestore()
 })
 
+it('hides <stripe-pricing-table> with `hidden`, not an inline style, until the script loads (#784)', async () => {
+  let load!: () => void
+  const script = vi.spyOn(document.head, 'appendChild').mockImplementation((node) => {
+    load = () => (node as HTMLScriptElement).onload?.(new Event('load'))
+    return node
+  })
+  const wrapper = mount({
+    render(h: CreateElement) {
+      return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+        h(VueStripePricingTable as never, { props: { pricingTableId: 'prctbl_784' } })
+      ])
+    }
+  })
+  await settle()
+  const table = () => wrapper.find('stripe-pricing-table').element as HTMLElement
+  expect(table().hidden).toBe(true)
+  expect(table().hasAttribute('style')).toBe(false)
+  load()
+  await settle()
+  expect(table().hasAttribute('hidden')).toBe(false)
+  expect(table().hasAttribute('style')).toBe(false)
+  script.mockRestore()
+})
+
 it('runs a method confirmer composable under Vue 2', async () => {
   const result = { paymentIntent: { id: 'pi_123', status: 'succeeded' } }
   stripe.confirmCardPayment.mockResolvedValueOnce(result)
