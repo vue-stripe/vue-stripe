@@ -45,7 +45,7 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </template>
 ```
 
-`amount` is in the smallest currency unit (cents for USD), so `12000` is $120.00. `currency` is an upper-case ISO code. `paymentMethodTypes` is optional: it limits the message to the providers you list. Without it, Stripe.js shows every provider that applies to the amount, currency and country. When none applies (for example for $0.50), the element renders an empty message and Stripe.js logs "No "Buy Now Pay Later" options are displayed because no relevant options were found."
+`amount` is in the smallest currency unit (cents for USD), so `12000` is $120.00 ([other currencies](/api/components/stripe-elements#amounts-and-currencies)). `currency` is an upper-case ISO code. `paymentMethodTypes` is optional: it limits the message to the providers you list. Without it, Stripe.js shows every provider that applies to the amount, currency and country. When none applies (for example for $0.50), the element renders an empty message and Stripe.js logs "No "Buy Now Pay Later" options are displayed because no relevant options were found."
 
 ## 2. Keep the amount in sync with the price
 

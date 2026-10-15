@@ -16,6 +16,8 @@ import {
 import {
   coverageMarkdown,
   homeMarkdown,
+  installCommand,
+  markdownLink,
   pageMarkdownCopy,
   parseFrontmatter,
   toPlainMarkdown,
@@ -319,8 +321,21 @@ describe('Markdown copies', () => {
   it('a same-page link names its page, so it still works in llms-full.txt', () => {
     const body = 'See [Events](#events) and [Slots](/api/x#slots).\n\n```md\n[Kept](#kept)\n```'
     expect(toPlainMarkdown(body, {}, '/api/components/stripe-provider')).toBe(
-      `See [Events](${SITE_URL}/api/components/stripe-provider#events) and [Slots](${SITE_URL}/api/x#slots).\n\n\`\`\`md\n[Kept](#kept)\n\`\`\``
+      `See [Events](${SITE_URL}/api/components/stripe-provider.md#events) and [Slots](${SITE_URL}/api/x.md#slots).\n\n\`\`\`md\n[Kept](#kept)\n\`\`\``
     )
+  })
+
+  // A Markdown reader that follows a link stays on Markdown; "URL plus .md" is a 404 for a
+  // section overview (/api/.md), so the copies name its index.md (#767).
+  it('links a site page by its Markdown copy, and keeps files and other sites as they are', () => {
+    expect(markdownLink('/guide/testing')).toBe(`${SITE_URL}/guide/testing.md`)
+    expect(markdownLink('/api/#compatibility')).toBe(`${SITE_URL}/api/index.md#compatibility`)
+    expect(markdownLink('/api/composables/confirm/#return-value')).toBe(
+      `${SITE_URL}/api/composables/confirm/index.md#return-value`
+    )
+    expect(markdownLink('/')).toBe(`${SITE_URL}/index.md`)
+    expect(markdownLink('/images/logo.png')).toBe(`${SITE_URL}/images/logo.png`)
+    expect(markdownLink('https://docs.stripe.com/js')).toBe('https://docs.stripe.com/js')
   })
 
   it('no page keeps a bare #fragment link in its Markdown copy', () => {
@@ -411,6 +426,48 @@ describe('Copy for LLMs', () => {
     }
   })
 
+  it('every site link in the copies, llms.txt and llms-full.txt opens a written file', () => {
+    const outDir = mkdtempSync(join(tmpdir(), 'vue-stripe-llms-'))
+    try {
+      const siteConfig = { srcDir: docsDir, outDir, pages: pages.map((p) => p.path) }
+      writeLlmsFiles(siteConfig as unknown as Parameters<typeof writeLlmsFiles>[0], {
+        sections: [],
+        sidebars: [],
+        header: '> Header',
+        components: { StripeCoverage: coverageMarkdown(coverage) }
+      })
+      const written = (dir: string): string[] =>
+        readdirSync(dir).flatMap((name) => {
+          const path = join(dir, name)
+          return statSync(path).isDirectory() ? written(path) : [path]
+        })
+      const files = written(outDir)
+      let links = 0
+      const problems = files.flatMap((file) => {
+        const prose = readFileSync(file, 'utf8').replace(/^```[\s\S]*?^```/gm, '')
+        return [...prose.matchAll(/\]\((https:\/\/vuestripe\.com[^)\s]*)\)/g)].flatMap(
+          ([, href]) => {
+            links++
+            const path = new URL(href!).pathname
+            // A page by its copy; anything else is a file the site serves from public/.
+            const target = path.endsWith('.md') ? join(outDir, path) : join(docsDir, 'public', path)
+            return existsSync(target) ? [] : [`${relative(outDir, file)}: ${href}`]
+          }
+        )
+      })
+      expect(problems, problems.join('\n')).toEqual([])
+      expect(links).toBeGreaterThan(1000)
+      const pageLinks = files.flatMap((file) =>
+        [...readFileSync(file, 'utf8').matchAll(/\]\((https:\/\/vuestripe\.com[^)\s]*)\)/g)]
+          .map(([, href]) => new URL(href!).pathname)
+          .filter((path) => !/\.\w+$/.test(path))
+      )
+      expect(pageLinks, 'site links to an HTML page').toEqual([])
+    } finally {
+      rmSync(outDir, { recursive: true, force: true })
+    }
+  })
+
   it('names a section overview by its index.md', () => {
     expect(markdownPathOf('/guide/testing')).toBe('/guide/testing.md')
     expect(markdownPathOf('/guide/')).toBe('/guide/index.md')
@@ -470,5 +527,50 @@ describe('llms-full coverage table', () => {
       .filter((item) => item.note && !markdown.includes(item.note))
       .map((item) => `${item.name} (${item.status}): ${item.note}`)
     expect(missing, missing.join('\n')).toEqual([])
+  })
+})
+
+// npm's `latest` stays on the previous major while this one is a prerelease, so an install
+// line without ranges installs Vue Stripe 5 and its style.css import fails (#763).
+describe('llms.txt install line', () => {
+  const pkg = JSON.parse(
+    readFileSync(join(docsDir, '../../packages/vue-stripe/package.json'), 'utf8')
+  ) as { name: string; version: string; peerDependencies: Record<string, string> }
+  const peers = { '@stripe/stripe-js': '^10.0.0' }
+
+  it('pins a prerelease to a range that starts at it, and a release to its major', () => {
+    expect(
+      installCommand({
+        name: '@vue-stripe/vue-stripe',
+        version: '6.0.0-beta.6',
+        peerDependencies: peers
+      })
+    ).toBe('npm install @vue-stripe/vue-stripe@^6.0.0-beta.6 @stripe/stripe-js@^10')
+    expect(
+      installCommand({ name: '@vue-stripe/vue-stripe', version: '6.1.2', peerDependencies: peers })
+    ).toBe('npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10')
+  })
+
+  it('is the line the llms.txt header uses', () => {
+    const config = readFileSync(join(docsDir, '.vitepress/config.ts'), 'utf8')
+    expect(config).toContain('- Install: \\`${installCommand(pkg)}\\`')
+  })
+
+  it('selects the same majors as the installation guide', () => {
+    const [, range = '', stripeJs = ''] =
+      /@vue-stripe\/vue-stripe@(\S+) @stripe\/stripe-js@(\S+)$/.exec(installCommand(pkg)) ?? []
+    const major = `^${/^\d+/.exec(pkg.version)?.[0]}.`
+    expect(range.startsWith(major) || range === major.slice(0, -1)).toBe(true)
+    const guide = readFileSync(join(docsDir, 'guide/installation.md'), 'utf8')
+    const commands = [
+      ...guide.matchAll(
+        /^(?:npm install|pnpm add|yarn add) @vue-stripe\/vue-stripe@(\S+) @stripe\/stripe-js@(\S+)$/gm
+      )
+    ]
+    expect(commands).toHaveLength(3)
+    for (const [line, guideRange = '', guideStripeJs = ''] of commands) {
+      expect(guideRange.startsWith(major) || guideRange === major.slice(0, -1), line).toBe(true)
+      expect(guideStripeJs, line).toBe(stripeJs)
+    }
   })
 })

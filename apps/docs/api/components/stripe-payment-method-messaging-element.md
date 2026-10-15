@@ -52,7 +52,7 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `amount` | `number` | Required. Price in the smallest currency unit |
+| `amount` | `number` | Required. Price in the smallest currency unit (cents for USD; see [Amounts and currencies](/api/components/stripe-elements#amounts-and-currencies)) |
 | `currency` | `'USD' \| 'EUR' \| 'GBP' \| ...` | Required. Upper-case ISO currency code: `AUD`, `CAD`, `CHF`, `CZK`, `DKK`, `EUR`, `GBP`, `NOK`, `NZD`, `PLN`, `RON`, `SEK` or `USD`. Stripe.js 10 accepts `RON`, but the `@stripe/stripe-js` 10.1.0 types leave it out, so TypeScript rejects it |
 | `countryCode` | `'US' \| 'GB' \| 'DE' \| ...` | The customer's country. Decides which providers can be offered. Optional, but pass it: without it Stripe uses the visitor's location, and for a country it doesn't support the element fails to load (`@loaderror`) |
 | `paymentMethodTypes` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | Optional. Limits the message to these providers. Without it, Stripe.js shows every provider that applies to the amount, currency and country |
@@ -71,7 +71,7 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 | `@ready` | `StripePaymentMethodMessagingElement` | Emitted when the element is mounted and ready |
 | `@loaderror` | `{ elementType: 'paymentMethodMessaging', error }` | Emitted when the messaging fails to load, for example without `countryCode` for a visitor in a country Stripe doesn't support, or when the element can't be created. Ends the loading state and shows the `#error` slot |
 
-The element is display-only, so it has no `@change`, `@focus`, `@blur` or `@escape`. Stripe.js 10's types declare only `ready` for this element, but Stripe.js emits `loaderror` at runtime and then destroys the element itself; the component listens for it, and unmounts cleanly afterwards. Stripe's load error carries no message, so `error` reads "Element failed to load".
+The element is display-only, so it has no `@change`, `@focus`, `@blur` or `@escape`. Stripe.js 10's types declare only `ready` for this element, but Stripe.js emits `loaderror` at runtime and then destroys the element itself; the component listens for it, and unmounts cleanly afterwards. Stripe's load error carries no message, so `error` reads "Element failed to load". The exception is a wrong publishable key in a group with a `clientSecret` or `mode`: there `error` is Stripe's "Invalid API Key provided" message ([`VueStripeProvider`](/api/components/stripe-provider#events)).
 
 ## Slots
 

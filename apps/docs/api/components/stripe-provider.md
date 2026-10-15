@@ -39,7 +39,7 @@ const onError = (error: Error) => console.error('Stripe.js failed to load', erro
 | `stripeKey` | `string` | Yes* | Alias for `publishableKey` (backwards compatibility) |
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect |
 | `apiVersion` | `string` | No | Deprecated and ignored: not passed to `loadStripe()`, because Stripe.js Endive refuses it. See [API version](#api-version) |
-| `locale` | `string` | No | Locale for Stripe.js (e.g., 'en', 'es', 'fr') |
+| `locale` | `string` | No | Locale for Stripe.js (e.g., 'en', 'es', 'fr'). Embedded and hosted Checkout ignore it; see [Locale](#locale) |
 | `betas` | `string[]` | No | Stripe beta flags, forwarded to `loadStripe()` (e.g. `elements_link_signup_beta_1` for the [Link Signup Element](/api/components/stripe-link-signup-element)) |
 | `developerTools` | `StripeConstructorOptions['developerTools']` | No | Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }`, forwarded to `loadStripe()` |
 | `advancedFraudSignals` | `boolean` | No | Default `true`. `false` loads Stripe.js without advanced fraud signals. See [Advanced fraud signals](#advanced-fraud-signals) |
@@ -107,6 +107,22 @@ Each Stripe.js release train sends its requests with that train's API version: S
 
 The `apiVersion` prop and the `apiVersion` key in `options` are deprecated and kept only so existing code compiles. The provider drops them before it calls `loadStripe()` and logs one `[Vue Stripe]` warning per page that the value is ignored. Remove them, and keep your server's API version on the same train instead.
 
+### Locale
+
+`locale` sets the language of what Stripe.js renders under the provider: the elements in a `VueStripeElements` group (which also has its own [`locale`](/api/components/stripe-elements#props) prop), Custom Checkout's elements and the Checkout Form. Embedded Checkout shows Stripe's Checkout page, which takes the language of the Checkout Session instead, like hosted Checkout. Set it on your server with `locale` in `stripe.checkout.sessions.create()` (left out or `'auto'`, it follows the browser's language):
+
+| Integration | Provider `locale` | Checkout Session `locale` |
+|-------------|-------------------|---------------------------|
+| Elements (`VueStripeElements`) | Yes | No session |
+| Hosted Checkout (`VueStripeCheckout`, `useStripeCheckout`) | No, Stripe.js is not loaded | Yes |
+| Embedded Checkout (`VueStripeEmbeddedCheckout`) | No, the page stays in the session's language | Yes |
+| Custom Checkout (`VueStripeCheckoutElementsProvider`) | Yes | Yes |
+| Checkout Form (`VueStripeCheckoutFormProvider`, beta) | Yes | Yes |
+
+The Checkout Form is a Stripe beta, and its localization has changed between Stripe.js releases (an earlier one rendered it in English whatever the locale), so check its language on your account.
+
+Checkout Sessions accept fewer locales than Stripe.js, and no right-to-left one: a session created with `locale: 'ar'` or `'he'` fails with "Invalid locale: must be one of auto, bg, cs, ...". Hosted and Embedded Checkout cannot be shown in Arabic or Hebrew. For a right-to-left store, use the Payment Element, Custom Checkout or the Checkout Form with the provider's `locale`. Stripe lists the locales in [Stripe.js supported locales](https://docs.stripe.com/js/appendix/supported_locales) and the [Checkout Session `locale` parameter](https://docs.stripe.com/api/checkout/sessions/create#create_checkout_session-locale).
+
 ### Advanced Fraud Signals
 
 `:advanced-fraud-signals="false"` loads Stripe.js without [advanced fraud detection signals](https://docs.stripe.com/disputes/prevention/advanced-fraud-detection). Turning them off gives Radar less information; [How Stripe.js is loaded](/guide/stripe-js-loading#advanced-fraud-signals) explains the trade-off.
@@ -144,8 +160,10 @@ export const STRIPE_JS_TRAIN: ReleaseTrain = 'endive'
 
 Stripe.js does not validate a publishable key when it loads: with a wrong, revoked or malformed key the provider emits `@load` and renders its default slot. The key fails on the first request to Stripe, and not every element makes one when it mounts:
 
-- The Payment, Express Checkout and Link Authentication elements, and the Address Element in a group with a `clientSecret` or `mode`, request an Elements session when they mount. They emit `@loaderror` and show `Invalid API Key provided` in their `#error` slot. The Payment Method Messaging Element also emits `@loaderror`, but without Stripe's message: its `error` reads "Element failed to load".
-- The Card Element, the split card elements (number, expiry, CVC), the IBAN and AU BECS elements, and the Address Element in a group without a `clientSecret` or `mode` make no request. They emit `@ready`, accept input and show no error. The key fails only when the customer pays: `confirmCardPayment()` (or another composable call) resolves `{ error }` with `Invalid API Key provided`, and sets the composable's `error`.
+- The Payment, Express Checkout and Link Authentication elements, and the Address and Payment Method Messaging elements in a group with a `clientSecret` or `mode`, request an Elements session when they mount. They emit `@loaderror` and show `Invalid API Key provided` in their `#error` slot. In a group with neither, the Payment Method Messaging Element also emits `@loaderror`, but without Stripe's message: its `error` reads "Element failed to load".
+- The Card Element, the split card elements (number, expiry, CVC), and the IBAN and AU BECS elements make no request. They emit `@ready`, accept input and show no error. The key fails only when the customer pays: `confirmCardPayment()` (or another composable call) resolves `{ error }` with `Invalid API Key provided`, and sets the composable's `error`.
+
+The Address Element in a group without a `clientSecret` or `mode` errors with any key, valid or not: it emits `@ready`, and Stripe.js throws an uncaught "Unable to select session" from its iframe on every load. Give the group a `clientSecret` or a `mode` (see [`VueStripeAddressElement`](/api/components/stripe-address-element)).
 
 Only a secret key (`sk_...`) fails the load. A load failure is not cached, so re-mounting the provider tries again. A failure tied to one provider's arguments, such as a secret key, reaches only that provider; other providers mounting at the same time load normally. A script that fails to load fails every provider waiting for it.
 
