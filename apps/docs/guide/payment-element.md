@@ -119,9 +119,39 @@ const handleSubmit = async () => {
 </template>
 ```
 
-The error message stays until the customer clicks Pay again; `handleChange` only tracks whether the form is complete, because Stripe sends a `change` event right after a decline. The customer is sent to `return_url` after a successful payment. Read the result there from the `payment_intent_client_secret` query parameter with `retrievePaymentIntent()` from the same composable.
+The error message stays until the customer clicks Pay again; `handleChange` only tracks whether the form is complete, because Stripe sends a `change` event right after a decline. The customer is sent to `return_url` after a successful payment; step 4 builds that page.
 
 When the element loads, Stripe.js logs "Your Elements integration is using an older API" in the browser console. That is expected for a Payment Element on a PaymentIntent, and needs no change; [Troubleshoot common problems](/guide/troubleshooting#the-console-says-your-elements-integration-is-using-an-older-api) explains it.
+
+## 4. Show the result on the return page
+
+With `redirect: 'always'`, every successful payment lands on `/payment-complete`, with `payment_intent_client_secret` and `redirect_status` in the query string. Read the result there with `CompletePage.vue` from [Check the result on the return page](/guide/error-handling#_4-check-the-result-on-the-return-page): it calls `retrievePaymentIntent()` from `usePaymentIntent()` and shows the PaymentIntent's status.
+
+The return page is a route of its own, so the provider in `PaymentPage.vue` is not above it. Give it its own `VueStripeProvider`; without one, `usePaymentIntent()` throws a `VueStripeProviderError` and the page stays blank:
+
+```vue
+<!-- PaymentComplete.vue: the page at /payment-complete -->
+<script setup lang="ts">
+import { VueStripeProvider } from '@vue-stripe/vue-stripe'
+import CompletePage from './CompletePage.vue'
+
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+</script>
+
+<template>
+  <VueStripeProvider :publishable-key="publishableKey">
+    <CompletePage />
+  </VueStripeProvider>
+</template>
+```
+
+Serve it at the path of `return_url`, for example with vue-router:
+
+```ts
+{ path: '/payment-complete', component: () => import('./PaymentComplete.vue') }
+```
+
+With the [plugin](/guide/plugin), render `CompletePage.vue` directly: the plugin gives it Stripe without a provider. The page only informs the customer; fulfil the order from a [webhook](/guide/webhooks).
 
 ## Stay on the page when no redirect is needed
 

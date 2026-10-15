@@ -234,7 +234,7 @@ onMounted(async () => {
 </template>
 ```
 
-For a SetupIntent, read `setup_intent_client_secret` and call `retrieveSetupIntent()` from `useSetupIntent`. Use this page to inform the customer only; fulfil orders from [webhooks](/guide/webhooks), because a payment can still fail after `processing` and a customer can close the tab before the redirect.
+The return page is a route of its own, so it needs a `VueStripeProvider` of its own (or the [plugin](/guide/plugin)): [Show the result on the return page](/guide/payment-element#_4-show-the-result-on-the-return-page) shows the wrapper. For a SetupIntent, read `setup_intent_client_secret` and call `retrieveSetupIntent()` from `useSetupIntent`. Use this page to inform the customer only; fulfil orders from [webhooks](/guide/webhooks), because a payment can still fail after `processing` and a customer can close the tab before the redirect.
 
 ## 5. Handle Checkout errors
 
