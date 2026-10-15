@@ -6,7 +6,7 @@ description: "Install @vue-stripe/vue-stripe and @stripe/stripe-js, import the s
 
 Add Vue Stripe to an existing Vue app, load its stylesheet, configure your publishable key and check that Stripe.js loads.
 
-Requirements: Vue 3 or Vue 2.7, `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive), and TypeScript 5.0 or later if the app uses TypeScript. Vue 2.6 is not supported; the full list is under [Compatibility](/api/#compatibility). Upgrading from v5? See [Upgrade from v5 to v6](/guide/migration-v6).
+Requirements: Vue 3 or Vue 2.7, `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive), TypeScript 5.0 or later if the app uses TypeScript, and a browser that [Stripe.js supports](https://docs.stripe.com/js/appendix/supported_browsers). Vue 2.6 is not supported; the full list, with the browsers these docs were tested in, is under [Compatibility](/api/#compatibility). Upgrading from v5? See [Upgrade from v5 to v6](/guide/migration-v6).
 
 ## 1. Install the package
 
@@ -54,10 +54,12 @@ Store the publishable key in an environment variable that your build tool expose
 |------------|------|----------|--------------|
 | Vite | `.env.local` | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
 | Vue CLI / webpack | `.env.local` | `VUE_APP_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` |
+| Rsbuild | `.env.local` | `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY` |
 | Quasar in Vite mode (`@quasar/app-vite`) | `.env` | `QCLI_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY` |
-| Quasar in webpack mode | `.env` plus `build.env` in `quasar.config.js` | `STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.STRIPE_PUBLISHABLE_KEY` |
+| Quasar in webpack mode (`@quasar/app-webpack` 4) | `.env` | `STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.STRIPE_PUBLISHABLE_KEY` |
 | Laravel with Vite | `.env` (not `.env.local`) | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
 | Nuxt | `.env` plus `runtimeConfig.public` in `nuxt.config.ts` | `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `useRuntimeConfig().public.stripePublishableKey` |
+| Astro | `.env` | `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY` |
 
 For Nuxt, declare the key in `nuxt.config.ts`; Nuxt fills it from `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` when the server starts, so the production server needs the variable in its environment, as [Configure Nuxt](/guide/ssr#_2-configure-nuxt) shows:
 
@@ -72,20 +74,12 @@ export default defineNuxtConfig({
 })
 ```
 
-For Quasar in webpack mode, forward the variable in `quasar.config.js`:
-
-```js
-build: {
-  env: {
-    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY
-  }
-}
-```
+Quasar in webpack mode loads `.env` itself and passes its variables to the browser, so the key needs no entry in `quasar.config`. Don't forward it in `build: { env: { ... } }` as well: the `.env` values are not in `process.env` while `quasar.config` runs, so `STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY` replaces the key with `undefined`, and every element shows "Expected publishable key to be of type string, got type undefined instead." Use `build.env` only when the key comes from the shell or the CI environment instead of `.env`. [Webpack mode](/guide/quasar#webpack-mode) in the Quasar guide lists the other changes.
 
 Quasar in Vite mode passes only `QCLI_` variables to the browser, so a `VITE_` variable is `undefined` there. In Laravel, keep `STRIPE_SECRET_KEY` and `VITE_STRIPE_PUBLISHABLE_KEY` in the same `.env`, and don't create a `.env.local`: with `APP_ENV=local`, Laravel loads it instead of `.env`, and every request fails. [Use Vue Stripe with Quasar](/guide/quasar) and [Use Vue Stripe with Laravel and Inertia](/guide/laravel) cover the rest of those setups.
 
 ::: tip Samples use Vite's variables
-Every sample in these docs reads the key as `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, write `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY`, and in Nuxt `useRuntimeConfig().public.stripePublishableKey`. In Nuxt the `VITE_` variable is `undefined` with the `.env` from the table, so a pasted sample with `VueStripeProvider` answers 500 "publishableKey or stripeKey is required". Webpack compiles `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` to `undefined` without a warning, so a pasted sample builds and then fails in the browser.
+Every sample in these docs reads the key as `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, write `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY`, in Rsbuild and Astro `import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY`, and in Nuxt `useRuntimeConfig().public.stripePublishableKey`. In Nuxt the `VITE_` variable is `undefined` with the `.env` from the table, so a pasted sample with `VueStripeProvider` answers 500 "publishableKey or stripeKey is required". Webpack compiles `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` to `undefined` without a warning, so a pasted sample builds and then fails in the browser. Rsbuild and Astro pass only `PUBLIC_` variables to the browser: in Rsbuild a `VITE_` key is `undefined` and the page stays empty, and in Astro it is defined while the page renders on the server but `undefined` in the browser, so the island stays on its loading state.
 :::
 
 ## 4. Check that Stripe.js loads
@@ -98,6 +92,7 @@ Render a `VueStripeProvider` with your key. It loads Stripe.js, shows its `#load
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
 // Vue CLI: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
+// Rsbuild, Astro: import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY
 // Nuxt: useRuntimeConfig().public.stripePublishableKey
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </script>
@@ -159,7 +154,9 @@ module.exports = {
 
 Vite restarts by itself when its config changes; restart `vue-cli-service serve` yourself. On Vue 2.7, use the "Vite, Vue 2.7" tab: a Vue 2.7 app compiles its components with `@vitejs/plugin-vue2`, and the Vue 3 config stops with `ERR_MODULE_NOT_FOUND` there. `@vitejs/plugin-vue2` supports Vite 3 to 7, so keep the app on Vite 7 ([Use Vue Stripe on Vue 2.7](/guide/vue-2#_1-install-the-packages)). Nuxt server routes (`server/api/`) and other setups that serve the app and its API from one origin need nothing here. In production, serve the API on the app's origin too, for example behind the same reverse proxy, or call it by its full URL and allow the app's origin with CORS on the server.
 
-- **Quasar** has no `vite.config.ts`: set the proxy in `devServer.proxy` of `quasar.config.ts`, as in [Use Vue Stripe with Quasar](/guide/quasar#_5-send-api-requests-to-your-server-in-development).
+- **Quasar** has no `vite.config.ts`: set the proxy in `devServer.proxy` of `quasar.config.ts`, as in [Use Vue Stripe with Quasar](/guide/quasar#_5-send-api-requests-to-your-server-in-development). In webpack mode the proxy is an array; see [Webpack mode](/guide/quasar#webpack-mode).
+- **Rsbuild**: `server.proxy` in `rsbuild.config.ts` takes the same object as Vite's, `{ '/api': 'http://localhost:3000' }`.
+- **Astro** has no `vite.config.ts` either: put the proxy under `vite.server.proxy` in `astro.config.mjs`, as in [Astro](#astro) below.
 - **Laravel** serves the app and its API from one origin, so it needs no proxy. But a `fetch` POST to a route in `routes/web.php` fails with 419 (CSRF): put the routes in `routes/api.php`, or send the CSRF token, as in [Use Vue Stripe with Laravel and Inertia](/guide/laravel#_4-create-the-api-routes).
 
 ## Other setups
@@ -179,6 +176,62 @@ Quasar apps, in SPA and SSR mode, need a few changes: see [Use Vue Stripe with Q
 ### Laravel and Inertia
 
 See [Use Vue Stripe with Laravel and Inertia](/guide/laravel) for the plugin in `createInertiaApp`, the stripe-php routes and webhooks.
+
+### Astro
+
+Astro renders Vue components as islands through `@astrojs/vue` (`npx astro add vue`). Four things differ from a Vite app:
+
+- **The key.** Astro passes only `PUBLIC_` variables to the browser, so use `PUBLIC_STRIPE_PUBLISHABLE_KEY` from the table in step 3.
+- **One island per Stripe tree.** Each island is a separate Vue app, and provide/inject does not cross from one island to another. Put `VueStripeProvider`, `VueStripeElements` and the form in one Vue component, and hydrate that component with `client:load`, `client:visible`, `client:idle` or `client:only="vue"`. Vue Stripe components written as nested islands in an `.astro` file compile, then throw "VueStripeElements must be used within a VueStripeProvider component or an app using createVueStripe()".
+
+  ```astro
+  ---
+  // src/pages/pay.astro
+  import PaymentCheckout from '../components/PaymentCheckout.vue'
+  ---
+
+  <PaymentCheckout client:load />
+  ```
+
+- **The plugin and the stylesheet.** Astro has no `main.ts`. `@astrojs/vue` runs the file named in its `appEntrypoint` option for every island; install the [plugin](/guide/plugin) and import the stylesheet there, and every island shares one Stripe instance. Without the plugin, keep only the stylesheet import there and put a `VueStripeProvider` in each island's component.
+
+  ```ts
+  // src/pages/_app.ts
+  import type { App } from 'vue'
+  import { createVueStripe } from '@vue-stripe/vue-stripe'
+  import '@vue-stripe/vue-stripe/style.css'
+
+  export default (app: App) => {
+    app.use(createVueStripe({ publishableKey: import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY }))
+  }
+  ```
+
+- **The API.** In development, forward `/api` to your server with `vite.server.proxy`:
+
+  ```js
+  // astro.config.mjs
+  import { defineConfig } from 'astro/config'
+  import vue from '@astrojs/vue'
+
+  export default defineConfig({
+    integrations: [vue({ appEntrypoint: '/src/pages/_app' })],
+    vite: {
+      server: {
+        proxy: { '/api': 'http://localhost:3000' }
+      }
+    }
+  })
+  ```
+
+  With an adapter such as `@astrojs/node`, the routes can be Astro endpoints in `src/pages/api/` instead, with `export const prerender = false`. Read the secret key there through `astro:env`, declared with `env: { schema: { STRIPE_SECRET_KEY: envField.string({ context: 'server', access: 'secret' }) } }` in `astro.config.mjs`, and import it with `import { STRIPE_SECRET_KEY } from 'astro:env/server'`. Astro reads that value at runtime, from `.env` in `astro dev` and from the server's environment in production. Don't read it as `import.meta.env.STRIPE_SECRET_KEY`: Astro writes non-public `import.meta.env` values into the server build in `dist/server`. `process.env.STRIPE_SECRET_KEY` also works on the Node adapter in production, but `astro dev` does not put `.env` values in `process.env`.
+
+### Ionic and Capacitor
+
+An Ionic Vue app is a Vite app, so the steps above apply as they are. Inside Capacitor's native web view, one thing differs. It follows from Capacitor's documented behavior and has **not been verified on a device** for these docs:
+
+- Capacitor opens a navigation to another domain in the system browser, not in the web view. That covers hosted Checkout (`session.url`) and the pages of redirect-based payment methods, such as bank redirects. Elements in the page, Embedded Checkout and 3D Secure, which Stripe.js opens in an iframe, stay in the web view.
+- To keep those pages in the web view, list their hosts in `server.allowNavigation` of `capacitor.config.ts`, for example `allowNavigation: ['checkout.stripe.com']`. Capacitor's [configuration reference](https://capacitorjs.com/docs/config) marks this option as not intended for production.
+- The guides build `return_url` from `window.location.origin`. In the web view that origin is the app's own (`https://localhost` on Android, `capacitor://localhost` on iOS), which the system browser cannot open. If a payment finishes in the system browser, send the customer to an `https` page on your own domain that opens the app again, for example through a universal link (iOS) or an app link (Android).
 
 ### Without a bundler
 

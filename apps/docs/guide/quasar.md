@@ -1,12 +1,12 @@
 ---
-description: "Set up Vue Stripe in a Quasar app: the QCLI_ key prefix, a boot file, the CSP meta tag, the dev proxy, return_url routing and SSR mode."
+description: "Set up Vue Stripe in a Quasar app: the QCLI_ key prefix, a boot file, the CSP meta tag, the dev proxy, return_url routing, SSR mode and webpack mode."
 ---
 
 # Use Vue Stripe with Quasar
 
 Set up Vue Stripe in a Quasar CLI app built with Vite (`@quasar/app-vite`), in SPA or SSR mode. A Quasar app differs from a plain Vite app in six places: the key's prefix, the missing `main.ts`, the Content Security Policy that some starters put in `index.html`, the dev proxy, the default hash router and, in SSR mode, where requests may start.
 
-These steps were tested with Quasar 2.35 and `@quasar/app-vite` 3.10 in SPA and SSR mode, in development and in a production build. For Quasar's webpack mode (`@quasar/app-webpack`), see the key table in [Install and set up](/guide/installation#_3-add-your-publishable-key); the other steps are the same.
+These steps were tested with Quasar 2.35 and `@quasar/app-vite` 3.10 in SPA and SSR mode, in development and in a production build. For Quasar's webpack mode (`@quasar/app-webpack`), follow the same steps with the changes in [Webpack mode](#webpack-mode).
 
 ## 1. Install the packages
 
@@ -337,6 +337,79 @@ STRIPE_SECRET_KEY=sk_live_... STRIPE_WEBHOOK_SECRET=whsec_... node index.js
   `CheckoutForm.vue` is the form from [Build the form](/guide/custom-checkout#_3-build-the-form), and `/api/checkout-elements-session` is a second route in the middleware that creates the session as in [step 1 of that guide](/guide/custom-checkout#_1-create-the-session-on-your-server).
 
 - To render a part of the page in the browser only, wrap it in [`<q-no-ssr>`](https://quasar.dev/vue-components/no-ssr). Code inside it does not run on the server, so a sample that starts its request in `setup` is safe there.
+
+## Webpack mode
+
+`@quasar/app-webpack` 4 needs a few changes to the steps above. `create-quasar` 2 still offers it ("Quasar App CLI with Webpack"); later versions scaffold only Vite. These changes were tested with Quasar 2.35 and `@quasar/app-webpack` 4.4 in SPA mode, in `quasar dev` and in a production build. Webpack mode with SSR was not tested.
+
+**Step 2, the key.** Webpack mode has no `QCLI_` prefix. Put the key in `.env` and read it as `process.env.STRIPE_PUBLISHABLE_KEY`:
+
+```bash
+# .env
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+```
+
+Quasar loads `.env` and passes its variables to the browser. Don't forward the key in `build.env` as well: that replaces it with `undefined` (see the [key table](/guide/installation#_3-add-your-publishable-key)). Quasar generates no type for it, so `vue-tsc` reports `Type 'string | undefined' is not assignable to type 'string'` on `publishableKey`. Declare it in the starter's `src/env.d.ts`:
+
+```ts
+// src/env.d.ts
+declare namespace NodeJS {
+  interface ProcessEnv {
+    // ...the starter's entries
+    STRIPE_PUBLISHABLE_KEY: string;
+  }
+}
+```
+
+The webpack starter's `.gitignore` ignores only `.env.local*`, so `.env` is committed with the project. That is fine for the publishable key, but never put the secret key in that file; add `.env` to `.gitignore` if it holds anything else.
+
+**Step 3, the boot file.** Import `defineBoot` from `#q-app/wrappers`. In webpack mode `#q-app` alone does not resolve (`"." is not exported`):
+
+```ts
+// src/boot/vue-stripe.ts
+import { defineBoot } from '#q-app/wrappers'
+import { createVueStripe } from '@vue-stripe/vue-stripe'
+import '@vue-stripe/vue-stripe/style.css'
+
+export default defineBoot(({ app }) => {
+  app.use(createVueStripe({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY }))
+})
+```
+
+**Step 4, the Content Security Policy.** Webpack's development build evaluates modules with `eval`, so with the tag from step 4 `quasar dev` shows an empty page, and the console says `'unsafe-eval' is not an allowed source of script`. Allow it in development only, by starting the tag's `script-src` like this:
+
+```html
+script-src 'self'<% if (ctx.dev) { %> 'unsafe-eval'<% } %> https://js.stripe.com https://*.js.stripe.com;
+```
+
+The production build needs no `'unsafe-eval'`.
+
+**Step 5, the dev proxy.** webpack-dev-server 5 takes the proxy as an array; the object form stops `quasar dev` with `options.proxy should be an array`. In webpack mode `ctx.mode.ssr` also fails type-checking (TS2339), so test `ctx.modeName`:
+
+```ts
+// quasar.config.ts
+devServer: {
+  proxy: ctx.modeName === 'ssr' ? [] : [{ context: ['/api'], target: 'http://localhost:3000' }]
+}
+```
+
+**Step 7, the imports.** The webpack starter has no `@` alias. Import with the `components/` and `pages/` aliases, as the starter's own `routes.ts` does:
+
+```ts
+// src/pages/PaymentPage.vue
+import PaymentForm from 'components/PaymentForm.vue'
+```
+
+```ts
+// src/router/routes.ts
+children: [
+  { path: '', component: () => import('pages/IndexPage.vue') },
+  { path: 'pay', component: () => import('pages/PaymentPage.vue') },
+  { path: 'payment-complete', component: () => import('pages/CompletePage.vue') }
+]
+```
+
+Steps 1 and 6 work unchanged, including `history` mode and `npx @quasar/cli serve dist/spa --history --proxy serve-proxy.js` for the production build.
 
 ## Result
 

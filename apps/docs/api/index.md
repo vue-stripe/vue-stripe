@@ -17,6 +17,7 @@ Every export of `@vue-stripe/vue-stripe`: components, composables, the plugin an
 | Module formats | ES, CommonJS and UMD builds (the UMD build, for a `<script>` tag, includes the `@stripe/stripe-js` loader and needs only the Vue and vue-demi globals; see [Without a bundler](/guide/installation#without-a-bundler)); TypeScript declarations for ES module and CommonJS consumers, with `moduleResolution` `bundler`, `node16`, `nodenext` or `node` |
 | TypeScript | 5.0 or later for the declarations (they use `export type *`). Vue 3.5's own declarations need 5.4 when `skipLibCheck` is `false`, and vue-tsc 3 needs 5.0 |
 | Stylesheet | `@vue-stripe/vue-stripe/style.css`, imported once per app |
+| Browsers | The browsers [Stripe.js supports](https://docs.stripe.com/js/appendix/supported_browsers). The guides' flows (Payment Element, Card Element, hosted, Embedded and Checkout Elements, and their return pages) were tested in Chromium, Firefox and WebKit (Safari's engine), on desktop and in iPhone and Android phone profiles, in development and production builds. The ES and CommonJS builds use ES2020 syntax; an app that targets older browsers transpiles them in its own build |
 
 ## Components
 
