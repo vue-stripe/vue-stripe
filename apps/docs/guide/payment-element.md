@@ -24,11 +24,14 @@ export async function createPaymentIntent() {
   const paymentIntent = await stripe.paymentIntents.create({
     amount: 2000,
     currency: 'usd',
-    automatic_payment_methods: { enabled: true }
+    automatic_payment_methods: { enabled: true },
+    metadata: { orderId: 'order_123' } // your own order ID, read back by the webhook
   })
   return { clientSecret: paymentIntent.client_secret }
 }
 ```
+
+The webhook that fulfils the order finds it from `metadata.orderId`, and skips PaymentIntents without one, such as those that Checkout creates ([Fulfil orders with webhooks](/guide/webhooks#_2-handle-the-events-for-your-integration)).
 
 ## 2. Load Stripe and create the Elements group
 

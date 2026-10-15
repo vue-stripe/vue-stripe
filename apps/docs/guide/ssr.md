@@ -259,10 +259,11 @@ export default defineEventHandler(async (event) => {
 
   switch (stripeEvent.type) {
     case 'payment_intent.succeeded':
-      // fulfil the order for stripeEvent.data.object
+      // fulfil the order in metadata.orderId, which your server set on the PaymentIntent;
+      // skip one without it: the PaymentIntent of a Checkout payment has none
       break
     case 'checkout.session.completed':
-      // fulfil the order for stripeEvent.data.object
+      // fulfil the order in client_reference_id, set on the Checkout Session
       break
   }
 
@@ -278,7 +279,7 @@ Forward test-mode events to the route with the Stripe CLI, and put the `whsec_..
 stripe listen --events payment_intent.succeeded,checkout.session.completed --forward-to localhost:3000/webhook
 ```
 
-Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. The webhook guide lists [the events for each integration](/guide/webhooks#_2-handle-the-events-for-your-integration).
+Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A Checkout payment sends both events, so fulfil it from `checkout.session.completed` only; the webhook guide explains why and lists [the events for each integration](/guide/webhooks#_2-handle-the-events-for-your-integration).
 
 ### Build the page on a Checkout Session instead
 

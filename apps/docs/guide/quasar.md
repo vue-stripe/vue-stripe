@@ -274,10 +274,11 @@ app.post(resolve.urlPath('/webhook'), async (c) => {
 
   switch (event.type) {
     case 'payment_intent.succeeded':
-      // fulfil the order for event.data.object
+      // fulfil the order in metadata.orderId, which your server set on the PaymentIntent;
+      // skip one without it: the PaymentIntent of a Checkout payment has none
       break
     case 'checkout.session.completed':
-      // fulfil the order for event.data.object
+      // fulfil the order in client_reference_id, set on the Checkout Session
       break
   }
 
@@ -293,7 +294,7 @@ Forward test-mode events to the route with the Stripe CLI. `quasar dev -m ssr` l
 stripe listen --events payment_intent.succeeded,checkout.session.completed --forward-to localhost:9100/webhook
 ```
 
-Put the `whsec_...` secret that the command prints in `.env` as `STRIPE_WEBHOOK_SECRET=whsec_...`, without the `QCLI_` prefix; `quasar dev` restarts by itself when `.env` changes. Pay on `/pay` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. The webhook guide lists [the events for each integration](/guide/webhooks#_2-handle-the-events-for-your-integration).
+Put the `whsec_...` secret that the command prints in `.env` as `STRIPE_WEBHOOK_SECRET=whsec_...`, without the `QCLI_` prefix; `quasar dev` restarts by itself when `.env` changes. Pay on `/pay` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A Checkout payment sends both events, so fulfil it from `checkout.session.completed` only; the webhook guide explains why and lists [the events for each integration](/guide/webhooks#_2-handle-the-events-for-your-integration).
 
 The production server reads the secret from its environment, like the secret key. Give it the signing secret of the endpoint you [register in the Dashboard](/guide/webhooks#_5-register-the-endpoint-for-production), not the one `stripe listen` prints:
 

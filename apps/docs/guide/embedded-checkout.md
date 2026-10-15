@@ -45,6 +45,7 @@ app.post('/api/embedded-checkout-session', async (req, res) => {
     ui_mode: 'embedded_page',
     mode: 'payment',
     line_items: [{ price: 'price_123', quantity: 1 }],
+    client_reference_id: 'order_123', // your own order ID, read back by the webhook
     return_url: 'https://example.com/checkout/complete?session_id={CHECKOUT_SESSION_ID}'
   })
 

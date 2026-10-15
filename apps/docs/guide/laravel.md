@@ -382,10 +382,11 @@ class StripeWebhookController extends Controller
 
         switch ($event->type) {
             case 'payment_intent.succeeded':
-                // fulfil the order for $event->data->object
+                // fulfil the order in metadata->orderId, which your server set on the PaymentIntent;
+                // skip one without it: the PaymentIntent of a Checkout payment has none
                 break;
             case 'checkout.session.completed':
-                // fulfil the order for $event->data->object
+                // fulfil the order in client_reference_id, set on the Checkout Session
                 break;
         }
 
@@ -409,7 +410,7 @@ Forward test-mode events to it with the Stripe CLI, and put the `whsec_...` secr
 stripe listen --events payment_intent.succeeded,checkout.session.completed --forward-to localhost:8000/stripe/webhook
 ```
 
-`--events` names the two events the controller handles; Stripe CLI 1.53 refuses to start `listen` without an event selection. Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A payment on `/hosted-checkout` also sends `checkout.session.completed`. A request with a wrong signature gets 400.
+`--events` names the two events the controller handles; Stripe CLI 1.53 refuses to start `listen` without an event selection. Pay on `/checkout` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. A payment on `/hosted-checkout` sends `checkout.session.completed` as well as `payment_intent.succeeded` for its PaymentIntent, so fulfil it from `checkout.session.completed` only ([Handle the events for your integration](/guide/webhooks#_2-handle-the-events-for-your-integration)). A request with a wrong signature gets 400.
 
 ## Result
 

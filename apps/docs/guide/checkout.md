@@ -29,6 +29,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
   const session = await stripe.checkout.sessions.create({
     line_items: [{ price: 'price_xxx', quantity: 1 }], // decide the price on the server
     mode: 'payment', // or 'subscription' with a recurring price
+    client_reference_id: 'order_123', // your own order ID, read back by the webhook
     success_url: 'https://example.com/success?session_id={CHECKOUT_SESSION_ID}', // a page in your app
     cancel_url: 'https://example.com/cancel'
   })
@@ -37,7 +38,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
 })
 ```
 
-Session options such as `customer_email`, `shipping_address_collection`, `allow_promotion_codes` and `automatic_tax` are set here too; see [Stripe's Checkout Session API](https://docs.stripe.com/api/checkout/sessions/create).
+The webhook that fulfils the order finds it from `client_reference_id` ([Fulfil orders with webhooks](/guide/webhooks#_2-handle-the-events-for-your-integration)). Session options such as `customer_email`, `shipping_address_collection`, `allow_promotion_codes` and `automatic_tax` are set here too; see [Stripe's Checkout Session API](https://docs.stripe.com/api/checkout/sessions/create).
 
 ## 2. Add the checkout button
 

@@ -57,39 +57,66 @@ Listen for the events that match how you take payments:
 - **[Subscriptions](/guide/subscriptions)**: grant access on `invoice.paid`; handle `invoice.payment_failed` and `customer.subscription.deleted`.
 - **[Identity](/guide/identity)**: `identity.verification_session.verified`, or `identity.verification_session.requires_input`.
 
+A Checkout Session pays with a PaymentIntent of its own, so one Checkout payment sends `payment_intent.*` events as well as `checkout.session.*` events; a subscription invoice does the same next to `invoice.paid`. Fulfil each payment from one object: Checkout Sessions from the `checkout.session.*` events, and PaymentIntents only when they carry the order ID that your server put on them, which those other PaymentIntents don't. Recording `event.id` can't catch the duplicate, because the two events have different IDs.
+
 ```js
 async function handleEvent(event) {
   switch (event.type) {
+    // Checkout Sessions: the order ID is the session's client_reference_id
     case 'checkout.session.completed':
     case 'checkout.session.async_payment_succeeded': {
       const session = event.data.object
-      if (session.payment_status !== 'unpaid') await fulfilOrder(session.client_reference_id, session.id)
+      if (session.client_reference_id && session.payment_status !== 'unpaid') {
+        await fulfilOrder(session.client_reference_id, session.id)
+      }
       break
     }
-    case 'checkout.session.async_payment_failed':
-      await markOrderFailed(event.data.object.client_reference_id)
+    case 'checkout.session.async_payment_failed': {
+      const session = event.data.object
+      if (session.client_reference_id) await markOrderFailed(session.client_reference_id)
       break
+    }
 
-    case 'payment_intent.succeeded':
-      await fulfilOrder(event.data.object.metadata.orderId, event.data.object.id)
+    // PaymentIntents your server created: the order ID is in metadata. A Checkout
+    // Session's PaymentIntent has none; the session events above fulfil that payment.
+    case 'payment_intent.succeeded': {
+      const paymentIntent = event.data.object
+      if (paymentIntent.metadata.orderId) {
+        await fulfilOrder(paymentIntent.metadata.orderId, paymentIntent.id)
+      }
       break
-    case 'payment_intent.processing':
-      await markOrderPending(event.data.object.metadata.orderId)
+    }
+    case 'payment_intent.processing': {
+      const paymentIntent = event.data.object
+      if (paymentIntent.metadata.orderId) await markOrderPending(paymentIntent.metadata.orderId)
       break
-    case 'payment_intent.payment_failed':
-      await markOrderFailed(event.data.object.metadata.orderId)
+    }
+    case 'payment_intent.payment_failed': {
+      const paymentIntent = event.data.object
+      if (paymentIntent.metadata.orderId) await markOrderFailed(paymentIntent.metadata.orderId)
       break
+    }
   }
 }
 ```
 
-To find your order from the event, store its ID on the Stripe object when you create it: `client_reference_id` or `metadata` on the Checkout Session, `metadata` on the PaymentIntent.
+`fulfilOrder()`, `markOrderPending()` and `markOrderFailed()` stand for your own code that updates the order. To find the order from the event, store its ID on the Stripe object when you create it:
+
+```js
+// The PaymentIntent of your Payment Element page (Payment Element guide, step 1)
+await stripe.paymentIntents.create({ /* amount, currency, ... */ metadata: { orderId: order.id } })
+
+// A Checkout Session (Checkout guides, step 1)
+await stripe.checkout.sessions.create({ /* line_items, mode, ... */ client_reference_id: order.id })
+```
+
+Use `client_reference_id` rather than the session's `metadata`: the pricing table sets it from its `client-reference-id` attribute. Don't copy the order ID to the session's PaymentIntent (`payment_intent_data.metadata`): the `payment_intent.*` cases would then fulfil Checkout payments a second time.
 
 ## 3. Make fulfilment safe to repeat
 
 Stripe retries an event until your endpoint answers with a `2xx` status, and can deliver the same event more than once. So:
 
-- Make `fulfilOrder()` idempotent: check whether the order is already fulfilled (or record `event.id`) before you act.
+- Make `fulfilOrder()` idempotent: check whether the order is already fulfilled before you act. Key the check on the order, not on `event.id`: recording the event ID catches a redelivered event, but not a second event about the same payment.
 - Answer quickly. If fulfilment is slow (emails, shipping APIs), record the event, respond `200`, and do the work in a background job.
 - Don't rely on the order in which events arrive; read the object's current `status` when it matters.
 
