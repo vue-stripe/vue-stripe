@@ -56,7 +56,7 @@ Up to 6.0.0-beta.2, the declarations fail under `node16` / `nodenext`: TS2834 ("
 
 ### Vue 2.7: components do not render
 
-vue-demi is still on its Vue 3 build because its `postinstall` script did not run (pnpm 10+ skips dependency scripts). Allow it or run `npx vue-demi-switch 2.7`; see [Use Vue Stripe on Vue 2.7](/guide/vue-2#_2-let-vue-demi-switch-to-vue-2).
+vue-demi is still on its Vue 3 build because its `postinstall` script did not run (pnpm 10+ skips dependency scripts). Allow vue-demi's script in the pnpm settings, or switch vue-demi by hand with the `node -e` command in [Use Vue Stripe on Vue 2.7](/guide/vue-2#_2-let-vue-demi-switch-to-vue-2). `npx vue-demi-switch` does not work: the command is not in your app's `node_modules/.bin`, so `npx` offers an unrelated registry package instead.
 
 On Vue 2.7, a warning about the unknown element `stripe-pricing-table` means `Vue.config.ignoredElements` is missing it.
 
