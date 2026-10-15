@@ -54,6 +54,7 @@ Store the publishable key in an environment variable that your build tool expose
 |------------|------|----------|--------------|
 | Vite | `.env.local` | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
 | Vue CLI / webpack | `.env.local` | `VUE_APP_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` |
+| Rsbuild | `.env.local` | `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY` |
 | Quasar in Vite mode (`@quasar/app-vite`) | `.env` | `QCLI_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY` |
 | Quasar in webpack mode (`@quasar/app-webpack` 4) | `.env` | `STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.STRIPE_PUBLISHABLE_KEY` |
 | Laravel with Vite | `.env` (not `.env.local`) | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
@@ -77,7 +78,7 @@ Quasar in webpack mode loads `.env` itself and passes its variables to the brows
 Quasar in Vite mode passes only `QCLI_` variables to the browser, so a `VITE_` variable is `undefined` there. In Laravel, keep `STRIPE_SECRET_KEY` and `VITE_STRIPE_PUBLISHABLE_KEY` in the same `.env`, and don't create a `.env.local`: with `APP_ENV=local`, Laravel loads it instead of `.env`, and every request fails. [Use Vue Stripe with Quasar](/guide/quasar) and [Use Vue Stripe with Laravel and Inertia](/guide/laravel) cover the rest of those setups.
 
 ::: tip Samples use Vite's variables
-Every sample in these docs reads the key as `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, write `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY`, and in Nuxt `useRuntimeConfig().public.stripePublishableKey`. In Nuxt the `VITE_` variable is `undefined` with the `.env` from the table, so a pasted sample with `VueStripeProvider` answers 500 "publishableKey or stripeKey is required". Webpack compiles `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` to `undefined` without a warning, so a pasted sample builds and then fails in the browser.
+Every sample in these docs reads the key as `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, write `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY`, in Rsbuild `import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY`, and in Nuxt `useRuntimeConfig().public.stripePublishableKey`. In Nuxt the `VITE_` variable is `undefined` with the `.env` from the table, so a pasted sample with `VueStripeProvider` answers 500 "publishableKey or stripeKey is required". Webpack compiles `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` to `undefined` without a warning, so a pasted sample builds and then fails in the browser. Rsbuild passes only `PUBLIC_` variables to the browser, so a `VITE_` key is `undefined` there and the page stays empty.
 :::
 
 ## 4. Check that Stripe.js loads
@@ -90,6 +91,7 @@ Render a `VueStripeProvider` with your key. It loads Stripe.js, shows its `#load
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
 // Vue CLI: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
+// Rsbuild: import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY
 // Nuxt: useRuntimeConfig().public.stripePublishableKey
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </script>
@@ -152,6 +154,7 @@ module.exports = {
 Vite restarts by itself when its config changes; restart `vue-cli-service serve` yourself. On Vue 2.7, use the "Vite, Vue 2.7" tab: a Vue 2.7 app compiles its components with `@vitejs/plugin-vue2`, and the Vue 3 config stops with `ERR_MODULE_NOT_FOUND` there. `@vitejs/plugin-vue2` supports Vite 3 to 7, so keep the app on Vite 7 ([Use Vue Stripe on Vue 2.7](/guide/vue-2#_1-install-the-packages)). Nuxt server routes (`server/api/`) and other setups that serve the app and its API from one origin need nothing here. In production, serve the API on the app's origin too, for example behind the same reverse proxy, or call it by its full URL and allow the app's origin with CORS on the server.
 
 - **Quasar** has no `vite.config.ts`: set the proxy in `devServer.proxy` of `quasar.config.ts`, as in [Use Vue Stripe with Quasar](/guide/quasar#_5-send-api-requests-to-your-server-in-development). In webpack mode the proxy is an array; see [Webpack mode](/guide/quasar#webpack-mode).
+- **Rsbuild**: `server.proxy` in `rsbuild.config.ts` takes the same object as Vite's, `{ '/api': 'http://localhost:3000' }`.
 - **Laravel** serves the app and its API from one origin, so it needs no proxy. But a `fetch` POST to a route in `routes/web.php` fails with 419 (CSRF): put the routes in `routes/api.php`, or send the CSRF token, as in [Use Vue Stripe with Laravel and Inertia](/guide/laravel#_4-create-the-api-routes).
 
 ## Other setups
