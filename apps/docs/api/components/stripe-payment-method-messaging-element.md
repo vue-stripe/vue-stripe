@@ -71,7 +71,7 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 | `@ready` | `StripePaymentMethodMessagingElement` | Emitted when the element is mounted and ready |
 | `@loaderror` | `{ elementType: 'paymentMethodMessaging', error }` | Emitted when the messaging fails to load, for example without `countryCode` for a visitor in a country Stripe doesn't support, or when the element can't be created. Ends the loading state and shows the `#error` slot |
 
-The element is display-only, so it has no `@change`, `@focus`, `@blur` or `@escape`. Stripe.js 10's types declare only `ready` for this element, but Stripe.js emits `loaderror` at runtime and then destroys the element itself; the component listens for it, and unmounts cleanly afterwards. Stripe's load error carries no message, so `error` reads "Element failed to load".
+The element is display-only, so it has no `@change`, `@focus`, `@blur` or `@escape`. Stripe.js 10's types declare only `ready` for this element, but Stripe.js emits `loaderror` at runtime and then destroys the element itself; the component listens for it, and unmounts cleanly afterwards. Stripe's load error carries no message, so `error` reads "Element failed to load". The exception is a wrong publishable key in a group with a `clientSecret` or `mode`: there `error` is Stripe's "Invalid API Key provided" message ([`VueStripeProvider`](/api/components/stripe-provider#events)).
 
 ## Slots
 
