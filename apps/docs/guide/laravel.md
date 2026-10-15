@@ -18,7 +18,7 @@ Both were tested with stripe-php 22 on PHP 8.4, served by `php artisan serve`. T
 ## 1. Install the packages
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 composer require stripe/stripe-php
 ```
 

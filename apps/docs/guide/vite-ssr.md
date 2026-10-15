@@ -17,7 +17,7 @@ The rules in [What every SSR app needs](/guide/ssr#what-every-ssr-app-needs) app
 Install Vue Stripe, Stripe.js, Stripe's Node library for the API routes, and Vue Router for the return page:
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10 stripe vue-router
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10 stripe vue-router
 ```
 
 The server loads the package from `node_modules` as an ES module. No `ssr.noExternal` or other Vite setting is needed.

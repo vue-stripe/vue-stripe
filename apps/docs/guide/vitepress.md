@@ -11,7 +11,7 @@ VitePress renders every page to static HTML at build time. Vue Stripe components
 ## 1. Install the packages
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 ```
 
 ## 2. Add the publishable key

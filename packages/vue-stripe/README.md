@@ -49,7 +49,7 @@ Upgrading from v5? Read [Migrating from v5 to v6](https://vuestripe.com/guide/mi
 ## Installation
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 ```
 
 Import the component styles once, for example in `main.ts`:

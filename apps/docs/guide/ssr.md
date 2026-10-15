@@ -13,7 +13,7 @@ Render pages that use Vue Stripe on the server. This page lists what every serve
 
 Stripe.js only runs in the browser. Vue Stripe never loads it on the server: `VueStripeProvider` loads Stripe.js in `onMounted`, and the [plugin](/guide/plugin) loads it the first time a component reads it in the browser. During server rendering every provider renders its `#loading` slot, and the browser's first render matches it, so hydration does not mismatch. After hydration Stripe.js loads and the elements mount.
 
-From 6.0.0-beta.1 no bundler setting is needed: the package loads in Node as it is. What you set up is where the keys live, and where the client secret is fetched.
+No bundler setting is needed: the package loads in Node as it is. What you set up is where the keys live, and where the client secret is fetched.
 
 ## What every SSR app needs
 
@@ -73,7 +73,7 @@ The paths below follow Nuxt 4, which reads plugins, pages and components from th
 Install Vue Stripe and Stripe.js, plus Stripe's Node library for the server routes:
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10 stripe
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10 stripe
 ```
 
 Nuxt builds without `stripe` installed; the server routes then fail at runtime with `ERR_MODULE_NOT_FOUND`.

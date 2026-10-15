@@ -11,7 +11,7 @@ These steps were tested with Quasar 2.35 and `@quasar/app-vite` 3.10 in SPA and 
 ## 1. Install the packages
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 ```
 
 ## 2. Add your publishable key

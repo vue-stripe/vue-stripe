@@ -21,7 +21,7 @@ The samples assume Vite 7 with `@vitejs/plugin-vue2` ([step 1](#_1-install-the-p
 ## 1. Install the packages
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 ```
 
 If the app uses TypeScript, it needs TypeScript 5.0 or later for the package's declarations. Vue CLI 5 scaffolds TypeScript 4.5; upgrade it:

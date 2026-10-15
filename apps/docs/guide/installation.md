@@ -14,15 +14,15 @@ Install Vue Stripe together with Stripe.js:
 
 ::: code-group
 ```bash [npm]
-npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 ```
 
 ```bash [pnpm]
-pnpm add @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
+pnpm add @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 ```
 
 ```bash [yarn]
-yarn add @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10
+yarn add @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
 ```
 :::
 
@@ -244,13 +244,13 @@ A page with no build step loads the UMD build from unpkg or jsDelivr. Add three 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5/dist/vue-stripe.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@vue-stripe/vue-stripe@^6/dist/vue-stripe.css" />
   </head>
   <body>
     <div id="app"></div>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/vue-demi@0.14/lib/index.iife.js"></script>
-    <script src="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5"></script>
+    <script src="https://unpkg.com/@vue-stripe/vue-stripe@^6"></script>
     <script>
       const { VueStripeProvider, VueStripeElements, VueStripeCardElement } = VueStripe
 
@@ -274,13 +274,13 @@ A page with no build step loads the UMD build from unpkg or jsDelivr. Add three 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5/dist/vue-stripe.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@vue-stripe/vue-stripe@^6/dist/vue-stripe.css" />
   </head>
   <body>
     <div id="app"></div>
     <script src="https://unpkg.com/vue@2.7.16/dist/vue.min.js"></script>
     <script src="https://unpkg.com/vue-demi@0.14/lib/index.iife.js"></script>
-    <script src="https://unpkg.com/@vue-stripe/vue-stripe@^6.0.0-beta.5"></script>
+    <script src="https://unpkg.com/@vue-stripe/vue-stripe@^6"></script>
     <script>
       const { VueStripeProvider, VueStripeElements, VueStripeCardElement } = VueStripe
 

@@ -45,7 +45,7 @@ Go into the folder and install the app's packages, then Vue Stripe, Stripe.js an
 ```bash
 cd first-payment
 npm install
-npm install @vue-stripe/vue-stripe@^6.0.0-beta.2 @stripe/stripe-js@^10 stripe
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10 stripe
 ```
 
 The version ranges pick Vue Stripe 6 and Stripe.js 10. Without them, npm installs Vue Stripe 5 while 6.0.0 is still a beta.
