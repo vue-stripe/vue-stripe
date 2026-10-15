@@ -13,11 +13,19 @@ Find the message or symptom you see, then apply the fix. Errors that Vue Stripe 
 `VueStripeProvider` received no key, usually because the environment variable is empty in the browser:
 
 - Check the variable prefix your build tool exposes to client code (`VITE_`, `VUE_APP_`, `NUXT_PUBLIC_`, `QCLI_` in Quasar); see [Install and set up](/guide/installation#_3-add-your-publishable-key).
+- Check how the code reads it. The samples in these docs read `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`; in Nuxt that is `undefined` when `.env` sets `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and the page answers 500 with this message. Read `useRuntimeConfig().public.stripePublishableKey` instead ([Configure Nuxt](/guide/ssr#_2-configure-nuxt)).
 - Restart the dev server after editing `.env` files; most tools read them only at startup.
 
-### Elements show "Expected publishable key to be of type string"
+<a id="elements-show-expected-publishable-key-to-be-of-type-string"></a>
 
-The full message is "Expected publishable key to be of type string, got type undefined instead.", and the console logs it as `[Vue Stripe] Initialization error`. The [plugin](/guide/plugin) received no key. Unlike `VueStripeProvider`, the plugin does not throw: the page renders, and the error appears in the browser when Stripe.js loads. The causes and fixes are the ones above.
+### Elements show "Expected publishable key to be of type string" or "You used an empty string"
+
+The [plugin](/guide/plugin) received no key, and Stripe.js reports it in one of two messages, which the console logs as `[Vue Stripe] Initialization error`:
+
+- "Expected publishable key to be of type string, got type undefined instead." The variable is missing, or the code reads one that doesn't exist.
+- "Please call Stripe() with your publishable key. You used an empty string." The variable exists but is empty: a blank `VITE_STRIPE_PUBLISHABLE_KEY=` line in `.env` or `.env.local` (Laravel's `.env` convention, or a template copied without filling it in), or Nuxt's `runtimeConfig` default `''` when `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` does not reach the server, such as a production server started without `--env-file`.
+
+Unlike `VueStripeProvider`, the plugin does not throw: the page renders, and the error appears in the browser when Stripe.js loads. The causes and fixes are the ones above.
 
 ### The provider shows an error instead of loading
 

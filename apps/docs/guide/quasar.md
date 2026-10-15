@@ -250,12 +250,63 @@ STRIPE_SECRET_KEY=sk_live_... node index.js
 
 The middleware uses the context API (`c.json()`) of Hono, the webserver Quasar scaffolds in `src-ssr/server.ts`.
 
+### Receive webhooks
+
+Fulfil orders from a route in the same middleware, as [Fulfil orders with webhooks](/guide/webhooks) explains. Verify the signature against the raw body, which `await c.req.text()` returns, and read the `whsec_...` signing secret the same way as the secret key:
+
+```ts
+// src-ssr/middlewares/api.ts, inside defineSsrMiddleware, after the route above
+const webhookSecret = import.meta.env.QUASAR_DEV
+  ? import.meta.env.STRIPE_WEBHOOK_SECRET
+  : process.env.STRIPE_WEBHOOK_SECRET
+
+app.post(resolve.urlPath('/webhook'), async (c) => {
+  let event: Stripe.Event
+  try {
+    event = stripe.webhooks.constructEvent(
+      await c.req.text(),
+      c.req.header('stripe-signature') ?? '',
+      webhookSecret ?? ''
+    )
+  } catch {
+    return c.text('Webhook signature check failed', 400)
+  }
+
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      // fulfil the order for event.data.object
+      break
+    case 'checkout.session.completed':
+      // fulfil the order for event.data.object
+      break
+  }
+
+  return c.json({ received: true })
+})
+```
+
+Don't read the body with `c.req.json()` first: the parsed body no longer matches the signature. `c.req.header()` returns `string | undefined`, which `constructEvent()` does not accept, hence the `?? ''`; a request without a signature then fails the check with 400.
+
+Forward test-mode events to the route with the Stripe CLI. `quasar dev -m ssr` listens on port 9100 unless `devServer.port` says otherwise:
+
+```bash
+stripe listen --events payment_intent.succeeded,checkout.session.completed --forward-to localhost:9100/webhook
+```
+
+Put the `whsec_...` secret that the command prints in `.env` as `STRIPE_WEBHOOK_SECRET=whsec_...`, without the `QCLI_` prefix; `quasar dev` restarts by itself when `.env` changes. Pay on `/pay` again: `stripe listen` shows `payment_intent.succeeded` answered with `[200]`. The webhook guide lists [the events for each integration](/guide/webhooks#_2-handle-the-events-for-your-integration).
+
+The production server reads the secret from its environment, like the secret key. Give it the signing secret of the endpoint you [register in the Dashboard](/guide/webhooks#_5-register-the-endpoint-for-production), not the one `stripe listen` prints:
+
+```bash
+STRIPE_SECRET_KEY=sk_live_... STRIPE_WEBHOOK_SECRET=whsec_... node index.js
+```
+
 ### Start requests in the browser, not in `setup`
 
 `<script setup>` runs on the server for every request. A relative `fetch('/api/...')` there rejects with "Failed to parse URL", and if nothing handles the rejection, Node stops the server process, in `quasar dev -m ssr` and in production alike. So:
 
 - Fetch the PaymentIntent in `onMounted`, as in step 7.
-- For [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider), `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`, never a Promise created at the top of `<script setup>` (the form shown in [Build your own page on a Checkout Session](/guide/custom-checkout#_2-wrap-the-page-in-the-provider)). The provider calls the function in the browser only, once Stripe.js has loaded:
+- For [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider), `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`, never a Promise created at the top of `<script setup>` (the form shown in [Build your own page on a Checkout Session](/guide/custom-checkout#_2-wrap-the-page-in-the-provider)). With the plugin from step 3, the provider renders on the server and handles that Promise's rejection: the server keeps running, but logs `[Vue Stripe] Checkout init error: Failed to parse URL from /api/checkout-elements-session` on every render (nothing, with an `#error` slot or `@error` listener). Inside a `VueStripeProvider`, which renders only its loading slot on the server, nothing handles it, and the server stops. The provider calls a function in the browser only, once Stripe.js has loaded:
 
   ```vue
   <!-- src/pages/CheckoutPage.vue -->

@@ -20,6 +20,8 @@ From 6.0.0-beta.1 no bundler setting is needed: the package loads in Node as it 
 
 `setup()` and `<script setup>` also run on the server. A request started there runs on every server render, and a relative URL such as `fetch('/api/checkout-elements-session')` has no origin on the server, so Node's `fetch` rejects with "Failed to parse URL". When nothing handles that rejection, Node exits: one page view stops a Vite SSR or Quasar SSR server, in development and in production. Nuxt catches the rejection and logs it.
 
+A Promise passed to `client-secret` of a Checkout provider is handled only when the provider renders on the server, which it does when the [plugin](/guide/plugin) provides Stripe. The server then keeps running and logs `[Vue Stripe] Checkout init error: Failed to parse URL from /api/...` on every render (nothing, when the provider has an `#error` slot or an `@error` listener). Inside `VueStripeProvider`, which renders only its loading slot on the server, nothing handles it, and the server stops.
+
 - **`VueStripeElements`:** fetch the client secret in `onMounted`, which runs only in the browser, as [the Payment Element guide](/guide/payment-element#_2-load-stripe-and-create-the-elements-group) does. In Nuxt, `useFetch(..., { server: false })` does the same.
 - **`VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`:** don't pass a Promise created at the top of `<script setup>` in `client-secret`. Pass a function in `fetch-client-secret`. The provider calls it in the browser only, once Stripe.js has loaded:
 
@@ -29,6 +31,7 @@ From 6.0.0-beta.1 no bundler setting is needed: the package loads in Node as it 
 import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
 import CheckoutForm from './CheckoutForm.vue'
 
+// Nuxt: useRuntimeConfig().public.stripePublishableKey (see below)
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // Called by the provider in the browser only, once Stripe.js has loaded.
@@ -51,6 +54,8 @@ const fetchClientSecret = () =>
 ```
 
 `CheckoutForm` is the form from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form). The server renders the providers' loading state, and the browser creates one session per visit.
+
+The sample reads the key as a Vite app does. In Nuxt, write `const publishableKey = useRuntimeConfig().public.stripePublishableKey`, as the comment says: the Nuxt setup below puts the key in `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, so `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` is `undefined` there, every render of the page answers 500 "publishableKey or stripeKey is required", and `nuxi generate` stops with a prerender error. The same change applies to every sample in these docs that reads `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. With the plugin from [step 3](#_3-provide-stripe), drop `VueStripeProvider` and the key line instead.
 
 ### Set the publishable key where the server can read it
 
@@ -99,6 +104,8 @@ NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
 You get the `whsec_...` webhook secret in [step 7](#_7-receive-webhooks); leave it empty until then.
 
+Read the publishable key as `useRuntimeConfig().public.stripePublishableKey`, as the steps below do. Samples on the other pages of these docs read `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`, which is `undefined` with this `.env`; replace that line when you copy one.
+
 `nuxi dev` reads `.env`; the production server does not. Set the variables in the server's environment, or pass the file to Node when you start the build:
 
 ```bash
@@ -106,7 +113,7 @@ npx nuxi build
 node --env-file=.env .output/server/index.mjs
 ```
 
-Without them every page that renders `VueStripeProvider` answers 500 "publishableKey or stripeKey is required", and the server routes fail with an empty secret key.
+Without them every page that renders `VueStripeProvider` answers 500 "publishableKey or stripeKey is required", and the server routes fail with an empty secret key. With the plugin from step 3 instead, the pages answer 200, and each element shows Stripe.js' message "Please call Stripe() with your publishable key. You used an empty string.": the plugin gets the `''` default from `nuxt.config.ts`.
 
 ### 3. Provide Stripe
 
@@ -403,7 +410,7 @@ export default defineNuxtConfig({
 
 ## Quasar SSR
 
-The full Quasar setup (the `QCLI_` key prefix, a boot file, the CSP, the dev proxy and an SSR middleware for `/api`) is in [Use Vue Stripe with Quasar](/guide/quasar#_8-run-in-ssr-mode). Use the components as in any Vue app, and fetch client secrets in the browser as in [every SSR app](#fetch-client-secrets-in-the-browser). A sample that starts a request at the top of `<script setup>`, such as a Promise in `client-secret`, stops the Quasar SSR server. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
+The full Quasar setup (the `QCLI_` key prefix, a boot file, the CSP, the dev proxy and an SSR middleware for `/api`) is in [Use Vue Stripe with Quasar](/guide/quasar#_8-run-in-ssr-mode). Use the components as in any Vue app, and fetch client secrets in the browser as in [every SSR app](#fetch-client-secrets-in-the-browser). A request started at the top of `<script setup>` runs on every server render. A bare `fetch()` there stops the Quasar SSR server, and so does a Promise in `client-secret` inside `VueStripeProvider`; under the boot file's plugin, such a Promise makes the server log `[Vue Stripe] Checkout init error: Failed to parse URL from /api/...` on every render instead. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
 
 ```vue
 <script setup lang="ts">
@@ -413,16 +420,24 @@ import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@
 defineProps<{ publishableKey: string }>()
 
 const clientSecret = ref('')
+const errorMessage = ref('')
 
 onMounted(async () => {
-  const response = await fetch('/api/create-payment-intent', { method: 'POST' })
-  clientSecret.value = (await response.json()).clientSecret
+  try {
+    const response = await fetch('/api/create-payment-intent', { method: 'POST' })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    clientSecret.value = (await response.json()).clientSecret
+  } catch {
+    // An error answer, or no answer at all (server down, offline)
+    errorMessage.value = 'Failed to initialize payment'
+  }
 })
 </script>
 
 <template>
   <q-no-ssr>
-    <VueStripeProvider :publishable-key="publishableKey">
+    <p v-if="errorMessage">{{ errorMessage }}</p>
+    <VueStripeProvider v-else :publishable-key="publishableKey">
       <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
         <VueStripePaymentElement />
       </VueStripeElements>
@@ -431,7 +446,7 @@ onMounted(async () => {
 </template>
 ```
 
-Render `VueStripeElements` only once the client secret has arrived (`v-if`): created without one, the Payment Element fails with a `[Vue Stripe]` error in the console.
+Render `VueStripeElements` only once the client secret has arrived (`v-if`): created without one, the Payment Element fails with a `[Vue Stripe]` error in the console. When the route fails, the page shows "Failed to initialize payment", as the [Quasar guide's payment page](/guide/quasar#_7-render-a-payment-form) does; without the `response.ok` check, an error answer such as Hono's plain-text "Internal Server Error" makes `response.json()` throw instead, and the page stays empty.
 
 ## VitePress
 
@@ -441,11 +456,13 @@ See [Use Vue Stripe in VitePress](/guide/vitepress): where VitePress reads the k
 
 ### The server process exits after one request
 
-Node prints `TypeError: Failed to parse URL from /api/...` and stops. A component starts a request with a relative URL during server rendering, usually a Promise passed to `client-secret`. Pass a function in `fetch-client-secret`, or fetch in `onMounted`; see [Fetch client secrets in the browser](#fetch-client-secrets-in-the-browser).
+Node prints `TypeError: Failed to parse URL from /api/...` and stops. A component starts a request with a relative URL during server rendering, and nothing handles its rejection: a `fetch()` at the top of `<script setup>`, or a Promise passed to `client-secret` of a Checkout provider inside `VueStripeProvider`. Pass a function in `fetch-client-secret`, or fetch in `onMounted`; see [Fetch client secrets in the browser](#fetch-client-secrets-in-the-browser).
+
+When the plugin provides Stripe, the same Promise does not stop the server: the provider handles the rejection, and the server logs `[Vue Stripe] Checkout init error: Failed to parse URL from /api/...` (`Checkout Form init error` for `VueStripeCheckoutFormProvider`) on every render. The fix is the same.
 
 ### Every page answers 500 "publishableKey or stripeKey is required"
 
-The server rendered `VueStripeProvider` with an empty key. In Nuxt's production server, set `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` in the environment or start it with `node --env-file=.env` ([step 2](#_2-configure-nuxt)). A Vite SSR app answers 500 from its development server only, and its key must be set when you run `vite build`; see [the Vite SSR troubleshooting entry](/guide/vite-ssr#the-page-shows-expected-publishable-key-to-be-of-type-string-or-the-payment-form-is-missing).
+The server rendered `VueStripeProvider` with an empty key. In Nuxt's production server, set `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` in the environment or start it with `node --env-file=.env` ([step 2](#_2-configure-nuxt)). When only the pages copied from other guides answer 500, in `nuxi dev` too, they read `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`; read `useRuntimeConfig().public.stripePublishableKey` instead. A Vite SSR app answers 500 from its development server only, and its key must be set when you run `vite build`; see [the Vite SSR troubleshooting entry](/guide/vite-ssr#the-page-shows-expected-publishable-key-to-be-of-type-string-or-the-payment-form-is-missing).
 
 ### The server fails with `ERR_UNSUPPORTED_DIR_IMPORT`
 
