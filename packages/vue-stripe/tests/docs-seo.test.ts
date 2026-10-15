@@ -381,6 +381,31 @@ describe('Copy for LLMs', () => {
   })
 })
 
+describe('docs theme accessibility', () => {
+  const themeDir = join(docsDir, '.vitepress/theme')
+  const vueFiles = (dir: string): string[] =>
+    readdirSync(dir).flatMap((name) => {
+      const path = join(dir, name)
+      if (statSync(path).isDirectory()) return vueFiles(path)
+      return name.endsWith('.vue') ? [path] : []
+    })
+
+  // ARIA does not let a generic element be named, so assistive technology drops the label
+  // (axe aria-prohibited-attr): the /usage chart's arrow-key instructions went unheard (#751).
+  it('an aria-label sits on an element with a role', () => {
+    const problems = vueFiles(themeDir).flatMap((file) => {
+      const source = readFileSync(file, 'utf8')
+      return [...source.matchAll(/<(div|span|p|b|i|em|strong|small|code)\b([^>]*)>/g)]
+        .filter(
+          ([, , attributes = '']) =>
+            /(^|\s):?aria-label(ledby)?=/.test(attributes) && !/(^|\s):?role=/.test(attributes)
+        )
+        .map((m) => `${relative(docsDir, file)}:${source.slice(0, m.index).split('\n').length}`)
+    })
+    expect(problems, problems.join('\n')).toEqual([])
+  })
+})
+
 describe('llms-full coverage table', () => {
   it('carries every coverage note, whatever the row status', () => {
     const markdown = coverageMarkdown(coverage)
