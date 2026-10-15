@@ -10,7 +10,7 @@ Add Vue Stripe to a Vue 3 app that you server-render yourself with Vite and `vue
 npm create vite-extra@latest my-app -- --template ssr-vue-ts
 ```
 
-The rules in [What every SSR app needs](/guide/ssr#what-every-ssr-app-needs) apply here. In a plain Node server they matter most: a request started at the top of `<script setup>` stops the server process.
+The rules in [What every SSR app needs](/guide/ssr#what-every-ssr-app-needs) apply here. In a plain Node server they matter most: a request started at the top of `<script setup>` runs on every server render, and when nothing handles its rejection, it stops the server process.
 
 ## 1. Install the packages
 
@@ -223,7 +223,11 @@ Add a route for `/checkout/complete` in `src/main.ts` that checks the session, a
 
 ### The server process exits after one request
 
-Node prints `TypeError: Failed to parse URL from /api/...` and the next request is refused. A component started a request in setup during server rendering. Fetch in `onMounted`, or pass a function in `fetch-client-secret`.
+Node prints `TypeError: Failed to parse URL from /api/...` and the next request is refused. A component started a request in setup during server rendering, and nothing handled its rejection: a `fetch()` at the top of `<script setup>`, or a Promise passed to `client-secret` of a Checkout provider inside `VueStripeProvider`. `VueStripeProvider` renders only its loading slot on the server, so the provider inside it never receives the Promise. Fetch in `onMounted`, or pass a function in `fetch-client-secret`.
+
+### The server logs "[Vue Stripe] Checkout init error: Failed to parse URL" on every render
+
+The full line is `[Vue Stripe] Checkout init error: Failed to parse URL from /api/checkout-elements-session` (`Checkout Form init error` for `VueStripeCheckoutFormProvider`). A page passes a Promise created at the top of `<script setup>` to `client-secret`, and the provider gets Stripe from the plugin. The provider then renders on the server and handles the rejection: the server keeps running, the page answers 200, and in the browser it creates its own session and works. With an `#error` slot or an `@error` listener the provider logs nothing, but the server still starts the request on every render. Pass a function in `fetch-client-secret` instead, as in [Build the page on a Checkout Session instead](#build-the-page-on-a-checkout-session-instead).
 
 ### The page shows "Expected publishable key to be of type string", or the payment form is missing
 

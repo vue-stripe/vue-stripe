@@ -86,7 +86,7 @@ const fetchClientSecret = () =>
 </template>
 ```
 
-`client-secret` also takes the client secret as a string, or as a Promise that you start at the top of `<script setup>`. The function is safer: a Promise that rejects before the provider mounts is reported as an uncaught rejection ([Errors](/api/components/stripe-checkout-provider#errors)), and on a server-rendered page (Nuxt, Vite SSR, Quasar SSR) the request starts during server rendering, which stops a plain Node SSR server ([Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser)). The previous name, `VueStripeCheckoutProvider`, still works as a deprecated alias.
+`client-secret` also takes the client secret as a string, or as a Promise that you start at the top of `<script setup>`. The function is safer: a Promise that rejects before the provider mounts is reported as an uncaught rejection ([Errors](/api/components/stripe-checkout-provider#errors)), and on a server-rendered page (Nuxt, Vite SSR, Quasar SSR) the request starts during server rendering, which logs an error on every render or, inside `VueStripeProvider`, stops a plain Node SSR server ([Fetch client secrets in the browser](/guide/ssr#fetch-client-secrets-in-the-browser)). The previous name, `VueStripeCheckoutProvider`, still works as a deprecated alias.
 
 ## 3. Build the form
 

@@ -20,6 +20,8 @@ From 6.0.0-beta.1 no bundler setting is needed: the package loads in Node as it 
 
 `setup()` and `<script setup>` also run on the server. A request started there runs on every server render, and a relative URL such as `fetch('/api/checkout-elements-session')` has no origin on the server, so Node's `fetch` rejects with "Failed to parse URL". When nothing handles that rejection, Node exits: one page view stops a Vite SSR or Quasar SSR server, in development and in production. Nuxt catches the rejection and logs it.
 
+A Promise passed to `client-secret` of a Checkout provider is handled only when the provider renders on the server, which it does when the [plugin](/guide/plugin) provides Stripe. The server then keeps running and logs `[Vue Stripe] Checkout init error: Failed to parse URL from /api/...` on every render (nothing, when the provider has an `#error` slot or an `@error` listener). Inside `VueStripeProvider`, which renders only its loading slot on the server, nothing handles it, and the server stops.
+
 - **`VueStripeElements`:** fetch the client secret in `onMounted`, which runs only in the browser, as [the Payment Element guide](/guide/payment-element#_2-load-stripe-and-create-the-elements-group) does. In Nuxt, `useFetch(..., { server: false })` does the same.
 - **`VueStripeCheckoutElementsProvider`, `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`:** don't pass a Promise created at the top of `<script setup>` in `client-secret`. Pass a function in `fetch-client-secret`. The provider calls it in the browser only, once Stripe.js has loaded:
 
@@ -408,7 +410,7 @@ export default defineNuxtConfig({
 
 ## Quasar SSR
 
-The full Quasar setup (the `QCLI_` key prefix, a boot file, the CSP, the dev proxy and an SSR middleware for `/api`) is in [Use Vue Stripe with Quasar](/guide/quasar#_8-run-in-ssr-mode). Use the components as in any Vue app, and fetch client secrets in the browser as in [every SSR app](#fetch-client-secrets-in-the-browser). A sample that starts a request at the top of `<script setup>`, such as a Promise in `client-secret`, stops the Quasar SSR server. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
+The full Quasar setup (the `QCLI_` key prefix, a boot file, the CSP, the dev proxy and an SSR middleware for `/api`) is in [Use Vue Stripe with Quasar](/guide/quasar#_8-run-in-ssr-mode). Use the components as in any Vue app, and fetch client secrets in the browser as in [every SSR app](#fetch-client-secrets-in-the-browser). A request started at the top of `<script setup>` runs on every server render. A bare `fetch()` there stops the Quasar SSR server, and so does a Promise in `client-secret` inside `VueStripeProvider`; under the boot file's plugin, such a Promise makes the server log `[Vue Stripe] Checkout init error: Failed to parse URL from /api/...` on every render instead. `<q-no-ssr>` around the form is optional, as `<ClientOnly>` is in Nuxt:
 
 ```vue
 <script setup lang="ts">
@@ -454,7 +456,9 @@ See [Use Vue Stripe in VitePress](/guide/vitepress): where VitePress reads the k
 
 ### The server process exits after one request
 
-Node prints `TypeError: Failed to parse URL from /api/...` and stops. A component starts a request with a relative URL during server rendering, usually a Promise passed to `client-secret`. Pass a function in `fetch-client-secret`, or fetch in `onMounted`; see [Fetch client secrets in the browser](#fetch-client-secrets-in-the-browser).
+Node prints `TypeError: Failed to parse URL from /api/...` and stops. A component starts a request with a relative URL during server rendering, and nothing handles its rejection: a `fetch()` at the top of `<script setup>`, or a Promise passed to `client-secret` of a Checkout provider inside `VueStripeProvider`. Pass a function in `fetch-client-secret`, or fetch in `onMounted`; see [Fetch client secrets in the browser](#fetch-client-secrets-in-the-browser).
+
+When the plugin provides Stripe, the same Promise does not stop the server: the provider handles the rejection, and the server logs `[Vue Stripe] Checkout init error: Failed to parse URL from /api/...` (`Checkout Form init error` for `VueStripeCheckoutFormProvider`) on every render. The fix is the same.
 
 ### Every page answers 500 "publishableKey or stripeKey is required"
 

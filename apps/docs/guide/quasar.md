@@ -255,7 +255,7 @@ The middleware uses the context API (`c.json()`) of Hono, the webserver Quasar s
 `<script setup>` runs on the server for every request. A relative `fetch('/api/...')` there rejects with "Failed to parse URL", and if nothing handles the rejection, Node stops the server process, in `quasar dev -m ssr` and in production alike. So:
 
 - Fetch the PaymentIntent in `onMounted`, as in step 7.
-- For [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider), `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`, never a Promise created at the top of `<script setup>` (the form shown in [Build your own page on a Checkout Session](/guide/custom-checkout#_2-wrap-the-page-in-the-provider)). The provider calls the function in the browser only, once Stripe.js has loaded:
+- For [`VueStripeCheckoutElementsProvider`](/api/components/stripe-checkout-provider), `VueStripeCheckoutFormProvider` and `VueStripeEmbeddedCheckout`, pass a function in `fetch-client-secret`, never a Promise created at the top of `<script setup>` (the form shown in [Build your own page on a Checkout Session](/guide/custom-checkout#_2-wrap-the-page-in-the-provider)). With the plugin from step 3, the provider renders on the server and handles that Promise's rejection: the server keeps running, but logs `[Vue Stripe] Checkout init error: Failed to parse URL from /api/checkout-elements-session` on every render (nothing, with an `#error` slot or `@error` listener). Inside a `VueStripeProvider`, which renders only its loading slot on the server, nothing handles it, and the server stops. The provider calls a function in the browser only, once Stripe.js has loaded:
 
   ```vue
   <!-- src/pages/CheckoutPage.vue -->
