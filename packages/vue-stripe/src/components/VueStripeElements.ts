@@ -13,6 +13,7 @@ import type {
   Appearance,
   CssFontSource,
   CustomFontSource,
+  StripeElementLocale,
   StripeElements,
   StripeElementsOptions,
   StripeElementsOptionsClientSecret,
@@ -54,7 +55,8 @@ const elementsProps = {
     type: Array as PropType<Array<CssFontSource | CustomFontSource> | undefined>,
     default: undefined
   },
-  locale: { type: String as PropType<string | undefined>, default: undefined },
+  /** One of Stripe's supported Elements locales (`'auto'`, `'en'`, `'fr'`, ...). */
+  locale: { type: String as PropType<StripeElementLocale | undefined>, default: undefined },
   /** Any other `stripe.elements()` option (e.g. allowedPaymentMethodTypes in mode-based flows). */
   options: {
     type: Object as PropType<StripeElementsOptions | Record<string, unknown> | undefined>,

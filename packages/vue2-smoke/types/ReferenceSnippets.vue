@@ -231,5 +231,13 @@ log(
     <VueStripeCheckoutFormProvider :client-secret="1" />
     <!-- @vue-expect-error options is an object -->
     <VueStripeIssuingDisclosure :options="1" />
+    <!-- Stripe's locale unions (#776): 'ja' is Japanese, 'jp' and 'arr' are typos -->
+    <VueStripeProvider publishable-key="pk_test_x" locale="ja">
+      <VueStripeElements locale="auto" />
+    </VueStripeProvider>
+    <!-- @vue-expect-error locale is one of Stripe's locales -->
+    <VueStripeProvider publishable-key="pk_test_x" locale="arr" />
+    <!-- @vue-expect-error locale is one of Stripe's Elements locales -->
+    <VueStripeElements locale="jp" />
   </div>
 </template>

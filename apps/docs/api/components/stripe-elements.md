@@ -50,7 +50,7 @@ Without an Intent, pass `mode` / `currency` / `amount` instead of `clientSecret`
 | `captureMethod` | `'automatic' \| 'automatic_async' \| 'manual'` | No | Controls when to capture funds from the customer's account |
 | `appearance` | `Appearance` | No | [Appearance API](#appearance-api) options to theme all child elements (theme, variables, rules, labels). Convenience prop — equivalent to `options.appearance`. Changes are applied live with `elements.update()`; a new but deep-equal object is not a change |
 | `fonts` | `(CssFontSource \| CustomFontSource)[]` | No | Custom fonts to load into the Elements iframe. Convenience prop — equivalent to `options.fonts` |
-| `locale` | `string` | No | Locale to display Elements in (e.g. `'en'`, `'fr'`, `'auto'`). Convenience prop — equivalent to `options.locale`. Changes are applied live with `elements.update()` |
+| `locale` | `StripeElementLocale` | No | Locale to display Elements in: one of Stripe's supported locales (`'auto'`, `'en'`, `'fr'`, ...); a value outside the list is a type error. Convenience prop — equivalent to `options.locale`. Changes are applied live with `elements.update()` |
 | `options` | `StripeElementsOptions` | No | Any other option passed to `stripe.elements()` (e.g. `allowedPaymentMethodTypes` in the mode-based flow, `loader`) |
 
 \* Required for Payment Element and some other elements. Optional for Card Element. When `clientSecret` is omitted, use `mode`/`currency`/`amount` for deferred intent creation; see [Collect payment details before creating an Intent](/guide/deferred-intent).

@@ -39,7 +39,7 @@ const onError = (error: Error) => console.error('Stripe.js failed to load', erro
 | `stripeKey` | `string` | Yes* | Alias for `publishableKey` (backwards compatibility) |
 | `stripeAccount` | `string` | No | Connected account ID for Stripe Connect |
 | `apiVersion` | `string` | No | Deprecated and ignored: not passed to `loadStripe()`, because Stripe.js Endive refuses it. See [API version](#api-version) |
-| `locale` | `string` | No | Locale for Stripe.js (e.g., 'en', 'es', 'fr') |
+| `locale` | `StripeConstructorOptions['locale']` | No | Locale for Stripe.js: one of Stripe's supported locales (`'auto'`, `'en'`, `'es'`, `'fr'`, ...), as in [`createVueStripe()`](/api/plugin). A value outside the list, such as `'jp'` for Japanese (`'ja'`), is a type error |
 | `betas` | `string[]` | No | Stripe beta flags, forwarded to `loadStripe()` (e.g. `elements_link_signup_beta_1` for the [Link Signup Element](/api/components/stripe-link-signup-element)) |
 | `developerTools` | `StripeConstructorOptions['developerTools']` | No | Stripe.js developer tooling, e.g. `{ assistant: { enabled: false } }`, forwarded to `loadStripe()` |
 | `advancedFraudSignals` | `boolean` | No | Default `true`. `false` loads Stripe.js without advanced fraud signals. See [Advanced fraud signals](#advanced-fraud-signals) |
