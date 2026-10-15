@@ -368,3 +368,29 @@ it('reports a failing fetch-client-secret through Vue 2 @error and #error, nothi
   expect(wrapper.text()).toBe(`Custom: ${message}`)
   expect(unhandled).toEqual([])
 })
+
+it('hands a missing key to Vue.config.errorHandler with no follow-up mount warning (#745)', async () => {
+  const { default: Vue } = await import('vue')
+  const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+  const errorHandler = vi.fn()
+  const previous = Vue.config.errorHandler
+  Vue.config.errorHandler = errorHandler
+  try {
+    const vm = new Vue({
+      render: (h: CreateElement) => h('main', [h(VueStripeProvider as never, { props: {} })])
+    }).$mount()
+    await settle()
+
+    expect(errorHandler).toHaveBeenCalledTimes(1)
+    expect((errorHandler.mock.calls[0]![0] as Error).message).toBe(
+      'publishableKey or stripeKey is required'
+    )
+    expect((vm.$el as HTMLElement).outerHTML).toBe('<main><!----></main>')
+    const mountWarnings = error.mock.calls.filter(([m]) => /render function/.test(String(m)))
+    expect(mountWarnings).toEqual([])
+    vm.$destroy()
+  } finally {
+    Vue.config.errorHandler = previous
+    error.mockRestore()
+  }
+})
