@@ -278,6 +278,30 @@ describe('VueStripeEmbeddedCheckout (stripe.createEmbeddedCheckoutPage)', () => 
     expect(stripe.createEmbeddedCheckoutPage).toHaveBeenCalledTimes(1)
   })
 
+  it('creates the page once, even when the context later reports a new instance or an error', async () => {
+    const stripe = makeMockStripe()
+    const current = shallowRef<ReturnType<typeof makeMockStripe> | null>(stripe)
+    const loadError = ref<string | null>(null)
+    const Parent = defineComponent({
+      setup() {
+        provide(stripeInjectionKey, {
+          stripe: current as never,
+          loading: ref(false),
+          error: loadError
+        })
+        return () => h(VueStripeEmbeddedCheckout, { clientSecret: 'cs_once', onError: () => {} })
+      }
+    })
+    const wrapper = mount(Parent)
+    await flushPromises()
+    current.value = makeMockStripe()
+    loadError.value = 'Late error'
+    await flushPromises()
+    expect(stripe.createEmbeddedCheckoutPage).toHaveBeenCalledTimes(1)
+    expect(current.value.createEmbeddedCheckoutPage).not.toHaveBeenCalled()
+    expect(wrapper.findComponent(VueStripeEmbeddedCheckout).emitted('error')).toBeUndefined()
+  })
+
   it('destroys the embedded page on unmount', async () => {
     const { embedded, shown } = await mountWith()
     shown.value = 0

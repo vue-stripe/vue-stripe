@@ -204,6 +204,20 @@ describe.each(CASES)('%s', (name, Disclosure, method, slug, options) => {
       consoleWarn.mockRestore()
     })
 
+    it('ignores an instance that resolves after a newer stripe prop', async () => {
+      let resolveFirst!: (stripe: unknown) => void
+      const first = new Promise((resolve) => (resolveFirst = resolve))
+      const stale = stripeWith(method, () => Promise.resolve({ htmlElement: legalText('Stale') }))
+      const fresh = stripeWith(method, () => Promise.resolve({ htmlElement: legalText('Fresh') }))
+      const wrapper = await mountWithProp(Disclosure, { stripe: first })
+      await wrapper.setProps({ stripe: fresh })
+      await flushPromises()
+      resolveFirst(stale)
+      await flushPromises()
+      expect(stale[method]).not.toHaveBeenCalled()
+      expect(wrapper.text()).toContain('Fresh')
+    })
+
     it('ignores a rejection that arrives after a newer stripe prop', async () => {
       let rejectFirst!: (err: Error) => void
       const first = new Promise<never>((_resolve, reject) => (rejectFirst = reject))
