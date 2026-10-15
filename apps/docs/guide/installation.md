@@ -246,7 +246,7 @@ A page with no build step loads the UMD build from unpkg or jsDelivr. Add three 
 ```
 :::
 
-The only differences on Vue 2.7 are the Vue script and `new Vue(...).$mount('#app')` in place of `Vue.createApp(...).mount('#app')`; vue-demi picks its Vue 2 build from the `Vue` global. Keep the viewport `<meta>` tag: without it, Stripe.js warns `Elements requires "width=device-width" be set in your page's viewport meta tag`. Pin exact versions in production, so that a new release cannot change the page.
+The only differences on Vue 2.7 are the Vue script and `new Vue(...).$mount('#app')` in place of `Vue.createApp(...).mount('#app')`; vue-demi picks its Vue 2 build from the `Vue` global. Keep the viewport `<meta>` tag: without it, Stripe.js warns `Elements requires "width=device-width" be set in your page's viewport meta tag`. Serve the page over HTTP (any static server, for example `npx serve .`) rather than opening it from disk: on a `file://` URL Stripe.js logs errors such as "Stripe.js requires 'allow-same-origin' if sandboxed". Pin exact versions in production, so that a new release cannot change the page.
 
 ### App-wide plugin
 
