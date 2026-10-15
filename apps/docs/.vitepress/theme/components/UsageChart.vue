@@ -3,7 +3,8 @@
 // The SVG is drawn in pixels at the width it is shown, so its text stays at text size on a
 // phone. One y scale places the area, the line, the grid, the tick labels and the points.
 // Hover, or focus the chart and use the arrow keys, to read each week; the table below the
-// chart lists every week too.
+// chart lists every week too. The focusable frame is a named group, so a screen reader reads
+// its label, the arrow-key instructions, on focus (ARIA ignores a name on a div with no role).
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { formatCompact, formatCount, formatDay, type WeeklyDownloads } from '../data/usage'
 
@@ -161,6 +162,7 @@ onBeforeUnmount(() => observer?.disconnect())
     <div
       ref="frame"
       class="usage-chart-frame"
+      role="group"
       tabindex="0"
       :aria-label="`${label}. Use the left and right arrow keys to read each week.`"
       @keydown="onKey"

@@ -4,7 +4,8 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./.vitepress/*"]
+      "@/*": ["./.vitepress/*"],
+      "vitepress/dist/client/theme-default/components/*": ["./.vitepress/vitepress-component.d.ts"]
     }
   },
   "include": [".vitepress/**/*", ".vitepress/**/*.vue"],

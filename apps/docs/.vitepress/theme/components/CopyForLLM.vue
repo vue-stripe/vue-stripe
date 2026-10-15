@@ -1,36 +1,29 @@
 <script setup lang="ts">
+// Copies the page's Markdown copy (/guide/testing.md), the file the build writes for language
+// models (../../llms.ts): the same text as /llms-full.txt, with the figures the page's
+// components show, absolute links and no frontmatter or VitePress-only syntax. The dev server
+// has no copies and serves the page source at that URL instead.
 import { ref, computed } from 'vue'
-import { useRoute } from 'vitepress'
+import { useData, useRoute, withBase } from 'vitepress'
 import { useAnalytics } from '../composables/useAnalytics'
-
-// Import all markdown files from guide and api directories
-const markdownFiles = import.meta.glob(['../../../guide/**/*.md', '../../../api/**/*.md'], {
-  query: '?raw',
-  import: 'default'
-})
+import { markdownPathOf } from '../data/markdown-copy'
 
 const route = useRoute()
+const { frontmatter } = useData()
 const { trackEvent } = useAnalytics()
 const copied = ref(false)
 const loading = ref(false)
 
-// Only show on guide and api pages
+// Guide and API pages only; a stub left at a removed page's URL (noindex) has no copy.
 const shouldShow = computed(() => {
   const path = route.path
-  return path.startsWith('/guide/') || path.startsWith('/api/')
+  return (path.startsWith('/guide/') || path.startsWith('/api/')) && !frontmatter.value['noindex']
 })
 
-// Get the markdown file path from the route
-function getMarkdownPath(routePath: string): string {
-  // Remove leading slash and .html extension, add .md
-  let path = routePath.replace(/^\//, '').replace(/\.html$/, '')
-
-  // Handle index pages
-  if (path.endsWith('/') || path === 'guide' || path === 'api') {
-    path = path.replace(/\/$/, '') + '/index'
-  }
-
-  return `../../../${path}.md`
+async function fetchMarkdown(url: string): Promise<string> {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`)
+  return response.text()
 }
 
 async function copyMarkdown() {
@@ -39,23 +32,23 @@ async function copyMarkdown() {
   loading.value = true
 
   try {
-    const markdownPath = getMarkdownPath(route.path)
-    const loader = markdownFiles[markdownPath]
-
-    if (!loader) {
-      console.warn('Markdown file not found:', markdownPath)
-      loading.value = false
-      return
+    const content = fetchMarkdown(withBase(markdownPathOf(route.path.replace(/\.html$/, ''))))
+    // Safari allows a clipboard write only inside the click, so hand it the pending text.
+    if (typeof ClipboardItem !== 'undefined' && navigator.clipboard.write) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/plain': content.then((text) => new Blob([text], { type: 'text/plain' }))
+        })
+      ])
+    } else {
+      await navigator.clipboard.writeText(await content)
     }
-
-    // DocIcon tags are visual only; the word next to each one carries the meaning.
-    const content = ((await loader()) as string).replace(/<DocIcon\b[^>]*\/>\s?/g, '')
-    await navigator.clipboard.writeText(content)
+    const text = await content
 
     // Track the copy event in Google Analytics
     trackEvent('copy_for_llm', {
       page_path: route.path,
-      content_length: content.length,
+      content_length: text.length,
       content_type: route.path.startsWith('/guide/') ? 'guide' : 'api'
     })
 
