@@ -1,4 +1,10 @@
-import { defineConfigWithTheme, loadEnv, type DefaultTheme, type HeadConfig } from 'vitepress'
+import {
+  defineConfigWithTheme,
+  loadEnv,
+  type DefaultTheme,
+  type HeadConfig,
+  type SiteConfig
+} from 'vitepress'
 import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
 import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -10,6 +16,7 @@ import {
   finishOgTags,
   maintainer,
   ogImageAlt,
+  routeOf,
   sectionOf,
   seoHead,
   type DocSection
@@ -19,12 +26,15 @@ import {
   coverageMarkdown,
   homeBundleSizeMarkdown,
   homeUsageMarkdown,
+  pageMarkdownCopy,
   parseFrontmatter,
   usageMarkdown,
   writeLlmsFiles
 } from './llms'
-import { loadUsage } from './theme/data/usage'
+import { emptyUsage, loadUsage, type UsageData } from './theme/data/usage'
 import { loadBundleSizes } from './theme/data/measure-bundle'
+import { emptyBundleSizes, type BundleSizes } from './theme/data/bundle-size'
+import { markdownPathOf } from './theme/data/markdown-copy'
 
 // Build the "Stripe.js Coverage NN%" nav label from the single coverage data source,
 // so the toolbar stays in sync with the /coverage page automatically.
@@ -422,6 +432,36 @@ Vue Stripe was created in 2017 by ${maintainer.name} (${maintainer.sameAs.join('
 
 The docs follow Diataxis: tutorials teach by doing, how-to guides solve one task each, the reference documents every export, and explanation pages cover how and why the library works. The live demos run each flow against Stripe's test mode.`
 
+// What the page components render, as Markdown in the page copies (./llms.ts).
+const llmsComponents = (usage: UsageData, sizes: BundleSizes): Record<string, string> => ({
+  StripeCoverage: coverageMarkdown(coverage),
+  // The same numbers the page was built with (one fetch per build).
+  UsageStats: usageMarkdown(usage),
+  ...bundleSizeMarkdown(sizes),
+  // The home page's numbers: the usage figures, then the bundle size.
+  HomeUsage: [homeUsageMarkdown(usage), homeBundleSizeMarkdown(sizes)].filter(Boolean).join('\n\n')
+})
+
+// The dev server's numbers for the page copies: fetched and measured once, on the first copy
+// asked for. A loader that fails gives the empty data, which the build falls back to as well.
+let devComponents: Promise<Record<string, string>> | undefined
+const loadDevComponents = () => {
+  const orEmpty = <T>(load: Promise<T>, empty: () => T, what: string) =>
+    load.catch((error: unknown) => {
+      console.warn(
+        `[Vue Stripe docs] ${what} unavailable for the dev server's .md copies: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      )
+      return empty()
+    })
+  devComponents ??= Promise.all([
+    orEmpty(loadUsage(), emptyUsage, 'Usage numbers'),
+    orEmpty(loadBundleSizes(), emptyBundleSizes, 'Bundle sizes')
+  ]).then(([usage, sizes]) => llmsComponents(usage, sizes))
+  return devComponents
+}
+
 // Load environment variables from .env files (for local dev)
 const envFromFile = loadEnv('', process.cwd())
 
@@ -598,6 +638,50 @@ export default defineConfigWithTheme<ThemeConfig>({
   },
 
   vite: {
+    plugins: [
+      // The page copies the build writes (/guide/testing.md, ./llms.ts), on the dev server too:
+      // without it Vite serves the page source there, which "Copy for LLMs" would copy. The
+      // page file is read on each request, so a copy follows edits.
+      {
+        name: 'vue-stripe-docs:markdown-copies',
+        apply: 'serve',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            const siteConfig = (server.config as { vitepress?: SiteConfig }).vitepress
+            const base = server.config.base
+            const [path = '', query] = (req.url ?? '').split('?')
+            // VitePress loads the page itself from the same path with a query (`?t=...`).
+            if (
+              !siteConfig ||
+              (req.method !== 'GET' && req.method !== 'HEAD') ||
+              query !== undefined ||
+              !path.startsWith(base) ||
+              !path.endsWith('.md')
+            ) {
+              return next()
+            }
+            const url = path.slice(base.length - 1)
+            const relativePath = siteConfig.pages.find((p) => markdownPathOf(routeOf(p)) === url)
+            if (!relativePath) return next()
+            loadDevComponents()
+              .then((components) => {
+                const copy = pageMarkdownCopy(relativePath, siteConfig.srcDir, components)
+                // A page without a copy (a `noindex` stub, the 404 page) has none on the site.
+                if (copy === null) {
+                  res.statusCode = 404
+                  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+                  res.end(`${url} has no Markdown copy`)
+                  return
+                }
+                res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
+                res.setHeader('Cache-Control', 'no-cache')
+                res.end(req.method === 'HEAD' ? undefined : copy)
+              })
+              .catch(next)
+          })
+        }
+      }
+    ],
     ssr: {
       noExternal: ['@vue-stripe/vue-stripe']
     },
@@ -688,16 +772,7 @@ export default defineConfigWithTheme<ThemeConfig>({
       sections: docSections,
       sidebars,
       header: llmsHeader,
-      components: {
-        StripeCoverage: coverageMarkdown(coverage),
-        // The same numbers the page was built with (one fetch per build).
-        UsageStats: usageMarkdown(usage),
-        ...bundleSizeMarkdown(sizes),
-        // The home page's numbers: the usage figures, then the bundle size.
-        HomeUsage: [homeUsageMarkdown(usage), homeBundleSizeMarkdown(sizes)]
-          .filter(Boolean)
-          .join('\n\n')
-      }
+      components: llmsComponents(usage, sizes)
     })
   }
 })

@@ -16,6 +16,7 @@ import {
 import {
   coverageMarkdown,
   homeMarkdown,
+  pageMarkdownCopy,
   parseFrontmatter,
   toPlainMarkdown,
   writeLlmsFiles
@@ -369,6 +370,42 @@ describe('Copy for LLMs', () => {
             .map((problem) => `${p.path}: ${problem}`)
         })
       expect(problems, problems.join('\n')).toEqual([])
+    } finally {
+      rmSync(outDir, { recursive: true, force: true })
+    }
+  })
+
+  // The dev server serves pageMarkdownCopy (config.ts), so it shows what the build writes.
+  it('pageMarkdownCopy is the copy the build writes, and null for a page without one', () => {
+    const outDir = mkdtempSync(join(tmpdir(), 'vue-stripe-llms-'))
+    const components = {
+      StripeCoverage: coverageMarkdown(coverage),
+      UsageStats: '| Figure | Value |',
+      HomeUsage: 'Home numbers.',
+      'BundleSize#summary': 'Bundle summary.'
+    }
+    try {
+      const siteConfig = { srcDir: docsDir, outDir, pages: pages.map((p) => p.path) }
+      writeLlmsFiles(siteConfig as unknown as Parameters<typeof writeLlmsFiles>[0], {
+        sections: [],
+        sidebars: [],
+        header: '> Header',
+        components
+      })
+      const problems = pages.flatMap((p) => {
+        const copy = pageMarkdownCopy(p.path, docsDir, components)
+        const file = join(outDir, markdownPathOf(routeOf(p.path)))
+        const written = existsSync(file) ? readFileSync(file, 'utf8') : null
+        if (p.noindex || p.path === '404.md') {
+          return [copy !== null && `${p.path}: a copy`, written !== null && `${p.path}: written`]
+            .filter(Boolean)
+            .map((problem) => `${problem}, though it has no copy on the site`)
+        }
+        return copy !== null && copy === written ? [] : [`${p.path}: differs from the build's`]
+      })
+      expect(problems, problems.join('\n')).toEqual([])
+      expect(pages.some((p) => p.noindex)).toBe(true)
+      expect(pageMarkdownCopy('guide/no-such-page.md', docsDir)).toBeNull()
     } finally {
       rmSync(outDir, { recursive: true, force: true })
     }
