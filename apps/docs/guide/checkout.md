@@ -125,7 +125,8 @@ const handleCheckout = async () => {
 
 Stripe sends the customer to `success_url` after paying. The customer can also open that URL directly, so ask your server for the session's status before showing a confirmation. Add a route that reads the session and always answers, paid or not:
 
-```js
+::: code-group
+```js [JavaScript]
 // GET /api/checkout-status?session_id=cs_test_...
 app.get('/api/checkout-status', async (req, res) => {
   try {
@@ -136,6 +137,20 @@ app.get('/api/checkout-status', async (req, res) => {
   }
 })
 ```
+
+```ts [TypeScript]
+// GET /api/checkout-status?session_id=cs_test_...
+app.get('/api/checkout-status', async (req, res) => {
+  try {
+    // req.query values can be arrays or objects; String() gives retrieve() a string
+    const session = await stripe.checkout.sessions.retrieve(String(req.query.session_id))
+    res.json({ status: session.status, paymentStatus: session.payment_status })
+  } catch {
+    res.status(404).json({ error: 'No such Checkout Session' })
+  }
+})
+```
+:::
 
 Then render the page at `success_url` (`/success` here) in your app. It reads `session_id` from the URL and calls the route through your `/api` proxy:
 
