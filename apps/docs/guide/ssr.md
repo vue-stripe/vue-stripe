@@ -418,16 +418,24 @@ import { VueStripeProvider, VueStripeElements, VueStripePaymentElement } from '@
 defineProps<{ publishableKey: string }>()
 
 const clientSecret = ref('')
+const errorMessage = ref('')
 
 onMounted(async () => {
-  const response = await fetch('/api/create-payment-intent', { method: 'POST' })
-  clientSecret.value = (await response.json()).clientSecret
+  try {
+    const response = await fetch('/api/create-payment-intent', { method: 'POST' })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    clientSecret.value = (await response.json()).clientSecret
+  } catch {
+    // An error answer, or no answer at all (server down, offline)
+    errorMessage.value = 'Failed to initialize payment'
+  }
 })
 </script>
 
 <template>
   <q-no-ssr>
-    <VueStripeProvider :publishable-key="publishableKey">
+    <p v-if="errorMessage">{{ errorMessage }}</p>
+    <VueStripeProvider v-else :publishable-key="publishableKey">
       <VueStripeElements v-if="clientSecret" :client-secret="clientSecret">
         <VueStripePaymentElement />
       </VueStripeElements>
@@ -436,7 +444,7 @@ onMounted(async () => {
 </template>
 ```
 
-Render `VueStripeElements` only once the client secret has arrived (`v-if`): created without one, the Payment Element fails with a `[Vue Stripe]` error in the console.
+Render `VueStripeElements` only once the client secret has arrived (`v-if`): created without one, the Payment Element fails with a `[Vue Stripe]` error in the console. When the route fails, the page shows "Failed to initialize payment", as the [Quasar guide's payment page](/guide/quasar#_7-render-a-payment-form) does; without the `response.ok` check, an error answer such as Hono's plain-text "Internal Server Error" makes `response.json()` throw instead, and the page stays empty.
 
 ## VitePress
 
