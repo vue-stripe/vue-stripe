@@ -2,7 +2,7 @@
 // Copies the page's Markdown copy (/guide/testing.md), the file the build writes for language
 // models (../../llms.ts): the same text as /llms-full.txt, with the figures the page's
 // components show, absolute links and no frontmatter or VitePress-only syntax. The dev server
-// has no copies and serves the page source at that URL instead.
+// answers the same URL with the same text (../../config.ts).
 import { ref, computed } from 'vue'
 import { useData, useRoute, withBase } from 'vitepress'
 import { useAnalytics } from '../composables/useAnalytics'
