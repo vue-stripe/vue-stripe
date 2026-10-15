@@ -539,7 +539,8 @@ export default defineConfigWithTheme<ThemeConfig>({
   lastUpdated: true,
 
   themeConfig: {
-    logo: { src: '/vue-stripe-logo-variant-1-small.png', alt: 'Vue Stripe' },
+    // The site title beside the logo names the home link, so the logo itself is decorative.
+    logo: { src: '/vue-stripe-logo-variant-1-small.png', alt: '' },
 
     // Environment config for live demos (passed to components via useData())
     stripeConfig: {
@@ -606,6 +607,17 @@ export default defineConfigWithTheme<ThemeConfig>({
         {
           find: /^.*\/VPDocFooterLastUpdated\.vue$/,
           replacement: fileURLToPath(new URL('./theme/components/LastUpdated.vue', import.meta.url))
+        },
+        // Sidebar groups with one disclosure button each (theme/components/SidebarItem.vue).
+        {
+          find: /^.*\/VPSidebarItem\.vue$/,
+          replacement: fileURLToPath(new URL('./theme/components/SidebarItem.vue', import.meta.url))
+        },
+        // The doc footer without a second contentinfo landmark (theme/components/DocFooter.vue).
+        // Only VPDoc's relative import: the wrapper imports the original by its package path.
+        {
+          find: /^\.\/VPDocFooter\.vue$/,
+          replacement: fileURLToPath(new URL('./theme/components/DocFooter.vue', import.meta.url))
         }
       ]
     },

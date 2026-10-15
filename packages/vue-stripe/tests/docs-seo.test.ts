@@ -404,6 +404,25 @@ describe('docs theme accessibility', () => {
     })
     expect(problems, problems.join('\n')).toEqual([])
   })
+
+  // A role="button" header with a role="button" caret inside it (axe nested-interactive, #750):
+  // the theme's controls are real buttons, and a disclosure says whether it is open.
+  it('uses real buttons, and a sidebar toggle has aria-expanded', () => {
+    const roleButtons = vueFiles(themeDir).filter((file) =>
+      readFileSync(file, 'utf8')
+        .replace(/^\s*\/\/.*$/gm, '')
+        .includes('role="button"')
+    )
+    expect(roleButtons.map((f) => relative(docsDir, f))).toEqual([])
+    const sidebar = readFileSync(join(themeDir, 'components/SidebarItem.vue'), 'utf8').split(
+      '<template>'
+    )[1]!
+    const toggles = [...sidebar.matchAll(/<button\b[^>]*>/g)].map(([tag]) => tag)
+    expect(toggles).toHaveLength(2)
+    for (const tag of toggles) expect(tag).toContain(':aria-expanded="!collapsed"')
+    const config = readFileSync(join(docsDir, '.vitepress/config.ts'), 'utf8')
+    expect(config).toContain("'./theme/components/SidebarItem.vue'")
+  })
 })
 
 describe('llms-full coverage table', () => {
