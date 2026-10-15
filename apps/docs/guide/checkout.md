@@ -42,7 +42,7 @@ The webhook that fulfils the order finds it from `client_reference_id` ([Fulfil 
 
 ## 2. Add the checkout button
 
-Fetch the session URL, then render `VueStripeCheckout`. If your endpoint fails, show your own message instead of the button; problems with the session itself (expired, already paid) are shown by Stripe on the hosted page.
+Fetch the session URL, then render `VueStripeCheckout`. If your endpoint fails, or the request gets no answer at all (server down, customer offline), show your own message instead of the button; problems with the session itself (expired, already paid) are shown by Stripe on the hosted page.
 
 ```vue
 <script setup lang="ts">
@@ -54,12 +54,14 @@ const sessionUrl = ref('')
 const failed = ref(false)
 
 onMounted(async () => {
-  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
-  if (!response.ok) {
+  try {
+    const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    sessionUrl.value = (await response.json()).url
+  } catch {
+    // An error answer, or no answer at all (server down, offline)
     failed.value = true
-    return
   }
-  sessionUrl.value = (await response.json()).url
 })
 </script>
 
@@ -100,12 +102,14 @@ const failed = ref(false)
 
 const handleCheckout = async () => {
   failed.value = false
-  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
-  if (!response.ok) {
+  try {
+    const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    redirectToUrl((await response.json()).url)
+  } catch {
+    // An error answer, or no answer at all (server down, offline)
     failed.value = true
-    return
   }
-  redirectToUrl((await response.json()).url)
 }
 </script>
 

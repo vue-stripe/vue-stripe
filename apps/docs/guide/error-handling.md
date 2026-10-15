@@ -247,7 +247,7 @@ The return page is a route of its own, so it needs a `VueStripeProvider` of its 
 | `useCheckoutSession().confirm()` | Declined, validation error, expired session | Resolves to `{ type: 'error', error }` |
 | `VueStripePricingTable` | Stripe's pricing table script failed to load | `@error` with an `Error`, `#error` slot |
 
-Problems with a hosted Checkout Session itself (expired, already paid) are shown by Stripe on its page. What remains for you is your own endpoint that creates the session: check `response.ok` before you render the button or the provider, and show your own message when it fails.
+Problems with a hosted Checkout Session itself (expired, already paid) are shown by Stripe on its page. What remains for you is your own endpoint that creates the session: check `response.ok` before you render the button or the provider, catch a `fetch()` that rejects (server down, customer offline), and show your own message in both cases.
 
 ```vue
 <script setup lang="ts">
@@ -258,12 +258,14 @@ const sessionUrl = ref('')
 const failed = ref(false)
 
 onMounted(async () => {
-  const response = await fetch('/api/create-checkout-session', { method: 'POST' })
-  if (!response.ok) {
+  try {
+    const response = await fetch('/api/create-checkout-session', { method: 'POST' })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    sessionUrl.value = (await response.json()).url
+  } catch {
+    // An error answer, or no answer at all (server down, offline)
     failed.value = true
-    return
   }
-  sessionUrl.value = (await response.json()).url
 })
 
 // VueStripeCheckoutError: clicked before the session URL arrived
