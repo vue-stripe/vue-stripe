@@ -40,6 +40,7 @@ Work through the table row by row. The last column gives the reason in short; [S
 | `@stripe/stripe-js` `^7.5 \|\| ^8.5` | `^10.0.0` | Stripe.js Endive |
 | `vue` `^2.6 \|\| ^3` | `^2.7 \|\| ^3` | v6 relies on `expose` and `useSlots`; Vue 2.6 is end-of-life |
 | No stylesheet export | `import '@vue-stripe/vue-stripe/style.css'` | Render-function components carry no styles of their own |
+| `apiVersion` on `VueStripeProvider` (prop or `options.apiVersion`) and in `createVueStripe()` | Remove it. v6 ignores it and logs a `[Vue Stripe]` warning; Stripe.js 10 always uses its own API version. Your server sets the API version (step 4) | Versioned Stripe.js refuses `apiVersion` ([API version](/api/components/stripe-provider#api-version)) |
 | `VueStripeIdealBankElement`, `VueStripeP24BankElement`, `VueStripeEpsBankElement`, `VueStripeFpxBankElement` | `VueStripePaymentElement` | Stripe removed these elements (Clover) |
 | `<VueStripeElements :payment-method-types>` | Mode-based flow: `:options="{ allowedPaymentMethodTypes }"`. `clientSecret` flow: `allowed_payment_method_types` on the Intent, or Dashboard settings | Stripe removed the option (Endive) |
 | Server: `payment_method_types` when creating PaymentIntents, SetupIntents and Checkout Sessions | `allowed_payment_method_types`, or no parameter so your Dashboard settings decide (step 4) | Stripe removed the parameter (Endive) |
@@ -130,6 +131,7 @@ Every element component now renders the same markup: a `vue-stripe-<name>-elemen
 
 - [ ] `@stripe/stripe-js` is `^10`, `vue` is `^2.7` or `^3`
 - [ ] `@vue-stripe/vue-stripe/style.css` is imported once
+- [ ] No `apiVersion` on `VueStripeProvider` or in `createVueStripe()`
 - [ ] No iDEAL / P24 / EPS / FPX element components remain; the Payment Element collects those methods
 - [ ] No `payment-method-types` prop on `VueStripeElements`
 - [ ] `VueStripeCheckout` gets `session-url`; the server creates the session
