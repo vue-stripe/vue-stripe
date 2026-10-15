@@ -7,7 +7,11 @@ import {
   useStripe,
   VueStripeCardElement,
   VueStripeElements,
-  VueStripeProvider
+  VueStripeEmbeddedCheckout,
+  VueStripeFinancialAccountDisclosure,
+  VueStripeIssuingDisclosure,
+  VueStripeProvider,
+  VueStripeTreasuryDisclosure
 } from '@vue-stripe/vue-stripe'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CreateElement } from 'vue'
@@ -108,3 +112,65 @@ it('starts the plugin load from a method composable and waits for it (#565)', as
   // Called before the load settles: waits instead of failing.
   await expect(api.confirmCardPayment('pi_x_secret_y')).resolves.toBe(result)
 })
+
+// #773: under the plugin alone these four stayed on their loader when Stripe.js failed to load.
+it.each([
+  ['VueStripeEmbeddedCheckout', VueStripeEmbeddedCheckout, 'embedded-checkout', 'Blocked'],
+  [
+    'VueStripeFinancialAccountDisclosure',
+    VueStripeFinancialAccountDisclosure,
+    'financial-account-disclosure',
+    { message: 'Blocked' }
+  ],
+  [
+    'VueStripeIssuingDisclosure',
+    VueStripeIssuingDisclosure,
+    'issuing-disclosure',
+    { message: 'Blocked' }
+  ],
+  [
+    'VueStripeTreasuryDisclosure',
+    VueStripeTreasuryDisclosure,
+    'treasury-disclosure',
+    { message: 'Blocked' }
+  ]
+])(
+  'reports a plugin load failure in %s through Vue 2 @error and #error (#773)',
+  async (name, Component, slug, payload) => {
+    vi.mocked(loadStripe).mockImplementation(() => Promise.reject(new Error('Blocked')))
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const onError = vi.fn()
+    const props = slug === 'embedded-checkout' ? { clientSecret: 'cs_x_secret_y' } : {}
+    const listening = mount(
+      {
+        render(h: CreateElement) {
+          return h(Component as never, { props, on: { error: onError } })
+        }
+      },
+      { localVue: withPlugin(`pk_test_773_listener_${name}`) }
+    )
+    const slotted = mount(
+      {
+        render(h: CreateElement) {
+          return h(Component as never, {
+            props,
+            scopedSlots: { error: ({ error }: { error: string }) => h('p', `slot: ${error}`) }
+          })
+        }
+      },
+      { localVue: withPlugin(`pk_test_773_slot_${name}`) }
+    )
+    await settle()
+    expect(onError).toHaveBeenCalledTimes(1)
+    expect(onError).toHaveBeenCalledWith(payload)
+    expect(listening.find(`.vue-stripe-${slug}-error`).text()).toBe('Blocked')
+    expect(listening.find(`.vue-stripe-${slug}-loader`).exists()).toBe(false)
+    expect(slotted.text()).toBe('slot: Blocked')
+    // Only the plugin's own log, once per plugin.
+    expect(consoleError.mock.calls).toEqual([
+      ['[Vue Stripe] Initialization error:', 'Blocked'],
+      ['[Vue Stripe] Initialization error:', 'Blocked']
+    ])
+    consoleError.mockRestore()
+  }
+)

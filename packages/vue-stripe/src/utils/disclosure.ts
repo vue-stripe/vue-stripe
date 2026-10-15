@@ -131,11 +131,12 @@ export function createStripeDisclosure<TOptions extends object>(
       const logError = errorLogger(slots)
       // Stripe's `{ error }` result and a rejected call are both load failures: each one is
       // logged unless the app handles it, like every other component (#761).
-      const fail = (err: DisclosureError) => {
+      // `log: false` for the plugin's Stripe.js load failure, which the plugin logs itself.
+      const fail = (err: DisclosureError, log = true) => {
         const message = err.message ?? `${componentName} failed to load`
         error.value = message
         loading.value = false
-        logError(`${componentName} error`, message)
+        if (log) logError(`${componentName} error`, message)
         emit('error', err)
       }
       const messageOf = (err: unknown) => (err instanceof Error ? err.message : String(err))
@@ -154,7 +155,13 @@ export function createStripeDisclosure<TOptions extends object>(
         }
         // toRaw: a Stripe instance kept in a deep ref() arrives as a reactive proxy.
         const stripe = resolved ? toRaw(resolved) : null
-        if (request !== latest || !stripe) return
+        if (request !== latest) return
+        if (!stripe) {
+          // Without a `stripe` prop: the createVueStripe() plugin's Stripe.js load failed (#773).
+          const loadError = props.stripe === undefined && providerCtx?.error.value
+          if (loadError) fail({ message: loadError }, false)
+          return
+        }
         loading.value = true
         error.value = null
         try {
@@ -185,7 +192,7 @@ export function createStripeDisclosure<TOptions extends object>(
       // The source sits in an array: Vue attaches its own handler to a Promise a watch getter
       // returns, and reports its rejection as an unhandled watcher getter error (#774). A
       // separate watch for the options, so an inline `:options` re-render does not reload.
-      watch(() => [stripeSource()], reload)
+      watch(() => [stripeSource(), props.stripe === undefined && providerCtx?.error.value], reload)
       watch(optionsKey, reload)
       onMounted(() => void create())
       onUnmounted(() => {

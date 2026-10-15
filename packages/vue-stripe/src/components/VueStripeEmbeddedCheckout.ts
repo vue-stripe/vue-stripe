@@ -99,16 +99,26 @@ export default /* @__PURE__ */ defineComponent({
 
     const logError = errorLogger(slots)
     const listens = listenerCheck()
-    const fail = (message: string) => {
+    // `log: false` for the plugin's Stripe.js load failure, which the plugin logs itself.
+    const fail = (message: string, log = true) => {
       error.value = message
       loading.value = false
-      logError('Embedded Checkout error', message)
+      if (log) logError('Embedded Checkout error', message)
       emit('error', message)
     }
 
     const start = async () => {
       const stripe = stripeInstance.stripe.value
-      if (started || unmounted || !mounted || !stripe) return
+      if (started || unmounted || !mounted) return
+      if (!stripe) {
+        // Under the createVueStripe() plugin alone: its Stripe.js load failed (#773).
+        const loadError = stripeInstance.error.value
+        if (loadError) {
+          started = true
+          fail(loadError, false)
+        }
+        return
+      }
       started = true
 
       if (!props.clientSecret && !props.fetchClientSecret) {
@@ -163,7 +173,7 @@ export default /* @__PURE__ */ defineComponent({
     }
 
     watch(
-      () => stripeInstance.stripe.value,
+      () => [stripeInstance.stripe.value, stripeInstance.error.value],
       () => void start()
     )
     onMounted(() => {

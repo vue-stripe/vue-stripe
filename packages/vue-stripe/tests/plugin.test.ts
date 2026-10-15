@@ -15,6 +15,10 @@ import VueStripeCheckoutElementsProvider from '../src/components/VueStripeChecko
 import VueStripeElements from '../src/components/VueStripeElements'
 import VueStripePaymentElement from '../src/components/VueStripePaymentElement'
 import VueStripeProvider from '../src/components/VueStripeProvider'
+import VueStripeEmbeddedCheckout from '../src/components/VueStripeEmbeddedCheckout'
+import VueStripeFinancialAccountDisclosure from '../src/components/VueStripeFinancialAccountDisclosure'
+import VueStripeIssuingDisclosure from '../src/components/VueStripeIssuingDisclosure'
+import VueStripeTreasuryDisclosure from '../src/components/VueStripeTreasuryDisclosure'
 import { flushPromises, makeMockStripe, type MockStripe, type MockStripeElements } from './setup'
 import { useRadarSession } from '../src/composables/useRadarSession'
 import { usePaymentIntent } from '../src/composables/usePaymentIntent'
@@ -279,6 +283,81 @@ describe('createVueStripe as a global provider (#424)', () => {
     expect(wrapper.find('.vue-stripe-checkout-error').text()).toBe('Network error')
     consoleError.mockRestore()
   })
+
+  // #773: these four stayed on their loader with no #error and no @error.
+  const LOAD_FAILURE_CASES = [
+    ['VueStripeEmbeddedCheckout', VueStripeEmbeddedCheckout, 'embedded-checkout', 'Network error'],
+    [
+      'VueStripeFinancialAccountDisclosure',
+      VueStripeFinancialAccountDisclosure,
+      'financial-account-disclosure',
+      { message: 'Network error' }
+    ],
+    [
+      'VueStripeIssuingDisclosure',
+      VueStripeIssuingDisclosure,
+      'issuing-disclosure',
+      { message: 'Network error' }
+    ],
+    [
+      'VueStripeTreasuryDisclosure',
+      VueStripeTreasuryDisclosure,
+      'treasury-disclosure',
+      { message: 'Network error' }
+    ]
+  ] as const
+
+  describe.each(LOAD_FAILURE_CASES)(
+    '%s under the plugin when Stripe.js fails to load (#773)',
+    (_name, Component, slug, payload) => {
+      const props =
+        slug === 'embedded-checkout'
+          ? { fetchClientSecret: () => Promise.resolve('cs_test_secret_x') }
+          : {}
+
+      it('emits @error, ends loading and shows the message', async () => {
+        const { loadStripe } = await import('@stripe/stripe-js/pure')
+        vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+        const wrapper = mount(Component as never, {
+          props: { ...props, onError: () => {} },
+          global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] }
+        })
+        await flushPromises()
+        await flushPromises()
+
+        expect(wrapper.emitted('error')).toEqual([[payload]])
+        expect(wrapper.find(`.vue-stripe-${slug}-error`).text()).toBe('Network error')
+        expect(wrapper.find(`.vue-stripe-${slug}-loader`).exists()).toBe(false)
+        expect((wrapper.vm as unknown as { loading: boolean }).loading).toBe(false)
+        // The plugin logs the load failure; the component does not log it a second time.
+        expect(consoleError).toHaveBeenCalledTimes(1)
+        expect(consoleError).toHaveBeenCalledWith(
+          '[Vue Stripe] Initialization error:',
+          'Network error'
+        )
+        consoleError.mockRestore()
+      })
+
+      it('renders the #error slot with the message', async () => {
+        const { loadStripe } = await import('@stripe/stripe-js/pure')
+        vi.mocked(loadStripe).mockRejectedValueOnce(new Error('Network error'))
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+        const wrapper = mount(Component as never, {
+          props,
+          slots: { error: ({ error }: { error: string }) => h('p', `slot: ${error}`) },
+          global: { plugins: [createVueStripe({ publishableKey: 'pk_test_123' })] }
+        })
+        await flushPromises()
+        await flushPromises()
+
+        expect(wrapper.text()).toBe('slot: Network error')
+        consoleError.mockRestore()
+      })
+    }
+  )
 
   it('reports loadStripe resolving null as an error', async () => {
     const { loadStripe } = await import('@stripe/stripe-js/pure')
