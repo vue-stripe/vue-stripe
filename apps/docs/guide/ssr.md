@@ -29,6 +29,7 @@ From 6.0.0-beta.1 no bundler setting is needed: the package loads in Node as it 
 import { VueStripeProvider, VueStripeCheckoutElementsProvider } from '@vue-stripe/vue-stripe'
 import CheckoutForm from './CheckoutForm.vue'
 
+// Nuxt: useRuntimeConfig().public.stripePublishableKey (see below)
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 // Called by the provider in the browser only, once Stripe.js has loaded.
@@ -51,6 +52,8 @@ const fetchClientSecret = () =>
 ```
 
 `CheckoutForm` is the form from [Build your own checkout page on a Checkout Session](/guide/custom-checkout#_3-build-the-form). The server renders the providers' loading state, and the browser creates one session per visit.
+
+The sample reads the key as a Vite app does. In Nuxt, write `const publishableKey = useRuntimeConfig().public.stripePublishableKey`, as the comment says: the Nuxt setup below puts the key in `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, so `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` is `undefined` there, every render of the page answers 500 "publishableKey or stripeKey is required", and `nuxi generate` stops with a prerender error. The same change applies to every sample in these docs that reads `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. With the plugin from [step 3](#_3-provide-stripe), drop `VueStripeProvider` and the key line instead.
 
 ### Set the publishable key where the server can read it
 
@@ -98,6 +101,8 @@ NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 You get the `whsec_...` webhook secret in [step 7](#_7-receive-webhooks); leave it empty until then.
+
+Read the publishable key as `useRuntimeConfig().public.stripePublishableKey`, as the steps below do. Samples on the other pages of these docs read `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`, which is `undefined` with this `.env`; replace that line when you copy one.
 
 `nuxi dev` reads `.env`; the production server does not. Set the variables in the server's environment, or pass the file to Node when you start the build:
 
@@ -445,7 +450,7 @@ Node prints `TypeError: Failed to parse URL from /api/...` and stops. A componen
 
 ### Every page answers 500 "publishableKey or stripeKey is required"
 
-The server rendered `VueStripeProvider` with an empty key. In Nuxt's production server, set `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` in the environment or start it with `node --env-file=.env` ([step 2](#_2-configure-nuxt)). A Vite SSR app answers 500 from its development server only, and its key must be set when you run `vite build`; see [the Vite SSR troubleshooting entry](/guide/vite-ssr#the-page-shows-expected-publishable-key-to-be-of-type-string-or-the-payment-form-is-missing).
+The server rendered `VueStripeProvider` with an empty key. In Nuxt's production server, set `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` in the environment or start it with `node --env-file=.env` ([step 2](#_2-configure-nuxt)). When only the pages copied from other guides answer 500, in `nuxi dev` too, they read `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`; read `useRuntimeConfig().public.stripePublishableKey` instead. A Vite SSR app answers 500 from its development server only, and its key must be set when you run `vite build`; see [the Vite SSR troubleshooting entry](/guide/vite-ssr#the-page-shows-expected-publishable-key-to-be-of-type-string-or-the-payment-form-is-missing).
 
 ### The server fails with `ERR_UNSUPPORTED_DIR_IMPORT`
 

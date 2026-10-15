@@ -13,6 +13,7 @@ Find the message or symptom you see, then apply the fix. Errors that Vue Stripe 
 `VueStripeProvider` received no key, usually because the environment variable is empty in the browser:
 
 - Check the variable prefix your build tool exposes to client code (`VITE_`, `VUE_APP_`, `NUXT_PUBLIC_`, `QCLI_` in Quasar); see [Install and set up](/guide/installation#_3-add-your-publishable-key).
+- Check how the code reads it. The samples in these docs read `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`; in Nuxt that is `undefined` when `.env` sets `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and the page answers 500 with this message. Read `useRuntimeConfig().public.stripePublishableKey` instead ([Configure Nuxt](/guide/ssr#_2-configure-nuxt)).
 - Restart the dev server after editing `.env` files; most tools read them only at startup.
 
 ### Elements show "Expected publishable key to be of type string"

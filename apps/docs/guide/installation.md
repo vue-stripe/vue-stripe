@@ -57,6 +57,20 @@ Store the publishable key in an environment variable that your build tool expose
 | Quasar in Vite mode (`@quasar/app-vite`) | `.env` | `QCLI_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY` |
 | Quasar in webpack mode | `.env` plus `build.env` in `quasar.config.js` | `STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.STRIPE_PUBLISHABLE_KEY` |
 | Laravel with Vite | `.env` (not `.env.local`) | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
+| Nuxt | `.env` plus `runtimeConfig.public` in `nuxt.config.ts` | `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `useRuntimeConfig().public.stripePublishableKey` |
+
+For Nuxt, declare the key in `nuxt.config.ts`; Nuxt fills it from `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` when the server starts, so the production server needs the variable in its environment, as [Configure Nuxt](/guide/ssr#_2-configure-nuxt) shows:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      stripePublishableKey: ''
+    }
+  }
+})
+```
 
 For Quasar in webpack mode, forward the variable in `quasar.config.js`:
 
@@ -71,7 +85,7 @@ build: {
 Quasar in Vite mode passes only `QCLI_` variables to the browser, so a `VITE_` variable is `undefined` there. In Laravel, keep `STRIPE_SECRET_KEY` and `VITE_STRIPE_PUBLISHABLE_KEY` in the same `.env`, and don't create a `.env.local`: with `APP_ENV=local`, Laravel loads it instead of `.env`, and every request fails. [Use Vue Stripe with Quasar](/guide/quasar) and [Use Vue Stripe with Laravel and Inertia](/guide/laravel) cover the rest of those setups.
 
 ::: tip Samples use Vite's variables
-Every sample in these docs reads the key as `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, write `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, and in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY`. Webpack compiles `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` to `undefined` without a warning, so a pasted sample builds and then fails in the browser.
+Every sample in these docs reads the key as `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY`. On Vue CLI, write `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` instead, in Quasar `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY`, and in Nuxt `useRuntimeConfig().public.stripePublishableKey`. In Nuxt the `VITE_` variable is `undefined` with the `.env` from the table, so a pasted sample with `VueStripeProvider` answers 500 "publishableKey or stripeKey is required". Webpack compiles `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` to `undefined` without a warning, so a pasted sample builds and then fails in the browser.
 :::
 
 ## 4. Check that Stripe.js loads
@@ -83,7 +97,9 @@ Render a `VueStripeProvider` with your key. It loads Stripe.js, shows its `#load
 <script setup lang="ts">
 import { VueStripeProvider } from '@vue-stripe/vue-stripe'
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY // Vue CLI: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
+// Vue CLI: process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY
+// Nuxt: useRuntimeConfig().public.stripePublishableKey
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 </script>
 
 <template>
