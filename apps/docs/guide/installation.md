@@ -55,7 +55,7 @@ Store the publishable key in an environment variable that your build tool expose
 | Vite | `.env.local` | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
 | Vue CLI / webpack | `.env.local` | `VUE_APP_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.VUE_APP_STRIPE_PUBLISHABLE_KEY` |
 | Quasar in Vite mode (`@quasar/app-vite`) | `.env` | `QCLI_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.QCLI_STRIPE_PUBLISHABLE_KEY` |
-| Quasar in webpack mode | `.env` plus `build.env` in `quasar.config.js` | `STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.STRIPE_PUBLISHABLE_KEY` |
+| Quasar in webpack mode (`@quasar/app-webpack` 4) | `.env` | `STRIPE_PUBLISHABLE_KEY=pk_test_...` | `process.env.STRIPE_PUBLISHABLE_KEY` |
 | Laravel with Vite | `.env` (not `.env.local`) | `VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY` |
 | Nuxt | `.env` plus `runtimeConfig.public` in `nuxt.config.ts` | `NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...` | `useRuntimeConfig().public.stripePublishableKey` |
 
@@ -72,15 +72,7 @@ export default defineNuxtConfig({
 })
 ```
 
-For Quasar in webpack mode, forward the variable in `quasar.config.js`:
-
-```js
-build: {
-  env: {
-    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY
-  }
-}
-```
+Quasar in webpack mode loads `.env` itself and passes its variables to the browser, so the key needs no entry in `quasar.config`. Don't forward it in `build: { env: { ... } }` as well: the `.env` values are not in `process.env` while `quasar.config` runs, so `STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY` replaces the key with `undefined`, and every element shows "Expected publishable key to be of type string, got type undefined instead." Use `build.env` only when the key comes from the shell or the CI environment instead of `.env`. [Webpack mode](/guide/quasar#webpack-mode) in the Quasar guide lists the other changes.
 
 Quasar in Vite mode passes only `QCLI_` variables to the browser, so a `VITE_` variable is `undefined` there. In Laravel, keep `STRIPE_SECRET_KEY` and `VITE_STRIPE_PUBLISHABLE_KEY` in the same `.env`, and don't create a `.env.local`: with `APP_ENV=local`, Laravel loads it instead of `.env`, and every request fails. [Use Vue Stripe with Quasar](/guide/quasar) and [Use Vue Stripe with Laravel and Inertia](/guide/laravel) cover the rest of those setups.
 
