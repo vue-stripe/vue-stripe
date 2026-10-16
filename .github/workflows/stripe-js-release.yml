@@ -1,0 +1,102 @@
+name: Stripe.js release watch
+
+# Opens one issue when npm has a newer @stripe/stripe-js than the version Vue Stripe
+# develops against (packages/vue-stripe devDependencies), with the upgrade checklist.
+# Scheduled workflows run from the default branch only.
+
+on:
+  schedule:
+    - cron: '23 7 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Print the issue instead of creating it'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: stripe-js-release
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Compare with npm and open an issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          set -euo pipefail
+          label=stripe-js-release
+
+          current=$(node -p "require('./packages/vue-stripe/package.json').devDependencies['@stripe/stripe-js'].replace(/^[^0-9]*/, '')")
+          latest=$(npm view @stripe/stripe-js version)
+          published=$(npm view @stripe/stripe-js "time[$latest]")
+          echo "Developed against: $current. npm latest: $latest (published $published)."
+
+          # Only a strictly newer version counts (numeric major.minor.patch compare).
+          newer=$(node -e '
+            const [a, b] = process.argv.slice(1).map((v) => v.split(".").map(Number))
+            for (let i = 0; i < 3; i++) if (b[i] !== a[i]) { console.log(b[i] > a[i]); process.exit(0) }
+            console.log(false)
+          ' "$current" "$latest")
+          if [ "$newer" != "true" ]; then
+            echo "Up to date."
+            exit 0
+          fi
+
+          title="Stripe.js $latest released (Vue Stripe develops against $current)"
+          # A failed lookup stops the run (set -e), so it can never open a duplicate.
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --label "$label" --state all --limit 200 --json title --jq '.[].title')
+          if printf '%s\n' "$existing" | grep -qF "Stripe.js $latest released"; then
+            echo "An issue for $latest already exists."
+            exit 0
+          fi
+
+          major_note="This is a minor or patch release of the same Stripe.js train."
+          if [ "${latest%%.*}" != "${current%%.*}" ]; then
+            major_note="**This is a new major version, which usually means a new Stripe.js release train.** Expect removed or renamed elements, methods and options; read Stripe's release notes and the upgrade guide for the train before changing code, and plan the matching updates to the docs (\`/guide/stripe-js-versions\`, \`/guide/migration-v6\`) and to the \`@stripe/stripe-js\` peer range."
+          fi
+
+          body=$(cat <<EOF
+          \`@stripe/stripe-js\` **$latest** is on npm (published $published). Vue Stripe develops and tests against **$current** (\`packages/vue-stripe\` devDependencies); the public peer range is in \`packages/vue-stripe/package.json\`.
+
+          $major_note
+
+          - Release notes: https://github.com/stripe/stripe-js/releases/tag/v$latest
+          - Changes since $current: https://github.com/stripe/stripe-js/compare/v$current...v$latest
+
+          ## Upgrade checklist
+
+          - [ ] Bump the \`@stripe/stripe-js\` devDependency (library, playground, vue2-smoke) and the lockfile; keep the peer range unless the library's public types need the new version.
+          - [ ] Run \`tests/stripe-surface.test.ts\` and classify every new member in \`apps/docs/.vitepress/theme/data/stripe-coverage.ts\` (the coverage tracker must stay at 100%).
+          - [ ] Check that conventions rule 8 (element events against the \`.d.ts\`) still passes, and wrap any new element or method.
+          - [ ] Re-measure the size budgets: the UMD build bundles the Stripe.js loader.
+          - [ ] Check whether the concurrent-load workaround in \`src/utils/load-stripe.ts\` is still needed for every version in the peer range.
+          - [ ] Check whether the Payment Method Messaging \`currency\` type now includes \`'RON'\` (stripe/stripe-js#998); if so, remove the note on its API page.
+          - [ ] Run \`pnpm lint && pnpm format:check && pnpm typecheck && pnpm test\` and the docs build.
+
+          Opened by the Stripe.js release watch workflow.
+          EOF
+          )
+
+          if [ "$DRY_RUN" = "true" ]; then
+            printf 'Dry run. Would open:\n\n# %s\n\n%s\n' "$title" "$body"
+            exit 0
+          fi
+
+          gh label create "$label" --repo "$GITHUB_REPOSITORY" --color 635BFF --description 'A new @stripe/stripe-js release to adopt' --force
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --label "$label" --body "$body"
