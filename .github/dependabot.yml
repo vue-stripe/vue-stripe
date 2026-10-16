@@ -5,8 +5,11 @@ updates:
     schedule:
       interval: weekly
     groups:
+      # Minor and patch only: a major arrives as its own PR, so one breaking bump can't
+      # hold back the rest of the group.
       dev-tooling:
         dependency-type: development
+        update-types: ['minor', 'patch']
       apps:
         patterns:
           - next
@@ -20,6 +23,15 @@ updates:
     ignore:
       # Stripe.js majors are release trains that need a planned library release.
       - dependency-name: '@stripe/stripe-js'
+        update-types: ['version-update:semver-major']
+      # packages/vue2-smoke must stay on Vue 2.7 and @vue/test-utils 1.x (the Vue 2 line);
+      # the library already uses the current majors.
+      - dependency-name: 'vue'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@vue/test-utils'
+        update-types: ['version-update:semver-major']
+      # @types/node follows the Node versions the project supports (.nvmrc, CI matrix).
+      - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
