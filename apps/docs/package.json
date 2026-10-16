@@ -16,7 +16,7 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@lucide/vue": "^1.48.0",
+    "@lucide/vue": "^1.56.0",
     "@vue-stripe/vue-stripe": "workspace:*"
   },
   "devDependencies": {
