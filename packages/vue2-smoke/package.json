@@ -12,7 +12,7 @@
     "typecheck:resolution": "for c in bundler node16 nodenext; do for v in vue3 vue2; do tsc -p types/resolution/tsconfig.$c.$v.json || exit 1; done; done"
   },
   "devDependencies": {
-    "@babel/types": "^7.29.8",
+    "@babel/types": "^8.0.6",
     "@stripe/stripe-js": "^10.1.0",
     "@vue-stripe/vue-stripe": "workspace:*",
     "@vue/test-utils": "1.3.6",
