@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@stripe/stripe-js": "^10.1.0",
-    "@unhead/vue": "^3.4.2",
+    "@unhead/vue": "^3.4.3",
     "@vercel/analytics": "^2.0.1",
     "@vue-stripe/vue-stripe": "workspace:*",
     "@vueuse/core": "^15.0.0",
