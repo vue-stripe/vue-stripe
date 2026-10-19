@@ -3,7 +3,7 @@ import { useRoute } from 'vitepress'
 import { useAnalytics } from './useAnalytics'
 
 export function usePageTracking() {
-  const { trackComponentView, trackUserJourney, trackPageView } = useAnalytics()
+  const { trackComponentView, trackUserJourney } = useAnalytics()
   const route = useRoute()
 
   // The tutorial is the entry point; installing into your own app and the background
@@ -49,8 +49,9 @@ export function usePageTracking() {
       }
     }
 
-    // Track page view
-    trackPageView(path)
+    // No page_view here: GA sends it itself, on the first load (`send_page_view` in the gtag
+    // config) and on each route change (Enhanced Measurement's browser history events).
+    // Sending one here as well counted every page twice.
   }
 
   // Track initial page load
