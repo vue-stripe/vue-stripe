@@ -32,24 +32,24 @@
     "knip": "knip"
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.2.3",
-    "@commitlint/config-conventional": "^21.2.3",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^10.0.1",
     "@vue-stripe/typescript-config": "workspace:*",
-    "eslint": "^10.12.0",
-    "eslint-config-next": "16.4.0",
+    "eslint": "^10.13.0",
+    "eslint-config-next": "16.4.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.11.1",
     "globals": "^17.13.0",
     "husky": "^9.1.7",
-    "knip": "^6.41.0",
+    "knip": "^6.42.1",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
-    "turbo": "^2.11.7",
+    "turbo": "^2.11.9",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.71.2",
+    "typescript-eslint": "^8.72.0",
     "vite": "^8.3.4",
-    "vitest": "^5.0.4"
+    "vitest": "^5.0.5"
   },
   "engines": {
     "node": ">=22",

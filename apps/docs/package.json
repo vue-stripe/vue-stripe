@@ -20,10 +20,10 @@
     "@vue-stripe/vue-stripe": "workspace:*"
   },
   "devDependencies": {
-    "@nolebase/vitepress-plugin-og-image": "^2.18.2",
-    "eslint": "^10.12.0",
+    "@nolebase/vitepress-plugin-og-image": "^2.21.1",
+    "eslint": "^10.13.0",
     "prettier": "^3.9.10",
-    "rolldown": "1.2.13",
+    "rolldown": "1.2.14",
     "typescript": "^5.9.3",
     "vitepress": "^1.6.4",
     "vitepress-mermaid-renderer": "^1.2.2",
