@@ -45,6 +45,8 @@ export interface MockStripeCheckoutActions {
   removePromotionCode: MockFn
   updateEmail: MockFn
   updatePhoneNumber: MockFn
+  updateIndividualName: MockFn
+  updateBusinessName: MockFn
   updateBillingAddress: MockFn
   updateShippingAddress: MockFn
   updateLineItemQuantity: MockFn
@@ -77,6 +79,7 @@ export interface MockStripeCheckout {
   getExpressCheckoutElement: MockFn
   getCurrencySelectorElement: MockFn
   getTaxIdElement: MockFn
+  getContactDetailsElement: MockFn
   getTermsElement: MockFn
   getLinkSignupElement: MockFn
 }
@@ -98,6 +101,8 @@ export type MockStripeCheckoutFormActions = Omit<
   MockStripeCheckoutActions,
   | 'updateEmail'
   | 'updatePhoneNumber'
+  | 'updateIndividualName'
+  | 'updateBusinessName'
   | 'updateShippingAddress'
   | 'updateBillingAddress'
   | 'updateTaxIdInfo'
@@ -141,6 +146,8 @@ export function makeMockCheckoutActions(): MockStripeCheckoutActions {
     removePromotionCode: vi.fn(() => ok()),
     updateEmail: vi.fn(() => ok()),
     updatePhoneNumber: vi.fn(() => ok()),
+    updateIndividualName: vi.fn(() => ok()),
+    updateBusinessName: vi.fn(() => ok()),
     updateBillingAddress: vi.fn(() => ok()),
     updateShippingAddress: vi.fn(() => ok()),
     updateLineItemQuantity: vi.fn(() => ok()),
@@ -174,6 +181,7 @@ export function makeMockCheckout(actions = makeMockCheckoutActions()): MockStrip
     getExpressCheckoutElement: vi.fn(() => null),
     getCurrencySelectorElement: vi.fn(() => null),
     getTaxIdElement: vi.fn(() => null),
+    getContactDetailsElement: vi.fn(() => null),
     getTermsElement: vi.fn(() => null),
     getLinkSignupElement: vi.fn(() => null)
   }
@@ -183,6 +191,8 @@ export function makeMockCheckoutFormActions(): MockStripeCheckoutFormActions {
   const {
     updateEmail: _email,
     updatePhoneNumber: _phone,
+    updateIndividualName: _individualName,
+    updateBusinessName: _businessName,
     updateShippingAddress: _shipping,
     updateBillingAddress: _billing,
     updateTaxIdInfo: _taxId,

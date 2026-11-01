@@ -59,6 +59,8 @@ interface UseCheckoutSessionReturn {
   removePromotionCode: StripeCheckoutLoadActionsSuccess['removePromotionCode']
   updateEmail: StripeCheckoutLoadActionsSuccess['updateEmail']
   updatePhoneNumber: StripeCheckoutLoadActionsSuccess['updatePhoneNumber']
+  updateIndividualName: StripeCheckoutLoadActionsSuccess['updateIndividualName']
+  updateBusinessName: StripeCheckoutLoadActionsSuccess['updateBusinessName']
   updateBillingAddress: StripeCheckoutLoadActionsSuccess['updateBillingAddress']
   updateShippingAddress: StripeCheckoutLoadActionsSuccess['updateShippingAddress']
   updateLineItemQuantity: StripeCheckoutLoadActionsSuccess['updateLineItemQuantity']
@@ -77,6 +79,7 @@ interface UseCheckoutSessionReturn {
   getExpressCheckoutElement: StripeCheckoutElementsSdk['getExpressCheckoutElement']
   getCurrencySelectorElement: StripeCheckoutElementsSdk['getCurrencySelectorElement']
   getTaxIdElement: StripeCheckoutElementsSdk['getTaxIdElement']
+  getContactDetailsElement: StripeCheckoutElementsSdk['getContactDetailsElement']
   getTermsElement: StripeCheckoutElementsSdk['getTermsElement']
   getLinkSignupElement: StripeCheckoutElementsSdk['getLinkSignupElement']
 }
@@ -102,6 +105,7 @@ Each action is forwarded to `actions` (Stripe's `StripeCheckoutLoadActionsSucces
 | `confirm(options?)` | Confirm the checkout. Resolves `{ type: 'success', session }` or `{ type: 'error', error }` |
 | `applyPromotionCode(code)` / `removePromotionCode()` | Manage promotion codes |
 | `updateEmail(email)` / `updatePhoneNumber(phone)` | Update contact info (pass `null` to clear) |
+| `updateIndividualName(name)` / `updateBusinessName(name)` | Update the customer's name or business name for a session with name collection (pass `null` to clear; the session's `nameCollection` holds the values) |
 | `updateBillingAddress(addr)` / `updateShippingAddress(addr)` | Update addresses (pass `null` to clear) |
 | `updateLineItemQuantity({ lineItem, quantity })` | Change a line item's quantity |
 | `updateShippingOption(id)` | Select a shipping rate |
@@ -120,6 +124,7 @@ Each action is forwarded to `actions` (Stripe's `StripeCheckoutLoadActionsSucces
 | `getBillingAddressElement()` / `getShippingAddressElement()` | The billing / shipping Address Element, or `null` |
 | `getExpressCheckoutElement()` | The Express Checkout Element, or `null` |
 | `getCurrencySelectorElement()` / `getTaxIdElement()` | The Currency Selector / Tax ID Element, or `null` |
+| `getContactDetailsElement()` | The Contact Details Element, or `null` |
 | `getTermsElement()` / `getLinkSignupElement()` | The Terms / Link Signup Element (Stripe beta), or `null`, also on an account without the beta |
 
 These call the SDK handle, which exists before the actions load. Called before the SDK exists, `changeAppearance` and `loadFonts` log a `[Vue Stripe]` warning and do nothing, and the getters return `null`. Stripe.js throws an `IntegrationError` from `getTermsElement()` and `getLinkSignupElement()` on an account without the beta; the getters catch it and return `null`. Inside a component you can also take the element from the component's exposed `element` ref.

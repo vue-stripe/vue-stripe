@@ -528,7 +528,7 @@ export const coverage: CoverageCategory[] = [
         ]
       },
       {
-        // The Checkout Form SDK's actions are a subset of these (same type, minus five).
+        // The Checkout Form SDK's actions are a subset of these (same type, minus seven).
         name: 'Checkout session actions',
         api: 'actions.confirm() / applyPromotionCode() / update*() / changeAppearance()',
         status: 'covered',
@@ -540,6 +540,8 @@ export const coverage: CoverageCategory[] = [
           'StripeCheckoutLoadActionsSuccess.removePromotionCode',
           'StripeCheckoutLoadActionsSuccess.updateEmail',
           'StripeCheckoutLoadActionsSuccess.updatePhoneNumber',
+          'StripeCheckoutLoadActionsSuccess.updateIndividualName',
+          'StripeCheckoutLoadActionsSuccess.updateBusinessName',
           'StripeCheckoutLoadActionsSuccess.updateBillingAddress',
           'StripeCheckoutLoadActionsSuccess.updateShippingAddress',
           'StripeCheckoutLoadActionsSuccess.updateLineItemQuantity',
@@ -565,6 +567,7 @@ export const coverage: CoverageCategory[] = [
           'StripeCheckoutElementsSdk.getExpressCheckoutElement',
           'StripeCheckoutElementsSdk.getCurrencySelectorElement',
           'StripeCheckoutElementsSdk.getTaxIdElement',
+          'StripeCheckoutElementsSdk.getContactDetailsElement',
           'StripeCheckoutElementsSdk.getTermsElement',
           'StripeCheckoutElementsSdk.getLinkSignupElement'
         ]
