@@ -1,4 +1,4 @@
-import type { Slots } from 'vue-demi'
+import type { Slots, VNode } from 'vue-demi'
 import { hx } from './h'
 
 /**
@@ -16,7 +16,7 @@ export function statusShell(
   slots: Slots,
   slotProps: Record<string, unknown>,
   loadingText: string
-) {
+): VNode {
   if (state.error) {
     return hx(
       'div',

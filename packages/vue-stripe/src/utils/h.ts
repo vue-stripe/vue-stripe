@@ -1,4 +1,4 @@
-import { h, isVue2 } from 'vue-demi'
+import { h, isVue2, type VNode } from 'vue-demi'
 
 type Props = Record<string, unknown>
 
@@ -10,7 +10,7 @@ type Props = Record<string, unknown>
  * library uses are translated. Vue 2 also resolves component props from `attrs`,
  * so the same call works for elements and components.
  */
-export function hx(tag: string | object, props: Props = {}, children?: unknown) {
+export function hx(tag: string | object, props: Props = {}, children?: unknown): VNode {
   if (!isVue2) return h(tag as string, props, children as never)
 
   const data: Props = {}
