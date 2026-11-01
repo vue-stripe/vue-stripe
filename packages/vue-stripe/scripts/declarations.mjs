@@ -52,7 +52,7 @@ const moduleSpecifiers = (source) => {
   return found
 }
 
-/** './x' -> './x' or './x/index', whichever declaration tsc emitted. */
+/** './x' (or '.', '..') -> './x' or './x/index', whichever declaration tsc emitted. */
 const target = (file, specifier) => {
   const path = resolve(dirname(file), specifier)
   if (existsSync(`${path}.d.ts`)) return specifier
@@ -71,7 +71,7 @@ for (const file of files) {
     specifiers.reduce((out, literal) => {
       const name = literal.text
       let next = name
-      if (/^\.\.?\//.test(name) && !/\.c?js$/.test(name)) {
+      if (/^\.\.?(\/|$)/.test(name) && !/\.c?js$/.test(name)) {
         next = `${target(file, name)}${format === 'esm' ? '.js' : '.cjs'}`
       } else if (format === 'esm' && name in esmFiles) {
         next = esmFiles[name]

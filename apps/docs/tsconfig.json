@@ -2,7 +2,6 @@
   "extends": "@vue-stripe/typescript-config/vue.json",
   "compilerOptions": {
     "moduleResolution": "Bundler",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./.vitepress/*"],
       "vitepress/dist/client/theme-default/components/*": ["./.vitepress/vitepress-component.d.ts"]

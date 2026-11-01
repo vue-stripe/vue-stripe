@@ -1,4 +1,4 @@
-import type { Slots } from 'vue-demi'
+import type { Slots, VNode } from 'vue-demi'
 import { hx } from './h'
 
 /**
@@ -17,7 +17,7 @@ export function renderElement(
   state: { error: string | null; loading: boolean; mount?: HTMLElement | null },
   slots: Slots,
   loadingText: string
-) {
+): VNode {
   const stripeClasses = Array.from(state.mount?.classList ?? []).filter((name) =>
     name.startsWith('StripeElement')
   )
