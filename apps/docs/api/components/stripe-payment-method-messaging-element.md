@@ -53,7 +53,7 @@ Changes to `options` are applied to the mounted element with `element.update()`,
 | Option | Type | Description |
 |--------|------|-------------|
 | `amount` | `number` | Required. Price in the smallest currency unit (cents for USD; see [Amounts and currencies](/api/components/stripe-elements#amounts-and-currencies)) |
-| `currency` | `'USD' \| 'EUR' \| 'GBP' \| ...` | Required. Upper-case ISO currency code: `AUD`, `CAD`, `CHF`, `CZK`, `DKK`, `EUR`, `GBP`, `NOK`, `NZD`, `PLN`, `RON`, `SEK` or `USD`. Stripe.js 10 accepts `RON`, but the `@stripe/stripe-js` 10.1.0 types leave it out, so TypeScript rejects it |
+| `currency` | `'USD' \| 'EUR' \| 'GBP' \| ...` | Required. Upper-case ISO currency code: `AUD`, `CAD`, `CHF`, `CZK`, `DKK`, `EUR`, `GBP`, `NOK`, `NZD`, `PLN`, `RON`, `SEK` or `USD` |
 | `countryCode` | `'US' \| 'GB' \| 'DE' \| ...` | The customer's country. Decides which providers can be offered. Optional, but pass it: without it Stripe uses the visitor's location, and for a country it doesn't support the element fails to load (`@loaderror`) |
 | `paymentMethodTypes` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | Optional. Limits the message to these providers. Without it, Stripe.js shows every provider that applies to the amount, currency and country |
 | `paymentMethodOrder` | `Array<'affirm' \| 'klarna' \| 'afterpay_clearpay'>` | Fixed display order. By default Stripe orders them per customer |

@@ -137,11 +137,13 @@ describe('useCheckoutForm (Checkout Form SDK actions, beta)', () => {
     expect(actions.confirm).toHaveBeenCalledWith({ formConfirmEvent })
   })
 
-  it('leaves out the updates the form UI owns (email, phone, addresses, tax ID)', async () => {
+  it('leaves out the updates the form UI owns (email, phone, names, addresses, tax ID)', async () => {
     const { api } = await mountWith()
     for (const name of [
       'updateEmail',
       'updatePhoneNumber',
+      'updateIndividualName',
+      'updateBusinessName',
       'updateBillingAddress',
       'updateShippingAddress',
       'updateTaxIdInfo'

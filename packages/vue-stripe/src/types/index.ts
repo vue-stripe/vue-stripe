@@ -466,6 +466,8 @@ export interface UseCheckoutSessionReturn {
   removePromotionCode: StripeCheckoutLoadActionsSuccess['removePromotionCode']
   updateEmail: StripeCheckoutLoadActionsSuccess['updateEmail']
   updatePhoneNumber: StripeCheckoutLoadActionsSuccess['updatePhoneNumber']
+  updateIndividualName: StripeCheckoutLoadActionsSuccess['updateIndividualName']
+  updateBusinessName: StripeCheckoutLoadActionsSuccess['updateBusinessName']
   updateBillingAddress: StripeCheckoutLoadActionsSuccess['updateBillingAddress']
   updateShippingAddress: StripeCheckoutLoadActionsSuccess['updateShippingAddress']
   updateLineItemQuantity: StripeCheckoutLoadActionsSuccess['updateLineItemQuantity']
@@ -484,6 +486,7 @@ export interface UseCheckoutSessionReturn {
   getExpressCheckoutElement: StripeCheckoutElementsSdk['getExpressCheckoutElement']
   getCurrencySelectorElement: StripeCheckoutElementsSdk['getCurrencySelectorElement']
   getTaxIdElement: StripeCheckoutElementsSdk['getTaxIdElement']
+  getContactDetailsElement: StripeCheckoutElementsSdk['getContactDetailsElement']
   getTermsElement: StripeCheckoutElementsSdk['getTermsElement']
   getLinkSignupElement: StripeCheckoutElementsSdk['getLinkSignupElement']
 }
@@ -491,7 +494,7 @@ export interface UseCheckoutSessionReturn {
 /**
  * Return value of `useCheckoutForm()`. Action signatures come from Stripe's
  * `StripeCheckoutFormLoadActionsSuccess`: the Checkout Elements actions minus the
- * email / phone / address / tax ID updates, which the form collects itself.
+ * email / phone / name / address / tax ID updates, which the form collects itself.
  */
 export interface UseCheckoutFormReturn {
   /** Checkout Form SDK handle (null until initialized). */

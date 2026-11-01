@@ -87,6 +87,8 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
     removePromotionCode: call('removePromotionCode'),
     updateEmail: call('updateEmail'),
     updatePhoneNumber: call('updatePhoneNumber'),
+    updateIndividualName: call('updateIndividualName'),
+    updateBusinessName: call('updateBusinessName'),
     updateBillingAddress: call('updateBillingAddress'),
     updateShippingAddress: call('updateShippingAddress'),
     updateLineItemQuantity: call('updateLineItemQuantity'),
@@ -111,6 +113,7 @@ export function useCheckoutSession(): UseCheckoutSessionReturn {
     getExpressCheckoutElement: getter('getExpressCheckoutElement'),
     getCurrencySelectorElement: getter('getCurrencySelectorElement'),
     getTaxIdElement: getter('getTaxIdElement'),
+    getContactDetailsElement: getter('getContactDetailsElement'),
     getTermsElement: getter('getTermsElement'),
     getLinkSignupElement: getter('getLinkSignupElement')
   } satisfies UseCheckoutSessionReturn

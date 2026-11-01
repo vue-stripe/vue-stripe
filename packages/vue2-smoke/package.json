@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@babel/types": "^7.29.8",
-    "@stripe/stripe-js": "^10.1.0",
+    "@stripe/stripe-js": "^10.2.0",
     "@vue-stripe/vue-stripe": "workspace:*",
     "@vue/test-utils": "1.3.6",
     "eslint": "^10.12.0",

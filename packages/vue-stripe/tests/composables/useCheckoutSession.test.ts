@@ -104,6 +104,8 @@ describe('useCheckoutSession (Checkout Elements SDK actions)', () => {
       ['removePromotionCode', []],
       ['updateEmail', ['new@b.com']],
       ['updatePhoneNumber', ['+15555550100']],
+      ['updateIndividualName', ['Jenny Rosen']],
+      ['updateBusinessName', ['Acme']],
       ['updateBillingAddress', [{ name: 'Jenny', address: { country: 'US' } }]],
       ['updateShippingAddress', [{ name: 'Jenny', address: { country: 'US' } }]],
       ['updateLineItemQuantity', [{ lineItem: 'li_1', quantity: 3 }]],
@@ -151,6 +153,7 @@ describe('useCheckoutSession (Checkout Elements SDK actions)', () => {
       'getExpressCheckoutElement',
       'getCurrencySelectorElement',
       'getTaxIdElement',
+      'getContactDetailsElement',
       'getTermsElement',
       'getLinkSignupElement'
     ] as const
