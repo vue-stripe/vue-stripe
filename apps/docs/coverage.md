@@ -20,6 +20,7 @@ Every component and composable above has unit tests, and the payment flows were 
 | [Terms Element](/api/components/stripe-terms-element) | Stripe beta; the test account has no access | The documented `@loaderror` and `#error` without access |
 | [Link Signup Element](/api/components/stripe-link-signup-element) | Stripe beta; the test account has no access | The documented errors without the beta flag or access |
 | [Checkout Form](/api/components/stripe-checkout-form), `compact` layout | Stripe private preview | The `expanded` layout, end to end |
+| [Pricing SDK / usePricing](/api/composables/use-pricing) | Stripe beta; no beta-access sandbox | API documentation follows Stripe.js 10.2.1's declarations; successful initialization and SDK operations are not verified against Stripe |
 | [Issuing Elements](/api/components/stripe-issuing-elements) | The test account has no Stripe Issuing | The documented errors without Issuing |
 | [Issuing disclosure](/api/components/stripe-issuing-disclosure) | The test account has not onboarded to Issuing | The documented `invalid_request_error` through `@error` |
 | [Financial Account and Treasury disclosures](/api/components/stripe-financial-account-disclosure) | The test account has not onboarded to Financial Accounts | The documented `invalid_request_error` through `@error` |

@@ -42,14 +42,14 @@ Thank you for your patience! This is an early release of the new Vue Stripe. As 
 | Package | Version |
 |---------|---------|
 | `vue` | `^2.7.0 \|\| ^3.0.0` (Vue 2.6 is not supported) |
-| `@stripe/stripe-js` | `^10.0.0` (Stripe.js Endive) |
+| `@stripe/stripe-js` | `^10.2.1` (Stripe.js Endive; public Pricing SDK types require 10.2.1+) |
 
 Upgrading from v5? Read [Migrating from v5 to v6](https://vuestripe.com/guide/migration-v6).
 
 ## Installation
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10.2.1
 ```
 
 Import the component styles once, for example in `main.ts`:
@@ -176,6 +176,7 @@ Stripe removed the standalone iDEAL, P24, EPS and FPX elements; the Payment Elem
 | `useCheckoutSession()` | Session state and actions inside `VueStripeCheckoutElementsProvider` |
 | `useCheckoutForm()` | Confirm the Checkout Form and drive its session inside `VueStripeCheckoutFormProvider` (Stripe beta) |
 | `useStripeCheckout()` | Redirect to a hosted Checkout Session URL |
+| [`usePricing()`](https://vuestripe.com/api/composables/use-pricing) | Explicitly initialize the Pricing SDK for currency selection, localized prices and pricing tokens (Stripe beta; not yet verified end to end) |
 
 ## TypeScript
 

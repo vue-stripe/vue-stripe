@@ -67,7 +67,7 @@
     "typescript"
   ],
   "peerDependencies": {
-    "@stripe/stripe-js": "^10.0.0",
+    "@stripe/stripe-js": "^10.2.1",
     "vue": "^2.7.0 || ^3.0.0"
   },
   "dependencies": {
@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "@size-limit/preset-small-lib": "^14.3.0",
-    "@stripe/stripe-js": "^10.2.0",
+    "@stripe/stripe-js": "^10.2.1",
     "@vitest/coverage-v8": "^5.0.5",
     "@vue-stripe/typescript-config": "workspace:*",
     "@vue/test-utils": "^2.5.1",
@@ -84,7 +84,6 @@
     "jsdom": "^30.1.3",
     "prettier": "^3.9.10",
     "size-limit": "^14.3.0",
-    "stripe-js-10.0.0": "npm:@stripe/stripe-js@10.0.0",
     "typescript": "^6.0.3",
     "vite": "^8.3.5",
     "vitest": "^5.0.5",

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest'
 
 // These tests run the REAL @stripe/stripe-js/pure loader (tests/setup.ts mocks it
 // for everything else). jsdom never fetches the injected <script>, so a test
@@ -39,20 +39,10 @@ const settled = <T>(promise: Promise<T>) =>
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
 
-// The peer range is ^10.0.0, so the loader must work on its floor too: the pure entry of
-// 10.0.0 does not share a load between concurrent calls, which src/utils/load-stripe.ts
-// makes up for. Every test runs against the installed version and against 10.0.0.
-const PURE_LOADERS: Array<[string, (() => Promise<unknown>) | null]> = [
-  ['installed @stripe/stripe-js', null],
-  ['@stripe/stripe-js 10.0.0', () => import('stripe-js-10.0.0/pure')]
-]
-let pureLoader: (() => Promise<unknown>) | null = null
-
-/** vi.resetModules(), then point @stripe/stripe-js/pure at the version under test. */
+/** Reset the real pure loader, including its cached script load. */
 const freshModules = () => {
   vi.resetModules()
-  if (pureLoader) vi.doMock('@stripe/stripe-js/pure', pureLoader)
-  else vi.doUnmock('@stripe/stripe-js/pure')
+  vi.doUnmock('@stripe/stripe-js/pure')
 }
 
 const freshLoader = async () => {
@@ -65,15 +55,7 @@ const freshLoader = async () => {
 // warm it once and give the tests room instead of failing on the default 5 s timeout.
 const LOADER_TIMEOUT = 20_000
 
-describe.each(PURE_LOADERS)('with the %s pure loader', (_, loader) => {
-  beforeAll(() => {
-    pureLoader = loader
-  })
-  afterAll(() => {
-    pureLoader = null
-    vi.doUnmock('@stripe/stripe-js/pure')
-  })
-
+describe('with the installed pure loader (peer minimum 10.2.1)', () => {
   describe(
     'loadStripeInstance with the real @stripe/stripe-js/pure loader',
     { timeout: LOADER_TIMEOUT },
