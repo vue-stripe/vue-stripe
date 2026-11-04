@@ -4,6 +4,7 @@ import {
   VueStripeElements,
   VueStripeProvider,
   useCheckoutSession,
+  usePricing,
   useStripe,
   useStripeElements
 } from '@vue-stripe/vue-stripe'
@@ -71,4 +72,27 @@ it('useCheckoutSession() returns the Checkout SDK, actions and session objects',
   expect(box.api?.checkout.value).toBe(sdk)
   expect(box.api?.actions.value).toBe(actions)
   expect(box.api?.session.value).toBe(session)
+})
+
+it('usePricing() exposes the original SDK and methods keep their receiver on Vue 2.7', async () => {
+  const sdk = {
+    currency: 'kwd',
+    async getSelectedCurrency() {
+      return { currency: this.currency }
+    }
+  }
+  stripe.initializePricing.mockResolvedValueOnce(sdk)
+  const { box, Child } = capture(() => usePricing())
+  const wrapper = mount({
+    render(h: CreateElement) {
+      return h(VueStripeProvider as never, { props: { publishableKey: 'pk_test_x' } }, [
+        h(Child as never)
+      ])
+    }
+  })
+  await settle()
+  expect(await box.api!.initializePricing({ pricingPolicy: 'prcpol_123' })).toBe(sdk)
+  expect(box.api!.pricing.value).toBe(sdk)
+  await expect(box.api!.pricing.value!.getSelectedCurrency()).resolves.toEqual({ currency: 'kwd' })
+  wrapper.destroy()
 })

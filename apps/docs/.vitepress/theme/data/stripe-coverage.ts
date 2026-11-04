@@ -503,6 +503,24 @@ export const coverage: CoverageCategory[] = [
         artifact: 'VueStripePricingTable'
       },
       {
+        name: 'Pricing SDK (beta)',
+        api: 'stripe.initializePricing()',
+        status: 'covered',
+        artifact: 'usePricing',
+        note: 'Requires Stripe beta access. The composable exposes the Pricing SDK unchanged.',
+        surface: [
+          'Stripe.initializePricing',
+          'Pricing.getAvailableCurrencies',
+          'Pricing.getSelectedCurrency',
+          'Pricing.setSelectedCurrency',
+          'Pricing.resolvePrice',
+          'Pricing.createPricingToken',
+          'Pricing.on',
+          'Pricing.once',
+          'Pricing.off'
+        ]
+      },
+      {
         // The component mounts the page and destroys it on unmount; removing the component
         // (v-if) is checkout.unmount(), and a new component mounts a new page.
         name: 'Embedded Checkout',

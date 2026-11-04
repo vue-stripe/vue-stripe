@@ -342,7 +342,8 @@ const referenceSidebar: DefaultTheme.SidebarItem[] = requirePages([
       },
       { text: 'useFinancialConnections', link: '/api/composables/use-financial-connections' },
       { text: 'useIdentity', link: '/api/composables/use-identity' },
-      { text: 'usePaymentRequest', link: '/api/composables/use-payment-request' }
+      { text: 'usePaymentRequest', link: '/api/composables/use-payment-request' },
+      { text: 'usePricing (beta)', link: '/api/composables/use-pricing' }
     ]
   },
   {

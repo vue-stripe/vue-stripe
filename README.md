@@ -53,6 +53,7 @@ Thank you for understanding, and for continuing to support Vue Stripe.
 - **TypeScript First** — Full TypeScript support with comprehensive types
 - **Modern Elements** — Payment Element supporting 40+ payment methods
 - **Composition API** — Composables for confirming payments (one per Stripe.js confirm method), tokens, Financial Connections, Identity and Checkout Sessions
+- **Pricing SDK (beta)** — [`usePricing()`](https://vuestripe.com/api/composables/use-pricing) for explicit initialization, currency selection, localized prices and pricing tokens; requires Stripe beta access and is not yet verified end to end
 - **Every Checkout** — Hosted Checkout, Embedded Checkout, Custom Checkout and the Checkout Form (beta)
 - **100% Stripe.js coverage** — Every Stripe.js 10 element and method has a component or composable ([coverage](https://vuestripe.com/coverage))
 - **Customizable** — Full support for Stripe's Appearance API
@@ -66,14 +67,14 @@ Thank you for understanding, and for continuing to support Vue Stripe.
 | Package | Version |
 |---------|---------|
 | `vue` | `^2.7.0 \|\| ^3.0.0` (Vue 2.6 is not supported) |
-| `@stripe/stripe-js` | `^10.0.0` (Stripe.js Endive) |
+| `@stripe/stripe-js` | `^10.2.1` (Stripe.js Endive; public Pricing SDK types require 10.2.1+) |
 
 Upgrading from v5? Read [Migrating from v5 to v6](https://vuestripe.com/guide/migration-v6).
 
 ### Installation
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10.2.1
 ```
 
 Import the component styles once, for example in `main.ts`:

@@ -6,7 +6,7 @@ description: "Install @vue-stripe/vue-stripe and @stripe/stripe-js, import the s
 
 Add Vue Stripe to an existing Vue app, load its stylesheet, configure your publishable key and check that Stripe.js loads.
 
-Requirements: Vue 3 or Vue 2.7, `@stripe/stripe-js` `^10.0.0` (Stripe.js Endive), TypeScript 5.0 or later if the app uses TypeScript, and a browser that [Stripe.js supports](https://docs.stripe.com/js/appendix/supported_browsers). Vue 2.6 is not supported; the full list, with the browsers these docs were tested in, is under [Compatibility](/api/#compatibility). Upgrading from v5? See [Upgrade from v5 to v6](/guide/migration-v6).
+Requirements: Vue 3 or Vue 2.7, `@stripe/stripe-js` `^10.2.1` (Stripe.js Endive), TypeScript 5.0 or later if the app uses TypeScript, and a browser that [Stripe.js supports](https://docs.stripe.com/js/appendix/supported_browsers). The Stripe.js peer floor is 10.2.1 because Vue Stripe's public types include the beta [Pricing SDK](/api/composables/use-pricing), even if your app does not use it. Vue 2.6 is not supported; the full list, with the browsers these docs were tested in, is under [Compatibility](/api/#compatibility). Upgrading from v5? See [Upgrade from v5 to v6](/guide/migration-v6).
 
 ## 1. Install the package
 
@@ -14,15 +14,15 @@ Install Vue Stripe together with Stripe.js:
 
 ::: code-group
 ```bash [npm]
-npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10.2.1
 ```
 
 ```bash [pnpm]
-pnpm add @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
+pnpm add @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10.2.1
 ```
 
 ```bash [yarn]
-yarn add @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10
+yarn add @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10.2.1
 ```
 :::
 

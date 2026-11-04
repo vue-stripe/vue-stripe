@@ -20,7 +20,7 @@ Each major version of the `@stripe/stripe-js` npm package loads exactly one trai
 | Basil | 7 | `2025-03-31.basil` | 5 (`^7.5`) |
 | Clover | 8 | `2025-09-30.clover` | 5 (`^8.5`) |
 | Dahlia | 9 | `2026-03-25.dahlia` | |
-| Endive | 10 | `2026-09-30.endive` | 6 (`^10.0.0`) |
+| Endive | 10 | `2026-09-30.endive` | 6 (current peer requirement: `^10.2.1`) |
 
 Vue Stripe's components and composables are typed against `@stripe/stripe-js`, and its tests check every element's events against the installed type declarations. So a Vue Stripe major release supports one `@stripe/stripe-js` major, and a new train means a new Vue Stripe major. [How Stripe.js is loaded](/guide/stripe-js-loading#release-trains) explains the loading side of this.
 
