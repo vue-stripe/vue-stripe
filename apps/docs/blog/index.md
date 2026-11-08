@@ -1,5 +1,5 @@
 ---
-title: Blog
+title: "Blog: Vue Stripe releases and news"
 description: "News from Vue Stripe: releases, new Stripe.js features, and how the library and its docs are built."
 ---
 

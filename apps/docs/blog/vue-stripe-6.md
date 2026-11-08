@@ -1,10 +1,10 @@
 ---
-title: "Vue Stripe 6: Stripe.js 10, Vue 3 and Vue 2.7 in one build"
+title: "Vue Stripe 6: Stripe.js 10 for Vue 3 and Vue 2.7"
 date: 2026-11-08
-description: "Vue Stripe 6 is out: Stripe.js 10 (Endive), one build for Vue 3 and Vue 2.7, every Stripe.js element and method wrapped, and live demos you can open in StackBlitz."
+description: "Vue Stripe 6 is out: Stripe.js 10 (Endive), one build for Vue 3 and Vue 2.7, every Stripe.js element and method wrapped, and live demos to open in StackBlitz."
 ---
 
-# Vue Stripe 6: Stripe.js 10, Vue 3 and Vue 2.7 in one build
+# Vue Stripe 6: Stripe.js 10 for Vue 3 and Vue 2.7
 
 <BlogPostDate />
 
@@ -76,7 +76,7 @@ Before 6.0.0, six rounds of dogfood testing built real apps from the docs alone,
 - in a v5 app upgraded with the migration guide;
 - under failure conditions: offline, blocked Stripe.js and a strict CSP.
 
-Every issue they found was fixed before the release, and the library shipped with 1,897 unit tests. The rounds also produced the framework guides: [Nuxt and SSR](/guide/ssr), [Vite SSR](/guide/vite-ssr), [VitePress](/guide/vitepress), [Quasar](/guide/quasar) and [Laravel with Inertia](/guide/laravel), plus guides for [webhooks](/guide/webhooks), [testing](/guide/testing) and [error handling](/guide/error-handling). For AI assistants, every page has a Markdown copy, indexed in [llms.txt](https://vuestripe.com/llms.txt).
+Every issue they found was fixed before the release, and the library shipped with 1,897 unit tests. The rounds also produced the framework guides: [Nuxt and SSR](/guide/ssr), [Vite SSR](/guide/vite-ssr), [VitePress](/guide/vitepress), [Quasar](/guide/quasar) and [Laravel with Inertia](/guide/laravel), plus guides for [webhooks](/guide/webhooks), [testing](/guide/testing) and [error handling](/guide/error-handling). For AI assistants, every page has a Markdown copy, indexed in `/llms.txt`.
 
 ## Upgrading from v5
 
