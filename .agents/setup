@@ -34,17 +34,26 @@ ensure_pnpm() {
 }
 
 # Used by `pnpm stripe:seed` (scripts/seed-stripe.sh). Authenticates via STRIPE_API_KEY.
+# Optional: it is called from an `||` list, where `set -e` does not apply, so each
+# command returns explicitly on failure.
 ensure_stripe_cli() {
 	if [[ "$(stripe version 2>/dev/null || true)" != *"$STRIPE_CLI_VERSION"* ]]; then
-		local tmp
-		tmp=$(mktemp -d)
-		curl -fsSL -o "$tmp/stripe.tar.gz" \
-			"https://github.com/stripe/stripe-cli/releases/download/v$STRIPE_CLI_VERSION/stripe_${STRIPE_CLI_VERSION}_linux_x86_64.tar.gz"
-		tar -xzf "$tmp/stripe.tar.gz" -C "$tmp" stripe
-		sudo install -m 0755 "$tmp/stripe" /usr/local/bin/stripe
+		local tmp status=0
+		tmp=$(mktemp -d) || return 1
+		curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors \
+			--connect-timeout 15 --max-time 120 -o "$tmp/stripe.tar.gz" \
+			"https://github.com/stripe/stripe-cli/releases/download/v$STRIPE_CLI_VERSION/stripe_${STRIPE_CLI_VERSION}_linux_x86_64.tar.gz" &&
+			tar -xzf "$tmp/stripe.tar.gz" -C "$tmp" stripe &&
+			sudo install -m 0755 "$tmp/stripe" /usr/local/bin/stripe || status=1
 		rm -rf "$tmp"
+		((status == 0)) || return 1
 	fi
 	stripe version
+}
+
+optional_stripe_cli() {
+	ensure_stripe_cli ||
+		echo "WARNING: Stripe CLI $STRIPE_CLI_VERSION could not be installed; continuing. \`pnpm stripe:seed\` needs it; rerun .agents/setup later." >&2
 }
 
 install_deps() {
@@ -57,6 +66,6 @@ build_library() {
 
 step "Check Node" check_node
 step "Ensure pnpm $PNPM_VERSION" ensure_pnpm
-step "Ensure Stripe CLI $STRIPE_CLI_VERSION" ensure_stripe_cli
+step "Ensure Stripe CLI $STRIPE_CLI_VERSION (optional)" optional_stripe_cli
 step "pnpm install" install_deps
 step "Build @vue-stripe/vue-stripe" build_library
