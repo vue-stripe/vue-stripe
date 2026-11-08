@@ -6,7 +6,7 @@ import {
   type SiteConfig
 } from 'vitepress'
 import { buildEndGenerateOpenGraphImages } from '@nolebase/vitepress-plugin-og-image/vitepress'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { coverage } from './theme/data/stripe-coverage'
 import {
@@ -22,6 +22,7 @@ import {
   type DocSection
 } from './seo'
 import {
+  blogPostsMarkdown,
   bundleSizeMarkdown,
   coverageMarkdown,
   homeBundleSizeMarkdown,
@@ -36,6 +37,7 @@ import { emptyUsage, loadUsage, type UsageData } from './theme/data/usage'
 import { loadBundleSizes } from './theme/data/measure-bundle'
 import { emptyBundleSizes, type BundleSizes } from './theme/data/bundle-size'
 import { markdownPathOf } from './theme/data/markdown-copy'
+import type { BlogPost } from './theme/data/blog'
 
 // Build the "Stripe.js Coverage NN%" nav label from the single coverage data source,
 // so the toolbar stays in sync with the /coverage page automatically.
@@ -72,7 +74,8 @@ const docSections: DocSection[] = [
   { name: 'How-to guides', link: '/guide/', match: howToMatch },
   { name: 'Reference', link: '/api/', match: '^/(api|coverage)(/|$)' },
   { name: 'Explanation', link: '/guide/introduction', match: explanationMatch },
-  { name: 'Live demos', link: '/live-demo/', match: '^/live-demo/' }
+  { name: 'Live demos', link: '/live-demo/', match: '^/live-demo/' },
+  { name: 'Blog', link: '/blog/', match: '^/blog/' }
 ]
 
 // Package facts for the home page's structured data and /llms.txt, read from the library.
@@ -405,7 +408,34 @@ const liveDemoSidebar: DefaultTheme.SidebarItem[] = requirePages([
   }
 ])
 
-const sidebars = [guideSidebar, referenceSidebar, liveDemoSidebar]
+// The blog posts are the Markdown files in blog/, newest first. Each needs `title`, `date`
+// (YYYY-MM-DD) and `description` frontmatter: the sidebar, the /blog/ index and the post's
+// structured data all read them, so a new post needs only its file.
+const blogPosts: BlogPost[] = readdirSync(`${docsRoot}blog`)
+  .filter((file) => file.endsWith('.md') && file !== 'index.md')
+  .map((file) => {
+    const { data } = parseFrontmatter(readFileSync(`${docsRoot}blog/${file}`, 'utf8'))
+    const { title = '', date = '', description = '' } = data
+    if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !description) {
+      throw new Error(
+        `[Vue Stripe docs] blog/${file} needs title, date (YYYY-MM-DD) and description frontmatter`
+      )
+    }
+    return { title, date, description, link: `/blog/${file.replace(/\.md$/, '')}` }
+  })
+  .sort((a, b) => b.date.localeCompare(a.date))
+
+const blogSidebar: DefaultTheme.SidebarItem[] = [
+  {
+    text: 'Blog',
+    items: [
+      { text: 'All posts', link: '/blog/' },
+      ...blogPosts.map((post) => ({ text: post.title, link: post.link }))
+    ]
+  }
+]
+
+const sidebars = [guideSidebar, referenceSidebar, liveDemoSidebar, blogSidebar]
 
 // Each page's share card (made by the OG image plugin in buildEnd) shows its sidebar label
 // under its Diataxis section.
@@ -436,6 +466,7 @@ The docs follow Diataxis: tutorials teach by doing, how-to guides solve one task
 // What the page components render, as Markdown in the page copies (./llms.ts).
 const llmsComponents = (usage: UsageData, sizes: BundleSizes): Record<string, string> => ({
   StripeCoverage: coverageMarkdown(coverage),
+  BlogPosts: blogPostsMarkdown(blogPosts),
   // The same numbers the page was built with (one fetch per build).
   UsageStats: usageMarkdown(usage),
   ...bundleSizeMarkdown(sizes),
@@ -535,6 +566,7 @@ interface ThemeConfig extends DefaultTheme.Config {
     publishableKey: string
     apiUrl: string
   }
+  blogPosts: BlogPost[]
 }
 
 export default defineConfigWithTheme<ThemeConfig>({
@@ -589,6 +621,9 @@ export default defineConfigWithTheme<ThemeConfig>({
       apiUrl: getEnv('VITE_API_URL') || 'https://backend.vuestripe.com'
     },
 
+    // The /blog/ index lists them (theme/components/BlogPosts.vue).
+    blogPosts,
+
     nav: [
       ...docSections.map((s) => ({ text: s.name, link: s.link, activeMatch: s.match })),
       { text: coverageNavLabel, link: '/coverage' },
@@ -609,7 +644,8 @@ export default defineConfigWithTheme<ThemeConfig>({
       '/guide/': guideSidebar,
       '/api/': referenceSidebar,
       '/coverage': referenceSidebar,
-      '/live-demo/': liveDemoSidebar
+      '/live-demo/': liveDemoSidebar,
+      '/blog/': blogSidebar
     },
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/vue-stripe/vue-stripe' }],
@@ -748,7 +784,7 @@ export default defineConfigWithTheme<ThemeConfig>({
 
   // Canonical URL, robots, Open Graph / Twitter tags and JSON-LD for each page (./seo.ts).
   transformHead(context) {
-    return seoHead(context, { sections: docSections, pkg, sidebars })
+    return seoHead(context, { sections: docSections, pkg, sidebars, blogPosts })
   },
 
   // Generate OG images at build time

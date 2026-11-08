@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { DefaultTheme, SiteConfig } from 'vitepress'
 import type { CoverageCategory } from './theme/data/stripe-coverage'
+import type { BlogPost } from './theme/data/blog'
 import {
   FEATURES,
   HERO,
@@ -243,6 +244,16 @@ export function coverageMarkdown(coverage: CoverageCategory[]): string {
       ].join('\n')
     })
     .join('\n\n')
+}
+
+/** The /blog/ index's post list, newest first (the page renders it with a component). */
+export function blogPostsMarkdown(posts: BlogPost[]): string {
+  return posts
+    .map(
+      (post) =>
+        `- [${post.title}](${markdownLink(post.link)}), ${formatDay(post.date)}: ${post.description}`
+    )
+    .join('\n')
 }
 
 /** The home page's usage strip as one line: the same four figures, linking to /usage. */

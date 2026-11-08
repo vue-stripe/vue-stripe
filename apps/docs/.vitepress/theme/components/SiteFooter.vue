@@ -47,6 +47,7 @@ const columns: { title: string; links: FooterLink[] }[] = [
     links: [
       { text: 'GitHub', link: 'https://github.com/vue-stripe/vue-stripe' },
       { text: 'npm', link: 'https://www.npmjs.com/package/@vue-stripe/vue-stripe' },
+      { text: 'Blog', link: '/blog/' },
       { text: 'Release notes', link: 'https://github.com/vue-stripe/vue-stripe/releases' },
       { text: 'Usage and downloads', link: '/usage' },
       {
