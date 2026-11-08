@@ -1,7 +1,52 @@
 # @vue-stripe/vue-stripe
 
-> **Release notes for v5.4.0 and later are published on [GitHub Releases](https://github.com/vue-stripe/vue-stripe/releases).**
-> The 6.0.0 beta entries point to the v6 notes; the older entries are kept for historical reference (through v5.3.0).
+> **Full release notes for v5.4.0 and later are published on [GitHub Releases](https://github.com/vue-stripe/vue-stripe/releases).**
+> The v6 entries below summarize each release and link to its notes; the older entries are kept for historical reference (through v5.3.0).
+
+## 6.1.0
+
+Adds the Checkout Elements SDK methods from Stripe.js 10.2.0. The peer range stays `@stripe/stripe-js@^10.0.0`; nothing changes for apps on 10.0 or 10.1.
+
+- `useCheckoutSession()` returns `updateIndividualName()`, `updateBusinessName()` and `getContactDetailsElement()`. The [coverage tracker](https://vuestripe.com/coverage) stays at 100%.
+- The type declarations are built with TypeScript 6. `hx()`, `statusShell()` and `renderElement()` declare their `VNode` return type, so the emitted declarations import from `vue-demi` instead of `vue`, and the declaration post-build step rewrites bare `.` / `..` specifiers to `../index.js` / `../index.cjs`.
+
+Notes: the [v6.1.0 GitHub Release](https://github.com/vue-stripe/vue-stripe/releases/tag/v6.1.0).
+
+## 6.0.0
+
+First stable release of v6, published under `latest`: `npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10`. It contains the whole v6 line from 6.0.0-beta.0 (Stripe.js 10 Endive, Vue 3 and Vue 2.7 from one build, 100% Stripe.js coverage); breaking changes are in [Migrating from v5 to v6](https://vuestripe.com/guide/migration-v6). Library changes since beta.6:
+
+- Under `createVueStripe()` alone, a failed Stripe.js load (blocked script, empty key) reaches `@error` and `#error` in `VueStripeEmbeddedCheckout`, the disclosures, `VueStripeElements` and both Checkout providers, instead of leaving them on their loader (#773).
+- The disclosures report a rejected `:stripe` promise through `@error` instead of an uncaught error (#774).
+- `locale` on `VueStripeProvider` and `VueStripeElements` is typed with Stripe's locales instead of `string`, so a typo such as `locale="jp"` fails type-checking (#776).
+- `VueStripePricingTable` hides its element with the `hidden` attribute instead of an inline style, so a nonce-based CSP without `'unsafe-inline'` no longer reports a violation on server-rendered pages (#784).
+
+Notes: the [v6.0.0 GitHub Release](https://github.com/vue-stripe/vue-stripe/releases/tag/v6.0.0).
+
+## 6.0.0-beta.6 (pre-release)
+
+- Components that throw from `setup()` when their wrapper or publishable key is missing no longer trigger Vue's follow-up "missing template or render function" warning under an app error handler such as Nuxt's (#745).
+- The disclosures log an unhandled Stripe `{ error }` result as `[Vue Stripe]`, like the other components (#761).
+- Development moves to `@stripe/stripe-js` 10.1.0; the peer range stays `^10.0.0`.
+
+Notes: the [v6.0.0-beta.6 GitHub Release](https://github.com/vue-stripe/vue-stripe/releases/tag/v6.0.0-beta.6).
+
+## 6.0.0-beta.5 (pre-release)
+
+- The UMD build bundles the `@stripe/stripe-js` loader, so a script-tag page needs only Vue, vue-demi and Vue Stripe. Before, `VueStripeProvider` failed with "Cannot read properties of undefined (reading 'loadStripe')" (#714).
+- `VueStripePricingTable` under `createVueStripe()` with an empty key renders `#error` and emits `@error` instead of throwing, which failed SSR pages with HTTP 500 (#728).
+
+Notes: the [v6.0.0-beta.5 GitHub Release](https://github.com/vue-stripe/vue-stripe/releases/tag/v6.0.0-beta.5).
+
+## 6.0.0-beta.4 (pre-release)
+
+- `VueStripeCheckoutElementsProvider` and `VueStripeCheckoutFormProvider` check the client secret before Stripe.js gets it, so a failed `fetch-client-secret` shows `#error` without an extra uncaught rejection (#697).
+- `VueStripeEmbeddedCheckout` passes `onComplete` and `onAnalyticsEvent` only when you listen for `@complete` / `@analytics`, which removes Stripe.js's `redirect_on_completion: always` warning (#688).
+- `VueStripeElements` skips `elements.update()` when an inline `appearance` or `locale` is deep-equal, which ends an update loop with `@update-end` handlers (#704).
+- Unused element components are tree-shaken in esbuild bundles too; `import { useStripe }` drops from 2.8 kB to 557 B gzipped.
+- Instances created with the library's `loadStripe` re-export register Vue Stripe's Stripe partner details, as provider and plugin instances already did.
+
+Notes: the [v6.0.0-beta.4 GitHub Release](https://github.com/vue-stripe/vue-stripe/releases/tag/v6.0.0-beta.4).
 
 ## 6.0.0-beta.3 (pre-release)
 

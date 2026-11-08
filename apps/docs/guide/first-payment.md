@@ -48,7 +48,7 @@ npm install
 npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10 stripe
 ```
 
-The version ranges pick Vue Stripe 6 and Stripe.js 10. Without them, npm installs Vue Stripe 5 while 6.0.0 is still a beta.
+The version ranges pick Vue Stripe 6 and Stripe.js 10, the versions this tutorial is written for.
 
 Check that all three are installed:
 
