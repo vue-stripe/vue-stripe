@@ -17,6 +17,18 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <CheckoutFormExample />
 
+## Source code
+
+<DemoSource example="CheckoutFormExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/CheckoutFormExample.vue
+<<< @/.vitepress/theme/components/examples/CheckoutFormPanel.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. The product step loads the demo account's one-time products from the backend.

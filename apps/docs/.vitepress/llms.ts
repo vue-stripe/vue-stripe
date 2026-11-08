@@ -174,6 +174,14 @@ export function toPlainMarkdown(
       if (replacement) out.push(replacement)
       continue
     }
+    // A code snippet imported from a file (`<<< @/path`, the live demos' code tabs): its source.
+    const snippet = /^<<<\s+@\/([^\s{#[]+)/.exec(line)?.[1]
+    if (snippet) {
+      out.push(
+        `- [${snippet.slice(snippet.lastIndexOf('/') + 1)}](https://github.com/vue-stripe/vue-stripe/blob/main/apps/docs/${snippet})`
+      )
+      continue
+    }
     // Layout-only HTML wrappers.
     if (/^\s*<\/?(div|span)\b[^>]*>\s*$/.test(line)) continue
 

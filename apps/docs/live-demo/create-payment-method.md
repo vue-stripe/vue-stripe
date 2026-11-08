@@ -13,6 +13,16 @@ The demo uses the docs' Stripe test-mode key and takes no payment. Enter the tes
 
 <CreatePaymentMethodExample />
 
+## Source code
+
+<DemoSource example="CreatePaymentMethodExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/CreatePaymentMethodExample.vue
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. Nothing is sent to the demo backend. `VueStripeProvider` loads Stripe.js and `VueStripeElements` creates an Elements group without an Intent.

@@ -9,6 +9,7 @@ import StripeCoverage from './components/StripeCoverage.vue'
 import UsageStats from './components/UsageStats.vue'
 import BundleSize from './components/BundleSize.vue'
 import DocIcon from './components/DocIcon.vue'
+import DemoSource from './components/DemoSource.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import NotFound from './components/NotFound.vue'
 import SearchKeyHint from './components/SearchKeyHint.vue'
@@ -136,6 +137,7 @@ export default {
     app.component('UsageStats', UsageStats)
     app.component('BundleSize', BundleSize)
     app.component('DocIcon', DocIcon)
+    app.component('DemoSource', DemoSource)
     // Home page sections (index.md uses layout: page and composes these)
     app.component('HomeHero', HomeHero)
     app.component('HomeFeatures', HomeFeatures)

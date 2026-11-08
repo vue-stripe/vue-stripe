@@ -17,6 +17,19 @@ The demo runs in Stripe test mode with the docs' test-mode key. Use the test car
 
 <TokensExample />
 
+## Source code
+
+<DemoSource example="TokensExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/TokensExample.vue
+<<< @/.vitepress/theme/components/examples/ConfirmationTokenPanel.vue
+<<< @/.vitepress/theme/components/examples/CardTokenPanel.vue
+<<< @/.vitepress/theme/components/examples/RadarSessionPanel.vue
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 One `VueStripeProvider` wraps three independent panels. None of them calls the demo backend.

@@ -13,6 +13,17 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <SetupIntentExample />
 
+## Source code
+
+<DemoSource example="SetupIntentExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/SetupIntentExample.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. Start asks the backend to create a SetupIntent and returns its client secret.

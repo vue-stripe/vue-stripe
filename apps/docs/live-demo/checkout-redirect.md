@@ -13,6 +13,17 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <CheckoutRedirectExample />
 
+## Source code
+
+<DemoSource example="CheckoutRedirectExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/CheckoutRedirectExample.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. The product step loads the demo account's one-time products from the backend. Choosing one shows a summary and a toggle between two ways to redirect.

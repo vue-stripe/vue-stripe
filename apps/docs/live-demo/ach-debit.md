@@ -13,6 +13,18 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <AchDebitExample />
 
+## Source code
+
+<DemoSource example="AchDebitExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/AchDebitExample.vue
+<<< @/.vitepress/theme/components/examples/AchDebitPanel.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. The product step loads the demo account's one-time products from the backend.
