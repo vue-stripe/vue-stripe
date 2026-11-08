@@ -13,7 +13,7 @@ Sign a customer up for a recurring price and collect the first payment. There ar
 | The Payment Element on your page | Your own page; your server creates the subscription | Option B below |
 | Save a card first, then subscribe | Your own page; the subscription starts after the card is saved | Option C below |
 
-For the trade-offs, see [Choosing an integration](/guide/approaches).
+For the trade-offs, see [Choosing an integration](/guide/approaches). To build Option B step by step from an empty folder first, take the [subscription tutorial](/guide/tutorial-subscription).
 
 Before you start, create a product with a **recurring** price in the Stripe Dashboard (or with the API) and note its price ID (`price_...`).
 

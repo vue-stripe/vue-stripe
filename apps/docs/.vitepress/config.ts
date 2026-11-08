@@ -110,7 +110,10 @@ const guideSidebar: DefaultTheme.SidebarItem[] = requirePages([
   },
   {
     text: 'Tutorials',
-    items: [{ text: 'Take your first test payment', link: '/guide/first-payment' }]
+    items: [
+      { text: 'Take your first test payment', link: '/guide/first-payment' },
+      { text: 'Start your first test subscription', link: '/guide/tutorial-subscription' }
+    ]
   },
   {
     text: 'How-to guides',

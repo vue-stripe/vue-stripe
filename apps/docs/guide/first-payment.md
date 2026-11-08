@@ -424,6 +424,7 @@ Stop both servers with <kbd>Ctrl</kbd>+<kbd>C</kbd> in each terminal.
 
 ## Next steps
 
+- [Start your first test subscription](/guide/tutorial-subscription): the next tutorial, which sells a monthly plan with the same components.
 - [Choosing an integration](/guide/approaches): the Payment Element compared with Stripe Checkout and the other options.
 - [Accept a payment with the Payment Element](/guide/payment-element): the same flow for a production app, with a return page for payment methods that redirect.
 - [Add Apple Pay, Google Pay and Link](/guide/express-checkout): wallet buttons next to the card form.
