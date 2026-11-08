@@ -42,7 +42,10 @@ export default tseslint.config(
       'apps/docs/.vitepress/dist/**',
       `${BACKEND}/.next/**`,
       // Browser e2e run output (HTML report, traces).
-      'tools/browser-e2e/results/**'
+      'tools/browser-e2e/results/**',
+      // Standalone starter apps on the published package (own npm installs, Nuxt auto-imports);
+      // CI type-checks and builds each one instead.
+      'examples/**'
     ]
   },
 

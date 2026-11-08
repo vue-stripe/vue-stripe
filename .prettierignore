@@ -3,6 +3,8 @@ dist
 .vitepress/dist
 .vitepress/cache
 .next
+.nuxt
+.output
 coverage
 
 # Dependencies

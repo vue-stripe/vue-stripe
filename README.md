@@ -133,6 +133,7 @@ const pay = () =>
 - [Website](https://vuestripe.com) - Official website for Vue Stripe
 - [Guides](https://vuestripe.com/guide/introduction) - Guides for using Vue Stripe
 - [API Reference](https://vuestripe.com/api/) - API reference for Vue Stripe components and composables
+- [Examples](./examples) - Runnable starter apps (Vite + Vue, Nuxt 4, Checkout, Subscriptions), each with an Open in StackBlitz link
 - [Playground](https://playground.vuestripe.com) - Interactive playground for testing Vue Stripe components and integrations
 - [Backend](https://backend.vuestripe.com) - Backend for the playground
 
@@ -149,6 +150,7 @@ vue-stripe/
 │   ├── docs/              # VitePress documentation site
 │   ├── playground/        # Development playground
 │   └── backend/           # Backend for the playground
+├── examples/              # Standalone starter apps on the published package (npm, not workspaces)
 └── tools/
     └── typescript-config/ # Shared TypeScript configuration
 ```
