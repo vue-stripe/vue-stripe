@@ -36,4 +36,6 @@ The redirect does not prove that the payment succeeded. A server confirms the re
 
 ::: tip See also
 How-to guide: [Redirect to Stripe Checkout](/guide/checkout). Reference: [VueStripeCheckout](/api/components/stripe-checkout).
+
+Starter app: [`examples/checkout`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/checkout) is a complete Vite + Vue app with hosted and embedded Checkout and its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/checkout?file=src/App.vue)).
 :::

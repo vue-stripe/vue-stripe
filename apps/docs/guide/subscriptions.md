@@ -72,6 +72,10 @@ const subscribe = async () => {
 
 ## Option B: the Payment Element
 
+::: tip Starter app
+[`examples/subscriptions`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/subscriptions) is this option as a complete Vite + Vue app with its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/subscriptions?file=src/App.vue)).
+:::
+
 ### 1. Create the subscription on the server
 
 Create the subscription in an incomplete state, and return the client secret of its first invoice's payment:

@@ -38,4 +38,6 @@ The customer stays on this page for the whole flow. The [Stripe Checkout subscri
 
 ::: tip See also
 How-to guide: [Start a subscription](/guide/subscriptions#option-b-the-payment-element). For the hosted alternative, try the [Stripe Checkout subscription demo](/live-demo/subscription-checkout).
+
+Starter app: [`examples/subscriptions`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/subscriptions) is Option B as a complete Vite + Vue app with its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/subscriptions?file=src/App.vue)).
 :::
