@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Prepares an Amp orb for this monorepo. Idempotent; no long-running processes.
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+PNPM_VERSION=12.11.2
+STRIPE_CLI_VERSION=1.55.8
+
+step() {
+	local name=$1
+	shift
+	echo "==> $name"
+	local start=$SECONDS
+	"$@"
+	echo "<== $name ($((SECONDS - start))s)"
+}
+
+check_node() {
+	local major
+	major=$(node -p 'process.versions.node.split(".")[0]')
+	if ((major < 22)); then
+		echo "Node >= 22 is required (found $(node -v))." >&2
+		exit 1
+	fi
+	echo "node $(node -v)"
+}
+
+ensure_pnpm() {
+	if [[ "$(pnpm -v 2>/dev/null || true)" != "$PNPM_VERSION" ]]; then
+		sudo npm install -g "pnpm@$PNPM_VERSION"
+	fi
+	echo "pnpm $(pnpm -v)"
+}
+
+# Used by `pnpm stripe:seed` (scripts/seed-stripe.sh). Authenticates via STRIPE_API_KEY.
+ensure_stripe_cli() {
+	if [[ "$(stripe version 2>/dev/null || true)" != *"$STRIPE_CLI_VERSION"* ]]; then
+		local tmp
+		tmp=$(mktemp -d)
+		curl -fsSL -o "$tmp/stripe.tar.gz" \
+			"https://github.com/stripe/stripe-cli/releases/download/v$STRIPE_CLI_VERSION/stripe_${STRIPE_CLI_VERSION}_linux_x86_64.tar.gz"
+		tar -xzf "$tmp/stripe.tar.gz" -C "$tmp" stripe
+		sudo install -m 0755 "$tmp/stripe" /usr/local/bin/stripe
+		rm -rf "$tmp"
+	fi
+	stripe version
+}
+
+install_deps() {
+	HUSKY=0 pnpm install --frozen-lockfile
+}
+
+build_library() {
+	pnpm vue-stripe:build
+}
+
+step "Check Node" check_node
+step "Ensure pnpm $PNPM_VERSION" ensure_pnpm
+step "Ensure Stripe CLI $STRIPE_CLI_VERSION" ensure_stripe_cli
+step "pnpm install" install_deps
+step "Build @vue-stripe/vue-stripe" build_library

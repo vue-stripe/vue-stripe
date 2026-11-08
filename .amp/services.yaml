@@ -1,0 +1,22 @@
+# Dev servers for Amp orbs. Start them with `amp orb services ensure`.
+# Fixed ports match the repo's local defaults (playground 3000, backend 3002, docs 5173).
+services:
+  playground:
+    command: pnpm exec vite --host 0.0.0.0 --port "$PORT" --strictPort
+    cwd: apps/playground
+    port: 3000
+    portal:
+      title: Playground
+  backend:
+    # Needs STRIPE_SECRET_KEY (project secret) for its /api routes.
+    command: pnpm exec next dev --hostname 0.0.0.0 --port "$PORT"
+    cwd: apps/backend
+    port: 3002
+    portal:
+      title: Backend
+  docs:
+    command: pnpm exec vitepress dev --host 0.0.0.0 --port "$PORT" --strictPort
+    cwd: apps/docs
+    port: 5173
+    portal:
+      title: Docs

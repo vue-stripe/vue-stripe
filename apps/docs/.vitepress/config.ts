@@ -709,7 +709,9 @@ export default defineConfigWithTheme<ThemeConfig>({
     server: {
       fs: {
         allow: ['../..']
-      }
+      },
+      // VitePress bundles Vite 5, which ignores the Amp orb portal host hint; allow it in orbs only.
+      allowedHosts: process.env.AMP_ORB ? true : undefined
     },
     // Explicitly define environment variables to ensure they're inlined during SSG build
     define: {
