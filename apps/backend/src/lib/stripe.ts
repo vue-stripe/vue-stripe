@@ -12,6 +12,7 @@ export function getStripe(): Stripe {
       throw new Error('STRIPE_SECRET_KEY is not set in environment variables')
     }
     stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      // @ts-expect-error -- stripe-node types apiVersion as its latest release only; we pin 2026-09-30.endive
       apiVersion: STRIPE_API_VERSION,
       typescript: true
     })
