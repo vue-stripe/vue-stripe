@@ -23,7 +23,7 @@
     "@vue-stripe/typescript-config": "workspace:*",
     "eslint": "^10.13.0",
     "prettier": "^3.9.10",
-    "stripe": "^23.0.1",
+    "stripe": "^23.1.0",
     "typescript": "^6.0.3"
   }
 }
