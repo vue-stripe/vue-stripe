@@ -22,7 +22,13 @@ import {
   VueStripeTermsElement,
   VueStripeTreasuryDisclosure,
   useConfirmCardPayment,
+  usePricing,
   type DisclosureError,
+  type Pricing,
+  type UsePricingReturn,
+  type InitializePricingOptions,
+  type ResolvedPrice,
+  type PricingChangeEvent,
   type Stripe,
   type StripeCheckoutFormLoadActionsSuccess,
   type StripeCheckoutLoadActionsSuccess,
@@ -30,6 +36,7 @@ import {
   type StripeElements,
   type StripeEmbeddedCheckout,
   type StripeEmbeddedCheckoutAnalyticsEventUnion,
+  type StripeTaxIdElementOptions,
   type StripePaymentElementChangeEvent
 } from '@vue-stripe/vue-stripe'
 
@@ -41,6 +48,42 @@ const clientSecret = ref<string | null>('pi_123_secret_456')
 const fonts = [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Inter' }]
 const seen: unknown[] = []
 const log = (...args: unknown[]) => seen.push(...args)
+
+// Pricing SDK: exported declarations, nullability and the 10.2.1 tax-ID additions,
+// checked against both Vue versions with skipLibCheck false as well as true.
+const initializeLocalizedPricing = async () => {
+  const api: UsePricingReturn = usePricing()
+  const options: InitializePricingOptions = {
+    pricingPolicy: 'prcpol_123',
+    detectedCurrencyOverride: 'kwd'
+  }
+  const sdk: Pricing | null = await api.initializePricing(options)
+  if (!sdk) return
+  const price: ResolvedPrice = await sdk.resolvePrice('price_123')
+  log(
+    price.unitAmount?.amount,
+    price.unitAmountDecimal?.minorUnitsAmount,
+    price.minorUnitsAmountDivisor
+  )
+  sdk.on('change', (event: PricingChangeEvent) => log(event))
+  // @ts-expect-error pricingPolicy is required
+  void api.initializePricing({})
+  // @ts-expect-error resolved amounts may be null
+  log(price.unitAmount.amount)
+  // @ts-expect-error only change events are supported
+  sdk.on('ready', () => {})
+  // @ts-expect-error the SDK ref is readonly
+  api.pricing.value = null
+}
+log(initializeLocalizedPricing)
+const taxId: Parameters<StripeCheckoutLoadActionsSuccess['updateTaxIdInfo']>[0] = {
+  taxId: { type: 'ic_nif', value: '12345678A' },
+  businessName: 'Example business'
+}
+const taxIdElement: StripeTaxIdElementOptions = {
+  defaultValues: { taxIdType: 'ic_nif', taxId: '12345678A' }
+}
+log(taxId, taxIdElement)
 // Accepts a value of type T (or narrower), and rejects `any`.
 const payload =
   <T,>() =>

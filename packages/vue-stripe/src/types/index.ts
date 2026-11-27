@@ -35,7 +35,9 @@ import type {
   PaymentRequestPaymentMethodEvent,
   PaymentRequestSourceEvent,
   PaymentRequestShippingAddressEvent,
-  PaymentRequestShippingOptionEvent
+  PaymentRequestShippingOptionEvent,
+  Pricing,
+  InitializePricingOptions
 } from '@stripe/stripe-js'
 
 // Stripe.js types that appear in the public signatures of the components and composables
@@ -78,6 +80,7 @@ export type {
   StripeLinkAuthenticationElementOptions,
   StripePaymentElementAvailablePaymentMethodsChangeEvent,
   StripePaymentElementCardDetailsChangeEvent,
+  StripePaymentElementFieldChangeEvent,
   StripePaymentElementOptions,
   StripePaymentElementSavedPaymentMethodRemoveEvent,
   StripePaymentElementSavedPaymentMethodUpdateEvent,
@@ -181,7 +184,15 @@ export type {
   PaymentRequestPaymentMethodEvent,
   PaymentRequestSourceEvent,
   PaymentRequestShippingAddressEvent,
-  PaymentRequestShippingOptionEvent
+  PaymentRequestShippingOptionEvent,
+  // Pricing SDK (Stripe beta)
+  Pricing,
+  InitializePricingOptions,
+  CurrencyInfo,
+  ResolvedPrice,
+  ResolvedPriceAmount,
+  PricingToken,
+  PricingChangeEvent
 } from '@stripe/stripe-js'
 
 // Vue-specific plugin configuration
@@ -368,6 +379,15 @@ export interface UseStripeReturn {
   loading: Readonly<Ref<boolean>>
   error: Readonly<Ref<string | null>>
   initialize: () => Promise<void>
+}
+
+export interface UsePricingReturn {
+  /** The beta Pricing SDK, unchanged, or null before initialization or after failure. */
+  pricing: Readonly<Ref<Pricing | null>>
+  /** Concurrent calls share the first call's options and promise; a settled call may retry. */
+  initializePricing: (options: InitializePricingOptions) => Promise<Pricing | null>
+  loading: Readonly<Ref<boolean>>
+  error: Readonly<Ref<string | null>>
 }
 
 /**

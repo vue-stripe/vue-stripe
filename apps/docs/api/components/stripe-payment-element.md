@@ -178,6 +178,7 @@ For example, `:options="{ layout: { type: 'accordion', radios: 'always' } }"` sw
 | `@loaderror` | `{ elementType: 'payment'; error: StripeError }` | Emitted when the element fails to load |
 | `@availablepaymentmethodschange` | `StripePaymentElementAvailablePaymentMethodsChangeEvent` | Emitted when the set of payment methods shown changes |
 | `@carddetailschange` | `StripePaymentElementCardDetailsChangeEvent` | Emitted when the entered card's brand or details change |
+| `@fieldchange` | `StripePaymentElementFieldChangeEvent` | Emitted when a field changes state, such as focused or completed (Stripe beta) |
 | `@savedpaymentmethodupdate` | `StripePaymentElementSavedPaymentMethodUpdateEvent` | Emitted when a saved payment method is updated |
 | `@savedpaymentmethodremove` | `StripePaymentElementSavedPaymentMethodRemoveEvent` | Emitted when a saved payment method is removed |
 

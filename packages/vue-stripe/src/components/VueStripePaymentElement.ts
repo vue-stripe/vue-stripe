@@ -3,6 +3,7 @@ import type {
   StripePaymentElementAvailablePaymentMethodsChangeEvent,
   StripePaymentElementCardDetailsChangeEvent,
   StripePaymentElementChangeEvent,
+  StripePaymentElementFieldChangeEvent,
   StripePaymentElementOptions,
   StripePaymentElementSavedPaymentMethodRemoveEvent,
   StripePaymentElementSavedPaymentMethodUpdateEvent
@@ -20,6 +21,7 @@ type PaymentEvents = BaseElementEvents<StripePaymentElement, StripePaymentElemen
   loaderror: LoadErrorEvent<'payment'>
   availablepaymentmethodschange: [event: StripePaymentElementAvailablePaymentMethodsChangeEvent]
   carddetailschange: [event: StripePaymentElementCardDetailsChangeEvent]
+  fieldchange: [event: StripePaymentElementFieldChangeEvent]
   savedpaymentmethodupdate: [event: StripePaymentElementSavedPaymentMethodUpdateEvent]
   savedpaymentmethodremove: [event: StripePaymentElementSavedPaymentMethodRemoveEvent]
 }
@@ -47,6 +49,7 @@ export default /* @__PURE__ */ createStripeElement<
     'loaderror',
     'availablepaymentmethodschange',
     'carddetailschange',
+    'fieldchange',
     'savedpaymentmethodupdate',
     'savedpaymentmethodremove'
   ],

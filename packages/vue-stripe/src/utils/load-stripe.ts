@@ -6,23 +6,7 @@ import type { Stripe, StripeConstructorOptions } from '@stripe/stripe-js'
 import { VueStripeProviderError } from './errors'
 import { STRIPE_PARTNER_DETAILS } from './constants'
 
-// The Stripe.js script load in progress (not any caller's Stripe() result).
-let inFlight: Promise<unknown> | null = null
-
-/**
- * The pure `loadStripe()` (with `setLoadParameters`), except that calls made
- * while Stripe.js is loading share that load. The pure entry of
- * @stripe/stripe-js 10.0.0 does not memoize it: a second call during the load
- * re-injects the script and drops the first call's listeners, so the first call
- * never settles. 10.1.0 shares the load itself, but the peer range still allows
- * 10.0.0 and the ES and CJS builds use the app's copy, so the wrapper stays until
- * the range starts at 10.1.0 (on 10.1.0 it only waits on a load that is shared
- * anyway). Waiting calls run once the script settles: each creates its own
- * instance from `window.Stripe`, so an argument `Stripe()` rejects (a secret key)
- * fails only its own call, while a script that fails to load fails them all.
- * Later calls go straight to the pure loader. tests/utils/load-stripe.test.ts
- * runs against both versions.
- */
+// Stripe.js >=10.2.1 shares concurrent script loads itself, including failure/retry.
 // Every instance Vue Stripe hands out, the loadStripe re-export's included, carries the
 // library's Stripe partner details.
 const register = (stripe: Stripe | null) => {
@@ -31,20 +15,7 @@ const register = (stripe: Stripe | null) => {
 }
 
 export const loadStripe: typeof pureLoadStripe = /* @__PURE__ */ Object.assign(
-  (...args: Parameters<typeof pureLoadStripe>) => {
-    if (inFlight) return inFlight.then(() => pureLoadStripe(...args)).then(register)
-    const load = pureLoadStripe(...args).then(register)
-    const script = load.catch((err: unknown) => {
-      // window.Stripe is set: the script loaded and only this call's Stripe() threw.
-      if (!(globalThis as { Stripe?: unknown }).Stripe) throw err
-    })
-    const settle = () => {
-      if (inFlight === script) inFlight = null
-    }
-    inFlight = script
-    script.then(settle, settle)
-    return load
-  },
+  (...args: Parameters<typeof pureLoadStripe>) => pureLoadStripe(...args).then(register),
   {
     setLoadParameters: (params: { advancedFraudSignals: boolean }) =>
       pureLoadStripe.setLoadParameters(params)

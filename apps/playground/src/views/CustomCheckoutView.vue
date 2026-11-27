@@ -89,8 +89,8 @@ const reset = () => {
   <div class="max-w-[900px] mx-auto flex flex-col gap-6">
     <Alert v-if="returnedSessionId" variant="info">
       <AlertDescription>
-        Returned from a redirect for session <code>{{ returnedSessionId }}</code
-        >. Check its status on your server with <code>stripe.checkout.sessions.retrieve()</code>.
+        Returned from a redirect for session <code>{{ returnedSessionId }}</code>. Check its status
+        on your server with <code>stripe.checkout.sessions.retrieve()</code>.
       </AlertDescription>
     </Alert>
 

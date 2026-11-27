@@ -46,6 +46,7 @@ const OWNERS = [
   'StripeCheckoutLoadActionsSuccess',
   'StripeEmbeddedCheckout',
   'PaymentRequest',
+  'Pricing',
   'loadStripe'
 ]
 
@@ -260,9 +261,9 @@ describe('Stripe.js surface guard self-test (stubbed matrix)', () => {
     expect(surfaceProblems(surface, stub(surface))).toEqual([])
   })
 
-  it('fails when a row is removed', () => {
-    const problems = surfaceProblems(surface, withoutRow(stub(surface), 'Stripe.confirmPayment'))
-    expect(problems).toEqual(['Stripe.confirmPayment: not in the coverage matrix'])
+  it.each(['Stripe.confirmPayment', 'Pricing.resolvePrice'])('fails when %s is removed', (key) => {
+    const problems = surfaceProblems(surface, withoutRow(stub(surface), key))
+    expect(problems).toEqual([`${key}: not in the coverage matrix`])
   })
 
   it('fails when a row is removed from the real matrix', () => {
