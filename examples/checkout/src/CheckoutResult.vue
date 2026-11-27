@@ -26,9 +26,8 @@ onMounted(async () => {
   <p v-else-if="result?.status === 'complete'">Your payment is processing.</p>
   <p v-else-if="result" class="error">The payment did not complete.</p>
   <p v-else-if="failed">
-    Back from Checkout with session <code>{{ sessionId }}</code
-    >, but the server's <code>/api/checkout-status</code> route did not answer, so the status is
-    unknown.
+    Back from Checkout with session <code>{{ sessionId }}</code>, but the server's
+    <code>/api/checkout-status</code> route did not answer, so the status is unknown.
   </p>
   <p v-else>Checking the payment…</p>
   <a href="/">Start over</a>

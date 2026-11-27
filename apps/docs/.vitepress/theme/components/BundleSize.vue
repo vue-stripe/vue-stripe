@@ -363,8 +363,8 @@ const words = (name: string) => name.split(/(?=[A-Z])/)
     </section>
 
     <p v-if="shown === 0" class="size-empty">
-      No export matches <strong>{{ query }}</strong
-      >. Try <code>Element</code>, <code>use</code> or <code>Checkout</code>.
+      No export matches <strong>{{ query }}</strong>. Try <code>Element</code>, <code>use</code> or
+      <code>Checkout</code>.
     </p>
   </div>
 </template>

@@ -173,9 +173,10 @@ const reset = () => {
 
     <div v-if="shown === 0" class="cov-empty">
       <p>
-        Nothing matches <strong>{{ query }}</strong
-        ><template v-if="filter !== 'all'"> in {{ filter }} features</template>. Try a Stripe.js
-        method such as <code>confirmPayment</code> or an element such as <code>iban</code>.
+        Nothing matches <strong>{{ query }}</strong><template v-if="filter !== 'all'">
+          in {{ filter }} features</template
+        >. Try a Stripe.js method such as <code>confirmPayment</code> or an element such as
+        <code>iban</code>.
       </p>
       <button type="button" class="cov-filter" @click="reset">Clear search</button>
     </div>
