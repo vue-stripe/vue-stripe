@@ -12,7 +12,7 @@ Every export of `@vue-stripe/vue-stripe`: components, composables, the plugin an
 | Requirement | Supported |
 |-------------|-----------|
 | Vue | `^2.7.0 \|\| ^3.0.0` (peer dependency). Vue 2.7 is tested in client-side apps; see [Use Vue Stripe on Vue 2.7](/guide/vue-2) |
-| Stripe.js | `@stripe/stripe-js` `^10.2.1`, Stripe.js Endive (peer dependency; public Pricing SDK types require 10.2.1+) |
+| Stripe.js | `@stripe/stripe-js` `^10.3.0`, Stripe.js Endive (peer dependency; public types include the Pricing SDK (10.2.1) and the Payment Element `fieldchange` event (10.3.0)) |
 | Rendering | Client and server. Stripe.js loads only in the browser; during server rendering, components render their loading state and hydrate without mismatches. `<ClientOnly>` is optional. See [Use Vue Stripe with Nuxt and SSR](/guide/ssr) |
 | Module formats | ES, CommonJS and UMD builds (the UMD build, for a `<script>` tag, includes the `@stripe/stripe-js` loader and needs only the Vue and vue-demi globals; see [Without a bundler](/guide/installation#without-a-bundler)); TypeScript declarations for ES module and CommonJS consumers, with `moduleResolution` `bundler`, `node16`, `nodenext` or `node` |
 | TypeScript | 5.0 or later for the declarations (they use `export type *`). Vue 3.5's own declarations need 5.4 when `skipLibCheck` is `false`, and vue-tsc 3 needs 5.0 |

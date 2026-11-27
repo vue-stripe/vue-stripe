@@ -379,6 +379,7 @@ describe('VueStripePaymentElement', () => {
     const names = [
       'availablepaymentmethodschange',
       'carddetailschange',
+      'fieldchange',
       'savedpaymentmethodupdate',
       'savedpaymentmethodremove'
     ]

@@ -55,7 +55,7 @@ const freshLoader = async () => {
 // warm it once and give the tests room instead of failing on the default 5 s timeout.
 const LOADER_TIMEOUT = 20_000
 
-describe('with the installed pure loader (peer minimum 10.2.1)', () => {
+describe('with the installed pure loader (peer range ^10.3.0)', () => {
   describe(
     'loadStripeInstance with the real @stripe/stripe-js/pure loader',
     { timeout: LOADER_TIMEOUT },

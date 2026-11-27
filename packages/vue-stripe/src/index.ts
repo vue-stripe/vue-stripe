@@ -188,6 +188,7 @@ export type {
   StripeLinkAuthenticationElementOptions,
   StripePaymentElementAvailablePaymentMethodsChangeEvent,
   StripePaymentElementCardDetailsChangeEvent,
+  StripePaymentElementFieldChangeEvent,
   StripePaymentElementOptions,
   StripePaymentElementSavedPaymentMethodRemoveEvent,
   StripePaymentElementSavedPaymentMethodUpdateEvent,

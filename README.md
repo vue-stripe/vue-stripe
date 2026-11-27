@@ -69,14 +69,14 @@ Thank you for understanding, and for continuing to support Vue Stripe.
 | Package | Version |
 |---------|---------|
 | `vue` | `^2.7.0 \|\| ^3.0.0` (Vue 2.6 is not supported) |
-| `@stripe/stripe-js` | `^10.2.1` (Stripe.js Endive; public Pricing SDK types require 10.2.1+) |
+| `@stripe/stripe-js` | `^10.3.0` (Stripe.js Endive; public types include the Pricing SDK (10.2.1) and the Payment Element `fieldchange` event (10.3.0)) |
 
 Upgrading from v5? Read [Migrating from v5 to v6](https://vuestripe.com/guide/migration-v6).
 
 ### Installation
 
 ```bash
-npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10.2.1
+npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10.3.0
 ```
 
 Import the component styles once, for example in `main.ts`:

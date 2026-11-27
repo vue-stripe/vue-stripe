@@ -362,8 +362,8 @@ importers:
   apps/playground:
     dependencies:
       '@stripe/stripe-js':
-        specifier: ^10.2.1
-        version: 10.2.1
+        specifier: ^10.4.0
+        version: 10.4.0
       '@unhead/vue':
         specifier: ^3.4.3
         version: 3.4.3(@oxc-project/types@0.156.0)(esbuild@0.28.2)(lightningcss@1.33.0)(oxc-parser@0.155.0)(rolldown@1.2.16)(rollup@4.64.5)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.44.1)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3))
@@ -442,8 +442,8 @@ importers:
         specifier: ^14.3.0
         version: 14.3.0(size-limit@14.3.0)
       '@stripe/stripe-js':
-        specifier: ^10.2.1
-        version: 10.2.1
+        specifier: ^10.4.0
+        version: 10.4.0
       '@vitest/coverage-v8':
         specifier: ^5.0.5
         version: 5.0.5(vitest@5.0.5)
@@ -487,8 +487,8 @@ importers:
         specifier: ^7.29.11
         version: 7.29.11
       '@stripe/stripe-js':
-        specifier: ^10.2.1
-        version: 10.2.1
+        specifier: ^10.4.0
+        version: 10.4.0
       '@vue-stripe/vue-stripe':
         specifier: workspace:*
         version: link:../vue-stripe
@@ -2463,8 +2463,8 @@ packages:
     peerDependencies:
       size-limit: 14.3.0
 
-  '@stripe/stripe-js@10.2.1':
-    resolution: {integrity: sha512-diHeR1/FeWZZzuFXEvkjRMzydgKEpxUTrKEUxSV8NcpeZY3Kl8C4Gerw/JSMK+3oXsBRJtgkG7ckviQJ651moA==}
+  '@stripe/stripe-js@10.4.0':
+    resolution: {integrity: sha512-ZGwmBIbKD9V8AA79nux7YxIrY+H3x3cOR60VYHTeBykJ5ZnNqFxhD+eNOg3t5Qz5QyB4Pfy6JnGaCmysYCD9IQ==}
     engines: {node: '>=12.16'}
 
   '@swc/helpers@0.5.23':
@@ -7941,7 +7941,7 @@ snapshots:
       rolldown: 1.2.16
       size-limit: 14.3.0
 
-  '@stripe/stripe-js@10.2.1': {}
+  '@stripe/stripe-js@10.4.0': {}
 
   '@swc/helpers@0.5.23':
     dependencies:
