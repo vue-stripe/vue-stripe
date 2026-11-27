@@ -137,7 +137,7 @@ A Payment Element that v5 code created itself with `checkout.createPaymentElemen
 
 ## 4. Update your server
 
-The v6 guides write their server code for the Node.js `stripe` package 23, which uses API version `2026-09-30.endive`, the same release train as Stripe.js 10. A v5 server usually runs an older package on a Clover API version (`stripe` 19 uses `2025-10-29.clover`), and two of its calls break on the way to Endive. Make these changes in this order:
+The v6 guides write their server code for the Node.js `stripe` package 23, which uses an Endive API version (`2026-11-18.endive` since 23.2; 23.0 used `2026-09-30.endive`), the same release train as Stripe.js 10. A v5 server usually runs an older package on a Clover API version (`stripe` 19 uses `2025-10-29.clover`), and two of its calls break on the way to Endive. Make these changes in this order:
 
 1. **Replace `payment_method_types`.** Endive rejects it when you create a PaymentIntent, SetupIntent or Checkout Session: "The `payment_method_types` parameter is no longer supported". Pass the same list as `allowed_payment_method_types`, or drop the parameter so your [Dashboard payment method settings](https://dashboard.stripe.com/settings/payment_methods) decide. Clover already accepts `allowed_payment_method_types`, so you can deploy this change before the others.
 
@@ -149,7 +149,7 @@ The v6 guides write their server code for the Node.js `stripe` package 23, which
    const setupIntent = await stripe.setupIntents.create({ allowed_payment_method_types: ['card'] })
    ```
 
-2. **Upgrade the `stripe` package and rename `ui_mode` in the same change.** Run `npm install stripe@^23`. Clover rejects `ui_mode: 'elements'` ("you must upgrade to Stripe API version 2026-03-25.dahlia"), and Dahlia and later reject `ui_mode: 'custom'` ("Use `elements` instead"), so neither value works on both sides of the upgrade. The same goes for `ui_mode: 'embedded'`, which became `'embedded_page'`. If your code pins a version with `new Stripe(key, { apiVersion })`, set it to `'2026-09-30.endive'` or remove it. On another server language, upgrade its Stripe library to a release that uses `2026-09-30.endive`.
+2. **Upgrade the `stripe` package and rename `ui_mode` in the same change.** Run `npm install stripe@^23`. Clover rejects `ui_mode: 'elements'` ("you must upgrade to Stripe API version 2026-03-25.dahlia"), and Dahlia and later reject `ui_mode: 'custom'` ("Use `elements` instead"), so neither value works on both sides of the upgrade. The same goes for `ui_mode: 'embedded'`, which became `'embedded_page'`. If your code pins a version with `new Stripe(key, { apiVersion })`, set it to an Endive version such as `'2026-11-18.endive'` or remove it. On another server language, upgrade its Stripe library to a release that uses an Endive API version.
 
 3. **Check the rest of your server code.** The move from Clover to Endive crosses the Dahlia and Endive API releases. Stripe's [API changelog](https://docs.stripe.com/changelog) lists their breaking changes, and the `stripe` package's [changelog](https://github.com/stripe/stripe-node/blob/master/CHANGELOG.md) lists changes to its own methods and types.
 
@@ -170,7 +170,7 @@ Every element component now renders the same markup: a `vue-stripe-<name>-elemen
 - [ ] `VueStripeCheckoutProvider` is renamed, and its `@ready` handler takes `actions`
 - [ ] Code that calls a Checkout Session action on mount waits for `@ready` or for `actions` from `useCheckoutSession()`
 - [ ] The server sends no `payment_method_types`
-- [ ] The server runs `stripe` 23 (API version `2026-09-30.endive`) and creates Checkout Sessions with `ui_mode: 'elements'`
+- [ ] The server runs `stripe` 23 (an Endive API version such as `2026-11-18.endive`) and creates Checkout Sessions with `ui_mode: 'elements'`
 - [ ] `@loadError` became `@loaderror`; `@loaderstop` is gone
 - [ ] CSS that targets `vue-stripe-link-auth-element` / `-loading` uses `-mount` / `-loader`
 
