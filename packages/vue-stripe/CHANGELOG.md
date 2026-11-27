@@ -3,6 +3,16 @@
 > **Full release notes for v5.4.0 and later are published on [GitHub Releases](https://github.com/vue-stripe/vue-stripe/releases).**
 > The v6 entries below summarize each release and link to its notes; the older entries are kept for historical reference (through v5.3.0).
 
+## 6.2.0
+
+Supports Stripe.js 10.4.0 and adds the beta Pricing SDK. **The peer range rises from `@stripe/stripe-js@^10.0.0` to `^10.3.0`**, because the public types now name declarations that first ship in 10.2.1 and 10.3.0; apps on Stripe.js 10.0 to 10.2 should run `npm install @stripe/stripe-js@^10.3.0`, even if they use neither feature.
+
+- `usePricing()` initializes Stripe's beta Pricing SDK through the existing provider or plugin and returns the SDK unchanged, with `loading` and `error`. Concurrent `initializePricing()` calls share the first call's options; a failed call resolves to `null` and can be retried. The Pricing types (`Pricing`, `InitializePricingOptions`, `ResolvedPrice` and the rest) are re-exported. It needs beta access from Stripe and has not been verified against a beta-enabled account.
+- `VueStripePaymentElement` emits `@fieldchange` (Stripe beta, Stripe.js 10.3.0), and `StripePaymentElementFieldChangeEvent` is re-exported.
+- Stripe.js 10.2.1 shares concurrent script loads itself, so the library no longer serializes them. The [coverage tracker](https://vuestripe.com/coverage) stays at 100%.
+
+Notes: the [v6.2.0 GitHub Release](https://github.com/vue-stripe/vue-stripe/releases/tag/v6.2.0).
+
 ## 6.1.0
 
 Adds the Checkout Elements SDK methods from Stripe.js 10.2.0. The peer range stays `@stripe/stripe-js@^10.0.0`; nothing changes for apps on 10.0 or 10.1.
