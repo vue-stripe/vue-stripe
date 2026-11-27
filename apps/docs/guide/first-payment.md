@@ -8,6 +8,8 @@ In this tutorial you build a small Vue app that charges €10 to a Stripe test c
 
 It takes about 30 minutes. No real money moves: everything runs in Stripe's test mode.
 
+To skip ahead, [`examples/vite-vue`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/vite-vue) is the finished app, with error handling and a return page added. You can also [open it in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/vite-vue?file=src/App.vue).
+
 This is what your app looks like at the end:
 
 <img src="/tutorial/payment-succeeded.webp" width="460" style="border: 1px solid var(--vp-c-divider); border-radius: 8px" alt="The finished app: a Pay €10 heading, a card form filled with 4242 4242 4242 4242, a Pay €10 button and the text Payment succeeded">
@@ -48,7 +50,7 @@ npm install
 npm install @vue-stripe/vue-stripe@^6 @stripe/stripe-js@^10 stripe
 ```
 
-The version ranges pick Vue Stripe 6 and Stripe.js 10. Without them, npm installs Vue Stripe 5 while 6.0.0 is still a beta.
+The version ranges pick Vue Stripe 6 and Stripe.js 10, the versions this tutorial is written for.
 
 Check that all three are installed:
 
@@ -422,6 +424,7 @@ Stop both servers with <kbd>Ctrl</kbd>+<kbd>C</kbd> in each terminal.
 
 ## Next steps
 
+- [Start your first test subscription](/guide/tutorial-subscription): the next tutorial, which sells a monthly plan with the same components.
 - [Choosing an integration](/guide/approaches): the Payment Element compared with Stripe Checkout and the other options.
 - [Accept a payment with the Payment Element](/guide/payment-element): the same flow for a production app, with a return page for payment methods that redirect.
 - [Add Apple Pay, Google Pay and Link](/guide/express-checkout): wallet buttons next to the card form.

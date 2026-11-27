@@ -1,0 +1,6 @@
+{
+  "env": {
+    "NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_51OIHqMIx2Vb66eaKneiRI89KWckP2FB7c75OLUZGezoXDiCHlIXMh6dBkTyWRe8oz77CO6B0udvWS6yWWdDaiwS800oW2Na8mk",
+    "NUXT_PUBLIC_API_BASE": "https://backend.vuestripe.com"
+  }
+}

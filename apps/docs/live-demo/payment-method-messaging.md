@@ -13,6 +13,16 @@ The demo uses the docs' Stripe test-mode key and takes no payment. Change the am
 
 <PaymentMethodMessagingExample />
 
+## Source code
+
+<DemoSource example="PaymentMethodMessagingExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/PaymentMethodMessagingExample.vue
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. Nothing is sent to the demo backend. `VueStripeElements` without a client secret wraps `VueStripePaymentMethodMessagingElement`.

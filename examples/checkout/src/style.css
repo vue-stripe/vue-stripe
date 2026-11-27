@@ -1,0 +1,41 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: #1a1a1a;
+}
+
+main {
+  max-width: 440px;
+  margin: 48px auto;
+  padding: 0 16px;
+}
+
+button {
+  margin-top: 16px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #635bff;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  color: #df1b41;
+}
+
+button + button {
+  margin-left: 8px;
+}
+
+button.secondary {
+  border: 1px solid #635bff;
+  background: #fff;
+  color: #635bff;
+}

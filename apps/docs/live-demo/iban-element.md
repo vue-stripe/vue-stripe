@@ -13,6 +13,17 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <IbanElementExample />
 
+## Source code
+
+<DemoSource example="IbanElementExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/IbanElementExample.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. Start asks the backend to create a SEPA Direct Debit PaymentIntent for €20.00 and returns its client secret.

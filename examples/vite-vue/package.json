@@ -1,0 +1,26 @@
+{
+  "name": "vue-stripe-vite-vue",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently --kill-others -n server,client \"npm:server\" \"npm:client\"",
+    "server": "node --env-file=.env --watch server.js",
+    "client": "vite",
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^10.2.1",
+    "@vue-stripe/vue-stripe": "^6.1.0",
+    "stripe": "^23.1.0",
+    "vue": "^3.5.45"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.10",
+    "concurrently": "^10.0.7",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.6",
+    "vue-tsc": "^3.3.14"
+  }
+}

@@ -13,7 +13,7 @@ Sign a customer up for a recurring price and collect the first payment. There ar
 | The Payment Element on your page | Your own page; your server creates the subscription | Option B below |
 | Save a card first, then subscribe | Your own page; the subscription starts after the card is saved | Option C below |
 
-For the trade-offs, see [Choosing an integration](/guide/approaches).
+For the trade-offs, see [Choosing an integration](/guide/approaches). To build Option B step by step from an empty folder first, take the [subscription tutorial](/guide/tutorial-subscription).
 
 Before you start, create a product with a **recurring** price in the Stripe Dashboard (or with the API) and note its price ID (`price_...`).
 
@@ -71,6 +71,10 @@ const subscribe = async () => {
 `VueStripeCheckout` does the same as a component: `<VueStripeCheckout :session-url="url" button-text="Subscribe" />`. To keep the customer on your site, embed the same session with [`VueStripeEmbeddedCheckout`](/guide/embedded-checkout) instead. Try it in the [subscription Checkout demo](/live-demo/subscription-checkout).
 
 ## Option B: the Payment Element
+
+::: tip Starter app
+[`examples/subscriptions`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/subscriptions) is this option as a complete Vite + Vue app with its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/subscriptions?file=src/App.vue)).
+:::
 
 ### 1. Create the subscription on the server
 

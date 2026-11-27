@@ -12,6 +12,10 @@ The redirect does not use Stripe.js, so this needs no provider: no `VueStripePro
 Stripe.js no longer offers a client-side `redirectToCheckout()`. If you passed `sessionId` or `priceId` in v5, see [Upgrade from v5 to v6](/guide/migration-v6).
 :::
 
+::: tip Starter app
+[`examples/checkout`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/checkout) is a complete Vite + Vue app with hosted and embedded Checkout and its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/checkout?file=src/App.vue)).
+:::
+
 ## Before you begin
 
 - A Stripe secret key on your server and a Price (`price_...`) in your Stripe account.

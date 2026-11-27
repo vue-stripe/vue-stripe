@@ -13,6 +13,18 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <SubscriptionEmbeddedExample />
 
+## Source code
+
+<DemoSource example="SubscriptionEmbeddedExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/SubscriptionEmbeddedExample.vue
+<<< @/.vitepress/theme/components/examples/ConfirmSubscriptionButton.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. The product step loads the demo account's recurring prices only, each with its billing interval.
@@ -26,4 +38,6 @@ The customer stays on this page for the whole flow. The [Stripe Checkout subscri
 
 ::: tip See also
 How-to guide: [Start a subscription](/guide/subscriptions#option-b-the-payment-element). For the hosted alternative, try the [Stripe Checkout subscription demo](/live-demo/subscription-checkout).
+
+Starter app: [`examples/subscriptions`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/subscriptions) is Option B as a complete Vite + Vue app with its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/subscriptions?file=src/App.vue)).
 :::

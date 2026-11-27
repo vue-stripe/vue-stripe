@@ -8,7 +8,7 @@ The Vue Stripe documentation has four sections. Each one serves a different need
 
 ## Tutorials
 
-Lessons that take you from an empty folder to a working result, one step at a time. Start here if you have not used Vue Stripe before: [Take your first test payment](/guide/first-payment).
+Lessons that take you from an empty folder to a working result, one step at a time. Start here if you have not used Vue Stripe before: [Take your first test payment](/guide/first-payment). Then, to bill customers every month, [Start your first test subscription](/guide/tutorial-subscription).
 
 ## How-to guides
 

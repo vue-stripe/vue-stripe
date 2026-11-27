@@ -120,5 +120,5 @@ playwright/.cache/
 # Vite config bundling leftovers
 *.timestamp-*.mjs
 
-# Orb portal metadata
-.amp/portals/*
+# Amp orb portal state (generated)
+.amp/portals/

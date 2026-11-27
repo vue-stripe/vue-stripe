@@ -17,6 +17,17 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <PaymentRequestExample />
 
+## Source code
+
+<DemoSource example="PaymentRequestExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/PaymentRequestExample.vue
+<<< @/.vitepress/theme/components/examples/PaymentRequestPanel.vue
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. `usePaymentRequest()` creates a `PaymentRequest` for $10.99 (country `US`, currency `usd`) that asks for the payer's name and email, and runs `canMakePayment()`. The demo prints the result: the wallets this browser offers, or `No wallet in this browser`.

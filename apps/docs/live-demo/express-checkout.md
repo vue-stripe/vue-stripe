@@ -13,6 +13,17 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <ExpressCheckoutExample />
 
+## Source code
+
+<DemoSource example="ExpressCheckoutExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/ExpressCheckoutExample.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. The product step loads the demo account's one-time products from the backend.

@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { DefaultTheme, HeadConfig, TransformContext } from 'vitepress'
+import type { BlogPost } from './theme/data/blog'
 
 // Per-page SEO head: canonical URL, Open Graph and Twitter tags, robots and JSON-LD.
 // Everything here is computed at build time from the page's own frontmatter and git date,
@@ -219,6 +220,7 @@ export function breadcrumbs(opts: {
 }
 
 function articleJsonLd(opts: {
+  type: 'TechArticle' | 'BlogPosting'
   url: string
   headline: string
   description: string
@@ -228,13 +230,14 @@ function articleJsonLd(opts: {
   section: DocSection | undefined
   crumbs: { name: string; url: string }[]
 }) {
-  const { url, headline, description, image, datePublished, dateModified, section, crumbs } = opts
+  const { type, url, headline, description, image, datePublished, dateModified, section, crumbs } =
+    opts
 
   return {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'TechArticle',
+        '@type': type,
         '@id': `${url}#article`,
         headline,
         description,
@@ -276,7 +279,12 @@ export function ogImageAlt(card: { title: string; category?: string | undefined 
 
 export function seoHead(
   { pageData, siteData, siteConfig, title }: TransformContext,
-  opts: { sections: DocSection[]; pkg: PackageFacts; sidebars: DefaultTheme.SidebarItem[][] }
+  opts: {
+    sections: DocSection[]
+    pkg: PackageFacts
+    sidebars: DefaultTheme.SidebarItem[][]
+    blogPosts: BlogPost[]
+  }
 ): HeadConfig[] {
   const { relativePath } = pageData
   const isHome = relativePath === 'index.md' || relativePath === ''
@@ -295,7 +303,13 @@ export function seoHead(
   const staticImage = isHome || trail.length === 0
   const image = staticImage ? HOME_IMAGE : ogImageOf(relativePath)
   const dateModified = pageData.lastUpdated ? new Date(pageData.lastUpdated).toISOString() : ''
-  const datePublished = isHome ? '' : datePublishedOf(siteConfig.srcDir, relativePath)
+  // A blog post is published on the day its frontmatter names, not the day it was committed.
+  const post = opts.blogPosts.find((p) => p.link === route)
+  const datePublished = post
+    ? new Date(`${post.date}T00:00:00Z`).toISOString()
+    : isHome
+      ? ''
+      : datePublishedOf(siteConfig.srcDir, relativePath)
 
   if (isNotFound) return [['meta', { name: 'robots', content: 'noindex, follow' }]]
   // A stub left at a removed page's old URL (`noindex: true` with `canonical:` frontmatter)
@@ -343,6 +357,7 @@ export function seoHead(
       isHome
         ? homeJsonLd(description, opts.pkg)
         : articleJsonLd({
+            type: post ? 'BlogPosting' : 'TechArticle',
             url,
             headline: pageData.title,
             description,

@@ -13,6 +13,16 @@ The demo uses the docs' Stripe test-mode key and takes no payment. Choose Shippi
 
 <AddressElementExample />
 
+## Source code
+
+<DemoSource example="AddressElementExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/AddressElementExample.vue
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. Nothing is sent to the demo backend. `VueStripeElements` gets `mode="payment"`, `currency="usd"` and `:amount="1000"` instead of an Intent's client secret, because Stripe.js 10 needs those values to create the Address Element.

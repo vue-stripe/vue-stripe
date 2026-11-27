@@ -66,6 +66,10 @@ The sample reads the key as a Vite app does. In Nuxt, write `const publishableKe
 
 ## Nuxt
 
+::: tip Starter app
+[`examples/nuxt`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/nuxt) is the payment from steps 1 to 6 as a complete Nuxt 4 app ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/nuxt?file=app/pages/index.vue)).
+:::
+
 The paths below follow Nuxt 4, which reads plugins, pages and components from the `app/` directory. On Nuxt 3, or in a Nuxt 4 project that keeps the Nuxt 3 layout (no `app/` directory), drop the `app/` prefix: `plugins/`, `pages/` and `components/` sit at the project root. `server/` stays at the root in both.
 
 ### 1. Install the packages

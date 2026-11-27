@@ -13,6 +13,17 @@ This demo runs in test mode: under **Complete with test data**, pick an outcome 
 
 <IdentityExample />
 
+## Source code
+
+<DemoSource example="IdentityExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/IdentityExample.vue
+<<< @/.vitepress/theme/components/examples/IdentityVerifyButton.vue
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. `VueStripeProvider` loads Stripe.js. The verify button is a child component, so it can call `useIdentity()`.

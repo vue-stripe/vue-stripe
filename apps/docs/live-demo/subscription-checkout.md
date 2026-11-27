@@ -13,6 +13,17 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <SubscriptionCheckoutExample />
 
+## Source code
+
+<DemoSource example="SubscriptionCheckoutExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/SubscriptionCheckoutExample.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. The product step loads the demo account's recurring prices only, each with its billing interval.

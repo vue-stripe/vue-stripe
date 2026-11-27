@@ -37,6 +37,15 @@ updates:
       # @types/node follows the Node versions the project supports (.nvmrc, CI matrix).
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
+  # The starter apps install the published package with npm; one grouped PR a month keeps their
+  # lockfiles current (CI builds them, so a bump that breaks one fails the PR).
+  - package-ecosystem: npm
+    directories: ['/examples/*']
+    schedule:
+      interval: monthly
+    groups:
+      examples:
+        patterns: ['*']
   - package-ecosystem: github-actions
     directory: /
     schedule:

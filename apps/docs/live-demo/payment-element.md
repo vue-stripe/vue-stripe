@@ -13,6 +13,18 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <PaymentElementExample />
 
+## Source code
+
+<DemoSource example="PaymentElementExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/PaymentElementExample.vue
+<<< @/.vitepress/theme/components/examples/ConfirmPaymentButton.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. The product step loads the demo account's one-time products from the backend.
@@ -23,4 +35,6 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 ::: tip See also
 How-to guide: [Accept a payment with the Payment Element](/guide/payment-element). Reference: [VueStripePaymentElement](/api/components/stripe-payment-element).
+
+Starter app: [`examples/vite-vue`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/vite-vue) is this flow as a complete Vite + Vue app with its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/vite-vue?file=src/App.vue)).
 :::

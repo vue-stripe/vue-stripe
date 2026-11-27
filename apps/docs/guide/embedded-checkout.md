@@ -6,6 +6,10 @@ description: "Embed Stripe's prebuilt Checkout page in a Vue app with VueStripeE
 
 Put Stripe's prebuilt Checkout page inside your own page with `VueStripeEmbeddedCheckout`. Stripe renders the full form (line items, totals, payment methods, addresses, tax IDs, promotion codes) in an iframe, and the customer never leaves your site. To compare it with hosted Checkout and your own Elements form, see [Choosing an integration](/guide/approaches).
 
+::: tip Starter app
+[`examples/checkout`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/checkout) is a complete Vite + Vue app with hosted and embedded Checkout and its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/checkout?file=src/App.vue)).
+:::
+
 ## Before you begin
 
 - Vue Stripe is installed and its stylesheet imported ([Install and set up](/guide/installation)).

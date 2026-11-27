@@ -1,27 +1,71 @@
 #!/usr/bin/env bash
+# Prepares an Amp orb for this monorepo. Idempotent; no long-running processes.
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
-export PATH="$HOME/.local/bin:$PATH"
 
-echo "[setup] Checking Node and pnpm"
-SECONDS=0
-node_major="$(tr -d '[:space:]' < .nvmrc)"
-pnpm_version="$(node -p "require('./package.json').packageManager.split('@')[1]")"
-tools=()
-if [[ "$(node -p 'process.versions.node.split(".")[0]')" != "$node_major" ]]; then
-  tools+=("node@$node_major")
-fi
-if ! command -v pnpm >/dev/null || [[ "$(pnpm --version)" != "$pnpm_version" ]]; then
-  tools+=("pnpm@$pnpm_version")
-fi
-if (( ${#tools[@]} )); then
-  npm install --global --prefix "$HOME/.local" "${tools[@]}"
-  hash -r
-fi
-echo "[setup] Toolchain ready in ${SECONDS}s: Node $(node --version), pnpm $(pnpm --version)"
+PNPM_VERSION=12.11.2
+STRIPE_CLI_VERSION=1.55.8
 
-echo "[setup] Installing locked workspace dependencies"
-SECONDS=0
-pnpm install --frozen-lockfile
-echo "[setup] Dependencies ready in ${SECONDS}s"
+step() {
+	local name=$1
+	shift
+	echo "==> $name"
+	local start=$SECONDS
+	"$@"
+	echo "<== $name ($((SECONDS - start))s)"
+}
+
+check_node() {
+	local major
+	major=$(node -p 'process.versions.node.split(".")[0]')
+	if ((major < 22)); then
+		echo "Node >= 22 is required (found $(node -v))." >&2
+		exit 1
+	fi
+	echo "node $(node -v)"
+}
+
+ensure_pnpm() {
+	if [[ "$(pnpm -v 2>/dev/null || true)" != "$PNPM_VERSION" ]]; then
+		sudo npm install -g "pnpm@$PNPM_VERSION"
+	fi
+	echo "pnpm $(pnpm -v)"
+}
+
+# Used by `pnpm stripe:seed` (scripts/seed-stripe.sh). Authenticates via STRIPE_API_KEY.
+# Optional: it is called from an `||` list, where `set -e` does not apply, so each
+# command returns explicitly on failure.
+ensure_stripe_cli() {
+	if [[ "$(stripe version 2>/dev/null || true)" != *"$STRIPE_CLI_VERSION"* ]]; then
+		local tmp status=0
+		tmp=$(mktemp -d) || return 1
+		curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors \
+			--connect-timeout 15 --max-time 120 -o "$tmp/stripe.tar.gz" \
+			"https://github.com/stripe/stripe-cli/releases/download/v$STRIPE_CLI_VERSION/stripe_${STRIPE_CLI_VERSION}_linux_x86_64.tar.gz" &&
+			tar -xzf "$tmp/stripe.tar.gz" -C "$tmp" stripe &&
+			sudo install -m 0755 "$tmp/stripe" /usr/local/bin/stripe || status=1
+		rm -rf "$tmp"
+		((status == 0)) || return 1
+	fi
+	stripe version
+}
+
+optional_stripe_cli() {
+	ensure_stripe_cli ||
+		echo "WARNING: Stripe CLI $STRIPE_CLI_VERSION could not be installed; continuing. \`pnpm stripe:seed\` needs it; rerun .agents/setup later." >&2
+}
+
+install_deps() {
+	HUSKY=0 pnpm install --frozen-lockfile
+}
+
+build_library() {
+	pnpm vue-stripe:build
+}
+
+step "Check Node" check_node
+step "Ensure pnpm $PNPM_VERSION" ensure_pnpm
+step "Ensure Stripe CLI $STRIPE_CLI_VERSION (optional)" optional_stripe_cli
+step "pnpm install" install_deps
+step "Build @vue-stripe/vue-stripe" build_library

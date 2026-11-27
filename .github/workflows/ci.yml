@@ -103,6 +103,38 @@ jobs:
       - name: Type declarations on Vue 2.7 and Vue 3
         run: pnpm --filter @vue-stripe/vue2-smoke typecheck
 
+  # The starters in examples/ are standalone npm projects on the published @vue-stripe/vue-stripe,
+  # outside the pnpm workspace. Type-check and build each one so they cannot rot.
+  examples:
+    name: Example ${{ matrix.example }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [vite-vue, nuxt, checkout, subscriptions]
+    defaults:
+      run:
+        working-directory: examples/${{ matrix.example }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: examples/${{ matrix.example }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
   size:
     name: Bundle size and dead code
     runs-on: ubuntu-latest

@@ -13,6 +13,17 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <EmbeddedCheckoutExample />
 
+## Source code
+
+<DemoSource example="EmbeddedCheckoutExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/EmbeddedCheckoutExample.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. The product step loads the demo account's one-time products from the backend.
@@ -24,4 +35,6 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 ::: tip See also
 How-to guide: [Embed Stripe Checkout](/guide/embedded-checkout). Reference: [VueStripeEmbeddedCheckout](/api/components/stripe-embedded-checkout).
+
+Starter app: [`examples/checkout`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/checkout) is a complete Vite + Vue app with hosted and embedded Checkout and its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/checkout?file=src/App.vue)).
 :::

@@ -35,7 +35,9 @@
 
 ## Announcement
 
-Thank you for your patience! This is an early release of the new Vue Stripe. As with any early release, you may encounter bugs. If you find any issues or have suggestions, please [create an issue](https://github.com/vue-stripe/vue-stripe/issues) or [submit a pull request](https://github.com/vue-stripe/vue-stripe/pulls). Your contributions are greatly appreciated!
+Vue Stripe 6 is out. It runs on Stripe.js 10 (Endive) and supports Vue 3 and Vue 2.7 from one build. Upgrading from v5? Follow [Migrating from v5 to v6](https://vuestripe.com/guide/migration-v6). Release notes are on [GitHub Releases](https://github.com/vue-stripe/vue-stripe/releases).
+
+If you find a bug or have a suggestion, please [create an issue](https://github.com/vue-stripe/vue-stripe/issues) or [submit a pull request](https://github.com/vue-stripe/vue-stripe/pulls). Your contributions are greatly appreciated!
 
 ## Requirements
 

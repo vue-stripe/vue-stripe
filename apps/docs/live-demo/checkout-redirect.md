@@ -13,6 +13,17 @@ The demo runs in Stripe test mode against the demo backend at `backend.vuestripe
 
 <CheckoutRedirectExample />
 
+## Source code
+
+<DemoSource example="CheckoutRedirectExample">
+
+::: code-group
+<<< @/.vitepress/theme/components/examples/CheckoutRedirectExample.vue
+<<< @/.vitepress/theme/composables/useBackendApi.ts
+:::
+
+</DemoSource>
+
 ## How the demo works
 
 1. The product step loads the demo account's one-time products from the backend. Choosing one shows a summary and a toggle between two ways to redirect.
@@ -25,4 +36,6 @@ The redirect does not prove that the payment succeeded. A server confirms the re
 
 ::: tip See also
 How-to guide: [Redirect to Stripe Checkout](/guide/checkout). Reference: [VueStripeCheckout](/api/components/stripe-checkout).
+
+Starter app: [`examples/checkout`](https://github.com/vue-stripe/vue-stripe/tree/main/examples/checkout) is a complete Vite + Vue app with hosted and embedded Checkout and its Node server ([open in StackBlitz](https://stackblitz.com/github/vue-stripe/vue-stripe/tree/main/examples/checkout?file=src/App.vue)).
 :::
